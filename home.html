@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N+ PLAY - Ultimate Gaming Lobby</title>
+    <style>
+        /* ==========================================
+           1. MODERN GAMING LOBBY STYLES
+           ========================================== */
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: #151d30;
+            --bg-card-hover: #1e2942;
+            --border-color: rgba(255, 255, 255, 0.08);
+            
+            --accent-gold: #f59e0b;
+            --accent-gold-glow: rgba(245, 158, 11, 0.4);
+            --accent-green: #10b981;
+            --accent-violet: #8b5cf6;
+            --accent-red: #ef4444;
+            --accent-cyan: #06b6d4;
+
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.12) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        .lobby-container {
+            width: 100%;
+            max-width: 480px; /* Mobile-first App Viewport */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            padding: 16px 16px 80px 16px;
+            position: relative;
+        }
+
+        /* TOOLBAR / NAVBAR */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(21, 29, 48, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 900;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-gold), #d97706);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 900;
+            box-shadow: 0 0 12px var(--accent-gold-glow);
+        }
+
+        .brand-text {
+            background: linear-gradient(90deg, #fff, var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-pill {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* HERO BANNER SLIDER */
+        .banner-slider {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .slides-wrapper {
+            display: flex;
+            width: 300%;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide {
+            width: 33.333%;
+            height: 100%;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide-1 {
+            background: linear-gradient(135deg, #1e1b4b 0%, #311b92 60%, #4c1d95 100%);
+        }
+        .slide-2 {
+            background: linear-gradient(135deg, #064e3b 0%, #047857 60%, #10b981 100%);
+        }
+        .slide-3 {
+            background: linear-gradient(135deg, #78350f 0%, #b45309 60%, #f59e0b 100%);
+        }
+
+        .slide-tag {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .slide-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        .slide-subtitle {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+        }
+
+        .btn-banner {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-gold);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px var(--accent-gold-glow);
+            transition: transform 0.2s;
+        }
+
+        .btn-banner:active {
+            transform: scale(0.95);
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--accent-gold);
+            width: 18px;
+            border-radius: 4px;
+        }
+
+        /* LIVE WINNINGS TICKER */
+        .live-ticker {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .ticker-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ticker-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .ticker-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            animation: scrollText 12s linear infinite;
+        }
+
+        @keyframes scrollText {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* SECTION TITLES */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: var(--accent-gold);
+            border-radius: 2px;
+        }
+
+        /* FEATURED COLOR PREDICTION GAME CARD */
+        .featured-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 2px solid var(--accent-gold);
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .hot-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(90deg, #ef4444, #f59e0b);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .game-info h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .game-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .color-chips-preview {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chip {
+            flex: 1;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .chip-green { background: var(--accent-green); }
+        .chip-violet { background: var(--accent-violet); }
+        .chip-red { background: var(--accent-red); }
+
+        .btn-play-main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent-gold), #d97706);
+            color: #000;
+            font-size: 1rem;
+            font-weight: 900;
+            text-decoration: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--accent-gold-glow);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-play-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        }
+
+        .btn-play-main:active {
+            transform: translateY(0);
+        }
+
+        /* OTHER GAMES GRID */
+        .games-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mini-game-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .mini-game-card:hover {
+            border-color: var(--card-hover);
+            transform: translateY(-3px);
+        }
+
+        .mini-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .mini-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .mini-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .badge-soon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.6rem;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        /* BOTTOM NAV BAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 200;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .nav-item.active {
+            color: var(--accent-gold);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lobby-container">
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="brand">
+                <div class="brand-logo">N+</div>
+                <span class="brand-text">PLAY</span>
+            </div>
+            <div class="user-profile">
+                <div class="wallet-pill">
+                    <span>⚡</span>
+                    <span>$1,000.00</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- BANNER SLIDER -->
+        <div class="banner-slider">
+            <div class="slides-wrapper" id="slidesWrapper">
+                <!-- Slide 1 -->
+                <div class="slide slide-1">
+                    <span class="slide-tag">🔥 Featured Game</span>
+                    <h2 class="slide-title">Color Prediction</h2>
+                    <p class="slide-subtitle">Predict colors & win up to 9x instant multiplier!</p>
+                    <a href="index.html" class="btn-banner">Play Now ➔</a>
+                </div>
+                <!-- Slide 2 -->
+                <div class="slide slide-2">
+                    <span class="slide-tag">🎁 Welcome Bonus</span>
+                    <h2 class="slide-title">100% First Deposit</h2>
+                    <p class="slide-subtitle">Get up to $500 bonus on your first recharge.</p>
+                    <a href="index.html" class="btn-banner">Claim Bonus ➔</a>
+                </div>
+                <!-- Slide 3 -->
+                <div class="slide slide-3">
+                    <span class="slide-tag">⚡ Instant Cashout</span>
+                    <h2 class="slide-title">Lightning Payouts</h2>
+                    <p class="slide-subtitle">24/7 Automated withdrawals straight to wallet.</p>
+                    <a href="index.html" class="btn-banner">Start Winning ➔</a>
+                </div>
+            </div>
+            <div class="slider-dots">
+                <div class="dot active" onclick="goToSlide(0)"></div>
+                <div class="dot" onclick="goToSlide(1)"></div>
+                <div class="dot" onclick="goToSlide(2)"></div>
+            </div>
+        </div>
+
+        <!-- LIVE WIN TICKER -->
+        <div class="live-ticker">
+            <div class="ticker-badge">LIVE WINS</div>
+            <div class="ticker-text" id="tickerText">
+                User ***8491 won $180.00 in Color Prediction! • User ***2203 won $450.00 on Green 7! • User ***9012 won $90.00!
+            </div>
+        </div>
+
+        <!-- FEATURED COLOR PREDICTION SECTION -->
+        <div class="section-header">
+            <h2 class="section-title">Popular Game</h2>
+        </div>
+
+        <div class="featured-card">
+            <span class="hot-badge">HOT ⚡</span>
+            <div class="game-info">
+                <h2>Color Prediction 30s</h2>
+                <p>30-Second Fast Rounds • High Win Rate</p>
+            </div>
+
+            <!-- Visual Preview Chips -->
+            <div class="color-chips-preview">
+                <div class="chip chip-green">2x</div>
+                <div class="chip chip-violet">4.5x</div>
+                <div class="chip chip-red">2x</div>
+            </div>
+
+            <!-- PRIMARY PLAY BUTTON -->
+            <a href="index.html" class="btn-play-main">
+                <span>🎮 PLAY NOW</span>
+            </a>
+        </div>
+
+        <!-- MORE GAMES SECTION -->
+        <div class="section-header">
+            <h2 class="section-title">Explore Arena</h2>
+        </div>
+
+        <div class="games-grid">
+            <!-- Mines -->
+            <div class="mini-game-card">
+                <span class="badge-soon">Soon</span>
+                <div class="mini-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);">💣</div>
+                <div class="mini-title">N+ Mines</div>
+                <div class="mini-desc">Uncover gems, avoid bombs</div>
+            </div>
+
+            <!-- Aviator/Crash -->
+            <div class="mini-game-card">
+                <span class="badge-soon">Soon</span>
+                <div class="mini-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">🚀</div>
+                <div class="mini-title">Crash Rocket</div>
+                <div class="mini-desc">Cash out before crash</div>
+            </div>
+
+            <!-- Dice -->
+            <div class="mini-game-card">
+                <span class="badge-soon">Soon</span>
+                <div class="mini-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-violet);">🎲</div>
+                <div class="mini-title">Lucky Dice</div>
+                <div class="mini-desc">Roll high or low</div>
+            </div>
+
+            <!-- Roulette -->
+            <div class="mini-game-card">
+                <span class="badge-soon">Soon</span>
+                <div class="mini-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red);">🎡</div>
+                <div class="mini-title">VIP Wheel</div>
+                <div class="mini-desc">Spin for jackpot multipliers</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🎮</span>
+            <span>Predict</span>
+        </a>
+        <a href="#" class="nav-item" onclick="alert('Wallet Deposit Feature')">
+            <span class="nav-icon">💳</span>
+            <span>Wallet</span>
+        </a>
+        <a href="#" class="nav-item" onclick="alert('User Profile & VIP Status')">
+            <span class="nav-icon">👤</span>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- ==========================================
+       2. JAVASCRIPT LOBBY INTERACTIVITY
+       ========================================== -->
+    <script>
+        // --- BANNER SLIDER LOGIC ---
+        let currentSlide = 0;
+        const slidesWrapper = document.getElementById('slidesWrapper');
+        const dots = document.querySelectorAll('.dot');
+        const totalSlides = 3;
+
+        function goToSlide(index) {
+            currentSlide = index;
+            slidesWrapper.style.transform = `translateX(-${currentSlide * 33.333}%)`;
+            
+            dots.forEach((dot, idx) => {
+                if (idx === currentSlide) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        // Auto slide every 4 seconds
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            goToSlide(currentSlide);
+        }, 4000);
+
+        // --- DYNAMIC WIN TICKER GENERATOR ---
+        const tickerEl = document.getElementById('tickerText');
+        const sampleWins = [
+            "User ***4812 won $240.00 on Violet 5!",
+            "User ***9901 won $100.00 in Color Prediction!",
+            "User ***1234 won $450.00 on Green 9!",
+            "User ***7782 won $80.00 on Red 2!",
+            "User ***3321 won $900.00 Jackpot!"
+        ];
+
+        function updateTicker() {
+            // Randomly select 3 wins to combine
+            let shuffled = sampleWins.sort(() => 0.5 - Math.random()).slice(0, 3);
+            tickerEl.innerText = shuffled.join(' • ');
+        }
+
+        // Periodically refresh fake ticker data
+        setInterval(updateTicker, 12000);
+    </script>
+</body>
+</html>
