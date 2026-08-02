@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N+ PLAY - Agent Live Chat</title>
+    <style>
+        /* ==========================================
+           1. MODERN DARK GAMING THEME & GLASSMORPHISM
+           ========================================== */
+        :root {
+            --bg-dark: #070a12;
+            --bg-surface: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.65);
+            --card-border: rgba(255, 255, 255, 0.1);
+            
+            --gold-neon: #f59e0b;
+            --gold-glow: rgba(245, 158, 11, 0.35);
+            --red-vibrant: #e63946;
+            --red-glow: rgba(230, 57, 70, 0.4);
+            --green-glow: #10b981;
+
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(15, 23, 42, 0.85);
+            --input-border: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, var(--red-glow) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, var(--gold-glow) 0%, transparent 40%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
+            background-attachment: fixed;
+            padding: 12px;
+        }
+
+        /* CHAT VIEWPORT CONTAINER */
+        .chat-viewport {
+            width: 100%;
+            max-width: 450px;
+            height: 92vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* SLEEK HEADER WITH AGENT STATUS */
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid var(--card-border);
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--gold-neon);
+            color: var(--gold-neon);
+        }
+
+        .agent-avatar-box {
+            position: relative;
+            width: 42px;
+            height: 42px;
+        }
+
+        .agent-avatar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: var(--green-glow);
+            border: 2px solid var(--bg-surface);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--green-glow);
+        }
+
+        .agent-info h3 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .agent-info p {
+            font-size: 0.72rem;
+            color: var(--green-glow);
+            font-weight: 700;
+        }
+
+        /* CHAT MESSAGES CONTAINER */
+        .chat-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .time-divider {
+            text-align: center;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 6px 0;
+        }
+
+        /* MESSAGE BUBBLES */
+        .msg-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 82%;
+            gap: 4px;
+            animation: fadeInMsg 0.3s ease;
+        }
+
+        @keyframes fadeInMsg {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg-row.agent {
+            align-self: flex-start;
+        }
+
+        .msg-row.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .msg-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            word-break: break-word;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .msg-row.agent .msg-bubble {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--card-border);
+            border-top-left-radius: 4px;
+            color: var(--text-main);
+        }
+
+        .msg-row.user .msg-bubble {
+            background: linear-gradient(135deg, #f59e0b 0%, #e63946 100%);
+            color: #ffffff;
+            border-top-right-radius: 4px;
+            font-weight: 600;
+        }
+
+        .msg-time {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            padding: 0 4px;
+        }
+
+        /* TYPING INDICATOR */
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--card-border);
+            padding: 10px 16px;
+            border-radius: 18px;
+            border-top-left-radius: 4px;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .dot-bounce {
+            width: 6px;
+            height: 6px;
+            background: var(--gold-neon);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+
+        .dot-bounce:nth-child(2) { animation-delay: 0.2s; }
+        .dot-bounce:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+        }
+
+        /* QUICK SUGGESTION CHIPS */
+        .quick-chips {
+            display: flex;
+            gap: 8px;
+            padding: 0 16px 10px 16px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .quick-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip-btn:hover {
+            border-color: var(--gold-neon);
+            color: var(--gold-neon);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        /* CHAT INPUT AREA */
+        .chat-footer {
+            padding: 12px 16px 16px 16px;
+            background: rgba(15, 23, 42, 0.9);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-box {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 20px;
+            padding: 0 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-box:focus-within {
+            border-color: var(--gold-neon);
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        .chat-input {
+            width: 100%;
+            height: 46px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .chat-input::placeholder {
+            color: rgba(148, 163, 184, 0.5);
+        }
+
+        .btn-send {
+            width: 46px;
+            height: 46px;
+            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
+            border: none;
+            border-radius: 50%;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--red-glow);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+        }
+
+        .btn-send:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-viewport">
+        <!-- HEADER -->
+        <header class="chat-header">
+            <div class="header-left">
+                <button class="btn-back" onclick="goBack()" title="Back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+
+                <div class="agent-avatar-box">
+                    <div class="agent-avatar">🎧</div>
+                    <div class="status-dot"></div>
+                </div>
+
+                <div class="agent-info">
+                    <h3>N+ Agent Support</h3>
+                    <p>Agent Online 🟢</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- CHAT BODY -->
+        <div class="chat-body" id="chatBody">
+            <div class="time-divider" id="timeDivider">Today</div>
+
+            <!-- AUTOMATED WELCOME MESSAGE -->
+            <div class="msg-row agent">
+                <div class="msg-bubble">
+                    Hello! Welcome to <strong>N+ PLAY Support</strong>. How can I help you today?
+                </div>
+                <div class="msg-time" id="welcomeTime">11:25 AM</div>
+            </div>
+
+            <!-- TYPING INDICATOR -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="dot-bounce"></div>
+                <div class="dot-bounce"></div>
+                <div class="dot-bounce"></div>
+            </div>
+        </div>
+
+        <!-- QUICK FAQ SUGGESTION CHIPS -->
+        <div class="quick-chips">
+            <button class="chip-btn" onclick="sendQuickChip('How to Deposit?')">💰 How to Deposit?</button>
+            <button class="chip-btn" onclick="sendQuickChip('Withdrawal Status')">⚡ Withdrawal Status</button>
+            <button class="chip-btn" onclick="sendQuickChip('Register Help')">📝 Register Help</button>
+            <button class="chip-btn" onclick="sendQuickChip('Game Rules')">🎯 Game Rules</button>
+        </div>
+
+        <!-- FOOTER INPUT AREA -->
+        <footer class="chat-footer">
+            <div class="input-box">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type your message..." autocomplete="off" onkeypress="handleKeyPress(event)">
+            </div>
+            <button class="btn-send" onclick="sendMessage()" title="Send">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </footer>
+    </div>
+
+    <!-- ==========================================
+       JAVASCRIPT AGENT CHAT BOT LOGIC
+       ========================================== -->
+    <script>
+        const chatBody = document.getElementById('chatBody');
+        const chatInput = document.getElementById('chatInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Set initial current time
+        document.getElementById('welcomeTime').innerText = getCurrentTime();
+
+        function goBack() {
+            if (document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = 'home.html';
+            }
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        function scrollToBottom() {
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendQuickChip(text) {
+            chatInput.value = text;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Render User Message
+            renderMessage(text, 'user');
+            chatInput.value = '';
+
+            // Show Typing Indicator & Generate Agent Reply
+            showTypingIndicator();
+
+            setTimeout(() => {
+                hideTypingIndicator();
+                const reply = generateAgentReply(text);
+                renderMessage(reply, 'agent');
+            }, 1200);
+        }
+
+        function renderMessage(text, sender) {
+            const msgRow = document.createElement('div');
+            msgRow.className = `msg-row ${sender}`;
+
+            const msgBubble = document.createElement('div');
+            msgBubble.className = 'msg-bubble';
+            msgBubble.innerHTML = text;
+
+            const msgTime = document.createElement('div');
+            msgTime.className = 'msg-time';
+            msgTime.innerText = getCurrentTime();
+
+            msgRow.appendChild(msgBubble);
+            msgRow.appendChild(msgTime);
+
+            // Insert before typing indicator
+            chatBody.insertBefore(msgRow, typingIndicator);
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.classList.add('active');
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.classList.remove('active');
+        }
+
+        // INTELLIGENT POLITE AGENT REPLY SYSTEM
+        function generateAgentReply(input) {
+            const lower = input.toLowerCase();
+
+            if (lower.includes('deposit') || lower.includes('recharge') || lower.includes('money')) {
+                return "To deposit funds, go to the <strong>Wallet</strong> tab on your N+ PLAY Dashboard. Minimum deposit is ₹100 / $10 with instant automated credit!";
+            } else if (lower.includes('withdraw') || lower.includes('payout') || lower.includes('cashout')) {
+                return "Withdrawals are processed 24/7 automatically. Average transfer time is <strong>5 to 15 minutes</strong> directly to your linked bank/UPI/wallet.";
+            } else if (lower.includes('register') || lower.includes('account') || lower.includes('sign up')) {
+                return "If you are facing registration issues, make sure your Indian mobile number (+91) is 10 digits and not previously registered.";
+            } else if (lower.includes('color') || lower.includes('prediction') || lower.includes('rule') || lower.includes('game')) {
+                return "N+ Color Prediction rounds run every 30 seconds. Predict <strong>Green (2x)</strong>, <strong>Red (2x)</strong>, <strong>Violet (4.5x)</strong>, or exact numbers for <strong>9x payouts</strong>!";
+            } else if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey')) {
+                return "Hello! Thank you for contacting N+ PLAY. How can I assist you with your gaming account today?";
+            } else {
+                return "Thank you for your message! Our support team has logged your query. An agent is reviewing your account details. Is there anything else I can help with?";
+            }
+        }
+    </script>
+</body>
+</html>
