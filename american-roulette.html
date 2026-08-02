@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N+ PLAY - American Roulette 3D</title>
+    <!-- Three.js for 3D WebGL Graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* ==========================================
+           1. LUXURY 3D AMERICAN CASINO DARK THEME
+           ========================================== */
+        :root {
+            --bg-dark: #0c0f16;
+            --bg-surface: #1a1d24;
+            --card-bg: rgba(26, 29, 36, 0.75);
+            --card-border: rgba(245, 158, 11, 0.25);
+            
+            --gold-neon: #f59e0b;
+            --gold-light: #fbbf24;
+            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fef08a 50%, #d97706 100%);
+            --gold-glow: rgba(245, 158, 11, 0.4);
+
+            --red-vibrant: #ef4444;
+            --red-glow: rgba(239, 68, 68, 0.4);
+            --green-vibrant: #10b981;
+            --black-vibrant: #111827;
+
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(12, 15, 22, 0.85);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 90% 90%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #05070a 100%);
+            background-attachment: fixed;
+            padding: 10px 10px 80px 10px; /* Space for bottom nav */
+        }
+
+        .app-viewport {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        /* HEADER */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            border: 1px solid var(--card-border);
+            color: var(--gold-light);
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn-back:hover {
+            border-color: var(--gold-neon);
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .brand-title-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .live-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: var(--red-vibrant);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--red-vibrant);
+            border-radius: 50%;
+            animation: pulseDot 1.2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .wallet-chip {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--green-vibrant);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        /* 3D HISTORY & HOT/COLD STATS BAR */
+        .history-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-strip {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .history-strip::-webkit-scrollbar { display: none; }
+
+        .num-badge-3d {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #fff;
+            flex-shrink: 0;
+            border: 1px solid var(--gold-neon);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .num-badge-3d.red { background: linear-gradient(135deg, #ef4444, #991b1b); }
+        .num-badge-3d.black { background: linear-gradient(135deg, #374151, #111827); }
+        .num-badge-3d.green { background: linear-gradient(135deg, #10b981, #047857); }
+
+        .hot-cold-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            padding: 2px 4px;
+        }
+
+        /* 3D STUDIO ARENA CANVAS */
+        .studio-arena-card {
+            background: radial-gradient(circle, #1a202c 0%, #05070a 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            height: 240px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #webglContainer {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 16px solid var(--gold-neon);
+            filter: drop-shadow(0 2px 6px var(--gold-glow));
+            z-index: 30;
+        }
+
+        .studio-hud-bottom {
+            position: absolute;
+            bottom: 10px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(12, 15, 22, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 6px 14px;
+            border-radius: 14px;
+            z-index: 20;
+        }
+
+        .status-text { font-size: 0.85rem; font-weight: 800; color: var(--text-main); }
+        .clock-val { font-size: 1.1rem; font-weight: 900; color: var(--gold-neon); font-family: monospace; }
+
+        /* 3D CHIP DENOMINATION SELECTORS */
+        .chips-panel {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 10px;
+        }
+
+        .chip-3d {
+            flex: 1;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255,255,255,0.4);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .chip-10 { background: radial-gradient(circle, #0284c7, #0369a1); }
+        .chip-50 { background: radial-gradient(circle, #7c3aed, #5b21b6); }
+        .chip-100 { background: radial-gradient(circle, #d97706, #b45309); }
+        .chip-500 { background: radial-gradient(circle, #dc2626, #991b1b); }
+        .chip-1k { background: radial-gradient(circle, #10b981, #047857); }
+
+        .chip-3d.active {
+            border-style: solid;
+            border-color: #ffffff;
+            transform: scale(1.12);
+            box-shadow: 0 0 16px var(--gold-neon);
+        }
+
+        /* 3D FELT BETTING GRID TABLE WITH 0 & 00 */
+        .table-felt-card {
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .grid-row-double-zero {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+
+        .grid-cell-zero {
+            background: linear-gradient(135deg, var(--green-vibrant), #047857);
+            color: #fff;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.9rem;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .grid-cell-basket {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: #fff;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.72rem;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid var(--gold-neon);
+        }
+
+        .grid-numbers-table {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 4px;
+        }
+
+        .num-cell {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.72rem;
+            cursor: pointer;
+            color: #fff;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .num-cell.red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .num-cell.black { background: linear-gradient(135deg, #374151, #1f2937); }
+
+        .grid-outside-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .outside-cell {
+            height: 38px;
+            background: rgba(26, 29, 36, 0.85);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 0.78rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .outside-cell.red-bg { background: linear-gradient(135deg, #ef4444, #991b1b); }
+        .outside-cell.black-bg { background: linear-gradient(135deg, #374151, #111827); }
+
+        .chip-placed-badge {
+            position: absolute;
+            top: -5px; right: -5px;
+            background: var(--gold-gradient);
+            color: #000;
+            font-size: 0.58rem;
+            font-weight: 900;
+            padding: 1px 5px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.9);
+            z-index: 10;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-ctrl {
+            flex: 1;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-clear { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+        .btn-double { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--gold-neon); color: var(--gold-neon); }
+
+        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100%; max-width: 480px;
+            background: rgba(12, 15, 22, 0.95);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .nav-item.active { color: var(--gold-neon); }
+        .nav-icon { font-size: 1.2rem; }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-30px);
+            background: rgba(12, 15, 22, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--gold-neon);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 0.85rem; font-weight: 700;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Notification</div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="app-viewport">
+        <!-- HEADER -->
+        <header class="app-header">
+            <a href="index.html" class="btn-back" title="Back to Home">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <div class="brand-title-box">
+                <span class="brand-title">American Roulette 3D</span>
+                <span class="live-badge"><span class="live-dot"></span> DOUBLE-ZERO (0, 00)</span>
+            </div>
+            <div class="wallet-chip" id="walletDisplay">$1,000.00</div>
+        </header>
+
+        <!-- 3D HISTORY & HOT/COLD STATS BAR -->
+        <div class="history-section">
+            <div class="history-strip" id="historyStrip">
+                <span class="num-badge-3d green">00</span>
+                <span class="num-badge-3d red">28</span>
+                <span class="num-badge-3d black">9</span>
+                <span class="num-badge-3d green">0</span>
+                <span class="num-badge-3d red">1', '00', '27', '10', '25', '29', '12', '8', '19', '31', '18', '6', '21', '33', '16', '4', '23', '35', '14', '2']7</span>
+            </div>
+            <div class="hot-cold-row">
+                <span>🔥 HOT: <strong style="color: var(--gold-neon);">28, 00, 17</strong></span>
+                <span>❄️ COLD: <strong style="color: var(--red-vibrant);">0, 13, 36</strong></span>
+            </div>
+        </div>
+
+        <!-- 3D CANVA ARENA -->
+        <div class="studio-arena-card">
+            <div class="wheel-pointer"></div>
+            <div id="webglContainer" style="width:100%; height:100%;"></div>
+
+            <!-- Studio HUD Bottom -->
+            <div class="studio-hud-bottom">
+                <span class="status-text" id="gameStatusText">Place Your Bets</span>
+                <span class="clock-val" id="clockDisplay">00:15</span>
+            </div>
+        </div>
+
+        <!-- 3D CHIP DENOMINATION SELECTORS -->
+        <div class="chips-panel">
+            <button class="chip-3d chip-10 active" onclick="selectChip(10, this)">$10</button>
+            <button class="chip-3d chip-50" onclick="selectChip(50, this)">$50</button>
+            <button class="chip-3d chip-100" onclick="selectChip(100, this)">$100</button>
+            <button class="chip-3d chip-500" onclick="selectChip(500, this)">$500</button>
+            <button class="chip-3d chip-1k" onclick="selectChip(1000, this)">$1K</button>
+        </div>
+
+        <!-- 3D FELT BETTING GRID TABLE WITH 0 & 00 & FIVE BET -->
+        <div class="table-felt-card">
+            <!-- Pockets 0 and 00 + Five-Number Basket Bet -->
+            <div class="grid-row-double-zero">
+                <div class="grid-cell-zero" onclick="placeBet('0', 'number')">
+                    0
+                    <span class="chip-placed-badge" id="betBadge-0" style="display:none;">$0</span>
+                </div>
+                <div class="grid-cell-zero" onclick="placeBet('00', 'number')">
+                    00
+                    <span class="chip-placed-badge" id="betBadge-00" style="display:none;">$0</span>
+                </div>
+                <div class="grid-cell-basket" onclick="placeBet('Basket5', 'basket')">
+                    5-Bet (7x)
+                    <span class="chip-placed-badge" id="betBadge-Basket5" style="display:none;">$0</span>
+                </div>
+            </div>
+
+            <!-- Numbers 1 to 36 Grid -->
+            <div class="grid-numbers-table" id="numbersGrid">
+                <!-- JS Population -->
+            </div>
+
+            <!-- Dozens -->
+            <div class="grid-outside-row">
+                <div class="outside-cell" onclick="placeBet('1st12', 'dozen')">
+                    1st 12 (1-12)
+                    <span class="chip-placed-badge" id="betBadge-1st12" style="display:none;">$0</span>
+                </div>
+                <div class="outside-cell" onclick="placeBet('2nd12', 'dozen')">
+                    2nd 12 (13-24)
+                    <span class="chip-placed-badge" id="betBadge-2nd12" style="display:none;">$0</span>
+                </div>
+                <div class="outside-cell" onclick="placeBet('3rd12', 'dozen')">
+                    3rd 12 (25-36)
+                    <span class="chip-placed-badge" id="betBadge-3rd12" style="display:none;">$0</span>
+                </div>
+            </div>
+
+            <!-- Colors & Parity -->
+            <div class="grid-outside-row">
+                <div class="outside-cell red-bg" onclick="placeBet('Red', 'color')">
+                    RED
+                    <span class="chip-placed-badge" id="betBadge-Red" style="display:none;">$0</span>
+                </div>
+                <div class="outside-cell black-bg" onclick="placeBet('Black', 'color')">
+                    BLACK
+                    <span class="chip-placed-badge" id="betBadge-Black" style="display:none;">$0</span>
+                </div>
+                <div class="outside-cell" onclick="placeBet('Even', 'parity')">
+                    EVEN
+                    <span class="chip-placed-badge" id="betBadge-Even" style="display:none;">$0</span>
+                </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="action-row">
+                <button class="btn-ctrl btn-clear" onclick="clearAllBets()">Clear Bets</button>
+                <button class="btn-ctrl btn-double" onclick="doubleAllBets()">Double Bets</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="activity.html" class="nav-item">
+            <span class="nav-icon">🔥</span>
+            <span>Activity</span>
+        </a>
+        <a href="promotion.html" class="nav-item">
+            <span class="nav-icon">🎁</span>
+            <span>Promotion</span>
+        </a>
+        <a href="account.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>Account</span>
+        </a>
+    </nav>
+
+    <!-- ==========================================
+       THREE.JS WebGL 3D AMERICAN ROULETTE ENGINE
+       ========================================== -->
+    <script>
+        // --- AMERICAN ROULETTE 38-POCKET SEQUENCE & COLOR MAPPING ---
+        const AMERICAN_SEQUENCE = ['0', '28', '9', '26', '30', '11', '7', '20', '32', '17', '5', '22', '34', '15', '3', '24', '36', '13', '1', '00', '27', '10', '25', '29', '12', '8', '19', '31', '18', '6', '21', '33', '16', '4', '23', '35', '14', '2'];
+        const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+
+        // --- GAME STATE ---
+        let walletBalance = 1000.00;
+        let selectedChip = 10;
+        let placedBets = {};
+        let totalStakedRound = 0;
+
+        let countdown = 15;
+        let isSpinning = false;
+        let historyList = ['00', 28, 9, 0, 17];
+
+        // Three.js Scene
+        let scene, camera, renderer;
+        let wheelRotorMesh, ballMesh;
+        let rotorRotation = 0;
+        let ballAngle = 0;
+        let ballRadius = 2.8;
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            initThreeJS();
+            renderNumbersGrid();
+            startContinuousLoop();
+        };
+
+        // --- THREE.JS PROCEDURAL 3D AMERICAN ROULETTE ENGINE ---
+        function initThreeJS() {
+            const container = document.getElementById('webglContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+            camera.position.set(0, 5.2, 6.2);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lighting Setup
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const goldSpotLight = new THREE.SpotLight(0xfbbf24, 2.5);
+            goldSpotLight.position.set(2, 8, 4);
+            scene.add(goldSpotLight);
+
+            const redSpotLight = new THREE.PointLight(0xef4444, 1.5, 10);
+            redSpotLight.position.set(-3, -2, 2);
+            scene.add(redSpotLight);
+
+            // Outer Mahogany Wood Bowl
+            const bowlGeo = new THREE.CylinderGeometry(3.6, 3.8, 0.6, 64);
+            const bowlMat = new THREE.MeshStandardMaterial({ color: 0x1f130b, roughness: 0.2 });
+            const bowlMesh = new THREE.Mesh(bowlGeo, bowlMat);
+            bowlMesh.position.y = -0.3;
+            scene.add(bowlMesh);
+
+            // Metallic Gold Rim
+            const rimGeo = new THREE.TorusGeometry(3.5, 0.1, 16, 64);
+            const rimMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.15, metalness: 0.9 });
+            const rimMesh = new THREE.Mesh(rimGeo, rimMat);
+            rimMesh.rotation.x = Math.PI / 2;
+            scene.add(rimMesh);
+
+            // 38-Pocket Rotating Rotor
+            wheelRotorMesh = new THREE.Group();
+
+            const rotorGeo = new THREE.CylinderGeometry(3.2, 3.2, 0.2, 64);
+            const rotorMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.3 });
+            const rotorBase = new THREE.Mesh(rotorGeo, rotorMat);
+            wheelRotorMesh.add(rotorBase);
+
+            // Center Brass Turret
+            const turretGeo = new THREE.CylinderGeometry(0.8, 1.2, 0.8, 32);
+            const turretMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.15 });
+            const turretMesh = new THREE.Mesh(turretGeo, turretMat);
+            turretMesh.position.y = 0.4;
+            wheelRotorMesh.add(turretMesh);
+
+            // Render 38 Pockets (0, 00, and 1-36)
+            const arc = (Math.PI * 2) / 38;
+            for (let i = 0; i < 38; i++) {
+                const item = AMERICAN_SEQUENCE[i];
+                const angle = i * arc;
+
+                const sectorGeo = new THREE.CylinderGeometry(3.1, 1.2, 0.05, 16, 1, false, angle, arc);
+                let colorHex = (item === '0' || item === '00') ? 0x10b981 : (RED_NUMBERS.includes(parseInt(item)) ? 0xef4444 : 0x1f2937);
+                const sectorMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.4 });
+                const sectorMesh = new THREE.Mesh(sectorGeo, sectorMat);
+                sectorMesh.position.y = 0.11;
+                wheelRotorMesh.add(sectorMesh);
+            }
+
+            scene.add(wheelRotorMesh);
+
+            // 3D Ivory Ball
+            const ballGeo = new THREE.SphereGeometry(0.12, 32, 32);
+            const ballMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.05 });
+            ballMesh = new THREE.Mesh(ballGeo, ballMat);
+            ballMesh.position.set(2.8, 0.2, 0);
+            scene.add(ballMesh);
+
+            animateThreeJS();
+        }
+
+        function animateThreeJS() {
+            requestAnimationFrame(animateThreeJS);
+
+            if (!isSpinning) {
+                rotorRotation += 0.004;
+                wheelRotorMesh.rotation.y = rotorRotation;
+
+                ballAngle += 0.004;
+                ballMesh.position.x = Math.cos(ballAngle) * ballRadius;
+                ballMesh.position.z = Math.sin(ballAngle) * ballRadius;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // --- RENDER BETTING GRID ---
+        function renderNumbersGrid() {
+            const container = document.getElementById('numbersGrid');
+            let html = '';
+            for (let i = 1; i <= 36; i++) {
+                let isRed = RED_NUMBERS.includes(i);
+                html += `
+                    <div class="num-cell ${isRed ? 'red' : 'black'}" onclick="placeBet('${i}', 'number')">
+                        ${i}
+                        <span class="chip-placed-badge" id="betBadge-${i}" style="display:none;">$0</span>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function updateWalletDisplay() {
+            document.getElementById('walletDisplay').innerText = `$${walletBalance.toFixed(2)}`;
+        }
+
+        function selectChip(val, btn) {
+            selectedChip = val;
+            document.querySelectorAll('.chip-3d').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // --- BETTING LOGIC ---
+        function placeBet(targetKey, type) {
+            if (isSpinning || countdown <= 3) {
+                showToast("Betting is locked during spin!");
+                return;
+            }
+
+            if (walletBalance < selectedChip) {
+                showToast("Insufficient Balance!");
+                return;
+            }
+
+            walletBalance -= selectedChip;
+            placedBets[targetKey] = (placedBets[targetKey] || 0) + selectedChip;
+            totalStakedRound += selectedChip;
+
+            updateWalletDisplay();
+            updateBetBadges();
+        }
+
+        function clearAllBets() {
+            if (isSpinning || countdown <= 3) return;
+            walletBalance += totalStakedRound;
+            placedBets = {};
+            totalStakedRound = 0;
+
+            updateWalletDisplay();
+            updateBetBadges();
+            showToast("All bets cleared!");
+        }
+
+        function doubleAllBets() {
+            if (isSpinning || countdown <= 3) return;
+            if (totalStakedRound === 0) return;
+            if (walletBalance < totalStakedRound) {
+                showToast("Insufficient Balance!");
+                return;
+            }
+
+            walletBalance -= totalStakedRound;
+            Object.keys(placedBets).forEach(key => {
+                placedBets[key] *= 2;
+            });
+            totalStakedRound *= 2;
+
+            updateWalletDisplay();
+            updateBetBadges();
+        }
+
+        function updateBetBadges() {
+            document.querySelectorAll('.chip-placed-badge').forEach(b => b.style.display = 'none');
+            Object.keys(placedBets).forEach(key => {
+                const badge = document.getElementById(`betBadge-${key}`);
+                if (badge && placedBets[key] > 0) {
+                    badge.innerText = `$${placedBets[key]}`;
+                    badge.style.display = 'block';
+                }
+            });
+        }
+
+        // --- CONTINUOUS GAME LOOP & SPIN PHYSICS ---
+        function startContinuousLoop() {
+            setInterval(() => {
+                if (isSpinning) return;
+
+                countdown--;
+                document.getElementById('clockDisplay').innerText = `00:${countdown < 10 ? '0' + countdown : countdown}`;
+
+                if (countdown <= 3 && countdown > 0) {
+                    document.getElementById('gameStatusText').innerText = "LOCKING BETS...";
+                }
+
+                if (countdown <= 0) {
+                    spinAmericanRoulette();
+                }
+            }, 1000);
+        }
+
+        function spinAmericanRoulette() {
+            isSpinning = true;
+            document.getElementById('gameStatusText').innerText = "SPINNING WHEEL...";
+
+            const winningItem = AMERICAN_SEQUENCE[Math.floor(Math.random() * AMERICAN_SEQUENCE.length)];
+            const targetIndex = AMERICAN_SEQUENCE.indexOf(winningItem);
+
+            const arc = (Math.PI * 2) / 38;
+            const targetSectorAngle = (38 - targetIndex) * arc;
+
+            const extraRotations = 5 * Math.PI * 2; // 5 Full spins
+            const totalTargetAngle = currentWheelAngle + extraRotations + (targetSectorAngle - (currentWheelAngle % (Math.PI * 2)));
+
+            const startTime = performance.now();
+            const duration = 4500; // 4.5s spin
+
+            const startRotor = rotorRotation;
+            const targetRotor = startRotor + (Math.PI * 6);
+
+            function animatePhysics(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(1, elapsed / duration);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+
+                rotorRotation = startRotor + (targetRotor - startRotor) * easeOut;
+                wheelRotorMesh.rotation.y = rotorRotation;
+
+                ballAngle = startRotor - (targetRotor * easeOut);
+                ballRadius = 2.8 - (1.6 * easeOut);
+
+                ballMesh.position.x = Math.cos(ballAngle) * ballRadius;
+                ballMesh.position.z = Math.sin(ballAngle) * ballRadius;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animatePhysics);
+                } else {
+                    evaluateOutcome(winningItem);
+                }
+            }
+
+            requestAnimationFrame(animatePhysics);
+        }
+
+        // --- EVALUATE OUTCOME & PAYOUTS ---
+        function evaluateOutcome(winningItem) {
+            const isZero = (winningItem === '0' || winningItem === '00');
+            const winningNum = isZero ? null : parseInt(winningItem);
+            let color = isZero ? 'Green' : (RED_NUMBERS.includes(winningNum) ? 'Red' : 'Black');
+            let isEven = winningNum !== null && winningNum % 2 === 0;
+
+            let totalPayout = 0;
+
+            // 1. Straight Up Number Bet (36x)
+            if (placedBets[winningItem]) {
+                totalPayout += placedBets[winningItem] * 36;
+            }
+
+            // 2. Five-Number Basket Bet (0, 00, 1, 2, 3) - Pays 7x
+            if (['0', '00', '1', '2', '3'].includes(winningItem) && placedBets['Basket5']) {
+                totalPayout += placedBets['Basket5'] * 7;
+            }
+
+            // 3. Color Bet (2x)
+            if (placedBets[color]) {
+                totalPayout += placedBets[color] * 2;
+            }
+
+            // 4. Parity Bet (2x)
+            if (!isZero) {
+                if (isEven && placedBets['Even']) totalPayout += placedBets['Even'] * 2;
+                if (!isEven && placedBets['Odd']) totalPayout += placedBets['Odd'] * 2;
+            }
+
+            // 5. Dozens Bet (3x)
+            if (winningNum !== null) {
+                if (winningNum >= 1 && winningNum <= 12 && placedBets['1st12']) totalPayout += placedBets['1st12'] * 3;
+                if (winningNum >= 13 && winningNum <= 24 && placedBets['2nd12']) totalPayout += placedBets['2nd12'] * 3;
+                if (winningNum >= 25 && winningNum <= 36 && placedBets['3rd12']) totalPayout += placedBets['3rd12'] * 3;
+            }
+
+            if (totalPayout > 0) {
+                walletBalance += totalPayout;
+                showToast(`🎉 WIN! Result: ${winningItem} (${color}). Paid $${totalPayout.toFixed(2)}!`);
+            } else if (totalStakedRound > 0) {
+                showToast(`❌ Result: ${winningItem} (${color}). No win.`);
+            }
+
+            updateWalletDisplay();
+            addHistoryBadge(winningItem, color);
+
+            placedBets = {};
+            totalStakedRound = 0;
+            updateBetBadges();
+
+            countdown = 15;
+            isSpinning = false;
+            document.getElementById('gameStatusText').innerText = "Place Your Bets";
+        }
+
+        function addHistoryBadge(item, color) {
+            const strip = document.getElementById('historyStrip');
+            const badge = document.createElement('span');
+            badge.className = `num-badge-3d ${color.toLowerCase()}`;
+            badge.innerText = item;
+            strip.insertBefore(badge, strip.firstChild);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = 'toast show';
+            setTimeout(() => { toast.className = 'toast'; }, 2800);
+        }
+    </script>
+</body>
+</html>
