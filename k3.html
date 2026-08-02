@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N+ PLAY - K3 Dice Game 3D</title>
+    <!-- Three.js for 3D WebGL Graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* ==========================================
+           1. LUXURY 3D DARK GAMING THEME
+           ========================================== */
+        :root {
+            --bg-dark: #0c0f16;
+            --bg-surface: #1a1d24;
+            --card-bg: rgba(26, 29, 36, 0.75);
+            --card-border: rgba(245, 158, 11, 0.25);
+            
+            --gold-neon: #f59e0b;
+            --gold-light: #fbbf24;
+            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fef08a 50%, #d97706 100%);
+            --gold-glow: rgba(245, 158, 11, 0.4);
+
+            --red-vibrant: #ef4444;
+            --red-glow: rgba(239, 68, 68, 0.4);
+            --green-vibrant: #10b981;
+            --blue-vibrant: #3b82f6;
+            --violet-vibrant: #8b5cf6;
+
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(12, 15, 22, 0.85);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 90% 90%, rgba(239, 68, 68, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #05070a 100%);
+            background-attachment: fixed;
+            padding: 10px 10px 80px 10px; /* Space for bottom nav */
+        }
+
+        .app-viewport {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        /* HEADER */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            border: 1px solid var(--card-border);
+            color: var(--gold-light);
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .brand-title-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .wallet-chip {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--green-vibrant);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        /* MULTI-TIMER SELECTOR TABS */
+        .timer-tabs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 6px;
+            border-radius: 16px;
+        }
+
+        .timer-tab {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 8px 4px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            transition: all 0.25s ease;
+        }
+
+        .timer-tab.active {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(15, 23, 42, 0.9));
+            border-color: var(--gold-neon);
+            color: var(--gold-neon);
+            box-shadow: 0 4px 15px var(--gold-glow);
+        }
+
+        /* 3D GAME ARENA CONTAINER */
+        .arena-card {
+            background: radial-gradient(circle, #1a202c 0%, #05070a 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            height: 240px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #webglContainer {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* LOCK OVERLAY (LAST 5 SECONDS) */
+        .lock-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(12, 15, 22, 0.88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--red-vibrant);
+            letter-spacing: 2px;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .lock-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .arena-hud {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(12, 15, 22, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 8px 14px;
+            border-radius: 14px;
+            z-index: 20;
+        }
+
+        .period-text { font-size: 0.85rem; font-weight: 800; color: var(--text-main); }
+        .clock-val { font-size: 1.1rem; font-weight: 900; color: var(--gold-neon); font-family: monospace; }
+
+        /* 3D CHIP DENOMINATION SELECTORS */
+        .chips-panel {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 10px;
+        }
+
+        .chip-3d {
+            flex: 1;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255,255,255,0.4);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .chip-10 { background: radial-gradient(circle, #0284c7, #0369a1); }
+        .chip-50 { background: radial-gradient(circle, #7c3aed, #5b21b6); }
+        .chip-100 { background: radial-gradient(circle, #d97706, #b45309); }
+        .chip-500 { background: radial-gradient(circle, #dc2626, #991b1b); }
+        .chip-1k { background: radial-gradient(circle, #10b981, #047857); }
+
+        .chip-3d.active {
+            border-style: solid;
+            border-color: #ffffff;
+            transform: scale(1.12);
+            box-shadow: 0 0 16px var(--gold-neon);
+        }
+
+        /* INTERACTIVE BETTING GRID */
+        .betting-grid-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .grid-row-quick {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .btn-quick-bet {
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: rgba(12, 15, 22, 0.8);
+            color: #fff;
+            font-weight: 900;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .btn-quick-bet.big { background: linear-gradient(135deg, #f59e0b, #b45309); }
+        .btn-quick-bet.small { background: linear-gradient(135deg, #06b6d4, #0369a1); }
+        .btn-quick-bet.odd { background: linear-gradient(135deg, #8b5cf6, #5b21b6); }
+        .btn-quick-bet.even { background: linear-gradient(135deg, #ef4444, #991b1b); }
+
+        .sum-numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .btn-sum-cell {
+            background: rgba(12, 15, 22, 0.8);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .btn-sum-cell .sum-val { font-size: 0.9rem; font-weight: 900; color: var(--gold-neon); }
+        .btn-sum-cell .sum-mult { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; }
+
+        .chip-placed-badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            background: var(--gold-gradient);
+            color: #000;
+            font-size: 0.58rem;
+            font-weight: 900;
+            padding: 1px 5px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+            z-index: 5;
+        }
+
+        /* HISTORY & TREND CHART SECTION */
+        .history-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-tabs-bar {
+            display: flex;
+            background: rgba(12, 15, 22, 0.8);
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid var(--card-border);
+        }
+
+        .sub-tab-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sub-tab-btn.active {
+            background: var(--card-bg);
+            color: var(--gold-neon);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .history-table-container {
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .history-table-container::-webkit-scrollbar { width: 4px; }
+        .history-table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 700;
+            background: rgba(12, 15, 22, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .dice-icon-inline {
+            display: inline-block;
+            width: 18px; height: 18px;
+            background: #fff;
+            color: #000;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 18px;
+            font-weight: 900;
+            font-size: 0.72rem;
+            margin-right: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100%; max-width: 480px;
+            background: rgba(12, 15, 22, 0.95);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .nav-item.active { color: var(--gold-neon); }
+        .nav-icon { font-size: 1.2rem; }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-30px);
+            background: rgba(12, 15, 22, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--gold-neon);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 0.85rem; font-weight: 700;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Notification</div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="app-viewport">
+        <!-- HEADER -->
+        <header class="app-header">
+            <a href="index.html" class="btn-back" title="Back to Home">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <div class="brand-title-box">
+                <span class="brand-title">K3 Dice Game 3D</span>
+            </div>
+            <div class="wallet-chip" id="walletDisplay">$1,000.00</div>
+        </header>
+
+        <!-- MULTI-TIMER SELECTOR TABS -->
+        <div class="timer-tabs-grid">
+            <button class="timer-tab active" onclick="switchTimerTab('30s')">
+                <span>⚡ 30s</span>
+                <span id="tabClock-30s">00:30</span>
+            </button>
+            <button class="timer-tab" onclick="switchTimerTab('1m')">
+                <span>⏱️ 1Min</span>
+                <span id="tabClock-1m">01:00</span>
+            </button>
+            <button class="timer-tab" onclick="switchTimerTab('3m')">
+                <span>⏱️ 3Min</span>
+                <span id="tabClock-3m">03:00</span>
+            </button>
+            <button class="timer-tab" onclick="switchTimerTab('5m')">
+                <span>⏱️ 5Min</span>
+                <span id="tabClock-5m">05:00</span>
+            </button>
+        </div>
+
+        <!-- 3D GAME ARENA -->
+        <div class="arena-card">
+            <div class="lock-overlay" id="lockOverlay">🔒 TIME LOCK</div>
+            <div id="webglContainer" style="width:100%; height:100%;"></div>
+
+            <!-- Arena HUD -->
+            <div class="arena-hud">
+                <span class="period-text" id="activePeriodDisplay">Period: 2026080230001</span>
+                <span class="clock-val" id="activeClockDisplay">00:30</span>
+            </div>
+        </div>
+
+        <!-- 3D CHIP DENOMINATION SELECTORS -->
+        <div class="chips-panel">
+            <button class="chip-3d chip-10 active" onclick="selectChip(10, this)">$10</button>
+            <button class="chip-3d chip-50" onclick="selectChip(50, this)">$50</button>
+            <button class="chip-3d chip-100" onclick="selectChip(100, this)">$100</button>
+            <button class="chip-3d chip-500" onclick="selectChip(500, this)">$500</button>
+            <button class="chip-3d chip-1k" onclick="selectChip(1000, this)">$1K</button>
+        </div>
+
+        <!-- INTERACTIVE BETTING GRID -->
+        <div class="betting-grid-card">
+            <!-- Quick Options -->
+            <div class="grid-row-quick">
+                <button class="btn-quick-bet big" onclick="placeBet('Big', 'quick')">
+                    BIG (11-17)
+                    <span class="chip-placed-badge" id="betBadge-Big" style="display:none;">$0</span>
+                </button>
+                <button class="btn-quick-bet small" onclick="placeBet('Small', 'quick')">
+                    SMALL (4-10)
+                    <span class="chip-placed-badge" id="betBadge-Small" style="display:none;">$0</span>
+                </button>
+                <button class="btn-quick-bet odd" onclick="placeBet('Odd', 'quick')">
+                    ODD
+                    <span class="chip-placed-badge" id="betBadge-Odd" style="display:none;">$0</span>
+                </button>
+                <button class="btn-quick-bet even" onclick="placeBet('Even', 'quick')">
+                    EVEN
+                    <span class="chip-placed-badge" id="betBadge-Even" style="display:none;">$0</span>
+                </button>
+            </div>
+
+            <!-- Sum Total Options (3 to 18) -->
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); margin-top: 4px;">Sum Total Bet (3-18)</div>
+            <div class="sum-numbers-grid">
+                <!-- Sums 3-18 populated via JS -->
+            </div>
+        </div>
+
+        <!-- HISTORY & TREND CHART SECTION -->
+        <div class="history-section">
+            <div class="history-tabs-bar">
+                <button class="sub-tab-btn active" onclick="switchSubTab('history')">Game History</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('myBets')">My Bets</button>
+            </div>
+
+            <div class="history-table-container" id="historyView">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Dice Outcome</th>
+                            <th>Sum</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="history-table-container" id="myBetsView" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Bet Target</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myBetsTableBody">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="activity.html" class="nav-item">
+            <span class="nav-icon">🔥</span>
+            <span>Activity</span>
+        </a>
+        <a href="promotion.html" class="nav-item">
+            <span class="nav-icon">🎁</span>
+            <span>Promotion</span>
+        </a>
+        <a href="account.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>Account</span>
+        </a>
+    </nav>
+
+    <!-- ==========================================
+       THREE.JS WebGL 3D K3 DICE & GAME ENGINE
+       ========================================== -->
+    <script>
+        // --- GAME STATE ---
+        let walletBalance = 1000.00;
+        let selectedChip = 10;
+        let activeTabKey = '30s';
+        let activeSubTab = 'history';
+        let placedBets = {};
+        let totalStakedRound = 0;
+
+        // 4 Multi-Timer Config
+        const TIMERS_CONFIG = {
+            '30s': { name: 'K3 30s', duration: 30, periodPrefix: '2026080230', periodSeq: 1001, remaining: 30, history: [], myBets: [] },
+            '1m':  { name: 'K3 1Min', duration: 60, periodPrefix: '2026080201', periodSeq: 1001, remaining: 60, history: [], myBets: [] },
+            '3m':  { name: 'K3 3Min', duration: 180, periodPrefix: '2026080203', periodSeq: 1001, remaining: 180, history: [], myBets: [] },
+            '5m':  { name: 'K3 5Min', duration: 300, periodPrefix: '2026080205', periodSeq: 1001, remaining: 300, history: [], myBets: [] }
+        };
+
+        // Three.js Scene Variables
+        let scene, camera, renderer;
+        let shakerCupMesh, diceMeshes = [];
+        let isShaking = false;
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            initThreeJS();
+            generateInitialHistory();
+            renderSumGrid();
+            startMasterClock();
+            renderActiveHistory();
+        };
+
+        // --- THREE.JS PROCEDURAL 3D K3 DICE ENGINE ---
+        function initThreeJS() {
+            const container = document.getElementById('webglContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+            camera.position.set(0, 4.5, 5.5);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lighting Setup
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const goldSpotLight = new THREE.SpotLight(0xfbbf24, 2.5);
+            goldSpotLight.position.set(2, 8, 4);
+            goldSpotLight.castShadow = true;
+            scene.add(goldSpotLight);
+
+            // Metallic Base Plate
+            const plateGeo = new THREE.CylinderGeometry(2.8, 3.0, 0.2, 32);
+            const plateMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.2, metalness: 0.8 });
+            const plateMesh = new THREE.Mesh(plateGeo, plateMat);
+            plateMesh.position.y = -0.2;
+            scene.add(plateMesh);
+
+            // 3 Cubical Dice
+            const dicePositions = [-0.8, 0, 0.8];
+            for (let i = 0; i < 3; i++) {
+                const dieGeo = new THREE.BoxGeometry(0.7, 0.7, 0.7);
+                const dieMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 });
+                const dieMesh = new THREE.Mesh(dieGeo, dieMat);
+                dieMesh.position.set(dicePositions[i], 0.25, 0);
+                scene.add(dieMesh);
+                diceMeshes.push(dieMesh);
+            }
+
+            // Gold Metallic Shaker Cup
+            const cupGeo = new THREE.CylinderGeometry(1.6, 2.2, 2.2, 32, 1, true);
+            const cupMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.15, side: THREE.DoubleSide });
+            shakerCupMesh = new THREE.Mesh(cupGeo, cupMat);
+            shakerCupMesh.position.set(0, 1.3, 0);
+            scene.add(shakerCupMesh);
+
+            animateThreeJS();
+        }
+
+        function animateThreeJS() {
+            requestAnimationFrame(animateThreeJS);
+
+            if (isShaking) {
+                // Vibrate Cup & Dice
+                shakerCupMesh.position.x = (Math.random() - 0.5) * 0.15;
+                shakerCupMesh.position.z = (Math.random() - 0.5) * 0.15;
+
+                diceMeshes.forEach(d => {
+                    d.rotation.x += 0.2;
+                    d.rotation.y += 0.2;
+                    d.position.y = 0.25 + Math.abs(Math.sin(Date.now() * 0.02) * 0.4);
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function triggerDiceRollAnimation(diceResults) {
+            isShaking = true;
+
+            // 1. Lower Shaker Cup
+            const startTime = performance.now();
+            const liftDuration = 2000;
+
+            setTimeout(() => {
+                isShaking = false;
+                shakerCupMesh.position.set(0, 3.5, 0); // Lift cup to reveal dice
+                diceMeshes.forEach(d => d.position.y = 0.25);
+            }, 2000);
+        }
+
+        // --- POPULATE 100+ INITIAL RECORDS FOR ALL TIMERS ---
+        function generateInitialHistory() {
+            Object.keys(TIMERS_CONFIG).forEach(key => {
+                const conf = TIMERS_CONFIG[key];
+                for (let i = 0; i < 110; i++) {
+                    const periodId = `${conf.periodPrefix}${conf.periodSeq - i}`;
+                    const d1 = Math.floor(Math.random() * 6) + 1;
+                    const d2 = Math.floor(Math.random() * 6) + 1;
+                    const d3 = Math.floor(Math.random() * 6) + 1;
+                    const sum = d1 + d2 + d3;
+                    const isTriple = (d1 === d2 && d2 === d3);
+                    const size = isTriple ? 'Triple' : (sum >= 11 ? 'Big' : 'Small');
+                    const parity = sum % 2 === 0 ? 'Even' : 'Odd';
+
+                    conf.history.push({
+                        period: periodId,
+                        dice: [d1, d2, d3],
+                        sum: sum,
+                        size: size,
+                        parity: parity
+                    });
+                }
+            });
+        }
+
+        // --- RENDER SUM GRID ---
+        function renderSumGrid() {
+            const container = document.querySelector('.sum-numbers-grid');
+            const mults = {3:207, 4:69, 5:34.5, 6:20.7, 7:13.8, 8:9.8, 9:7.8, 10:6.9, 11:6.9, 12:7.8, 13:9.8, 14:13.8, 15:20.7, 16:34.5, 17:69, 18:207};
+            let html = '';
+            for (let s = 3; s <= 18; s++) {
+                html += `
+                    <div class="btn-sum-cell" onclick="placeBet('Sum${s}', 'sum')">
+                        <span class="sum-val">${s}</span>
+                        <span class="sum-mult">${mults[s]}x</span>
+                        <span class="chip-placed-badge" id="betBadge-Sum${s}" style="display:none;">$0</span>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // --- MASTER TIMER LOOP ---
+        function startMasterClock() {
+            setInterval(() => {
+                Object.keys(TIMERS_CONFIG).forEach(key => {
+                    const conf = TIMERS_CONFIG[key];
+                    conf.remaining--;
+
+                    document.getElementById(`tabClock-${key}`).innerText = formatTime(conf.remaining);
+
+                    if (conf.remaining <= 0) {
+                        evaluateRound(key);
+                        conf.remaining = conf.duration;
+                        conf.periodSeq++;
+                    }
+
+                    if (key === activeTabKey) {
+                        document.getElementById('activeClockDisplay').innerText = formatTime(conf.remaining);
+                        document.getElementById('activePeriodDisplay').innerText = `Period: ${conf.periodPrefix}${conf.periodSeq}`;
+
+                        const lockOverlay = document.getElementById('lockOverlay');
+                        if (conf.remaining <= 5) lockOverlay.classList.add('active');
+                        else lockOverlay.classList.remove('active');
+                    }
+                });
+            }, 1000);
+        }
+
+        // --- ROUND EVALUATION ---
+        function evaluateRound(timerKey) {
+            const conf = TIMERS_CONFIG[timerKey];
+            const currentPeriodId = `${conf.periodPrefix}${conf.periodSeq}`;
+
+            const d1 = Math.floor(Math.random() * 6) + 1;
+            const d2 = Math.floor(Math.random() * 6) + 1;
+            const d3 = Math.floor(Math.random() * 6) + 1;
+            const sum = d1 + d2 + d3;
+            const isTriple = (d1 === d2 && d2 === d3);
+            const size = isTriple ? 'Triple' : (sum >= 11 ? 'Big' : 'Small');
+            const parity = sum % 2 === 0 ? 'Even' : 'Odd';
+
+            if (timerKey === activeTabKey) {
+                triggerDiceRollAnimation([d1, d2, d3]);
+            }
+
+            conf.history.unshift({
+                period: currentPeriodId,
+                dice: [d1, d2, d3],
+                sum: sum,
+                size: size,
+                parity: parity
+            });
+
+            // Check User Bets
+            const pendingBet = conf.myBets.find(b => b.period === currentPeriodId && b.status === 'Pending');
+            if (pendingBet) {
+                let isWin = false;
+                let payout = 0;
+
+                if (pendingBet.value === 'Big' && size === 'Big') { isWin = true; payout = pendingBet.amount * 2; }
+                else if (pendingBet.value === 'Small' && size === 'Small') { isWin = true; payout = pendingBet.amount * 2; }
+                else if (pendingBet.value === 'Odd' && parity === 'Odd') { isWin = true; payout = pendingBet.amount * 2; }
+                else if (pendingBet.value === 'Even' && parity === 'Even') { isWin = true; payout = pendingBet.amount * 2; }
+                else if (pendingBet.value === `Sum${sum}`) { isWin = true; payout = pendingBet.amount * 6.9; }
+
+                if (isWin) {
+                    walletBalance += payout;
+                    pendingBet.status = `+ $${payout.toFixed(2)}`;
+                    if (timerKey === activeTabKey) showToast(`🎉 WIN! Dice: ${d1}-${d2}-${d3} (Sum ${sum}). Paid $${payout.toFixed(2)}`);
+                } else {
+                    pendingBet.status = `-$${pendingBet.amount.toFixed(2)}`;
+                    if (timerKey === activeTabKey) showToast(`❌ Result: ${d1}-${d2}-${d3} (Sum ${sum}). Bet Lost.`);
+                }
+                updateWalletDisplay();
+            }
+
+            if (timerKey === activeTabKey) renderActiveHistory();
+        }
+
+        // --- BETTING LOGIC ---
+        function placeBet(targetKey, type) {
+            const conf = TIMERS_CONFIG[activeTabKey];
+            if (conf.remaining <= 5) {
+                showToast("Betting is locked in last 5 seconds!");
+                return;
+            }
+
+            if (walletBalance < selectedChip) {
+                showToast("Insufficient Balance!");
+                return;
+            }
+
+            const currentPeriodId = `${conf.periodPrefix}${conf.periodSeq}`;
+            walletBalance -= selectedChip;
+            placedBets[targetKey] = (placedBets[targetKey] || 0) + selectedChip;
+
+            conf.myBets.unshift({
+                period: currentPeriodId,
+                value: targetKey,
+                amount: selectedChip,
+                status: 'Pending'
+            });
+
+            updateWalletDisplay();
+            updateBetBadges();
+            showToast(`Bet placed on ${targetKey} for $${selectedChip}`);
+        }
+
+        function updateBetBadges() {
+            document.querySelectorAll('.chip-placed-badge').forEach(b => b.style.display = 'none');
+            Object.keys(placedBets).forEach(key => {
+                const badge = document.getElementById(`betBadge-${key}`);
+                if (badge && placedBets[key] > 0) {
+                    badge.innerText = `$${placedBets[key]}`;
+                    badge.style.display = 'block';
+                }
+            });
+        }
+
+        function switchTimerTab(key) {
+            activeTabKey = key;
+            const conf = TIMERS_CONFIG[key];
+
+            document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.getElementById('activePeriodDisplay').innerText = `Period: ${conf.periodPrefix}${conf.periodSeq}`;
+            document.getElementById('activeClockDisplay').innerText = formatTime(conf.remaining);
+
+            renderActiveHistory();
+        }
+
+        function switchSubTab(tabName) {
+            activeSubTab = tabName;
+            document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.getElementById('historyView').style.display = tabName === 'history' ? 'block' : 'none';
+            document.getElementById('myBetsView').style.display = tabName === 'myBets' ? 'block' : 'none';
+
+            renderActiveHistory();
+        }
+
+        function renderActiveHistory() {
+            const conf = TIMERS_CONFIG[activeTabKey];
+
+            if (activeSubTab === 'history') {
+                const tbody = document.getElementById('historyTableBody');
+                tbody.innerHTML = conf.history.slice(0, 100).map(item => `
+                    <tr>
+                        <td>${item.period}</td>
+                        <td>
+                            <span class="dice-icon-inline">${item.dice[0]}</span>
+                            <span class="dice-icon-inline">${item.dice[1]}</span>
+                            <span class="dice-icon-inline">${item.dice[2]}</span>
+                        </td>
+                        <td style="font-weight:900; color:var(--gold-neon);">${item.sum}</td>
+                        <td><strong>${item.size}</strong> / ${item.parity}</td>
+                    </tr>
+                `).join('');
+            } else if (activeSubTab === 'myBets') {
+                const tbody = document.getElementById('myBetsTableBody');
+                tbody.innerHTML = conf.myBets.slice(0, 50).map(bet => `
+                    <tr>
+                        <td>${bet.period}</td>
+                        <td style="font-weight:800;">${bet.value}</td>
+                        <td>$${bet.amount.toFixed(2)}</td>
+                        <td style="font-weight:900; color:${bet.status.includes('+') ? 'var(--green-vibrant)' : 'var(--red-vibrant)'}">${bet.status}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function selectChip(val, btn) {
+            selectedChip = val;
+            document.querySelectorAll('.chip-3d').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function updateWalletDisplay() {
+            document.getElementById('walletDisplay').innerText = `$${walletBalance.toFixed(2)}`;
+        }
+
+        function formatTime(totalSec) {
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+            return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = 'toast show';
+            setTimeout(() => { toast.className = 'toast'; }, 2800);
+        }
+    </script>
+</body>
+</html>
