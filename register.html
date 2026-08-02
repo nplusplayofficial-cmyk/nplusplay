@@ -5,465 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>N+ PLAY - Register</title>
     <style>
-        /* ==========================================
-           1. DAMAN APPS RED-THEMED CSS STYLES
-           ========================================== */
-        :root {
-            --primary-red: #f43f5e;
-            --primary-red-dark: #e11d48;
-            --header-gradient: linear-gradient(135deg, #fb7185, #e11d48);
-            --bg-body: #f8fafc;
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --input-bg: #f1f5f9;
-            --accent-green: #10b981;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #1a1a2e; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 420px; background: #22223b; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        
+        /* Header */
+        .header { background: #e63946; padding: 15px 20px; display: flex; align-items: center; color: white; position: relative; }
+        .back-btn { font-size: 20px; text-decoration: none; color: white; margin-right: 15px; }
+        .header-title { font-size: 18px; font-weight: bold; width: 100%; text-align: center; margin-right: 25px; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* Form Body */
+        .form-body { padding: 25px 20px; flex-grow: 1; }
+        .form-subtitle { font-size: 13px; color: #adb5bd; margin-bottom: 25px; }
+        
+        .section-title { font-size: 14px; font-weight: bold; color: #e63946; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        
+        .input-group { margin-bottom: 20px; }
+        .input-label { font-size: 13px; color: #adb5bd; margin-bottom: 8px; display: block; }
+        
+        .input-box { display: flex; align-items: center; background: #2d2d44; border-radius: 8px; border: 1px solid #4a4e69; overflow: hidden; }
+        .prefix { background: #3a3a5e; padding: 12px 15px; font-size: 14px; color: #e2e2e2; border-right: 1px solid #4a4e69; }
+        .input-box input { background: transparent; border: none; outline: none; color: white; padding: 12px 15px; width: 100%; font-size: 14px; }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 15px; font-size: 12px; color: #adb5bd; }
+        .checkbox-group a { color: #e63946; text-decoration: none; }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-        }
+        .btn-submit { width: 100%; background: linear-gradient(135deg, #e63946, #d90429); color: white; border: none; padding: 14px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 30px; box-shadow: 0 4px 15px rgba(230,57,70,0.4); }
+        .btn-submit:active { transform: scale(0.98); }
 
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            min-height: 100vh;
-            background-color: var(--bg-card);
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
+        .footer-links { text-align: center; margin-top: 20px; font-size: 13px; color: #adb5bd; }
+        .footer-links a { color: #e63946; text-decoration: none; font-weight: bold; }
 
-        /* DAMAN STYLE HEADER */
-        .app-header {
-            background: var(--header-gradient);
-            color: #ffffff;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-        }
-
-        /* BRAND HERO BANNER */
-        .brand-section {
-            background: var(--header-gradient);
-            padding: 20px 20px 40px 20px;
-            text-align: center;
-            color: #ffffff;
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
-            margin-bottom: -20px;
-        }
-
-        .brand-logo-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 54px;
-            height: 54px;
-            background: #ffffff;
-            color: var(--primary-red-dark);
-            font-size: 1.5rem;
-            font-weight: 900;
-            border-radius: 16px;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-            margin-bottom: 8px;
-        }
-
-        .brand-subtitle {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            font-weight: 500;
-        }
-
-        /* FORM CONTAINER */
-        .form-container {
-            padding: 24px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            z-index: 10;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 0 14px;
-            transition: all 0.2s ease;
-        }
-
-        .input-wrapper:focus-within {
-            border-color: var(--primary-red);
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.12);
-        }
-
-        .input-icon {
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-        }
-
-        .country-code {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--primary-red-dark);
-            padding-right: 10px;
-            border-right: 1px solid var(--border-color);
-            margin-right: 10px;
-            user-select: none;
-        }
-
-        .form-control {
-            width: 100%;
-            height: 48px;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-size: 0.95rem;
-            color: var(--text-main);
-            font-weight: 500;
-        }
-
-        .form-control::placeholder {
-            color: #94a3b8;
-            font-weight: 400;
-        }
-
-        .toggle-password {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            padding: 4px;
-        }
-
-        /* CHECKBOX AGREEMENT */
-        .agreement-box {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .agreement-box input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary-red);
-            cursor: pointer;
-            margin-top: 1px;
-        }
-
-        .link-text {
-            color: var(--primary-red-dark);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* REGISTER BUTTON */
-        .btn-register {
-            width: 100%;
-            height: 50px;
-            background: var(--header-gradient);
-            color: #ffffff;
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            box-shadow: 0 6px 18px rgba(225, 29, 72, 0.3);
-            transition: all 0.2s ease;
-            margin-top: 10px;
-        }
-
-        .btn-register:active {
-            transform: scale(0.98);
-            box-shadow: 0 3px 10px rgba(225, 29, 72, 0.2);
-        }
-
-        /* FOOTER LOGIN LINK */
-        .login-prompt {
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 15px;
-        }
-
-        /* TOAST NOTIFICATION */
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-20px);
-            background: #1e293b;
-            color: #ffffff;
-            padding: 12px 22px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            white-space: nowrap;
-        }
-
-        .toast.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .toast.error {
-            background: #ef4444;
-        }
-
-        .toast.success {
-            background: #10b981;
-        }
+        /* Help / Agent Live Chat Button */
+        .help-bar { background: #161625; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2d2d44; }
+        .help-text { font-size: 13px; color: #adb5bd; }
+        .help-btn { background: #3a3a5e; color: #4cc9f0; border: none; padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Notification Message</div>
-
-    <div class="app-container">
-        <!-- HEADER -->
-        <header class="app-header">
-            <div class="header-left">
-                <button class="back-btn" onclick="window.location.href='home.html'">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                </button>
-                <span class="header-title">Register</span>
-            </div>
-        </header>
-
-        <!-- BRAND BANNER -->
-        <div class="brand-section">
-            <div class="brand-logo-badge">N+</div>
-            <div class="brand-subtitle">Create an account to start playing</div>
+<div class="container">
+    <div>
+        <!-- Header -->
+        <div class="header">
+            <a href="index.html" class="back-btn">❮</a>
+            <div class="header-title">N+ PLAY</div>
         </div>
 
-        <!-- FORM SECTION -->
-        <form class="form-container" id="registerForm" onsubmit="handleRegister(event)">
-            
-            <!-- PHONE NUMBER -->
-            <div class="input-group">
-                <label class="input-label">
-                    <span>Phone Number</span>
-                </label>
-                <div class="input-wrapper">
-                    <span class="country-code">+91</span>
-                    <input type="tel" id="phone" class="form-control" placeholder="Please enter phone number" maxlength="10" required>
+        <!-- Body -->
+        <div class="form-body">
+            <h2 style="font-size: 22px; margin-bottom: 5px;">Register</h2>
+            <p class="form-subtitle">Please register by Indian phone number (+91)</p>
+
+            <div class="section-title">📱 Register your phone</div>
+
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label class="input-label">Phone number</label>
+                    <div class="input-box">
+                        <span class="prefix">+91</span>
+                        <input type="tel" id="phone" placeholder="Enter 10-digit mobile number" maxlength="10" pattern="[6-9][0-9]{9}" required>
+                    </div>
                 </div>
-            </div>
 
-            <!-- SET PASSWORD -->
-            <div class="input-group">
-                <label class="input-label">Set Password</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    </span>
-                    <input type="password" id="password" class="form-control" placeholder="Set password (min 6 chars)" required>
-                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password', this)">
-                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </button>
+                <div class="input-group">
+                    <label class="input-label">Set password</label>
+                    <div class="input-box">
+                        <input type="password" id="password" placeholder="Set password" required>
+                    </div>
                 </div>
-            </div>
 
-            <!-- CONFIRM PASSWORD -->
-            <div class="input-group">
-                <label class="input-label">Confirm Password</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    </span>
-                    <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm your password" required>
-                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirmPassword', this)">
-                        <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </button>
+                <div class="input-group">
+                    <label class="input-label">Confirm password</label>
+                    <div class="input-box">
+                        <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+                    </div>
                 </div>
-            </div>
 
-            <!-- INVITE CODE -->
-            <div class="input-group">
-                <label class="input-label">Invite Code</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"></path><path d="M2 7h20v5H2z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
-                    </span>
-                    <input type="text" id="inviteCode" class="form-control" placeholder="Please enter recommendation code" value="918237">
+                <div class="input-group">
+                    <label class="input-label">Invite code</label>
+                    <div class="input-box">
+                        <input type="text" id="inviteCode" value="NPLUS999" readonly style="color: #4cc9f0; font-weight: bold;">
+                    </div>
                 </div>
-            </div>
 
-            <!-- PRIVACY AGREEMENT -->
-            <div class="agreement-box">
-                <input type="checkbox" id="agreement" checked required>
-                <label for="agreement">
-                    I have read and agree to the <a href="#" class="link-text" onclick="alert('Privacy Agreement: Play responsibly.')">Privacy Agreement</a>
-                </label>
-            </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="agreement" required>
+                    <label for="agreement">I have read and agree <a href="#">[Privacy Agreement]</a></label>
+                </div>
 
-            <!-- SUBMIT BUTTON -->
-            <button type="submit" class="btn-register">Register</button>
+                <button type="submit" class="btn-submit">Register</button>
+            </form>
 
-            <!-- LOGIN LINK -->
-            <div class="login-prompt">
-                I have an account? <a href="#" class="link-text" onclick="showToast('Redirecting to Login...')">Log in</a>
+            <div class="footer-links">
+                I have an account? <a href="login.html">Login</a>
             </div>
-        </form>
+        </div>
     </div>
 
-    <!-- ==========================================
-       2. JAVASCRIPT VALIDATION & LOGIC
-       ========================================== -->
-    <script>
-        // --- TOGGLE PASSWORD VISIBILITY ---
-        function togglePasswordVisibility(fieldId, btn) {
-            const input = document.getElementById(fieldId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                btn.style.color = 'var(--primary-red)';
-            } else {
-                input.type = 'password';
-                btn.style.color = 'var(--text-muted)';
-            }
+    <!-- Help & Agent Chat Bar -->
+    <div class="help-bar">
+        <span class="help-text">Need assistance?</span>
+        <a href="agent-chat.html" class="help-btn">💬 Customer Support</a>
+    </div>
+</div>
+
+<script>
+    function handleRegister(event) {
+        event.preventDefault();
+        const phone = document.getElementById('phone').value;
+        const pass = document.getElementById('password').value;
+        const cpass = document.getElementById('confirmPassword').value;
+
+        if(phone.length !== 10) {
+            alert('Please enter a valid 10-digit Indian mobile number!');
+            return;
+        }
+        if(pass !== cpass) {
+            alert('Passwords do not match!');
+            return;
         }
 
-        // --- SHOW CUSTOM TOAST ---
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.className = `toast show ${type}`;
+        alert('Registration Successful! Redirecting to Login...');
+        window.location.href = 'login.html';
+    }
+</script>
 
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 2500);
-        }
-
-        // --- REGISTER FORM SUBMISSION ---
-        function handleRegister(e) {
-            e.preventDefault();
-
-            const phone = document.getElementById('phone').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const inviteCode = document.getElementById('inviteCode').value.trim();
-            const agreement = document.getElementById('agreement').checked;
-
-            // 1. Phone number validation (10 Digits)
-            const phoneRegex = /^[0-9]{10}$/;
-            if (!phoneRegex.test(phone)) {
-                showToast('Please enter a valid 10-digit phone number', 'error');
-                return;
-            }
-
-            // 2. Password Length Check
-            if (password.length < 6) {
-                showToast('Password must be at least 6 characters long', 'error');
-                return;
-            }
-
-            // 3. Confirm Password Match Check
-            if (password !== confirmPassword) {
-                showToast('Passwords do not match!', 'error');
-                return;
-            }
-
-            // 4. Privacy Checkbox Validation
-            if (!agreement) {
-                showToast('You must agree to the Privacy Agreement', 'error');
-                return;
-            }
-
-            // Store User session simulated data
-            const userData = {
-                phone: '+91' + phone,
-                inviteCode: inviteCode || 'DEFAULT',
-                registeredAt: new Date().toISOString()
-            };
-            localStorage.setItem('nplus_user', JSON.stringify(userData));
-
-            // Success feedback
-            showToast('🎉 Registration Successful!', 'success');
-
-            // Redirect to home lobby or index game page after 1.2s
-            setTimeout(() => {
-                window.location.href = 'home.html'; // Or 'index.html'
-            }, 1200);
-        }
-    </script>
 </body>
 </html>
