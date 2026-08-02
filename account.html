@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N+ PLAY - User Account</title>
+    <style>
+        /* ==========================================
+           1. MODERN DARK GAMING THEME & GLASSMORPHISM
+           ========================================== */
+        :root {
+            --bg-dark: #070a12;
+            --bg-surface: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.65);
+            --card-border: rgba(255, 255, 255, 0.1);
+            
+            --gold-neon: #f59e0b;
+            --gold-glow: rgba(245, 158, 11, 0.35);
+            --red-vibrant: #e63946;
+            --red-glow: rgba(230, 57, 70, 0.4);
+            --green-glow: #10b981;
+
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(15, 23, 42, 0.85);
+            --input-border: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 15% 15%, var(--gold-glow) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, var(--red-glow) 0%, transparent 45%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
+            background-attachment: fixed;
+            padding: 10px 10px 80px 10px; /* Space for bottom nav */
+        }
+
+        .app-viewport {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        /* USER PROFILE BANNER HEADER */
+        .profile-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .user-avatar {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 0 15px var(--gold-glow);
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-phone {
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-uid {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .vip-badge {
+            align-self: flex-start;
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--gold-neon);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            font-size: 0.68rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        /* MAIN WALLET BALANCE CARD */
+        .wallet-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--gold-neon);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        .wallet-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .wallet-title {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .wallet-amount {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--green-glow);
+        }
+
+        .wallet-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-wallet-action {
+            flex: 1;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: transform 0.2s;
+        }
+
+        .btn-deposit {
+            background: linear-gradient(135deg, var(--gold-neon), #d97706);
+            color: #000;
+            box-shadow: 0 4px 12px var(--gold-glow);
+        }
+
+        .btn-withdraw {
+            background: rgba(230, 57, 70, 0.2);
+            border: 1px solid var(--red-vibrant);
+            color: var(--red-vibrant);
+        }
+
+        .btn-wallet-action:active {
+            transform: scale(0.96);
+        }
+
+        /* VIP PROGRESS BAR */
+        .vip-progress-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .vip-progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 65%;
+            background: linear-gradient(90deg, var(--gold-neon), var(--red-vibrant));
+            border-radius: 8px;
+        }
+
+        /* SECTION HEADER */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--gold-neon);
+            border-radius: 2px;
+        }
+
+        /* QUICK ACCESS MENU CARDS */
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .menu-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .menu-item:hover {
+            border-color: var(--gold-neon);
+            transform: translateY(-2px);
+        }
+
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .menu-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .menu-status {
+            font-size: 0.72rem;
+            color: var(--green-glow);
+            font-weight: 700;
+            margin-right: 6px;
+        }
+
+        .menu-arrow {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* LOGOUT BUTTON */
+        .btn-logout {
+            width: 100%;
+            height: 50px;
+            background: rgba(230, 57, 70, 0.15);
+            border: 1px solid var(--red-vibrant);
+            color: var(--red-vibrant);
+            border-radius: 16px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            margin-top: 6px;
+        }
+
+        .btn-logout:hover {
+            background: var(--red-vibrant);
+            color: #ffffff;
+            box-shadow: 0 6px 18px var(--red-glow);
+        }
+
+        .btn-logout:active {
+            transform: scale(0.98);
+        }
+
+        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .nav-item.active {
+            color: var(--gold-neon);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-30px);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--green-glow);
+            color: #6ee7b7;
+            padding: 12px 22px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 2000;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Notification Message</div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="app-viewport">
+        
+        <!-- PROFILE & VIP HEADER BANNER -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="user-avatar">👤</div>
+                <div class="user-details">
+                    <div class="user-phone">
+                        +91 98***1234
+                        <span class="vip-badge">VIP 3</span>
+                    </div>
+                    <div class="user-uid">UID: 889102</div>
+                </div>
+            </div>
+
+            <!-- MAIN WALLET BALANCE CARD -->
+            <div class="wallet-card">
+                <div class="wallet-top">
+                    <span class="wallet-title">Main Wallet Balance</span>
+                    <span style="font-size: 0.75rem; color: var(--gold-neon); cursor: pointer;" onclick="showToast('Wallet Refreshed!')">🔄 Refresh</span>
+                </div>
+                <div class="wallet-amount">$1,000.00</div>
+                <div class="wallet-actions">
+                    <button class="btn-wallet-action btn-deposit" onclick="showToast('Redirecting to Payment Gateway...')">
+                        <span>💳 Deposit</span>
+                    </button>
+                    <button class="btn-wallet-action btn-withdraw" onclick="showToast('Withdrawal Portal Opened')">
+                        <span>⚡ Withdrawal</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIP PROGRESS LEVEL CARD -->
+        <div class="vip-progress-card">
+            <div class="vip-progress-header">
+                <span>VIP 3 Level Progress</span>
+                <span style="color: var(--gold-neon);">Exp: 6,500 / 10,000</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+
+        <!-- MENU SECTIONS -->
+        <div class="section-header">
+            <h3 class="section-title">Quick Services</h3>
+        </div>
+
+        <div class="menu-list">
+            <!-- Betting History -->
+            <a href="#" class="menu-item" onclick="showToast('Opening Betting History...')">
+                <div class="menu-left">
+                    <div class="menu-icon" style="color: var(--gold-neon);">📊</div>
+                    <span class="menu-label">Betting History</span>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </a>
+
+            <!-- Transaction Records -->
+            <a href="#" class="menu-item" onclick="showToast('Opening Transaction Logs...')">
+                <div class="menu-left">
+                    <div class="menu-icon" style="color: var(--green-glow);">📝</div>
+                    <span class="menu-label">Transaction Records</span>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </a>
+
+            <!-- Bank Card Binding -->
+            <a href="#" class="menu-item" onclick="showToast('Bank Account Bound')">
+                <div class="menu-left">
+                    <div class="menu-icon" style="color: #60a5fa;">🏦</div>
+                    <span class="menu-label">Bank Card Binding</span>
+                </div>
+                <div>
+                    <span class="menu-status">Bound 🟢</span>
+                    <span class="menu-arrow">➔</span>
+                </div>
+            </a>
+
+            <!-- Security & Password -->
+            <a href="forgot-password.html" class="menu-item">
+                <div class="menu-left">
+                    <div class="menu-icon" style="color: var(--red-vibrant);">🔒</div>
+                    <span class="menu-label">Security / Password Change</span>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </a>
+
+            <!-- Customer Service -->
+            <a href="agent-chat.html" class="menu-item">
+                <div class="menu-left">
+                    <div class="menu-icon" style="color: var(--gold-neon);">🎧</div>
+                    <span class="menu-label">24/7 Customer Service</span>
+                </div>
+                <div>
+                    <span class="menu-status">Online 🟢</span>
+                    <span class="menu-arrow">➔</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- LOGOUT BUTTON -->
+        <button class="btn-logout" onclick="handleLogout()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span>LOG OUT ACCOUNT</span>
+        </button>
+    </div>
+
+    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="activity.html" class="nav-item">
+            <span class="nav-icon">🔥</span>
+            <span>Activity</span>
+        </a>
+        <a href="promotion.html" class="nav-item">
+            <span class="nav-icon">🎁</span>
+            <span>Promotion</span>
+        </a>
+        <a href="account.html" class="nav-item active">
+            <span class="nav-icon">👤</span>
+            <span>Account</span>
+        </a>
+    </nav>
+
+    <!-- ==========================================
+       JAVASCRIPT LOGIC
+       ========================================== -->
+    <script>
+        // LUXURY TOAST POPUP SYSTEM
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = 'toast show';
+
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 2500);
+        }
+
+        // LOGOUT HANDLER
+        function handleLogout() {
+            localStorage.removeItem('nplus_user');
+            showToast('🚪 Logged out successfully! Redirecting...');
+
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
