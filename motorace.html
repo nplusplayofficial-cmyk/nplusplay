@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N+ PLAY - MotoRace 3D</title>
+    <!-- Three.js for 3D WebGL Graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* ==========================================
+           1. LUXURY 3D DARK GAMING THEME
+           ========================================== */
+        :root {
+            --bg-dark: #0c0f16;
+            --bg-surface: #1a1d24;
+            --card-bg: rgba(26, 29, 36, 0.75);
+            --card-border: rgba(245, 158, 11, 0.25);
+            
+            --gold-neon: #f59e0b;
+            --gold-light: #fbbf24;
+            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fef08a 50%, #d97706 100%);
+            --gold-glow: rgba(245, 158, 11, 0.4);
+
+            --red-vibrant: #ef4444;
+            --red-glow: rgba(239, 68, 68, 0.4);
+            --green-vibrant: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.4);
+            --cyan-vibrant: #06b6d4;
+            --blue-vibrant: #3b82f6;
+            --violet-vibrant: #8b5cf6;
+
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(12, 15, 22, 0.85);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 90% 90%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #05070a 100%);
+            background-attachment: fixed;
+            padding: 10px 10px 80px 10px; /* Space for bottom nav */
+        }
+
+        .app-viewport {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        /* HEADER */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            border: 1px solid var(--card-border);
+            color: var(--gold-light);
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn-back:hover {
+            border-color: var(--gold-neon);
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .brand-title-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .live-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: var(--cyan-vibrant);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--cyan-vibrant);
+            border-radius: 50%;
+            animation: pulseDot 1.2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .wallet-chip {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--green-vibrant);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        /* RECENT MULTIPLIER HISTORY STRIP */
+        .history-strip {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 4px 2px;
+            white-space: nowrap;
+        }
+
+        .history-strip::-webkit-scrollbar { display: none; }
+
+        .multiplier-tag {
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--card-border);
+            flex-shrink: 0;
+        }
+
+        .multiplier-tag.low { color: var(--cyan-vibrant); border-color: rgba(6, 182, 212, 0.3); }
+        .multiplier-tag.mid { color: var(--violet-vibrant); border-color: rgba(139, 92, 246, 0.3); }
+        .multiplier-tag.high { color: var(--gold-neon); border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 0 8px var(--gold-glow); }
+
+        /* 3D GAME ARENA CONTAINER */
+        .arena-card {
+            background: radial-gradient(circle, #1a202c 0%, #05070a 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #webglContainer {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* DYNAMIC FLOATING MULTIPLIER OVERLAY */
+        .arena-overlay-hud {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .multiplier-display {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .multiplier-display.crashed {
+            color: var(--red-vibrant);
+            text-shadow: 0 0 20px var(--red-glow);
+        }
+
+        .arena-status-sub {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: -6px;
+        }
+
+        /* 3D CHIP DENOMINATION SELECTORS */
+        .chips-panel {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 10px;
+        }
+
+        .chip-3d {
+            flex: 1;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255,255,255,0.4);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .chip-10 { background: radial-gradient(circle, #0284c7, #0369a1); }
+        .chip-50 { background: radial-gradient(circle, #7c3aed, #5b21b6); }
+        .chip-100 { background: radial-gradient(circle, #d97706, #b45309); }
+        .chip-500 { background: radial-gradient(circle, #dc2626, #991b1b); }
+        .chip-1k { background: radial-gradient(circle, #10b981, #047857); }
+
+        .chip-3d.active {
+            border-style: solid;
+            border-color: #ffffff;
+            transform: scale(1.12);
+            box-shadow: 0 0 16px var(--gold-neon);
+        }
+
+        /* BETTING CONTROLS PANEL */
+        .bet-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 14px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-box {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 0 12px;
+            height: 50px;
+        }
+
+        .input-box input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--gold-neon);
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
+
+        .btn-main-action {
+            flex: 1.2;
+            height: 50px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+        }
+
+        .btn-main-action.bet {
+            background: linear-gradient(135deg, var(--green-vibrant), #047857);
+            color: #ffffff;
+            box-shadow: 0 6px 18px var(--green-glow);
+        }
+
+        .btn-main-action.cashout {
+            background: var(--gold-gradient);
+            color: #000000;
+            box-shadow: 0 6px 18px var(--gold-glow);
+            animation: pulseGlow 1s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 10px var(--gold-glow); }
+            to { box-shadow: 0 0 25px var(--gold-neon); }
+        }
+
+        .btn-main-action.waiting {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* LIVE BETS / LEADERBOARD SECTION */
+        .live-leaderboard-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 8px;
+        }
+
+        .live-rows-container {
+            max-height: 160px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .live-rows-container::-webkit-scrollbar { width: 4px; }
+        .live-rows-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+
+        .player-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: rgba(12, 15, 22, 0.6);
+            border-radius: 10px;
+            font-size: 0.78rem;
+        }
+
+        .player-row.cashed {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .player-name { font-weight: 700; color: var(--text-main); }
+        .player-mult { font-weight: 800; color: var(--gold-neon); }
+        .player-win { font-weight: 900; color: var(--green-vibrant); }
+
+        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100%; max-width: 480px;
+            background: rgba(12, 15, 22, 0.95);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .nav-item.active { color: var(--gold-neon); }
+        .nav-icon { font-size: 1.2rem; }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-30px);
+            background: rgba(12, 15, 22, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--gold-neon);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 0.85rem; font-weight: 700;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Notification</div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="app-viewport">
+        <!-- HEADER -->
+        <header class="app-header">
+            <a href="index.html" class="btn-back" title="Back to Home">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <div class="brand-title-box">
+                <span class="brand-title">MotoRace 3D</span>
+                <span class="live-badge"><span class="live-dot"></span> NEON HIGHWAY</span>
+            </div>
+            <div class="wallet-chip" id="walletDisplay">$1,000.00</div>
+        </header>
+
+        <!-- RECENT MULTIPLIER HISTORY STRIP -->
+        <div class="history-strip" id="historyStrip">
+            <span class="multiplier-tag low">1.85x</span>
+            <span class="multiplier-tag mid">3.20x</span>
+            <span class="multiplier-tag high">18.50x</span>
+            <span class="multiplier-tag low">1.08x</span>
+            <span class="multiplier-tag mid">4.60x</span>
+            <span class="multiplier-tag high">35.20x</span>
+        </div>
+
+        <!-- 3D GAME ARENA -->
+        <div class="arena-card">
+            <div id="webglContainer" style="width:100%; height:100%;"></div>
+
+            <!-- Floating Overlay HUD -->
+            <div class="arena-overlay-hud">
+                <div class="multiplier-display" id="multiplierDisplay">
+                    <span id="multVal">1.00x</span>
+                    <span class="arena-status-sub" id="arenaSub">WAITING FOR NEXT RACE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D CHIP DENOMINATION SELECTORS -->
+        <div class="chips-panel">
+            <button class="chip-3d chip-10 active" onclick="selectChip(10, this)">$10</button>
+            <button class="chip-3d chip-50" onclick="selectChip(50, this)">$50</button>
+            <button class="chip-3d chip-100" onclick="selectChip(100, this)">$100</button>
+            <button class="chip-3d chip-500" onclick="selectChip(500, this)">$500</button>
+            <button class="chip-3d chip-1k" onclick="selectChip(1000, this)">$1K</button>
+        </div>
+
+        <!-- BETTING CONTROLS PANEL -->
+        <div class="bet-panel">
+            <div class="input-box">
+                <span style="color: var(--text-muted); font-weight: 800; margin-right: 4px;">$</span>
+                <input type="number" id="stakeInput" value="10" min="1" step="1" oninput="updateStake()">
+            </div>
+            <button class="btn-main-action bet" id="actionBtn" onclick="handleActionButton()">
+                <span id="btnTextMain">BET</span>
+                <span id="btnTextSub" style="font-size: 0.72rem; opacity: 0.8; font-weight: 700;">NEXT RACE</span>
+            </button>
+        </div>
+
+        <!-- LIVE LEADERBOARD / BETS TABLE -->
+        <div class="live-leaderboard-card">
+            <div class="table-header">
+                <span>Live Racers</span>
+                <span style="color: var(--cyan-vibrant); font-size: 0.75rem;">🟢 215 Online</span>
+            </div>
+            <div class="live-rows-container" id="liveRowsContainer">
+                <!-- Dynamic Player Rows -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="activity.html" class="nav-item">
+            <span class="nav-icon">🔥</span>
+            <span>Activity</span>
+        </a>
+        <a href="promotion.html" class="nav-item">
+            <span class="nav-icon">🎁</span>
+            <span>Promotion</span>
+        </a>
+        <a href="account.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>Account</span>
+        </a>
+    </nav>
+
+    <!-- ==========================================
+       THREE.JS WebGL 3D ARENA & GAME ENGINE
+       ========================================== -->
+    <script>
+        // --- GAME STATE ---
+        let walletBalance = 1000.00;
+        let stakeAmount = 10.00;
+        let currentMultiplier = 1.00;
+        let crashPoint = 2.80;
+
+        let gameState = 'WAITING'; // 'WAITING', 'RACING', 'CRASHED'
+        let waitingTime = 5.0;
+
+        let hasBetNextRound = false;
+        let hasBetCurrentRound = false;
+        let hasCashedOut = false;
+
+        // Three.js Scene Variables
+        let scene, camera, renderer;
+        let motorcycleGroup, roadMesh, lightPillars = [];
+        let particlesGroup;
+
+        // Simulated Live Players Data
+        const mockPlayers = [
+            { name: "User ***712", stake: 50, cashout: null, won: false },
+            { name: "User ***904", stake: 100, cashout: null, won: false },
+            { name: "User ***318", stake: 20, cashout: null, won: false },
+            { name: "User ***552", stake: 200, cashout: null, won: false },
+            { name: "User ***101", stake: 10, cashout: null, won: false }
+        ];
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            initThreeJS();
+            startWaitingPhase();
+            renderLivePlayers();
+        };
+
+        // --- THREE.JS PROCEDURAL 3D MOTORACE ENGINE ---
+        function initThreeJS() {
+            const container = document.getElementById('webglContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x0c0f16, 0.06);
+
+            // Dynamic chasing camera angle (slightly above and behind motorcycle)
+            camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+            camera.position.set(0, 2.8, 5.5);
+            camera.lookAt(0, 1.2, -5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lighting Setup
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const cyanSpotLight = new THREE.SpotLight(0x06b6d4, 3);
+            cyanSpotLight.position.set(0, 8, 4);
+            cyanSpotLight.castShadow = true;
+            scene.add(cyanSpotLight);
+
+            const redTailLight = new THREE.PointLight(0xef4444, 2, 8);
+            redTailLight.position.set(0, 1, 1);
+            scene.add(redTailLight);
+
+            // 1. Procedural Futuristic Grid Highway
+            const roadGeo = new THREE.PlaneGeometry(8, 60);
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 });
+            roadMesh = new THREE.Mesh(roadGeo, roadMat);
+            roadMesh.rotation.x = -Math.PI / 2;
+            roadMesh.position.z = -15;
+            scene.add(roadMesh);
+
+            // Neon Road Lane Markers
+            for (let i = -30; i < 15; i += 3) {
+                const lineGeo = new THREE.PlaneGeometry(0.12, 1.5);
+                const lineMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
+                const lineMesh = new THREE.Mesh(lineGeo, lineMat);
+                lineMesh.rotation.x = -Math.PI / 2;
+                lineMesh.position.set(0, 0.01, i);
+                scene.add(lineMesh);
+            }
+
+            // Neon City Light Pillars on sides
+            for (let i = -30; i < 15; i += 4) {
+                const pillarGeo = new THREE.CylinderGeometry(0.1, 0.1, 4, 16);
+                const pillarMat = new THREE.MeshBasicMaterial({ color: (i % 8 === 0) ? 0xf59e0b : 0x06b6d4 });
+                
+                const pillarLeft = new THREE.Mesh(pillarGeo, pillarMat);
+                pillarLeft.position.set(-4.2, 2, i);
+                scene.add(pillarLeft);
+                lightPillars.push(pillarLeft);
+
+                const pillarRight = new THREE.Mesh(pillarGeo, pillarMat);
+                pillarRight.position.set(4.2, 2, i);
+                scene.add(pillarRight);
+                lightPillars.push(pillarRight);
+            }
+
+            // 2. Procedural 3D Sports Motorcycle & Racer
+            motorcycleGroup = new THREE.Group();
+
+            // Main Frame Body
+            const frameGeo = new THREE.BoxGeometry(0.5, 0.5, 1.8);
+            const frameMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.2 });
+            const frameMesh = new THREE.Mesh(frameGeo, frameMat);
+            frameMesh.position.y = 0.6;
+            motorcycleGroup.add(frameMesh);
+
+            // Neon Wheels (Front & Rear)
+            const wheelGeo = new THREE.TorusGeometry(0.35, 0.1, 16, 32);
+            const wheelMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
+
+            const rearWheel = new THREE.Mesh(wheelGeo, wheelMat);
+            rearWheel.position.set(0, 0.35, 0.6);
+            motorcycleGroup.add(rearWheel);
+
+            const frontWheel = new THREE.Mesh(wheelGeo, wheelMat);
+            frontWheel.position.set(0, 0.35, -0.6);
+            motorcycleGroup.add(frontWheel);
+
+            // Racer Body & Helmet
+            const racerBodyGeo = new THREE.BoxGeometry(0.4, 0.6, 0.7);
+            const racerBodyMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+            const racerBody = new THREE.Mesh(racerBodyGeo, racerBodyMat);
+            racerBody.position.set(0, 1.0, 0.1);
+            racerBody.rotation.x = -0.3; // Leaning forward
+            motorcycleGroup.add(racerBody);
+
+            const helmetGeo = new THREE.SphereGeometry(0.25, 16, 16);
+            const helmetMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.9, roughness: 0.1 });
+            const helmet = new THREE.Mesh(helmetGeo, helmetMat);
+            helmet.position.set(0, 1.4, -0.1);
+            motorcycleGroup.add(helmet);
+
+            motorcycleGroup.position.set(0, 0, 0);
+            scene.add(motorcycleGroup);
+
+            // Particles Group for Exhaust Sparks & Crash
+            particlesGroup = new THREE.Group();
+            scene.add(particlesGroup);
+
+            // Start Animation Render Loop
+            animateThreeJS();
+        }
+
+        function animateThreeJS() {
+            requestAnimationFrame(animateThreeJS);
+
+            if (gameState === 'RACING') {
+                // Scroll Road & Light Pillars
+                roadMesh.position.z += 0.35;
+                if (roadMesh.position.z > 0) roadMesh.position.z = -15;
+
+                lightPillars.forEach(p => {
+                    p.position.z += 0.35;
+                    if (p.position.z > 5) p.position.z = -35;
+                });
+
+                // Motorcycle speed vibration & lean
+                motorcycleGroup.position.x = Math.sin(Date.now() * 0.008) * 0.12;
+                motorcycleGroup.rotation.z = Math.sin(Date.now() * 0.008) * -0.08;
+                motorcycleGroup.position.y = Math.sin(Date.now() * 0.02) * 0.02;
+            } else if (gameState === 'CRASHED') {
+                // Animate crash explosion particles
+                particlesGroup.children.forEach(p => {
+                    p.position.add(p.userData.velocity);
+                    p.rotation.x += 0.1;
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function triggerCrashExplosion() {
+            particlesGroup.clear();
+            const colors = [0xef4444, 0x06b6d4, 0xf59e0b, 0xffffff];
+
+            for (let i = 0; i < 35; i++) {
+                const geo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+                const mat = new THREE.MeshBasicMaterial({ color: colors[Math.floor(Math.random() * colors.length)] });
+                const p = new THREE.Mesh(geo, mat);
+                p.position.copy(motorcycleGroup.position);
+                p.userData.velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.25,
+                    (Math.random()) * 0.25,
+                    (Math.random() - 0.5) * 0.25
+                );
+                particlesGroup.add(p);
+            }
+        }
+
+        // --- GAME LOOP ENGINE ---
+        function startWaitingPhase() {
+            gameState = 'WAITING';
+            waitingTime = 5.0;
+            currentMultiplier = 1.00;
+
+            const multDisplay = document.getElementById('multiplierDisplay');
+            multDisplay.classList.remove('crashed');
+            document.getElementById('multVal').innerText = "1.00x";
+            document.getElementById('arenaSub').innerText = "WAITING FOR NEXT RACE";
+
+            motorcycleGroup.position.set(0, 0, 0);
+            motorcycleGroup.visible = true;
+            particlesGroup.clear();
+
+            mockPlayers.forEach(p => { p.cashout = null; p.won = false; });
+            renderLivePlayers();
+
+            updateActionButtonState();
+
+            const timerInterval = setInterval(() => {
+                waitingTime -= 0.1;
+                if (waitingTime > 0) {
+                    document.getElementById('arenaSub').innerText = `NEXT RACE IN ${waitingTime.toFixed(1)}s`;
+                } else {
+                    clearInterval(timerInterval);
+                    startRacingPhase();
+                }
+            }, 100);
+        }
+
+        function startRacingPhase() {
+            gameState = 'RACING';
+            document.getElementById('arenaSub').innerText = "RACING AT HIGH SPEED...";
+
+            if (hasBetNextRound) {
+                hasBetCurrentRound = true;
+                hasBetNextRound = false;
+                hasCashedOut = false;
+            } else {
+                hasBetCurrentRound = false;
+            }
+
+            updateActionButtonState();
+
+            // Random crash point generator
+            const rand = Math.random();
+            if (rand < 0.1) crashPoint = (1.02 + Math.random() * 0.2).toFixed(2);
+            else if (rand < 0.65) crashPoint = (1.25 + Math.random() * 1.8).toFixed(2);
+            else if (rand < 0.9) crashPoint = (3.00 + Math.random() * 6.0).toFixed(2);
+            else crashPoint = (10.00 + Math.random() * 25.0).toFixed(2);
+
+            const raceInterval = setInterval(() => {
+                if (gameState !== 'RACING') {
+                    clearInterval(raceInterval);
+                    return;
+                }
+
+                currentMultiplier += 0.01 + (currentMultiplier * 0.008);
+                document.getElementById('multVal').innerText = `${currentMultiplier.toFixed(2)}x`;
+
+                // Cash out fake players randomly
+                mockPlayers.forEach(p => {
+                    if (!p.cashout && Math.random() < 0.05 && currentMultiplier > 1.2) {
+                        p.cashout = currentMultiplier.toFixed(2);
+                        p.won = true;
+                        renderLivePlayers();
+                    }
+                });
+
+                if (hasBetCurrentRound && !hasCashedOut) {
+                    const currentWin = stakeAmount * currentMultiplier;
+                    document.getElementById('btnTextSub').innerText = `CASH OUT $${currentWin.toFixed(2)}`;
+                }
+
+                // Crash Check
+                if (currentMultiplier >= crashPoint) {
+                    clearInterval(raceInterval);
+                    triggerCrash();
+                }
+            }, 60);
+        }
+
+        function triggerCrash() {
+            gameState = 'CRASHED';
+            const multDisplay = document.getElementById('multiplierDisplay');
+            multDisplay.classList.add('crashed');
+            document.getElementById('multVal').innerText = `${crashPoint}x`;
+            document.getElementById('arenaSub').innerText = "CRASHED ON TRACK!";
+
+            triggerCrashExplosion();
+            motorcycleGroup.visible = false;
+
+            if (hasBetCurrentRound && !hasCashedOut) {
+                showToast(`❌ Crashed at ${crashPoint}x! Bet Lost.`);
+            }
+
+            hasBetCurrentRound = false;
+            updateActionButtonState();
+
+            addHistoryTag(crashPoint);
+
+            setTimeout(() => {
+                startWaitingPhase();
+            }, 3000);
+        }
+
+        // --- BUTTON ACTION HANDLER ---
+        function handleActionButton() {
+            if (gameState === 'WAITING') {
+                if (!hasBetNextRound) {
+                    if (walletBalance < stakeAmount) {
+                        showToast("Insufficient Balance!");
+                        return;
+                    }
+                    walletBalance -= stakeAmount;
+                    updateWalletDisplay();
+                    hasBetNextRound = true;
+                    showToast(`Bet placed: $${stakeAmount.toFixed(2)}`);
+                    updateActionButtonState();
+                } else {
+                    walletBalance += stakeAmount;
+                    updateWalletDisplay();
+                    hasBetNextRound = false;
+                    showToast("Bet Cancelled!");
+                    updateActionButtonState();
+                }
+            } else if (gameState === 'RACING') {
+                if (hasBetCurrentRound && !hasCashedOut) {
+                    hasCashedOut = true;
+                    const winAmount = stakeAmount * currentMultiplier;
+                    walletBalance += winAmount;
+                    updateWalletDisplay();
+                    showToast(`🎉 Cashed out at ${currentMultiplier.toFixed(2)}x! Won $${winAmount.toFixed(2)}`);
+                    updateActionButtonState();
+                }
+            }
+        }
+
+        function updateActionButtonState() {
+            const btn = document.getElementById('actionBtn');
+            const mainText = document.getElementById('btnTextMain');
+            const subText = document.getElementById('btnTextSub');
+
+            btn.className = 'btn-main-action';
+
+            if (gameState === 'WAITING') {
+                if (hasBetNextRound) {
+                    btn.classList.add('waiting');
+                    mainText.innerText = "CANCEL";
+                    subText.innerText = "BET PLACED";
+                } else {
+                    btn.classList.add('bet');
+                    mainText.innerText = "BET";
+                    subText.innerText = "FOR NEXT RACE";
+                }
+            } else if (gameState === 'RACING') {
+                if (hasBetCurrentRound && !hasCashedOut) {
+                    btn.classList.add('cashout');
+                    mainText.innerText = "CASH OUT";
+                    const currentWin = stakeAmount * currentMultiplier;
+                    subText.innerText = `$${currentWin.toFixed(2)}`;
+                } else {
+                    btn.classList.add('waiting');
+                    mainText.innerText = "RACING";
+                    subText.innerText = "WAITING NEXT RACE";
+                }
+            } else if (gameState === 'CRASHED') {
+                btn.classList.add('waiting');
+                mainText.innerText = "CRASHED";
+                subText.innerText = "PREPARING...";
+            }
+        }
+
+        // --- UI HELPERS ---
+        function updateWalletDisplay() {
+            document.getElementById('walletDisplay').innerText = `$${walletBalance.toFixed(2)}`;
+        }
+
+        function selectChip(val, btn) {
+            stakeAmount = val;
+            document.getElementById('stakeInput').value = val;
+            document.querySelectorAll('.chip-3d').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function updateStake() {
+            const val = parseFloat(document.getElementById('stakeInput').value);
+            stakeAmount = isNaN(val) || val < 1 ? 1 : val;
+        }
+
+        function addHistoryTag(mult) {
+            const strip = document.getElementById('historyStrip');
+            const badge = document.createElement('span');
+            badge.className = `multiplier-tag ${mult < 2 ? 'low' : (mult < 10 ? 'mid' : 'high')}`;
+            badge.innerText = `${mult}x`;
+            strip.insertBefore(badge, strip.firstChild);
+        }
+
+        function renderLivePlayers() {
+            const container = document.getElementById('liveRowsContainer');
+            container.innerHTML = mockPlayers.map(p => `
+                <div class="player-row ${p.won ? 'cashed' : ''}">
+                    <span class="player-name">${p.name}</span>
+                    <span class="player-mult">${p.cashout ? p.cashout + 'x' : 'racing...'}</span>
+                    <span class="player-win">${p.won ? '+$' + (p.stake * p.cashout).toFixed(2) : '$' + p.stake}</span>
+                </div>
+            `).join('');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = 'toast show';
+            setTimeout(() => { toast.className = 'toast'; }, 2800);
+        }
+    </script>
+</body>
+</html>
