@@ -3,28 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N+ PLAY - European Casino Roulette</title>
+    <title>N+ PLAY - Roulette 3D Live Studio</title>
+    <!-- Three.js for 3D WebGL Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         /* ==========================================
-           1. MODERN DARK GAMING THEME & GLASSMORPHISM
+           1. LUXURY 3D STUDIO DARK THEME STYLES
            ========================================== */
         :root {
-            --bg-dark: #070a12;
-            --bg-surface: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.65);
-            --card-border: rgba(255, 255, 255, 0.1);
+            --bg-dark: #0c0f16;
+            --bg-surface: #1a1d24;
+            --card-bg: rgba(26, 29, 36, 0.75);
+            --card-border: rgba(245, 158, 11, 0.25);
             
             --gold-neon: #f59e0b;
-            --gold-glow: rgba(245, 158, 11, 0.35);
+            --gold-light: #fbbf24;
+            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fef08a 50%, #d97706 100%);
+            --gold-glow: rgba(245, 158, 11, 0.4);
+
             --red-vibrant: #ef4444;
-            --red-glow: rgba(239, 68, 68, 0.4);
+            --red-glow: rgba(239, 68, 68, 0.35);
             --green-vibrant: #10b981;
-            --black-vibrant: #1e293b;
+            --black-vibrant: #111827;
 
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --input-bg: rgba(15, 23, 42, 0.85);
-            --input-border: rgba(255, 255, 255, 0.12);
+            --input-bg: rgba(12, 15, 22, 0.85);
         }
 
         * {
@@ -42,9 +46,9 @@
             display: flex;
             justify-content: center;
             background-image: 
-                radial-gradient(circle at 50% 10%, var(--gold-glow) 0%, transparent 40%),
-                radial-gradient(circle at 10% 90%, var(--red-glow) 0%, transparent 40%),
-                linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
+                radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 10% 90%, rgba(239, 68, 68, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #05070a 100%);
             background-attachment: fixed;
             padding: 10px 10px 80px 10px; /* Space for bottom nav */
         }
@@ -58,25 +62,26 @@
             position: relative;
         }
 
-        /* HEADER */
+        /* METALLIC EMBOSSED HEADER */
         .app-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 12px 16px;
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--card-border);
-            border-radius: 18px;
+            border-radius: 20px;
             position: sticky;
             top: 10px;
             z-index: 100;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
         }
 
         .btn-back {
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
             border: 1px solid var(--card-border);
-            color: var(--text-main);
+            color: var(--gold-light);
             width: 38px;
             height: 38px;
             border-radius: 12px;
@@ -86,47 +91,87 @@
             cursor: pointer;
             transition: all 0.2s ease;
             text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .btn-back:hover {
-            background: rgba(255, 255, 255, 0.15);
             border-color: var(--gold-neon);
-            color: var(--gold-neon);
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .brand-title-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .brand-title {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 900;
-            background: linear-gradient(90deg, #ffffff, var(--gold-neon));
+            background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .live-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: var(--red-vibrant);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            text-shadow: 0 0 8px var(--red-glow);
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--red-vibrant);
+            border-radius: 50%;
+            animation: pulseDot 1.2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         .wallet-chip {
             background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.4);
             color: var(--green-vibrant);
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 800;
+            transition: transform 0.2s;
         }
 
-        /* LIVE ROLLING HISTORY BADGES */
+        /* 3D HISTORY & LIVE STATS BAR */
+        .history-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .history-strip {
             display: flex;
             gap: 6px;
             overflow-x: auto;
-            padding: 4px 2px;
             white-space: nowrap;
+            padding-bottom: 2px;
         }
 
         .history-strip::-webkit-scrollbar { display: none; }
 
-        .num-badge {
+        .num-badge-3d {
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -137,119 +182,156 @@
             font-weight: 900;
             color: #fff;
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--gold-neon);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+            background-size: cover;
         }
 
-        .num-badge.red { background: var(--red-vibrant); }
-        .num-badge.black { background: var(--black-vibrant); border: 1px solid rgba(255,255,255,0.2); }
-        .num-badge.green { background: var(--green-vibrant); }
+        .num-badge-3d.red { background: linear-gradient(135deg, #ef4444, #991b1b); }
+        .num-badge-3d.black { background: linear-gradient(135deg, #374151, #111827); }
+        .num-badge-3d.green { background: linear-gradient(135deg, #10b981, #047857); }
 
-        /* ROULETTE WHEEL ARENA CONTAINER */
-        .wheel-arena-card {
-            background: radial-gradient(circle, rgba(30, 41, 59, 0.9), #030712);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 16px;
+        .stats-ratio-bar {
             display: flex;
-            flex-direction: column;
+            height: 6px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .ratio-red { background: var(--red-vibrant); transition: width 0.3s; }
+        .ratio-green { background: var(--green-vibrant); transition: width 0.3s; }
+        .ratio-black { background: #4b5563; transition: width 0.3s; }
+
+        /* 3D LIVE STUDIO CANVA / ARENA */
+        .studio-arena-card {
+            background: radial-gradient(circle, #1a202c 0%, #05070a 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+            display: flex;
             align-items: center;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            justify-content: center;
         }
 
-        .canvas-wrapper {
-            position: relative;
-            width: 230px;
-            height: 230px;
-            margin-bottom: 12px;
-        }
-
-        canvas {
+        #webglCanvas {
             width: 100%;
             height: 100%;
+            display: block;
         }
 
-        .wheel-pointer {
+        /* LIVE STUDIO HUD OVERLAY */
+        .studio-hud-top {
             position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 16px solid var(--gold-neon);
-            filter: drop-shadow(0 2px 6px var(--gold-glow));
-            z-index: 10;
-        }
-
-        .arena-status-bar {
-            width: 100%;
+            top: 12px;
+            left: 12px;
+            right: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 14px;
-            background: rgba(15, 23, 42, 0.8);
-            border-radius: 12px;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .dealer-info {
+            background: rgba(12, 15, 22, 0.75);
+            backdrop-filter: blur(8px);
             border: 1px solid var(--card-border);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .studio-hud-bottom {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(12, 15, 22, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 8px 14px;
+            border-radius: 14px;
+            z-index: 20;
+        }
+
+        .status-text {
             font-size: 0.85rem;
             font-weight: 800;
+            color: var(--text-main);
         }
 
         .clock-val {
+            font-size: 1.1rem;
+            font-weight: 900;
             color: var(--gold-neon);
             font-family: monospace;
-            font-size: 1.1rem;
+            text-shadow: 0 0 8px var(--gold-glow);
         }
 
-        /* CHIP SELECTION BAR */
-        .chips-bar {
+        /* 3D CHIP DENOMINATION SELECTORS */
+        .chips-panel {
             display: flex;
             justify-content: space-between;
-            gap: 8px;
+            gap: 6px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 10px;
         }
 
-        .chip-btn {
+        .chip-3d {
             flex: 1;
-            height: 42px;
+            height: 44px;
             border-radius: 50%;
             border: 2px dashed rgba(255,255,255,0.4);
             color: #fff;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 900;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        .chip-10 { background: #0284c7; }
-        .chip-50 { background: #7c3aed; }
-        .chip-100 { background: #d97706; }
-        .chip-500 { background: #dc2626; }
+        .chip-10 { background: radial-gradient(circle, #0284c7, #0369a1); }
+        .chip-50 { background: radial-gradient(circle, #7c3aed, #5b21b6); }
+        .chip-100 { background: radial-gradient(circle, #d97706, #b45309); }
+        .chip-500 { background: radial-gradient(circle, #dc2626, #991b1b); }
+        .chip-1k { background: radial-gradient(circle, #10b981, #047857); }
 
-        .chip-btn.active {
+        .chip-3d.active {
             border-style: solid;
             border-color: #ffffff;
             transform: scale(1.12);
-            box-shadow: 0 0 15px var(--gold-neon);
+            box-shadow: 0 0 16px var(--gold-neon);
         }
 
-        /* INTERACTIVE BETTING GRID TABLE */
-        .table-grid-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+        /* 3D FELT BETTING GRID TABLE */
+        .table-felt-card {
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 20px;
             padding: 12px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
 
         .grid-row-0 {
@@ -258,7 +340,7 @@
         }
 
         .grid-cell-0 {
-            background: var(--green-vibrant);
+            background: linear-gradient(135deg, var(--green-vibrant), #047857);
             color: #fff;
             height: 38px;
             border-radius: 10px;
@@ -266,10 +348,11 @@
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
             position: relative;
             border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.15s;
         }
 
         .grid-numbers-table {
@@ -290,10 +373,17 @@
             color: #fff;
             position: relative;
             border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.15s;
         }
 
-        .num-cell.red { background: var(--red-vibrant); }
-        .num-cell.black { background: var(--black-vibrant); }
+        .num-cell.red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .num-cell.black { background: linear-gradient(135deg, #374151, #1f2937); }
+
+        .num-cell:hover, .grid-cell-0:hover, .outside-cell:hover {
+            transform: scale(1.08);
+            z-index: 5;
+            box-shadow: 0 0 10px var(--gold-neon);
+        }
 
         .grid-outside-row {
             display: grid;
@@ -303,7 +393,7 @@
 
         .outside-cell {
             height: 38px;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(26, 29, 36, 0.85);
             border: 1px solid var(--card-border);
             border-radius: 10px;
             color: var(--text-main);
@@ -316,22 +406,22 @@
             position: relative;
         }
 
-        .outside-cell.red-bg { background: var(--red-vibrant); }
-        .outside-cell.black-bg { background: var(--black-vibrant); }
+        .outside-cell.red-bg { background: linear-gradient(135deg, #ef4444, #991b1b); }
+        .outside-cell.black-bg { background: linear-gradient(135deg, #374151, #111827); }
 
         /* CHIP BADGE ON PLACED BETS */
         .chip-placed-badge {
             position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--gold-neon);
+            top: -5px;
+            right: -5px;
+            background: var(--gold-gradient);
             color: #000;
             font-size: 0.58rem;
             font-weight: 900;
-            padding: 1px 4px;
+            padding: 1px 5px;
             border-radius: 10px;
-            box-shadow: 0 0 6px rgba(0,0,0,0.8);
-            z-index: 5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.9);
+            z-index: 10;
         }
 
         /* CONTROL BUTTONS */
@@ -351,7 +441,7 @@
             transition: all 0.2s ease;
         }
 
-        .btn-clear { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+        .btn-clear { background: rgba(255,255,255,0.08); color: var(--text-muted); }
         .btn-double { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--gold-neon); color: var(--gold-neon); }
 
         /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
@@ -360,7 +450,7 @@
             bottom: 0; left: 50%;
             transform: translateX(-50%);
             width: 100%; max-width: 480px;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(12, 15, 22, 0.95);
             backdrop-filter: blur(16px);
             border-top: 1px solid var(--card-border);
             display: flex;
@@ -388,14 +478,14 @@
             position: fixed;
             top: 20px; left: 50%;
             transform: translateX(-50%) translateY(-30px);
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(12, 15, 22, 0.95);
             backdrop-filter: blur(16px);
             border: 1px solid var(--gold-neon);
             color: #fff;
             padding: 10px 22px;
             border-radius: 30px;
             font-size: 0.85rem; font-weight: 700;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
             opacity: 0; visibility: hidden;
             transition: all 0.3s ease;
             z-index: 2000;
@@ -418,45 +508,65 @@
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
             </a>
-            <span class="brand-title">🎡 Roulette VIP</span>
+            <div class="brand-title-box">
+                <span class="brand-title">Roulette 3D Live</span>
+                <span class="live-badge"><span class="live-dot"></span> LIVE 4K STUDIO</span>
+            </div>
             <div class="wallet-chip" id="walletDisplay">$1,000.00</div>
         </header>
 
-        <!-- RECENT ROLLING HISTORY BADGES -->
-        <div class="history-strip" id="historyStrip">
-            <span class="num-badge red">32</span>
-            <span class="num-badge black">15</span>
-            <span class="num-badge green">0</span>
-            <span class="num-badge red">19</span>
-            <span class="num-badge black">4</span>
-            <span class="num-badge red">21</span>
-            <span class="num-badge black">2</span>
-            <span class="num-badge red">25</span>
+        <!-- 3D HISTORY & STATS BAR -->
+        <div class="history-section">
+            <div class="history-strip" id="historyStrip">
+                <span class="num-badge-3d red">32</span>
+                <span class="num-badge-3d black">15</span>
+                <span class="num-badge-3d green">0</span>
+                <span class="num-badge-3d red">19</span>
+                <span class="num-badge-3d black">4</span>
+                <span class="num-badge-3d red">21</span>
+                <span class="num-badge-3d black">2</span>
+                <span class="num-badge-3d red">25</span>
+            </div>
+            <div class="stats-ratio-bar">
+                <div class="ratio-red" id="ratioRed" style="width: 48%;"></div>
+                <div class="ratio-green" id="ratioGreen" style="width: 6%;"></div>
+                <div class="ratio-black" id="ratioBlack" style="width: 46%;"></div>
+            </div>
         </div>
 
-        <!-- ROULETTE WHEEL ARENA -->
-        <div class="wheel-arena-card">
-            <div class="canvas-wrapper">
-                <div class="wheel-pointer"></div>
-                <canvas id="rouletteCanvas" width="230" height="230"></canvas>
+        <!-- 3D LIVE STUDIO CANVA ARENA -->
+        <div class="studio-arena-card">
+            <!-- Studio HUD Top -->
+            <div class="studio-hud-top">
+                <div class="dealer-info">
+                    <span>👩‍💼 Host: Elena V.</span>
+                </div>
+                <div class="dealer-info">
+                    <span>Table #4 • Max $5K</span>
+                </div>
             </div>
 
-            <div class="arena-status-bar">
-                <span id="gameStatusText">Place Your Bets</span>
+            <!-- WebGL 3D Canvas -->
+            <div id="webglContainer" style="width:100%; height:100%;"></div>
+
+            <!-- Studio HUD Bottom -->
+            <div class="studio-hud-bottom">
+                <span class="status-text" id="gameStatusText">Place Your Bets</span>
                 <span class="clock-val" id="clockDisplay">00:15</span>
             </div>
         </div>
 
-        <!-- CHIP SELECTION BAR -->
-        <div class="chips-bar">
-            <button class="chip-btn chip-10 active" onclick="selectChip(10, this)">$10</button>
-            <button class="chip-btn chip-50" onclick="selectChip(50, this)">$50</button>
-            <button class="chip-btn chip-100" onclick="selectChip(100, this)">$100</button>
-            <button class="chip-btn chip-500" onclick="selectChip(500, this)">$500</button>
+        <!-- 3D CHIP DENOMINATION SELECTORS -->
+        <div class="chips-panel">
+            <button class="chip-3d chip-10 active" onclick="selectChip(10, this)">$10</button>
+            <button class="chip-3d chip-50" onclick="selectChip(50, this)">$50</button>
+            <button class="chip-3d chip-100" onclick="selectChip(100, this)">$100</button>
+            <button class="chip-3d chip-500" onclick="selectChip(500, this)">$500</button>
+            <button class="chip-3d chip-1k" onclick="selectChip(1000, this)">$1K</button>
         </div>
 
-        <!-- INTERACTIVE BETTING GRID TABLE -->
-        <div class="table-grid-card">
+        <!-- 3D FELT BETTING GRID TABLE -->
+        <div class="table-felt-card">
             <!-- Pocket 0 -->
             <div class="grid-row-0">
                 <div class="grid-cell-0" onclick="placeBet('0', 'number')">
@@ -502,7 +612,7 @@
                 </div>
             </div>
 
-            <!-- Clear & Double Actions -->
+            <!-- Control Buttons -->
             <div class="action-row">
                 <button class="btn-ctrl btn-clear" onclick="clearAllBets()">Clear Bets</button>
                 <button class="btn-ctrl btn-double" onclick="doubleAllBets()">Double Bets</button>
@@ -531,7 +641,7 @@
     </nav>
 
     <!-- ==========================================
-       JAVASCRIPT ROULETTE WHEEL & BETTING ENGINE
+       THREE.JS WebGL 3D ROULETTE & GAME ENGINE
        ========================================== -->
     <script>
         // --- EUROPEAN ROULETTE WHEEL SEQUENCE & COLOR MAPPING ---
@@ -541,36 +651,129 @@
         // --- GAME STATE ---
         let walletBalance = 1000.00;
         let selectedChip = 10;
-        let placedBets = {}; // e.g. { 'Red': 50, '17': 10 }
+        let placedBets = {};
         let totalStakedRound = 0;
 
         let countdown = 15;
         let isSpinning = false;
+        let historyList = [32, 15, 0, 19, 4, 21, 2, 25];
 
-        let canvas, ctx;
-        let currentWheelAngle = 0;
+        // Three.js Scene Variables
+        let scene, camera, renderer;
+        let wheelRotorMesh, ballMesh;
+        let rotorRotation = 0;
+        let ballAngle = 0;
+        let ballRadius = 2.8;
 
         // --- INITIALIZATION ---
         window.onload = () => {
-            canvas = document.getElementById('rouletteCanvas');
-            ctx = canvas.getContext('2d');
-
-            drawWheel(0);
+            initThreeJS();
             renderNumbersGrid();
             startContinuousLoop();
         };
 
-        function updateWalletDisplay() {
-            document.getElementById('walletDisplay').innerText = `$${walletBalance.toFixed(2)}`;
+        // --- THREE.JS PROCEDURAL 3D WHEEL GENERATOR ---
+        function initThreeJS() {
+            const container = document.getElementById('webglContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+            camera.position.set(0, 5.5, 6.5);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lighting Setup
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const goldSpotLight = new THREE.SpotLight(0xfbbf24, 2.5);
+            goldSpotLight.position.set(2, 8, 5);
+            goldSpotLight.castShadow = true;
+            scene.add(goldSpotLight);
+
+            const redAccentLight = new THREE.PointLight(0xef4444, 1.2, 10);
+            redAccentLight.position.set(-4, 3, -2);
+            scene.add(redAccentLight);
+
+            // 1. Outer Mahogany Bowl
+            const bowlGeo = new THREE.CylinderGeometry(3.6, 3.8, 0.6, 64);
+            const bowlMat = new THREE.MeshStandardMaterial({ color: 0x1f130b, roughness: 0.2, metalness: 0.1 });
+            const bowlMesh = new THREE.Mesh(bowlGeo, bowlMat);
+            bowlMesh.position.y = -0.3;
+            scene.add(bowlMesh);
+
+            // 2. Brass Rim Accent
+            const rimGeo = new THREE.TorusGeometry(3.5, 0.1, 16, 64);
+            const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.15, metalness: 0.9 });
+            const rimMesh = new THREE.Mesh(rimGeo, goldMat);
+            rimMesh.rotation.x = Math.PI / 2;
+            scene.add(rimMesh);
+
+            // 3. Rotating Inner Rotor (Pockets + Numbers Ring)
+            wheelRotorMesh = new THREE.Group();
+
+            const rotorGeo = new THREE.CylinderGeometry(3.2, 3.2, 0.2, 64);
+            const rotorMat = new THREE.MeshStandardMaterial({ color: 0x1a202c, roughness: 0.3 });
+            const rotorBase = new THREE.Mesh(rotorGeo, rotorMat);
+            wheelRotorMesh.add(rotorBase);
+
+            // Center Brass Turret
+            const turretGeo = new THREE.CylinderGeometry(0.8, 1.2, 0.8, 32);
+            const turretMesh = new THREE.Mesh(turretGeo, goldMat);
+            turretMesh.position.y = 0.4;
+            wheelRotorMesh.add(turretMesh);
+
+            // Render 37 Pocket Sectors
+            const arc = (Math.PI * 2) / 37;
+            for (let i = 0; i < 37; i++) {
+                const num = ROULETTE_SEQUENCE[i];
+                const angle = i * arc;
+
+                const sectorGeo = new THREE.CylinderGeometry(3.1, 1.2, 0.05, 16, 1, false, angle, arc);
+                let colorHex = num === 0 ? 0x10b981 : (RED_NUMBERS.includes(num) ? 0xef4444 : 0x1f2937);
+                const sectorMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.4 });
+                const sectorMesh = new THREE.Mesh(sectorGeo, sectorMat);
+                sectorMesh.position.y = 0.11;
+                wheelRotorMesh.add(sectorMesh);
+            }
+
+            scene.add(wheelRotorMesh);
+
+            // 4. Ivory Ball
+            const ballGeo = new THREE.SphereGeometry(0.12, 32, 32);
+            const ballMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.05, metalness: 0.1 });
+            ballMesh = new THREE.Mesh(ballGeo, ballMat);
+            ballMesh.position.set(2.8, 0.2, 0);
+            scene.add(ballMesh);
+
+            // Start Three.js Animation Render Loop
+            animateThreeJS();
         }
 
-        function selectChip(val, btn) {
-            selectedChip = val;
-            document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function animateThreeJS() {
+            requestAnimationFrame(animateThreeJS);
+
+            // Slow idle rotation when waiting
+            if (!isSpinning) {
+                rotorRotation += 0.003;
+                wheelRotorMesh.rotation.y = rotorRotation;
+
+                ballAngle += 0.003;
+                ballMesh.position.x = Math.cos(ballAngle) * ballRadius;
+                ballMesh.position.z = Math.sin(ballAngle) * ballRadius;
+            }
+
+            renderer.render(scene, camera);
         }
 
-        // --- RENDER BETTING GRID (NUMBERS 1 TO 36) ---
+        // --- RENDER BETTING GRID ---
         function renderNumbersGrid() {
             const container = document.getElementById('numbersGrid');
             let html = '';
@@ -584,6 +787,19 @@
                 `;
             }
             container.innerHTML = html;
+        }
+
+        function updateWalletDisplay() {
+            const el = document.getElementById('walletDisplay');
+            el.innerText = `$${walletBalance.toFixed(2)}`;
+            el.style.transform = 'scale(1.1)';
+            setTimeout(() => el.style.transform = 'scale(1)', 200);
+        }
+
+        function selectChip(val, btn) {
+            selectedChip = val;
+            document.querySelectorAll('.chip-3d').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
 
         // --- BETTING LOGIC ---
@@ -636,20 +852,17 @@
         }
 
         function updateBetBadges() {
-            // Hide all badges first
             document.querySelectorAll('.chip-placed-badge').forEach(b => b.style.display = 'none');
-
-            // Render active placed bets
             Object.keys(placedBets).forEach(key => {
                 const badge = document.getElementById(`betBadge-${key}`);
                 if (badge && placedBets[key] > 0) {
-                    badge.innerText = `$${placedBets[key]}`;
+                    badge.innerText = `$${placedBets[key] >= 1000 ? (placedBets[key]/1000) + 'K' : placedBets[key]}`;
                     badge.style.display = 'block';
                 }
             });
         }
 
-        // --- CONTINUOUS GAME LOOP & COUNTDOWN ---
+        // --- CONTINUOUS GAME LOOP & 3D SPIN PHYSICS ---
         function startContinuousLoop() {
             setInterval(() => {
                 if (isSpinning) return;
@@ -662,77 +875,75 @@
                 }
 
                 if (countdown <= 0) {
-                    spinWheelRoutine();
+                    spinWheel3DRoutine();
                 }
             }, 1000);
         }
 
-        function spinWheelRoutine() {
+        function spinWheel3DRoutine() {
             isSpinning = true;
             document.getElementById('gameStatusText').innerText = "SPINNING...";
 
-            // Pick random winning European Roulette number (0 to 36)
+            // Pick random European Roulette number
             const winningNum = ROULETTE_SEQUENCE[Math.floor(Math.random() * ROULETTE_SEQUENCE.length)];
             const targetIndex = ROULETTE_SEQUENCE.indexOf(winningNum);
 
-            // Calculate rotation angle to align winning sector with top pointer
-            const numSectors = 37;
-            const sectorAngle = (2 * Math.PI) / numSectors;
-            const targetSectorAngle = (numSectors - targetIndex) * sectorAngle;
-
-            const extraRotations = 5 * 2 * Math.PI; // 5 Full spins
-            const totalTargetAngle = currentWheelAngle + extraRotations + (targetSectorAngle - (currentWheelAngle % (2 * Math.PI)));
+            const arc = (Math.PI * 2) / 37;
+            const targetPocketAngle = targetIndex * arc;
 
             const startTime = performance.now();
-            const duration = 4500; // 4.5s animation
+            const duration = 5000; // 5 Seconds spin animation
 
-            function animate(now) {
+            const startRotorRot = rotorRotation;
+            const targetRotorRot = startRotorRot + (Math.PI * 8); // 4 full rotor spins
+
+            const startBallAngle = ballAngle;
+            const targetBallAngle = startRotorRot + targetRotorRot + targetPocketAngle + (Math.PI * 12); // Opposite spiral
+
+            function animatePhysics(now) {
                 const elapsed = now - startTime;
                 const progress = Math.min(1, elapsed / duration);
-                const easeOut = 1 - Math.pow(1 - progress, 3); // Cubic ease out
+                const easeOut = 1 - Math.pow(1 - progress, 3); // Cubic Ease Out
 
-                currentWheelAngle = currentWheelAngle + (totalTargetAngle - currentWheelAngle) * easeOut;
-                drawWheel(currentWheelAngle);
+                // Rotor spin
+                rotorRotation = startRotorRot + (targetRotorRot - startRotorRot) * easeOut;
+                wheelRotorMesh.rotation.y = rotorRotation;
+
+                // Ball spiraling inward onto target pocket
+                ballAngle = startBallAngle - (targetBallAngle * easeOut);
+                ballRadius = 2.8 - (1.6 * easeOut); // Radius contracts to pocket
+
+                ballMesh.position.x = Math.cos(ballAngle) * ballRadius;
+                ballMesh.position.z = Math.sin(ballAngle) * ballRadius;
+                ballMesh.position.y = 0.15 + (Math.sin(elapsed * 0.02) * (1 - progress) * 0.1); // Bouncing physics
 
                 if (progress < 1) {
-                    requestAnimationFrame(animate);
+                    requestAnimationFrame(animatePhysics);
                 } else {
-                    evaluateRouletteOutcome(winningNum);
+                    evaluateOutcome(winningNum);
                 }
             }
 
-            requestAnimationFrame(animate);
+            requestAnimationFrame(animatePhysics);
         }
 
-        // --- OUTCOME EVALUATION & PAYOUTS ---
-        function evaluateRouletteOutcome(winningNum) {
+        // --- EVALUATE OUTCOME & STATS ---
+        function evaluateOutcome(winningNum) {
             let color = winningNum === 0 ? 'Green' : (RED_NUMBERS.includes(winningNum) ? 'Red' : 'Black');
             let isEven = winningNum !== 0 && winningNum % 2 === 0;
 
             let totalPayout = 0;
 
-            // 1. Straight Up Number Bet (36x)
-            if (placedBets[winningNum]) {
-                totalPayout += placedBets[winningNum] * 36;
-            }
-
-            // 2. Color Bet (2x)
-            if (placedBets[color]) {
-                totalPayout += placedBets[color] * 2;
-            }
-
-            // 3. Parity Bet (2x)
+            if (placedBets[winningNum]) totalPayout += placedBets[winningNum] * 36;
+            if (placedBets[color]) totalPayout += placedBets[color] * 2;
             if (winningNum !== 0) {
                 if (isEven && placedBets['Even']) totalPayout += placedBets['Even'] * 2;
                 if (!isEven && placedBets['Odd']) totalPayout += placedBets['Odd'] * 2;
             }
-
-            // 4. Dozens Bet (3x)
             if (winningNum >= 1 && winningNum <= 12 && placedBets['1st12']) totalPayout += placedBets['1st12'] * 3;
             if (winningNum >= 13 && winningNum <= 24 && placedBets['2nd12']) totalPayout += placedBets['2nd12'] * 3;
             if (winningNum >= 25 && winningNum <= 36 && placedBets['3rd12']) totalPayout += placedBets['3rd12'] * 3;
 
-            // Credit winnings & Reset
             if (totalPayout > 0) {
                 walletBalance += totalPayout;
                 showToast(`🎉 WIN! Result: ${winningNum} (${color}). Paid $${totalPayout.toFixed(2)}!`);
@@ -743,7 +954,6 @@
             updateWalletDisplay();
             addHistoryBadge(winningNum, color);
 
-            // Reset bets & restart timer loop
             placedBets = {};
             totalStakedRound = 0;
             updateBetBadges();
@@ -753,75 +963,24 @@
             document.getElementById('gameStatusText').innerText = "Place Your Bets";
         }
 
-        // --- DRAW CANVAS ROULETTE WHEEL ---
-        function drawWheel(angleOffset) {
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            const radius = canvas.width / 2 - 8;
-            const numSectors = 37;
-            const arc = (2 * Math.PI) / numSectors;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Outer Brass Rim
-            ctx.beginPath();
-            ctx.arc(cx, cy, radius + 4, 0, 2 * Math.PI);
-            ctx.fillStyle = '#f59e0b';
-            ctx.fill();
-
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(angleOffset);
-
-            for (let i = 0; i < numSectors; i++) {
-                const num = ROULETTE_SEQUENCE[i];
-                const startAngle = i * arc - Math.PI / 2;
-                const endAngle = startAngle + arc;
-
-                // Color Pocket Fill
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.arc(0, 0, radius, startAngle, endAngle);
-                ctx.fillStyle = num === 0 ? '#10b981' : (RED_NUMBERS.includes(num) ? '#ef4444' : '#1e293b');
-                ctx.fill();
-                ctx.strokeStyle = '#f59e0b';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-
-                // Numbers Text
-                ctx.save();
-                ctx.rotate(startAngle + arc / 2);
-                ctx.textAlign = 'right';
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 9px Segoe UI, sans-serif';
-                ctx.fillText(num, radius - 8, 3);
-                ctx.restore();
-            }
-
-            // Center Brass Cap
-            ctx.beginPath();
-            ctx.arc(0, 0, radius * 0.35, 0, 2 * Math.PI);
-            ctx.fillStyle = '#0f172a';
-            ctx.fill();
-            ctx.strokeStyle = '#f59e0b';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(0, 0, radius * 0.15, 0, 2 * Math.PI);
-            ctx.fillStyle = '#f59e0b';
-            ctx.fill();
-
-            ctx.restore();
-        }
-
-        // --- HISTORY BADGE HELPER ---
         function addHistoryBadge(num, color) {
+            historyList.unshift(num);
+            if (historyList.length > 15) historyList.pop();
+
             const strip = document.getElementById('historyStrip');
             const badge = document.createElement('span');
-            badge.className = `num-badge ${color.toLowerCase()}`;
+            badge.className = `num-badge-3d ${color.toLowerCase()}`;
             badge.innerText = num;
             strip.insertBefore(badge, strip.firstChild);
+
+            // Update stats ratio bar
+            let redCount = historyList.filter(n => RED_NUMBERS.includes(n)).length;
+            let greenCount = historyList.filter(n => n === 0).length;
+            let blackCount = historyList.length - redCount - greenCount;
+
+            document.getElementById('ratioRed').style.width = `${(redCount/historyList.length)*100}%`;
+            document.getElementById('ratioGreen').style.width = `${(greenCount/historyList.length)*100}%`;
+            document.getElementById('ratioBlack').style.width = `${(blackCount/historyList.length)*100}%`;
         }
 
         function showToast(msg) {
