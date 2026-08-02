@@ -1,1 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N+ PLAY - Ultimate Gaming & Prediction Platform</title>
+    <style>
+        /* ==========================================
+           1. MODERN DARK GAMING THEME & GLASSMORPHISM
+           ========================================== */
+        :root {
+            --bg-dark: #070a12;
+            --bg-surface: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.65);
+            --card-border: rgba(255, 255, 255, 0.1);
+            
+            --gold-neon: #f59e0b;
+            --gold-glow: rgba(245, 158, 11, 0.35);
+            --red-vibrant: #e63946;
+            --red-glow: rgba(230, 57, 70, 0.4);
+            --green-glow: #10b981;
 
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 10% 15%, var(--red-glow) 0%, transparent 40%),
+                radial-gradient(circle at 90% 85%, var(--gold-glow) 0%, transparent 40%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
+            background-attachment: fixed;
+            padding: 10px 10px 80px 10px; /* Clearance for fixed bottom nav */
+        }
+
+        .app-viewport {
+            width: 100%;
+            max-width: 480px; /* Mobile Viewport Container */
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        /* 18+ AGE & RISK WARNING MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-card {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--red-vibrant);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(230, 57, 70, 0.3);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: modalPop 0.3s ease;
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .warning-badge {
+            width: 50px;
+            height: 50px;
+            background: rgba(230, 57, 70, 0.15);
+            border: 2px solid var(--red-vibrant);
+            color: var(--red-vibrant);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin: 0 auto;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .modal-body {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .modal-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            text-align: left;
+            font-size: 0.78rem;
+            color: var(--text-main);
+        }
+
+        .modal-checkbox input {
+            accent-color: var(--red-vibrant);
+            width: 18px; height: 18px;
+            margin-top: 2px;
+        }
+
+        .btn-modal-agree {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--red-glow);
+            transition: transform 0.2s;
+        }
+
+        .btn-modal-agree:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* HEADER */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            sticky: top 10px;
+            z-index: 100;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-box {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1rem; color: #000;
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .brand-title {
+            font-size: 1.2rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #fff, var(--gold-neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-pill {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--green-glow);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        /* PROMOTIONAL BANNER CAROUSEL */
+        .promo-banner {
+            width: 100%;
+            height: 160px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #1e1b4b, #311b92, #4c1d95);
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .promo-title {
+            font-size: 1.4rem; font-weight: 900; margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .promo-subtitle {
+            font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-bottom: 12px;
+        }
+
+        .btn-banner {
+            align-self: flex-start;
+            padding: 8px 16px;
+            background: var(--gold-neon);
+            color: #000; font-weight: 800; font-size: 0.8rem;
+            border-radius: 10px; text-decoration: none;
+            box-shadow: 0 4px 12px var(--gold-glow);
+        }
+
+        /* LIVE SCROLLING WINNINGS TICKER */
+        .live-ticker {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+            font-size: 0.78rem;
+        }
+
+        .ticker-tag {
+            background: rgba(230, 57, 70, 0.2);
+            color: var(--red-vibrant);
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .ticker-content {
+            white-space: nowrap;
+            color: var(--text-muted);
+            animation: tickerScroll 15s linear infinite;
+        }
+
+        @keyframes tickerScroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* SECTION HEADERS */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+        }
+
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px; height: 16px;
+            background: var(--gold-neon);
+            border-radius: 2px;
+        }
+
+        /* GAME GRID & CARDS */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 120px;
+            text-decoration: none;
+            color: var(--text-main);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .game-card:hover {
+            border-color: var(--gold-neon);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .game-icon {
+            font-size: 1.8rem;
+        }
+
+        .game-name {
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .game-badge {
+            position: absolute;
+            top: 10px; right: 10px;
+            font-size: 0.62rem; font-weight: 800;
+            padding: 2px 6px; border-radius: 6px;
+            background: rgba(245, 158, 11, 0.2); color: var(--gold-neon);
+        }
+
+        /* LEADERBOARD / EARNING CHART */
+        .leaderboard-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rank-badge {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 0.75rem;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #708090); color: #000; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
+        .rank-other { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+
+        .user-phone { font-size: 0.82rem; font-weight: 700; }
+        .user-win { font-size: 0.85rem; font-weight: 800; color: var(--green-glow); }
+
+        /* FOOTER INFO LINKS */
+        .footer-links {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+
+        .footer-link-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px;
+            border-radius: 8px;
+            transition: color 0.2s;
+        }
+
+        .footer-link-item:hover { color: var(--gold-neon); }
+
+        /* FIXED BOTTOM NAVIGATION BAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100%; max-width: 480px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .nav-item.active { color: var(--gold-neon); }
+        .nav-icon { font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <!-- 18+ AGE RESTRICTION & RISK WARNING MODAL -->
+    <div class="modal-overlay" id="riskModal">
+        <div class="modal-card">
+            <div class="warning-badge">18+</div>
+            <h2 class="modal-title">Age & Risk Disclaimer</h2>
+            <div class="modal-body">
+                N+ PLAY is strictly restricted to users aged <strong>18 years or older</strong>.
+                <br><br>
+                <strong>Financial Loss Warning:</strong> Online gaming & prediction involves financial risk and may be addictive. Please play responsibly and at your own risk. The platform holds no liability for personal financial losses.
+            </div>
+            <div class="modal-checkbox">
+                <input type="checkbox" id="modalAgreeCheck" onchange="toggleAgreeBtn()">
+                <label for="modalAgreeCheck">I am 18+ years old and accept full responsibility for all financial risks.</label>
+            </div>
+            <button class="btn-modal-agree" id="btnAgree" disabled onclick="dismissModal()">I AGREE / ENTER PLATFORM</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="app-viewport">
+        <!-- HEADER -->
+        <header class="app-header">
+            <a href="index.html" class="brand-logo">
+                <div class="logo-box">N+</div>
+                <span class="brand-title">PLAY</span>
+            </a>
+            <div class="header-actions">
+                <div class="wallet-pill">$1,000.00</div>
+            </div>
+        </header>
+
+        <!-- PROMOTIONAL HERO BANNER -->
+        <div class="promo-banner">
+            <h2 class="promo-title">Win Go 30s</h2>
+            <p class="promo-subtitle">Predict Color & Multiply Your Wealth Instant 9X</p>
+            <a href="dashboard.html" class="btn-banner">Play Win Go ➔</a>
+        </div>
+
+        <!-- LIVE WINNINGS TICKER -->
+        <div class="live-ticker">
+            <span class="ticker-tag">LIVE WINS</span>
+            <div class="ticker-content" id="tickerFeed">
+                User ***8891 won $340.00 in Win Go • User ***2203 won $1,200.00 in Aviator • User ***7712 won $850.00 in K3 • User ***4401 won $450.00 in 5D
+            </div>
+        </div>
+
+        <!-- 1. LOTTERY SECTION (5 GAMES) -->
+        <div class="section-header">
+            <h3 class="section-title">Lottery Games</h3>
+        </div>
+        <div class="game-grid">
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">HOT ⚡</span>
+                <div class="game-icon">🎰</div>
+                <div class="game-name">Win Go</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">30s</span>
+                <div class="game-icon">🏎️</div>
+                <div class="game-name">MotoRace</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Dice</span>
+                <div class="game-icon">🎲</div>
+                <div class="game-name">K3</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">5 Digits</span>
+                <div class="game-icon">🔢</div>
+                <div class="game-name">5D</div>
+            </a>
+            <a href="dashboard.html" class="game-card" style="grid-column: span 2;">
+                <span class="game-badge">TRX Crypto</span>
+                <div class="game-icon">💎</div>
+                <div class="game-name">Trx Win Go</div>
+            </a>
+        </div>
+
+        <!-- 2. PLATFORM RECOMMENDATION (4 GAMES) -->
+        <div class="section-header">
+            <h3 class="section-title">Platform Recommendation</h3>
+        </div>
+        <div class="game-grid">
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Crash</span>
+                <div class="game-icon">🚀</div>
+                <div class="game-name">Aviator</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Popular</span>
+                <div class="game-icon">🎨</div>
+                <div class="game-name">Wingo</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">New</span>
+                <div class="game-icon">🌀</div>
+                <div class="game-name">Vortex</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Fun</span>
+                <div class="game-icon">🐔</div>
+                <div class="game-name">Chicken Road 2</div>
+            </a>
+        </div>
+
+        <!-- 3. CASINO SECTION (4 GAMES) -->
+        <div class="section-header">
+            <h3 class="section-title">Casino Games</h3>
+        </div>
+        <div class="game-grid">
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Live</span>
+                <div class="game-icon">🎡</div>
+                <div class="game-name">Crazy Time</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Auto</span>
+                <div class="game-icon">🔴</div>
+                <div class="game-name">Auto Roulette</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Classic</span>
+                <div class="game-icon">🎰</div>
+                <div class="game-name">American Roulette</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">VIP</span>
+                <div class="game-icon">👑</div>
+                <div class="game-name">Roulette</div>
+            </a>
+        </div>
+
+        <!-- 4. RUMMY SECTION (3 GAMES) -->
+        <div class="section-header">
+            <h3 class="section-title">Rummy Cards</h3>
+        </div>
+        <div class="game-grid">
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Cards</span>
+                <div class="game-icon">🃏</div>
+                <div class="game-name">365 Rummy</div>
+            </a>
+            <a href="dashboard.html" class="game-card">
+                <span class="game-badge">Poker</span>
+                <div class="game-icon">♠️</div>
+                <div class="game-name">V8 Poker Rummy</div>
+            </a>
+            <a href="dashboard.html" class="game-card" style="grid-column: span 2;">
+                <span class="game-badge">Kool</span>
+                <div class="game-icon">♦️</div>
+                <div class="game-name">Koolbet Rummy</div>
+            </a>
+        </div>
+
+        <!-- TODAY'S EARNING CHART (LEADERBOARD TOP 10) -->
+        <div class="section-header">
+            <h3 class="section-title">Today's Earning Chart</h3>
+        </div>
+        <div class="leaderboard-section" id="leaderboardList">
+            <!-- Dynamic Top 10 List -->
+        </div>
+
+        <!-- FOOTER INFO LINKS -->
+        <div class="footer-links">
+            <a href="#" class="footer-link-item" onclick="alert('Terms & Conditions')">📄 Terms & Conditions</a>
+            <a href="#" class="footer-link-item" onclick="alert('Language: English')">🌐 Language</a>
+            <a href="#" class="footer-link-item" onclick="alert('No new announcements')">📢 Announcement</a>
+            <a href="agent-chat.html" class="footer-link-item">🎧 24/7 Customer Service</a>
+            <a href="#" class="footer-link-item" onclick="alert('Beginner Guide: Predict colors to win 2x to 9x multipliers.')">📖 Beginner Guide</a>
+            <a href="#" class="footer-link-item" onclick="alert('N+ PLAY Official Gaming Platform')">ℹ️ About Us</a>
+            <a href="#" class="footer-link-item" style="grid-column: span 2;" onclick="alert('Downloading N+ PLAY Android APK...')">📲 Download App</a>
+        </div>
+    </div>
+
+    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <span class="nav-icon">🔥</span>
+            <span>Activity</span>
+        </a>
+        <a href="register.html" class="nav-item">
+            <span class="nav-icon">🎁</span>
+            <span>Promotion</span>
+        </a>
+        <a href="login.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>Account</span>
+        </a>
+    </nav>
+
+    <!-- ==========================================
+       JAVASCRIPT DYNAMIC ENGINE & MODAL LOGIC
+       ========================================== -->
+    <script>
+        // --- 18+ MODAL CONTROL ---
+        function toggleAgreeBtn() {
+            const check = document.getElementById('modalAgreeCheck');
+            document.getElementById('btnAgree').disabled = !check.checked;
+        }
+
+        function dismissModal() {
+            document.getElementById('riskModal').style.display = 'none';
+        }
+
+        // --- TOP 10 EARNING CHART GENERATOR ---
+        const topWinners = [
+            { phone: "***9812", amount: "$14,850.00", rank: 1 },
+            { phone: "***4401", amount: "$11,200.00", rank: 2 },
+            { phone: "***7723", amount: "$9,450.00", rank: 3 },
+            { phone: "***1109", amount: "$7,800.00", rank: 4 },
+            { phone: "***3342", amount: "$6,150.00", rank: 5 },
+            { phone: "***8890", amount: "$5,400.00", rank: 6 },
+            { phone: "***2218", amount: "$4,900.00", rank: 7 },
+            { phone: "***6654", amount: "$3,850.00", rank: 8 },
+            { phone: "***0012", amount: "$3,100.00", rank: 9 },
+            { phone: "***5531", amount: "$2,750.00", rank: 10 }
+        ];
+
+        function renderLeaderboard() {
+            const leaderboardContainer = document.getElementById('leaderboardList');
+            leaderboardContainer.innerHTML = topWinners.map(item => {
+                let badgeClass = "rank-other";
+                let badgeText = item.rank;
+
+                if (item.rank === 1) { badgeClass = "rank-1"; badgeText = "🥇"; }
+                else if (item.rank === 2) { badgeClass = "rank-2"; badgeText = "🥈"; }
+                else if (item.rank === 3) { badgeClass = "rank-3"; badgeText = "🥉"; }
+
+                return `
+                    <div class="leaderboard-item">
+                        <div class="user-info">
+                            <div class="rank-badge ${badgeClass}">${badgeText}</div>
+                            <div class="user-phone">User ${item.phone}</div>
+                        </div>
+                        <div class="user-win">${item.amount}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize Page Engine
+        window.onload = () => {
+            renderLeaderboard();
+        };
+    </script>
+</body>
+</html>
