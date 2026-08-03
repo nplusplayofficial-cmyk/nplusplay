@@ -2,928 +2,931 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N+ PLAY - Chicken Road 3D 2</title>
-    <!-- Three.js for 3D WebGL Graphics -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chicken Road 2 - Casino Game</title>
     <style>
         /* ==========================================
-           1. LUXURY 3D DARK GAMING THEME
+           1. RESET & MOBILE-FIRST DARK THEME
            ========================================== */
-        :root {
-            --bg-dark: #0c0f16;
-            --bg-surface: #1a1d24;
-            --card-bg: rgba(26, 29, 36, 0.75);
-            --card-border: rgba(245, 158, 11, 0.25);
-            
-            --gold-neon: #f59e0b;
-            --gold-light: #fbbf24;
-            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fef08a 50%, #d97706 100%);
-            --gold-glow: rgba(245, 158, 11, 0.4);
-
-            --red-vibrant: #ef4444;
-            --red-glow: rgba(239, 68, 68, 0.4);
-            --green-vibrant: #10b981;
-            --green-glow: rgba(16, 185, 129, 0.4);
-            --cyan-vibrant: #06b6d4;
-            --violet-vibrant: #8b5cf6;
-
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: rgba(12, 15, 22, 0.85);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        :root {
+            --bg-dark: #121214;
+            --bg-card: #1e1e22;
+            --bg-input: #27272a;
+            --border-color: #3f3f46;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --yellow-gold: #f59e0b;
+            --yellow-glow: rgba(245, 158, 11, 0.4);
+            --green-primary: #22c55e;
+            --green-hover: #16a34a;
+            --red-primary: #ef4444;
+            --road-asphalt: #27272a;
+            --sidewalk-tile: #d4d4d8;
         }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: #09090b;
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
-                radial-gradient(circle at 90% 90%, rgba(239, 68, 68, 0.08) 0%, transparent 50%),
-                linear-gradient(180deg, var(--bg-dark) 0%, #05070a 100%);
-            background-attachment: fixed;
-            padding: 10px 10px 80px 10px; /* Space for bottom nav */
+            align-items: flex-start;
+            overflow-x: hidden;
         }
 
+        /* App Viewport Container */
         .app-viewport {
             width: 100%;
             max-width: 480px;
+            min-height: 100vh;
+            background-color: var(--bg-dark);
             display: flex;
             flex-direction: column;
-            gap: 12px;
             position: relative;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
         }
 
-        /* HEADER */
-        .app-header {
+        /* ==========================================
+           2. LOADING SCREEN OVERLAY (z-index highest)
+           ========================================== */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 50px 24px 30px 24px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loading-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-auto: 0;
+            flex: 1;
+        }
+
+        /* Cartoon Dazed Chicken Logo */
+        .dazed-chicken-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 0 15px var(--yellow-glow));
+            animation: bounceGentle 2s infinite ease-in-out;
+        }
+
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+
+        .loading-title {
+            color: var(--yellow-gold);
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px var(--yellow-glow);
+            margin-bottom: 24px;
+        }
+
+        /* Progress Dots & Percentage */
+        .progress-dots-container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            gap: 12px;
+            margin-bottom: 8px;
         }
 
-        .btn-back {
-            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            border: 1px solid var(--card-border);
-            color: var(--gold-light);
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
+        .dots-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #4b5563; /* Grey */
+        }
+
+        .dot.active {
+            background-color: var(--yellow-gold);
+            box-shadow: 0 0 8px var(--yellow-gold);
+        }
+
+        .progress-percentage {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .loading-footer-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.72rem;
+            text-align: center;
+            line-height: 1.4;
+            letter-spacing: 0.2px;
+        }
+
+        .loading-footer-text strong {
+            color: var(--yellow-gold);
+        }
+
+        /* ==========================================
+           3. HEADER BAR
+           ========================================== */
+        header {
+            background-color: #18181b;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--yellow-gold);
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .header-right-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-icon-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .btn-back:hover {
-            border-color: var(--gold-neon);
-            box-shadow: 0 0 12px var(--gold-glow);
-        }
-
-        .brand-title-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .brand-title {
-            font-size: 1.1rem;
-            font-weight: 900;
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .live-badge {
-            font-size: 0.62rem;
+            font-size: 0.8rem;
             font-weight: 800;
-            color: var(--green-vibrant);
+            cursor: pointer;
+        }
+
+        .balance-badge {
+            background-color: #09090b;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: #ffffff;
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--green-vibrant);
-            border-radius: 50%;
-            animation: pulseDot 1.2s infinite;
-        }
-
-        @keyframes pulseDot {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.3); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        .wallet-chip {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            color: var(--green-vibrant);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 800;
-        }
-
-        /* RECENT MULTIPLIER HISTORY STRIP */
-        .history-strip {
+        .hamburger-icon {
             display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding: 4px 2px;
-            white-space: nowrap;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            padding: 4px;
         }
 
-        .history-strip::-webkit-scrollbar { display: none; }
-
-        .multiplier-tag {
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--card-border);
-            flex-shrink: 0;
+        .hamburger-icon span {
+            width: 20px;
+            height: 2px;
+            background-color: var(--text-main);
+            border-radius: 2px;
         }
 
-        .multiplier-tag.low { color: var(--cyan-vibrant); border-color: rgba(6, 182, 212, 0.3); }
-        .multiplier-tag.mid { color: var(--violet-vibrant); border-color: rgba(139, 92, 246, 0.3); }
-        .multiplier-tag.high { color: var(--gold-neon); border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 0 8px var(--gold-glow); }
-
-        /* 3D GAME ARENA CONTAINER */
-        .arena-card {
-            background: radial-gradient(circle, #1a202c 0%, #05070a 100%);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            height: 250px;
+        /* ==========================================
+           4. GAME CANVAS AREA (TOP-DOWN VIEW)
+           ========================================== */
+        .game-canvas-container {
+            width: 100%;
+            height: 320px;
+            display: flex;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-bottom: 1px solid var(--border-color);
+            background-color: #000;
         }
 
-        #webglCanvas {
-            width: 100%;
+        /* Left Sidewalk (30%) */
+        .sidewalk-area {
+            width: 30%;
             height: 100%;
-            display: block;
-        }
-
-        /* DYNAMIC FLOATING MULTIPLIER OVERLAY */
-        .arena-overlay-hud {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-        }
-
-        .multiplier-display {
-            font-size: 3.2rem;
-            font-weight: 900;
-            color: #ffffff;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            font-family: monospace;
+            background-color: var(--sidewalk-tile);
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 24px 24px;
+            position: relative;
+            border-right: 4px solid #a1a1aa;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: inset -4px 0 10px rgba(0,0,0,0.15);
         }
 
-        .multiplier-display.crashed {
-            color: var(--red-vibrant);
-            text-shadow: 0 0 20px var(--red-glow);
-        }
-
-        .arena-status-sub {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: -6px;
-        }
-
-        /* 3D CHIP DENOMINATION SELECTORS */
-        .chips-panel {
-            display: flex;
-            justify-content: space-between;
-            gap: 6px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 10px;
-        }
-
-        .chip-3d {
-            flex: 1;
-            height: 44px;
+        .bush-graphic {
+            width: 28px;
+            height: 28px;
+            background-color: #16a34a;
             border-radius: 50%;
-            border: 2px dashed rgba(255,255,255,0.4);
-            color: #fff;
-            font-size: 0.8rem;
-            font-weight: 900;
-            cursor: pointer;
+            box-shadow: inset -2px -2px 0 #15803d, 0 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .streetlamp-graphic {
+            width: 20px;
+            height: 40px;
+            position: relative;
+        }
+
+        /* Cartoon Standing Chicken on Sidewalk */
+        .chicken-character {
+            position: absolute;
+            bottom: 35px;
+            right: 8px;
+            width: 52px;
+            height: 52px;
+            z-index: 20;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+
+        .chicken-character.walking {
+            animation: waddle 0.25s infinite alternate;
+        }
+
+        @keyframes waddle {
+            0% { transform: scale(1) rotate(-4deg); }
+            100% { transform: scale(1.05) rotate(4deg); }
+        }
+
+        .chicken-character.splatted {
+            transform: scale(1.3, 0.3) rotate(30deg) !important;
+            filter: grayscale(0.5) drop-shadow(0 0 10px red) !important;
+        }
+
+        /* Right Road (70%) */
+        .road-area {
+            width: 70%;
+            height: 100%;
+            background-color: var(--road-asphalt);
+            position: relative;
+            overflow: hidden;
             display: flex;
-            align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            align-items: center;
         }
 
-        .chip-10 { background: radial-gradient(circle, #0284c7, #0369a1); }
-        .chip-50 { background: radial-gradient(circle, #7c3aed, #5b21b6); }
-        .chip-100 { background: radial-gradient(circle, #d97706, #b45309); }
-        .chip-500 { background: radial-gradient(circle, #dc2626, #991b1b); }
-        .chip-1k { background: radial-gradient(circle, #10b981, #047857); }
-
-        .chip-3d.active {
-            border-style: solid;
-            border-color: #ffffff;
-            transform: scale(1.12);
-            box-shadow: 0 0 16px var(--gold-neon);
+        /* Scrolling Dashed Road Lines */
+        .road-dashed-line {
+            position: absolute;
+            left: 50%;
+            top: -100px;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 500px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #ffffff 0px,
+                #ffffff 30px,
+                transparent 30px,
+                transparent 60px
+            );
         }
 
-        /* BETTING CONTROLS PANEL */
-        .bet-panel {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
+        .road-dashed-line.animating {
+            animation: scrollRoad 0.6s linear infinite;
+        }
+
+        @keyframes scrollRoad {
+            0% { transform: translateX(-50%) translateY(0); }
+            100% { transform: translateX(-50%) translateY(60px); }
+        }
+
+        /* Manhole Cover in Middle of Road */
+        .manhole-cover {
+            width: 130px;
+            height: 130px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Multiplier Text Over Manhole */
+        .multiplier-text {
+            position: absolute;
+            z-index: 25;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.8);
+            letter-spacing: -0.5px;
+        }
+
+        .multiplier-text.splatted-text {
+            color: var(--red-primary) !important;
+            text-shadow: 0 0 15px rgba(239, 68, 68, 0.8) !important;
+            font-size: 2.2rem;
+        }
+
+        /* ==========================================
+           5. BETTING CONTROL PANEL
+           ========================================== */
+        .bet-panel-container {
+            padding: 16px;
+            background-color: var(--bg-dark);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bet-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             padding: 14px;
             display: flex;
-            gap: 10px;
-            align-items: center;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        .input-box {
-            flex: 1;
-            position: relative;
+        /* Top Row: Bet ID */
+        .bet-id-row {
             display: flex;
             align-items: center;
-            background: var(--input-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 0 12px;
-            height: 50px;
+            justify-content: flex-start;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        .input-box input {
-            width: 100%;
+        /* Input Row: Amount & Quick Multipliers */
+        .input-controls-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .amount-input-box {
+            flex: 1.2;
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 4px 8px;
+            height: 44px;
+        }
+
+        .btn-step {
+            width: 28px;
+            height: 28px;
+            background-color: var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .amount-input-box input {
+            flex: 1;
             background: transparent;
             border: none;
             outline: none;
-            color: var(--gold-neon);
-            font-size: 1.1rem;
-            font-weight: 900;
-        }
-
-        .btn-main-action {
-            flex: 1.2;
-            height: 50px;
-            border: none;
-            border-radius: 14px;
-            font-size: 1.05rem;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-        }
-
-        .btn-main-action.bet {
-            background: linear-gradient(135deg, var(--green-vibrant), #047857);
             color: #ffffff;
-            box-shadow: 0 6px 18px var(--green-glow);
-        }
-
-        .btn-main-action.cashout {
-            background: var(--gold-gradient);
-            color: #000000;
-            box-shadow: 0 6px 18px var(--gold-glow);
-            animation: pulseGlow 1s infinite alternate;
-        }
-
-        @keyframes pulseGlow {
-            from { box-shadow: 0 0 10px var(--gold-glow); }
-            to { box-shadow: 0 0 25px var(--gold-neon); }
-        }
-
-        .btn-main-action.waiting {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* LIVE BETS / LEADERBOARD SECTION */
-        .live-leaderboard-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
             font-weight: 800;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 8px;
+            font-size: 0.9rem;
+            text-align: center;
         }
 
-        .live-rows-container {
-            max-height: 160px;
-            overflow-y: auto;
+        .quick-multiplier-btns {
             display: flex;
-            flex-direction: column;
             gap: 6px;
         }
 
-        .live-rows-container::-webkit-scrollbar { width: 4px; }
-        .live-rows-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        .btn-quick {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0 10px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
 
-        .player-row {
+        .btn-quick:hover {
+            border-color: var(--yellow-gold);
+            color: var(--yellow-gold);
+        }
+
+        /* Difficulty Selector Dropdown */
+        .difficulty-dropdown-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .difficulty-box {
+            width: 100%;
+            height: 44px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 10px;
-            background: rgba(12, 15, 22, 0.6);
-            border-radius: 10px;
-            font-size: 0.78rem;
-        }
-
-        .player-row.cashed {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .player-name { font-weight: 700; color: var(--text-main); }
-        .player-mult { font-weight: 800; color: var(--gold-neon); }
-        .player-win { font-weight: 900; color: var(--green-vibrant); }
-
-        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 100%; max-width: 480px;
-            background: rgba(12, 15, 22, 0.95);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.7rem;
+            color: var(--text-main);
             font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
         }
 
-        .nav-item.active { color: var(--gold-neon); }
-        .nav-icon { font-size: 1.2rem; }
+        .difficulty-options {
+            position: absolute;
+            top: 48px;
+            left: 0;
+            width: 100%;
+            background-color: #27272a;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            z-index: 50;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
 
-        /* TOAST NOTIFICATION */
-        .toast {
+        .difficulty-options.open {
+            display: block;
+        }
+
+        .opt-item {
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .opt-item:hover {
+            background-color: var(--border-color);
+            color: var(--yellow-gold);
+        }
+
+        /* Massive Action Button */
+        .btn-action-main {
+            width: 100%;
+            height: 54px;
+            background-color: var(--green-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-action-main:active {
+            transform: scale(0.98);
+        }
+
+        .btn-action-main.cashout-state {
+            background-color: var(--yellow-gold) !important;
+            color: #000000 !important;
+            box-shadow: 0 6px 20px var(--yellow-glow) !important;
+        }
+
+        .btn-action-main.splatted-state {
+            background-color: var(--red-primary) !important;
+            color: #ffffff !important;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+        }
+
+        /* Toast Popup */
+        .toast-msg {
             position: fixed;
-            top: 20px; left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            background: rgba(12, 15, 22, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--gold-neon);
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 30px;
-            font-size: 0.85rem; font-weight: 700;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
-            opacity: 0; visibility: hidden;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #18181b;
+            color: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            opacity: 0;
+            visibility: hidden;
             transition: all 0.3s ease;
-            z-index: 2000;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
-        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .toast-msg.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Notification</div>
+    <!-- TOAST POPUP -->
+    <div id="toast" class="toast-msg">Notification Message</div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div class="app-viewport">
-        <!-- HEADER -->
-        <header class="app-header">
-            <a href="index.html" class="btn-back" title="Back to Home">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <div class="brand-title-box">
-                <span class="brand-title">Chicken Road 3D 2</span>
-                <span class="live-badge"><span class="live-dot"></span> LIVE 3D ARENA</span>
-            </div>
-            <div class="wallet-chip" id="walletDisplay">$1,000.00</div>
-        </header>
+    <!-- ==========================================
+       2. LOADING SCREEN OVERLAY (z-index 99999)
+       ========================================== -->
+    <div id="loading-overlay">
+        <div class="loading-center">
+            <!-- Cartoon Dazed Chicken SVG -->
+            <svg class="dazed-chicken-logo" viewBox="0 0 100 100">
+                <!-- Body -->
+                <circle cx="50" cy="55" r="32" fill="#ffffff" stroke="#d4d4d8" stroke-width="2"/>
+                <!-- Wing -->
+                <path d="M 30 55 Q 18 60 30 70 Q 42 65 30 55" fill="#f4f4f5" stroke="#a1a1aa" stroke-width="1.5"/>
+                <!-- Comb -->
+                <path d="M 42 22 Q 46 12 50 20 Q 54 10 58 22 Z" fill="#ef4444"/>
+                <!-- Beak -->
+                <polygon points="50,42 62,48 50,52" fill="#f59e0b"/>
+                <!-- Dazed Spiral Eyes -->
+                <circle cx="42" cy="38" r="6" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+                <path d="M 40 38 Q 42 36 44 38 Q 42 40 40 38" fill="none" stroke="#000000" stroke-width="1.5"/>
+                <circle cx="58" cy="38" r="6" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+                <path d="M 56 38 Q 58 36 60 38 Q 58 40 56 38" fill="none" stroke="#000000" stroke-width="1.5"/>
+                <!-- Legs -->
+                <line x1="42" y1="85" x2="42" y2="95" stroke="#f59e0b" stroke-width="3"/>
+                <line x1="58" y1="85" x2="58" y2="95" stroke="#f59e0b" stroke-width="3"/>
+            </svg>
 
-        <!-- RECENT MULTIPLIER HISTORY STRIP -->
-        <div class="history-strip" id="historyStrip">
-            <span class="multiplier-tag low">1.45x</span>
-            <span class="multiplier-tag mid">2.80x</span>
-            <span class="multiplier-tag high">14.20x</span>
-            <span class="multiplier-tag low">1.10x</span>
-            <span class="multiplier-tag mid">5.40x</span>
-            <span class="multiplier-tag high">28.50x</span>
-        </div>
+            <!-- Yellow/Gold Title -->
+            <div class="loading-title">CHICKEN ROAD 2</div>
 
-        <!-- 3D GAME ARENA -->
-        <div class="arena-card">
-            <div id="webglContainer" style="width:100%; height:100%;"></div>
-
-            <!-- Floating Overlay HUD -->
-            <div class="arena-overlay-hud">
-                <div class="multiplier-display" id="multiplierDisplay">
-                    <span id="multVal">1.00x</span>
-                    <span class="arena-status-sub" id="arenaSub">WAITING FOR NEXT ROUND</span>
+            <!-- Progress Indicator: 5 Dots (2 yellow, 3 grey) + 39% -->
+            <div class="progress-dots-container">
+                <div class="dots-row">
+                    <div class="dot active"></div>
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
                 </div>
+                <span class="progress-percentage">39%</span>
             </div>
         </div>
 
-        <!-- 3D CHIP DENOMINATION SELECTORS -->
-        <div class="chips-panel">
-            <button class="chip-3d chip-10 active" onclick="selectChip(10, this)">$10</button>
-            <button class="chip-3d chip-50" onclick="selectChip(50, this)">$50</button>
-            <button class="chip-3d chip-100" onclick="selectChip(100, this)">$100</button>
-            <button class="chip-3d chip-500" onclick="selectChip(500, this)">$500</button>
-            <button class="chip-3d chip-1k" onclick="selectChip(1000, this)">$1K</button>
-        </div>
-
-        <!-- BETTING CONTROLS PANEL -->
-        <div class="bet-panel">
-            <div class="input-box">
-                <span style="color: var(--text-muted); font-weight: 800; margin-right: 4px;">$</span>
-                <input type="number" id="stakeInput" value="10" min="1" step="1" oninput="updateStake()">
-            </div>
-            <button class="btn-main-action bet" id="actionBtn" onclick="handleActionButton()">
-                <span id="btnTextMain">BET</span>
-                <span id="btnTextSub" style="font-size: 0.72rem; opacity: 0.8; font-weight: 700;">NEXT ROUND</span>
-            </button>
-        </div>
-
-        <!-- LIVE LEADERBOARD / BETS TABLE -->
-        <div class="live-leaderboard-card">
-            <div class="table-header">
-                <span>Live Players</span>
-                <span style="color: var(--green-vibrant); font-size: 0.75rem;">🟢 182 Online</span>
-            </div>
-            <div class="live-rows-container" id="liveRowsContainer">
-                <!-- Dynamic Player Rows -->
-            </div>
+        <!-- Bottom Disclaimer -->
+        <div class="loading-footer-text">
+            <strong>CHICKEN ROAD 2™</strong> is a 100% provably fair game.
         </div>
     </div>
 
-    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="activity.html" class="nav-item">
-            <span class="nav-icon">🔥</span>
-            <span>Activity</span>
-        </a>
-        <a href="promotion.html" class="nav-item">
-            <span class="nav-icon">🎁</span>
-            <span>Promotion</span>
-        </a>
-        <a href="account.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            <span>Account</span>
-        </a>
-    </nav>
+    <!-- ==========================================
+       3. MAIN GAME VIEWPORT
+       ========================================== -->
+    <div class="app-viewport">
+        
+        <!-- HEADER -->
+        <header>
+            <div class="header-logo-group">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#f59e0b">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span>CHICKEN ROAD 2</span>
+            </div>
+            <div class="header-right-group">
+                <div class="btn-icon-circle" onclick="showToast('Chicken Road 2 Help Guide')">?</div>
+                <div class="balance-badge">
+                    <span id="user-balance">0.49</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">INR</span>
+                </div>
+                <div class="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- GAME CANVAS AREA (TOP-DOWN VIEW) -->
+        <div class="game-canvas-container" id="gameCanvas">
+            
+            <!-- Left Side: Sidewalk (30%) -->
+            <div class="sidewalk-area">
+                <div class="bush-graphic"></div>
+
+                <!-- Streetlamp Graphic -->
+                <div class="streetlamp-graphic">
+                    <svg viewBox="0 0 30 60" width="24" height="48">
+                        <path d="M15 50 L15 15 Q15 5 22 5" fill="none" stroke="#52525b" stroke-width="3"/>
+                        <circle cx="22" cy="8" r="5" fill="#fef08a"/>
+                    </svg>
+                </div>
+
+                <div class="bush-graphic"></div>
+
+                <!-- Cartoon Chicken Standing on Sidewalk -->
+                <div class="chicken-character" id="chickenChar">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <circle cx="50" cy="50" r="30" fill="#ffffff" stroke="#d4d4d8" stroke-width="2"/>
+                        <path d="M 40 22 Q 45 12 50 20 Q 55 10 60 22 Z" fill="#ef4444"/>
+                        <polygon points="50,42 62,48 50,52" fill="#f59e0b"/>
+                        <circle cx="42" cy="38" r="3" fill="#000000"/>
+                        <circle cx="58" cy="38" r="3" fill="#000000"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Right Side: Road (70%) -->
+            <div class="road-area">
+                <!-- Dashed Center Lines -->
+                <div class="road-dashed-line" id="roadLine"></div>
+
+                <!-- Manhole Cover in Center -->
+                <div class="manhole-cover">
+                    <svg viewBox="0 0 100 100" width="120" height="120">
+                        <circle cx="50" cy="50" r="45" fill="#3f3f46" stroke="#18181b" stroke-width="4"/>
+                        <circle cx="50" cy="50" r="36" fill="none" stroke="#27272a" stroke-width="3"/>
+                        <path d="M20 50 L80 50 M50 20 L50 80 M28 28 L72 72 M28 72 L72 28" stroke="#27272a" stroke-width="2"/>
+                    </svg>
+
+                    <!-- Multiplier Text directly over manhole cover -->
+                    <div class="multiplier-text" id="multText">1.00x</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BETTING CONTROL PANEL -->
+        <div class="bet-panel-container">
+            <div class="bet-card">
+                
+                <!-- Row 1: Bet ID -->
+                <div class="bet-id-row">
+                    <span>Bet ID: #CR2-98412</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </div>
+
+                <!-- Row 2: Input Controls & Quick Multipliers -->
+                <div class="input-controls-row">
+                    <div class="amount-input-box">
+                        <div class="btn-step" onclick="adjustAmount(-0.50)">-</div>
+                        <input type="text" id="amountInput" value="1.00 INR" readonly>
+                        <div class="btn-step" onclick="adjustAmount(0.50)">+</div>
+                    </div>
+
+                    <div class="quick-multiplier-btns">
+                        <div class="btn-quick" onclick="multiplyAmount(0.5)">x0.5</div>
+                        <div class="btn-quick" onclick="multiplyAmount(2.0)">x2.0</div>
+                        <div class="btn-quick" onclick="showToast('Coin Stack Presets')">🪙</div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Difficulty Selector Dropdown -->
+                <div class="difficulty-dropdown-container">
+                    <div class="difficulty-box" onclick="toggleDifficultyDropdown()">
+                        <span id="selectedDifficulty">Easy</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                    <div class="difficulty-options" id="difficultyMenu">
+                        <div class="opt-item" onclick="selectDifficulty('Easy')">Easy</div>
+                        <div class="opt-item" onclick="selectDifficulty('Medium')">Medium</div>
+                        <div class="opt-item" onclick="selectDifficulty('Hard')">Hard</div>
+                        <div class="opt-item" onclick="selectDifficulty('Hardcore')">Hardcore</div>
+                    </div>
+                </div>
+
+                <!-- Row 4: Massive Prominent Action Button -->
+                <button class="btn-action-main" id="btnPlay" onclick="handlePlayAction()">Play</button>
+
+            </div>
+        </div>
+
+    </div>
 
     <!-- ==========================================
-       THREE.JS WebGL 3D ARENA & GAME ENGINE
+       4. JAVASCRIPT GAME ENGINE & LOGIC
        ========================================== -->
     <script>
         // --- GAME STATE ---
-        let walletBalance = 1000.00;
-        let stakeAmount = 10.00;
+        let balance = 0.49;
+        let currentBet = 1.00;
+        let gameState = 'IDLE'; // 'IDLE', 'RUNNING', 'CASHED_OUT', 'SPLATTED'
         let currentMultiplier = 1.00;
-        let crashPoint = 2.50;
+        let crashMultiplier = 2.00;
+        let gameInterval = null;
 
-        let gameState = 'WAITING'; // 'WAITING', 'RUNNING', 'CRASHED'
-        let waitingTime = 5.0;
+        // DOM Elements
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const userBalanceEl = document.getElementById('user-balance');
+        const amountInput = document.getElementById('amountInput');
+        const difficultyMenu = document.getElementById('difficultyMenu');
+        const selectedDifficulty = document.getElementById('selectedDifficulty');
+        const btnPlay = document.getElementById('btnPlay');
+        const multText = document.getElementById('multText');
+        const roadLine = document.getElementById('roadLine');
+        const chickenChar = document.getElementById('chickenChar');
 
-        let hasBetNextRound = false;
-        let hasBetCurrentRound = false;
-        let hasCashedOut = false;
+        // 1. Loading Screen Auto-Fade after 3 seconds
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                loadingOverlay.classList.add('hidden');
+            }, 3000);
+        });
 
-        // Three.js Scene Variables
-        let scene, camera, renderer;
-        let chickenGroup, roadMesh, obstacles = [];
-        let particlesGroup;
-
-        // Simulated Live Players Data
-        const mockPlayers = [
-            { name: "User ***912", stake: 50, cashout: null, won: false },
-            { name: "User ***404", stake: 100, cashout: null, won: false },
-            { name: "User ***718", stake: 20, cashout: null, won: false },
-            { name: "User ***332", stake: 200, cashout: null, won: false },
-            { name: "User ***881", stake: 10, cashout: null, won: false }
-        ];
-
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            initThreeJS();
-            startWaitingPhase();
-            renderLivePlayers();
-        };
-
-        // --- THREE.JS PROCEDURAL 3D CHICKEN ROAD ENGINE ---
-        function initThreeJS() {
-            const container = document.getElementById('webglContainer');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x0c0f16, 0.08);
-
-            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-            camera.position.set(0, 3.5, 6.5);
-            camera.lookAt(0, 0.8, 0);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.shadowMap.enabled = true;
-            container.appendChild(renderer.domElement);
-
-            // Lighting Setup
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-
-            const spotLight = new THREE.SpotLight(0xf59e0b, 2.5);
-            spotLight.position.set(0, 8, 4);
-            spotLight.castShadow = true;
-            scene.add(spotLight);
-
-            const cyanLight = new THREE.PointLight(0x06b6d4, 1.5, 10);
-            cyanLight.position.set(-3, 2, -2);
-            scene.add(cyanLight);
-
-            // 1. Procedural Road Highway
-            const roadGeo = new THREE.PlaneGeometry(6, 40);
-            const roadMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.5 });
-            roadMesh = new THREE.Mesh(roadGeo, roadMat);
-            roadMesh.rotation.x = -Math.PI / 2;
-            roadMesh.position.z = -10;
-            scene.add(roadMesh);
-
-            // Road Lines
-            for (let i = -20; i < 10; i += 3) {
-                const lineGeo = new THREE.PlaneGeometry(0.15, 1.2);
-                const lineMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
-                const lineMesh = new THREE.Mesh(lineGeo, lineMat);
-                lineMesh.rotation.x = -Math.PI / 2;
-                lineMesh.position.set(0, 0.01, i);
-                scene.add(lineMesh);
-            }
-
-            // 2. Procedural 3D Chicken Kart Character
-            chickenGroup = new THREE.Group();
-
-            // Body
-            const bodyGeo = new THREE.SphereGeometry(0.5, 16, 16);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
-            const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-            bodyMesh.position.y = 0.5;
-            chickenGroup.add(bodyMesh);
-
-            // Comb (Red Crest)
-            const combGeo = new THREE.BoxGeometry(0.1, 0.25, 0.3);
-            const combMat = new THREE.MeshStandardMaterial({ color: 0xef4444 });
-            const combMesh = new THREE.Mesh(combGeo, combMat);
-            combMesh.position.set(0, 1.0, 0);
-            chickenGroup.add(combMesh);
-
-            // Cool Gold Visor / Sunglasses
-            const visorGeo = new THREE.BoxGeometry(0.45, 0.15, 0.1);
-            const visorMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.1 });
-            const visorMesh = new THREE.Mesh(visorGeo, visorMat);
-            visorMesh.position.set(0, 0.65, 0.45);
-            chickenGroup.add(visorMesh);
-
-            chickenGroup.position.set(0, 0, 1);
-            scene.add(chickenGroup);
-
-            // Particles Group for Crash Burst
-            particlesGroup = new THREE.Group();
-            scene.add(particlesGroup);
-
-            // Start Animation Loop
-            animateThreeJS();
+        // 2. Bet Amount Controls
+        function adjustAmount(delta) {
+            if (gameState !== 'IDLE') return;
+            currentBet = Math.max(0.50, currentBet + delta);
+            amountInput.value = `${currentBet.toFixed(2)} INR`;
         }
 
-        function animateThreeJS() {
-            requestAnimationFrame(animateThreeJS);
-
-            if (gameState === 'RUNNING') {
-                // Scroll Road Markers effect
-                roadMesh.position.z += 0.25;
-                if (roadMesh.position.z > 0) roadMesh.position.z = -10;
-
-                // Chicken Running Bouncing animation
-                chickenGroup.position.y = Math.sin(Date.now() * 0.015) * 0.08;
-                chickenGroup.rotation.z = Math.sin(Date.now() * 0.02) * 0.05;
-            } else if (gameState === 'CRASHED') {
-                // Animate crash particles
-                particlesGroup.children.forEach(p => {
-                    p.position.add(p.userData.velocity);
-                    p.rotation.x += 0.1;
-                });
-            }
-
-            renderer.render(scene, camera);
+        function multiplyAmount(factor) {
+            if (gameState !== 'IDLE') return;
+            currentBet = Math.max(0.50, currentBet * factor);
+            amountInput.value = `${currentBet.toFixed(2)} INR`;
         }
 
-        function triggerCrashExplosion() {
-            particlesGroup.clear();
-            const colors = [0xef4444, 0xf59e0b, 0xffffff];
+        // 3. Difficulty Dropdown
+        function toggleDifficultyDropdown() {
+            if (gameState !== 'IDLE') return;
+            difficultyMenu.classList.toggle('open');
+        }
 
-            for (let i = 0; i < 30; i++) {
-                const geo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-                const mat = new THREE.MeshBasicMaterial({ color: colors[Math.floor(Math.random() * colors.length)] });
-                const p = new THREE.Mesh(geo, mat);
-                p.position.copy(chickenGroup.position);
-                p.userData.velocity = new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.2,
-                    (Math.random()) * 0.2,
-                    (Math.random() - 0.5) * 0.2
-                );
-                particlesGroup.add(p);
+        function selectDifficulty(level) {
+            selectedDifficulty.innerText = level;
+            difficultyMenu.classList.remove('open');
+            showToast(`Difficulty set to ${level}`);
+        }
+
+        // 4. Main Game Play / Cash Out Action Handler
+        function handlePlayAction() {
+            if (gameState === 'IDLE') {
+                startRound();
+            } else if (gameState === 'RUNNING') {
+                cashOut();
             }
         }
 
-        // --- GAME LOOP ENGINE ---
-        function startWaitingPhase() {
-            gameState = 'WAITING';
-            waitingTime = 5.0;
+        function startRound() {
+            gameState = 'RUNNING';
             currentMultiplier = 1.00;
 
-            const multDisplay = document.getElementById('multiplierDisplay');
-            multDisplay.classList.remove('crashed');
-            document.getElementById('multVal').innerText = "1.00x";
-            document.getElementById('arenaSub').innerText = "WAITING FOR NEXT ROUND";
+            // Generate weighted random crash point
+            const difficulty = selectedDifficulty.innerText;
+            let maxRange = 5.0;
+            if (difficulty === 'Medium') maxRange = 10.0;
+            if (difficulty === 'Hard') maxRange = 25.0;
+            if (difficulty === 'Hardcore') maxRange = 50.0;
 
-            chickenGroup.position.set(0, 0, 1);
-            chickenGroup.visible = true;
-            particlesGroup.clear();
+            crashMultiplier = (1.05 + Math.random() * (maxRange - 1.05)).toFixed(2);
 
-            mockPlayers.forEach(p => { p.cashout = null; p.won = false; });
-            renderLivePlayers();
+            // Deduct / update UI
+            btnPlay.innerText = `Cash Out (1.00 INR)`;
+            btnPlay.className = "btn-action-main cashout-state";
 
-            updateActionButtonState();
+            multText.innerText = "1.00x";
+            multText.className = "multiplier-text";
 
-            const timerInterval = setInterval(() => {
-                waitingTime -= 0.1;
-                if (waitingTime > 0) {
-                    document.getElementById('arenaSub').innerText = `NEXT ROUND IN ${waitingTime.toFixed(1)}s`;
+            // Animate road & chicken
+            roadLine.classList.add('animating');
+            chickenChar.classList.add('walking');
+            chickenChar.style.right = "8px";
+
+            // Start multiplier counter
+            const startTime = Date.now();
+            gameInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                currentMultiplier = (1.00 + Math.pow(elapsed * 0.5, 1.6)).toFixed(2);
+
+                if (parseFloat(currentMultiplier) >= parseFloat(crashMultiplier)) {
+                    triggerCrash();
                 } else {
-                    clearInterval(timerInterval);
-                    startRunningPhase();
+                    multText.innerText = `${currentMultiplier}x`;
+                    const currentPayout = (currentBet * parseFloat(currentMultiplier)).toFixed(2);
+                    btnPlay.innerText = `Cash Out (${currentPayout} INR)`;
                 }
-            }, 100);
+            }, 50);
         }
 
-        function startRunningPhase() {
-            gameState = 'RUNNING';
-            document.getElementById('arenaSub').innerText = "RUNNING...";
+        function cashOut() {
+            if (gameState !== 'RUNNING') return;
 
-            if (hasBetNextRound) {
-                hasBetCurrentRound = true;
-                hasBetNextRound = false;
-                hasCashedOut = false;
-            } else {
-                hasBetCurrentRound = false;
-            }
+            clearInterval(gameInterval);
+            gameState = 'CASHED_OUT';
 
-            updateActionButtonState();
+            const winAmount = currentBet * parseFloat(currentMultiplier);
+            balance += winAmount;
+            userBalanceEl.innerText = balance.toFixed(2);
 
-            // Random crash point generator
-            const rand = Math.random();
-            if (rand < 0.1) crashPoint = (1.02 + Math.random() * 0.2).toFixed(2);
-            else if (rand < 0.65) crashPoint = (1.25 + Math.random() * 1.8).toFixed(2);
-            else if (rand < 0.9) crashPoint = (3.00 + Math.random() * 6.0).toFixed(2);
-            else crashPoint = (10.00 + Math.random() * 25.0).toFixed(2);
+            roadLine.classList.remove('animating');
+            chickenChar.classList.remove('walking');
 
-            const runInterval = setInterval(() => {
-                if (gameState !== 'RUNNING') {
-                    clearInterval(runInterval);
-                    return;
-                }
+            btnPlay.innerText = `Cashed Out! (+${winAmount.toFixed(2)} INR)`;
+            showToast(`🎉 Cashed out at ${currentMultiplier}x! Won ${winAmount.toFixed(2)} INR`);
 
-                currentMultiplier += 0.01 + (currentMultiplier * 0.008);
-                document.getElementById('multVal').innerText = `${currentMultiplier.toFixed(2)}x`;
-
-                // Cash out fake players randomly
-                mockPlayers.forEach(p => {
-                    if (!p.cashout && Math.random() < 0.05 && currentMultiplier > 1.2) {
-                        p.cashout = currentMultiplier.toFixed(2);
-                        p.won = true;
-                        renderLivePlayers();
-                    }
-                });
-
-                if (hasBetCurrentRound && !hasCashedOut) {
-                    const currentWin = stakeAmount * currentMultiplier;
-                    document.getElementById('btnTextSub').innerText = `CASH OUT $${currentWin.toFixed(2)}`;
-                }
-
-                // Collision Crash Check
-                if (currentMultiplier >= crashPoint) {
-                    clearInterval(runInterval);
-                    triggerCrash();
-                }
-            }, 60);
+            setTimeout(() => {
+                resetToIdle();
+            }, 1800);
         }
 
         function triggerCrash() {
-            gameState = 'CRASHED';
-            const multDisplay = document.getElementById('multiplierDisplay');
-            multDisplay.classList.add('crashed');
-            document.getElementById('multVal').innerText = `${crashPoint}x`;
-            document.getElementById('arenaSub').innerText = "CRASHED INTO OBSTACLE!";
+            clearInterval(gameInterval);
+            gameState = 'SPLATTED';
 
-            triggerCrashExplosion();
-            chickenGroup.visible = false;
+            roadLine.classList.remove('animating');
+            chickenChar.classList.remove('walking');
+            chickenChar.classList.add('splatted');
 
-            if (hasBetCurrentRound && !hasCashedOut) {
-                showToast(`❌ Crashed at ${crashPoint}x! Bet Lost.`);
-            }
+            multText.innerText = "SPLATTED!";
+            multText.className = "multiplier-text splatted-text";
 
-            hasBetCurrentRound = false;
-            updateActionButtonState();
-
-            addHistoryTag(crashPoint);
+            btnPlay.innerText = "SPLATTED!";
+            btnPlay.className = "btn-action-main splatted-state";
 
             setTimeout(() => {
-                startWaitingPhase();
-            }, 3000);
+                resetToIdle();
+            }, 2000);
         }
 
-        // --- BUTTON ACTION HANDLER ---
-        function handleActionButton() {
-            if (gameState === 'WAITING') {
-                if (!hasBetNextRound) {
-                    if (walletBalance < stakeAmount) {
-                        showToast("Insufficient Balance!");
-                        return;
-                    }
-                    walletBalance -= stakeAmount;
-                    updateWalletDisplay();
-                    hasBetNextRound = true;
-                    showToast(`Bet placed: $${stakeAmount.toFixed(2)}`);
-                    updateActionButtonState();
-                } else {
-                    walletBalance += stakeAmount;
-                    updateWalletDisplay();
-                    hasBetNextRound = false;
-                    showToast("Bet Cancelled!");
-                    updateActionButtonState();
-                }
-            } else if (gameState === 'RUNNING') {
-                if (hasBetCurrentRound && !hasCashedOut) {
-                    hasCashedOut = true;
-                    const winAmount = stakeAmount * currentMultiplier;
-                    walletBalance += winAmount;
-                    updateWalletDisplay();
-                    showToast(`🎉 Cashed out at ${currentMultiplier.toFixed(2)}x! Won $${winAmount.toFixed(2)}`);
-                    updateActionButtonState();
-                }
-            }
-        }
-
-        function updateActionButtonState() {
-            const btn = document.getElementById('actionBtn');
-            const mainText = document.getElementById('btnTextMain');
-            const subText = document.getElementById('btnTextSub');
-
-            btn.className = 'btn-main-action';
-
-            if (gameState === 'WAITING') {
-                if (hasBetNextRound) {
-                    btn.classList.add('waiting');
-                    mainText.innerText = "CANCEL";
-                    subText.innerText = "BET PLACED";
-                } else {
-                    btn.classList.add('bet');
-                    mainText.innerText = "BET";
-                    subText.innerText = "FOR NEXT ROUND";
-                }
-            } else if (gameState === 'RUNNING') {
-                if (hasBetCurrentRound && !hasCashedOut) {
-                    btn.classList.add('cashout');
-                    mainText.innerText = "CASH OUT";
-                    const currentWin = stakeAmount * currentMultiplier;
-                    subText.innerText = `$${currentWin.toFixed(2)}`;
-                } else {
-                    btn.classList.add('waiting');
-                    mainText.innerText = "RUNNING";
-                    subText.innerText = "WAITING NEXT ROUND";
-                }
-            } else if (gameState === 'CRASHED') {
-                btn.classList.add('waiting');
-                mainText.innerText = "CRASHED";
-                subText.innerText = "PREPARING...";
-            }
-        }
-
-        // --- UI HELPERS ---
-        function updateWalletDisplay() {
-            document.getElementById('walletDisplay').innerText = `$${walletBalance.toFixed(2)}`;
-        }
-
-        function selectChip(val, btn) {
-            stakeAmount = val;
-            document.getElementById('stakeInput').value = val;
-            document.querySelectorAll('.chip-3d').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        function updateStake() {
-            const val = parseFloat(document.getElementById('stakeInput').value);
-            stakeAmount = isNaN(val) || val < 1 ? 1 : val;
-        }
-
-        function addHistoryTag(mult) {
-            const strip = document.getElementById('historyStrip');
-            const badge = document.createElement('span');
-            badge.className = `multiplier-tag ${mult < 2 ? 'low' : (mult < 10 ? 'mid' : 'high')}`;
-            badge.innerText = `${mult}x`;
-            strip.insertBefore(badge, strip.firstChild);
-        }
-
-        function renderLivePlayers() {
-            const container = document.getElementById('liveRowsContainer');
-            container.innerHTML = mockPlayers.map(p => `
-                <div class="player-row ${p.won ? 'cashed' : ''}">
-                    <span class="player-name">${p.name}</span>
-                    <span class="player-mult">${p.cashout ? p.cashout + 'x' : 'running...'}</span>
-                    <span class="player-win">${p.won ? '+$' + (p.stake * p.cashout).toFixed(2) : '$' + p.stake}</span>
-                </div>
-            `).join('');
+        function resetToIdle() {
+            gameState = 'IDLE';
+            btnPlay.innerText = "Play";
+            btnPlay.className = "btn-action-main";
+            multText.innerText = "1.00x";
+            multText.className = "multiplier-text";
+            chickenChar.className = "chicken-character";
         }
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.innerText = msg;
-            toast.className = 'toast show';
-            setTimeout(() => { toast.className = 'toast'; }, 2800);
+            toast.className = 'toast-msg show';
+            setTimeout(() => {
+                toast.className = 'toast-msg';
+            }, 2600);
         }
     </script>
 </body>
