@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPlus Play - AI Premium Roulette</title>
+    <style>
+        /* Base Deep Black Theme */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505; /* Pitch Black */
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* To prevent scroll, feel like an app */
+        }
+
+        /* Neon Gold Glow Effects */
+        .neon-gold {
+            color: #ffd700;
+            text-shadow: 0 0 5px #ffd700, 0 0 15px #ffaa00;
+        }
+
+        .neon-border {
+            border: 1px solid #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Glassmorphism (Transparent Blur Panels) */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 15px;
+        }
+
+        /* Layout Grid */
+        .game-container {
+            display: grid;
+            grid-template-rows: 60px 1fr 250px;
+            height: 100vh;
+            padding: 10px;
+            box-sizing: border-box;
+            gap: 15px;
+        }
+
+        /* Top Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .balance {
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Middle Section: AI 3D Wheel & Chat */
+        .middle-section {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 15px;
+        }
+
+        .wheel-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .ai-chat-area {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-title {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .chat-msg {
+            background: rgba(0, 255, 0, 0.1);
+            border-left: 3px solid #00ff00;
+            padding: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        /* Bottom Section: Interactive Grid */
+        .betting-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .roulette-table {
+            display: grid;
+            grid-template-columns: 60px repeat(12, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 4px;
+        }
+
+        .grid-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .grid-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            border: 1px solid #ffd700;
+            z-index: 10;
+        }
+
+        /* Colors for Numbers */
+        .green { background: #008000; }
+        .red { background: #d91e18; }
+        .black { background: #1a1a1a; border: 1px solid #333; }
+        .zero-box { grid-row: 1 / span 3; }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- 1. Top Header (Balance) -->
+        <div class="top-header glass-panel">
+            <div style="font-weight: bold; opacity: 0.7;">VIP ID: NPLUS_001</div>
+            <div class="balance neon-gold">USDT 50,000.00</div>
+        </div>
+
+        <!-- 2. Middle Section (Wheel & AI) -->
+        <div class="middle-section">
+            <!-- 3D Wheel Area -->
+            <div class="wheel-area glass-panel neon-border">
+                <span class="neon-gold">[ AI 3D WEBGL ENGINE ACTIVE ]</span>
+            </div>
+
+            <!-- AI Chat/Stats -->
+            <div class="ai-chat-area glass-panel">
+                <div class="chat-title neon-gold">System Logs</div>
+                <div class="chat-msg">Hello, Welcome to NPlus Premium Roulette!</div>
+                <div class="chat-msg">No More Bets.</div>
+            </div>
+        </div>
+
+        <!-- 3. Interactive Betting Grid (Haptic Style) -->
+        <div class="betting-grid">
+            <div class="roulette-table">
+                <!-- Zero -->
+                <div class="grid-box green zero-box">0</div>
+                <!-- Row 1 -->
+                <div class="grid-box red">3</div><div class="grid-box black">6</div><div class="grid-box red">9</div>
+                <div class="grid-box red">12</div><div class="grid-box black">15</div><div class="grid-box red">18</div>
+                <div class="grid-box red">21</div><div class="grid-box black">24</div><div class="grid-box red">27</div>
+                <div class="grid-box red">30</div><div class="grid-box black">33</div><div class="grid-box red">36</div>
+                <!-- Row 2 -->
+                <div class="grid-box black">2</div><div class="grid-box red">5</div><div class="grid-box black">8</div>
+                <div class="grid-box black">11</div><div class="grid-box red">14</div><div class="grid-box black">17</div>
+                <div class="grid-box black">20</div><div class="grid-box red">23</div><div class="grid-box black">26</div>
+                <div class="grid-box black">29</div><div class="grid-box red">32</div><div class="grid-box black">35</div>
+                <!-- Row 3 -->
+                <div class="grid-box red">1</div><div class="grid-box black">4</div><div class="grid-box red">7</div>
+                <div class="grid-box black">10</div><div class="grid-box black">13</div><div class="grid-box red">16</div>
+                <div class="grid-box red">19</div><div class="grid-box black">22</div><div class="grid-box red">25</div>
+                <div class="grid-box black">28</div><div class="grid-box black">31</div><div class="grid-box red">34</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
