@@ -3,188 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NPlus Play - AI Premium Roulette</title>
+    <title>NPlus Play - Elite AI Roulette</title>
     <style>
-        /* Base Deep Black Theme */
+        /* === PROFESSIONAL CSS VARIABLES === */
+        :root {
+            --bg-black: #050505;
+            --panel-bg: rgba(20, 20, 20, 0.8);
+            --gold: #ffd700;
+            --gold-glow: 0 0 10px rgba(255, 215, 0, 0.4);
+            --roulette-red: #B22222;
+            --roulette-black: #1a1a1a;
+            --roulette-green: #006400;
+            --text-light: #e0e0e0;
+            --border-color: rgba(255, 215, 0, 0.2);
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background-color: #050505; /* Pitch Black */
-            color: #ffffff;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden; /* To prevent scroll, feel like an app */
-        }
-
-        /* Neon Gold Glow Effects */
-        .neon-gold {
-            color: #ffd700;
-            text-shadow: 0 0 5px #ffd700, 0 0 15px #ffaa00;
-        }
-
-        .neon-border {
-            border: 1px solid #ffd700;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-
-        /* Glassmorphism (Transparent Blur Panels) */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            border-radius: 15px;
-        }
-
-        /* Layout Grid */
-        .game-container {
-            display: grid;
-            grid-template-rows: 60px 1fr 250px;
+            background-color: var(--bg-black);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* === TOP BAR === */
+        .top-bar {
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .game-title {
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        /* === MIDDLE SECTION (Chat + AI Video + Stats) === */
+        .middle-section {
+            display: flex;
+            flex: 1;
+            height: 40vh;
+        }
+
+        /* Left: Chat Box */
+        .chat-section {
+            width: 250px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
             padding: 10px;
             box-sizing: border-box;
-            gap: 15px;
+        }
+        .dealer-name { color: var(--gold); font-size: 0.8rem; margin-bottom: 10px; }
+        .chat-messages { flex: 1; font-size: 0.8rem; overflow-y: auto; }
+        .chat-input { background: #000; border: 1px solid var(--border-color); color: white; padding: 8px; border-radius: 4px; }
+
+        /* Center: AI Video Feed Placeholder */
+        .video-section {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+        }
+        .ai-camera-placeholder {
+            border: 2px dashed var(--gold);
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            background: rgba(255, 215, 0, 0.05);
+        }
+        .ai-camera-placeholder h2 { color: var(--gold); margin: 0; }
+
+        /* Right: Stats & Round Wheel */
+        .stats-section {
+            width: 300px;
+            background: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hot-cold { width: 100%; display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.8rem; }
+        .round-wheel {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 3px solid var(--border-color);
+            background: conic-gradient(var(--roulette-red) 0% 30%, var(--roulette-black) 30% 70%, var(--roulette-red) 70% 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--gold-glow);
+        }
+        .wheel-center { width: 30px; height: 30px; background: #fff; border-radius: 50%; }
+
+        /* === STATUS BAR === */
+        .status-bar {
+            background-color: #00aa00; /* Bright Green */
+            color: white;
+            text-align: center;
+            padding: 5px 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px black;
         }
 
-        /* Top Header */
-        .top-header {
+        /* === BOTTOM SECTION (Betting Grids) === */
+        .bottom-section {
+            height: 45vh;
+            display: flex;
+            padding: 10px;
+            background: #0a0a0a;
+            gap: 20px;
+        }
+
+        /* Main Betting Grid */
+        .main-grid-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .roulette-board {
+            display: grid;
+            grid-template-columns: 60px repeat(12, 1fr);
+            grid-template-rows: repeat(3, 1fr) 1fr 1fr;
+            gap: 2px;
+            background: var(--border-color);
+            border: 2px solid var(--gold);
+            padding: 2px;
+            height: 100%;
+        }
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .cell:hover { transform: scale(0.95); border-color: var(--gold); box-shadow: inset 0 0 10px var(--gold); z-index: 10; }
+        
+        .zero { grid-row: 1 / span 3; background: var(--roulette-green); }
+        .red { background: var(--roulette-red); }
+        .black { background: var(--roulette-black); }
+        
+        /* Bottom action rows of the grid */
+        .dozen { grid-column: auto / span 4; background: transparent; border: 1px solid var(--border-color); }
+        .bottom-bet { grid-column: auto / span 2; background: transparent; border: 1px solid var(--border-color); }
+
+        /* Racetrack (Oval Grid) */
+        .racetrack-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .racetrack {
+            width: 90%;
+            height: 150px;
+            border: 2px solid var(--gold);
+            border-radius: 75px; /* Creates the capsule/oval shape */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 215, 0, 0.05);
+        }
+        .racetrack-inner {
+            width: 70%;
+            height: 90px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 45px;
+        }
+        .racetrack-text { position: absolute; color: var(--gold); font-size: 0.8rem; text-align: center;}
+
+        /* === FOOTER (Chips & Balance) === */
+        .footer-controls {
+            height: 60px;
+            background: var(--panel-bg);
+            border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
         }
+        
+        .balance-box { display: flex; gap: 20px; font-weight: bold; }
+        .balance-box span { color: var(--gold); }
 
-        .balance {
-            font-size: 1.2rem;
-            font-weight: bold;
-            letter-spacing: 1px;
+        .chips-container { display: flex; gap: 10px; align-items: center; }
+        .chip {
+            width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; font-weight: bold; cursor: pointer; border: 2px dashed #ccc; background: rgba(0,0,0,0.5);
         }
+        .chip.active { border: 2px solid var(--gold); box-shadow: var(--gold-glow); transform: translateY(-5px); }
 
-        /* Middle Section: AI 3D Wheel & Chat */
-        .middle-section {
-            display: grid;
-            grid-template-columns: 3fr 1fr;
-            gap: 15px;
-        }
-
-        .wheel-area {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
-            position: relative;
-        }
-
-        .ai-chat-area {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-title {
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            opacity: 0.8;
-            text-transform: uppercase;
-        }
-
-        .chat-msg {
-            background: rgba(0, 255, 0, 0.1);
-            border-left: 3px solid #00ff00;
-            padding: 8px;
-            font-size: 0.85rem;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-
-        /* Bottom Section: Interactive Grid */
-        .betting-grid {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
-
-        .roulette-table {
-            display: grid;
-            grid-template-columns: 60px repeat(12, 60px);
-            grid-template-rows: repeat(3, 60px);
-            gap: 4px;
-        }
-
-        .grid-box {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .grid-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-            border: 1px solid #ffd700;
-            z-index: 10;
-        }
-
-        /* Colors for Numbers */
-        .green { background: #008000; }
-        .red { background: #d91e18; }
-        .black { background: #1a1a1a; border: 1px solid #333; }
-        .zero-box { grid-row: 1 / span 3; }
+        .btn-lobby { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 20px; border-radius: 20px; cursor: pointer; }
 
     </style>
 </head>
 <body>
 
-    <div class="game-container">
-        <!-- 1. Top Header (Balance) -->
-        <div class="top-header glass-panel">
-            <div style="font-weight: bold; opacity: 0.7;">VIP ID: NPLUS_001</div>
-            <div class="balance neon-gold">USDT 50,000.00</div>
-        </div>
+    <!-- TOP BAR -->
+    <header class="top-bar">
+        <div class="game-title">AI American Roulette &nbsp; <span style="color:#aaa; font-weight:normal;">₹20 - 500,000</span></div>
+        <div>⚙️ 🔊 🕒</div>
+    </header>
 
-        <!-- 2. Middle Section (Wheel & AI) -->
-        <div class="middle-section">
-            <!-- 3D Wheel Area -->
-            <div class="wheel-area glass-panel neon-border">
-                <span class="neon-gold">[ AI 3D WEBGL ENGINE ACTIVE ]</span>
+    <!-- MIDDLE SECTION -->
+    <main class="middle-section">
+        <!-- 1. Chat & Dealer -->
+        <aside class="chat-section">
+            <div class="dealer-name">DEALER: AI SANDRO</div>
+            <div class="chat-messages">
+                <p><span style="color:var(--gold);">System:</span> Welcome to NPlus AI Live!</p>
             </div>
+            <input type="text" class="chat-input" placeholder="Click to chat...">
+        </aside>
 
-            <!-- AI Chat/Stats -->
-            <div class="ai-chat-area glass-panel">
-                <div class="chat-title neon-gold">System Logs</div>
-                <div class="chat-msg">Hello, Welcome to NPlus Premium Roulette!</div>
-                <div class="chat-msg">No More Bets.</div>
+        <!-- 2. AI Video Feed -->
+        <section class="video-section">
+            <div class="ai-camera-placeholder">
+                <h2>[ AI AVATAR VIDEO STREAM HERE ]</h2>
+                <p>WebRTC Low Latency Feed</p>
             </div>
-        </div>
+        </section>
 
-        <!-- 3. Interactive Betting Grid (Haptic Style) -->
-        <div class="betting-grid">
-            <div class="roulette-table">
-                <!-- Zero -->
-                <div class="grid-box green zero-box">0</div>
+        <!-- 3. Statistics & Round Wheel -->
+        <aside class="stats-section">
+            <div class="hot-cold">
+                <span style="color:red;">🔥 HOT: 7, 17, 22</span>
+                <span style="color:#00aaff;">❄️ COLD: 8, 36, 10</span>
+            </div>
+            <div class="round-wheel">
+                <div class="wheel-center"></div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">PLACE YOUR BETS</div>
+
+    <!-- BOTTOM SECTION (Betting) -->
+    <section class="bottom-section">
+        <!-- 4. Main Grid -->
+        <div class="main-grid-container">
+            <div class="roulette-board">
+                <!-- Zero column -->
+                <div class="cell zero">0</div>
                 <!-- Row 1 -->
-                <div class="grid-box red">3</div><div class="grid-box black">6</div><div class="grid-box red">9</div>
-                <div class="grid-box red">12</div><div class="grid-box black">15</div><div class="grid-box red">18</div>
-                <div class="grid-box red">21</div><div class="grid-box black">24</div><div class="grid-box red">27</div>
-                <div class="grid-box red">30</div><div class="grid-box black">33</div><div class="grid-box red">36</div>
+                <div class="cell red">3</div><div class="cell black">6</div><div class="cell red">9</div><div class="cell red">12</div><div class="cell black">15</div><div class="cell red">18</div><div class="cell red">21</div><div class="cell black">24</div><div class="cell red">27</div><div class="cell red">30</div><div class="cell black">33</div><div class="cell red">36</div>
                 <!-- Row 2 -->
-                <div class="grid-box black">2</div><div class="grid-box red">5</div><div class="grid-box black">8</div>
-                <div class="grid-box black">11</div><div class="grid-box red">14</div><div class="grid-box black">17</div>
-                <div class="grid-box black">20</div><div class="grid-box red">23</div><div class="grid-box black">26</div>
-                <div class="grid-box black">29</div><div class="grid-box red">32</div><div class="grid-box black">35</div>
+                <div class="cell black">2</div><div class="cell red">5</div><div class="cell black">8</div><div class="cell black">11</div><div class="cell red">14</div><div class="cell black">17</div><div class="cell black">20</div><div class="cell red">23</div><div class="cell black">26</div><div class="cell black">29</div><div class="cell red">32</div><div class="cell black">35</div>
                 <!-- Row 3 -->
-                <div class="grid-box red">1</div><div class="grid-box black">4</div><div class="grid-box red">7</div>
-                <div class="grid-box black">10</div><div class="grid-box black">13</div><div class="grid-box red">16</div>
-                <div class="grid-box red">19</div><div class="grid-box black">22</div><div class="grid-box red">25</div>
-                <div class="grid-box black">28</div><div class="grid-box black">31</div><div class="grid-box red">34</div>
+                <div class="cell red">1</div><div class="cell black">4</div><div class="cell red">7</div><div class="cell black">10</div><div class="cell black">13</div><div class="cell red">16</div><div class="cell red">19</div><div class="cell black">22</div><div class="cell red">25</div><div class="cell black">28</div><div class="cell black">31</div><div class="cell red">34</div>
+                
+                <!-- Dozens Row -->
+                <div style="grid-column: 1;"></div> <!-- Empty space below zero -->
+                <div class="cell dozen">1st 12</div><div class="cell dozen">2nd 12</div><div class="cell dozen">3rd 12</div>
+                
+                <!-- Outside Bets Row -->
+                <div style="grid-column: 1;"></div>
+                <div class="cell bottom-bet">1-18</div><div class="cell bottom-bet">EVEN</div><div class="cell bottom-bet" style="color:red;">♦</div><div class="cell bottom-bet" style="color:black; border-color:white;">♦</div><div class="cell bottom-bet">ODD</div><div class="cell bottom-bet">19-36</div>
             </div>
         </div>
-    </div>
+
+        <!-- 5. Racetrack Oval -->
+        <div class="racetrack-container">
+            <div class="racetrack">
+                <div class="racetrack-inner"></div>
+            </div>
+            <div class="racetrack-text">OVAL<br>RACETRACK<br>GRID</div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer-controls">
+        <div class="balance-box">
+            <div>BALANCE<br><span>₹ 50,000.00</span></div>
+            <div>TOTAL BET<br><span>₹ 0</span></div>
+        </div>
+        
+        <div class="chips-container">
+            <div>↩️ UNDO</div>
+            <div class="chip" style="border-color:#aaa; color:#aaa;">20</div>
+            <div class="chip active" style="border-color:var(--gold); color:var(--gold);">50</div>
+            <div class="chip" style="border-color:#aaa; color:#aaa;">100</div>
+            <div class="chip" style="border-color:#aaa; color:#aaa;">500</div>
+            <div>x2 DOUBLE</div>
+        </div>
+
+        <button class="btn-lobby">LOBBY</button>
+    </footer>
 
 </body>
 </html>
