@@ -2,422 +2,642 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NPlus Play - Auto Roulette</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Auto-Roulette | Premium Casino</title>
     <style>
-        /* === PROFESSIONAL CSS VARIABLES === */
+        /* CSS Variables */
         :root {
-            --bg-black: #050505;
+            --bg-color: #050505;
             --panel-bg: rgba(20, 20, 20, 0.8);
-            --gold: #ffd700;
-            --gold-glow: 0 0 10px rgba(255, 215, 0, 0.4);
-            --roulette-red: #B22222;
-            --roulette-black: #1a1a1a;
-            --roulette-green: #006400;
-            --text-light: #e0e0e0;
-            --border-color: rgba(255, 215, 0, 0.2);
+            --neon-gold: #ffd700;
+            --gold-dim: rgba(255, 215, 0, 0.3);
+            --roulette-green: #016D29;
+            --roulette-red: #E0080B;
+            --roulette-black: #111111;
+            --text-light: #ffffff;
+            --text-dim: #aaaaaa;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Reset & Global */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-black);
+            background-color: var(--bg-color);
             color: var(--text-light);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             height: 100vh;
+            width: 100vw;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            overflow: hidden; 
         }
 
-        /* === TOP BAR === */
-        .top-bar {
+        /* Layout Architecture */
+        .header {
             height: 40px;
+            flex-shrink: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
+            background: var(--panel-bg);
             border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
         }
 
-        .game-title {
-            color: var(--gold);
-            font-weight: bold;
-        }
-
-        /* === MIDDLE SECTION (Chat + AI Video + Stats) === */
         .middle-section {
-            display: flex;
-            flex: 1;
             height: 40vh;
-        }
-
-        /* Left: Chat Box */
-        .chat-section {
-            width: 250px;
-            background: var(--panel-bg);
-            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
             display: flex;
-            flex-direction: column;
+            gap: 10px;
             padding: 10px;
-            box-sizing: border-box;
-        }
-        .dealer-name { color: #00ff00; font-size: 0.8rem; margin-bottom: 10px; font-weight: bold; }
-        .chat-messages { flex: 1; font-size: 0.8rem; overflow-y: auto; }
-        .chat-input { background: #000; border: 1px solid var(--border-color); color: white; padding: 8px; border-radius: 4px; outline: none; }
-
-        /* Center: Auto Wheel Video Feed */
-        .video-section {
-            flex: 1;
-            position: relative;
-            background: #000;
-            overflow: hidden; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 50px rgba(0,0,0,1);
         }
 
-        .ai-video-feed {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-        }
-
-        /* Right: Stats & Round Wheel */
-        .stats-section {
-            width: 300px;
-            background: var(--panel-bg);
-            border-left: 1px solid var(--border-color);
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .hot-cold { width: 100%; display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.8rem; }
-        .round-wheel {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 3px solid var(--border-color);
-            background: conic-gradient(var(--roulette-red) 0% 30%, var(--roulette-black) 30% 70%, var(--roulette-red) 70% 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: var(--gold-glow);
-        }
-        .wheel-center { width: 30px; height: 30px; background: #fff; border-radius: 50%; }
-
-        /* === STATUS BAR === */
         .status-bar {
-            background-color: rgba(255, 255, 255, 0.1); 
-            color: white;
-            text-align: center;
-            padding: 5px 0;
-            font-size: 1rem;
-            text-transform: uppercase;
+            height: 30px;
+            flex-shrink: 0;
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--neon-gold);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
             letter-spacing: 2px;
-            border-bottom: 1px solid var(--border-color);
+            border-top: 1px solid var(--gold-dim);
+            border-bottom: 1px solid var(--gold-dim);
+            text-shadow: 0 0 5px var(--neon-gold);
         }
 
-        /* === BOTTOM SECTION (Betting Grids) === */
         .bottom-section {
-            height: 45vh;
+            flex: 1; /* Takes remaining space (~45vh) */
             display: flex;
-            padding: 10px;
-            background: #0a0a0a;
-            gap: 20px;
+            gap: 15px;
+            padding: 15px;
+            overflow: hidden;
         }
 
-        /* Main Betting Grid (European Single Zero) */
-        .main-grid-container {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .roulette-board {
-            display: grid;
-            grid-template-columns: 60px repeat(12, 1fr);
-            grid-template-rows: repeat(3, 1fr) 1fr 1fr;
-            gap: 2px;
-            background: var(--border-color);
-            border: 2px solid var(--gold);
-            padding: 2px;
-            height: 100%;
-        }
-        
-        .cell {
-            position: relative; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: 0.2s;
-            color: white;
-            border: 1px solid rgba(255,255,255,0.1);
-            user-select: none; 
-        }
-        .cell:hover { transform: scale(0.95); border-color: var(--gold); box-shadow: inset 0 0 10px var(--gold); z-index: 10; }
-        
-        .zero { grid-row: 1 / span 3; background: var(--roulette-green); clip-path: polygon(100% 0, 100% 100%, 0 70%, 0 30%); }
-        .red { background: var(--roulette-red); }
-        .black { background: var(--roulette-black); }
-        
-        .dozen { grid-column: auto / span 4; background: transparent; border: 1px solid var(--border-color); }
-        .bottom-bet { grid-column: auto / span 2; background: transparent; border: 1px solid var(--border-color); }
-
-        /* Chip Animation */
-        .placed-chip {
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid var(--gold);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.7rem;
-            color: var(--gold);
-            font-weight: bold;
-            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
-            pointer-events: none; 
-            z-index: 5;
-            animation: dropChip 0.2s ease-out;
-        }
-
-        @keyframes dropChip {
-            0% { transform: scale(1.5) translateY(-20px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
-        }
-
-        /* European Racetrack (Oval Grid) */
-        .racetrack-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        .racetrack {
-            width: 90%;
-            height: 150px;
-            border: 2px solid var(--gold);
-            border-radius: 75px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(255, 215, 0, 0.05);
-            position: relative;
-        }
-        .racetrack-inner {
-            width: 70%;
-            height: 90px;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 45px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.7);
-        }
-        .racetrack-sections {
-            position: absolute;
-            display: flex;
-            width: 70%;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--gold);
-            font-weight: bold;
-        }
-
-        /* === FOOTER (Chips & Balance) === */
-        .footer-controls {
+        .footer {
             height: 60px;
+            flex-shrink: 0;
             background: var(--panel-bg);
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Header Elements */
+        .game-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+        .game-title span {
+            color: var(--text-light);
+            font-weight: bold;
+        }
+        .header-icons span {
+            margin-left: 15px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.2s;
+        }
+        .header-icons span:hover { color: var(--neon-gold); }
+
+        /* Middle Section Elements */
+        .chatbox, .statistics {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
         }
         
-        .balance-box { display: flex; gap: 20px; font-weight: bold; }
-        .balance-box span { color: var(--gold); }
-
-        .chips-container { display: flex; gap: 10px; align-items: center; }
-        .action-btn { cursor: pointer; color: white; transition: 0.2s; user-select: none; }
-        .action-btn:hover { color: var(--gold); }
-
-        .chip {
-            width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center;
-            align-items: center; font-weight: bold; cursor: pointer; border: 2px dashed #aaa; background: rgba(0,0,0,0.5);
-            color: #aaa; transition: all 0.2s ease; user-select: none;
+        .chatbox {
+            width: 250px;
         }
-        .chip.active { border: 2px solid var(--gold); box-shadow: var(--gold-glow); transform: translateY(-5px); color: var(--gold); }
-        .chip:hover:not(.active) { transform: scale(1.1); border-color: white; color: white; }
+        .chat-title {
+            color: #00ff00;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 10px;
+            font-size: 12px;
+            overflow-y: auto;
+            color: var(--text-dim);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .chat-messages span.user { color: var(--neon-gold); }
+        .chat-input {
+            height: 30px;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0 10px;
+            border-radius: 0 0 8px 8px;
+            outline: none;
+        }
 
-        .btn-lobby { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 20px; border-radius: 20px; cursor: pointer; }
-        .btn-lobby:hover { background: rgba(255, 215, 0, 0.1); }
+        .video-container {
+            flex: 1;
+            border: 2px solid var(--gold-dim);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 15px var(--gold-dim);
+        }
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.85;
+        }
+
+        .statistics {
+            width: 300px;
+            padding: 10px;
+            align-items: center;
+        }
+        .stats-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .hot-nums { color: #ff4444; }
+        .cold-nums { color: #44aaff; }
+        .stats-wheel {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--roulette-red) 0% 10%, var(--roulette-black) 10% 20%, 
+                var(--roulette-red) 20% 30%, var(--roulette-black) 30% 40%,
+                var(--roulette-green) 40% 50%, var(--roulette-black) 50% 60%,
+                var(--roulette-red) 60% 70%, var(--roulette-black) 70% 80%,
+                var(--roulette-red) 80% 90%, var(--roulette-black) 90% 100%
+            );
+            border: 2px solid var(--gold-dim);
+            box-shadow: 0 0 20px rgba(0,0,0,0.8) inset;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .stats-wheel-inner {
+            width: 110px;
+            height: 110px;
+            background: var(--bg-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+        }
+        .stats-wheel-inner span { font-size: 10px; color: var(--text-dim); }
+        .stats-wheel-inner strong { font-size: 24px; color: var(--text-light); }
+
+        /* Bottom Section - Betting Grid */
+        .betting-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .main-grid-wrapper {
+            display: flex;
+            height: 60%;
+        }
+
+        .zero-cell {
+            width: 8%;
+            background: var(--roulette-green);
+            border: 1px solid var(--border-color);
+            border-radius: 6px 0 0 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .numbers-grid {
+            flex: 1;
+            display: flex;
+        }
+        
+        .grid-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column-reverse; /* Reverses standard flex to put 3 at top, 1 at bottom */
+        }
+
+        .bet-cell {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .bet-cell.red { background-color: var(--roulette-red); }
+        .bet-cell.black { background-color: var(--roulette-black); }
+        .bet-cell.empty { background-color: transparent; }
+
+        .dozens-row, .outside-row {
+            display: flex;
+            height: 18%;
+        }
+        
+        .dozens-row .bet-cell { flex: 1; background: var(--panel-bg); }
+        .outside-row .bet-cell { flex: 1; background: var(--panel-bg); border-radius: 0 0 6px 6px;}
+        
+        /* Grid Corners Fix */
+        .grid-col:last-child .bet-cell:last-child { border-radius: 0 6px 0 0; }
+        .dozens-row .bet-cell:first-child { margin-left: 8%; } /* offset for zero */
+        .outside-row .bet-cell:first-child { margin-left: 8%; border-radius: 0 0 0 6px; }
+
+        /* Cell Hover Effect */
+        .bet-cell:hover, .zero-cell:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 0 10px var(--neon-gold);
+            border-color: var(--neon-gold);
+        }
+
+        /* Racetrack */
+        .racetrack-area {
+            width: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .racetrack {
+            width: 100%;
+            height: 80%;
+            border: 2px solid var(--border-color);
+            border-radius: 100px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 20px;
+            background: var(--panel-bg);
+        }
+        .racetrack-section {
+            font-size: 12px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 15px;
+            transition: 0.2s;
+        }
+        .racetrack-section:hover {
+            background: rgba(255,215,0,0.2);
+            color: var(--neon-gold);
+        }
+
+        /* Footer Controls */
+        .balance-info {
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+            color: var(--text-dim);
+            gap: 2px;
+        }
+        .balance-info span.val {
+            color: var(--text-light);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .chip-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .chip {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 0 5px rgba(255,255,255,0.3);
+            border: 2px dashed rgba(255,255,255,0.4);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        .chip-10 { background: #4a90e2; }
+        .chip-50 { background: #2e7d32; }
+        .chip-100 { background: #111111; color: var(--neon-gold); border-color: var(--neon-gold); }
+        .chip-500 { background: #8e44ad; }
+
+        .chip.active {
+            transform: translateY(-8px) scale(1.1);
+            border: 2px solid var(--neon-gold);
+            box-shadow: 0 8px 15px rgba(255, 215, 0, 0.4), inset 0 0 5px rgba(255,255,255,0.5);
+        }
+
+        .undo-btn {
+            background: transparent;
+            color: var(--text-dim);
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 15px;
+            transition: color 0.2s;
+        }
+        .undo-btn:hover { color: var(--text-light); }
+
+        .lobby-btn {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lobby-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--text-light);
+        }
+
+        /* Visual Chip Dropped on Grid */
+        .placed-chip {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 9px;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.6), inset 0 0 3px rgba(255,255,255,0.4);
+            border: 1.5px dashed rgba(255,255,255,0.5);
+            animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        @keyframes dropIn {
+            0% { transform: scale(2) translateY(-20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* Placed chip color mapping classes */
+        .placed-10 { background: #4a90e2; }
+        .placed-50 { background: #2e7d32; }
+        .placed-100 { background: #111111; color: var(--neon-gold); border-color: var(--neon-gold); }
+        .placed-500 { background: #8e44ad; }
+
     </style>
 </head>
 <body>
 
-    <!-- TOP BAR -->
-    <header class="top-bar">
-        <div class="game-title">Auto-Roulette &nbsp; <span style="color:#aaa; font-weight:normal;">₹10 - 500,000</span></div>
-        <div>⚙️ 🔊 🕒</div>
+    <header class="header">
+        <div class="game-title">Auto-Roulette <span>₹10 - 500,000</span></div>
+        <div class="header-icons">
+            <span>⚙️</span>
+            <span>🔊</span>
+            <span>📹</span>
+        </div>
     </header>
 
-    <!-- MIDDLE SECTION -->
     <main class="middle-section">
-        <!-- 1. Chat & Dealer -->
-        <aside class="chat-section">
-            <div class="dealer-name">DEALER: AUTO</div>
+        <aside class="chatbox">
+            <div class="chat-title">DEALER: AUTO</div>
             <div class="chat-messages">
-                <p><span style="color:var(--gold);">System:</span> Welcome to Auto-Roulette!</p>
-                <p><span style="color:#aaa;">player88:</span> Last game please 25 to 36</p>
-                <p><span style="color:#aaa;">max_bet:</span> im betting lol</p>
+                <div><span class="user">VIP_Gamer:</span> Let's go red!</div>
+                <div><span class="user">LuckyStrike:</span> 0 is coming</div>
+                <div><span class="user">Dealer:</span> No more bets please.</div>
+                <div><span class="user">Alex99:</span> Good luck all</div>
             </div>
             <input type="text" class="chat-input" placeholder="Click to chat...">
         </aside>
 
-        <!-- 2. Auto Wheel Video Feed -->
-        <section class="video-section">
-            <video autoplay loop muted playsinline class="ai-video-feed">
-                <!-- Placeholder for Spinning Wheel Video -->
-                <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
+        <section class="video-container">
+            <!-- Dummy looping video placeholder -->
+            <video autoplay loop muted playsinline>
+                <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
             </video>
         </section>
 
-        <!-- 3. Statistics -->
-        <aside class="stats-section">
-            <div class="hot-cold">
-                <span style="color:red;">🔥 HOT: 12, 4, 31</span>
-                <span style="color:#00aaff;">❄️ COLD: 13, 18, 1</span>
+        <aside class="statistics">
+            <div class="stats-header">
+                <span class="hot-nums">HOT: 3, 26, 0</span>
+                <span class="cold-nums">COLD: 14, 8, 30</span>
             </div>
-            <div class="round-wheel">
-                <div class="wheel-center"></div>
+            <div class="stats-wheel">
+                <div class="stats-wheel-inner">
+                    <span>LAST WIN</span>
+                    <strong>26</strong>
+                </div>
             </div>
         </aside>
     </main>
 
-    <!-- STATUS BAR -->
-    <div class="status-bar">NEXT GAME SOON</div>
+    <div class="status-bar">
+        NEXT GAME SOON
+    </div>
 
-    <!-- BOTTOM SECTION (Betting Grid) -->
     <section class="bottom-section">
-        <!-- 4. Main Grid -->
-        <div class="main-grid-container">
-            <div class="roulette-board" id="betting-board">
-                <!-- Single Zero -->
-                <div class="cell zero">0</div>
-                <!-- Row 1 -->
-                <div class="cell red">3</div><div class="cell black">6</div><div class="cell red">9</div><div class="cell red">12</div><div class="cell black">15</div><div class="cell red">18</div><div class="cell red">21</div><div class="cell black">24</div><div class="cell red">27</div><div class="cell red">30</div><div class="cell black">33</div><div class="cell red">36</div>
-                <!-- Row 2 -->
-                <div class="cell black">2</div><div class="cell red">5</div><div class="cell black">8</div><div class="cell black">11</div><div class="cell red">14</div><div class="cell black">17</div><div class="cell black">20</div><div class="cell red">23</div><div class="cell black">26</div><div class="cell black">29</div><div class="cell red">32</div><div class="cell black">35</div>
-                <!-- Row 3 -->
-                <div class="cell red">1</div><div class="cell black">4</div><div class="cell red">7</div><div class="cell black">10</div><div class="cell black">13</div><div class="cell red">16</div><div class="cell red">19</div><div class="cell black">22</div><div class="cell red">25</div><div class="cell black">28</div><div class="cell black">31</div><div class="cell red">34</div>
-                
-                <!-- Dozens Row -->
-                <div style="grid-column: 1;"></div>
-                <div class="cell dozen">1st 12</div><div class="cell dozen">2nd 12</div><div class="cell dozen">3rd 12</div>
-                
-                <!-- Outside Bets Row -->
-                <div style="grid-column: 1;"></div>
-                <div class="cell bottom-bet">1-18</div><div class="cell bottom-bet">EVEN</div><div class="cell bottom-bet" style="color:red;">♦</div><div class="cell bottom-bet" style="color:black; border-color:white;">♦</div><div class="cell bottom-bet">ODD</div><div class="cell bottom-bet">19-36</div>
+        <div class="betting-area">
+            <div class="main-grid-wrapper">
+                <div class="zero-cell bet-cell" data-bet="0">0</div>
+                <div class="numbers-grid" id="numbersGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            
+            <div class="dozens-row">
+                <div class="bet-cell" data-bet="1st12">1st 12</div>
+                <div class="bet-cell" data-bet="2nd12">2nd 12</div>
+                <div class="bet-cell" data-bet="3rd12">3rd 12</div>
+            </div>
+            
+            <div class="outside-row">
+                <div class="bet-cell" data-bet="1-18">1 TO 18</div>
+                <div class="bet-cell" data-bet="EVEN">EVEN</div>
+                <div class="bet-cell red" data-bet="RED">
+                    <div style="width:15px;height:15px;background:#fff;transform:rotate(45deg);"></div>
+                </div>
+                <div class="bet-cell black" data-bet="BLACK">
+                    <div style="width:15px;height:15px;background:#fff;transform:rotate(45deg);"></div>
+                </div>
+                <div class="bet-cell" data-bet="ODD">ODD</div>
+                <div class="bet-cell" data-bet="19-36">19 TO 36</div>
             </div>
         </div>
 
-        <!-- 5. European Racetrack Oval -->
-        <div class="racetrack-container">
+        <div class="racetrack-area">
             <div class="racetrack">
-                <div class="racetrack-inner">
-                    <span>TIER</span>
-                    <span>ORPHELINS</span>
-                    <span>VOISINS</span>
-                    <span>ZERO</span>
-                </div>
+                <div class="racetrack-section bet-cell" data-bet="VOISINS">VOISINS</div>
+                <div class="racetrack-section bet-cell" data-bet="ORPHELINS">ORPHELINS</div>
+                <div class="racetrack-section bet-cell" data-bet="TIER">TIER</div>
+                <div class="racetrack-section bet-cell" data-bet="ZERO">ZERO</div>
             </div>
         </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer class="footer-controls">
-        <div class="balance-box">
-            <div>BALANCE<br><span>₹ 50,000.00</span></div>
-            <div>TOTAL BET<br><span id="total-bet-amount">₹ 0</span></div> 
-        </div>
-        
-        <div class="chips-container">
-            <div class="action-btn" id="undo-btn">↩️ UNDO</div>
-            <div class="chip">10</div>
-            <div class="chip active" style="border-color:var(--gold); color:var(--gold);">50</div>
-            <div class="chip">100</div>
-            <div class="chip">500</div>
-            <div class="action-btn">x2 DOUBLE</div>
+    <footer class="footer">
+        <div class="balance-info">
+            <div>BALANCE <span class="val">₹ 50,000.00</span></div>
+            <div>TOTAL BET <span class="val" id="totalBetDisplay">₹ 0</span></div>
         </div>
 
-        <button class="btn-lobby">LOBBY</button>
+        <div class="chip-selector">
+            <div class="chip chip-10 active" data-val="10">10</div>
+            <div class="chip chip-50" data-val="50">50</div>
+            <div class="chip chip-100" data-val="100">100</div>
+            <div class="chip chip-500" data-val="500">500</div>
+            <button class="undo-btn" id="undoBtn">↩️ UNDO</button>
+        </div>
+
+        <button class="lobby-btn">LOBBY</button>
     </footer>
 
-    <!-- JAVASCRIPT: ENGINE FOR BETTING & ANIMATION -->
     <script>
-        let currentChipValue = 50; 
-        let totalBetAmount = 0;
-        let betHistory = []; 
+        // Data & Variables
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        let currentChipValue = 10;
+        let totalBet = 0;
+        let betHistory = [];
 
+        // DOM Elements
+        const numbersGrid = document.getElementById('numbersGrid');
         const chips = document.querySelectorAll('.chip');
-        chips.forEach(chip => {
-            chip.addEventListener('click', function() {
-                chips.forEach(c => {
-                    c.classList.remove('active');
-                    c.style.borderColor = '#aaa';
-                    c.style.color = '#aaa';
-                });
+        const totalBetDisplay = document.getElementById('totalBetDisplay');
+        const undoBtn = document.getElementById('undoBtn');
+
+        // 1. Generate Numbers Grid (1 to 36)
+        // Roulette layout uses 12 columns, 3 rows.
+        // We use flex columns. The 'column-reverse' in CSS places the highest number of the column at the top.
+        // Col 1: 1, 2, 3 -> displayed top to bottom as 3, 2, 1.
+        function generateGrid() {
+            for (let col = 0; col < 12; col++) {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'grid-col';
                 
-                this.classList.add('active');
-                this.style.borderColor = 'var(--gold)';
-                this.style.color = 'var(--gold)';
-                currentChipValue = parseInt(this.innerText);
+                for (let row = 1; row <= 3; row++) {
+                    const num = (col * 3) + row;
+                    const cell = document.createElement('div');
+                    
+                    const isRed = redNumbers.includes(num);
+                    cell.className = `bet-cell ${isRed ? 'red' : 'black'}`;
+                    cell.innerText = num;
+                    cell.dataset.bet = num.toString();
+                    
+                    colDiv.appendChild(cell);
+                }
+                numbersGrid.appendChild(colDiv);
+            }
+        }
+        generateGrid();
+
+        // 2. Chip Selection Logic
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                // Remove active class from all
+                chips.forEach(c => c.classList.remove('active'));
+                // Add active class to clicked
+                chip.classList.add('active');
+                // Update current value
+                currentChipValue = parseInt(chip.dataset.val);
             });
         });
 
-        const cells = document.querySelectorAll('.cell, .racetrack-inner span');
-        const totalBetDisplay = document.getElementById('total-bet-amount');
-
-        cells.forEach(cell => {
-            cell.addEventListener('click', function() {
-                const newChip = document.createElement('div');
-                newChip.classList.add('placed-chip');
-                newChip.innerText = currentChipValue;
-
-                const randomX = Math.floor(Math.random() * 10) - 5;
-                const randomY = Math.floor(Math.random() * 10) - 5;
-                newChip.style.transform = `translate(${randomX}px, ${randomY}px)`;
-
-                this.appendChild(newChip);
-
-                totalBetAmount += currentChipValue;
-                totalBetDisplay.innerText = '₹ ' + totalBetAmount.toLocaleString();
-                betHistory.push({ chipElement: newChip, amount: currentChipValue });
-            });
-        });
-
-        const undoBtn = document.getElementById('undo-btn');
-        undoBtn.addEventListener('click', function() {
-            if (betHistory.length > 0) {
-                const lastBet = betHistory.pop();
-                lastBet.chipElement.remove();
-                totalBetAmount -= lastBet.amount;
-                totalBetDisplay.innerText = '₹ ' + totalBetAmount.toLocaleString();
+        // 3. Bet Placement Logic
+        document.body.addEventListener('click', (e) => {
+            // Find closest element with class 'bet-cell'
+            const cell = e.target.closest('.bet-cell');
+            
+            if (cell) {
+                placeBet(cell);
             }
         });
+
+        function placeBet(cell) {
+            // Create visual chip
+            const visualChip = document.createElement('div');
+            visualChip.className = `placed-chip placed-${currentChipValue}`;
+            visualChip.innerText = currentChipValue >= 100 ? (currentChipValue / 100) + 'k' : currentChipValue; // Simple shorthand just for UI fit
+            if(currentChipValue < 1000) visualChip.innerText = currentChipValue; // Fix shorthand for logic
+
+            // Slight random offset to simulate stacking
+            const offsetX = (Math.random() * 8) - 4;
+            const offsetY = (Math.random() * 8) - 4;
+            visualChip.style.marginLeft = `${offsetX}px`;
+            visualChip.style.marginTop = `${offsetY}px`;
+
+            // Append to cell
+            cell.appendChild(visualChip);
+
+            // Update State
+            totalBet += currentChipValue;
+            betHistory.push({
+                element: visualChip,
+                value: currentChipValue
+            });
+
+            updateUI();
+        }
+
+        // 4. Undo Logic
+        undoBtn.addEventListener('click', () => {
+            if (betHistory.length === 0) return;
+
+            // Remove last bet
+            const lastBet = betHistory.pop();
+            lastBet.element.remove();
+            
+            totalBet -= lastBet.value;
+            updateUI();
+        });
+
+        // 5. Update UI
+        function updateUI() {
+            // Format number to currency string
+            totalBetDisplay.innerText = `₹ ${totalBet.toLocaleString('en-IN')}`;
+        }
+
     </script>
 </body>
 </html>
