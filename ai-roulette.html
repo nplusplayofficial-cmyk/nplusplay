@@ -27,7 +27,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: hidden; /* App feel, prevents scrolling */
         }
 
         /* === TOP BAR === */
@@ -65,18 +65,17 @@
         }
         .dealer-name { color: var(--gold); font-size: 0.8rem; margin-bottom: 10px; }
         .chat-messages { flex: 1; font-size: 0.8rem; overflow-y: auto; }
-        .chat-input { background: #000; border: 1px solid var(--border-color); color: white; padding: 8px; border-radius: 4px; }
+        .chat-input { background: #000; border: 1px solid var(--border-color); color: white; padding: 8px; border-radius: 4px; outline: none; }
 
-        /* Center: Professional AI Video Feed */
+        /* Center: AI Video Feed (Zero-Lag Setup) */
         .video-section {
             flex: 1;
             position: relative;
             background: #000;
-            overflow: hidden; /* Keeps video strictly inside the frame */
+            overflow: hidden; 
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Cyber-Gold Glow around the stream */
             border: 2px solid rgba(255, 215, 0, 0.3);
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 50px rgba(0,0,0,1);
         }
@@ -84,7 +83,7 @@
         .ai-video-feed {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Scales video perfectly */
+            object-fit: cover; 
         }
 
         /* Right: Stats & Round Wheel */
@@ -113,7 +112,7 @@
 
         /* === STATUS BAR === */
         .status-bar {
-            background-color: #00aa00; /* Bright Green */
+            background-color: #00aa00; 
             color: white;
             text-align: center;
             padding: 5px 0;
@@ -148,7 +147,10 @@
             padding: 2px;
             height: 100%;
         }
+        
+        /* Interactive Cells */
         .cell {
+            position: relative; /* Important for placing chips */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -158,6 +160,7 @@
             transition: 0.2s;
             color: white;
             border: 1px solid rgba(255,255,255,0.1);
+            user-select: none; /* Prevents text selection on rapid clicks */
         }
         .cell:hover { transform: scale(0.95); border-color: var(--gold); box-shadow: inset 0 0 10px var(--gold); z-index: 10; }
         
@@ -165,9 +168,33 @@
         .red { background: var(--roulette-red); }
         .black { background: var(--roulette-black); }
         
-        /* Bottom action rows of the grid */
         .dozen { grid-column: auto / span 4; background: transparent; border: 1px solid var(--border-color); }
         .bottom-bet { grid-column: auto / span 2; background: transparent; border: 1px solid var(--border-color); }
+
+        /* Chip Drop Animation inside Cells */
+        .placed-chip {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            color: var(--gold);
+            font-weight: bold;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+            pointer-events: none; /* Allows clicking through the chip to place more */
+            z-index: 5;
+            animation: dropChip 0.2s ease-out;
+        }
+
+        @keyframes dropChip {
+            0% { transform: scale(1.5) translateY(-20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
 
         /* Racetrack (Oval Grid) */
         .racetrack-container {
@@ -210,17 +237,19 @@
         .balance-box span { color: var(--gold); }
 
         .chips-container { display: flex; gap: 10px; align-items: center; }
+        .action-btn { cursor: pointer; color: white; transition: 0.2s; user-select: none; }
+        .action-btn:hover { color: var(--gold); }
+
         .chip {
             width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center;
-            align-items: center; font-weight: bold; cursor: pointer; border: 2px dashed #ccc; background: rgba(0,0,0,0.5);
-            transition: all 0.2s ease;
+            align-items: center; font-weight: bold; cursor: pointer; border: 2px dashed #aaa; background: rgba(0,0,0,0.5);
+            color: #aaa; transition: all 0.2s ease; user-select: none;
         }
-        .chip.active { border: 2px solid var(--gold); box-shadow: var(--gold-glow); transform: translateY(-5px); }
-        .chip:hover { transform: scale(1.1); border-color: white; }
+        .chip.active { border: 2px solid var(--gold); box-shadow: var(--gold-glow); transform: translateY(-5px); color: var(--gold); }
+        .chip:hover:not(.active) { transform: scale(1.1); border-color: white; color: white; }
 
         .btn-lobby { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 20px; border-radius: 20px; cursor: pointer; }
         .btn-lobby:hover { background: rgba(255, 215, 0, 0.1); }
-
     </style>
 </head>
 <body>
@@ -242,15 +271,15 @@
             <input type="text" class="chat-input" placeholder="Click to chat...">
         </aside>
 
-        <!-- 2. AI Video Feed (Zero Lag) -->
+        <!-- 2. AI Video Feed -->
         <section class="video-section">
             <video autoplay loop muted playsinline class="ai-video-feed">
-                <!-- Sample Casino Dealer Loop (Replace src with your own later) -->
+                <!-- Sample Casino Dealer Loop -->
                 <source src="https://assets.mixkit.co/videos/preview/mixkit-croupier-mixing-poker-cards-in-the-casino-27694-large.mp4" type="video/mp4">
             </video>
         </section>
 
-        <!-- 3. Statistics & Round Wheel -->
+        <!-- 3. Statistics -->
         <aside class="stats-section">
             <div class="hot-cold">
                 <span style="color:red;">🔥 HOT: 7, 17, 22</span>
@@ -265,11 +294,11 @@
     <!-- STATUS BAR -->
     <div class="status-bar">PLACE YOUR BETS</div>
 
-    <!-- BOTTOM SECTION (Betting) -->
+    <!-- BOTTOM SECTION (Betting Grid) -->
     <section class="bottom-section">
         <!-- 4. Main Grid -->
         <div class="main-grid-container">
-            <div class="roulette-board">
+            <div class="roulette-board" id="betting-board">
                 <!-- Zero column -->
                 <div class="cell zero">0</div>
                 <!-- Row 1 -->
@@ -302,20 +331,96 @@
     <footer class="footer-controls">
         <div class="balance-box">
             <div>BALANCE<br><span>₹ 50,000.00</span></div>
-            <div>TOTAL BET<br><span>₹ 0</span></div>
+            <!-- Added ID here for JavaScript -->
+            <div>TOTAL BET<br><span id="total-bet-amount">₹ 0</span></div> 
         </div>
         
         <div class="chips-container">
-            <div style="cursor: pointer;">↩️ UNDO</div>
-            <div class="chip" style="border-color:#aaa; color:#aaa;">20</div>
+            <!-- Added ID here for Undo Logic -->
+            <div class="action-btn" id="undo-btn">↩️ UNDO</div>
+            <div class="chip">20</div>
             <div class="chip active" style="border-color:var(--gold); color:var(--gold);">50</div>
-            <div class="chip" style="border-color:#aaa; color:#aaa;">100</div>
-            <div class="chip" style="border-color:#aaa; color:#aaa;">500</div>
-            <div style="cursor: pointer;">x2 DOUBLE</div>
+            <div class="chip">100</div>
+            <div class="chip">500</div>
+            <div class="action-btn">x2 DOUBLE</div>
         </div>
 
         <button class="btn-lobby">LOBBY</button>
     </footer>
 
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT: ENGINE FOR BETTING & ANIMATION -->
+    <!-- ========================================== -->
+    <script>
+        // Game State Variables
+        let currentChipValue = 50; 
+        let totalBetAmount = 0;
+        let betHistory = []; // Array to store history for UNDO function
+
+        // 1. Chip Selection System
+        const chips = document.querySelectorAll('.chip');
+        chips.forEach(chip => {
+            chip.addEventListener('click', function() {
+                // Clear active state from all chips
+                chips.forEach(c => {
+                    c.classList.remove('active');
+                    c.style.borderColor = '#aaa';
+                    c.style.color = '#aaa';
+                });
+                
+                // Set clicked chip as active
+                this.classList.add('active');
+                this.style.borderColor = 'var(--gold)';
+                this.style.color = 'var(--gold)';
+                
+                // Update active chip value
+                currentChipValue = parseInt(this.innerText);
+            });
+        });
+
+        // 2. Placing Bets on the Board
+        const cells = document.querySelectorAll('.cell');
+        const totalBetDisplay = document.getElementById('total-bet-amount');
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', function() {
+                // Create the visual chip element
+                const newChip = document.createElement('div');
+                newChip.classList.add('placed-chip');
+                newChip.innerText = currentChipValue;
+
+                // Slightly randomize chip position for realistic stacking effect
+                const randomX = Math.floor(Math.random() * 10) - 5;
+                const randomY = Math.floor(Math.random() * 10) - 5;
+                newChip.style.transform = `translate(${randomX}px, ${randomY}px)`;
+
+                // Add chip to the clicked cell
+                this.appendChild(newChip);
+
+                // Update Total Bet Amount
+                totalBetAmount += currentChipValue;
+                totalBetDisplay.innerText = '₹ ' + totalBetAmount.toLocaleString();
+
+                // Save action to history for the Undo feature
+                betHistory.push({ chipElement: newChip, amount: currentChipValue });
+            });
+        });
+
+        // 3. UNDO Button Logic
+        const undoBtn = document.getElementById('undo-btn');
+        undoBtn.addEventListener('click', function() {
+            if (betHistory.length > 0) {
+                // Get the last placed bet
+                const lastBet = betHistory.pop();
+                
+                // Remove the chip visual from the board
+                lastBet.chipElement.remove();
+                
+                // Deduct the amount and update display
+                totalBetAmount -= lastBet.amount;
+                totalBetDisplay.innerText = '₹ ' + totalBetAmount.toLocaleString();
+            }
+        });
+    </script>
 </body>
 </html>
