@@ -2,1068 +2,473 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N+ PLAY - Win Go Color Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wingo Color Prediction</title>
     <style>
-        /* ==========================================
-           1. MODERN DARK GAMING THEME & GLASSMORPHISM
-           ========================================== */
+        /* CSS Variables & Theme Setup */
         :root {
-            --bg-dark: #070a12;
-            --bg-surface: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.65);
-            --card-border: rgba(255, 255, 255, 0.1);
+            --bg-main: #171b26;
+            --bg-panel: #212836;
+            --text-white: #ffffff;
+            --text-grey: #94a3b8;
+            --gold: #f59e0b;
+            --gold-glow: rgba(245, 158, 11, 0.2);
+            --green-solid: #10b981;
+            --green-dark: #0e3c26;
+            --violet-solid: #8b5cf6;
+            --red-solid: #ef4444;
+            --blue-solid: #0ea5e9;
+            --border-dim: #334155;
             
-            --gold-neon: #f59e0b;
-            --gold-glow: rgba(245, 158, 11, 0.35);
-            --red-vibrant: #ef4444;
-            --green-vibrant: #10b981;
-            --violet-vibrant: #8b5cf6;
-            --cyan-vibrant: #06b6d4;
-
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: rgba(15, 23, 42, 0.85);
-            --input-border: rgba(255, 255, 255, 0.12);
+            --grad-0: linear-gradient(135deg, #ef4444 50%, #8b5cf6 50%);
+            --grad-5: linear-gradient(135deg, #10b981 50%, #8b5cf6 50%);
         }
 
+        /* Reset & Global */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
+            background-color: var(--bg-main);
+            color: var(--text-white);
             display: flex;
             justify-content: center;
-            background-image: 
-                radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 90%, var(--gold-glow) 0%, transparent 40%),
-                linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
-            background-attachment: fixed;
-            padding: 10px 10px 80px 10px; /* Space for bottom nav */
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
-        .app-viewport {
+        /* Mobile-First App Container */
+        .app-container {
             width: 100%;
             max-width: 480px;
+            background-color: var(--bg-main);
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
+            padding-bottom: 20px;
             position: relative;
         }
 
-        /* HEADER */
-        .app-header {
+        /* 1. Top Header */
+        .header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-        }
-
-        .btn-back {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            color: var(--text-main);
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: flex;
             align-items: center;
-            justify-content: center;
+            padding: 12px 16px;
+            background-color: var(--bg-panel);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .back-icon {
+            font-size: 20px;
+            color: var(--text-grey);
             cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
+            padding: 4px;
         }
 
-        .brand-title {
-            font-size: 1.15rem;
-            font-weight: 900;
-            background: linear-gradient(90deg, #ffffff, var(--gold-neon));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .header-logo {
+            max-height: 35px;
+            object-fit: contain;
         }
 
-        .wallet-chip {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--green-vibrant);
+        .balance-pill {
+            background-color: var(--green-dark);
+            color: var(--green-solid);
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 800;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
-        /* MULTI-TIMER SELECTOR TABS */
-        .timer-tabs-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+        /* 2. Timer Tabs Panel */
+        .timer-tabs-panel {
+            background-color: var(--bg-panel);
+            margin: 4px 12px 0 12px;
+            border-radius: 12px;
+            display: flex;
             padding: 6px;
-            border-radius: 16px;
+            gap: 6px;
         }
 
         .timer-tab {
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--text-muted);
-            padding: 10px 4px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            cursor: pointer;
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
-            transition: all 0.25s ease;
+            justify-content: center;
+            padding: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .timer-tab .tab-icon {
+            font-size: 18px;
+            margin-bottom: 2px;
+            opacity: 0.6;
+        }
+
+        .timer-tab .tab-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-grey);
         }
 
         .timer-tab.active {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(15, 23, 42, 0.9));
-            border-color: var(--gold-neon);
-            color: var(--gold-neon);
-            box-shadow: 0 4px 15px var(--gold-glow);
+            border-color: var(--gold);
+            background-color: rgba(245, 158, 11, 0.05);
+            box-shadow: inset 0 0 10px var(--gold-glow);
         }
 
-        /* LIVE GAME DISPLAY BANNER */
-        .game-banner {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 16px 20px;
+        .timer-tab.active .tab-icon { opacity: 1; }
+        .timer-tab.active .tab-text { color: var(--gold); }
+
+        /* 3. Period & Countdown Box */
+        .period-countdown-box {
+            background-color: var(--bg-panel);
+            margin: 0 12px;
+            border-radius: 12px;
+            padding: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
-        .period-box h4 {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: 700;
+        .period-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .period-label {
+            font-size: 12px;
+            color: var(--text-grey);
+            font-weight: 600;
             text-transform: uppercase;
         }
 
         .period-id {
-            font-size: 1.1rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: var(--text-main);
-            margin-top: 2px;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-white);
         }
 
-        .clock-box {
-            text-align: right;
-        }
-
-        .clock-title {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            font-weight: 700;
-        }
-
-        .clock-digits {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--gold-neon);
-            font-family: monospace;
-            letter-spacing: 2px;
-            text-shadow: 0 0 12px var(--gold-glow);
-        }
-
-        /* LOCK OVERLAY (LAST 5 SECONDS) */
-        .lock-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.88);
-            backdrop-filter: blur(8px);
+        .countdown-info {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.4rem;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .countdown-label {
+            font-size: 12px;
+            color: var(--text-grey);
+            font-weight: 600;
+        }
+
+        .countdown-timer {
+            font-size: 28px;
             font-weight: 900;
-            color: var(--red-vibrant);
-            letter-spacing: 2px;
-            z-index: 50;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            border-radius: 20px;
+            color: var(--gold);
+            letter-spacing: 1px;
+            font-family: monospace;
+            text-shadow: 0 0 10px var(--gold-glow);
         }
 
-        .lock-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        /* COLOR PREDICTION BUTTONS */
-        .color-btns-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        /* 4. Color Action Buttons */
+        .color-actions-row {
+            display: flex;
+            margin: 4px 12px 0 12px;
             gap: 10px;
         }
 
-        .btn-action-color {
-            height: 48px;
+        .btn-color {
+            flex: 1;
+            padding: 14px 0;
             border: none;
-            border-radius: 14px;
-            color: #fff;
-            font-size: 0.9rem;
-            font-weight: 900;
+            border-radius: 10px;
+            color: var(--text-white);
+            font-size: 14px;
+            font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-            transition: transform 0.15s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
         }
+        
+        .btn-color:active { transform: scale(0.96); }
 
-        .btn-action-color:active { transform: scale(0.96); }
+        .btn-join-green { background-color: var(--green-solid); }
+        .btn-join-violet { background-color: var(--violet-solid); }
+        .btn-join-red { background-color: var(--red-solid); }
 
-        .bg-green { background: var(--green-vibrant); }
-        .bg-violet { background: var(--violet-vibrant); }
-        .bg-red { background: var(--red-vibrant); }
-
-        /* NUMBER GRID (0-9) */
-        .number-grid-container {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 14px;
+        /* 5. Number Grid (0-9) */
+        .number-grid-panel {
+            background-color: var(--bg-panel);
+            margin: 0 12px;
+            border-radius: 12px;
+            padding: 16px;
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
 
         .btn-num {
             aspect-ratio: 1;
             border: none;
             border-radius: 12px;
-            font-size: 1.25rem;
+            color: var(--text-white);
+            font-size: 24px;
             font-weight: 900;
-            color: #fff;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: transform 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
         }
 
         .btn-num:active { transform: scale(0.94); }
 
-        .num-0 { background: linear-gradient(135deg, var(--red-vibrant) 50%, var(--violet-vibrant) 50%); }
-        .num-5 { background: linear-gradient(135deg, var(--green-vibrant) 50%, var(--violet-vibrant) 50%); }
+        .btn-num.n-1, .btn-num.n-3, .btn-num.n-7, .btn-num.n-9 { background-color: var(--green-solid); }
+        .btn-num.n-2, .btn-num.n-4, .btn-num.n-6, .btn-num.n-8 { background-color: var(--red-solid); }
+        .btn-num.n-0 { background: var(--grad-0); }
+        .btn-num.n-5 { background: var(--grad-5); }
 
-        /* BIG / SMALL BUTTONS */
-        .size-btns-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        /* 6. Size Buttons */
+        .size-actions-row {
+            display: flex;
+            margin: 0 12px;
             gap: 10px;
         }
 
         .btn-size {
-            height: 44px;
+            flex: 1;
+            padding: 14px 0;
             border: none;
-            border-radius: 14px;
-            font-size: 0.95rem;
-            font-weight: 900;
-            color: #fff;
+            border-radius: 10px;
+            color: var(--text-white);
+            font-size: 16px;
+            font-weight: 800;
             cursor: pointer;
-            transition: transform 0.15s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
         }
 
         .btn-size:active { transform: scale(0.96); }
-        .btn-big { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .btn-small { background: linear-gradient(135deg, #06b6d4, #0284c7); }
 
-        /* HISTORY & CHART TABS */
-        .history-section {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .btn-big { background-color: var(--gold); }
+        .btn-small { background-color: var(--blue-solid); }
 
-        .history-tabs-bar {
-            display: flex;
-            background: rgba(15, 23, 42, 0.8);
+        /* 7. History Tabs */
+        .history-tabs-panel {
+            background-color: var(--bg-panel);
+            margin: 8px 12px 0 12px;
             border-radius: 12px;
+            display: flex;
             padding: 4px;
-            border: 1px solid var(--card-border);
         }
 
-        .sub-tab-btn {
+        .hist-tab {
             flex: 1;
-            padding: 8px;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 800;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .sub-tab-btn.active {
-            background: var(--card-bg);
-            color: var(--gold-neon);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        /* HISTORY TABLE */
-        .history-table-container {
-            max-height: 380px;
-            overflow-y: auto;
-            border-radius: 12px;
-        }
-
-        .history-table-container::-webkit-scrollbar { width: 4px; }
-        .history-table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 10px 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-
-        th {
-            color: var(--text-muted);
-            font-weight: 700;
-            background: rgba(15, 23, 42, 0.6);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .dot-badge {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 4px;
-        }
-
-        /* TREND CHART GRID */
-        .chart-grid-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 380px;
-            overflow-y: auto;
-        }
-
-        .chart-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 8px;
-            font-size: 0.72rem;
-        }
-
-        .chart-nums {
-            display: flex;
-            gap: 4px;
-        }
-
-        .chart-num-circle {
-            width: 20px; height: 20px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 0.65rem; color: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .chart-num-circle.hit {
-            color: #fff;
-            box-shadow: 0 0 8px currentColor;
-        }
-
-        /* STAKE SELECTION MODAL DRAWER */
-        .stake-modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 7, 18, 0.85);
-            backdrop-filter: blur(12px);
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .stake-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .stake-modal-card {
-            background: rgba(15, 23, 42, 0.98);
-            border-top: 1px solid var(--gold-neon);
-            border-radius: 24px 24px 0 0;
-            width: 100%;
-            max-width: 480px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .stake-modal-overlay.active .stake-modal-card {
-            transform: translateY(0);
-        }
-
-        .modal-target-title {
             text-align: center;
-            font-size: 1.1rem;
-            font-weight: 900;
-            color: var(--gold-neon);
-        }
-
-        .preset-grid {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-preset {
-            flex: 1;
-            padding: 8px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--card-border);
-            color: #fff;
-            border-radius: 8px;
+            padding: 14px 0;
+            font-size: 14px;
             font-weight: 700;
+            color: var(--text-grey);
             cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s;
         }
 
-        .btn-preset.active {
-            border-color: var(--gold-neon);
-            color: var(--gold-neon);
-            background: rgba(245, 158, 11, 0.15);
+        .hist-tab.active {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
         }
 
-        .multiplier-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .qty-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-qty {
-            width: 32px; height: 32px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid var(--card-border);
-            color: #fff; font-size: 1.2rem; font-weight: 800;
-            border-radius: 6px; cursor: pointer;
-        }
-
-        .modal-total-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            font-weight: 800;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-modal {
-            flex: 1;
-            height: 48px;
-            border-radius: 14px;
-            border: none;
-            font-weight: 900;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
-
-        .btn-cancel { background: rgba(255,255,255,0.1); color: var(--text-muted); }
-        .btn-confirm { background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant)); color: #fff; box-shadow: 0 4px 15px var(--red-glow); }
-
-        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 100%; max-width: 480px;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .nav-item.active { color: var(--gold-neon); }
-        .nav-icon { font-size: 1.2rem; }
-
-        /* TOAST NOTIFICATION */
-        .toast {
-            position: fixed;
-            top: 20px; left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--gold-neon);
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 30px;
-            font-size: 0.85rem; font-weight: 700;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            opacity: 0; visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 2000;
-        }
-
-        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Notification</div>
-
-    <!-- MAIN APP CONTAINER -->
-    <div class="app-viewport">
+    <div class="app-container">
         
-        <!-- HEADER -->
-        <header class="app-header">
-            <a href="index.html" class="btn-back" title="Back to Home">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <span class="brand-title">Win Go Prediction</span>
-            <div class="wallet-chip" id="walletDisplay">$1,000.00</div>
+        <!-- Top Header -->
+        <header class="header">
+            <div class="back-icon" onclick="history.back()">&#10094;</div>
+            <img src="wingo.png" alt="Wingo" class="header-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span style="display:none; font-weight: 900; font-size: 20px; font-style: italic;">WINGO</span> <!-- Fallback if img missing -->
+            <div class="balance-pill">₹ 50,000.00</div>
         </header>
 
-        <!-- MULTI-TIMER SELECTOR TABS -->
-        <div class="timer-tabs-grid">
-            <button class="timer-tab active" onclick="switchTimerTab('30s')">
-                <span>⚡ 30s</span>
-                <span id="tabClock-30s">00:30</span>
-            </button>
-            <button class="timer-tab" onclick="switchTimerTab('1m')">
-                <span>⏱️ 1Min</span>
-                <span id="tabClock-1m">01:00</span>
-            </button>
-            <button class="timer-tab" onclick="switchTimerTab('3m')">
-                <span>⏱️ 3Min</span>
-                <span id="tabClock-3m">03:00</span>
-            </button>
-            <button class="timer-tab" onclick="switchTimerTab('5m')">
-                <span>⏱️ 5Min</span>
-                <span id="tabClock-5m">05:00</span>
-            </button>
-        </div>
-
-        <!-- LIVE GAME DISPLAY BANNER -->
-        <div class="game-banner">
-            <!-- Lock Overlay for Last 5 Seconds -->
-            <div class="lock-overlay" id="lockOverlay">🔒 TIME LOCK</div>
-
-            <div class="period-box">
-                <h4 id="activeTimerName">Win Go 30s</h4>
-                <div class="period-id" id="activePeriodDisplay">2026080230001</div>
+        <!-- Timer Tabs Panel -->
+        <div class="timer-tabs-panel" id="modeTabs">
+            <div class="timer-tab active" data-mode="30">
+                <span class="tab-icon">⚡</span>
+                <span class="tab-text">30s</span>
             </div>
-
-            <div class="clock-box">
-                <div class="clock-title">Time Remaining</div>
-                <div class="clock-digits" id="activeClockDisplay">00:30</div>
+            <div class="timer-tab" data-mode="60">
+                <span class="tab-icon">⏱️</span>
+                <span class="tab-text">1Min</span>
+            </div>
+            <div class="timer-tab" data-mode="180">
+                <span class="tab-icon">⏱️</span>
+                <span class="tab-text">3Min</span>
+            </div>
+            <div class="timer-tab" data-mode="300">
+                <span class="tab-icon">⏱️</span>
+                <span class="tab-text">5Min</span>
             </div>
         </div>
 
-        <!-- COLOR PREDICTION ACTION BUTTONS -->
-        <div class="color-btns-grid">
-            <button class="btn-action-color bg-green" onclick="openStakeModal('color', 'Green')">Join Green</button>
-            <button class="btn-action-color bg-violet" onclick="openStakeModal('color', 'Violet')">Join Violet</button>
-            <button class="btn-action-color bg-red" onclick="openStakeModal('color', 'Red')">Join Red</button>
-        </div>
-
-        <!-- NUMBER GRID (0-9) -->
-        <div class="number-grid-container">
-            <button class="btn-num num-0" onclick="openStakeModal('number', 0)">0</button>
-            <button class="btn-num bg-green" onclick="openStakeModal('number', 1)">1</button>
-            <button class="btn-num bg-red" onclick="openStakeModal('number', 2)">2</button>
-            <button class="btn-num bg-green" onclick="openStakeModal('number', 3)">3</button>
-            <button class="btn-num bg-red" onclick="openStakeModal('number', 4)">4</button>
-            <button class="btn-num num-5" onclick="openStakeModal('number', 5)">5</button>
-            <button class="btn-num bg-red" onclick="openStakeModal('number', 6)">6</button>
-            <button class="btn-num bg-green" onclick="openStakeModal('number', 7)">7</button>
-            <button class="btn-num bg-red" onclick="openStakeModal('number', 8)">8</button>
-            <button class="btn-num bg-green" onclick="openStakeModal('number', 9)">9</button>
-        </div>
-
-        <!-- BIG / SMALL BUTTONS -->
-        <div class="size-btns-grid">
-            <button class="btn-size btn-big" onclick="openStakeModal('size', 'Big')">Big (5-9)</button>
-            <button class="btn-size btn-small" onclick="openStakeModal('size', 'Small')">Small (0-4)</button>
-        </div>
-
-        <!-- EXTENDED LIVE HISTORY & TREND CHART SECTION -->
-        <div class="history-section">
-            <div class="history-tabs-bar">
-                <button class="sub-tab-btn active" onclick="switchSubTab('history')">Game History</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('chart')">Trend Chart</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('myBets')">My Bets</button>
+        <!-- Period & Countdown Box -->
+        <div class="period-countdown-box">
+            <div class="period-info">
+                <span class="period-label" id="periodLabel">WIN GO 30S</span>
+                <span class="period-id" id="periodDisplay">Loading...</span>
             </div>
-
-            <!-- 1. GAME HISTORY TABLE VIEW (100+ RECORDS) -->
-            <div class="history-table-container" id="historyView">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>Number</th>
-                            <th>Size</th>
-                            <th>Color</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyTableBody">
-                        <!-- Dynamic Rows -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- 2. TREND CHART VIEW -->
-            <div class="chart-grid-container" id="chartView" style="display: none;">
-                <!-- Dynamic Chart Rows -->
-            </div>
-
-            <!-- 3. MY BETS VIEW -->
-            <div class="history-table-container" id="myBetsView" style="display: none;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>Select</th>
-                            <th>Amount</th>
-                            <th>Outcome</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myBetsTableBody">
-                        <!-- Dynamic Rows -->
-                    </tbody>
-                </table>
+            <div class="countdown-info">
+                <span class="countdown-label">Time Remaining</span>
+                <span class="countdown-timer" id="countdownDisplay">00:00</span>
             </div>
         </div>
+
+        <!-- Color Action Buttons -->
+        <div class="color-actions-row">
+            <button class="btn-color btn-join-green">Join Green</button>
+            <button class="btn-color btn-join-violet">Join Violet</button>
+            <button class="btn-color btn-join-red">Join Red</button>
+        </div>
+
+        <!-- Number Grid (0-9) -->
+        <div class="number-grid-panel">
+            <button class="btn-num n-0">0</button>
+            <button class="btn-num n-1">1</button>
+            <button class="btn-num n-2">2</button>
+            <button class="btn-num n-3">3</button>
+            <button class="btn-num n-4">4</button>
+            <button class="btn-num n-5">5</button>
+            <button class="btn-num n-6">6</button>
+            <button class="btn-num n-7">7</button>
+            <button class="btn-num n-8">8</button>
+            <button class="btn-num n-9">9</button>
+        </div>
+
+        <!-- Size Buttons -->
+        <div class="size-actions-row">
+            <button class="btn-size btn-big">Big (5-9)</button>
+            <button class="btn-size btn-small">Small (0-4)</button>
+        </div>
+
+        <!-- History Tabs -->
+        <div class="history-tabs-panel">
+            <div class="hist-tab">Game History</div>
+            <div class="hist-tab">Trend Chart</div>
+            <div class="hist-tab active">My Bets</div>
+        </div>
+
     </div>
 
-    <!-- STAKE SELECTION MODAL DRAWER -->
-    <div class="stake-modal-overlay" id="stakeModal">
-        <div class="stake-modal-card">
-            <div class="modal-target-title" id="modalTargetTitle">Select Target</div>
-            
-            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">Base Amount</span>
-            <div class="preset-grid">
-                <button class="btn-preset active" onclick="setBaseAmount(1, this)">$1</button>
-                <button class="btn-preset" onclick="setBaseAmount(10, this)">$10</button>
-                <button class="btn-preset" onclick="setBaseAmount(100, this)">$100</button>
-                <button class="btn-preset" onclick="setBaseAmount(1000, this)">$1000</button>
-            </div>
-
-            <div class="multiplier-bar">
-                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Quantity Multiplier</span>
-                <div class="qty-control">
-                    <button class="btn-qty" onclick="changeQty(-1)">-</button>
-                    <span id="qtyVal" style="font-weight: 900; font-size: 1rem;">1</span>
-                    <button class="btn-qty" onclick="changeQty(1)">+</button>
-                </div>
-            </div>
-
-            <div class="modal-total-row">
-                <span style="color: var(--text-muted);">Total Contract Money:</span>
-                <span id="totalStakeVal" style="color: var(--gold-neon); font-size: 1.2rem;">$1.00</span>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel" onclick="closeStakeModal()">Cancel</button>
-                <button class="btn-modal btn-confirm" onclick="confirmStakeBet()">Confirm Bet</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="activity.html" class="nav-item active">
-            <span class="nav-icon">🔥</span>
-            <span>Activity</span>
-        </a>
-        <a href="promotion.html" class="nav-item">
-            <span class="nav-icon">🎁</span>
-            <span>Promotion</span>
-        </a>
-        <a href="account.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            <span>Account</span>
-        </a>
-    </nav>
-
-    <!-- ==========================================
-       JAVASCRIPT WINGO ENGINE & MULTI-TIMER
-       ========================================== -->
+    <!-- 24/7 Real-Time JavaScript Engine -->
     <script>
-        // --- GAME STATE & CONTINUOUS TIMERS ---
-        let walletBalance = 1000.00;
-        let activeTabKey = '30s'; // '30s', '1m', '3m', '5m'
-        let activeSubTab = 'history'; // 'history', 'chart', 'myBets'
+        // Configuration
+        const periodDisplay = document.getElementById('periodDisplay');
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        const periodLabel = document.getElementById('periodLabel');
+        const tabs = document.querySelectorAll('.timer-tab');
+        
+        let currentModeSeconds = 30; // Default to 30s
+        let timerInterval = null;
 
-        let currentSelection = { type: null, value: null };
-        let baseAmount = 1;
-        let quantityMultiplier = 1;
+        // --- Core Time Engine ---
+        function updateGameEngine() {
+            const now = new Date();
+            
+            // 1. Calculate midnight of the current day to act as absolute zero anchor
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+            
+            // 2. Calculate exact total seconds passed since midnight
+            const msPassedToday = now.getTime() - midnight.getTime();
+            const totalSecondsPassed = Math.floor(msPassedToday / 1000);
 
-        // 4 Continuous Multi-Timer Config
-        const TIMERS_CONFIG = {
-            '30s': { name: 'Win Go 30s', duration: 30, periodPrefix: '2026080230', periodSeq: 1001, remaining: 30, history: [], myBets: [] },
-            '1m':  { name: 'Win Go 1Min', duration: 60, periodPrefix: '2026080201', periodSeq: 1001, remaining: 60, history: [], myBets: [] },
-            '3m':  { name: 'Win Go 3Min', duration: 180, periodPrefix: '2026080203', periodSeq: 1001, remaining: 180, history: [], myBets: [] },
-            '5m':  { name: 'Win Go 5Min', duration: 300, periodPrefix: '2026080205', periodSeq: 1001, remaining: 300, history: [], myBets: [] }
-        };
+            // 3. Calculate Period ID logic
+            // E.g., if mode is 30s, period increments every 30s.
+            const currentIntervalIndex = Math.floor(totalSecondsPassed / currentModeSeconds);
+            
+            // Generate standard YYYYMMDD string
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const datePrefix = `${yyyy}${mm}${dd}`;
 
-        // --- POPULATE 100+ INITIAL RECORDS FOR ALL TIMERS ---
-        function generateInitialHistory() {
-            Object.keys(TIMERS_CONFIG).forEach(key => {
-                const conf = TIMERS_CONFIG[key];
-                for (let i = 0; i < 110; i++) {
-                    const periodId = `${conf.periodPrefix}${conf.periodSeq - i}`;
-                    const winningNum = Math.floor(Math.random() * 10);
-                    const size = winningNum >= 5 ? 'Big' : 'Small';
-                    
-                    let colors = [];
-                    if (winningNum === 0) colors = ['Red', 'Violet'];
-                    else if (winningNum === 5) colors = ['Green', 'Violet'];
-                    else if ([1, 3, 7, 9].includes(winningNum)) colors = ['Green'];
-                    else colors = ['Red'];
+            // Unique game mode identifier (e.g. 1 for 30s, 2 for 1m, 3 for 3m, 4 for 5m)
+            let modeId = '1'; 
+            if(currentModeSeconds === 60) modeId = '2';
+            else if(currentModeSeconds === 180) modeId = '3';
+            else if(currentModeSeconds === 300) modeId = '4';
 
-                    conf.history.push({
-                        period: periodId,
-                        number: winningNum,
-                        size: size,
-                        colors: colors
-                    });
-                }
+            // Sequence padded to 4 digits (e.g., 0001, 0002)
+            // Sequence starts at 1, so add 1 to the index.
+            const sequenceNum = String(currentIntervalIndex + 1).padStart(4, '0');
+            
+            const finalPeriodId = `${datePrefix}${modeId}${sequenceNum}`;
+            periodDisplay.innerText = finalPeriodId;
+
+            // 4. Calculate Countdown logic
+            // Find how many seconds have elapsed inside the CURRENT interval
+            const secondsElapsedInInterval = totalSecondsPassed % currentModeSeconds;
+            
+            // Remaining seconds is the total interval length minus what has elapsed
+            const remainingSeconds = currentModeSeconds - secondsElapsedInInterval;
+
+            // Format mm:ss
+            const remMins = Math.floor(remainingSeconds / 60);
+            const remSecs = remainingSeconds % 60;
+            const formattedTime = `${String(remMins).padStart(2, '0')}:${String(remSecs).padStart(2, '0')}`;
+            
+            countdownDisplay.innerText = formattedTime;
+        }
+
+        // --- Tab Switching Logic ---
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                // UI Update
+                tabs.forEach(t => t.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+
+                // State Update
+                const modeSecs = parseInt(e.currentTarget.getAttribute('data-mode'));
+                currentModeSeconds = modeSecs;
+
+                // Update Label
+                let labelText = "WIN GO 30S";
+                if(modeSecs === 60) labelText = "WIN GO 1MIN";
+                else if(modeSecs === 180) labelText = "WIN GO 3MIN";
+                else if(modeSecs === 300) labelText = "WIN GO 5MIN";
+                
+                periodLabel.innerText = labelText;
+
+                // Instantly update engine to avoid 1-second lag
+                updateGameEngine();
             });
-        }
+        });
 
-        // --- MASTER TIMER LOOP (CONTINUOUS BACKGROUND TICK) ---
-        function startMasterClock() {
-            setInterval(() => {
-                Object.keys(TIMERS_CONFIG).forEach(key => {
-                    const conf = TIMERS_CONFIG[key];
-                    conf.remaining--;
+        // Start the engine
+        // Run immediately once, then set interval
+        updateGameEngine();
+        timerInterval = setInterval(updateGameEngine, 1000);
 
-                    // Update Top Tab Clock Display
-                    const tabClockEl = document.getElementById(`tabClock-${key}`);
-                    if (tabClockEl) {
-                        tabClockEl.innerText = formatTime(conf.remaining);
-                    }
-
-                    // If Timer Reaches 0 -> Generate New Result
-                    if (conf.remaining <= 0) {
-                        evaluateRound(key);
-                        conf.remaining = conf.duration;
-                        conf.periodSeq++;
-                    }
-
-                    // Active Tab UI Refresh
-                    if (key === activeTabKey) {
-                        document.getElementById('activeClockDisplay').innerText = formatTime(conf.remaining);
-                        document.getElementById('activePeriodDisplay').innerText = `${conf.periodPrefix}${conf.periodSeq}`;
-
-                        // Lock phase in last 5 seconds
-                        const lockOverlay = document.getElementById('lockOverlay');
-                        if (conf.remaining <= 5) {
-                            lockOverlay.classList.add('active');
-                            closeStakeModal();
-                        } else {
-                            lockOverlay.classList.remove('active');
-                        }
-                    }
-                });
-            }, 1000);
-        }
-
-        // --- ROUND EVALUATION ---
-        function evaluateRound(timerKey) {
-            const conf = TIMERS_CONFIG[timerKey];
-            const currentPeriodId = `${conf.periodPrefix}${conf.periodSeq}`;
-            const winningNum = Math.floor(Math.random() * 10);
-            const size = winningNum >= 5 ? 'Big' : 'Small';
-
-            let colors = [];
-            if (winningNum === 0) colors = ['Red', 'Violet'];
-            else if (winningNum === 5) colors = ['Green', 'Violet'];
-            else if ([1, 3, 7, 9].includes(winningNum)) colors = ['Green'];
-            else colors = ['Red'];
-
-            const newResult = {
-                period: currentPeriodId,
-                number: winningNum,
-                size: size,
-                colors: colors
-            };
-
-            conf.history.unshift(newResult);
-
-            // Check User Pending Bets for this Timer
-            const pendingBet = conf.myBets.find(b => b.period === currentPeriodId && b.status === 'Pending');
-            if (pendingBet) {
-                let isWin = false;
-                let payout = 0;
-
-                if (pendingBet.type === 'color' && colors.includes(pendingBet.value)) {
-                    isWin = true;
-                    payout = pendingBet.value === 'Violet' ? pendingBet.amount * 4.5 : pendingBet.amount * 2;
-                } else if (pendingBet.type === 'number' && pendingBet.value === winningNum) {
-                    isWin = true;
-                    payout = pendingBet.amount * 9;
-                } else if (pendingBet.type === 'size' && pendingBet.value === size) {
-                    isWin = true;
-                    payout = pendingBet.amount * 2;
-                }
-
-                if (isWin) {
-                    walletBalance += payout;
-                    pendingBet.status = `+ $${payout.toFixed(2)}`;
-                    pendingBet.win = true;
-                    if (timerKey === activeTabKey) showToast(`🎉 WIN! You won $${payout.toFixed(2)}`);
-                } else {
-                    pendingBet.status = `-$${pendingBet.amount.toFixed(2)}`;
-                    pendingBet.win = false;
-                    if (timerKey === activeTabKey) showToast(`❌ LOSS! Outcome: ${winningNum} (${size})`);
-                }
-                updateWalletDisplay();
-            }
-
-            // Re-render UI if Active
-            if (timerKey === activeTabKey) {
-                renderActiveHistory();
-            }
-        }
-
-        // --- SWITCH TIMER TABS ---
-        function switchTimerTab(key) {
-            activeTabKey = key;
-            const conf = TIMERS_CONFIG[key];
-
-            document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            document.getElementById('activeTimerName').innerText = conf.name;
-            document.getElementById('activePeriodDisplay').innerText = `${conf.periodPrefix}${conf.periodSeq}`;
-            document.getElementById('activeClockDisplay').innerText = formatTime(conf.remaining);
-
-            renderActiveHistory();
-        }
-
-        // --- STAKE SELECTION MODAL ---
-        function openStakeModal(type, value) {
-            const conf = TIMERS_CONFIG[activeTabKey];
-            if (conf.remaining <= 5) {
-                showToast('Betting is locked in the last 5 seconds!');
-                return;
-            }
-
-            currentSelection = { type, value };
-            document.getElementById('modalTargetTitle').innerText = `Select ${type.toUpperCase()}: ${value}`;
-            baseAmount = 1;
-            quantityMultiplier = 1;
-            document.getElementById('qtyVal').innerText = '1';
-            updateStakeCalculation();
-
-            document.getElementById('stakeModal').classList.add('active');
-        }
-
-        function closeStakeModal() {
-            document.getElementById('stakeModal').classList.remove('active');
-        }
-
-        function setBaseAmount(amt, btn) {
-            baseAmount = amt;
-            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            updateStakeCalculation();
-        }
-
-        function changeQty(delta) {
-            quantityMultiplier += delta;
-            if (quantityMultiplier < 1) quantityMultiplier = 1;
-            document.getElementById('qtyVal').innerText = quantityMultiplier;
-            updateStakeCalculation();
-        }
-
-        function updateStakeCalculation() {
-            const total = baseAmount * quantityMultiplier;
-            document.getElementById('totalStakeVal').innerText = `$${total.toFixed(2)}`;
-        }
-
-        function confirmStakeBet() {
-            const totalCost = baseAmount * quantityMultiplier;
-            if (walletBalance < totalCost) {
-                showToast('Insufficient Wallet Balance!');
-                return;
-            }
-
-            const conf = TIMERS_CONFIG[activeTabKey];
-            const currentPeriodId = `${conf.periodPrefix}${conf.periodSeq}`;
-
-            walletBalance -= totalCost;
-            updateWalletDisplay();
-
-            conf.myBets.unshift({
-                period: currentPeriodId,
-                type: currentSelection.type,
-                value: currentSelection.value,
-                amount: totalCost,
-                status: 'Pending',
-                win: null
-            });
-
-            showToast(`Bet placed on ${currentSelection.value} for $${totalCost.toFixed(2)}`);
-            closeStakeModal();
-            renderActiveHistory();
-        }
-
-        // --- SUB TABS (HISTORY / CHART / MY BETS) ---
-        function switchSubTab(tabName) {
-            activeSubTab = tabName;
-            document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            document.getElementById('historyView').style.display = tabName === 'history' ? 'block' : 'none';
-            document.getElementById('chartView').style.display = tabName === 'chart' ? 'flex' : 'none';
-            document.getElementById('myBetsView').style.display = tabName === 'myBets' ? 'block' : 'none';
-
-            renderActiveHistory();
-        }
-
-        // --- RENDERING HELPERS ---
-        function renderActiveHistory() {
-            const conf = TIMERS_CONFIG[activeTabKey];
-
-            if (activeSubTab === 'history') {
-                const tbody = document.getElementById('historyTableBody');
-                tbody.innerHTML = conf.history.slice(0, 100).map(item => {
-                    const dots = item.colors.map(c => {
-                        let hex = c === 'Green' ? 'var(--green-vibrant)' : (c === 'Red' ? 'var(--red-vibrant)' : 'var(--violet-vibrant)');
-                        return `<span class="dot-badge" style="background:${hex};"></span>`;
-                    }).join('');
-
-                    return `
-                        <tr>
-                            <td>${item.period}</td>
-                            <td style="font-weight:900; font-size:0.95rem;">${item.number}</td>
-                            <td style="font-weight:700;">${item.size}</td>
-                            <td>${dots} ${item.colors.join('/')}</td>
-                        </tr>
-                    `;
-                }).join('');
-            } else if (activeSubTab === 'chart') {
-                const chartContainer = document.getElementById('chartView');
-                chartContainer.innerHTML = conf.history.slice(0, 50).map(item => {
-                    let nums = '';
-                    for (let n = 0; n <= 9; n++) {
-                        let isHit = n === item.number;
-                        let hitColor = isHit ? (n === 0 || n === 5 ? 'var(--violet-vibrant)' : ([1,3,7,9].includes(n) ? 'var(--green-vibrant)' : 'var(--red-vibrant)')) : 'transparent';
-                        nums += `<div class="chart-num-circle ${isHit ? 'hit' : ''}" style="background:${hitColor};">${n}</div>`;
-                    }
-                    return `
-                        <div class="chart-row">
-                            <span style="width:90px; color:var(--text-muted);">${item.period.slice(-5)}</span>
-                            <div class="chart-nums">${nums}</div>
-                        </div>
-                    `;
-                }).join('');
-            } else if (activeSubTab === 'myBets') {
-                const tbody = document.getElementById('myBetsTableBody');
-                tbody.innerHTML = conf.myBets.slice(0, 50).map(bet => {
-                    let statusColor = bet.win === true ? 'var(--green-vibrant)' : (bet.win === false ? 'var(--red-vibrant)' : 'var(--gold-neon)');
-                    return `
-                        <tr>
-                            <td>${bet.period}</td>
-                            <td style="font-weight:800;">${bet.value}</td>
-                            <td>$${bet.amount.toFixed(2)}</td>
-                            <td style="color:${statusColor}; font-weight:900;">${bet.status}</td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-        }
-
-        function formatTime(totalSec) {
-            const m = Math.floor(totalSec / 60);
-            const s = totalSec % 60;
-            return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-        }
-
-        function updateWalletDisplay() {
-            document.getElementById('walletDisplay').innerText = `$${walletBalance.toFixed(2)}`;
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.className = 'toast show';
-            setTimeout(() => { toast.className = 'toast'; }, 2600);
-        }
-
-        // INIT
-        window.onload = () => {
-            generateInitialHistory();
-            startMasterClock();
-            renderActiveHistory();
-        };
     </script>
 </body>
 </html>
