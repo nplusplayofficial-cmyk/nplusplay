@@ -67,24 +67,25 @@
         .chat-messages { flex: 1; font-size: 0.8rem; overflow-y: auto; }
         .chat-input { background: #000; border: 1px solid var(--border-color); color: white; padding: 8px; border-radius: 4px; }
 
-        /* Center: AI Video Feed Placeholder */
+        /* Center: Professional AI Video Feed */
         .video-section {
             flex: 1;
             position: relative;
             background: #000;
+            overflow: hidden; /* Keeps video strictly inside the frame */
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+            /* Cyber-Gold Glow around the stream */
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 50px rgba(0,0,0,1);
         }
-        .ai-camera-placeholder {
-            border: 2px dashed var(--gold);
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px;
-            background: rgba(255, 215, 0, 0.05);
+
+        .ai-video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Scales video perfectly */
         }
-        .ai-camera-placeholder h2 { color: var(--gold); margin: 0; }
 
         /* Right: Stats & Round Wheel */
         .stats-section {
@@ -180,7 +181,7 @@
             width: 90%;
             height: 150px;
             border: 2px solid var(--gold);
-            border-radius: 75px; /* Creates the capsule/oval shape */
+            border-radius: 75px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -212,10 +213,13 @@
         .chip {
             width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center;
             align-items: center; font-weight: bold; cursor: pointer; border: 2px dashed #ccc; background: rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
         }
         .chip.active { border: 2px solid var(--gold); box-shadow: var(--gold-glow); transform: translateY(-5px); }
+        .chip:hover { transform: scale(1.1); border-color: white; }
 
         .btn-lobby { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 20px; border-radius: 20px; cursor: pointer; }
+        .btn-lobby:hover { background: rgba(255, 215, 0, 0.1); }
 
     </style>
 </head>
@@ -231,19 +235,19 @@
     <main class="middle-section">
         <!-- 1. Chat & Dealer -->
         <aside class="chat-section">
-            <div class="dealer-name">DEALER: AI SANDRO</div>
+            <div class="dealer-name">DEALER: AI AVATAR</div>
             <div class="chat-messages">
                 <p><span style="color:var(--gold);">System:</span> Welcome to NPlus AI Live!</p>
             </div>
             <input type="text" class="chat-input" placeholder="Click to chat...">
         </aside>
 
-        <!-- 2. AI Video Feed -->
+        <!-- 2. AI Video Feed (Zero Lag) -->
         <section class="video-section">
-            <div class="ai-camera-placeholder">
-                <h2>[ AI AVATAR VIDEO STREAM HERE ]</h2>
-                <p>WebRTC Low Latency Feed</p>
-            </div>
+            <video autoplay loop muted playsinline class="ai-video-feed">
+                <!-- Sample Casino Dealer Loop (Replace src with your own later) -->
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-croupier-mixing-poker-cards-in-the-casino-27694-large.mp4" type="video/mp4">
+            </video>
         </section>
 
         <!-- 3. Statistics & Round Wheel -->
@@ -276,7 +280,7 @@
                 <div class="cell red">1</div><div class="cell black">4</div><div class="cell red">7</div><div class="cell black">10</div><div class="cell black">13</div><div class="cell red">16</div><div class="cell red">19</div><div class="cell black">22</div><div class="cell red">25</div><div class="cell black">28</div><div class="cell black">31</div><div class="cell red">34</div>
                 
                 <!-- Dozens Row -->
-                <div style="grid-column: 1;"></div> <!-- Empty space below zero -->
+                <div style="grid-column: 1;"></div>
                 <div class="cell dozen">1st 12</div><div class="cell dozen">2nd 12</div><div class="cell dozen">3rd 12</div>
                 
                 <!-- Outside Bets Row -->
@@ -302,12 +306,12 @@
         </div>
         
         <div class="chips-container">
-            <div>↩️ UNDO</div>
+            <div style="cursor: pointer;">↩️ UNDO</div>
             <div class="chip" style="border-color:#aaa; color:#aaa;">20</div>
             <div class="chip active" style="border-color:var(--gold); color:var(--gold);">50</div>
             <div class="chip" style="border-color:#aaa; color:#aaa;">100</div>
             <div class="chip" style="border-color:#aaa; color:#aaa;">500</div>
-            <div>x2 DOUBLE</div>
+            <div style="cursor: pointer;">x2 DOUBLE</div>
         </div>
 
         <button class="btn-lobby">LOBBY</button>
