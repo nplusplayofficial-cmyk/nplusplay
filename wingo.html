@@ -5,26 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Wingo Color Prediction</title>
     <style>
-        /* CSS Variables & Theme Setup */
+        /* ==========================================
+           1. CSS VARIABLES & THEME SETUP
+           ========================================== */
         :root {
+            /* Colors */
             --bg-main: #171b26;
             --bg-panel: #212836;
             --text-white: #ffffff;
             --text-grey: #94a3b8;
+            
             --gold: #f59e0b;
             --gold-glow: rgba(245, 158, 11, 0.2);
+            
             --green-solid: #10b981;
             --green-dark: #0e3c26;
-            --violet-solid: #8b5cf6;
-            --red-solid: #ef4444;
-            --blue-solid: #0ea5e9;
-            --border-dim: #334155;
+            --green-glow: rgba(16, 185, 129, 0.2);
             
+            --violet-solid: #8b5cf6;
+            
+            --red-solid: #ef4444;
+            --red-dark: #7f1d1d;
+            --red-glow: rgba(239, 68, 68, 0.2);
+            
+            --blue-solid: #0ea5e9;
+            
+            --border-color: #334155;
+
+            /* Gradients */
             --grad-0: linear-gradient(135deg, #ef4444 50%, #8b5cf6 50%);
             --grad-5: linear-gradient(135deg, #10b981 50%, #8b5cf6 50%);
         }
 
-        /* Reset & Global */
+        /* ==========================================
+           2. GLOBAL RESET & BASE
+           ========================================== */
         * {
             margin: 0;
             padding: 0;
@@ -40,11 +55,9 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
         }
 
-        /* Mobile-First App Container */
+        /* Mobile-First Constraints */
         .app-container {
             width: 100%;
             max-width: 480px;
@@ -52,12 +65,14 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            padding-bottom: 20px;
+            padding-bottom: 30px;
             position: relative;
         }
 
-        /* 1. Top Header */
-        .header {
+        /* ==========================================
+           3. HEADER
+           ========================================== */
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -66,140 +81,167 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .back-icon {
+        .back-btn {
             font-size: 20px;
             color: var(--text-grey);
             cursor: pointer;
-            padding: 4px;
+            padding: 4px 8px;
         }
 
-        .header-logo {
+        .logo-img {
             max-height: 35px;
             object-fit: contain;
+        }
+        
+        /* Fallback text if image doesn't load */
+        .logo-fallback {
+            display: none;
+            font-size: 20px;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--gold);
         }
 
         .balance-pill {
             background-color: var(--green-dark);
             color: var(--green-solid);
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 14px;
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.4);
         }
 
-        /* 2. Timer Tabs Panel */
-        .timer-tabs-panel {
-            background-color: var(--bg-panel);
-            margin: 4px 12px 0 12px;
-            border-radius: 12px;
+        /* ==========================================
+           4. TIMER TABS
+           ========================================== */
+        .timer-tabs {
             display: flex;
+            background-color: var(--bg-panel);
+            margin: 4px 12px 0;
+            border-radius: 12px;
             padding: 6px;
             gap: 6px;
         }
 
-        .timer-tab {
+        .tab {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 8px 0;
             border-radius: 8px;
             cursor: pointer;
             border: 1px solid transparent;
             transition: all 0.2s ease;
-        }
-
-        .timer-tab .tab-icon {
-            font-size: 18px;
-            margin-bottom: 2px;
-            opacity: 0.6;
-        }
-
-        .timer-tab .tab-text {
-            font-size: 12px;
-            font-weight: 700;
             color: var(--text-grey);
         }
 
-        .timer-tab.active {
+        .tab-icon { font-size: 18px; margin-bottom: 2px; }
+        .tab-text { font-size: 12px; font-weight: 700; }
+
+        .tab.active {
             border-color: var(--gold);
-            background-color: rgba(245, 158, 11, 0.05);
-            box-shadow: inset 0 0 10px var(--gold-glow);
+            background-color: var(--gold-glow);
+            color: var(--gold);
         }
 
-        .timer-tab.active .tab-icon { opacity: 1; }
-        .timer-tab.active .tab-text { color: var(--gold); }
-
-        /* 3. Period & Countdown Box */
-        .period-countdown-box {
+        /* ==========================================
+           5. PERIOD & COUNTDOWN
+           ========================================== */
+        .timer-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background-color: var(--bg-panel);
             margin: 0 12px;
             border-radius: 12px;
             padding: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .period-info { display: flex; flex-direction: column; gap: 4px; }
+        .period-label { font-size: 12px; color: var(--text-grey); font-weight: 700; }
+        .period-id { font-size: 18px; font-weight: 800; color: var(--text-white); }
+
+        .countdown-info { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .countdown-label { font-size: 12px; color: var(--text-grey); font-weight: 700; }
+        .countdown-val {
+            font-size: 30px;
+            font-weight: 900;
+            color: var(--gold);
+            font-family: monospace;
+            text-shadow: 0 0 10px var(--gold-glow);
+            line-height: 1;
+        }
+
+        /* Lock Overlay inside Timer Box */
+        .lock-indicator {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(239, 68, 68, 0.95);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 14px;
+            letter-spacing: 2px;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+        }
+
+        /* ==========================================
+           6. AI PREDICTOR BOX
+           ========================================== */
+        .ai-box {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid var(--border-color);
+            margin: 0 12px;
+            border-radius: 12px;
+            padding: 14px 16px;
         }
 
-        .period-info {
+        .ai-label { font-size: 13px; font-weight: 800; color: var(--text-grey); }
+        .ai-result { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 15px; }
+        .ai-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        /* ==========================================
+           7. BETTING CONTROLS (LOCKED STATE SUPPORT)
+           ========================================== */
+        .betting-wrapper {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 12px;
+            transition: opacity 0.3s;
         }
 
-        .period-label {
-            font-size: 12px;
-            color: var(--text-grey);
-            font-weight: 600;
-            text-transform: uppercase;
+        .betting-wrapper.locked {
+            opacity: 0.3;
+            pointer-events: none;
         }
 
-        .period-id {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--text-white);
-        }
-
-        .countdown-info {
+        /* Color Buttons */
+        .color-actions {
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-        }
-
-        .countdown-label {
-            font-size: 12px;
-            color: var(--text-grey);
-            font-weight: 600;
-        }
-
-        .countdown-timer {
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold);
-            letter-spacing: 1px;
-            font-family: monospace;
-            text-shadow: 0 0 10px var(--gold-glow);
-        }
-
-        /* 4. Color Action Buttons */
-        .color-actions-row {
-            display: flex;
-            margin: 4px 12px 0 12px;
+            margin: 0 12px;
             gap: 10px;
         }
 
         .btn-color {
             flex: 1;
-            padding: 14px 0;
+            padding: 16px 0;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--text-white);
             font-size: 14px;
             font-weight: 800;
@@ -207,22 +249,21 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transition: transform 0.1s;
         }
-        
         .btn-color:active { transform: scale(0.96); }
 
-        .btn-join-green { background-color: var(--green-solid); }
-        .btn-join-violet { background-color: var(--violet-solid); }
-        .btn-join-red { background-color: var(--red-solid); }
+        .bg-green { background-color: var(--green-solid); }
+        .bg-violet { background-color: var(--violet-solid); }
+        .bg-red { background-color: var(--red-solid); }
 
-        /* 5. Number Grid (0-9) */
-        .number-grid-panel {
+        /* Number Grid */
+        .number-grid {
             background-color: var(--bg-panel);
             margin: 0 12px;
             border-radius: 12px;
             padding: 16px;
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
+            gap: 10px;
         }
 
         .btn-num {
@@ -236,19 +277,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
             transition: transform 0.1s;
         }
-
         .btn-num:active { transform: scale(0.94); }
 
-        .btn-num.n-1, .btn-num.n-3, .btn-num.n-7, .btn-num.n-9 { background-color: var(--green-solid); }
-        .btn-num.n-2, .btn-num.n-4, .btn-num.n-6, .btn-num.n-8 { background-color: var(--red-solid); }
         .btn-num.n-0 { background: var(--grad-0); }
         .btn-num.n-5 { background: var(--grad-5); }
+        .btn-num.green { background-color: var(--green-solid); }
+        .btn-num.red { background-color: var(--red-solid); }
 
-        /* 6. Size Buttons */
-        .size-actions-row {
+        /* Size Buttons */
+        .size-actions {
             display: flex;
             margin: 0 12px;
             gap: 10px;
@@ -256,7 +296,7 @@
 
         .btn-size {
             flex: 1;
-            padding: 14px 0;
+            padding: 16px 0;
             border: none;
             border-radius: 10px;
             color: var(--text-white);
@@ -266,25 +306,26 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transition: transform 0.1s;
         }
-
         .btn-size:active { transform: scale(0.96); }
 
         .btn-big { background-color: var(--gold); }
         .btn-small { background-color: var(--blue-solid); }
 
-        /* 7. History Tabs */
-        .history-tabs-panel {
-            background-color: var(--bg-panel);
-            margin: 8px 12px 0 12px;
-            border-radius: 12px;
+        /* ==========================================
+           8. HISTORY AREA
+           ========================================== */
+        .history-tabs {
             display: flex;
+            background-color: var(--bg-panel);
+            margin: 4px 12px 0 12px;
+            border-radius: 12px;
             padding: 4px;
         }
 
-        .hist-tab {
+        .h-tab {
             flex: 1;
             text-align: center;
-            padding: 14px 0;
+            padding: 12px 0;
             font-size: 14px;
             font-weight: 700;
             color: var(--text-grey);
@@ -293,181 +334,514 @@
             transition: color 0.2s;
         }
 
-        .hist-tab.active {
+        .h-tab.active {
             color: var(--gold);
             border-bottom-color: var(--gold);
         }
+
+        .history-list {
+            background-color: var(--bg-panel);
+            margin: 8px 12px 0 12px;
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            background-color: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .list-item-left { display: flex; flex-direction: column; gap: 4px; }
+        .list-item-period { color: var(--text-grey); font-weight: 600; font-family: monospace; font-size: 12px;}
+        .list-item-target { font-weight: 800; }
+
+        .list-item-right { display: flex; align-items: center; gap: 10px; font-weight: 800;}
+        .result-dots { display: flex; gap: 4px; }
+        .res-dot { width: 14px; height: 14px; border-radius: 50%; }
+
+        .status-win { color: var(--green-solid); }
+        .status-loss { color: var(--red-solid); }
+        .status-pending { color: var(--gold); }
+
+        /* Empty State */
+        .empty-msg {
+            text-align: center;
+            color: var(--text-grey);
+            padding: 20px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        /* ==========================================
+           9. TOAST NOTIFICATION
+           ========================================== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--text-white);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     </style>
 </head>
 <body>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Message</div>
+
     <div class="app-container">
         
-        <!-- Top Header -->
+        <!-- 1. Header -->
         <header class="header">
-            <div class="back-icon" onclick="history.back()">&#10094;</div>
-            <img src="wingo.png" alt="Wingo" class="header-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <span style="display:none; font-weight: 900; font-size: 20px; font-style: italic;">WINGO</span> <!-- Fallback if img missing -->
-            <div class="balance-pill">₹ 50,000.00</div>
+            <div class="back-btn">&#10094;</div>
+            <img src="wingo.png" alt="Wingo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="logo-fallback">WINGO</div>
+            <div class="balance-pill" id="balanceDisplay">₹ 50,000.00</div>
         </header>
 
-        <!-- Timer Tabs Panel -->
-        <div class="timer-tabs-panel" id="modeTabs">
-            <div class="timer-tab active" data-mode="30">
+        <!-- 2. Timer Tabs -->
+        <div class="timer-tabs" id="modeTabs">
+            <div class="tab active" data-mode="30">
                 <span class="tab-icon">⚡</span>
                 <span class="tab-text">30s</span>
             </div>
-            <div class="timer-tab" data-mode="60">
+            <div class="tab" data-mode="60">
                 <span class="tab-icon">⏱️</span>
                 <span class="tab-text">1Min</span>
             </div>
-            <div class="timer-tab" data-mode="180">
+            <div class="tab" data-mode="180">
                 <span class="tab-icon">⏱️</span>
                 <span class="tab-text">3Min</span>
             </div>
-            <div class="timer-tab" data-mode="300">
+            <div class="tab" data-mode="300">
                 <span class="tab-icon">⏱️</span>
                 <span class="tab-text">5Min</span>
             </div>
         </div>
 
-        <!-- Period & Countdown Box -->
-        <div class="period-countdown-box">
+        <!-- 3. Timer & Period Box -->
+        <div class="timer-box">
+            <div class="lock-indicator" id="lockIndicator">🔒 LOCKED</div>
             <div class="period-info">
                 <span class="period-label" id="periodLabel">WIN GO 30S</span>
                 <span class="period-id" id="periodDisplay">Loading...</span>
             </div>
             <div class="countdown-info">
                 <span class="countdown-label">Time Remaining</span>
-                <span class="countdown-timer" id="countdownDisplay">00:00</span>
+                <span class="countdown-val" id="countdownDisplay">00:00</span>
             </div>
         </div>
 
-        <!-- Color Action Buttons -->
-        <div class="color-actions-row">
-            <button class="btn-color btn-join-green">Join Green</button>
-            <button class="btn-color btn-join-violet">Join Violet</button>
-            <button class="btn-color btn-join-red">Join Red</button>
+        <!-- 4. AI Predictor Box -->
+        <div class="ai-box">
+            <div class="ai-label">🤖 AI Prediction</div>
+            <div class="ai-result" id="aiDisplay">
+                <div class="ai-dot" id="aiDot" style="background-color: transparent;"></div>
+                <span id="aiText">Calculating...</span>
+            </div>
         </div>
 
-        <!-- Number Grid (0-9) -->
-        <div class="number-grid-panel">
-            <button class="btn-num n-0">0</button>
-            <button class="btn-num n-1">1</button>
-            <button class="btn-num n-2">2</button>
-            <button class="btn-num n-3">3</button>
-            <button class="btn-num n-4">4</button>
-            <button class="btn-num n-5">5</button>
-            <button class="btn-num n-6">6</button>
-            <button class="btn-num n-7">7</button>
-            <button class="btn-num n-8">8</button>
-            <button class="btn-num n-9">9</button>
+        <!-- BETTING WRAPPER -->
+        <div class="betting-wrapper" id="bettingWrapper">
+            
+            <!-- 5. Color Action Buttons -->
+            <div class="color-actions">
+                <button class="btn-color bg-green" onclick="placeBet('Color', 'Green')">Join Green</button>
+                <button class="btn-color bg-violet" onclick="placeBet('Color', 'Violet')">Join Violet</button>
+                <button class="btn-color bg-red" onclick="placeBet('Color', 'Red')">Join Red</button>
+            </div>
+
+            <!-- 6. Number Grid -->
+            <div class="number-grid">
+                <button class="btn-num n-0" onclick="placeBet('Number', 0)">0</button>
+                <button class="btn-num green" onclick="placeBet('Number', 1)">1</button>
+                <button class="btn-num red" onclick="placeBet('Number', 2)">2</button>
+                <button class="btn-num green" onclick="placeBet('Number', 3)">3</button>
+                <button class="btn-num red" onclick="placeBet('Number', 4)">4</button>
+                <button class="btn-num n-5" onclick="placeBet('Number', 5)">5</button>
+                <button class="btn-num red" onclick="placeBet('Number', 6)">6</button>
+                <button class="btn-num green" onclick="placeBet('Number', 7)">7</button>
+                <button class="btn-num red" onclick="placeBet('Number', 8)">8</button>
+                <button class="btn-num green" onclick="placeBet('Number', 9)">9</button>
+            </div>
+
+            <!-- 7. Size Buttons -->
+            <div class="size-actions">
+                <button class="btn-size btn-big" onclick="placeBet('Size', 'Big')">Big (5-9)</button>
+                <button class="btn-size btn-small" onclick="placeBet('Size', 'Small')">Small (0-4)</button>
+            </div>
         </div>
 
-        <!-- Size Buttons -->
-        <div class="size-actions-row">
-            <button class="btn-size btn-big">Big (5-9)</button>
-            <button class="btn-size btn-small">Small (0-4)</button>
+        <!-- 8. History Area -->
+        <div class="history-tabs">
+            <div class="h-tab" data-target="history">Game History</div>
+            <div class="h-tab" data-target="chart">Trend Chart</div>
+            <div class="h-tab active" data-target="mybets">My Bets</div>
         </div>
 
-        <!-- History Tabs -->
-        <div class="history-tabs-panel">
-            <div class="hist-tab">Game History</div>
-            <div class="hist-tab">Trend Chart</div>
-            <div class="hist-tab active">My Bets</div>
+        <div class="history-list" id="historyListContainer">
+            <!-- Dynamic Content -->
         </div>
 
     </div>
 
-    <!-- 24/7 Real-Time JavaScript Engine -->
+    <!-- ==========================================
+       CORE JAVASCRIPT ENGINE
+       ========================================== -->
     <script>
-        // Configuration
+        // --- GAME STATE ---
+        let balance = 50000.00;
+        const betAmount = 100.00;
+        const winReward = 200.00; // As per prompt: "add ₹200 to Balance"
+        
+        let currentMode = 30; // Active timer mode in seconds
+        let activeHistoryTab = 'mybets';
+
+        // State objects for all 4 modes to run continuously in background
+        const modes = [30, 60, 180, 300];
+        const state = {};
+        
+        modes.forEach(m => {
+            state[m] = {
+                currentPeriod: '',
+                lastSequence: 0,
+                aiPrediction: { color: '', number: null, hex: '' },
+                gameHistory: [],
+                myBets: []
+            };
+        });
+
+        // --- DOM Elements ---
+        const balanceDisplay = document.getElementById('balanceDisplay');
         const periodDisplay = document.getElementById('periodDisplay');
         const countdownDisplay = document.getElementById('countdownDisplay');
         const periodLabel = document.getElementById('periodLabel');
-        const tabs = document.querySelectorAll('.timer-tab');
-        
-        let currentModeSeconds = 30; // Default to 30s
-        let timerInterval = null;
+        const lockIndicator = document.getElementById('lockIndicator');
+        const bettingWrapper = document.getElementById('bettingWrapper');
+        const aiText = document.getElementById('aiText');
+        const aiDot = document.getElementById('aiDot');
+        const historyListContainer = document.getElementById('historyListContainer');
+        const toastEl = document.getElementById('toast');
 
-        // --- Core Time Engine ---
-        function updateGameEngine() {
+        // --- MATH & UTILS ---
+        function getWingoProps(num) {
+            let colors = [];
+            if (num === 0) colors = ['Red', 'Violet'];
+            else if (num === 5) colors = ['Green', 'Violet'];
+            else if (num % 2 === 0) colors = ['Red'];
+            else colors = ['Green'];
+            
+            let primaryColor = colors[0];
+            let hex = primaryColor === 'Red' ? 'var(--red-solid)' : 'var(--green-solid)';
+            if(num === 0 || num === 5) hex = 'var(--violet-solid)'; // Primary visual dot
+
+            let size = num >= 5 ? 'Big' : 'Small';
+            
+            return { colors, size, primaryColor, hex };
+        }
+
+        function formatMoney(num) {
+            return `₹ ${num.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+
+        function showToast(msg) {
+            toastEl.innerText = msg;
+            toastEl.classList.add('show');
+            setTimeout(() => { toastEl.classList.remove('show'); }, 2000);
+        }
+
+        function updateBalanceUI() {
+            balanceDisplay.innerText = formatMoney(balance);
+        }
+
+        // --- AI PREDICTION LOGIC ---
+        function generateAIPrediction(mode) {
+            const num = Math.floor(Math.random() * 10);
+            const props = getWingoProps(num);
+            state[mode].aiPrediction = {
+                number: num,
+                color: props.primaryColor,
+                hex: props.hex
+            };
+            
+            // Update UI if this is the active mode
+            if (mode === currentMode) {
+                updateAIPredictionUI();
+            }
+        }
+
+        function updateAIPredictionUI() {
+            const ai = state[currentMode].aiPrediction;
+            if (ai.number !== null) {
+                aiText.innerText = `${ai.color} ${ai.number}`;
+                aiText.style.color = ai.hex;
+                aiDot.style.backgroundColor = ai.hex;
+            }
+        }
+
+        // --- 24/7 OS SYNC TIMER ENGINE ---
+        function tickEngine() {
             const now = new Date();
-            
-            // 1. Calculate midnight of the current day to act as absolute zero anchor
+            // Calculate absolute seconds since midnight to ensure 24/7 consistency
             const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-            
-            // 2. Calculate exact total seconds passed since midnight
-            const msPassedToday = now.getTime() - midnight.getTime();
-            const totalSecondsPassed = Math.floor(msPassedToday / 1000);
+            const msPassed = now.getTime() - midnight.getTime();
+            const totalSecondsPassed = Math.floor(msPassed / 1000);
 
-            // 3. Calculate Period ID logic
-            // E.g., if mode is 30s, period increments every 30s.
-            const currentIntervalIndex = Math.floor(totalSecondsPassed / currentModeSeconds);
-            
-            // Generate standard YYYYMMDD string
+            // Format YYYYMMDD
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
-            const datePrefix = `${yyyy}${mm}${dd}`;
+            const dateStr = `${yyyy}${mm}${dd}`;
 
-            // Unique game mode identifier (e.g. 1 for 30s, 2 for 1m, 3 for 3m, 4 for 5m)
-            let modeId = '1'; 
-            if(currentModeSeconds === 60) modeId = '2';
-            else if(currentModeSeconds === 180) modeId = '3';
-            else if(currentModeSeconds === 300) modeId = '4';
+            modes.forEach(mode => {
+                const s = state[mode];
+                const sequence = Math.floor(totalSecondsPassed / mode) + 1;
+                const remaining = mode - (totalSecondsPassed % mode);
 
-            // Sequence padded to 4 digits (e.g., 0001, 0002)
-            // Sequence starts at 1, so add 1 to the index.
-            const sequenceNum = String(currentIntervalIndex + 1).padStart(4, '0');
-            
-            const finalPeriodId = `${datePrefix}${modeId}${sequenceNum}`;
-            periodDisplay.innerText = finalPeriodId;
+                // Mode Identifier prefix (1, 2, 3, 4)
+                let modePrefix = '1';
+                if(mode === 60) modePrefix = '2';
+                if(mode === 180) modePrefix = '3';
+                if(mode === 300) modePrefix = '4';
 
-            // 4. Calculate Countdown logic
-            // Find how many seconds have elapsed inside the CURRENT interval
-            const secondsElapsedInInterval = totalSecondsPassed % currentModeSeconds;
-            
-            // Remaining seconds is the total interval length minus what has elapsed
-            const remainingSeconds = currentModeSeconds - secondsElapsedInInterval;
+                const newPeriod = `${dateStr}${modePrefix}${String(sequence).padStart(4, '0')}`;
 
-            // Format mm:ss
-            const remMins = Math.floor(remainingSeconds / 60);
-            const remSecs = remainingSeconds % 60;
-            const formattedTime = `${String(remMins).padStart(2, '0')}:${String(remSecs).padStart(2, '0')}`;
-            
-            countdownDisplay.innerText = formattedTime;
+                // Check for New Round
+                if (s.lastSequence !== sequence) {
+                    if (s.lastSequence !== 0) { // Not the very first load
+                        resolveRound(mode, s.currentPeriod);
+                    }
+                    s.lastSequence = sequence;
+                    s.currentPeriod = newPeriod;
+                    generateAIPrediction(mode);
+                }
+
+                // Update UI only for Active Mode
+                if (mode === currentMode) {
+                    periodDisplay.innerText = s.currentPeriod;
+                    
+                    const remMins = Math.floor(remaining / 60);
+                    const remSecs = remaining % 60;
+                    countdownDisplay.innerText = `${String(remMins).padStart(2, '0')}:${String(remSecs).padStart(2, '0')}`;
+
+                    // Lock State Logic
+                    if (remaining <= 5) {
+                        if (!bettingWrapper.classList.contains('locked')) {
+                            bettingWrapper.classList.add('locked');
+                            lockIndicator.style.display = 'block';
+                        }
+                    } else {
+                        if (bettingWrapper.classList.contains('locked')) {
+                            bettingWrapper.classList.remove('locked');
+                            lockIndicator.style.display = 'none';
+                        }
+                    }
+                }
+            });
         }
 
-        // --- Tab Switching Logic ---
-        tabs.forEach(tab => {
+        // --- ROUND RESOLUTION & MATH ---
+        function resolveRound(mode, resolvedPeriod) {
+            const s = state[mode];
+            const ai = s.aiPrediction;
+            
+            // 5% Accuracy Math Enforcement
+            let resultNum;
+            const rand = Math.random();
+            if (rand <= 0.05) {
+                // AI is correct
+                resultNum = ai.number;
+            } else {
+                // AI is wrong (95%)
+                do {
+                    resultNum = Math.floor(Math.random() * 10);
+                } while (resultNum === ai.number);
+            }
+
+            const props = getWingoProps(resultNum);
+
+            // Process Pending Bets for this mode & period
+            s.myBets.forEach(bet => {
+                if (bet.period === resolvedPeriod && bet.status === 'Pending') {
+                    let win = false;
+                    if (bet.type === 'Color' && props.colors.includes(bet.value)) win = true;
+                    else if (bet.type === 'Number' && parseInt(bet.value) === resultNum) win = true;
+                    else if (bet.type === 'Size' && bet.value === props.size) win = true;
+
+                    if (win) {
+                        balance += winReward;
+                        bet.status = 'Win';
+                    } else {
+                        bet.status = 'Loss';
+                    }
+                }
+            });
+            updateBalanceUI();
+
+            // Add to Game History
+            s.gameHistory.unshift({
+                period: resolvedPeriod,
+                number: resultNum,
+                colors: props.colors,
+                size: props.size,
+                hex: props.hex
+            });
+
+            // Keep array size manageable
+            if(s.gameHistory.length > 50) s.gameHistory.pop();
+            if(s.myBets.length > 50) s.myBets.pop();
+
+            // Refresh UI if this is the active mode
+            if (mode === currentMode) renderHistoryList();
+        }
+
+        // --- BETTING INTERACTION ---
+        window.placeBet = function(type, value) {
+            if (bettingWrapper.classList.contains('locked')) return;
+            
+            if (balance < betAmount) {
+                showToast("Insufficient Balance!");
+                return;
+            }
+
+            balance -= betAmount;
+            updateBalanceUI();
+
+            const s = state[currentMode];
+            s.myBets.unshift({
+                period: s.currentPeriod,
+                type: type,
+                value: value,
+                amount: betAmount,
+                status: 'Pending'
+            });
+
+            showToast(`Bet Placed: ${value}`);
+            if (activeHistoryTab === 'mybets') renderHistoryList();
+        };
+
+        // --- UI TABS & RENDERING ---
+        const timerTabs = document.querySelectorAll('.timer-tab');
+        timerTabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
-                // UI Update
-                tabs.forEach(t => t.classList.remove('active'));
+                timerTabs.forEach(t => t.classList.remove('active'));
                 e.currentTarget.classList.add('active');
-
-                // State Update
-                const modeSecs = parseInt(e.currentTarget.getAttribute('data-mode'));
-                currentModeSeconds = modeSecs;
-
-                // Update Label
-                let labelText = "WIN GO 30S";
-                if(modeSecs === 60) labelText = "WIN GO 1MIN";
-                else if(modeSecs === 180) labelText = "WIN GO 3MIN";
-                else if(modeSecs === 300) labelText = "WIN GO 5MIN";
                 
-                periodLabel.innerText = labelText;
+                currentMode = parseInt(e.currentTarget.getAttribute('data-mode'));
+                
+                let label = "WIN GO 30S";
+                if(currentMode===60) label = "WIN GO 1MIN";
+                if(currentMode===180) label = "WIN GO 3MIN";
+                if(currentMode===300) label = "WIN GO 5MIN";
+                periodLabel.innerText = label;
 
-                // Instantly update engine to avoid 1-second lag
-                updateGameEngine();
+                updateAIPredictionUI();
+                renderHistoryList();
+                tickEngine(); // Force immediate UI refresh
             });
         });
 
-        // Start the engine
-        // Run immediately once, then set interval
-        updateGameEngine();
-        timerInterval = setInterval(updateGameEngine, 1000);
+        const historyTabs = document.querySelectorAll('.h-tab');
+        historyTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                historyTabs.forEach(t => t.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                activeHistoryTab = e.currentTarget.getAttribute('data-target');
+                renderHistoryList();
+            });
+        });
+
+        function renderHistoryList() {
+            const s = state[currentMode];
+            let html = '';
+
+            if (activeHistoryTab === 'history') {
+                if (s.gameHistory.length === 0) html = '<div class="empty-msg">No data available</div>';
+                else {
+                    s.gameHistory.forEach(item => {
+                        const dots = item.colors.map(c => {
+                            let colorHex = c === 'Red' ? 'var(--red-solid)' : (c === 'Green' ? 'var(--green-solid)' : 'var(--violet-solid)');
+                            return `<div class="res-dot" style="background-color: ${colorHex}"></div>`;
+                        }).join('');
+
+                        html += `
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <span class="list-item-period">${item.period}</span>
+                                <span style="font-size:11px; color:var(--text-grey);">${item.size}</span>
+                            </div>
+                            <div class="list-item-right">
+                                <span style="font-size:18px; color:${item.hex};">${item.number}</span>
+                                <div class="result-dots">${dots}</div>
+                            </div>
+                        </div>`;
+                    });
+                }
+            } 
+            else if (activeHistoryTab === 'mybets') {
+                if (s.myBets.length === 0) html = '<div class="empty-msg">No bets placed</div>';
+                else {
+                    s.myBets.forEach(bet => {
+                        let statusClass = 'status-pending';
+                        if(bet.status === 'Win') statusClass = 'status-win';
+                        if(bet.status === 'Loss') statusClass = 'status-loss';
+
+                        html += `
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <span class="list-item-period">${bet.period}</span>
+                                <span class="list-item-target">Select: ${bet.value}</span>
+                            </div>
+                            <div class="list-item-right">
+                                <span style="font-size:12px; font-weight:600;">₹${bet.amount}</span>
+                                <span class="h-status ${statusClass}">${bet.status}</span>
+                            </div>
+                        </div>`;
+                    });
+                }
+            }
+            else if (activeHistoryTab === 'chart') {
+                // Simple representation for Trend Chart
+                if (s.gameHistory.length === 0) html = '<div class="empty-msg">No data available</div>';
+                else {
+                    let trendStr = s.gameHistory.map(h => `<span style="color:${h.hex}; font-weight:900; margin:0 2px;">${h.number}</span>`).join('-');
+                    html = `<div style="padding:16px; text-align:center; word-break:break-all; line-height:1.8;">${trendStr}</div>`;
+                }
+            }
+
+            historyListContainer.innerHTML = html;
+        }
+
+        // --- STARTUP ---
+        updateBalanceUI();
+        tickEngine(); // Initial run
+        setInterval(tickEngine, 1000); // 1-second loop
 
     </script>
 </body>
