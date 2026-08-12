@@ -44,12 +44,12 @@
                 radial-gradient(circle at 90% 85%, var(--gold-glow) 0%, transparent 40%),
                 linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
             background-attachment: fixed;
-            padding: 10px 10px 80px 10px; /* Clearance for fixed bottom nav */
+            padding: 10px 10px 80px 10px;
         }
 
         .app-viewport {
             width: 100%;
-            max-width: 480px; /* Mobile Viewport Container */
+            max-width: 480px;
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -167,7 +167,6 @@
             backdrop-filter: blur(12px);
             border: 1px solid var(--card-border);
             border-radius: 18px;
-            sticky: top 10px;
             z-index: 100;
         }
 
@@ -301,6 +300,16 @@
             border-radius: 2px;
         }
 
+        .view-all-link {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .view-all-link:hover {
+            color: var(--gold-neon);
+        }
+
         /* GAME GRID & CARDS */
         .game-grid {
             display: grid;
@@ -330,21 +339,33 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
 
-        .game-icon {
-            font-size: 1.8rem;
+        .game-card .game-icon {
+            font-size: 2rem;
         }
 
-        .game-name {
+        .game-card .game-name {
             font-size: 0.9rem;
             font-weight: 800;
         }
 
-        .game-badge {
+        .game-card .game-badge {
             position: absolute;
             top: 10px; right: 10px;
-            font-size: 0.62rem; font-weight: 800;
-            padding: 2px 6px; border-radius: 6px;
-            background: rgba(245, 158, 11, 0.2); color: var(--gold-neon);
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--gold-neon);
+        }
+
+        .game-card .game-rtp {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .game-card.span-2 {
+            grid-column: span 2;
         }
 
         /* LEADERBOARD / EARNING CHART */
@@ -413,6 +434,19 @@
         }
 
         .footer-link-item:hover { color: var(--gold-neon); }
+        .footer-link-item.admin-link {
+            color: var(--gold-neon);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 6px 12px;
+            text-align: center;
+            grid-column: span 2;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .footer-link-item.admin-link:hover {
+            background: rgba(245, 158, 11, 0.1);
+        }
 
         /* FIXED BOTTOM NAVIGATION BAR */
         .bottom-nav {
@@ -441,7 +475,31 @@
         }
 
         .nav-item.active { color: var(--gold-neon); }
-        .nav-icon { font-size: 1.2rem; }
+        .nav-item .nav-icon { font-size: 1.2rem; }
+
+        /* ADMIN PANEL - Hidden link (only visible on hover) */
+        .admin-hidden {
+            position: fixed;
+            bottom: 80px;
+            right: 10px;
+            z-index: 999;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+        .admin-hidden:hover {
+            opacity: 1;
+        }
+        .admin-hidden a {
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            text-decoration: none;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        .admin-hidden a:hover {
+            color: var(--gold-neon);
+        }
     </style>
 </head>
 <body>
@@ -464,6 +522,11 @@
         </div>
     </div>
 
+    <!-- ADMIN HIDDEN LINK (Quick access to Admin Panel) -->
+    <div class="admin-hidden">
+        <a href="https://nplus-play.vercel.app/admin" target="_blank">🔐 Admin</a>
+    </div>
+
     <!-- MAIN APP CONTAINER -->
     <div class="app-viewport">
         <!-- HEADER -->
@@ -473,7 +536,7 @@
                 <span class="brand-title">PLAY</span>
             </a>
             <div class="header-actions">
-                <div class="wallet-pill">$1,000.00</div>
+                <div class="wallet-pill">₹1,000.00</div>
             </div>
         </header>
 
@@ -481,122 +544,142 @@
         <div class="promo-banner">
             <h2 class="promo-title">Win Go 30s</h2>
             <p class="promo-subtitle">Predict Color & Multiply Your Wealth Instant 9X</p>
-            <a href="wingo.html" class="btn-banner">Play Win Go ➔</a>
+            <a href="https://nplus-play.vercel.app/game/wingo" class="btn-banner">Play Win Go ➔</a>
         </div>
 
         <!-- LIVE WINNINGS TICKER -->
         <div class="live-ticker">
             <span class="ticker-tag">LIVE WINS</span>
             <div class="ticker-content" id="tickerFeed">
-                User ***8891 won $340.00 in Win Go • User ***2203 won $1,200.00 in Aviator • User ***7712 won $850.00 in K3 • User ***4401 won $450.00 in 5D
+                User ***8891 won ₹340.00 in Win Go • User ***2203 won ₹1,200.00 in Aviator • User ***7712 won ₹850.00 in K3 • User ***4401 won ₹450.00 in 5D
             </div>
         </div>
 
         <!-- 1. LOTTERY SECTION (5 GAMES) -->
         <div class="section-header">
             <h3 class="section-title">Lottery Games</h3>
+            <a href="https://nplus-play.vercel.app/" class="view-all-link">View All →</a>
         </div>
         <div class="game-grid">
-            <a href="wingo.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/wingo" class="game-card">
                 <span class="game-badge">HOT ⚡</span>
-                <div class="game-icon"><img src="images/wingo.png" alt="Win Go" class="game-img"></div>
+                <div class="game-icon">🎰</div>
                 <div class="game-name">Win Go</div>
+                <div class="game-rtp">RTP 96.64%</div>
             </a>
-            <a href="motorace.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/wingo" class="game-card">
                 <span class="game-badge">30s</span>
-                <div class="game-icon"><img src="images/motorace.png" alt="MotoRace" class="game-img"></div>
+                <div class="game-icon">🏍️</div>
                 <div class="game-name">MotoRace</div>
+                <div class="game-rtp">Coming Soon</div>
             </a>
-            <a href="k3.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/k3" class="game-card">
                 <span class="game-badge">Dice</span>
-                <div class="game-icon"><img src="images/k3.png" alt="K3" class="game-img"></div>
+                <div class="game-icon">🎲</div>
                 <div class="game-name">K3</div>
+                <div class="game-rtp">RTP 96.20%</div>
             </a>
-            <a href="5d.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/5d" class="game-card">
                 <span class="game-badge">5 Digits</span>
-                <div class="game-icon"><img src="images/5d.png" alt="5D" class="game-img"></div>
+                <div class="game-icon">🎯</div>
                 <div class="game-name">5D</div>
+                <div class="game-rtp">RTP 96.50%</div>
             </a>
-            <a href="trx-wingo.html" class="game-card" style="grid-column: span 2;">
+            <a href="https://nplus-play.vercel.app/game/trx" class="game-card span-2">
                 <span class="game-badge">TRX Crypto</span>
-                <div class="game-icon"><img src="images/trx-wingo.png" alt="TRX" class="game-img"></div>
+                <div class="game-icon">🔗</div>
                 <div class="game-name">Trx Win Go</div>
+                <div class="game-rtp">RTP 97.10%</div>
             </a>
         </div>
 
         <!-- 2. PLATFORM RECOMMENDATION (4 GAMES) -->
         <div class="section-header">
             <h3 class="section-title">Platform Recommendation</h3>
+            <a href="https://nplus-play.vercel.app/" class="view-all-link">All 6 →</a>
         </div>
         <div class="game-grid">
-            <a href="aviator.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/aviator" class="game-card">
                 <span class="game-badge">Crash</span>
-                <div class="game-icon"><img src="images/aviator.png" alt="Aviator" class="game-img"></div>
+                <div class="game-icon">✈️</div>
                 <div class="game-name">Aviator</div>
+                <div class="game-rtp">RTP 97.06%</div>
             </a>
-            <a href="wingo.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/wingo" class="game-card">
                 <span class="game-badge">Popular</span>
                 <div class="game-icon">🎨</div>
                 <div class="game-name">Wingo</div>
+                <div class="game-rtp">RTP 96.64%</div>
             </a>
-            <a href="vortex.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/vortex" class="game-card">
                 <span class="game-badge">New</span>
                 <div class="game-icon">🌀</div>
                 <div class="game-name">Vortex</div>
+                <div class="game-rtp">RTP 97.65%</div>
             </a>
-            <a href="chicken-road-2.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/chicken" class="game-card">
                 <span class="game-badge">Fun</span>
                 <div class="game-icon">🐔</div>
                 <div class="game-name">Chicken Road 2</div>
+                <div class="game-rtp">RTP 96.46%</div>
             </a>
         </div>
 
         <!-- 3. CASINO SECTION (4 GAMES) -->
         <div class="section-header">
             <h3 class="section-title">Casino Games</h3>
+            <a href="https://nplus-play.vercel.app/" class="view-all-link">View All →</a>
         </div>
         <div class="game-grid">
-            <a href="crazy-time.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card">
                 <span class="game-badge">Live</span>
                 <div class="game-icon">🎡</div>
                 <div class="game-name">Crazy Time</div>
+                <div class="game-rtp">RTP 96.00%</div>
             </a>
-            <a href="auto-roulette.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card">
                 <span class="game-badge">Auto</span>
                 <div class="game-icon">🔴</div>
                 <div class="game-name">Auto Roulette</div>
+                <div class="game-rtp">Coming Soon</div>
             </a>
-            <a href="american-roulette.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card">
                 <span class="game-badge">Classic</span>
                 <div class="game-icon">🎰</div>
                 <div class="game-name">American Roulette</div>
+                <div class="game-rtp">Coming Soon</div>
             </a>
-            <a href="roulette.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card">
                 <span class="game-badge">VIP</span>
                 <div class="game-icon">👑</div>
                 <div class="game-name">Roulette</div>
+                <div class="game-rtp">Coming Soon</div>
             </a>
         </div>
 
         <!-- 4. RUMMY SECTION (3 GAMES) -->
         <div class="section-header">
             <h3 class="section-title">Rummy Cards</h3>
+            <a href="https://nplus-play.vercel.app/" class="view-all-link">View All →</a>
         </div>
         <div class="game-grid">
-            <a href="365-rummy.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/" class="game-card">
                 <span class="game-badge">Cards</span>
                 <div class="game-icon">🃏</div>
                 <div class="game-name">365 Rummy</div>
+                <div class="game-rtp">Coming Soon</div>
             </a>
-            <a href="v8-poker-rummy.html" class="game-card">
+            <a href="https://nplus-play.vercel.app/" class="game-card">
                 <span class="game-badge">Poker</span>
                 <div class="game-icon">♠️</div>
                 <div class="game-name">V8 Poker Rummy</div>
+                <div class="game-rtp">Coming Soon</div>
             </a>
-            <a href="koolbet-rummy.html" class="game-card" style="grid-column: span 2;">
+            <a href="https://nplus-play.vercel.app/" class="game-card span-2">
                 <span class="game-badge">Kool</span>
                 <div class="game-icon">♦️</div>
                 <div class="game-name">Koolbet Rummy</div>
+                <div class="game-rtp">Coming Soon</div>
             </a>
         </div>
 
@@ -613,10 +696,13 @@
             <a href="#" class="footer-link-item" onclick="alert('Terms & Conditions')">📄 Terms & Conditions</a>
             <a href="#" class="footer-link-item" onclick="alert('Language: English')">🌐 Language</a>
             <a href="#" class="footer-link-item" onclick="alert('No new announcements')">📢 Announcement</a>
-            <a href="agent-chat.html" class="footer-link-item">🎧 24/7 Customer Service</a>
+            <a href="#" class="footer-link-item" onclick="alert('Customer Support: support@nplusplay.com')">🎧 24/7 Customer Service</a>
             <a href="#" class="footer-link-item" onclick="alert('Beginner Guide: Predict colors to win 2x to 9x multipliers.')">📖 Beginner Guide</a>
             <a href="#" class="footer-link-item" onclick="alert('N+ PLAY Official Gaming Platform')">ℹ️ About Us</a>
             <a href="#" class="footer-link-item" style="grid-column: span 2;" onclick="alert('Downloading N+ PLAY Android APK...')">📲 Download App</a>
+            <a href="https://nplus-play.vercel.app/admin" target="_blank" class="footer-link-item admin-link">
+                🔐 Admin Panel
+            </a>
         </div>
     </div>
 
@@ -626,15 +712,15 @@
             <span class="nav-icon">🏠</span>
             <span>Home</span>
         </a>
-        <a href="activity.html" class="nav-item">
+        <a href="https://nplus-play.vercel.app/activity" class="nav-item">
             <span class="nav-icon">🔥</span>
             <span>Activity</span>
         </a>
-        <a href="promotion.html" class="nav-item">
+        <a href="https://nplus-play.vercel.app/bonus" class="nav-item">
             <span class="nav-icon">🎁</span>
             <span>Promotion</span>
         </a>
-        <a href="account.html" class="nav-item">
+        <a href="https://nplus-play.vercel.app/account" class="nav-item">
             <span class="nav-icon">👤</span>
             <span>Account</span>
         </a>
