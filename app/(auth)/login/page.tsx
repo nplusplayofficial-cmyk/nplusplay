@@ -23,7 +23,6 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    // For demo, use email as username
     const username = activeTab === 'phone' ? phone : email.split('@')[0] || email;
     if (!username) { setError('Please enter your phone or email'); setLoading(false); return; }
 
@@ -34,11 +33,14 @@ export default function LoginPage() {
     setLoading(false);
   };
 
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+
   return (
     <div className="min-h-screen bg-[#0a0808] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
 
-        {/* Brand Header */}
+        {/* Brand */}
         <div className="text-center mb-6">
           <h1 className="text-4xl font-black gold-text tracking-wider">N+ PLAY</h1>
         </div>
@@ -52,7 +54,7 @@ export default function LoginPage() {
             <span className="text-xs text-gray-500">If you forget your password, please contact customer service</span>
           </p>
 
-          {/* Tabs: Phone / Email */}
+          {/* Tabs */}
           <div className="flex bg-[#1a1a2e] p-1 rounded-xl mb-5">
             <button
               onClick={() => setActiveTab('phone')}
@@ -77,7 +79,7 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Phone / Email Input */}
+            {/* Phone / Email */}
             {activeTab === 'phone' ? (
               <div>
                 <label className="block text-xs font-medium text-gray-400 mb-1">Phone number</label>
@@ -119,7 +121,7 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Remember & Forgot Password */}
+            {/* Remember & Forgot */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <input
@@ -135,7 +137,6 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Error Message */}
             {error && <p className="text-red-500 text-xs font-medium">{error}</p>}
 
             {/* Login Button */}
@@ -154,7 +155,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Footer (Daman style weather/language) */}
+        {/* Footer */}
         <div className="flex justify-between items-center text-xs text-gray-500 mt-4 px-2">
           <div className="flex items-center gap-2">
             <span>36°C</span>
@@ -166,7 +167,7 @@ export default function LoginPage() {
             <span className="text-gray-600">|</span>
             <span>IN</span>
             <span className="text-gray-600">|</span>
-            <span className="text-gray-400">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}</span>
+            <span className="text-gray-400">{dateStr}</span>
           </div>
         </div>
 
