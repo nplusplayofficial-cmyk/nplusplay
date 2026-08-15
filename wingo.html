@@ -18,9 +18,7 @@
         }
         .app { max-width: 480px; width: 100%; }
 
-        /* Gold Text */
         .gold-text { color: #f5c518; }
-        .gold-bg { background: #f5c518; color: #000; }
         .glass-card {
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(12px);
@@ -41,7 +39,6 @@
         .btn-gold:hover { transform: scale(1.03); opacity: 0.9; }
         .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-        /* Top Bar */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .balance-box { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 8px 14px; }
         .balance-box .label { font-size: 10px; color: #94a3b8; }
@@ -54,12 +51,10 @@
         .timer-box .period { font-size: 10px; color: #64748b; }
         .timer-box .status-label { font-size: 9px; font-weight: 700; color: #22c55e; }
 
-        /* Duration Tabs */
         .duration-tabs { display: flex; gap: 6px; background: #0f172a; padding: 4px; border-radius: 12px; margin-bottom: 12px; }
         .duration-tabs button { flex: 1; padding: 6px; border-radius: 8px; border: none; background: transparent; color: #94a3b8; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; }
         .duration-tabs button.active { background: #f5c518; color: #000; }
 
-        /* Number Grid */
         .num-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 12px; }
         .num-grid button {
             padding: 12px 0; border-radius: 8px; border: 2px solid transparent;
@@ -68,11 +63,11 @@
         }
         .num-grid button.green-num { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
         .num-grid button.violet-num { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+        .num-grid button.red-num { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
         .num-grid button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.2); transform: scale(1.05); }
         .num-grid button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
         .color-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 12px; }
 
-        /* Action Row */
         .action-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
         .action-row button {
             padding: 10px 0; border-radius: 10px; border: 2px solid transparent;
@@ -83,7 +78,6 @@
         .action-row button:disabled { opacity: 0.4; cursor: not-allowed; }
         .action-row .red { color: #ef4444; } .action-row .green { color: #22c55e; } .action-row .violet { color: #a855f7; }
 
-        /* Multipliers */
         .multipliers { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; justify-content: center; }
         .multipliers button {
             padding: 6px 12px; border-radius: 8px; border: 1px solid #2a2a3a;
@@ -92,7 +86,6 @@
         .multipliers button.active { border-color: #f5c518; background: rgba(245, 197, 24, 0.1); color: #f5c518; }
         .multipliers button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Bet Slip */
         .bet-slip { padding: 16px; }
         .bet-slip .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
         .bet-slip .qty-box { display: flex; align-items: center; background: #1e293b; border-radius: 8px; overflow: hidden; }
@@ -112,7 +105,6 @@
         .bet-slip .actions .place:disabled { opacity: 0.4; cursor: not-allowed; }
         .bet-slip .agree { font-size: 10px; color: #64748b; text-align: center; margin-top: 6px; }
 
-        /* Betting Closed Overlay */
         .betting-closed {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
@@ -127,7 +119,6 @@
         }
         .betting-closed.active { display: block; }
 
-        /* Result Display */
         .result-display {
             background: rgba(245, 197, 24, 0.05);
             border: 1px solid rgba(245, 197, 24, 0.15);
@@ -143,7 +134,6 @@
         .result-display .win { color: #10b981; }
         .result-display .lose { color: #ef4444; }
 
-        /* Info Tabs */
         .info-tabs { display: flex; border-bottom: 1px solid #2a2a3a; margin-top: 12px; }
         .info-tabs button { flex: 1; padding: 10px; background: transparent; border: none; color: #94a3b8; font-weight: 700; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
         .info-tabs button.active { color: #f5c518; border-bottom-color: #f5c518; }
@@ -164,8 +154,6 @@
         .history-list .round-result.no-bet { color: #64748b; }
 
         .chart-placeholder, .strategy-placeholder { text-align: center; color: #64748b; font-size: 14px; padding: 20px 0; }
-
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #f5c518; border-radius: 10px; }
@@ -176,7 +164,6 @@
         .message.info { background: rgba(245, 197, 24, 0.1); color: #f5c518; border: 1px solid rgba(245, 197, 24, 0.2); }
         .message.closed { background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.15); }
 
-        /* Responsive */
         @media (max-width: 400px) {
             .action-row button { font-size: 12px; padding: 8px 0; }
             .num-grid button { font-size: 14px; padding: 10px 0; }
@@ -186,13 +173,11 @@
 <body>
 <div class="app" id="app">
 
-    <!-- Header -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <span style="font-size:24px; font-weight:900; color:#f5c518;">N+ PLAY</span>
         <span style="font-size:12px; border:1px solid #2a2a3a; padding:2px 10px; border-radius:20px; color:#94a3b8;">18+</span>
     </div>
 
-    <!-- Top Bar -->
     <div class="top-bar">
         <div class="balance-box">
             <div class="label">Wallet Balance</div>
@@ -205,7 +190,6 @@
         </div>
     </div>
 
-    <!-- Duration Tabs -->
     <div class="duration-tabs">
         <button class="active" data-dur="15">15s</button>
         <button data-dur="30">30s</button>
@@ -213,26 +197,23 @@
         <button data-dur="180">3 Min</button>
     </div>
 
-    <!-- Betting Closed Notice -->
     <div class="betting-closed" id="bettingClosed">
         ⛔ Betting Closed — Round in progress
     </div>
 
-    <!-- Result Display -->
     <div class="result-display" id="resultDisplay">
         <div class="number" id="resultNumber">7</div>
         <div class="color-name" id="resultColor">🟣 Violet</div>
         <div id="resultBetResult" style="font-size:14px; margin-top:4px;"></div>
     </div>
 
-    <!-- Number Grid -->
     <div class="num-grid" id="numGrid"></div>
     <div class="color-labels">
-        <span style="color:#22c55e;">Green (0-4)</span>
-        <span style="color:#a855f7;">Violet (5-9)</span>
+        <span style="color:#22c55e;">Green (0-3)</span>
+        <span style="color:#a855f7;">Violet (4-6)</span>
+        <span style="color:#ef4444;">Red (7-9)</span>
     </div>
 
-    <!-- Action Row -->
     <div class="action-row" id="actionRow">
         <button class="red" data-type="red">Red</button>
         <button class="green" data-type="green">Green</button>
@@ -241,7 +222,6 @@
         <button data-type="small">Small</button>
     </div>
 
-    <!-- Multipliers -->
     <div class="multipliers" id="multipliers">
         <button data-mult="1" class="active">X1</button>
         <button data-mult="5">X5</button>
@@ -251,10 +231,9 @@
         <button data-mult="100">X100</button>
     </div>
 
-    <!-- Bet Slip -->
     <div class="glass-card bet-slip">
         <div class="row">
-            <span style="font-size:14px; font-weight:700; color:#f5c518;">WinGo 30sec</span>
+            <span style="font-size:14px; font-weight:700; color:#f5c518;">WinGo</span>
         </div>
         <div class="row">
             <span style="color:#94a3b8; font-size:13px;">Quantity</span>
@@ -296,7 +275,6 @@
         <div id="message" class="message" style="display:none;"></div>
     </div>
 
-    <!-- Info Tabs -->
     <div class="glass-card" style="margin-top:12px; padding:0 16px 16px 16px;">
         <div class="info-tabs">
             <button class="active" data-tab="game">Game</button>
@@ -332,13 +310,16 @@
 
 <script>
     // ============================================================
-    // WINGO PROFESSIONAL — Real-time timer, betting closes at 5s, auto-history
+    // WINGO PROFESSIONAL — Fixed: Timer persists on refresh, balanced colors
     // ============================================================
     (function() {
         'use strict';
 
-        // --- State ---
+        // --- Constants ---
         const STORAGE_KEY = 'wingo_data';
+        const ROUND_STATE_KEY = 'wingo_round_state';
+
+        // --- Data ---
         let data = loadData();
         let timer = 15;
         let totalDuration = 15;
@@ -347,6 +328,7 @@
         let roundActive = false;
         let bettingOpen = true;
         let resultShown = false;
+        let roundStartTimestamp = Date.now();
 
         // Bet state
         let selectedType = null;
@@ -354,6 +336,8 @@
         let quantity = 1;
         let stakeMultiplier = 1;
         let currentStake = 1;
+        let betPlacedThisRound = false;
+        let betAmountThisRound = 0;
 
         // DOM refs
         const balanceEl = document.getElementById('balanceDisplay');
@@ -391,6 +375,32 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
+        function saveRoundState() {
+            const state = {
+                startTime: roundStartTimestamp,
+                duration: totalDuration,
+                period: period,
+                status: roundActive ? 'active' : 'idle',
+                bettingOpen: bettingOpen,
+                timer: timer,
+                betPlaced: betPlacedThisRound,
+                betAmount: betAmountThisRound
+            };
+            localStorage.setItem(ROUND_STATE_KEY, JSON.stringify(state));
+        }
+
+        function loadRoundState() {
+            try {
+                const raw = localStorage.getItem(ROUND_STATE_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return null;
+        }
+
+        function clearRoundState() {
+            localStorage.removeItem(ROUND_STATE_KEY);
+        }
+
         function generatePeriod() {
             return 'WG' + Date.now().toString(36).toUpperCase().slice(0, 12);
         }
@@ -420,7 +430,7 @@
             document.querySelectorAll('.num-grid button, .action-row button, .multipliers button, #quickAmounts button, .qty-box button, #cancelBet').forEach(el => {
                 el.disabled = disabled;
             });
-            placeBtn.disabled = disabled || !selectedType || selectedValue === null || currentStake > data.balance;
+            placeBtn.disabled = disabled || !selectedType || selectedValue === null || currentStake > data.balance || betPlacedThisRound;
             if (open) {
                 bettingClosedEl.classList.remove('active');
                 statusLabel.textContent = '● Betting Open';
@@ -433,16 +443,23 @@
                 timerEl.className = 'time closed';
             }
             updateTotalUI();
+            saveRoundState();
         }
 
-        // --- Result Generation ---
+        // --- Result Generation (Balanced: Green 0-3, Violet 4-6, Red 7-9) ---
         function generateResult() {
             const num = Math.floor(Math.random() * 10);
             let color;
-            if (num <= 4) color = 'green';
-            else if (num <= 8) color = 'violet';
+            if (num >= 0 && num <= 3) color = 'green';
+            else if (num >= 4 && num <= 6) color = 'violet';
             else color = 'red';
             return { number: num, color: color };
+        }
+
+        function getNumberColor(num) {
+            if (num >= 0 && num <= 3) return 'green';
+            if (num >= 4 && num <= 6) return 'violet';
+            return 'red';
         }
 
         function showResult(result, won, payout, multiplier) {
@@ -453,35 +470,28 @@
             if (won) {
                 resultBetResult.textContent = `✅ Won ${payout.toFixed(2)} coins! (${multiplier}x)`;
                 resultBetResult.style.color = '#10b981';
-            } else {
+            } else if (betPlacedThisRound) {
                 resultBetResult.textContent = '❌ Lost';
                 resultBetResult.style.color = '#ef4444';
+            } else {
+                resultBetResult.textContent = '⏳ No Bet';
+                resultBetResult.style.color = '#64748b';
             }
-            setTimeout(() => {
-                resultDisplay.classList.remove('active');
-            }, 5000);
         }
 
         // --- Round Logic ---
         function completeRound() {
-            if (roundActive) return;
+            if (roundActive && resultShown) return;
             roundActive = true;
+            resultShown = false;
             setBettingState(false);
 
-            // Generate result
             const result = generateResult();
-            let betPlaced = false;
             let won = false;
             let payout = 0;
             let multiplier = 0;
 
-            // Check if user had a bet
-            if (selectedType && selectedValue !== null && !placeBtn.disabled && currentStake <= data.balance) {
-                betPlaced = true;
-                // Deduct stake (already deducted when placed, but we need to settle)
-                // Actually, we'll process the bet now
-                // But we want to keep the stake already deducted — so we process win/loss
-                // We'll use the existing selectedBet
+            if (betPlacedThisRound && selectedType && selectedValue !== null) {
                 if (selectedType === 'number') {
                     if (selectedValue === result.number) { won = true; multiplier = 9; }
                 } else if (selectedType === 'color') {
@@ -494,8 +504,9 @@
                 } else if (selectedType === 'small') {
                     if (result.number <= 4) { won = true; multiplier = 2; }
                 }
+
                 if (won) {
-                    payout = currentStake * multiplier;
+                    payout = betAmountThisRound * multiplier;
                     data.balance += payout;
                     data.wins++;
                     data.totalWon += payout;
@@ -510,14 +521,13 @@
             }
 
             data.rounds++;
-            // Save to history
             data.history.unshift({
                 period: period,
                 number: result.number,
                 color: result.color,
                 betType: selectedType || 'none',
                 betVal: selectedValue || 'none',
-                stake: betPlaced ? currentStake : 0,
+                stake: betPlacedThisRound ? betAmountThisRound : 0,
                 payout: won ? payout : 0,
                 won: won,
                 multiplier: multiplier,
@@ -526,29 +536,30 @@
             if (data.history.length > 200) data.history.pop();
             saveData();
 
-            // Show result
             showResult(result, won, payout, multiplier);
+            resultShown = true;
 
-            // Reset selections after showing result
+            // Reset selections
             document.querySelectorAll('.num-grid button, .action-row button').forEach(b => b.classList.remove('selected'));
             selectedType = null;
             selectedValue = null;
+            betPlacedThisRound = false;
+            betAmountThisRound = 0;
             placeBtn.disabled = true;
 
             renderHistory();
             updateStats();
+            clearRoundState();
 
-            // Reset betting state after result shown
             setTimeout(() => {
                 roundActive = false;
-                // Reset timer for next round
+                resultShown = false;
                 resetTimer();
                 setBettingState(true);
-                // Clear result after a moment
                 setTimeout(() => {
                     resultDisplay.classList.remove('active');
                 }, 3000);
-            }, 5500); // Show result for 5.5s, then next round
+            }, 5500);
         }
 
         // --- Timer ---
@@ -557,13 +568,17 @@
             const activeDur = document.querySelector('.duration-tabs .active');
             totalDuration = parseInt(activeDur.dataset.dur);
             timer = totalDuration;
+            roundStartTimestamp = Date.now();
             timerEl.textContent = timer;
             timerEl.className = 'time';
             period = generatePeriod();
             periodEl.textContent = period;
             resultDisplay.classList.remove('active');
             roundActive = false;
+            betPlacedThisRound = false;
+            betAmountThisRound = 0;
             setBettingState(true);
+            clearRoundState();
             startTimer();
         }
 
@@ -572,8 +587,8 @@
             timerInterval = setInterval(() => {
                 timer--;
                 timerEl.textContent = timer;
+                saveRoundState();
 
-                // Warning at 5 seconds
                 if (timer <= 5 && timer > 0) {
                     timerEl.className = 'time danger';
                     if (timer === 5) {
@@ -598,10 +613,12 @@
                 const btn = document.createElement('button');
                 btn.textContent = i;
                 btn.dataset.num = i;
-                if (i <= 4) btn.className = 'green-num';
-                else btn.className = 'violet-num';
+                const color = getNumberColor(i);
+                if (color === 'green') btn.className = 'green-num';
+                else if (color === 'violet') btn.className = 'violet-num';
+                else btn.className = 'red-num';
                 btn.addEventListener('click', function() {
-                    if (!bettingOpen) return;
+                    if (!bettingOpen || betPlacedThisRound) return;
                     document.querySelectorAll('.num-grid button').forEach(b => b.classList.remove('selected'));
                     this.classList.add('selected');
                     selectedType = 'number';
@@ -617,7 +634,7 @@
             const buttons = actionRow.querySelectorAll('button');
             buttons.forEach(btn => {
                 btn.addEventListener('click', function() {
-                    if (!bettingOpen) return;
+                    if (!bettingOpen || betPlacedThisRound) return;
                     document.querySelectorAll('.num-grid button').forEach(b => b.classList.remove('selected'));
                     document.querySelectorAll('.action-row button').forEach(b => b.classList.remove('selected'));
                     this.classList.add('selected');
@@ -634,7 +651,7 @@
                 const btns = container.querySelectorAll('button');
                 btns.forEach(btn => {
                     btn.addEventListener('click', function() {
-                        if (!bettingOpen) return;
+                        if (!bettingOpen || betPlacedThisRound) return;
                         container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
                         const mult = parseInt(this.dataset.mult);
@@ -648,7 +665,7 @@
 
             document.querySelectorAll('#quickAmounts button').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    if (!bettingOpen) return;
+                    if (!bettingOpen || betPlacedThisRound) return;
                     document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     quantity = parseInt(this.dataset.val);
@@ -658,14 +675,14 @@
             });
 
             document.getElementById('qtyMinus').addEventListener('click', function() {
-                if (!bettingOpen) return;
+                if (!bettingOpen || betPlacedThisRound) return;
                 if (quantity > 1) quantity--;
                 else quantity = 1;
                 qtyDisplay.textContent = quantity;
                 updateTotalUI();
             });
             document.getElementById('qtyPlus').addEventListener('click', function() {
-                if (!bettingOpen) return;
+                if (!bettingOpen || betPlacedThisRound) return;
                 quantity++;
                 qtyDisplay.textContent = quantity;
                 updateTotalUI();
@@ -680,7 +697,7 @@
             let html = '';
             data.history.slice(0, 30).forEach(item => {
                 const dotClass = item.color + '-dot';
-                const resultClass = item.won ? 'won' : (item.payout > 0 ? 'won' : 'lost');
+                const resultClass = item.won ? 'won' : (item.stake > 0 ? 'lost' : 'no-bet');
                 const resultText = item.won ? '✅ +' + item.payout.toFixed(2) : (item.stake > 0 ? '❌' : '⏳ No Bet');
                 html += `
                     <div class="row">
@@ -700,7 +717,6 @@
             statTotal.textContent = '₹' + (data.totalWon || 0).toFixed(2);
         }
 
-        // --- Tab Switching ---
         function setupTabs() {
             document.querySelectorAll('.info-tabs button').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -713,7 +729,6 @@
             });
         }
 
-        // --- Duration Tabs ---
         function setupDurationTabs() {
             document.querySelectorAll('.duration-tabs button').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -722,6 +737,43 @@
                     resetTimer();
                 });
             });
+        }
+
+        // --- Resume State on Page Load ---
+        function resumeState() {
+            const saved = loadRoundState();
+            if (saved && saved.status === 'active') {
+                const elapsed = (Date.now() - saved.startTime) / 1000;
+                const remaining = Math.ceil(saved.duration - elapsed);
+                if (remaining <= 0) {
+                    // Round already ended while user was away
+                    completeRound();
+                    return true;
+                }
+                // Restore state
+                timer = remaining;
+                totalDuration = saved.duration;
+                period = saved.period;
+                roundStartTimestamp = saved.startTime;
+                roundActive = true;
+                bettingOpen = saved.bettingOpen;
+                betPlacedThisRound = saved.betPlaced || false;
+                betAmountThisRound = saved.betAmount || 0;
+
+                timerEl.textContent = timer;
+                periodEl.textContent = period;
+                setBettingState(bettingOpen);
+
+                if (betPlacedThisRound) {
+                    placeBtn.disabled = true;
+                    showMessage('Bet already placed this round.', 'info');
+                }
+
+                // Continue timer
+                startTimer();
+                return true;
+            }
+            return false;
         }
 
         // --- Init ---
@@ -735,13 +787,22 @@
             updateTotalUI();
             renderHistory();
             updateStats();
-            setBettingState(true);
-            resetTimer();
+
+            // Try to resume state
+            const resumed = resumeState();
+            if (!resumed) {
+                setBettingState(true);
+                resetTimer();
+            }
 
             // Place bet
             placeBtn.addEventListener('click', function() {
                 if (!bettingOpen) {
                     showMessage('⛔ Betting is closed!', 'closed');
+                    return;
+                }
+                if (betPlacedThisRound) {
+                    showMessage('⚠️ Bet already placed this round!', 'info');
                     return;
                 }
                 if (!selectedType || selectedValue === null) {
@@ -752,30 +813,32 @@
                     showMessage('Insufficient balance!', 'lose');
                     return;
                 }
-                // Deduct balance immediately
+                // Deduct balance and mark bet placed
                 data.balance -= currentStake;
+                betAmountThisRound = currentStake;
+                betPlacedThisRound = true;
                 updateBalanceUI();
-                showMessage(`✅ Bet placed! ₹${currentStake.toFixed(2)}`, 'win');
                 placeBtn.disabled = true;
-                // We'll process the result when round ends
+                showMessage(`✅ Bet placed! ₹${currentStake.toFixed(2)}`, 'win');
+                saveRoundState();
             });
 
-            // Cancel bet
             cancelBtn.addEventListener('click', function() {
                 if (!bettingOpen) {
                     showMessage('Cannot cancel — round in progress', 'closed');
                     return;
                 }
-                // Refund if balance was deducted? For simplicity, we just clear selection.
-                // But if bet was placed (balance deducted), we need to refund.
-                // In this version, we refund immediately if cancel clicked.
-                // However, we haven't actually deducted yet — we deduct on place.
-                // So we can just clear selection.
+                if (betPlacedThisRound) {
+                    // Refund if possible? We'll just clear selection, but we already deducted.
+                    // In a real game, cancel shouldn't refund after bet. We'll just clear selection for next time.
+                    // But the user might want to cancel before betting. Since we deduct on 'place', we can't refund.
+                    // However, we haven't placed yet! Wait, we place on click. So this clears the selection.
+                }
                 document.querySelectorAll('.num-grid button, .action-row button').forEach(b => b.classList.remove('selected'));
                 selectedType = null;
                 selectedValue = null;
                 placeBtn.disabled = true;
-                showMessage('Bet cleared.', 'info');
+                showMessage('Bet selection cleared.', 'info');
             });
         }
 
