@@ -167,7 +167,9 @@
         .bet-slip { padding: 14px; }
         .bet-slip .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .bet-slip .title-row .game-name { font-size: 13px; font-weight: 700; color: #f5c518; }
-        .bet-slip .title-row .bet-type { font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 2px 10px; border-radius: 12px; }
+        .bet-slip .title-row .bet-type { font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 2px 10px; border-radius: 12px; display: none; }
+        .bet-slip .title-row .bet-type.visible { display: inline-block; }
+
         .bet-slip .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
         .bet-slip .row-label { font-size: 11px; color: #94a3b8; font-weight: 600; min-width: 60px; }
         .bet-slip .qty-box { display: flex; align-items: center; background: #1a1a2e; border-radius: 6px; overflow: hidden; border: 1px solid #2a2a3a; }
@@ -481,16 +483,14 @@
     <!-- Tabs -->
     <div class="glass-card" style="margin-top:10px; padding:0 12px 12px 12px;">
         <div class="info-tabs">
-            <button class="active" data-tab="game">Game</button>
-            <button data-tab="history">Game History</button>
+            <button class="active" data-tab="history">Game History</button>
             <button data-tab="mybets">My Bets</button>
             <button data-tab="chart">Chart</button>
             <button data-tab="strategy">Strategy</button>
             <button data-tab="stats">Stats</button>
         </div>
         <div id="tabContent" class="tab-content">
-            <div id="panel-game" style="display:block;"><p style="color:#94a3b8; font-size:13px; text-align:center; padding:8px 0;">Select any combination! <span style="color:#f5c518;">Good luck!</span></p></div>
-            <div id="panel-history" style="display:none;">
+            <div id="panel-history" style="display:block;">
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-item"><div class="num" id="statRounds">0</div><div class="label">Rounds</div></div>
                     <div class="stat-item"><div class="num" id="statWins">0</div><div class="label">Wins</div></div>
@@ -525,10 +525,7 @@
 
 <script>
     // ============================================================
-    // WINGO — FINAL ULTIMATE VERSION
-    // Features: Separate history per timer, Sequential Period (Date+Counter),
-    // Violet rule, 1.5% house edge, bet limits, presets, preview,
-    // Game History (all rounds) & My Bets (only my bets).
+    // WINGO — FINAL VERSION (Game Tab Removed, Select Bets only appears on selection)
     // ============================================================
     (function() {
         'use strict';
@@ -604,7 +601,7 @@
         const getHistoryKey = (dur) => `wingo_history_${dur}`;
         const getCounterKey = (dur) => `wingo_counter_${dur}`;
 
-        // --- Period Generation (YearMonthDate + Sequential Counter) ---
+        // --- Period Generation ---
         function generateNextPeriod(duration) {
             const today = new Date();
             const y = today.getFullYear();
@@ -1057,6 +1054,22 @@
             playSound('spin');
         }
 
+        // --- Bet Display Update ---
+        function updateBetDisplay() {
+            const hasBet = selectedBets.colors.length > 0 || selectedBets.size || selectedBets.numbers.length > 0;
+            if (hasBet) {
+                let parts = [];
+                if (selectedBets.colors.length) parts.push(selectedBets.colors.join('+').toUpperCase());
+                if (selectedBets.size) parts.push(selectedBets.size.toUpperCase());
+                if (selectedBets.numbers.length) parts.push('#'+selectedBets.numbers.join(','));
+                selectedBetDisplay.textContent = parts.join(' + ');
+                selectedBetDisplay.className = 'bet-type visible';
+            } else {
+                selectedBetDisplay.className = 'bet-type';
+                selectedBetDisplay.textContent = '';
+            }
+        }
+
         // --- Render History Helpers ---
         function renderAllHistory() {
             if(history.length===0){ historyList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div>'; return; }
@@ -1156,7 +1169,7 @@
                 document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
                 betPlacedThisRound = false;
                 placeBtn.disabled = true;
-                updateSelectedBetDisplay();
+                updateBetDisplay();
                 updatePreview();
             } else {
                 betPlacedThisRound = false;
@@ -1217,15 +1230,6 @@
             currentStake = quantity * stakeMultiplier;
             const totalStake = currentStake * (activeCount || 1);
             totalAmount.textContent = '₹' + totalStake.toFixed(2);
-        }
-
-        function updateSelectedBetDisplay() {
-            let parts = [];
-            if (selectedBets.colors.length) parts.push(selectedBets.colors.join('+').toUpperCase());
-            if (selectedBets.size) parts.push(selectedBets.size.toUpperCase());
-            if (selectedBets.numbers.length) parts.push('#'+selectedBets.numbers.join(','));
-            if (parts.length===0) selectedBetDisplay.textContent = 'Select Bets';
-            else selectedBetDisplay.textContent = parts.join(' + ');
         }
 
         function showMessage(text,type='info') {
@@ -1294,7 +1298,7 @@
                 if(btn5) btn5.classList.add('selected');
             }
             placeBtn.disabled = false;
-            updateSelectedBetDisplay();
+            updateBetDisplay();
             updateTotalUI();
             updatePreview();
         }
@@ -1323,7 +1327,7 @@
             betPlacedThisRound = false;
             placeBtn.disabled = true;
             document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
-            updateSelectedBetDisplay();
+            updateBetDisplay();
             updateTotalUI();
             currentStreak = 0;
             streakType = null;
@@ -1354,7 +1358,7 @@
                         this.classList.add('selected');
                     }
                     placeBtn.disabled = false;
-                    updateSelectedBetDisplay(); updateTotalUI(); updatePreview();
+                    updateBetDisplay(); updateTotalUI(); updatePreview();
                 });
                 numRow1.appendChild(btn);
             });
@@ -1375,7 +1379,7 @@
                         this.classList.add('selected');
                     }
                     placeBtn.disabled = false;
-                    updateSelectedBetDisplay(); updateTotalUI(); updatePreview();
+                    updateBetDisplay(); updateTotalUI(); updatePreview();
                 });
                 numRow2.appendChild(btn);
             });
@@ -1396,7 +1400,7 @@
                         this.classList.add('selected');
                     }
                     placeBtn.disabled = false;
-                    updateSelectedBetDisplay(); updateTotalUI(); updatePreview();
+                    updateBetDisplay(); updateTotalUI(); updatePreview();
                 });
             });
             sizeRow.querySelectorAll('button').forEach(btn => {
@@ -1406,7 +1410,7 @@
                     if(selectedBets.size === size) { selectedBets.size = null; this.classList.remove('selected'); }
                     else { selectedBets.size = size; this.classList.add('selected'); }
                     placeBtn.disabled = false;
-                    updateSelectedBetDisplay(); updateTotalUI(); updatePreview();
+                    updateBetDisplay(); updateTotalUI(); updatePreview();
                 });
             });
         }
@@ -1554,7 +1558,7 @@
                     if(btn) btn.classList.add('selected');
                 });
                 placeBtn.disabled = false;
-                updateSelectedBetDisplay();
+                updateBetDisplay();
                 updateTotalUI();
                 updatePreview();
                 showMessage('↻ Repeated last bet','info');
@@ -1599,7 +1603,7 @@
                 document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
                 selectedBets = { colors: [], size: null, numbers: [] };
                 placeBtn.disabled = true;
-                updateSelectedBetDisplay();
+                updateBetDisplay();
                 updateTotalUI();
                 updatePreview();
                 showMessage('Cleared.','info');
