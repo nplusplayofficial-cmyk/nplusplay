@@ -31,15 +31,18 @@
             background: transparent;
             border: none;
             color: #94a3b8;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
             padding: 4px 8px;
             transition: 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
         }
-        .back-btn:hover { color: #f5c518; }
+        .back-btn:hover { color: #f5c518; background: rgba(245,197,24,0.1); }
 
         .winner-feed {
             position: fixed;
@@ -116,28 +119,47 @@
         .game-info-row .right { font-size: 20px; font-weight: 900; font-family: 'Courier New', monospace; color: #f5c518; }
         .game-info-row .right .sec { font-size: 14px; color: #94a3b8; }
 
+        /* Bright, vibrant number buttons */
         .num-grid { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
         .num-grid .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
         .num-grid button {
-            padding: 10px 0; border-radius: 8px; border: 2px solid transparent;
-            font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.12s;
-            background: #1a1a2e; color: #fff;
-            border-color: transparent;
-        }
-        .num-grid button.red-num { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .num-grid button.green-num { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-        .num-grid button.violet-red {
-            background: linear-gradient(135deg, #ef4444 49%, #f5c518 49%, #f5c518 51%, #a855f7 51%);
+            padding: 10px 0;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.12s;
             color: #fff;
-            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 12px rgba(255,255,255,0.05);
+        }
+        .num-grid button.red-num {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: #ef4444;
+            box-shadow: 0 0 15px rgba(239,68,68,0.4);
+        }
+        .num-grid button.green-num {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-color: #22c55e;
+            box-shadow: 0 0 15px rgba(34,197,94,0.4);
+        }
+        .num-grid button.violet-red {
+            background: linear-gradient(135deg, #ef4444 45%, #f5c518 48%, #f5c518 52%, #a855f7 55%);
+            border-color: #f5c518;
+            box-shadow: 0 0 20px rgba(239,68,68,0.6), 0 0 20px rgba(168,85,247,0.6);
         }
         .num-grid button.violet-green {
-            background: linear-gradient(135deg, #22c55e 49%, #f5c518 49%, #f5c518 51%, #a855f7 51%);
-            color: #fff;
-            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, #22c55e 45%, #f5c518 48%, #f5c518 52%, #a855f7 55%);
+            border-color: #f5c518;
+            box-shadow: 0 0 20px rgba(34,197,94,0.6), 0 0 20px rgba(168,85,247,0.6);
         }
-        .num-grid button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.2); transform: scale(1.05); }
-        .num-grid button:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
+        .num-grid button.selected {
+            border-color: #fff;
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(245,197,24,0.6);
+        }
+        .num-grid button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
         .color-labels { display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-bottom: 8px; padding: 0 2px; }
         .color-labels .red { color: #ef4444; }
@@ -175,7 +197,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(10, 8, 8, 0.9);
+            background: rgba(10, 8, 8, 0.95);
             backdrop-filter: blur(12px);
             border-top: 1px solid rgba(255, 215, 0, 0.15);
             padding: 16px 16px 20px;
@@ -236,7 +258,6 @@
         }
         .betting-closed.active { display: block; }
 
-        /* Result Popup */
         .result-popup-overlay {
             position: fixed;
             top: 0;
@@ -277,7 +298,6 @@
         .result-popup .result-details span { color: #f5c518; font-weight: 600; }
         .result-popup .result-close { margin-top: 16px; font-size: 12px; color: #64748b; }
 
-        /* Rules Popup */
         .rules-overlay {
             position: fixed;
             top: 0;
@@ -390,9 +410,9 @@
     <!-- Winner Feed -->
     <div class="winner-feed" id="winnerFeed"></div>
 
-    <!-- Top Bar: Back, N+ PLAY, Sound/18+ -->
+    <!-- Top Bar: Back Arrow, N+ PLAY, Sound/18+ -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+        <button class="back-btn" onclick="window.location.href='index.html'">←</button>
         <span style="font-size:20px; font-weight:900; color:#f5c518;">N+ PLAY</span>
         <div>
             <button id="soundToggle" class="sound-toggle" title="Toggle Sound">🔊</button>
@@ -589,8 +609,8 @@
 <script>
     // ============================================================
     // WINGO — FINAL ULTIMATE VERSION
-    // All features: Centered N+ PLAY, 5-4-3-2-1 countdown beeps,
-    // Bet slip auto-closes on success, 0/5 diagonal split.
+    // Bright numbers, single beep per second, back arrow only,
+    // modal closes at 5 sec.
     // ============================================================
     (function() {
         'use strict';
@@ -787,21 +807,20 @@
         let audioCtx = null;
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
 
-        function playBeeps(count) {
+        function playSingleBeep() {
             if(!soundEnabled || !audioCtx) return;
-            const now = audioCtx.currentTime;
-            for (let i = 0; i < count; i++) {
+            try {
+                const now = audioCtx.currentTime;
                 const o = audioCtx.createOscillator();
                 const g = audioCtx.createGain();
                 o.connect(g);
                 g.connect(audioCtx.destination);
                 o.type = 'square';
-                o.frequency.value = 800 + (count * 20);
-                g.gain.value = 0.07;
-                const start = now + i * 0.1;
-                o.start(start);
-                o.stop(start + 0.05);
-            }
+                o.frequency.value = 800;
+                g.gain.value = 0.08;
+                o.start(now);
+                o.stop(now + 0.05);
+            } catch(e) {}
         }
 
         function playSound(type) {
@@ -971,18 +990,22 @@
             timerEl.textContent = formatted;
             timerLarge.textContent = formatted;
 
-            // Countdown Beeps: 5s->5 beeps, 4s->4, 3s->3, 2s->2, 1s->1
+            // Single beep at each second from 5 down to 1
             if (secs >= 1 && secs <= 5 && secs !== lastBeepSecond) {
                 lastBeepSecond = secs;
-                if (soundEnabled) playBeeps(secs);
+                if (soundEnabled) playSingleBeep();
             }
             if (secs > 5) lastBeepSecond = -1;
 
+            // Close betting and modal at 5 seconds
             if (secs <= 5 && bettingOpen) {
                 setBettingState(false);
                 if (secs === 5) {
                     showMessage('⛔ Betting Closed!', 'closed');
-                    if (betModal.classList.contains('active')) { closeBetModal(); }
+                    // Force close modal immediately
+                    if (betModal.classList.contains('active')) {
+                        closeBetModal();
+                    }
                 }
             } else if (secs > 5 && !bettingOpen && !roundActive) {
                 setBettingState(true);
@@ -1588,7 +1611,7 @@
                 betAmountThisRound = totalCost;
                 betPlacedThisRound = true;
                 playSound('bet');
-                // *** Auto-close modal & show success ***
+                // Auto-close modal & show success
                 closeBetModal();
                 showMessage('✅ Bet placed successfully!', 'win');
                 setBettingState(false);
