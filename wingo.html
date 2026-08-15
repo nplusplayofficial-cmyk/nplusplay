@@ -164,21 +164,6 @@
         }
         .preset-btn:hover { border-color: #f5c518; color: #f5c518; background: rgba(245,197,24,0.05); }
 
-        .guess-btn {
-            background: rgba(245, 197, 24, 0.1);
-            border: 1px dashed rgba(245, 197, 24, 0.3);
-            border-radius: 8px;
-            padding: 4px 0;
-            text-align: center;
-            font-size: 12px;
-            color: #94a3b8;
-            cursor: pointer;
-            margin-bottom: 10px;
-            transition: 0.2s;
-        }
-        .guess-btn:hover { background: rgba(245, 197, 24, 0.15); border-color: #f5c518; }
-        .guess-btn .guess-result { color: #f5c518; font-weight: 700; }
-
         .bet-slip { padding: 14px; }
         .bet-slip .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .bet-slip .title-row .game-name { font-size: 13px; font-weight: 700; color: #f5c518; }
@@ -273,7 +258,8 @@
         .info-tabs button.active { color: #f5c518; border-bottom-color: #f5c518; }
 
         .tab-content { padding: 10px 0; max-height: 350px; overflow-y: auto; }
-        .tab-content .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .stats-grid .stat-item { background: #1a1a2e; padding: 6px; border-radius: 6px; text-align: center; }
         .stats-grid .stat-item .num { font-size: 14px; font-weight: 700; color: #f5c518; }
         .stats-grid .stat-item .label { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }
@@ -426,11 +412,6 @@
         <button class="preset-btn" data-preset="violet5">🟣 Violet + #5</button>
     </div>
 
-    <!-- Guess Button -->
-    <div class="guess-btn" id="guessBtn">
-        💡 Guess: <span class="guess-result" id="guessResult">Tap to predict</span>
-    </div>
-
     <!-- Bet Slip -->
     <div class="glass-card bet-slip">
         <div class="title-row">
@@ -501,9 +482,10 @@
     <div class="glass-card" style="margin-top:10px; padding:0 12px 12px 12px;">
         <div class="info-tabs">
             <button class="active" data-tab="game">Game</button>
-            <button data-tab="history">My History</button>
+            <button data-tab="history">Game History</button>
+            <button data-tab="mybets">My Bets</button>
             <button data-tab="chart">Chart</button>
-            <button data-tab="strategy">Follow Strategy</button>
+            <button data-tab="strategy">Strategy</button>
             <button data-tab="stats">Stats</button>
         </div>
         <div id="tabContent" class="tab-content">
@@ -516,6 +498,9 @@
                     <div class="stat-item"><div class="num" id="statTotal">₹0</div><div class="label">Total Won</div></div>
                 </div>
                 <div class="history-list" id="historyList"><div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div></div>
+            </div>
+            <div id="panel-mybets" style="display:none;">
+                <div class="history-list" id="myBetsList"><div style="color:#64748b; text-align:center; padding:10px;">No bets placed yet.</div></div>
             </div>
             <div id="panel-chart" style="display:none;">
                 <div class="chart-container"><canvas id="chartCanvas"></canvas></div>
@@ -542,13 +527,14 @@
     // ============================================================
     // WINGO — FINAL ULTIMATE VERSION
     // Features: Separate history per timer, Sequential Period (Date+Counter),
-    // Violet rule, 1.5% house edge, bet limits, presets, preview, etc.
+    // Violet rule, 1.5% house edge, bet limits, presets, preview,
+    // Game History (all rounds) & My Bets (only my bets).
     // ============================================================
     (function() {
         'use strict';
 
         // --- Config ---
-        let currentDuration = 30; // default 30s
+        let currentDuration = 30;
         let balance = 1000;
         let history = [];
         let rounds = 0, wins = 0, losses = 0, totalWon = 0;
@@ -595,6 +581,7 @@
         const totalAmount = document.getElementById('totalAmount');
         const messageEl = document.getElementById('message');
         const historyList = document.getElementById('historyList');
+        const myBetsList = document.getElementById('myBetsList');
         const statRounds = document.getElementById('statRounds');
         const statWins = document.getElementById('statWins');
         const statLosses = document.getElementById('statLosses');
@@ -607,8 +594,6 @@
         const soundCheck = document.getElementById('soundCheck');
         const soundToggle = document.getElementById('soundToggle');
         const tickerText = document.getElementById('tickerText');
-        const guessBtn = document.getElementById('guessBtn');
-        const guessResult = document.getElementById('guessResult');
         const streakBox = document.getElementById('streakBox');
         const winnerFeed = document.getElementById('winnerFeed');
         const statPanel = document.getElementById('statPanel');
@@ -834,17 +819,6 @@
             winnerFeed.appendChild(el);
             setTimeout(() => { if(el.parentNode) el.remove(); }, 3500);
             if(winnerFeed.children.length > 5) winnerFeed.firstChild.remove();
-        }
-
-        // --- Guess ---
-        function updateGuess() {
-            if(history.length<3){ guessResult.textContent='Need more data'; return; }
-            const last = history[0];
-            const isCorrect = Math.random() < 0.05;
-            let guess = isCorrect ? (last.colors?.[0]?.toUpperCase() || 'RED') :
-                (['RED','GREEN','VIOLET'].filter(c=>c!==last.colors?.[0]?.toUpperCase())[Math.floor(Math.random()*2)]);
-            guessResult.textContent = `💡 ${guess} (${isCorrect ? '✅' : '❌'})`;
-            guessResult.style.color = isCorrect ? '#10b981' : '#ef4444';
         }
 
         // --- Stats Panel ---
@@ -1083,6 +1057,68 @@
             playSound('spin');
         }
 
+        // --- Render History Helpers ---
+        function renderAllHistory() {
+            if(history.length===0){ historyList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div>'; return; }
+            let html='';
+            history.slice(0,30).forEach(item=>{
+                const colors = item.colors || ['red'];
+                const dotHtml = colors.map(c => `<span class="color-dot ${c}-dot"></span>`).join('');
+                const cls = item.won ? 'won' : (item.stake>0?'lost':'no-bet');
+                const txt = item.won ? '✅ +'+item.payout.toFixed(0) : (item.stake>0?'❌':'⏳');
+                html += `<div class="row">
+                    <span style="font-size:10px;color:#64748b;">${(item.period||'').slice(0,14)}</span>
+                    <span>${item.number} ${dotHtml}</span>
+                    <span class="round-result ${cls}">${txt}</span>
+                </div>`;
+            });
+            historyList.innerHTML = html;
+        }
+
+        function renderMyBets() {
+            const myBets = history.filter(item => item.stake > 0);
+            if(myBets.length===0){ myBetsList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No bets placed yet.</div>'; return; }
+            let html='';
+            myBets.slice(0,30).forEach(item=>{
+                const colors = item.colors || ['red'];
+                const dotHtml = colors.map(c => `<span class="color-dot ${c}-dot"></span>`).join('');
+                const cls = item.won ? 'won' : 'lost';
+                const txt = item.won ? '✅ +'+item.payout.toFixed(0) : '❌';
+                html += `<div class="row">
+                    <span style="font-size:10px;color:#64748b;">${(item.period||'').slice(0,14)}</span>
+                    <span>${item.number} ${dotHtml}</span>
+                    <span class="round-result ${cls}">${txt}</span>
+                </div>`;
+            });
+            myBetsList.innerHTML = html;
+        }
+
+        function updateStats() {
+            statRounds.textContent=rounds||0;
+            statWins.textContent=wins||0;
+            statLosses.textContent=losses||0;
+            statTotal.textContent='₹'+(totalWon||0).toFixed(0);
+        }
+
+        function updateStrategy() {
+            const box = document.getElementById('strategyDetail');
+            if(!box) return;
+            const recent = history.slice(0,20);
+            if(recent.length<5){ box.textContent='Need more data'; return; }
+            const last5 = recent.slice(0,5);
+            const colors = last5.map(r => r.colors?.[0] || 'red');
+            if(colors.every(c=>c===colors[0])) box.textContent=`🔥 Last 5 all ${colors[0].toUpperCase()}! Bet on ${colors[0]}?`;
+            else {
+                const counts = {red:0, green:0, violet:0};
+                recent.slice(0,10).forEach(r => {
+                    if(r.colors) r.colors.forEach(c => { if(counts[c]!==undefined) counts[c]++; });
+                });
+                if(counts.red>counts.green && counts.red>counts.violet) box.textContent='🔴 Red is hot!';
+                else if(counts.green>counts.red && counts.green>counts.violet) box.textContent='🟢 Green is hot!';
+                else box.textContent='⚖️ Balanced. No clear trend.';
+            }
+        }
+
         // --- Complete Round ---
         function completeRound() {
             if (roundActive) return;
@@ -1127,13 +1163,12 @@
                 placeBtn.disabled = false;
             }
 
-            renderHistory(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats();
+            renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats();
             updateBalanceUI();
 
             roundActive = false;
             nextRoundStart = getNextRoundStart(currentDuration);
             setTimeout(() => {
-                // Generate period ONLY when new round starts
                 currentPeriod = generateNextPeriod(currentDuration);
                 updatePeriodDisplay();
                 
@@ -1235,50 +1270,6 @@
             previewContent.innerHTML = html;
         }
 
-        // --- History ---
-        function renderHistory() {
-            if(history.length===0){ historyList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div>'; return; }
-            let html='';
-            history.slice(0,30).forEach(item=>{
-                const colors = item.colors || ['red'];
-                const dotHtml = colors.map(c => `<span class="color-dot ${c}-dot"></span>`).join('');
-                const cls = item.won ? 'won' : (item.stake>0?'lost':'no-bet');
-                const txt = item.won ? '✅ +'+item.payout.toFixed(0) : (item.stake>0?'❌':'⏳');
-                html += `<div class="row">
-                    <span style="font-size:10px;color:#64748b;">${(item.period||'').slice(0,14)}</span>
-                    <span>${item.number} ${dotHtml}</span>
-                    <span class="round-result ${cls}">${txt}</span>
-                </div>`;
-            });
-            historyList.innerHTML = html;
-        }
-
-        function updateStats() {
-            statRounds.textContent=rounds||0;
-            statWins.textContent=wins||0;
-            statLosses.textContent=losses||0;
-            statTotal.textContent='₹'+(totalWon||0).toFixed(0);
-        }
-
-        function updateStrategy() {
-            const box = document.getElementById('strategyDetail');
-            if(!box) return;
-            const recent = history.slice(0,20);
-            if(recent.length<5){ box.textContent='Need more data'; return; }
-            const last5 = recent.slice(0,5);
-            const colors = last5.map(r => r.colors?.[0] || 'red');
-            if(colors.every(c=>c===colors[0])) box.textContent=`🔥 Last 5 all ${colors[0].toUpperCase()}! Bet on ${colors[0]}?`;
-            else {
-                const counts = {red:0, green:0, violet:0};
-                recent.slice(0,10).forEach(r => {
-                    if(r.colors) r.colors.forEach(c => { if(counts[c]!==undefined) counts[c]++; });
-                });
-                if(counts.red>counts.green && counts.red>counts.violet) box.textContent='🔴 Red is hot!';
-                else if(counts.green>counts.red && counts.green>counts.violet) box.textContent='🟢 Green is hot!';
-                else box.textContent='⚖️ Balanced. No clear trend.';
-            }
-        }
-
         // --- Presets ---
         function applyPreset(type) {
             if(!bettingOpen || betPlacedThisRound) return;
@@ -1311,25 +1302,13 @@
         // --- Switch Duration ---
         function switchDuration(newDuration) {
             if (newDuration === currentDuration) return;
-            // Save current state
             saveHistory(currentDuration);
-            // Load new state
             currentDuration = newDuration;
             loadHistory(currentDuration);
-            // Generate period for the new duration
             currentPeriod = getInitialPeriod(currentDuration);
             updatePeriodDisplay();
-            // Reset UI
             resetGameState();
-            renderHistory();
-            updateStats();
-            renderChart();
-            updateStrategy();
-            updateTicker();
-            renderStats();
-            updateGuess();
-            updatePreview();
-            // Restart timer
+            renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats(); updatePreview();
             if (timerInterval) clearInterval(timerInterval);
             roundActive = false;
             resultShown = false;
@@ -1354,18 +1333,14 @@
 
         // --- Render Number Grid ---
         function renderNumberGrid() {
-            numRow1.innerHTML = '';
-            numRow2.innerHTML = '';
-            const n1 = [0,1,2,3,4];
-            const n2 = [5,6,7,8,9];
+            numRow1.innerHTML = ''; numRow2.innerHTML = '';
+            const n1 = [0,1,2,3,4]; const n2 = [5,6,7,8,9];
             const colorMap = ['red','green','red','green','red','green','red','green','red','green'];
             const special = [true,false,false,false,false,true,false,false,false,false];
             n1.forEach(i => {
                 const btn = document.createElement('button');
-                btn.textContent = i;
-                btn.dataset.num = i;
-                let cls = colorMap[i]+'-num';
-                if(special[i]) cls+=' violet-special';
+                btn.textContent = i; btn.dataset.num = i;
+                let cls = colorMap[i]+'-num'; if(special[i]) cls+=' violet-special';
                 btn.className = cls;
                 btn.addEventListener('click', function() {
                     if(!bettingOpen || betPlacedThisRound) return;
@@ -1374,26 +1349,19 @@
                         selectedBets.numbers = selectedBets.numbers.filter(n => n !== num);
                         this.classList.remove('selected');
                     } else {
-                        if(selectedBets.numbers.length >= 5) {
-                            showMessage('Max 5 numbers only!', 'info');
-                            return;
-                        }
+                        if(selectedBets.numbers.length >= 5) { showMessage('Max 5 numbers only!', 'info'); return; }
                         selectedBets.numbers.push(num);
                         this.classList.add('selected');
                     }
                     placeBtn.disabled = false;
-                    updateSelectedBetDisplay();
-                    updateTotalUI();
-                    updatePreview();
+                    updateSelectedBetDisplay(); updateTotalUI(); updatePreview();
                 });
                 numRow1.appendChild(btn);
             });
             n2.forEach(i => {
                 const btn = document.createElement('button');
-                btn.textContent = i;
-                btn.dataset.num = i;
-                let cls = colorMap[i]+'-num';
-                if(special[i]) cls+=' violet-special';
+                btn.textContent = i; btn.dataset.num = i;
+                let cls = colorMap[i]+'-num'; if(special[i]) cls+=' violet-special';
                 btn.className = cls;
                 btn.addEventListener('click', function() {
                     if(!bettingOpen || betPlacedThisRound) return;
@@ -1402,17 +1370,12 @@
                         selectedBets.numbers = selectedBets.numbers.filter(n => n !== num);
                         this.classList.remove('selected');
                     } else {
-                        if(selectedBets.numbers.length >= 5) {
-                            showMessage('Max 5 numbers only!', 'info');
-                            return;
-                        }
+                        if(selectedBets.numbers.length >= 5) { showMessage('Max 5 numbers only!', 'info'); return; }
                         selectedBets.numbers.push(num);
                         this.classList.add('selected');
                     }
                     placeBtn.disabled = false;
-                    updateSelectedBetDisplay();
-                    updateTotalUI();
-                    updatePreview();
+                    updateSelectedBetDisplay(); updateTotalUI(); updatePreview();
                 });
                 numRow2.appendChild(btn);
             });
@@ -1428,34 +1391,22 @@
                         selectedBets.colors = selectedBets.colors.filter(c => c !== color);
                         this.classList.remove('selected');
                     } else {
-                        if(selectedBets.colors.length >= 2) {
-                            showMessage('Max 2 colors only!', 'info');
-                            return;
-                        }
+                        if(selectedBets.colors.length >= 2) { showMessage('Max 2 colors only!', 'info'); return; }
                         selectedBets.colors.push(color);
                         this.classList.add('selected');
                     }
                     placeBtn.disabled = false;
-                    updateSelectedBetDisplay();
-                    updateTotalUI();
-                    updatePreview();
+                    updateSelectedBetDisplay(); updateTotalUI(); updatePreview();
                 });
             });
             sizeRow.querySelectorAll('button').forEach(btn => {
                 btn.addEventListener('click', function() {
                     if(!bettingOpen || betPlacedThisRound) return;
                     const size = this.dataset.type;
-                    if(selectedBets.size === size) {
-                        selectedBets.size = null;
-                        this.classList.remove('selected');
-                    } else {
-                        selectedBets.size = size;
-                        this.classList.add('selected');
-                    }
+                    if(selectedBets.size === size) { selectedBets.size = null; this.classList.remove('selected'); }
+                    else { selectedBets.size = size; this.classList.add('selected'); }
                     placeBtn.disabled = false;
-                    updateSelectedBetDisplay();
-                    updateTotalUI();
-                    updatePreview();
+                    updateSelectedBetDisplay(); updateTotalUI(); updatePreview();
                 });
             });
         }
@@ -1468,8 +1419,7 @@
                     document.querySelectorAll('#betMultipliers button').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     stakeMultiplier = parseInt(this.dataset.mult);
-                    updateTotalUI();
-                    updatePreview();
+                    updateTotalUI(); updatePreview();
                 });
             });
             document.querySelectorAll('#quickAmounts button').forEach(btn => {
@@ -1482,31 +1432,27 @@
                         document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
                         qtyDisplay.textContent = quantity;
-                        updateTotalUI();
-                        updatePreview();
+                        updateTotalUI(); updatePreview();
                         return;
                     }
                     document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     quantity = parseInt(this.dataset.val);
                     qtyDisplay.textContent = quantity;
-                    updateTotalUI();
-                    updatePreview();
+                    updateTotalUI(); updatePreview();
                 });
             });
             document.getElementById('qtyMinus').addEventListener('click', function() {
                 if(!bettingOpen || betPlacedThisRound) return;
                 if(quantity>1) quantity--;
                 qtyDisplay.textContent=quantity;
-                updateTotalUI();
-                updatePreview();
+                updateTotalUI(); updatePreview();
             });
             document.getElementById('qtyPlus').addEventListener('click', function() {
                 if(!bettingOpen || betPlacedThisRound) return;
                 quantity++;
                 qtyDisplay.textContent=quantity;
-                updateTotalUI();
-                updatePreview();
+                updateTotalUI(); updatePreview();
             });
         }
 
@@ -1552,16 +1498,15 @@
             setupDurationTabs();
             updateBalanceUI();
             updateTotalUI();
-            renderHistory();
+            renderAllHistory();
+            renderMyBets();
             updateStats();
             renderChart();
             updateStrategy();
             updateTicker();
-            updateGuess();
             renderStats();
             updatePreview();
 
-            // Sound
             soundCheck.addEventListener('change', function() {
                 soundEnabled = this.checked;
                 soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
@@ -1573,7 +1518,6 @@
                 if(soundEnabled) initAudio();
             });
 
-            // Auto-bet
             autoBetCheck.addEventListener('change', function() {
                 autoBet = this.checked;
                 if(autoBet) {
@@ -1584,17 +1528,12 @@
                 }
             });
 
-            // Presets
             document.querySelectorAll('.preset-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     applyPreset(this.dataset.preset);
                 });
             });
 
-            // Guess
-            guessBtn.addEventListener('click', updateGuess);
-
-            // Repeat
             document.getElementById('repeatBetBtn').addEventListener('click', function() {
                 if(!lastBetState){ showMessage('No previous bet','info'); return; }
                 if(!bettingOpen || betPlacedThisRound) return;
@@ -1621,7 +1560,6 @@
                 showMessage('↻ Repeated last bet','info');
             });
 
-            // Double
             document.getElementById('doubleBetBtn').addEventListener('click', function() {
                 if(!bettingOpen || betPlacedThisRound) return;
                 const newVal = quantity * 2;
@@ -1637,7 +1575,6 @@
                 showMessage(`2x! Stake: ${quantity}`,'info');
             });
 
-            // Place Bet
             placeBtn.addEventListener('click', function() {
                 if(!bettingOpen){ showMessage('⛔ Betting closed!','closed'); return; }
                 if(betPlacedThisRound){ showMessage('Already placed!','info'); return; }
@@ -1657,7 +1594,6 @@
                 setBettingState(false);
             });
 
-            // Cancel
             cancelBtn.addEventListener('click', function() {
                 if(betPlacedThisRound){ showMessage('Cannot cancel','closed'); return; }
                 document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
@@ -1669,16 +1605,13 @@
                 showMessage('Cleared.','info');
             });
 
-            // Result display click to dismiss
             resultDisplay.addEventListener('click', function() {
                 this.classList.remove('active');
             });
 
-            // Start timer
             startTimerLoop();
         }
 
-        // --- Run ---
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
