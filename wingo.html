@@ -119,7 +119,6 @@
         .game-info-row .right { font-size: 20px; font-weight: 900; font-family: 'Courier New', monospace; color: #f5c518; }
         .game-info-row .right .sec { font-size: 14px; color: #94a3b8; }
 
-        /* Number Grid: Two rows */
         .num-grid { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
         .num-grid .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
         .num-grid button {
@@ -132,7 +131,6 @@
         .num-grid button.violet-special { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
         .num-grid button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.15); transform: scale(1.05); }
         .num-grid button:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
-        .num-grid .num-label { font-size: 9px; color: #64748b; text-align: center; margin-top: 2px; }
 
         .color-labels { display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-bottom: 8px; padding: 0 2px; }
         .color-labels .red { color: #ef4444; }
@@ -160,7 +158,13 @@
 
         .random-label { text-align: center; font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 4px; }
 
-        /* Guess Button */
+        .preset-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+        .preset-btn {
+            padding: 6px 0; border-radius: 8px; border: 1px solid #2a2a3a;
+            background: #1a1a2e; color: #94a3b8; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .preset-btn:hover { border-color: #f5c518; color: #f5c518; background: rgba(245,197,24,0.05); }
+
         .guess-btn {
             background: rgba(245, 197, 24, 0.1);
             border: 1px dashed rgba(245, 197, 24, 0.3);
@@ -175,14 +179,6 @@
         }
         .guess-btn:hover { background: rgba(245, 197, 24, 0.15); border-color: #f5c518; }
         .guess-btn .guess-result { color: #f5c518; font-weight: 700; }
-
-        /* Quick Presets */
-        .preset-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
-        .preset-btn {
-            padding: 6px 0; border-radius: 8px; border: 1px solid #2a2a3a;
-            background: #1a1a2e; color: #94a3b8; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s;
-        }
-        .preset-btn:hover { border-color: #f5c518; color: #f5c518; background: rgba(245,197,24,0.05); }
 
         .bet-slip { padding: 14px; }
         .bet-slip .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -214,7 +210,6 @@
         .bet-slip .options-row .action-btns button { padding: 2px 10px; border-radius: 4px; border: 1px solid #2a2a3a; background: transparent; color: #94a3b8; font-size: 10px; font-weight: 700; cursor: pointer; }
         .bet-slip .options-row .action-btns button:hover { border-color: #f5c518; color: #f5c518; }
 
-        /* Bet Slip Preview */
         .preview-box {
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid rgba(255, 215, 0, 0.1);
@@ -268,7 +263,6 @@
         .result-display .number { font-size: 40px; font-weight: 900; font-family: 'Courier New', monospace; }
         .result-display .number.spinning { animation: spinReveal 0.1s infinite alternate; }
         .result-display .color-name { font-size: 16px; font-weight: 700; }
-        .result-display .color-name .violet-tag { font-size: 12px; font-weight: 600; background: rgba(168,85,247,0.2); padding: 0 6px; border-radius: 4px; margin-left: 4px; }
         .result-display .hash { font-size: 9px; color: #64748b; font-family: monospace; margin-top: 4px; }
         .result-display .win { color: #10b981; }
         .result-display .lose { color: #ef4444; }
@@ -355,8 +349,8 @@
             <div class="amount" id="balanceDisplay">₹1,000</div>
         </div>
         <div class="header-actions">
-            <button class="action-btn withdraw" onclick="alert('💳 Withdraw page coming soon!')">Withdraw</button>
-            <button class="action-btn deposit" onclick="alert('💳 Deposit page coming soon!')">Deposit</button>
+            <button class="action-btn withdraw" onclick="alert('💳 Withdraw coming soon!')">Withdraw</button>
+            <button class="action-btn deposit" onclick="alert('💳 Deposit coming soon!')">Deposit</button>
             <div class="timer-box">
                 <div class="time" id="timerDisplay">--:--</div>
                 <div class="period" id="periodDisplay">---</div>
@@ -547,674 +541,10 @@
 
 <script>
     // ============================================================
-    // WINGO — ULTIMATE VERSION: Violet Rule, Clock Timer, 1.5% House Edge, 2-Row Grid, Bet Limits, Presets, Preview, Persistent History
-    // ============================================================
-    (function() {
-        'use strict';
-
-        const STORAGE_KEY = 'wingo_data';
-
-        // --- Load persistent data ---
-        let data = loadData();
-
-        // --- Game State ---
-        let selectedBets = { color: null, size: null, numbers: [] }; // numbers: array of selected numbers (0-9)
-        let quantity = 1;
-        let stakeMultiplier = 1;
-        let currentStake = 1;
-        let totalBetsCount = 0;
-        let betPlacedThisRound = false;
-        let betAmountThisRound = 0;
-        let autoBet = false;
-        let soundEnabled = true;
-        let lastBetState = null;
-        let currentStreak = 0;
-        let streakType = null;
-
-        // Timer state (clock-based)
-        let duration = 30; // seconds, default 30s
-        let timerInterval = null;
-        let roundActive = false;
-        let bettingOpen = true;
-        let resultShown = false;
-        let currentPeriod = '';
-        let nextRoundStart = 0; // timestamp when next round starts
-        let roundStartTimestamp = 0;
-
-        // DOM refs (many)
-        const balanceEl = document.getElementById('balanceDisplay');
-        const timerEl = document.getElementById('timerDisplay');
-        const timerLarge = document.getElementById('timerLarge');
-        const periodEl = document.getElementById('periodDisplay');
-        const periodLarge = document.getElementById('periodDisplayLarge');
-        const statusLabel = document.getElementById('statusLabel');
-        const bettingClosedEl = document.getElementById('bettingClosed');
-        const resultDisplay = document.getElementById('resultDisplay');
-        const resultNumber = document.getElementById('resultNumber');
-        const resultColor = document.getElementById('resultColor');
-        const resultBetResult = document.getElementById('resultBetResult');
-        const resultHash = document.getElementById('resultHash');
-        const numRow1 = document.getElementById('numRow1');
-        const numRow2 = document.getElementById('numRow2');
-        const colorRow = document.getElementById('colorRow');
-        const sizeRow = document.getElementById('sizeRow');
-        const qtyDisplay = document.getElementById('qtyDisplay');
-        const totalAmount = document.getElementById('totalAmount');
-        const messageEl = document.getElementById('message');
-        const historyList = document.getElementById('historyList');
-        const statRounds = document.getElementById('statRounds');
-        const statWins = document.getElementById('statWins');
-        const statLosses = document.getElementById('statLosses');
-        const statTotal = document.getElementById('statTotal');
-        const placeBtn = document.getElementById('placeBet');
-        const cancelBtn = document.getElementById('cancelBet');
-        const selectedBetDisplay = document.getElementById('selectedBetDisplay');
-        const agreeCheck = document.getElementById('agreeCheck');
-        const autoBetCheck = document.getElementById('autoBetCheck');
-        const soundCheck = document.getElementById('soundCheck');
-        const soundToggle = document.getElementById('soundToggle');
-        const tickerText = document.getElementById('tickerText');
-        const guessBtn = document.getElementById('guessBtn');
-        const guessResult = document.getElementById('guessResult');
-        const streakBox = document.getElementById('streakBox');
-        const winnerFeed = document.getElementById('winnerFeed');
-        const statPanel = document.getElementById('statPanel');
-        const previewContent = document.getElementById('previewContent');
-
-        // --- Audio ---
-        let audioCtx = null;
-        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
-        function playLuxurySound(type) {
-            if(!soundEnabled || !audioCtx) return;
-            try {
-                const now = audioCtx.currentTime;
-                const gain = audioCtx.createGain();
-                gain.connect(audioCtx.destination);
-                gain.gain.value = 0.12;
-                if(type==='win') {
-                    [523.25,659.25,783.99].forEach((f,i)=>{ const o=audioCtx.createOscillator(); o.connect(gain); o.type='sine'; o.frequency.value=f; const g=audioCtx.createGain(); g.gain.value=0.15; o.connect(g); g.connect(audioCtx.destination); o.start(now+i*0.12); o.stop(now+i*0.12+0.2); g.gain.exponentialRampToValueAtTime(0.001, now+i*0.12+0.2); });
-                } else if(type==='lose') { [400,300,200].forEach((f,i)=>{ const o=audioCtx.createOscillator(); o.connect(gain); o.type='sine'; o.frequency.value=f; o.start(now+i*0.1); o.stop(now+i*0.1+0.15); }); }
-                else if(type==='spin') { for(let i=0;i<5;i++){ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value=800+Math.random()*400; g.gain.value=0.03; o.start(now+i*0.04); o.stop(now+i*0.04+0.02); } }
-                else if(type==='bet') { const o=audioCtx.createOscillator(); o.connect(gain); o.type='square'; o.frequency.value=600; o.start(now); o.stop(now+0.08); }
-                if (navigator.vibrate && (type==='win' || type==='lose')) { navigator.vibrate(type==='win' ? [30,50,30] : [50]); }
-            } catch(e) {}
-        }
-
-        // --- Confetti ---
-        function launchConfetti() {
-            const canvas = document.getElementById('confettiCanvas');
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width; canvas.height = rect.height;
-            const ctx = canvas.getContext('2d');
-            const pieces = []; const colors=['#f5c518','#ef4444','#22c55e','#a855f7','#3b82f6'];
-            for(let i=0;i<60;i++) { pieces.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height-20, w:Math.random()*8+4, h:Math.random()*4+2, color:colors[Math.floor(Math.random()*colors.length)], vx:(Math.random()-0.5)*4, vy:Math.random()*3+1, rot:Math.random()*360, rv:(Math.random()-0.5)*6 }); }
-            let frames=0;
-            function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.rot+=p.rv; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }); frames++; if(frames<60) requestAnimationFrame(animate); else ctx.clearRect(0,0,canvas.width,canvas.height); }
-            animate();
-        }
-
-        // --- Chart ---
-        function renderChart() {
-            const canvas = document.getElementById('chartCanvas'); if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width||400; canvas.height = rect.height||120;
-            const w=canvas.width, h=canvas.height; ctx.clearRect(0,0,w,h);
-            const recent = data.history.slice(0,100);
-            const freq = Array(10).fill(0);
-            recent.forEach(item=>{ if(item.number!==undefined) freq[item.number]=(freq[item.number]||0)+1; });
-            const maxFreq = Math.max(...freq,1); const pad=2, barWidth = w/10 - pad;
-            const colors = ['#ef4444','#22c55e','#ef4444','#22c55e','#ef4444','#a855f7','#ef4444','#22c55e','#ef4444','#22c55e'];
-            ctx.fillStyle='#1a1a2e'; ctx.fillRect(0,0,w,h);
-            freq.forEach((val,i)=>{ const barH=(val/maxFreq)*(h-20); ctx.fillStyle=colors[i]||'#f5c518'; ctx.fillRect(i*(barWidth+pad)+pad, h-barH-10, barWidth, barH); ctx.fillStyle='#94a3b8'; ctx.font='8px sans-serif'; ctx.textAlign='center'; ctx.fillText(i, i*(barWidth+pad)+pad+barWidth/2, h-2); });
-        }
-
-        // --- Ticker ---
-        function updateTicker() {
-            const recent = data.history.slice(0,5);
-            if(recent.length===0){ tickerText.textContent='🔥 LIVE WINS: Waiting...'; return; }
-            let text = '🔥 LIVE WINS: ';
-            recent.forEach(item=>{
-                if(item.won && item.payout>0) { text += `User ***${String(Math.floor(Math.random()*1000)).padStart(3,'0')} won ₹${item.payout.toFixed(0)} on ${(item.betType||'bet').toUpperCase()} • `; }
-            });
-            if(text==='🔥 LIVE WINS: ') text += 'Recent wins coming soon...';
-            tickerText.textContent = text;
-        }
-
-        // --- Winner Feed ---
-        function addWinnerFeed(name, amount, game) {
-            const el = document.createElement('div');
-            el.className = 'item';
-            el.innerHTML = `${name} won <span class="amount">₹${amount.toFixed(0)}</span> on <span class="game">${game}</span>`;
-            winnerFeed.appendChild(el);
-            setTimeout(() => { if(el.parentNode) el.remove(); }, 3500);
-            if(winnerFeed.children.length > 5) winnerFeed.firstChild.remove();
-        }
-
-        // --- Guess ---
-        function updateGuess() {
-            if(data.history.length<3){ guessResult.textContent='Need more data'; return; }
-            const last = data.history[0];
-            const isCorrect = Math.random() < 0.05;
-            let guess = isCorrect ? last.color.toUpperCase() : (['RED','GREEN','VIOLET'].filter(c=>c!==last.color.toUpperCase())[Math.floor(Math.random()*2)]);
-            guessResult.textContent = `💡 ${guess} (${isCorrect ? '✅' : '❌'})`;
-            guessResult.style.color = isCorrect ? '#10b981' : '#ef4444';
-        }
-
-        // --- Stats Panel ---
-        function renderStats() {
-            const last100 = data.history.slice(0,100);
-            const freq = Array(10).fill(0);
-            const lastSeen = Array(10).fill(-1);
-            const gaps = Array.from({length:10}, ()=>[]);
-            let maxConsecutive = Array(10).fill(0);
-            let currentConsecutive = Array(10).fill(0);
-            last100.forEach((item, idx) => {
-                if(item.number!==undefined) {
-                    const n = item.number;
-                    freq[n]++;
-                    if(lastSeen[n] !== -1) { gaps[n].push(idx - lastSeen[n] - 1); }
-                    lastSeen[n] = idx;
-                    if(idx > 0 && last100[idx-1]?.number === n) currentConsecutive[n]++;
-                    else currentConsecutive[n] = 1;
-                    if(currentConsecutive[n] > maxConsecutive[n]) maxConsecutive[n] = currentConsecutive[n];
-                }
-            });
-            const missing = lastSeen.map((v, i) => {
-                if(v === -1) return 100;
-                return last100.length - v - 1;
-            });
-            const avgMissing = gaps.map(g => g.length > 0 ? Math.round(g.reduce((a,b)=>a+b,0)/g.length) : 0);
-
-            let html = '';
-            for(let i=0; i<10; i++) {
-                html += `<div class="col">
-                    <div class="label">${i}</div>
-                    <div class="value missing">${missing[i]}</div>
-                    <div class="value" style="font-size:7px;color:#94a3b8;">${avgMissing[i]}</div>
-                    <div class="value freq">${freq[i]}</div>
-                    <div class="value" style="font-size:7px;color:#94a3b8;">${maxConsecutive[i]}</div>
-                </div>`;
-            }
-            statPanel.innerHTML = html;
-        }
-
-        // --- Streak ---
-        function updateStreak(won) {
-            if(won) {
-                if(streakType === 'win') currentStreak++;
-                else { currentStreak = 1; streakType = 'win'; }
-            } else {
-                if(streakType === 'lose') currentStreak++;
-                else { currentStreak = 1; streakType = 'lose'; }
-            }
-            if(currentStreak >= 3) {
-                streakBox.textContent = streakType === 'win' ? `🔥 ${currentStreak} Wins in a row!` : `💀 ${currentStreak} Losses in a row!`;
-                streakBox.className = 'streak-box ' + streakType;
-            } else {
-                streakBox.className = 'streak-box';
-                streakBox.style.display = 'none';
-            }
-        }
-
-        // --- Data Management ---
-        function loadData() {
-            try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
-            return { balance: 1000, history: [], rounds: 0, wins: 0, losses: 0, totalWon: 0 };
-        }
-        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-
-        function updateBalanceUI() { balanceEl.textContent='₹'+data.balance.toFixed(2); saveData(); }
-
-        // --- Timer & Clock Sync ---
-        function getNextRoundStart(durationSec) {
-            const now = Date.now();
-            // Round start times are multiples of durationSec from 00:00:00 of current day
-            // For simplicity, we align to the next boundary: roundStart = now + (durationSec - (now % durationSec))
-            const remainder = Math.floor(now / 1000) % durationSec;
-            const next = now + (durationSec - remainder) * 1000;
-            return next;
-        }
-
-        function updateTimerDisplay() {
-            const now = Date.now();
-            const remaining = Math.max(0, (nextRoundStart - now) / 1000);
-            const secs = Math.ceil(remaining);
-            const m = Math.floor(secs / 60);
-            const s = secs % 60;
-            const formatted = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-            timerEl.textContent = formatted;
-            timerLarge.textContent = formatted;
-
-            // Update period (unique ID based on current time)
-            const d = new Date();
-            const pad = n => String(n).padStart(2,'0');
-            currentPeriod = d.getFullYear() +
-                           pad(d.getMonth()+1) +
-                           pad(d.getDate()) +
-                           pad(d.getHours()) +
-                           pad(d.getMinutes()) +
-                           pad(d.getSeconds()) +
-                           String(d.getMilliseconds()).padStart(3,'0');
-            periodEl.textContent = currentPeriod.slice(0,14);
-            periodLarge.textContent = currentPeriod;
-
-            // Betting open/closed logic
-            if (secs <= 5 && bettingOpen) {
-                setBettingState(false);
-                if (secs === 5) {
-                    playLuxurySound('tick');
-                    showMessage('⛔ Betting Closed! Round in progress...', 'closed');
-                }
-            } else if (secs > 5 && !bettingOpen && !roundActive) {
-                setBettingState(true);
-            }
-
-            if (secs <= 0) {
-                // Round start
-                completeRound();
-            }
-        }
-
-        function startTimerLoop() {
-            if (timerInterval) clearInterval(timerInterval);
-            // Initialize next round start
-            nextRoundStart = getNextRoundStart(duration);
-            updateTimerDisplay();
-            timerInterval = setInterval(() => {
-                updateTimerDisplay();
-                // Recalculate next round start if we passed it (should be handled by secs<=0)
-            }, 200);
-        }
-
-        // --- Violet Rule ---
-        function getNumberColor(num) {
-            // Returns base color: 'red' or 'green'
-            if (num === 0 || num === 2 || num === 4 || num === 6 || num === 8) return 'red';
-            if (num === 1 || num === 3 || num === 7 || num === 9) return 'green';
-            if (num === 5) return 'green'; // 5 is green, but violet special
-            return 'red';
-        }
-        function isVioletSpecial(num) { return num === 0 || num === 5; }
-
-        function generateResult() {
-            const num = Math.floor(Math.random() * 10);
-            const baseColor = getNumberColor(num);
-            let resultColors = [baseColor];
-            let isViolet = false;
-            if (isVioletSpecial(num)) {
-                // Violet appears as Red-Violet or Green-Violet
-                isViolet = true;
-                const additionalColor = Math.random() < 0.5 ? 'red' : 'green';
-                resultColors = [additionalColor, 'violet'];
-            }
-            return { number: num, colors: resultColors, isViolet };
-        }
-
-        // --- Bet Processing with House Edge (1.5%) ---
-        function processResult(result) {
-            const { number, colors } = result;
-            let totalPayout = 0;
-            let totalWon = false;
-            let betResults = [];
-
-            // Calculate total bet amount (each active selection uses currentStake)
-            const activeCount = (selectedBets.color ? 1 : 0) + (selectedBets.size ? 1 : 0) + selectedBets.numbers.length;
-            if (activeCount === 0) return { totalPayout: 0, totalWon: false, betResults: [] };
-            const totalBetAmount = currentStake * activeCount;
-            if (betPlacedThisRound) data.balance -= totalBetAmount;
-
-            // Helper to check win
-            const checkWin = (betType, betVal) => {
-                if (betType === 'color') {
-                    if (betVal === 'violet') {
-                        return result.isViolet; // Violet bet wins on any Violet appearance
-                    } else {
-                        return colors.includes(betVal);
-                    }
-                }
-                if (betType === 'size') {
-                    const isBig = number >= 5;
-                    return (betVal === 'big' && isBig) || (betVal === 'small' && !isBig);
-                }
-                if (betType === 'number') {
-                    return number === betVal;
-                }
-                return false;
-            };
-
-            // Helper to get multiplier
-            const getMultiplier = (betType, betVal) => {
-                if (betType === 'color') {
-                    if (betVal === 'violet') return 14;
-                    return 2;
-                }
-                if (betType === 'size') return 2;
-                if (betType === 'number') return 9;
-                return 2;
-            };
-
-            // Process color bet
-            if (selectedBets.color) {
-                const color = selectedBets.color;
-                const won = checkWin('color', color);
-                const multiplier = getMultiplier('color', color);
-                betResults.push({ type: 'color', val: color, won, multiplier });
-                if (won) totalWon = true;
-            }
-
-            // Process size bet
-            if (selectedBets.size) {
-                const size = selectedBets.size;
-                const won = checkWin('size', size);
-                const multiplier = getMultiplier('size', size);
-                betResults.push({ type: 'size', val: size, won, multiplier });
-                if (won) totalWon = true;
-            }
-
-            // Process number bets (limited to max 5)
-            selectedBets.numbers.forEach(num => {
-                const won = checkWin('number', num);
-                const multiplier = getMultiplier('number', num);
-                betResults.push({ type: 'number', val: num, won, multiplier });
-                if (won) totalWon = true;
-            });
-
-            // Apply House Edge (1.5%) to each winning payout
-            betResults.forEach(b => {
-                if (b.won) {
-                    const rawPayout = currentStake * b.multiplier;
-                    const payout = rawPayout * (1 - 0.015); // 1.5% house edge
-                    totalPayout += payout;
-                    data.balance += payout;
-                }
-            });
-
-            if (totalPayout > 0) {
-                data.wins++;
-                data.totalWon += totalPayout;
-                updateBalanceUI();
-                playLuxurySound('win');
-                launchConfetti();
-                showMessage(`🎉 Won ₹${totalPayout.toFixed(2)}!`, 'win');
-                updateStreak(true);
-                const names = ['Mem***JVN','Su***aj','Kap***oor','Mem***H3M','Me***er','HAR***ARA','Rs***gh','Mem***XZ2'];
-                addWinnerFeed(names[Math.floor(Math.random()*names.length)], totalPayout, result.colors.join('+').toUpperCase());
-            } else if (betPlacedThisRound) {
-                data.losses++;
-                playLuxurySound('lose');
-                showMessage(`😞 Lost. ${result.colors.join('+').toUpperCase()} ${number}`, 'lose');
-                updateStreak(false);
-            } else {
-                showMessage('⏳ No bet placed.', 'info');
-            }
-
-            return { totalPayout, totalWon, betResults };
-        }
-
-        // --- Show Result with Spin Animation ---
-        function showResultWithSpin(result, payout, won) {
-            resultDisplay.classList.add('active');
-            const { number, colors } = result;
-            let spinCount = 0;
-            const maxSpins = 15 + Math.floor(Math.random() * 10);
-            resultNumber.classList.add('spinning');
-            const interval = setInterval(() => {
-                resultNumber.textContent = Math.floor(Math.random() * 10);
-                spinCount++;
-                if (spinCount >= maxSpins) {
-                    clearInterval(interval);
-                    resultNumber.classList.remove('spinning');
-                    resultNumber.textContent = number;
-                    // Display colors
-                    let colorStr = colors.map(c => {
-                        if (c === 'red') return '🔴';
-                        if (c === 'green') return '🟢';
-                        if (c === 'violet') return '🟣';
-                        return '';
-                    }).join(' ');
-                    let colorNameStr = colors.map(c => c.charAt(0).toUpperCase()+c.slice(1)).join('+');
-                    resultColor.innerHTML = colorStr + ' ' + colorNameStr;
-                    if (won) {
-                        resultBetResult.textContent = `✅ Won ₹${payout.toFixed(2)}!`;
-                        resultBetResult.style.color = '#10b981';
-                    } else if (betPlacedThisRound) {
-                        resultBetResult.textContent = '❌ Lost';
-                        resultBetResult.style.color = '#ef4444';
-                    } else {
-                        resultBetResult.textContent = '⏳ No Bet';
-                        resultBetResult.style.color = '#64748b';
-                    }
-                    // Hash
-                    const hash = '0x'+Array.from({length:10},()=>Math.floor(Math.random()*16).toString(16)).join('');
-                    resultHash.textContent = '🔐 Hash: '+hash;
-                }
-            }, 70);
-            playLuxurySound('spin');
-        }
-
-        // --- Complete Round ---
-        function completeRound() {
-            if (roundActive) return;
-            roundActive = true;
-            setBettingState(false);
-            const result = generateResult();
-            const { totalPayout, totalWon } = processResult(result);
-
-            data.rounds++;
-            // Record history
-            const betStr = (selectedBets.color?selectedBets.color:'') + (selectedBets.size?selectedBets.size:'') + selectedBets.numbers.join(',');
-            data.history.unshift({
-                period: currentPeriod,
-                number: result.number,
-                colors: result.colors,
-                betType: betStr || 'none',
-                stake: betPlacedThisRound ? currentStake : 0,
-                payout: totalPayout,
-                won: totalWon,
-                timestamp: Date.now()
-            });
-            if (data.history.length > 500) data.history.pop();
-            saveData();
-
-            showResultWithSpin(result, totalPayout, totalWon);
-            if (betPlacedThisRound) {
-                lastBetState = {
-                    color: selectedBets.color,
-                    size: selectedBets.size,
-                    numbers: [...selectedBets.numbers]
-                };
-            }
-
-            // Reset bets (unless auto-bet)
-            if (!autoBet) {
-                selectedBets = { color: null, size: null, numbers: [] };
-                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
-                betPlacedThisRound = false;
-                placeBtn.disabled = true;
-                updateSelectedBetDisplay();
-                updatePreview();
-            } else {
-                betPlacedThisRound = false;
-                placeBtn.disabled = false;
-                // Auto-bet will be placed after round starts
-            }
-
-            renderHistory(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats();
-            updateBalanceUI();
-
-            // Schedule next round start
-            roundActive = false;
-            nextRoundStart = getNextRoundStart(duration);
-            setTimeout(() => {
-                setBettingState(true);
-                resultDisplay.classList.remove('active');
-                if (autoBet && !betPlacedThisRound && (selectedBets.color || selectedBets.size || selectedBets.numbers.length>0)) {
-                    setTimeout(autoPlaceBet, 500);
-                }
-            }, 4000);
-        }
-
-        // --- UI Helpers ---
-        function setBettingState(open) {
-            bettingOpen = open;
-            const disabled = !open || betPlacedThisRound;
-            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .multiplier-row button, #quickAmounts button, .qty-box button, #cancelBet').forEach(el => {
-                el.disabled = disabled;
-            });
-            placeBtn.disabled = disabled || (!selectedBets.color && !selectedBets.size && selectedBets.numbers.length===0) || currentStake > data.balance || betPlacedThisRound;
-            if(open && !betPlacedThisRound){
-                bettingClosedEl.classList.remove('active');
-                statusLabel.textContent = '● Betting Open';
-                statusLabel.style.color = '#22c55e';
-            } else {
-                bettingClosedEl.classList.add('active');
-                statusLabel.textContent = '● Betting Closed';
-                statusLabel.style.color = '#ef4444';
-            }
-            updateTotalUI();
-            updatePreview();
-        }
-
-        function updateTotalUI() {
-            const activeCount = (selectedBets.color?1:0) + (selectedBets.size?1:0) + selectedBets.numbers.length;
-            totalBetsCount = activeCount || 1;
-            currentStake = quantity * stakeMultiplier;
-            const totalStake = currentStake * (activeCount || 1);
-            totalAmount.textContent = '₹' + totalStake.toFixed(2);
-        }
-
-        function updateSelectedBetDisplay() {
-            let parts = [];
-            if (selectedBets.color) parts.push(selectedBets.color.toUpperCase());
-            if (selectedBets.size) parts.push(selectedBets.size.toUpperCase());
-            if (selectedBets.numbers.length) parts.push('#'+selectedBets.numbers.join(','));
-            if (parts.length===0) selectedBetDisplay.textContent = 'Select Bets';
-            else selectedBetDisplay.textContent = parts.join(' + ');
-        }
-
-        function showMessage(text,type='info') {
-            messageEl.textContent=text; messageEl.className='message '+type; messageEl.style.display='block';
-            if(type!=='closed') setTimeout(()=>{messageEl.style.display='none';},3500);
-        }
-
-        // --- Bet Limits ---
-        function canAddNumber() {
-            return selectedBets.numbers.length < 5;
-        }
-        function canAddColor() {
-            return !selectedBets.color; // max 1 color? Actually user said max 2 colors. But we only have 3 colors, they said max 2. So we'll allow up to 2.
-            // We'll implement: user can select up to 2 colors.
-        }
-
-        // --- UI Rendering ---
-        function renderNumberGrid() {
-            numRow1.innerHTML = '';
-            numRow2.innerHTML = '';
-            const numbers1 = [0,1,2,3,4];
-            const numbers2 = [5,6,7,8,9];
-            const colorMap = ['red','green','red','green','red','green','red','green','red','green'];
-            const special = [true,false,false,false,false,true,false,false,false,false];
-            numbers1.forEach(i => {
-                const btn = document.createElement('button');
-                btn.textContent = i;
-                btn.dataset.num = i;
-                let cls = colorMap[i]+'-num';
-                if(special[i]) cls+=' violet-special';
-                btn.className = cls;
-                btn.addEventListener('click', function() {
-                    if(!bettingOpen || betPlacedThisRound) return;
-                    const num = parseInt(this.dataset.num);
-                    if (selectedBets.numbers.includes(num)) {
-                        // Deselect
-                        selectedBets.numbers = selectedBets.numbers.filter(n => n !== num);
-                        this.classList.remove('selected');
-                    } else {
-                        if (!canAddNumber()) {
-                            showMessage('Max 5 numbers only!', 'info');
-                            return;
-                        }
-                        selectedBets.numbers.push(num);
-                        this.classList.add('selected');
-                    }
-                    placeBtn.disabled = false;
-                    updateSelectedBetDisplay();
-                    updateTotalUI();
-                    updatePreview();
-                });
-                numRow1.appendChild(btn);
-            });
-            numbers2.forEach(i => {
-                const btn = document.createElement('button');
-                btn.textContent = i;
-                btn.dataset.num = i;
-                let cls = colorMap[i]+'-num';
-                if(special[i]) cls+=' violet-special';
-                btn.className = cls;
-                btn.addEventListener('click', function() {
-                    if(!bettingOpen || betPlacedThisRound) return;
-                    const num = parseInt(this.dataset.num);
-                    if (selectedBets.numbers.includes(num)) {
-                        selectedBets.numbers = selectedBets.numbers.filter(n => n !== num);
-                        this.classList.remove('selected');
-                    } else {
-                        if (!canAddNumber()) {
-                            showMessage('Max 5 numbers only!', 'info');
-                            return;
-                        }
-                        selectedBets.numbers.push(num);
-                        this.classList.add('selected');
-                    }
-                    placeBtn.disabled = false;
-                    updateSelectedBetDisplay();
-                    updateTotalUI();
-                    updatePreview();
-                });
-                numRow2.appendChild(btn);
-            });
-        }
-
-        function renderActionRows() {
-            // Colors
-            colorRow.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if(!bettingOpen || betPlacedThisRound) return;
-                    const color = this.dataset.type;
-                    // Max 2 colors logic: we only allow one color for simplicity (since we have 3 colors, max 2 is fine)
-                    // We'll allow toggling but only one at a time? Actually user said max 2 colors, meaning they can select up to 2 colors.
-                    // We'll implement: toggle, but if already selected, deselect; if selecting a second one, we need to deselect previous? 
-                    // Let's allow multi-select up to 2.
-                    if (selectedBets.color === color) {
-                        selectedBets.color = null;
-                        this.classList.remove('selected');
-                    } else {
-                        // Check if already have 2 colors selected (color + another?)
-                        // Since we only store one color, we'll allow up to 2 by storing an array.
-                        // For simplicity, we'll just allow one color (the UI has 3 buttons, but they said max 2, we can allow selecting 2 but we'll only store one for simplicity? 
-                        // Actually we can change to array. But let's keep it simple: user said max 2 colors, but we'll allow selection of multiple colors by clicking multiple buttons.
-                        // We'll store an array.
-                        // Let's modify selectedBets to have colors array.
-                        // But we defined selectedBets.color as single string earlier. We'll change it to an array.
-                        // Refactor: use selectedBets.colors = [].
-                        // I'll quickly adapt.
-                    }
-                    // For now, keep single color to avoid major rewrite; but user said max 2 colors, we can allow multiple by clicking multiple, but we only have one color stored.
-                    // Let's quickly change to colors array. We'll update selectedBets to have colors array.
-                });
-            });
-            // Actually, to save time, we'll implement colors as array.
-            // Modify selectedBets structure to have colors: [].
-            // We'll adjust code accordingly.
-            // I'll do a quick refactor in the initialization.
-            // Since this is a code block, I'll include the refactor in the final script.
-        }
-
-        // --- Placeholder for quick and dirty — I'll just put the full script with all refactors. Since this is a long code, I'll provide the final code directly. 
-        // To avoid repetition, I'll output the full HTML file now with the complete script. 
-    })();
-    <script>
-    // ============================================================
-    // WINGO — COMPLETE GAME ENGINE
+    // WINGO — FINAL ULTIMATE VERSION
+    // All features: clock‑sync timer, violet rule, 2‑row grid,
+    // bet limits (max 5 numbers, max 2 colors), 1.5% house edge,
+    // presets, preview, persistent history, auto‑bet, sounds, etc.
     // ============================================================
     (function() {
         'use strict';
@@ -1414,7 +744,7 @@
             if(data.history.length<3){ guessResult.textContent='Need more data'; return; }
             const last = data.history[0];
             const isCorrect = Math.random() < 0.05;
-            let guess = isCorrect ? last.colors?.[0]?.toUpperCase() || 'RED' :
+            let guess = isCorrect ? (last.colors?.[0]?.toUpperCase() || 'RED') :
                 (['RED','GREEN','VIOLET'].filter(c=>c!==last.colors?.[0]?.toUpperCase())[Math.floor(Math.random()*2)]);
             guessResult.textContent = `💡 ${guess} (${isCorrect ? '✅' : '❌'})`;
             guessResult.style.color = isCorrect ? '#10b981' : '#ef4444';
@@ -1549,7 +879,8 @@
             const num = Math.floor(Math.random() * 10);
             const baseColor = getNumberColor(num);
             let resultColors = [baseColor];
-            if (isVioletSpecial(num) && Math.random() < 0.3) { // 30% chance of violet
+            // Violet appears as Red-Violet or Green-Violet (30% chance on special numbers)
+            if (isVioletSpecial(num) && Math.random() < 0.3) {
                 const additionalColor = Math.random() < 0.5 ? 'red' : 'green';
                 resultColors = [additionalColor, 'violet'];
             }
@@ -1751,7 +1082,7 @@
         function setBettingState(open) {
             bettingOpen = open;
             const disabled = !open || betPlacedThisRound;
-            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .multiplier-row button, #quickAmounts button, .qty-box button, #cancelBtn').forEach(el => {
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .multiplier-row button, #quickAmounts button, .qty-box button, #cancelBet').forEach(el => {
                 if(el) el.disabled = disabled;
             });
             placeBtn.disabled = disabled || (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) || currentStake > data.balance || betPlacedThisRound;
@@ -1891,7 +1222,9 @@
                 selectedBets.colors = ['violet'];
                 selectedBets.numbers = [5];
                 colorRow.querySelector('button[data-type="violet"]')?.classList.add('selected');
-                numRow1.querySelector('button[data-num="5"]')?.classList.add('selected');
+                // select number 5 in either row
+                const btn5 = document.querySelector('.num-grid button[data-num="5"]');
+                if(btn5) btn5.classList.add('selected');
             }
             placeBtn.disabled = false;
             updateSelectedBetDisplay();
@@ -2159,8 +1492,8 @@
                     sizeRow.querySelector(`button[data-type="${selectedBets.size}"]`)?.classList.add('selected');
                 }
                 selectedBets.numbers.forEach(n => {
-                    numRow1.querySelector(`button[data-num="${n}"]`)?.classList.add('selected');
-                    numRow2.querySelector(`button[data-num="${n}"]`)?.classList.add('selected');
+                    const btn = document.querySelector(`.num-grid button[data-num="${n}"]`);
+                    if(btn) btn.classList.add('selected');
                 });
                 placeBtn.disabled = false;
                 updateSelectedBetDisplay();
@@ -2234,3 +1567,5 @@
         }
     })();
 </script>
+</body>
+</html>
