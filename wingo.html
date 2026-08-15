@@ -27,7 +27,6 @@
             padding: 14px;
         }
 
-        /* Winner Feed */
         .winner-feed {
             position: fixed;
             right: 10px;
@@ -222,7 +221,6 @@
         .preview-box .preview-item { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
         .preview-box .preview-item:last-child { border-bottom: none; }
         .preview-box .preview-total { font-weight: 700; color: #f5c518; border-top: 1px solid rgba(255,215,0,0.15); padding-top: 4px; margin-top: 4px; }
-        .preview-box .preview-potential { color: #10b981; font-weight: 700; }
 
         .bet-slip .total-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1a1a2e; padding-top: 10px; margin-top: 4px; }
         .bet-slip .total-row .total-label { font-size: 10px; color: #64748b; }
@@ -541,18 +539,17 @@
 
 <script>
     // ============================================================
-    // WINGO — FINAL ULTIMATE VERSION
-    // All features: clock‑sync timer, violet rule, 2‑row grid,
-    // bet limits (max 5 numbers, max 2 colors), 1.5% house edge,
-    // presets, preview, persistent history, auto‑bet, sounds, etc.
+    // WINGO — SEPARATE HISTORY FOR EACH TIMER (30s, 1m, 3m, 5m)
+    // Each duration has its own localStorage key.
     // ============================================================
     (function() {
         'use strict';
 
-        const STORAGE_KEY = 'wingo_data';
-
-        // --- Load Data ---
-        let data = loadData();
+        // --- Config ---
+        let currentDuration = 30; // default 30s
+        let balance = 1000;
+        let history = [];
+        let rounds = 0, wins = 0, losses = 0, totalWon = 0;
 
         // --- State ---
         let selectedBets = { colors: [], size: null, numbers: [] };
@@ -568,7 +565,6 @@
         let currentStreak = 0;
         let streakType = null;
 
-        let duration = 30;
         let timerInterval = null;
         let roundActive = false;
         let bettingOpen = true;
@@ -615,6 +611,49 @@
         const winnerFeed = document.getElementById('winnerFeed');
         const statPanel = document.getElementById('statPanel');
         const previewContent = document.getElementById('previewContent');
+
+        // --- Storage Keys ---
+        const BALANCE_KEY = 'wingo_balance';
+        const getHistoryKey = (dur) => `wingo_history_${dur}`;
+
+        // --- Data Functions ---
+        function loadBalance() {
+            try {
+                const val = localStorage.getItem(BALANCE_KEY);
+                if (val !== null) balance = parseFloat(val) || 1000;
+                else balance = 1000;
+            } catch(e) { balance = 1000; }
+            updateBalanceUI();
+        }
+        function saveBalance() {
+            localStorage.setItem(BALANCE_KEY, String(balance));
+        }
+
+        function loadHistory(duration) {
+            try {
+                const raw = localStorage.getItem(getHistoryKey(duration));
+                if (raw) {
+                    const d = JSON.parse(raw);
+                    history = d.history || [];
+                    rounds = d.rounds || 0;
+                    wins = d.wins || 0;
+                    losses = d.losses || 0;
+                    totalWon = d.totalWon || 0;
+                    return;
+                }
+            } catch(e) {}
+            history = [];
+            rounds = 0; wins = 0; losses = 0; totalWon = 0;
+        }
+
+        function saveHistory(duration) {
+            const data = { history, rounds, wins, losses, totalWon };
+            localStorage.setItem(getHistoryKey(duration), JSON.stringify(data));
+        }
+
+        function updateBalanceUI() {
+            balanceEl.textContent = '₹' + balance.toFixed(2);
+        }
 
         // --- Audio ---
         let audioCtx = null;
@@ -696,7 +735,7 @@
             canvas.width = rect.width||400; canvas.height = rect.height||120;
             const w=canvas.width, h=canvas.height;
             ctx.clearRect(0,0,w,h);
-            const recent = data.history.slice(0,100);
+            const recent = history.slice(0,100);
             const freq = Array(10).fill(0);
             recent.forEach(item=>{ if(item.number!==undefined) freq[item.number]=(freq[item.number]||0)+1; });
             const maxFreq = Math.max(...freq,1);
@@ -717,7 +756,7 @@
 
         // --- Ticker ---
         function updateTicker() {
-            const recent = data.history.slice(0,5);
+            const recent = history.slice(0,5);
             if(recent.length===0){ tickerText.textContent='🔥 LIVE WINS: Waiting...'; return; }
             let text = '🔥 LIVE WINS: ';
             recent.forEach(item=>{
@@ -741,8 +780,8 @@
 
         // --- Guess ---
         function updateGuess() {
-            if(data.history.length<3){ guessResult.textContent='Need more data'; return; }
-            const last = data.history[0];
+            if(history.length<3){ guessResult.textContent='Need more data'; return; }
+            const last = history[0];
             const isCorrect = Math.random() < 0.05;
             let guess = isCorrect ? (last.colors?.[0]?.toUpperCase() || 'RED') :
                 (['RED','GREEN','VIOLET'].filter(c=>c!==last.colors?.[0]?.toUpperCase())[Math.floor(Math.random()*2)]);
@@ -752,7 +791,7 @@
 
         // --- Stats Panel ---
         function renderStats() {
-            const last100 = data.history.slice(0,100);
+            const last100 = history.slice(0,100);
             const freq = Array(10).fill(0);
             const lastSeen = Array(10).fill(-1);
             const gaps = Array.from({length:10}, ()=>[]);
@@ -807,18 +846,6 @@
             }
         }
 
-        // --- Data ---
-        function loadData() {
-            try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
-            return { balance: 1000, history: [], rounds: 0, wins: 0, losses: 0, totalWon: 0 };
-        }
-        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-
-        function updateBalanceUI() {
-            balanceEl.textContent='₹'+data.balance.toFixed(2);
-            saveData();
-        }
-
         // --- Timer ---
         function getNextRoundStart(durationSec) {
             const now = Date.now();
@@ -862,7 +889,7 @@
 
         function startTimerLoop() {
             if (timerInterval) clearInterval(timerInterval);
-            nextRoundStart = getNextRoundStart(duration);
+            nextRoundStart = getNextRoundStart(currentDuration);
             updateTimerDisplay();
             timerInterval = setInterval(updateTimerDisplay, 200);
         }
@@ -879,7 +906,6 @@
             const num = Math.floor(Math.random() * 10);
             const baseColor = getNumberColor(num);
             let resultColors = [baseColor];
-            // Violet appears as Red-Violet or Green-Violet (30% chance on special numbers)
             if (isVioletSpecial(num) && Math.random() < 0.3) {
                 const additionalColor = Math.random() < 0.5 ? 'red' : 'green';
                 resultColors = [additionalColor, 'violet'];
@@ -897,7 +923,7 @@
             const activeCount = selectedBets.colors.length + (selectedBets.size ? 1 : 0) + selectedBets.numbers.length;
             if (activeCount === 0) return { totalPayout: 0, totalWon: false };
             const totalBetAmount = currentStake * activeCount;
-            if (betPlacedThisRound) data.balance -= totalBetAmount;
+            if (betPlacedThisRound) balance -= totalBetAmount;
 
             const checkWin = (type, val) => {
                 if (type === 'color') {
@@ -945,14 +971,14 @@
                     const rawPayout = currentStake * b.multiplier;
                     const payout = rawPayout * 0.985; // 1.5% house edge
                     totalPayout += payout;
-                    data.balance += payout;
+                    balance += payout;
                 }
             });
 
             if (totalPayout > 0) {
-                data.wins++;
-                data.totalWon += totalPayout;
-                updateBalanceUI();
+                wins++;
+                totalWon += totalPayout;
+                saveBalance();
                 playSound('win');
                 launchConfetti();
                 showMessage(`🎉 Won ₹${totalPayout.toFixed(2)}!`, 'win');
@@ -960,7 +986,7 @@
                 const names = ['Mem***JVN','Su***aj','Kap***oor','Mem***H3M','Me***er'];
                 addWinnerFeed(names[Math.floor(Math.random()*names.length)], totalPayout, colors.join('+').toUpperCase());
             } else if (betPlacedThisRound) {
-                data.losses++;
+                losses++;
                 playSound('lose');
                 showMessage(`😞 Lost. ${colors.join('+').toUpperCase()} ${number}`, 'lose');
                 updateStreak(false);
@@ -968,6 +994,7 @@
                 showMessage('⏳ No bet placed.', 'info');
             }
 
+            saveBalance();
             return { totalPayout, totalWon, betResults };
         }
 
@@ -1018,9 +1045,9 @@
             const result = generateResult();
             const { totalPayout, totalWon } = processResult(result);
 
-            data.rounds++;
+            rounds++;
             const betStr = selectedBets.colors.join(',') + (selectedBets.size||'') + selectedBets.numbers.join(',');
-            data.history.unshift({
+            history.unshift({
                 period: currentPeriod,
                 number: result.number,
                 colors: result.colors,
@@ -1030,8 +1057,8 @@
                 won: totalWon,
                 timestamp: Date.now()
             });
-            if (data.history.length > 500) data.history.pop();
-            saveData();
+            if (history.length > 500) history.pop();
+            saveHistory(currentDuration);
 
             showResultWithSpin(result, totalPayout, totalWon);
             if (betPlacedThisRound) {
@@ -1058,7 +1085,7 @@
             updateBalanceUI();
 
             roundActive = false;
-            nextRoundStart = getNextRoundStart(duration);
+            nextRoundStart = getNextRoundStart(currentDuration);
             setTimeout(() => {
                 setBettingState(true);
                 resultDisplay.classList.remove('active');
@@ -1073,7 +1100,7 @@
             if (!autoBet || !bettingOpen || betPlacedThisRound) return;
             if (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) return;
             const totalCost = currentStake * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
-            if (totalCost > data.balance) return;
+            if (totalCost > balance) return;
             if (!agreeCheck.checked) return;
             placeBtn.click();
         }
@@ -1085,7 +1112,7 @@
             document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .multiplier-row button, #quickAmounts button, .qty-box button, #cancelBet').forEach(el => {
                 if(el) el.disabled = disabled;
             });
-            placeBtn.disabled = disabled || (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) || currentStake > data.balance || betPlacedThisRound;
+            placeBtn.disabled = disabled || (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) || currentStake > balance || betPlacedThisRound;
             if(open && !betPlacedThisRound){
                 bettingClosedEl.classList.remove('active');
                 statusLabel.textContent = '● Betting Open';
@@ -1153,16 +1180,16 @@
                 html += `<div class="preview-item"><span>#${n}</span><span>${mult}x → ₹${win}</span></div>`;
             });
             const totalStake = currentStake * activeCount;
-            const totalWin = (currentStake * 9 * 0.985 * activeCount).toFixed(2); // rough max
+            const totalWin = (currentStake * 9 * 0.985 * activeCount).toFixed(2);
             html += `<div class="preview-total">Total Stake: ₹${totalStake.toFixed(2)} | Potential Win: ₹${totalWin}</div>`;
             previewContent.innerHTML = html;
         }
 
         // --- History ---
         function renderHistory() {
-            if(data.history.length===0){ historyList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div>'; return; }
+            if(history.length===0){ historyList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div>'; return; }
             let html='';
-            data.history.slice(0,30).forEach(item=>{
+            history.slice(0,30).forEach(item=>{
                 const colors = item.colors || ['red'];
                 const dotHtml = colors.map(c => `<span class="color-dot ${c}-dot"></span>`).join('');
                 const cls = item.won ? 'won' : (item.stake>0?'lost':'no-bet');
@@ -1177,16 +1204,16 @@
         }
 
         function updateStats() {
-            statRounds.textContent=data.rounds||0;
-            statWins.textContent=data.wins||0;
-            statLosses.textContent=data.losses||0;
-            statTotal.textContent='₹'+(data.totalWon||0).toFixed(0);
+            statRounds.textContent=rounds||0;
+            statWins.textContent=wins||0;
+            statLosses.textContent=losses||0;
+            statTotal.textContent='₹'+(totalWon||0).toFixed(0);
         }
 
         function updateStrategy() {
             const box = document.getElementById('strategyDetail');
             if(!box) return;
-            const recent = data.history.slice(0,20);
+            const recent = history.slice(0,20);
             if(recent.length<5){ box.textContent='Need more data'; return; }
             const last5 = recent.slice(0,5);
             const colors = last5.map(r => r.colors?.[0] || 'red');
@@ -1222,7 +1249,6 @@
                 selectedBets.colors = ['violet'];
                 selectedBets.numbers = [5];
                 colorRow.querySelector('button[data-type="violet"]')?.classList.add('selected');
-                // select number 5 in either row
                 const btn5 = document.querySelector('.num-grid button[data-num="5"]');
                 if(btn5) btn5.classList.add('selected');
             }
@@ -1230,6 +1256,47 @@
             updateSelectedBetDisplay();
             updateTotalUI();
             updatePreview();
+        }
+
+        // --- Switch Duration ---
+        function switchDuration(newDuration) {
+            if (newDuration === currentDuration) return;
+            // Save current state
+            saveHistory(currentDuration);
+            // Load new state
+            currentDuration = newDuration;
+            loadHistory(currentDuration);
+            // Reset UI
+            resetGameState();
+            renderHistory();
+            updateStats();
+            renderChart();
+            updateStrategy();
+            updateTicker();
+            renderStats();
+            updateGuess();
+            updatePreview();
+            // Restart timer
+            if (timerInterval) clearInterval(timerInterval);
+            roundActive = false;
+            resultShown = false;
+            nextRoundStart = getNextRoundStart(currentDuration);
+            setBettingState(true);
+            resultDisplay.classList.remove('active');
+            startTimerLoop();
+        }
+
+        function resetGameState() {
+            selectedBets = { colors: [], size: null, numbers: [] };
+            betPlacedThisRound = false;
+            placeBtn.disabled = true;
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+            updateSelectedBetDisplay();
+            updateTotalUI();
+            currentStreak = 0;
+            streakType = null;
+            streakBox.className = 'streak-box';
+            streakBox.style.display = 'none';
         }
 
         // --- Render Number Grid ---
@@ -1357,7 +1424,7 @@
                     if(!bettingOpen || betPlacedThisRound) return;
                     if(this.dataset.val === 'max') {
                         const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
-                        quantity = Math.floor(data.balance / (currentStake * (activeCount||1)));
+                        quantity = Math.floor(balance / (currentStake * (activeCount||1)));
                         if(quantity < 1) quantity = 1;
                         document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
@@ -1412,20 +1479,16 @@
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.duration-tabs button').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    duration = parseInt(this.dataset.dur);
-                    if (timerInterval) clearInterval(timerInterval);
-                    roundActive = false;
-                    resultShown = false;
-                    nextRoundStart = getNextRoundStart(duration);
-                    setBettingState(true);
-                    resultDisplay.classList.remove('active');
-                    startTimerLoop();
+                    const newDur = parseInt(this.dataset.dur);
+                    switchDuration(newDur);
                 });
             });
         }
 
         // --- Init ---
         function init() {
+            loadBalance();
+            loadHistory(currentDuration);
             renderNumberGrid();
             renderActionRows();
             renderMultipliers();
@@ -1528,7 +1591,7 @@
                 }
                 if(!agreeCheck.checked){ showMessage('Agree to rules','info'); return; }
                 const totalCost = currentStake * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
-                if(totalCost > data.balance){ showMessage('Insufficient balance!','lose'); return; }
+                if(totalCost > balance){ showMessage('Insufficient balance!','lose'); return; }
                 initAudio();
                 betAmountThisRound = totalCost;
                 betPlacedThisRound = true;
