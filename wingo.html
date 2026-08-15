@@ -284,10 +284,10 @@
         .history-list .row .red-dot { background: #ef4444; }
         .history-list .row .green-dot { background: #22c55e; }
         .history-list .row .violet-dot { background: #a855f7; }
-        .history-list .round-result { font-weight: 600; }
-        .history-list .round-result.won { color: #10b981; }
-        .history-list .round-result.lost { color: #ef4444; }
-        .history-list .round-result.no-bet { color: #64748b; }
+        .history-list .row .round-result { font-weight: 600; }
+        .history-list .row .round-result.won { color: #10b981; }
+        .history-list .row .round-result.lost { color: #ef4444; }
+        .history-list .row .round-result.no-bet { color: #64748b; }
 
         .chart-container { width: 100%; height: 120px; position: relative; margin: 10px 0; }
         #chartCanvas { width: 100%; height: 100%; background: #0f172a; border-radius: 8px; }
@@ -540,7 +540,9 @@
 
 <script>
     // ============================================================
-    // WINGO — FINAL: Sequential Period (Date+Counter), Separate History per Timer
+    // WINGO — FINAL ULTIMATE VERSION
+    // Features: Separate history per timer, Sequential Period (Date+Counter),
+    // Violet rule, 1.5% house edge, bet limits, presets, preview, etc.
     // ============================================================
     (function() {
         'use strict';
@@ -659,15 +661,11 @@
                     }
                 }
             } catch(e) {}
-            // If count is 0, it means no round started yet for today. Generate first one.
             if (meta.count === 0) {
                 meta.count = 1;
                 localStorage.setItem(key, JSON.stringify(meta));
                 return dateStr + '1';
             }
-            // Return the current period (the one that will be used for the next round)
-            // Actually, if we just loaded, the next period should be the next number.
-            // But we want to display the current period for the upcoming round. So we use the current count.
             return dateStr + meta.count;
         }
 
@@ -923,8 +921,6 @@
             timerEl.textContent = formatted;
             timerLarge.textContent = formatted;
 
-            // Period is static, updated only via generateNextPeriod
-
             if (secs <= 5 && bettingOpen) {
                 setBettingState(false);
                 if (secs === 5) { playSound('spin'); showMessage('⛔ Betting Closed!', 'closed'); }
@@ -1134,13 +1130,13 @@
             renderHistory(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats();
             updateBalanceUI();
 
-            // Generate period for the NEXT round right now
-            currentPeriod = generateNextPeriod(currentDuration);
-            updatePeriodDisplay();
-
             roundActive = false;
             nextRoundStart = getNextRoundStart(currentDuration);
             setTimeout(() => {
+                // Generate period ONLY when new round starts
+                currentPeriod = generateNextPeriod(currentDuration);
+                updatePeriodDisplay();
+                
                 setBettingState(true);
                 resultDisplay.classList.remove('active');
                 if (autoBet && !betPlacedThisRound && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
