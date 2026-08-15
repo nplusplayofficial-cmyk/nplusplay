@@ -502,7 +502,7 @@
         <button class="preset-btn" data-preset="violet5">🟣 Violet + #5</button>
     </div>
 
-    <!-- ============ BET SLIP MODAL ============ -->
+    <!-- BET SLIP MODAL -->
     <div class="bet-modal-overlay" id="betModal">
         <div class="bet-slip-inner">
             <div class="title-row">
@@ -624,7 +624,7 @@
 
 <script>
     // ============================================================
-    // WINGO — FINAL FIX: Balance deducts immediately, timer never freezes.
+    // WINGO — FIXED: Win popup, period update, payout addition.
     // ============================================================
     (function() {
         'use strict';
@@ -648,10 +648,8 @@
         let timerInterval = null;
         let roundActive = false;
         let bettingOpen = true;
-        let resultShown = false;
         let currentPeriod = '';
         let lastBeepSecond = -1;
-        let roundResult = null; // store result for the current round
 
         const balanceEl = document.getElementById('balanceDisplay');
         const timerEl = document.getElementById('timerDisplay');
@@ -707,7 +705,6 @@
             const nextStart = getNextRoundStart(currentDuration);
             const remaining = Math.max(0, (nextStart - now) / 1000);
             const secs = Math.ceil(remaining);
-            
             const m = Math.floor(secs / 60);
             const s = secs % 60;
             const formatted = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
@@ -724,9 +721,7 @@
                 setBettingState(false);
                 if (secs === 5) {
                     showMessage('⛔ Betting Closed!', 'closed');
-                    if (betModal.classList.contains('active')) {
-                        closeBetModal();
-                    }
+                    if (betModal.classList.contains('active')) closeBetModal();
                 }
             } else if (secs > 5 && !bettingOpen && !roundActive) {
                 setBettingState(true);
@@ -1073,7 +1068,7 @@
             updateModalPreview();
         }
 
-        // --- Bet Placement (immediate balance deduction) ---
+        // --- Place Bet (immediate deduction) ---
         function placeBetNow() {
             if (!bettingOpen) { showMessage('⛔ Betting closed!','closed'); return false; }
             if (betPlacedThisRound) { showMessage('Already placed!','info'); return false; }
@@ -1085,7 +1080,6 @@
             if (totalCost > balance) { showMessage('Insufficient balance!','lose'); return false; }
 
             initAudio();
-            // Deduct balance immediately
             balance -= totalCost;
             betAmountThisRound = totalCost;
             betPlacedThisRound = true;
@@ -1094,7 +1088,7 @@
             updateBalanceUI();
             closeBetModal();
             showMessage(`✅ Bet placed! ₹${totalCost.toFixed(2)} deducted`, 'win');
-            setBettingState(false); // prevent further bets this round
+            setBettingState(false);
             autoBet = modalAutoBet.checked;
             document.getElementById('autoBetCheck').checked = autoBet;
             return true;
@@ -1108,8 +1102,10 @@
             let betResults = [];
 
             const activeCount = selectedBets.colors.length + (selectedBets.size ? 1 : 0) + selectedBets.numbers.length;
-            if (activeCount === 0 || !betPlacedThisRound) return { totalPayout: 0, totalWon: false, betResults: [], totalBetAmount: 0, netChange: 0 };
-            
+            if (activeCount === 0 || !betPlacedThisRound) {
+                return { totalPayout: 0, totalWon: false, betResults: [], totalBetAmount: 0, netChange: 0 };
+            }
+
             const perBetStake = getCurrentStake();
             const totalBetAmount = perBetStake * activeCount;
 
@@ -1133,6 +1129,7 @@
                 return 2;
             };
 
+            // Process colors
             selectedBets.colors.forEach(c => {
                 const won = checkWin('color', c);
                 const mult = getMultiplier('color', c);
@@ -1140,6 +1137,7 @@
                 if (won) totalWonRound = true;
             });
 
+            // Process size
             if (selectedBets.size) {
                 const won = checkWin('size', selectedBets.size);
                 const mult = getMultiplier('size', selectedBets.size);
@@ -1147,6 +1145,7 @@
                 if (won) totalWonRound = true;
             }
 
+            // Process numbers
             selectedBets.numbers.forEach(n => {
                 const won = checkWin('number', n);
                 const mult = getMultiplier('number', n);
@@ -1208,6 +1207,7 @@
             }
             popupDetails.innerHTML = details;
 
+            // Show popup
             resultPopup.classList.add('active');
             setTimeout(() => {
                 resultPopup.classList.remove('active');
@@ -1218,9 +1218,11 @@
             if (roundActive) return;
             roundActive = true;
             setBettingState(false);
+
             const result = generateResult();
             const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processResult(result);
 
+            // Update history
             rounds++;
             const betStr = selectedBets.colors.join(',') + (selectedBets.size||'') + selectedBets.numbers.join(',');
             history.unshift({
@@ -1237,6 +1239,7 @@
             if (history.length > 50) history.pop();
             saveHistory(currentDuration);
 
+            // Show popup only if a bet was placed
             if (betPlacedThisRound && betResults.length > 0) {
                 let details = betResults.map(b => {
                     let label = b.type.toUpperCase() + ' ' + (b.val !== undefined ? b.val : '');
@@ -1246,25 +1249,28 @@
                 showResultPopup(totalWon, totalPayout, currentPeriod, details, result.colors, netChange);
             }
 
+            // Reset bets
             selectedBets = { colors: [], size: null, numbers: [] };
             document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
             betPlacedThisRound = false;
             closeBetModal();
 
+            // Update UI
             renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); renderStats();
             updateBalanceUI();
 
+            // Generate new period and reset timer for next round
             roundActive = false;
-            setTimeout(() => {
-                currentPeriod = generateNextPeriod(currentDuration);
-                updatePeriodDisplay();
-                setBettingState(true);
-                if (autoBet && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
-                    setTimeout(openBetModal, 500);
-                }
-            }, 3000);
+            currentPeriod = generateNextPeriod(currentDuration);
+            updatePeriodDisplay();
+            setBettingState(true);
+
+            if (autoBet && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
+                setTimeout(openBetModal, 500);
+            }
         }
 
+        // --- Modal functions ---
         function openBetModal() {
             const hasBet = selectedBets.colors.length > 0 || selectedBets.size || selectedBets.numbers.length > 0;
             if (!hasBet || !bettingOpen || betPlacedThisRound) return;
@@ -1330,6 +1336,7 @@
             modalTotalAmount.textContent = '₹' + totalStake.toFixed(2);
         }
 
+        // --- UI helpers ---
         function setBettingState(open) {
             bettingOpen = open;
             const disabled = !open || betPlacedThisRound;
@@ -1355,6 +1362,7 @@
             if(type!=='closed') setTimeout(()=>{el.style.display='none';},3500);
         }
 
+        // --- Presets ---
         function applyPreset(type) {
             if(!bettingOpen || betPlacedThisRound) return;
             document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
@@ -1380,6 +1388,7 @@
             openBetModal();
         }
 
+        // --- Switch duration ---
         function switchDuration(newDuration) {
             if (newDuration === currentDuration) return;
             saveHistory(currentDuration);
@@ -1394,11 +1403,11 @@
             renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); renderStats();
             if (timerInterval) clearInterval(timerInterval);
             roundActive = false;
-            resultShown = false;
             setBettingState(true);
             startTimerLoop();
         }
 
+        // --- Render functions ---
         function renderNumberGrid() {
             numRow1.innerHTML = ''; numRow2.innerHTML = '';
             const n1 = [0,1,2,3,4]; const n2 = [5,6,7,8,9];
@@ -1574,6 +1583,7 @@
             });
         }
 
+        // --- Init ---
         function init() {
             cleanHistory();
             loadBalance();
@@ -1624,7 +1634,7 @@
                 if (e.target === this) rulesOverlay.classList.remove('active');
             });
 
-            // Qty Controls
+            // Qty
             document.getElementById('modalQtyMinus').addEventListener('click', function() {
                 if(!bettingOpen || betPlacedThisRound) return;
                 if(quantity>1) quantity--;
