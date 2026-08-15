@@ -132,32 +132,31 @@
             transition: 0.12s;
             color: #fff;
             text-shadow: 0 0 10px rgba(0,0,0,0.5);
-            box-shadow: 0 0 12px rgba(255,255,255,0.05);
         }
         .num-grid button.red-num {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             border-color: #ef4444;
-            box-shadow: 0 0 15px rgba(239,68,68,0.4);
+            box-shadow: 0 0 20px rgba(239,68,68,0.5);
         }
         .num-grid button.green-num {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             border-color: #22c55e;
-            box-shadow: 0 0 15px rgba(34,197,94,0.4);
+            box-shadow: 0 0 20px rgba(34,197,94,0.5);
         }
         .num-grid button.violet-red {
             background: linear-gradient(135deg, #ef4444 45%, #f5c518 48%, #f5c518 52%, #a855f7 55%);
             border-color: #f5c518;
-            box-shadow: 0 0 20px rgba(239,68,68,0.6), 0 0 20px rgba(168,85,247,0.6);
+            box-shadow: 0 0 25px rgba(239,68,68,0.6), 0 0 25px rgba(168,85,247,0.6);
         }
         .num-grid button.violet-green {
             background: linear-gradient(135deg, #22c55e 45%, #f5c518 48%, #f5c518 52%, #a855f7 55%);
             border-color: #f5c518;
-            box-shadow: 0 0 20px rgba(34,197,94,0.6), 0 0 20px rgba(168,85,247,0.6);
+            box-shadow: 0 0 25px rgba(34,197,94,0.6), 0 0 25px rgba(168,85,247,0.6);
         }
         .num-grid button.selected {
             border-color: #fff;
             transform: scale(1.08);
-            box-shadow: 0 0 30px rgba(245,197,24,0.6);
+            box-shadow: 0 0 40px rgba(245,197,24,0.7);
         }
         .num-grid button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
@@ -166,31 +165,51 @@
         .color-labels .green { color: #22c55e; }
         .color-labels .violet { color: #a855f7; }
 
+        /* Bright Color Buttons (Red, Green, Violet) */
         .action-row-colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 6px; }
         .action-row-colors button {
             padding: 8px 0; border-radius: 8px; border: 2px solid transparent;
             font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.12s;
-            background: #1a1a2e; color: #fff;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
         }
-        .action-row-colors button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.12); }
-        .action-row-colors button:disabled { opacity: 0.3; cursor: not-allowed; }
-        .action-row-colors .red { color: #ef4444; } .action-row-colors .green { color: #22c55e; } .action-row-colors .violet { color: #a855f7; }
+        .action-row-colors button.red { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 0 15px rgba(239,68,68,0.4); border-color: #ef4444; }
+        .action-row-colors button.green { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 0 15px rgba(34,197,94,0.4); border-color: #22c55e; }
+        .action-row-colors button.violet { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 0 15px rgba(168,85,247,0.4); border-color: #a855f7; }
+        .action-row-colors button.selected { border-color: #f5c518; box-shadow: 0 0 25px rgba(245,197,24,0.5); transform: scale(1.05); }
+        .action-row-colors button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
+        /* Bright Big/Small Buttons */
         .action-row-size { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 10px; }
         .action-row-size button {
             padding: 8px 0; border-radius: 8px; border: 2px solid transparent;
             font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.12s;
-            background: #1a1a2e; color: #fff;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
         }
-        .action-row-size button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.12); }
-        .action-row-size button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .action-row-size button[data-type="big"] { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 0 15px rgba(245,158,11,0.4); border-color: #f59e0b; }
+        .action-row-size button[data-type="small"] { background: linear-gradient(135deg, #06b6d4, #0891b2); box-shadow: 0 0 15px rgba(6,182,212,0.4); border-color: #06b6d4; }
+        .action-row-size button.selected { border-color: #f5c518; box-shadow: 0 0 25px rgba(245,197,24,0.5); transform: scale(1.05); }
+        .action-row-size button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
+        /* Bright Presets */
         .preset-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
         .preset-btn {
-            padding: 6px 0; border-radius: 8px; border: 1px solid #2a2a3a;
-            background: #1a1a2e; color: #94a3b8; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s;
+            padding: 6px 0; border-radius: 8px; border: 2px solid #2a2a3a;
+            background: #1a1a2e;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #94a3b8;
+            text-shadow: 0 0 4px rgba(0,0,0,0.3);
         }
-        .preset-btn:hover { border-color: #f5c518; color: #f5c518; background: rgba(245,197,24,0.05); }
+        .preset-btn[data-preset="greenSmall"] { border-color: #22c55e; color: #22c55e; background: rgba(34,197,94,0.15); box-shadow: 0 0 10px rgba(34,197,94,0.2); }
+        .preset-btn[data-preset="greenSmall"]:hover { background: rgba(34,197,94,0.3); box-shadow: 0 0 20px rgba(34,197,94,0.5); }
+        .preset-btn[data-preset="redBig"] { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.15); box-shadow: 0 0 10px rgba(239,68,68,0.2); }
+        .preset-btn[data-preset="redBig"]:hover { background: rgba(239,68,68,0.3); box-shadow: 0 0 20px rgba(239,68,68,0.5); }
+        .preset-btn[data-preset="violet5"] { border-color: #a855f7; color: #a855f7; background: rgba(168,85,247,0.15); box-shadow: 0 0 10px rgba(168,85,247,0.2); }
+        .preset-btn[data-preset="violet5"]:hover { background: rgba(168,85,247,0.3); box-shadow: 0 0 20px rgba(168,85,247,0.5); }
 
         .bet-modal-overlay {
             position: fixed;
@@ -464,17 +483,20 @@
         <span class="violet">● Violet (0,5)</span>
     </div>
 
+    <!-- BRIGHT COLOR ROW -->
     <div class="action-row-colors" id="colorRow">
         <button class="red" data-type="red">Red</button>
         <button class="green" data-type="green">Green</button>
         <button class="violet" data-type="violet">Violet</button>
     </div>
 
+    <!-- BRIGHT BIG/SMALL ROW -->
     <div class="action-row-size" id="sizeRow">
         <button data-type="big">Big</button>
         <button data-type="small">Small</button>
     </div>
 
+    <!-- BRIGHT PRESETS -->
     <div class="preset-row" id="presetRow">
         <button class="preset-btn" data-preset="greenSmall">🟢 Green + Small</button>
         <button class="preset-btn" data-preset="redBig">🔴 Red + Big</button>
@@ -609,8 +631,7 @@
 <script>
     // ============================================================
     // WINGO — FINAL ULTIMATE VERSION
-    // Bright numbers, single beep per second, back arrow only,
-    // modal closes at 5 sec.
+    // ALL elements bright, modal closes at 5s, Violet always = 2 colors.
     // ============================================================
     (function() {
         'use strict';
@@ -990,19 +1011,17 @@
             timerEl.textContent = formatted;
             timerLarge.textContent = formatted;
 
-            // Single beep at each second from 5 down to 1
             if (secs >= 1 && secs <= 5 && secs !== lastBeepSecond) {
                 lastBeepSecond = secs;
                 if (soundEnabled) playSingleBeep();
             }
             if (secs > 5) lastBeepSecond = -1;
 
-            // Close betting and modal at 5 seconds
+            // FORCE CLOSE MODAL AT 5 SECONDS
             if (secs <= 5 && bettingOpen) {
                 setBettingState(false);
                 if (secs === 5) {
                     showMessage('⛔ Betting Closed!', 'closed');
-                    // Force close modal immediately
                     if (betModal.classList.contains('active')) {
                         closeBetModal();
                     }
@@ -1034,7 +1053,8 @@
             const num = Math.floor(Math.random() * 10);
             const baseColor = getNumberColor(num);
             let resultColors = [baseColor];
-            if (isVioletSpecial(num) && Math.random() < 0.3) {
+            // Violet ALWAYS appears as 2 colors
+            if (isVioletSpecial(num)) {
                 const additionalColor = Math.random() < 0.5 ? 'red' : 'green';
                 resultColors = [additionalColor, 'violet'];
             }
@@ -1121,7 +1141,7 @@
             return { totalPayout, totalWon, betResults, totalBetAmount };
         }
 
-        function showResultPopup(won, payout, period, betDetails) {
+        function showResultPopup(won, payout, period, betDetails, resultColors) {
             const icon = won ? '🎉' : '😞';
             const title = won ? 'You Win!' : 'You Lose';
             const titleClass = won ? 'win' : 'lose';
@@ -1132,6 +1152,7 @@
             let details = `<div><strong>Period:</strong> ${period}</div>`;
             details += `<div><strong>Bet:</strong> ${betDetails}</div>`;
             details += `<div><strong>Stake:</strong> ₹${betAmountThisRound.toFixed(2)}</div>`;
+            details += `<div><strong>Result:</strong> ${resultColors.join(' + ').toUpperCase()}</div>`;
             if (won) {
                 details += `<div><strong>Payout:</strong> ₹${payout.toFixed(2)}</div>`;
                 const profit = payout - betAmountThisRound;
@@ -1174,7 +1195,8 @@
                     let label = b.type.toUpperCase() + ' ' + (b.val !== undefined ? b.val : '');
                     return label;
                 }).join(' + ');
-                showResultPopup(totalWon, totalPayout, currentPeriod, details);
+                let colorNames = result.colors.map(c => c.toUpperCase()).join(' + ');
+                showResultPopup(totalWon, totalPayout, currentPeriod, details, result.colors);
             }
 
             selectedBets = { colors: [], size: null, numbers: [] };
@@ -1417,11 +1439,18 @@
                 <thead><tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr></thead>
                 <tbody>`;
             history.slice(0,50).forEach(item => {
-                const dotColor = item.colors && item.colors.includes('violet') ? 'violet' :
-                                (item.colors && item.colors.includes('red') ? 'red' : 'green');
-                const dotClass = dotColor + '-dot';
+                const colors = item.colors || ['red'];
+                // Show both colors if Violet is present
+                let colorHtml = '';
+                if (colors.includes('violet')) {
+                    const other = colors.find(c => c !== 'violet') || 'red';
+                    colorHtml = `<span class="color-dot ${other}-dot"></span> + <span class="color-dot violet-dot"></span>`;
+                } else {
+                    const main = colors[0] || 'red';
+                    colorHtml = `<span class="color-dot ${main}-dot"></span>`;
+                }
                 const isBig = item.number >= 5 ? 'Big' : 'Small';
-                html += `<tr><td>${item.period || ''}</td><td>${item.number}</td><td>${isBig}</td><td><span class="color-dot ${dotClass}"></span></td></tr>`;
+                html += `<tr><td>${item.period || ''}</td><td>${item.number}</td><td>${isBig}</td><td>${colorHtml}</td></tr>`;
             });
             html += `</tbody></table>`;
             historyList.innerHTML = html;
