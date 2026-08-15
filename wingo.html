@@ -27,7 +27,6 @@
             padding: 14px;
         }
 
-        /* Top Bar */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .balance-box { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: 10px; padding: 6px 12px; }
         .balance-box .label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -40,12 +39,11 @@
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        /* Duration Tabs */
         .duration-tabs { display: flex; gap: 4px; background: #0f172a; padding: 3px; border-radius: 10px; margin-bottom: 10px; }
         .duration-tabs button { flex: 1; padding: 5px; border-radius: 8px; border: none; background: transparent; color: #94a3b8; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
         .duration-tabs button.active { background: #f5c518; color: #000; }
+        .duration-tabs button.turbo { color: #f59e0b; }
 
-        /* How to play - Timer & Period row */
         .game-info-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); margin-bottom: 10px; }
         .game-info-row .left { font-size: 12px; font-weight: 700; color: #94a3b8; }
         .game-info-row .left span { color: #f5c518; }
@@ -53,7 +51,6 @@
         .game-info-row .right .sec { font-size: 14px; color: #94a3b8; }
         .game-info-row .period-id { font-size: 10px; color: #64748b; font-family: monospace; text-align: right; }
 
-        /* Number Grid */
         .num-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 8px; }
         .num-grid button {
             padding: 10px 0; border-radius: 8px; border: 2px solid transparent;
@@ -69,7 +66,6 @@
         .color-labels .green { color: #22c55e; }
         .color-labels .violet { color: #a855f7; }
 
-        /* Color & Big/Small Row */
         .action-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px; }
         .action-row button {
             padding: 8px 0; border-radius: 8px; border: 2px solid transparent;
@@ -80,7 +76,6 @@
         .action-row button:disabled { opacity: 0.3; cursor: not-allowed; }
         .action-row .red { color: #ef4444; } .action-row .green { color: #22c55e; } .action-row .violet { color: #a855f7; }
 
-        /* Bet Slip */
         .bet-slip { padding: 14px; }
         .bet-slip .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .bet-slip .title-row .game-name { font-size: 13px; font-weight: 700; color: #f5c518; }
@@ -104,6 +99,10 @@
         .bet-slip .multiplier-row button.active { border-color: #f5c518; background: rgba(245,197,24,0.1); color: #f5c518; }
         .bet-slip .multiplier-row button:disabled { opacity: 0.3; cursor: not-allowed; }
 
+        .bet-slip .options-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+        .bet-slip .options-row label { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+        .bet-slip .options-row input[type="checkbox"] { accent-color: #f5c518; width: 14px; height: 14px; }
+
         .bet-slip .total-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1a1a2e; padding-top: 10px; margin-top: 4px; }
         .bet-slip .total-row .total-label { font-size: 10px; color: #64748b; }
         .bet-slip .total-row .total-amount { font-size: 18px; font-weight: 800; color: #10b981; }
@@ -114,7 +113,6 @@
         .bet-slip .actions .place:disabled { opacity: 0.4; cursor: not-allowed; }
         .bet-slip .agree { font-size: 9px; color: #64748b; text-align: center; margin-top: 6px; }
 
-        /* Betting Closed Banner */
         .betting-closed {
             background: rgba(239, 68, 68, 0.08);
             border: 1px solid rgba(239, 68, 68, 0.2);
@@ -129,7 +127,6 @@
         }
         .betting-closed.active { display: block; }
 
-        /* Result Display */
         .result-display {
             background: rgba(245, 197, 24, 0.05);
             border: 1px solid rgba(245, 197, 24, 0.12);
@@ -138,6 +135,8 @@
             text-align: center;
             margin-bottom: 8px;
             display: none;
+            position: relative;
+            overflow: hidden;
         }
         .result-display.active { display: block; }
         .result-display .number { font-size: 40px; font-weight: 900; }
@@ -146,12 +145,19 @@
         .result-display .lose { color: #ef4444; }
         .result-display .no-bet { color: #64748b; }
 
-        /* Info Tabs */
+        /* Confetti canvas */
+        #confettiCanvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
         .info-tabs { display: flex; border-bottom: 1px solid #1a1a2e; margin-top: 10px; }
-        .info-tabs button { flex: 1; padding: 8px 0; background: transparent; border: none; color: #94a3b8; font-weight: 600; font-size: 12px; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .info-tabs button { flex: 1; padding: 8px 0; background: transparent; border: none; color: #94a3b8; font-weight: 600; font-size: 11px; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
         .info-tabs button.active { color: #f5c518; border-bottom-color: #f5c518; }
 
-        .tab-content { padding: 10px 0; max-height: 320px; overflow-y: auto; }
+        .tab-content { padding: 10px 0; max-height: 350px; overflow-y: auto; }
         .tab-content .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .stats-grid .stat-item { background: #1a1a2e; padding: 6px; border-radius: 6px; text-align: center; }
         .stats-grid .stat-item .num { font-size: 14px; font-weight: 700; color: #f5c518; }
@@ -167,7 +173,11 @@
         .history-list .round-result.lost { color: #ef4444; }
         .history-list .round-result.no-bet { color: #64748b; }
 
-        .chart-placeholder, .strategy-placeholder { text-align: center; color: #64748b; font-size: 13px; padding: 20px 0; }
+        .chart-container { width: 100%; height: 120px; position: relative; margin: 10px 0; }
+        #chartCanvas { width: 100%; height: 100%; background: #0f172a; border-radius: 8px; }
+
+        .strategy-box { background: #1a1a2e; padding: 8px; border-radius: 8px; font-size: 12px; color: #94a3b8; text-align: center; }
+        .strategy-box .highlight { color: #f5c518; font-weight: 700; }
 
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
@@ -178,6 +188,8 @@
         .message.lose { background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.15); }
         .message.info { background: rgba(245, 197, 24, 0.08); color: #f5c518; border: 1px solid rgba(245, 197, 24, 0.12); }
         .message.closed { background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.1); }
+
+        .sound-toggle { background: transparent; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 0 4px; }
 
         @media (max-width: 400px) {
             .action-row button { font-size: 11px; padding: 6px 0; }
@@ -193,10 +205,13 @@
     <!-- Header -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <span style="font-size:22px; font-weight:900; color:#f5c518;">N+ PLAY</span>
-        <span style="font-size:10px; border:1px solid #2a2a3a; padding:1px 10px; border-radius:20px; color:#94a3b8;">18+</span>
+        <div>
+            <button id="soundToggle" class="sound-toggle" title="Toggle Sound">🔊</button>
+            <span style="font-size:10px; border:1px solid #2a2a3a; padding:1px 10px; border-radius:20px; color:#94a3b8;">18+</span>
+        </div>
     </div>
 
-    <!-- Top Bar: Balance & Timer -->
+    <!-- Top Bar -->
     <div class="top-bar">
         <div class="balance-box">
             <div class="label">Wallet Balance</div>
@@ -215,9 +230,10 @@
         <button data-dur="30">1 Min</button>
         <button data-dur="90">3 Min</button>
         <button data-dur="150">5 Min</button>
+        <button class="turbo" data-dur="5">⚡Turbo</button>
     </div>
 
-    <!-- How to play row -->
+    <!-- How to play -->
     <div class="game-info-row">
         <div class="left">How to play <span>WinGo</span></div>
         <div class="right"><span id="timerLarge">00:15</span> <span class="sec">sec</span></div>
@@ -226,11 +242,10 @@
     <!-- Period ID -->
     <div style="text-align:center; font-size:10px; color:#64748b; font-family:monospace; margin-bottom:6px;" id="periodDisplayLarge">20260807100051640</div>
 
-    <!-- Betting Closed -->
     <div class="betting-closed" id="bettingClosed">⛔ Betting Closed — Round in progress</div>
 
-    <!-- Result Display -->
     <div class="result-display" id="resultDisplay">
+        <canvas id="confettiCanvas"></canvas>
         <div class="number" id="resultNumber">7</div>
         <div class="color-name" id="resultColor">🟣 Violet</div>
         <div id="resultBetResult" style="font-size:13px; margin-top:2px;"></div>
@@ -255,7 +270,7 @@
     <!-- Bet Slip -->
     <div class="glass-card bet-slip">
         <div class="title-row">
-            <span class="game-name">WinGo 30sec</span>
+            <span class="game-name">WinGo</span>
             <span class="bet-type" id="selectedBetDisplay">Select Bet</span>
         </div>
 
@@ -287,9 +302,10 @@
             <button data-mult="100">X100</button>
         </div>
 
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
-            <input type="checkbox" id="agreeCheck" checked style="accent-color:#f5c518; width:14px; height:14px;">
-            <label for="agreeCheck" style="font-size:9px; color:#94a3b8;">I agree 《Pre-sale rules》</label>
+        <div class="options-row">
+            <label><input type="checkbox" id="agreeCheck" checked> I agree 《Pre-sale rules》</label>
+            <label><input type="checkbox" id="autoBetCheck"> 🤖 Auto-Bet</label>
+            <label><input type="checkbox" id="soundCheck" checked> 🔇 Sound</label>
         </div>
 
         <div class="total-row">
@@ -310,16 +326,14 @@
     <div class="glass-card" style="margin-top:10px; padding:0 12px 12px 12px;">
         <div class="info-tabs">
             <button class="active" data-tab="game">Game</button>
-            <button data-tab="history">Game history</button>
+            <button data-tab="history">History</button>
             <button data-tab="chart">Chart</button>
-            <button data-tab="strategy">Follow Strategy</button>
+            <button data-tab="strategy">Strategy</button>
         </div>
         <div id="tabContent" class="tab-content">
-            <!-- Game Tab -->
             <div id="panel-game" style="display:block;">
-                <p style="color:#94a3b8; font-size:13px; text-align:center; padding:8px 0;">Select your bet above. <span style="color:#f5c518;">Good luck!</span></p>
+                <p style="color:#94a3b8; font-size:13px; text-align:center; padding:8px 0;">Select your bet. <span style="color:#f5c518;">Good luck!</span></p>
             </div>
-            <!-- History Tab -->
             <div id="panel-history" style="display:none;">
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-item"><div class="num" id="statRounds">0</div><div class="label">Rounds</div></div>
@@ -331,13 +345,15 @@
                     <div style="color:#64748b; text-align:center; padding:10px; font-size:13px;">No rounds yet.</div>
                 </div>
             </div>
-            <!-- Chart Tab -->
             <div id="panel-chart" style="display:none;">
-                <div class="chart-placeholder">📊 Chart visualization coming soon.</div>
+                <div class="chart-container"><canvas id="chartCanvas"></canvas></div>
+                <p style="color:#64748b; font-size:10px; text-align:center;">Number frequency (last 100 rounds)</p>
             </div>
-            <!-- Strategy Tab -->
             <div id="panel-strategy" style="display:none;">
-                <div class="strategy-placeholder">🧠 Five draws in a row with the same result</div>
+                <div class="strategy-box" id="strategyBox">
+                    <p>🧠 <span class="highlight">Follow Strategy:</span> Five draws in a row with the same result</p>
+                    <div id="strategyDetail" style="margin-top:6px; font-size:11px;">Waiting for data...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -346,7 +362,7 @@
 
 <script>
     // ============================================================
-    // WINGO — PROFESSIONAL DAMAN STYLE
+    // WINGO — ALL FEATURES: Sound, Auto-Bet, Turbo, Confetti, Chart, Strategy
     // ============================================================
     (function() {
         'use strict';
@@ -354,7 +370,7 @@
         const STORAGE_KEY = 'wingo_data';
         const ROUND_STATE_KEY = 'wingo_round_state';
 
-        // Data
+        // --- Data ---
         let data = loadData();
         let timer = 15;
         let totalDuration = 15;
@@ -373,6 +389,10 @@
         let currentStake = 1;
         let betPlacedThisRound = false;
         let betAmountThisRound = 0;
+
+        // Options
+        let autoBet = false;
+        let soundEnabled = true;
 
         // DOM refs
         const balanceEl = document.getElementById('balanceDisplay');
@@ -400,8 +420,172 @@
         const cancelBtn = document.getElementById('cancelBet');
         const selectedBetDisplay = document.getElementById('selectedBetDisplay');
         const agreeCheck = document.getElementById('agreeCheck');
+        const autoBetCheck = document.getElementById('autoBetCheck');
+        const soundCheck = document.getElementById('soundCheck');
+        const soundToggle = document.getElementById('soundToggle');
 
-        // --- Helpers ---
+        // Audio context for sounds
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        function playSound(type) {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                gain.gain.value = 0.15;
+                if (type === 'bet') {
+                    osc.frequency.value = 800;
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.1);
+                } else if (type === 'win') {
+                    osc.frequency.value = 1200;
+                    gain.gain.value = 0.2;
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.3);
+                    // second tone
+                    setTimeout(() => {
+                        const osc2 = audioCtx.createOscillator();
+                        const gain2 = audioCtx.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(audioCtx.destination);
+                        osc2.type = 'sine';
+                        osc2.frequency.value = 1600;
+                        gain2.gain.value = 0.15;
+                        osc2.start(audioCtx.currentTime);
+                        osc2.stop(audioCtx.currentTime + 0.2);
+                    }, 150);
+                } else if (type === 'lose') {
+                    osc.frequency.value = 300;
+                    gain.gain.value = 0.15;
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.2);
+                } else if (type === 'tick') {
+                    osc.frequency.value = 600;
+                    gain.gain.value = 0.05;
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.05);
+                }
+            } catch(e) {}
+        }
+
+        // --- Confetti ---
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            const ctx = canvas.getContext('2d');
+            const pieces = [];
+            const colors = ['#f5c518', '#ef4444', '#22c55e', '#a855f7', '#3b82f6', '#ec4899'];
+            for (let i = 0; i < 50; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - 20,
+                    w: Math.random() * 8 + 4,
+                    h: Math.random() * 4 + 2,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: Math.random() * 3 + 1,
+                    rot: Math.random() * 360,
+                    rv: (Math.random() - 0.5) * 6,
+                });
+            }
+            let frames = 0;
+            const maxFrames = 60;
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.05;
+                    p.rot += p.rv;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI/180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                    ctx.restore();
+                });
+                frames++;
+                if (frames < maxFrames) requestAnimationFrame(animate);
+                else { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+            }
+            animate();
+        }
+
+        // --- Chart ---
+        function renderChart() {
+            const canvas = document.getElementById('chartCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width || 400;
+            canvas.height = rect.height || 120;
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // Get last 100 numbers
+            const recent = data.history.slice(0, 100);
+            const freq = Array(10).fill(0);
+            recent.forEach(item => {
+                if (item.number !== undefined) freq[item.number] = (freq[item.number] || 0) + 1;
+            });
+            const maxFreq = Math.max(...freq, 1);
+            const barWidth = w / 10 - 4;
+            const pad = 2;
+            const colors = ['#22c55e','#22c55e','#22c55e','#22c55e','#22c55e',
+                            '#a855f7','#a855f7','#a855f7','#a855f7','#a855f7'];
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, w, h);
+            freq.forEach((val, i) => {
+                const barH = (val / maxFreq) * (h - 20);
+                ctx.fillStyle = colors[i] || '#f5c518';
+                ctx.fillRect(i*(barWidth+pad)+pad, h - barH - 10, barWidth, barH);
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '8px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(i, i*(barWidth+pad)+pad+barWidth/2, h-2);
+            });
+        }
+
+        // --- Strategy ---
+        function updateStrategy() {
+            const box = document.getElementById('strategyDetail');
+            if (!box) return;
+            const recent = data.history.slice(0, 20);
+            if (recent.length < 5) {
+                box.textContent = 'Need more data (at least 5 rounds)';
+                return;
+            }
+            const last5 = recent.slice(0, 5);
+            const colors = last5.map(r => r.color);
+            const nums = last5.map(r => r.number);
+            const allSameColor = colors.every(c => c === colors[0]);
+            const allSameNumber = nums.every(n => n === nums[0]);
+            let suggestion = '';
+            if (allSameColor) {
+                suggestion = `🔥 Last 5 all ${colors[0].toUpperCase()}! Bet on ${colors[0]}?`;
+            } else if (allSameNumber) {
+                suggestion = `🔥 Last 5 all ${nums[0]}! Bet on Number ${nums[0]}?`;
+            } else {
+                // count frequency
+                const colorCount = { green:0, violet:0 };
+                recent.slice(0, 10).forEach(r => { if (r.color) colorCount[r.color] = (colorCount[r.color]||0)+1; });
+                if (colorCount.green > colorCount.violet) suggestion = '🟢 Green appearing more often. Consider Green.';
+                else if (colorCount.violet > colorCount.green) suggestion = '🟣 Violet appearing more often. Consider Violet.';
+                else suggestion = '⚖️ Balanced. No clear strategy.';
+            }
+            box.innerHTML = suggestion;
+        }
+
+        // --- Load/Save ---
         function loadData() {
             try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
             return { balance: 1000, history: [], rounds: 0, wins: 0, losses: 0, totalWon: 0 };
@@ -419,18 +603,15 @@
             balanceEl.textContent = '₹' + data.balance.toFixed(2);
             saveData();
         }
-
         function updateTotalUI() {
             currentStake = quantity * stakeMultiplier;
             totalAmount.textContent = '₹' + currentStake.toFixed(2);
         }
-
         function updateTimerDisplay() {
             const formatted = formatTime(timer);
             timerEl.textContent = formatted;
             timerLarge.textContent = formatted;
         }
-
         function updatePeriodDisplay() {
             periodEl.textContent = period;
             periodLarge.textContent = period;
@@ -474,7 +655,6 @@
             updateTotalUI();
         }
 
-        // --- Color Logic: Green (0-4), Violet (5-9) ---
         function getNumberColor(num) {
             if (num >= 0 && num <= 4) return 'green';
             return 'violet';
@@ -483,20 +663,23 @@
         function generateResult() {
             const num = Math.floor(Math.random() * 10);
             const color = getNumberColor(num);
-            // Red is a separate bet type — the result itself is Green or Violet
-            // Red is only for betting on Red (which doesn't exist as a result color, but we'll map Red to a special condition)
-            // Actually in Daman, Red is a separate color option. We'll handle Red as a special bet.
             return { number: num, color: color };
         }
 
-        // Red bet wins if number is 0 or 9? In Daman, Red is its own color bet.
-        // We'll treat Red as a color option with a random win condition.
-        function checkRedWin(num) {
-            // Red wins on 0 or 9 (rare)
-            return num === 0 || num === 9;
+        function checkRedWin(num) { return num === 0 || num === 9; }
+
+        // --- Auto-Bet ---
+        function autoPlaceBet() {
+            if (!autoBet) return;
+            if (!bettingOpen || betPlacedThisRound) return;
+            if (!selectedType || selectedValue === null) return;
+            if (currentStake > data.balance) return;
+            if (!agreeCheck.checked) return;
+            // Simulate click
+            placeBtn.click();
         }
 
-        // --- Result Processing ---
+        // --- Process Result ---
         function processResult(result) {
             let won = false;
             let multiplier = 0;
@@ -523,9 +706,12 @@
                 data.totalWon += payout;
                 updateBalanceUI();
                 showMessage(`🎉 Won! ${result.color.toUpperCase()} ${result.number} (${multiplier}x)`, 'win');
+                playSound('win');
+                launchConfetti();
             } else if (betPlacedThisRound) {
                 data.losses++;
                 showMessage(`😞 Lost. ${result.color.toUpperCase()} ${result.number}`, 'lose');
+                playSound('lose');
             } else {
                 showMessage('⏳ No bet placed.', 'info');
             }
@@ -577,15 +763,25 @@
 
             resultShown = true;
 
-            // Reset selections
-            document.querySelectorAll('.num-grid button, .action-row button').forEach(b => b.classList.remove('selected'));
-            selectedType = null; selectedValue = null;
-            betPlacedThisRound = false; betAmountThisRound = 0;
-            placeBtn.disabled = true;
-            updateSelectedBetDisplay();
+            // Reset selections (but keep for auto-bet)
+            if (!autoBet) {
+                document.querySelectorAll('.num-grid button, .action-row button').forEach(b => b.classList.remove('selected'));
+                selectedType = null; selectedValue = null;
+                betPlacedThisRound = false; betAmountThisRound = 0;
+                placeBtn.disabled = true;
+                updateSelectedBetDisplay();
+            } else {
+                // Auto-bet: keep selection, clear bet placed flag
+                betPlacedThisRound = false;
+                betAmountThisRound = 0;
+                placeBtn.disabled = false;
+                // If auto-bet, place again next round
+            }
 
             renderHistory();
             updateStats();
+            renderChart();
+            updateStrategy();
 
             setTimeout(() => {
                 roundActive = false;
@@ -593,6 +789,10 @@
                 resetTimer();
                 setBettingState(true);
                 setTimeout(() => { resultDisplay.classList.remove('active'); }, 2500);
+                // Auto-bet after round start
+                if (autoBet) {
+                    setTimeout(autoPlaceBet, 500);
+                }
             }, 4500);
         }
 
@@ -619,17 +819,16 @@
             timerInterval = setInterval(() => {
                 timer--;
                 updateTimerDisplay();
-
                 if (timer <= 5 && timer > 0) {
                     timerEl.className = 'time danger';
                     if (timer === 5) {
                         setBettingState(false);
                         showMessage('⛔ Betting Closed! Round in progress...', 'closed');
+                        playSound('tick');
                     }
                 } else if (timer > 5) {
                     timerEl.className = 'time';
                 }
-
                 if (timer <= 0) {
                     clearInterval(timerInterval);
                     completeRound();
@@ -746,6 +945,8 @@
                     const tab = this.dataset.tab;
                     document.querySelectorAll('.tab-content > div').forEach(p => p.style.display = 'none');
                     document.getElementById('panel-' + tab).style.display = 'block';
+                    if (tab === 'chart') renderChart();
+                    if (tab === 'strategy') updateStrategy();
                 });
             });
         }
@@ -773,9 +974,34 @@
             updateStats();
             updatePeriodDisplay();
             updateTimerDisplay();
-
             setBettingState(true);
             resetTimer();
+            renderChart();
+            updateStrategy();
+
+            // Sound toggle
+            soundCheck.addEventListener('change', function() {
+                soundEnabled = this.checked;
+                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+            });
+            soundToggle.addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                soundCheck.checked = soundEnabled;
+                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+                if (soundEnabled) initAudio();
+            });
+
+            // Auto-bet
+            autoBetCheck.addEventListener('change', function() {
+                autoBet = this.checked;
+                if (autoBet) {
+                    initAudio();
+                    // If round is open and betting allowed, place bet immediately
+                    if (bettingOpen && !betPlacedThisRound && selectedType && selectedValue !== null) {
+                        autoPlaceBet();
+                    }
+                }
+            });
 
             // Place bet
             placeBtn.addEventListener('click', function() {
@@ -785,12 +1011,14 @@
                 if (!agreeCheck.checked) { showMessage('Agree to Pre-sale rules', 'info'); return; }
                 if (currentStake > data.balance) { showMessage('Insufficient balance!', 'lose'); return; }
 
+                initAudio();
                 data.balance -= currentStake;
                 betAmountThisRound = currentStake;
                 betPlacedThisRound = true;
                 updateBalanceUI();
                 placeBtn.disabled = true;
                 showMessage(`✅ Bet placed! ₹${currentStake.toFixed(2)}`, 'win');
+                playSound('bet');
                 setBettingState(false);
             });
 
@@ -801,6 +1029,11 @@
                 placeBtn.disabled = true;
                 updateSelectedBetDisplay();
                 showMessage('Bet cleared.', 'info');
+            });
+
+            // Click on result to dismiss
+            resultDisplay.addEventListener('click', function() {
+                this.classList.remove('active');
             });
         }
 
