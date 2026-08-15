@@ -53,11 +53,14 @@ export default function RegisterPage() {
     setLoading(false);
   };
 
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+
   return (
     <div className="min-h-screen bg-[#0a0808] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
 
-        {/* Brand Header */}
+        {/* Brand */}
         <div className="text-center mb-6">
           <h1 className="text-4xl font-black gold-text tracking-wider">N+ PLAY</h1>
         </div>
@@ -67,7 +70,7 @@ export default function RegisterPage() {
           <h2 className="text-2xl font-bold text-white mb-1">Register</h2>
           <p className="text-sm text-gray-400 mb-5">Please register by phone number or email</p>
 
-          {/* Tabs: Phone / Email */}
+          {/* Tabs */}
           <div className="flex bg-[#1a1a2e] p-1 rounded-xl mb-5">
             <button
               onClick={() => setActiveTab('phone')}
@@ -92,7 +95,7 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
-            {/* Phone / Email Input */}
+            {/* Phone / Email */}
             {activeTab === 'phone' ? (
               <div>
                 <label className="block text-xs font-medium text-gray-400 mb-1">Phone number</label>
@@ -160,7 +163,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Terms Checkbox */}
+            {/* Terms */}
             <div className="flex items-start gap-2">
               <input
                 type="checkbox"
@@ -173,7 +176,6 @@ export default function RegisterPage() {
               </label>
             </div>
 
-            {/* Error Message */}
             {error && <p className="text-red-500 text-xs font-medium">{error}</p>}
 
             {/* Register Button */}
@@ -192,7 +194,7 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        {/* Footer (Daman style weather/language) */}
+        {/* Footer */}
         <div className="flex justify-between items-center text-xs text-gray-500 mt-4 px-2">
           <div className="flex items-center gap-2">
             <span>36°C</span>
@@ -204,7 +206,7 @@ export default function RegisterPage() {
             <span className="text-gray-600">|</span>
             <span>IN</span>
             <span className="text-gray-600">|</span>
-            <span className="text-gray-400">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}</span>
+            <span className="text-gray-400">{dateStr}</span>
           </div>
         </div>
 
