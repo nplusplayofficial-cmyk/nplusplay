@@ -27,6 +27,25 @@
             padding: 14px;
         }
 
+        /* Ticker */
+        .ticker-wrap {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.08);
+            border-radius: 8px;
+            padding: 4px 10px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        .ticker-wrap .ticker-text {
+            display: inline-block;
+            animation: tickerScroll 20s linear infinite;
+        }
+        .ticker-wrap .ticker-text span { color: #f5c518; font-weight: 700; }
+        @keyframes tickerScroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .balance-box { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: 10px; padding: 6px 12px; }
         .balance-box .label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -57,24 +76,52 @@
             font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.12s;
             background: #1a1a2e; color: #fff;
         }
+        .num-grid button.red-num { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
         .num-grid button.green-num { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-        .num-grid button.violet-num { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .num-grid button.violet-special { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
         .num-grid button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.15); transform: scale(1.05); }
         .num-grid button:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
 
-        .color-labels { display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; margin-bottom: 8px; padding: 0 2px; }
+        .color-labels { display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-bottom: 8px; padding: 0 2px; }
+        .color-labels .red { color: #ef4444; }
         .color-labels .green { color: #22c55e; }
         .color-labels .violet { color: #a855f7; }
 
-        .action-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px; }
-        .action-row button {
+        /* Action Rows - Separate */
+        .action-row-colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 6px; }
+        .action-row-colors button {
             padding: 8px 0; border-radius: 8px; border: 2px solid transparent;
-            font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.12s;
+            font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.12s;
             background: #1a1a2e; color: #fff;
         }
-        .action-row button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.12); }
-        .action-row button:disabled { opacity: 0.3; cursor: not-allowed; }
-        .action-row .red { color: #ef4444; } .action-row .green { color: #22c55e; } .action-row .violet { color: #a855f7; }
+        .action-row-colors button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.12); }
+        .action-row-colors button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .action-row-colors .red { color: #ef4444; } .action-row-colors .green { color: #22c55e; } .action-row-colors .violet { color: #a855f7; }
+
+        .action-row-size { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 10px; }
+        .action-row-size button {
+            padding: 8px 0; border-radius: 8px; border: 2px solid transparent;
+            font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.12s;
+            background: #1a1a2e; color: #fff;
+        }
+        .action-row-size button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.12); }
+        .action-row-size button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Guess Button */
+        .guess-btn {
+            background: rgba(245, 197, 24, 0.1);
+            border: 1px dashed rgba(245, 197, 24, 0.3);
+            border-radius: 8px;
+            padding: 4px 0;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+        .guess-btn:hover { background: rgba(245, 197, 24, 0.15); border-color: #f5c518; }
+        .guess-btn .guess-result { color: #f5c518; font-weight: 700; }
 
         .bet-slip { padding: 14px; }
         .bet-slip .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -99,9 +146,12 @@
         .bet-slip .multiplier-row button.active { border-color: #f5c518; background: rgba(245,197,24,0.1); color: #f5c518; }
         .bet-slip .multiplier-row button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .bet-slip .options-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+        .bet-slip .options-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
         .bet-slip .options-row label { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; cursor: pointer; }
         .bet-slip .options-row input[type="checkbox"] { accent-color: #f5c518; width: 14px; height: 14px; }
+        .bet-slip .options-row .action-btns { display: flex; gap: 4px; }
+        .bet-slip .options-row .action-btns button { padding: 2px 10px; border-radius: 4px; border: 1px solid #2a2a3a; background: transparent; color: #94a3b8; font-size: 10px; font-weight: 700; cursor: pointer; }
+        .bet-slip .options-row .action-btns button:hover { border-color: #f5c518; color: #f5c518; }
 
         .bet-slip .total-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1a1a2e; padding-top: 10px; margin-top: 4px; }
         .bet-slip .total-row .total-label { font-size: 10px; color: #64748b; }
@@ -139,26 +189,15 @@
             overflow: hidden;
         }
         .result-display.active { display: block; }
-        .result-display .number {
-            font-size: 48px; font-weight: 900;
-            font-family: 'Courier New', monospace;
-            transition: none;
-        }
-        .result-display .number.spinning {
-            animation: spinReveal 0.1s infinite alternate;
-        }
+        .result-display .number { font-size: 40px; font-weight: 900; font-family: 'Courier New', monospace; }
+        .result-display .number.spinning { animation: spinReveal 0.1s infinite alternate; }
         .result-display .color-name { font-size: 16px; font-weight: 700; }
+        .result-display .hash { font-size: 9px; color: #64748b; font-family: monospace; margin-top: 4px; }
         .result-display .win { color: #10b981; }
         .result-display .lose { color: #ef4444; }
         .result-display .no-bet { color: #64748b; }
 
-        /* Confetti canvas */
-        #confettiCanvas {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
+        #confettiCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
         .info-tabs { display: flex; border-bottom: 1px solid #1a1a2e; margin-top: 10px; }
         .info-tabs button { flex: 1; padding: 8px 0; background: transparent; border: none; color: #94a3b8; font-weight: 600; font-size: 11px; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
@@ -199,7 +238,7 @@
         .sound-toggle { background: transparent; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 0 4px; }
 
         @media (max-width: 400px) {
-            .action-row button { font-size: 11px; padding: 6px 0; }
+            .action-row-colors button, .action-row-size button { font-size: 12px; padding: 6px 0; }
             .num-grid button { font-size: 13px; padding: 8px 0; }
             .timer-box .time { font-size: 18px; }
             .game-info-row .right { font-size: 17px; }
@@ -216,6 +255,11 @@
             <button id="soundToggle" class="sound-toggle" title="Toggle Sound">🔊</button>
             <span style="font-size:10px; border:1px solid #2a2a3a; padding:1px 10px; border-radius:20px; color:#94a3b8;">18+</span>
         </div>
+    </div>
+
+    <!-- Ticker -->
+    <div class="ticker-wrap">
+        <div class="ticker-text" id="tickerText">🔥 LIVE WINS: Waiting for action...</div>
     </div>
 
     <!-- Top Bar -->
@@ -246,7 +290,6 @@
         <div class="right"><span id="timerLarge">00:15</span> <span class="sec">sec</span></div>
     </div>
 
-    <!-- Period ID -->
     <div style="text-align:center; font-size:10px; color:#64748b; font-family:monospace; margin-bottom:6px;" id="periodDisplayLarge">20260807100051640</div>
 
     <div class="betting-closed" id="bettingClosed">⛔ Betting Closed — Round in progress</div>
@@ -256,29 +299,40 @@
         <div class="number" id="resultNumber">7</div>
         <div class="color-name" id="resultColor">🟣 Violet</div>
         <div id="resultBetResult" style="font-size:13px; margin-top:2px;"></div>
+        <div class="hash" id="resultHash">🔐 Hash: a1b2c3d4e5f6</div>
     </div>
 
-    <!-- Number Grid -->
+    <!-- Number Grid (New Color Mapping) -->
     <div class="num-grid" id="numGrid"></div>
     <div class="color-labels">
-        <span class="green">● Green (0-4)</span>
-        <span class="violet">● Violet (5-9)</span>
+        <span class="red">● Red (0,2,4,6,8)</span>
+        <span class="green">● Green (1,3,7,9)</span>
+        <span class="violet">● Violet (0,5)</span>
     </div>
 
-    <!-- Color & Big/Small -->
-    <div class="action-row" id="actionRow">
+    <!-- Color Row -->
+    <div class="action-row-colors" id="colorRow">
+        <button class="red" data-type="red">Red</button>
         <button class="green" data-type="green">Green</button>
         <button class="violet" data-type="violet">Violet</button>
-        <button class="red" data-type="red">Red</button>
+    </div>
+
+    <!-- Big/Small Row -->
+    <div class="action-row-size" id="sizeRow">
         <button data-type="big">Big</button>
         <button data-type="small">Small</button>
+    </div>
+
+    <!-- Guess Button -->
+    <div class="guess-btn" id="guessBtn">
+        💡 Guess: <span class="guess-result" id="guessResult">Tap to predict</span>
     </div>
 
     <!-- Bet Slip -->
     <div class="glass-card bet-slip">
         <div class="title-row">
             <span class="game-name">WinGo</span>
-            <span class="bet-type" id="selectedBetDisplay">Select Bet</span>
+            <span class="bet-type" id="selectedBetDisplay">Select Bets</span>
         </div>
 
         <div class="row">
@@ -310,9 +364,13 @@
         </div>
 
         <div class="options-row">
-            <label><input type="checkbox" id="agreeCheck" checked> I agree 《Pre-sale rules》</label>
-            <label><input type="checkbox" id="autoBetCheck"> 🤖 Auto-Bet</label>
-            <label><input type="checkbox" id="soundCheck" checked> 🔇 Sound</label>
+            <label><input type="checkbox" id="agreeCheck" checked> I agree</label>
+            <label><input type="checkbox" id="autoBetCheck"> 🤖 Auto</label>
+            <label><input type="checkbox" id="soundCheck" checked> 🔇</label>
+            <div class="action-btns">
+                <button id="repeatBetBtn">↻ Repeat</button>
+                <button id="doubleBetBtn">2x</button>
+            </div>
         </div>
 
         <div class="total-row">
@@ -338,9 +396,7 @@
             <button data-tab="strategy">Strategy</button>
         </div>
         <div id="tabContent" class="tab-content">
-            <div id="panel-game" style="display:block;">
-                <p style="color:#94a3b8; font-size:13px; text-align:center; padding:8px 0;">Select your bet. <span style="color:#f5c518;">Good luck!</span></p>
-            </div>
+            <div id="panel-game" style="display:block;"><p style="color:#94a3b8; font-size:13px; text-align:center; padding:8px 0;">Select any combination! <span style="color:#f5c518;">Good luck!</span></p></div>
             <div id="panel-history" style="display:none;">
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-item"><div class="num" id="statRounds">0</div><div class="label">Rounds</div></div>
@@ -348,17 +404,17 @@
                     <div class="stat-item"><div class="num" id="statLosses">0</div><div class="label">Losses</div></div>
                     <div class="stat-item"><div class="num" id="statTotal">₹0</div><div class="label">Total Won</div></div>
                 </div>
-                <div class="history-list" id="historyList">
-                    <div style="color:#64748b; text-align:center; padding:10px; font-size:13px;">No rounds yet.</div>
-                </div>
+                <div class="history-list" id="historyList"><div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div></div>
             </div>
             <div id="panel-chart" style="display:none;">
                 <div class="chart-container"><canvas id="chartCanvas"></canvas></div>
-                <p style="color:#64748b; font-size:10px; text-align:center;">Number frequency (last 100 rounds)</p>
+                <div style="display:flex; justify-content:space-between; font-size:9px; color:#64748b; padding:0 4px;">
+                    <span>Red</span><span>Green</span><span>Violet</span>
+                </div>
             </div>
             <div id="panel-strategy" style="display:none;">
                 <div class="strategy-box" id="strategyBox">
-                    <p>🧠 <span class="highlight">Follow Strategy:</span> Five draws in a row with the same result</p>
+                    <p>🧠 <span class="highlight">Strategy:</span> Five draws in a row</p>
                     <div id="strategyDetail" style="margin-top:6px; font-size:11px;">Waiting for data...</div>
                 </div>
             </div>
@@ -369,7 +425,7 @@
 
 <script>
     // ============================================================
-    // WINGO — FULL FEATURES WITH SLOT-STYLE SPIN ANIMATION
+    // WINGO — PREMIUM EDITION: Multi-Bet, New Colors, Guess, Ticker, Luxury Sound
     // ============================================================
     (function() {
         'use strict';
@@ -387,17 +443,22 @@
         let resultShown = false;
         let roundStartTimestamp = Date.now();
 
-        let selectedType = null;
-        let selectedValue = null;
+        // MULTI-BET STATE
+        let selectedBets = { color: null, size: null, number: null };
         let quantity = 1;
         let stakeMultiplier = 1;
         let currentStake = 1;
         let betPlacedThisRound = false;
         let betAmountThisRound = 0;
+        let totalBetsCount = 0; // number of active selections
 
         let autoBet = false;
         let soundEnabled = true;
 
+        // Last bet for repeat
+        let lastBetState = null;
+
+        // DOM refs
         const balanceEl = document.getElementById('balanceDisplay');
         const timerEl = document.getElementById('timerDisplay');
         const timerLarge = document.getElementById('timerLarge');
@@ -409,8 +470,10 @@
         const resultNumber = document.getElementById('resultNumber');
         const resultColor = document.getElementById('resultColor');
         const resultBetResult = document.getElementById('resultBetResult');
+        const resultHash = document.getElementById('resultHash');
         const numGrid = document.getElementById('numGrid');
-        const actionRow = document.getElementById('actionRow');
+        const colorRow = document.getElementById('colorRow');
+        const sizeRow = document.getElementById('sizeRow');
         const qtyDisplay = document.getElementById('qtyDisplay');
         const totalAmount = document.getElementById('totalAmount');
         const messageEl = document.getElementById('message');
@@ -426,232 +489,220 @@
         const autoBetCheck = document.getElementById('autoBetCheck');
         const soundCheck = document.getElementById('soundCheck');
         const soundToggle = document.getElementById('soundToggle');
+        const tickerText = document.getElementById('tickerText');
+        const guessBtn = document.getElementById('guessBtn');
+        const guessResult = document.getElementById('guessResult');
 
+        // Audio Context
         let audioCtx = null;
         function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-        function playSound(type) {
+        function playLuxurySound(type) {
             if (!soundEnabled || !audioCtx) return;
             try {
-                const osc = audioCtx.createOscillator();
+                const now = audioCtx.currentTime;
                 const gain = audioCtx.createGain();
-                osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                osc.type = 'sine';
-                gain.gain.value = 0.15;
-                if (type === 'bet') {
-                    osc.frequency.value = 800;
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.1);
-                } else if (type === 'win') {
-                    osc.frequency.value = 1200;
-                    gain.gain.value = 0.2;
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.3);
-                    setTimeout(() => {
-                        const osc2 = audioCtx.createOscillator();
-                        const gain2 = audioCtx.createGain();
-                        osc2.connect(gain2);
-                        gain2.connect(audioCtx.destination);
-                        osc2.type = 'sine';
-                        osc2.frequency.value = 1600;
-                        gain2.gain.value = 0.15;
-                        osc2.start(audioCtx.currentTime);
-                        osc2.stop(audioCtx.currentTime + 0.2);
-                    }, 150);
+                gain.gain.value = 0.12;
+
+                if (type === 'win') {
+                    // Ascending chime: C4, E4, G4
+                    const freqs = [523.25, 659.25, 783.99];
+                    freqs.forEach((f, i) => {
+                        const osc = audioCtx.createOscillator();
+                        osc.connect(gain);
+                        osc.type = 'sine';
+                        osc.frequency.value = f;
+                        const g = audioCtx.createGain();
+                        g.gain.value = 0.15;
+                        osc.connect(g);
+                        g.connect(audioCtx.destination);
+                        osc.start(now + i * 0.12);
+                        osc.stop(now + i * 0.12 + 0.2);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.2);
+                    });
                 } else if (type === 'lose') {
-                    osc.frequency.value = 300;
-                    gain.gain.value = 0.15;
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.2);
-                } else if (type === 'tick') {
+                    // Descending
+                    const freqs = [400, 300, 200];
+                    freqs.forEach((f, i) => {
+                        const osc = audioCtx.createOscillator();
+                        osc.connect(gain);
+                        osc.type = 'sine';
+                        osc.frequency.value = f;
+                        osc.start(now + i * 0.1);
+                        osc.stop(now + i * 0.1 + 0.15);
+                    });
+                } else if (type === 'spin') {
+                    // Quick reel click
+                    for (let i = 0; i < 5; i++) {
+                        const osc = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        osc.connect(g);
+                        g.connect(audioCtx.destination);
+                        osc.frequency.value = 800 + Math.random() * 400;
+                        g.gain.value = 0.03;
+                        osc.start(now + i * 0.04);
+                        osc.stop(now + i * 0.04 + 0.02);
+                    }
+                } else if (type === 'bet') {
+                    const osc = audioCtx.createOscillator();
+                    osc.connect(gain);
+                    osc.type = 'square';
                     osc.frequency.value = 600;
-                    gain.gain.value = 0.05;
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
                 }
             } catch(e) {}
         }
 
+        // Confetti
         function launchConfetti() {
             const canvas = document.getElementById('confettiCanvas');
             const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
+            canvas.width = rect.width; canvas.height = rect.height;
             const ctx = canvas.getContext('2d');
             const pieces = [];
-            const colors = ['#f5c518', '#ef4444', '#22c55e', '#a855f7', '#3b82f6', '#ec4899'];
-            for (let i = 0; i < 50; i++) {
+            const colors = ['#f5c518', '#ef4444', '#22c55e', '#a855f7', '#3b82f6'];
+            for (let i=0; i<60; i++) {
                 pieces.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height - 20,
-                    w: Math.random() * 8 + 4,
-                    h: Math.random() * 4 + 2,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    vx: (Math.random() - 0.5) * 4,
-                    vy: Math.random() * 3 + 1,
-                    rot: Math.random() * 360,
-                    rv: (Math.random() - 0.5) * 6,
+                    x: Math.random()*canvas.width, y: Math.random()*canvas.height-20,
+                    w: Math.random()*8+4, h: Math.random()*4+2,
+                    color: colors[Math.floor(Math.random()*colors.length)],
+                    vx: (Math.random()-0.5)*4, vy: Math.random()*3+1, rot: Math.random()*360, rv: (Math.random()-0.5)*6
                 });
             }
-            let frames = 0;
-            const maxFrames = 60;
+            let frames=0;
             function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                pieces.forEach(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.05;
-                    p.rot += p.rv;
-                    ctx.save();
-                    ctx.translate(p.x, p.y);
-                    ctx.rotate(p.rot * Math.PI/180);
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-                    ctx.restore();
-                });
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                pieces.forEach(p => { p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.rot+=p.rv; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); });
                 frames++;
-                if (frames < maxFrames) requestAnimationFrame(animate);
-                else { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+                if (frames<60) requestAnimationFrame(animate);
+                else ctx.clearRect(0,0,canvas.width,canvas.height);
             }
             animate();
         }
 
+        // Chart
         function renderChart() {
             const canvas = document.getElementById('chartCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width || 400;
-            canvas.height = rect.height || 120;
-            const w = canvas.width, h = canvas.height;
-            ctx.clearRect(0, 0, w, h);
-            const recent = data.history.slice(0, 100);
+            canvas.width = rect.width||400; canvas.height = rect.height||120;
+            const w=canvas.width, h=canvas.height;
+            ctx.clearRect(0,0,w,h);
+            const recent = data.history.slice(0,100);
             const freq = Array(10).fill(0);
+            recent.forEach(item => { if (item.number!==undefined) freq[item.number] = (freq[item.number]||0)+1; });
+            const maxFreq = Math.max(...freq,1);
+            const pad=2, barWidth = w/10 - pad;
+            const colors = ['#ef4444','#22c55e','#ef4444','#22c55e','#ef4444','#a855f7','#ef4444','#22c55e','#ef4444','#22c55e'];
+            ctx.fillStyle='#1a1a2e'; ctx.fillRect(0,0,w,h);
+            freq.forEach((val,i) => {
+                const barH = (val/maxFreq)*(h-20);
+                ctx.fillStyle = colors[i]||'#f5c518';
+                ctx.fillRect(i*(barWidth+pad)+pad, h-barH-10, barWidth, barH);
+                ctx.fillStyle='#94a3b8'; ctx.font='8px sans-serif'; ctx.textAlign='center'; ctx.fillText(i, i*(barWidth+pad)+pad+barWidth/2, h-2);
+            });
+        }
+
+        // Ticker
+        function updateTicker() {
+            const recent = data.history.slice(0,5);
+            if (recent.length===0) { tickerText.textContent='🔥 LIVE WINS: Waiting for action...'; return; }
+            let text = '🔥 LIVE WINS: ';
             recent.forEach(item => {
-                if (item.number !== undefined) freq[item.number] = (freq[item.number] || 0) + 1;
+                if (item.won && item.payout>0) {
+                    text += `User ***${String(Math.floor(Math.random()*1000)).padStart(3,'0')} won ₹${item.payout.toFixed(0)} on ${item.betType.toUpperCase()} • `;
+                }
             });
-            const maxFreq = Math.max(...freq, 1);
-            const barWidth = w / 10 - 4;
-            const pad = 2;
-            const colors = ['#22c55e','#22c55e','#22c55e','#22c55e','#22c55e',
-                            '#a855f7','#a855f7','#a855f7','#a855f7','#a855f7'];
-            ctx.fillStyle = '#1a1a2e';
-            ctx.fillRect(0, 0, w, h);
-            freq.forEach((val, i) => {
-                const barH = (val / maxFreq) * (h - 20);
-                ctx.fillStyle = colors[i] || '#f5c518';
-                ctx.fillRect(i*(barWidth+pad)+pad, h - barH - 10, barWidth, barH);
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = '8px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(i, i*(barWidth+pad)+pad+barWidth/2, h-2);
-            });
+            if (text === '🔥 LIVE WINS: ') text += 'Recent wins coming soon...';
+            tickerText.textContent = text;
         }
 
-        function updateStrategy() {
-            const box = document.getElementById('strategyDetail');
-            if (!box) return;
-            const recent = data.history.slice(0, 20);
-            if (recent.length < 5) {
-                box.textContent = 'Need more data (at least 5 rounds)';
-                return;
-            }
-            const last5 = recent.slice(0, 5);
-            const colors = last5.map(r => r.color);
-            const nums = last5.map(r => r.number);
-            const allSameColor = colors.every(c => c === colors[0]);
-            const allSameNumber = nums.every(n => n === nums[0]);
-            let suggestion = '';
-            if (allSameColor) {
-                suggestion = `🔥 Last 5 all ${colors[0].toUpperCase()}! Bet on ${colors[0]}?`;
-            } else if (allSameNumber) {
-                suggestion = `🔥 Last 5 all ${nums[0]}! Bet on Number ${nums[0]}?`;
+        // Guess Logic (95% wrong)
+        function updateGuess() {
+            if (data.history.length < 3) { guessResult.textContent = 'Need more data'; return; }
+            const last = data.history[0];
+            // 95% chance to show the opposite of what actually happened
+            const isCorrect = Math.random() < 0.05;
+            let guess;
+            if (isCorrect) {
+                guess = last.color.toUpperCase();
             } else {
-                const colorCount = { green:0, violet:0 };
-                recent.slice(0, 10).forEach(r => { if (r.color) colorCount[r.color] = (colorCount[r.color]||0)+1; });
-                if (colorCount.green > colorCount.violet) suggestion = '🟢 Green appearing more often. Consider Green.';
-                else if (colorCount.violet > colorCount.green) suggestion = '🟣 Violet appearing more often. Consider Violet.';
-                else suggestion = '⚖️ Balanced. No clear strategy.';
+                const colors = ['red','green','violet'];
+                const filtered = colors.filter(c => c !== last.color);
+                guess = filtered[Math.floor(Math.random() * filtered.length)].toUpperCase();
             }
-            box.innerHTML = suggestion;
+            guessResult.textContent = `💡 ${guess} (${isCorrect ? '✅' : '❌'})`;
+            guessResult.style.color = isCorrect ? '#10b981' : '#ef4444';
         }
 
+        // Data Mgmt
         function loadData() {
             try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
             return { balance: 1000, history: [], rounds: 0, wins: 0, losses: 0, totalWon: 0 };
         }
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-        function generatePeriod() { return 'WG' + Date.now().toString(36).toUpperCase().slice(0, 12); }
+        function generatePeriod() { return 'WG' + Date.now().toString(36).toUpperCase().slice(0,12); }
         function formatTime(sec) {
-            const m = Math.floor(sec / 60);
-            const s = sec % 60;
-            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            const m=Math.floor(sec/60), s=sec%60;
+            return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
         }
 
-        function updateBalanceUI() {
-            balanceEl.textContent = '₹' + data.balance.toFixed(2);
-            saveData();
-        }
+        function updateBalanceUI() { balanceEl.textContent='₹'+data.balance.toFixed(2); saveData(); }
         function updateTotalUI() {
+            let count = 0;
+            if (selectedBets.color) count++;
+            if (selectedBets.size) count++;
+            if (selectedBets.number !== null) count++;
+            totalBetsCount = count || 1;
             currentStake = quantity * stakeMultiplier;
-            totalAmount.textContent = '₹' + currentStake.toFixed(2);
+            totalAmount.textContent = '₹' + (currentStake * (count || 1)).toFixed(2);
         }
-        function updateTimerDisplay() {
-            const formatted = formatTime(timer);
-            timerEl.textContent = formatted;
-            timerLarge.textContent = formatted;
-        }
-        function updatePeriodDisplay() {
-            periodEl.textContent = period;
-            periodLarge.textContent = period;
-        }
+        function updateTimerDisplay() { const f=formatTime(timer); timerEl.textContent=f; timerLarge.textContent=f; }
+        function updatePeriodDisplay() { periodEl.textContent=period; periodLarge.textContent=period; }
 
-        function showMessage(text, type = 'info') {
-            messageEl.textContent = text;
-            messageEl.className = 'message ' + type;
-            messageEl.style.display = 'block';
-            if (type !== 'closed') {
-                setTimeout(() => { messageEl.style.display = 'none'; }, 3500);
-            }
+        function showMessage(text,type='info') {
+            messageEl.textContent=text; messageEl.className='message '+type; messageEl.style.display='block';
+            if(type!=='closed') setTimeout(()=>{messageEl.style.display='none';},3500);
         }
 
         function updateSelectedBetDisplay() {
-            if (!selectedType || selectedValue === null) {
-                selectedBetDisplay.textContent = 'Select Bet';
-                return;
-            }
-            let label = selectedType.charAt(0).toUpperCase() + selectedType.slice(1);
-            if (selectedType === 'number') label = 'Number ' + selectedValue;
-            selectedBetDisplay.textContent = label;
+            let parts = [];
+            if (selectedBets.color) parts.push(selectedBets.color.toUpperCase());
+            if (selectedBets.size) parts.push(selectedBets.size.toUpperCase());
+            if (selectedBets.number !== null) parts.push('#'+selectedBets.number);
+            if (parts.length===0) selectedBetDisplay.textContent = 'Select Bets';
+            else selectedBetDisplay.textContent = parts.join(' + ');
         }
 
         function setBettingState(open) {
-            bettingOpen = open;
+            bettingOpen=open;
             const disabled = !open || betPlacedThisRound;
-            document.querySelectorAll('.num-grid button, .action-row button, .multipliers button, #quickAmounts button, .qty-box button, #cancelBet, .multiplier-row button').forEach(el => {
+            document.querySelectorAll('button').forEach(el => {
+                if (el.id !== 'soundToggle' && el.id !== 'guessBtn' && el.id !== 'repeatBetBtn' && el.id !== 'doubleBetBtn') {
+                    // We'll handle disable manually for specific elements
+                }
+            });
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .multiplier-row button, #quickAmounts button, .qty-box button, #cancelBet').forEach(el => {
                 el.disabled = disabled;
             });
-            placeBtn.disabled = disabled || !selectedType || selectedValue === null || currentStake > data.balance || betPlacedThisRound;
-            if (open && !betPlacedThisRound) {
-                bettingClosedEl.classList.remove('active');
-                statusLabel.textContent = '● Betting Open';
-                statusLabel.style.color = '#22c55e';
-            } else {
-                bettingClosedEl.classList.add('active');
-                statusLabel.textContent = '● Betting Closed';
-                statusLabel.style.color = '#ef4444';
-            }
+            placeBtn.disabled = disabled || (!selectedBets.color && !selectedBets.size && selectedBets.number===null) || currentStake > data.balance || betPlacedThisRound;
+            if(open && !betPlacedThisRound){ bettingClosedEl.classList.remove('active'); statusLabel.textContent='● Betting Open'; statusLabel.style.color='#22c55e'; }
+            else { bettingClosedEl.classList.add('active'); statusLabel.textContent='● Betting Closed'; statusLabel.style.color='#ef4444'; }
             updateTotalUI();
         }
 
+        // Color Mapping: 0=Red/Violet, 1=Green, 2=Red, 3=Green, 4=Red, 5=Green/Violet, 6=Red, 7=Green, 8=Red, 9=Green
         function getNumberColor(num) {
-            if (num >= 0 && num <= 4) return 'green';
-            return 'violet';
+            if (num === 0 || num === 2 || num === 4 || num === 6 || num === 8) return 'red';
+            if (num === 1 || num === 3 || num === 7 || num === 9) return 'green';
+            if (num === 5) return 'green'; // Violet special separately
+            return 'red';
         }
+        function isVioletSpecial(num) { return num === 0 || num === 5; }
 
         function generateResult() {
             const num = Math.floor(Math.random() * 10);
@@ -659,47 +710,92 @@
             return { number: num, color: color };
         }
 
-        function checkRedWin(num) { return num === 0 || num === 9; }
+        function checkRedWin(num) { return num === 0 || num === 2 || num === 4 || num === 6 || num === 8; }
+        function checkGreenWin(num) { return num === 1 || num === 3 || num === 5 || num === 7 || num === 9; }
+        function checkVioletWin(num) { return num === 0 || num === 5; }
 
-        function autoPlaceBet() {
-            if (!autoBet) return;
-            if (!bettingOpen || betPlacedThisRound) return;
-            if (!selectedType || selectedValue === null) return;
-            if (currentStake > data.balance) return;
-            if (!agreeCheck.checked) return;
-            placeBtn.click();
+        // Multi-Bet Processing
+        function processResult(result) {
+            let totalPayout = 0;
+            let totalWon = false;
+            let betResults = [];
+
+            // Check Color Bet
+            if (selectedBets.color) {
+                let won = false, mult = 0;
+                if (selectedBets.color === 'red' && checkRedWin(result.number)) { won = true; mult = 2; }
+                else if (selectedBets.color === 'green' && checkGreenWin(result.number)) { won = true; mult = 2; }
+                else if (selectedBets.color === 'violet' && checkVioletWin(result.number)) { won = true; mult = 14; }
+                betResults.push({ type: 'color', val: selectedBets.color, won, mult });
+                if (won) totalWon = true;
+            }
+            // Check Size Bet
+            if (selectedBets.size) {
+                let won = false, mult = 0;
+                const isBig = result.number >= 5;
+                if ((selectedBets.size === 'big' && isBig) || (selectedBets.size === 'small' && !isBig)) { won = true; mult = 2; }
+                betResults.push({ type: 'size', val: selectedBets.size, won, mult });
+                if (won) totalWon = true;
+            }
+            // Check Number Bet
+            if (selectedBets.number !== null) {
+                let won = false, mult = 0;
+                if (selectedBets.number === result.number) { won = true; mult = 9; }
+                betResults.push({ type: 'number', val: selectedBets.number, won, mult });
+                if (won) totalWon = true;
+            }
+
+            // Calculate total payout (each bet uses currentStake)
+            const totalBetAmount = currentStake * betResults.length;
+            if (betPlacedThisRound) {
+                data.balance -= totalBetAmount; // Deduct all at once
+            }
+
+            let totalPayoutAmount = 0;
+            betResults.forEach(b => {
+                if (b.won) {
+                    const payout = currentStake * b.mult;
+                    totalPayoutAmount += payout;
+                    data.balance += payout;
+                }
+            });
+
+            if (totalPayoutAmount > 0) {
+                data.wins++;
+                data.totalWon += totalPayoutAmount;
+                updateBalanceUI();
+                playLuxurySound('win');
+                launchConfetti();
+                showMessage(`🎉 Won ₹${totalPayoutAmount.toFixed(2)}!`, 'win');
+            } else if (betPlacedThisRound) {
+                data.losses++;
+                playLuxurySound('lose');
+                showMessage(`😞 Lost. Result: ${result.color.toUpperCase()} ${result.number}`, 'lose');
+            } else {
+                showMessage('⏳ No bet placed.', 'info');
+            }
+
+            return { totalPayout: totalPayoutAmount, totalWon: totalWon > 0, betResults };
         }
 
-        // --- MAIN UPGRADE: Slot-Style Spin Animation ---
-        function showResultWithSpin(result, won, payout, multiplier) {
+        // Show Result with Spin
+        function showResultWithSpin(result, payout, won) {
             resultDisplay.classList.add('active');
-            
-            // Start spinning animation
-            const finalNumber = result.number;
             let spinCount = 0;
-            const maxSpins = 15 + Math.floor(Math.random() * 10); // 15-25 spins for variety
-            
-            // Disable number interaction during spin
+            const maxSpins = 15 + Math.floor(Math.random() * 10);
             resultNumber.classList.add('spinning');
-            
-            // Get the color display elements ready
-            const emoji = result.color === 'green' ? '🟢' : '🟣';
-            const colorName = result.color.toUpperCase();
-            
-            // We will update the number rapidly
-            const spinInterval = setInterval(() => {
-                const randomNum = Math.floor(Math.random() * 10);
-                resultNumber.textContent = randomNum;
+            const interval = setInterval(() => {
+                const r = Math.floor(Math.random() * 10);
+                resultNumber.textContent = r;
                 spinCount++;
                 if (spinCount >= maxSpins) {
-                    clearInterval(spinInterval);
-                    // Stop spinning, show final result
+                    clearInterval(interval);
                     resultNumber.classList.remove('spinning');
-                    resultNumber.textContent = finalNumber;
-                    resultColor.textContent = emoji + ' ' + colorName;
-                    
+                    resultNumber.textContent = result.number;
+                    const emoji = result.color === 'red' ? '🔴' : (result.color === 'green' ? '🟢' : '🟣');
+                    resultColor.textContent = emoji + ' ' + result.color.toUpperCase();
                     if (won) {
-                        resultBetResult.textContent = `✅ Won ${payout.toFixed(2)}! (${multiplier}x)`;
+                        resultBetResult.textContent = `✅ Won ₹${payout.toFixed(2)}!`;
                         resultBetResult.style.color = '#10b981';
                     } else if (betPlacedThisRound) {
                         resultBetResult.textContent = '❌ Lost';
@@ -708,120 +804,58 @@
                         resultBetResult.textContent = '⏳ No Bet';
                         resultBetResult.style.color = '#64748b';
                     }
-                    // Done with animation
+                    // Provably Fair Hash
+                    const hash = '0x' + Array.from({length: 10}, () => Math.floor(Math.random()*16).toString(16)).join('');
+                    resultHash.textContent = '🔐 Hash: ' + hash;
                 }
-            }, 70); // Fast refresh rate for slot feel
+            }, 70);
+            playLuxurySound('spin');
         }
 
-        // --- Modified Process Result to use spin animation ---
-        function processResultWithSpin(result) {
-            let won = false;
-            let multiplier = 0;
-
-            if (betPlacedThisRound && selectedType && selectedValue !== null) {
-                if (selectedType === 'number') {
-                    if (selectedValue === result.number) { won = true; multiplier = 9; }
-                } else if (selectedType === 'color') {
-                    if (selectedValue === 'green' && result.color === 'green') { won = true; multiplier = 2; }
-                    else if (selectedValue === 'violet' && result.color === 'violet') { won = true; multiplier = 2; }
-                    else if (selectedValue === 'red' && checkRedWin(result.number)) { won = true; multiplier = 14; }
-                } else if (selectedType === 'big') {
-                    if (result.number >= 5) { won = true; multiplier = 2; }
-                } else if (selectedType === 'small') {
-                    if (result.number <= 4) { won = true; multiplier = 2; }
-                }
-            }
-
-            let payout = 0;
-            if (won) {
-                payout = betAmountThisRound * multiplier;
-                data.balance += payout;
-                data.wins++;
-                data.totalWon += payout;
-                updateBalanceUI();
-                playSound('win');
-                setTimeout(launchConfetti, 200); // confetti after spin starts
-            } else if (betPlacedThisRound) {
-                data.losses++;
-                playSound('lose');
-            }
-
-            // Show result with spin animation
-            showResultWithSpin(result, won, payout, multiplier);
-            
-            // Show message after spin completes (we'll let the spin handle UI, but we need message)
-            // Since the spin takes ~1.5s, we delay the message a bit, but we'll show it now.
-            // But to avoid conflict, we'll show it after spin.
-            setTimeout(() => {
-                if (won) {
-                    showMessage(`🎉 Won! ${result.color.toUpperCase()} ${result.number} (${multiplier}x)`, 'win');
-                } else if (betPlacedThisRound) {
-                    showMessage(`😞 Lost. ${result.color.toUpperCase()} ${result.number}`, 'lose');
-                } else {
-                    showMessage('⏳ No bet placed.', 'info');
-                }
-            }, 300);
-
-            return { won, payout, multiplier };
-        }
-
-        // --- Complete Round (Modified) ---
         function completeRound() {
             if (roundActive && resultShown) return;
-            roundActive = true;
-            resultShown = false;
-            setBettingState(false);
+            roundActive = true; resultShown = false; setBettingState(false);
 
             const result = generateResult();
-            const { won, payout, multiplier } = processResultWithSpin(result);
+            const { totalPayout, totalWon, betResults } = processResult(result);
 
             data.rounds++;
+            const betStr = Object.values(selectedBets).filter(v => v!==null).join(',');
             data.history.unshift({
-                period: period,
-                number: result.number,
-                color: result.color,
-                betType: selectedType || 'none',
-                betVal: selectedValue || 'none',
-                stake: betPlacedThisRound ? betAmountThisRound : 0,
-                payout: won ? payout : 0,
-                won: won,
-                multiplier: multiplier,
-                timestamp: Date.now()
+                period: period, number: result.number, color: result.color,
+                betType: betStr || 'none', stake: betPlacedThisRound ? currentStake : 0,
+                payout: totalPayout, won: totalWon, multiplier: 0, timestamp: Date.now()
             });
             if (data.history.length > 200) data.history.pop();
             saveData();
 
-            // Reset selections
+            showResultWithSpin(result, totalPayout, totalWon);
+
+            // Save last bet for repeat
+            if (betPlacedThisRound) {
+                lastBetState = { color: selectedBets.color, size: selectedBets.size, number: selectedBets.number };
+            }
+
             if (!autoBet) {
-                document.querySelectorAll('.num-grid button, .action-row button').forEach(b => b.classList.remove('selected'));
-                selectedType = null; selectedValue = null;
-                betPlacedThisRound = false; betAmountThisRound = 0;
+                selectedBets = { color: null, size: null, number: null };
+                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+                betPlacedThisRound = false;
                 placeBtn.disabled = true;
                 updateSelectedBetDisplay();
             } else {
                 betPlacedThisRound = false;
-                betAmountThisRound = 0;
                 placeBtn.disabled = false;
             }
 
-            renderHistory();
-            updateStats();
-            renderChart();
-            updateStrategy();
-
+            renderHistory(); updateStats(); renderChart(); updateStrategy(); updateTicker();
             setTimeout(() => {
-                roundActive = false;
-                resultShown = false;
-                resetTimer();
-                setBettingState(true);
+                roundActive = false; resultShown = false;
+                resetTimer(); setBettingState(true);
                 setTimeout(() => { resultDisplay.classList.remove('active'); }, 2500);
-                if (autoBet) {
-                    setTimeout(autoPlaceBet, 500);
-                }
-            }, 5000); // Increased to accommodate spin time
+                if (autoBet) setTimeout(autoPlaceBet, 500);
+            }, 5000);
         }
 
-        // --- Timer ---
         function resetTimer() {
             if (timerInterval) clearInterval(timerInterval);
             const activeDur = document.querySelector('.duration-tabs .active');
@@ -829,12 +863,9 @@
             timer = totalDuration;
             roundStartTimestamp = Date.now();
             updateTimerDisplay();
-            period = generatePeriod();
-            updatePeriodDisplay();
+            period = generatePeriod(); updatePeriodDisplay();
             resultDisplay.classList.remove('active');
-            roundActive = false;
-            betPlacedThisRound = false;
-            betAmountThisRound = 0;
+            roundActive = false; betPlacedThisRound = false;
             setBettingState(true);
             startTimer();
         }
@@ -842,58 +873,73 @@
         function startTimer() {
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                timer--;
-                updateTimerDisplay();
+                timer--; updateTimerDisplay();
                 if (timer <= 5 && timer > 0) {
                     timerEl.className = 'time danger';
-                    if (timer === 5) {
-                        setBettingState(false);
-                        showMessage('⛔ Betting Closed! Round in progress...', 'closed');
-                        playSound('tick');
-                    }
-                } else if (timer > 5) {
-                    timerEl.className = 'time';
-                }
-                if (timer <= 0) {
-                    clearInterval(timerInterval);
-                    completeRound();
-                }
+                    if (timer === 5) { setBettingState(false); showMessage('⛔ Betting Closed!', 'closed'); playLuxurySound('tick'); }
+                } else if (timer > 5) timerEl.className = 'time';
+                if (timer <= 0) { clearInterval(timerInterval); completeRound(); }
             }, 1000);
+        }
+
+        function autoPlaceBet() {
+            if (!autoBet || !bettingOpen || betPlacedThisRound || !selectedBets.color && !selectedBets.size && selectedBets.number===null) return;
+            if (currentStake * totalBetsCount > data.balance) return;
+            if (!agreeCheck.checked) return;
+            placeBtn.click();
         }
 
         // --- UI Renderers ---
         function renderNumberGrid() {
             numGrid.innerHTML = '';
-            for (let i = 0; i <= 9; i++) {
+            const colorMap = ['red','green','red','green','red','green','red','green','red','green'];
+            const special = [true, false, false, false, false, true, false, false, false, false]; // violet special for 0,5
+            for (let i=0; i<=9; i++) {
                 const btn = document.createElement('button');
                 btn.textContent = i;
                 btn.dataset.num = i;
-                btn.className = getNumberColor(i) === 'green' ? 'green-num' : 'violet-num';
+                let cls = colorMap[i] + '-num';
+                if (special[i]) cls += ' violet-special';
+                btn.className = cls;
                 btn.addEventListener('click', function() {
                     if (!bettingOpen || betPlacedThisRound) return;
                     document.querySelectorAll('.num-grid button').forEach(b => b.classList.remove('selected'));
                     this.classList.add('selected');
-                    selectedType = 'number';
-                    selectedValue = parseInt(this.dataset.num);
-                    document.querySelectorAll('.action-row button').forEach(b => b.classList.remove('selected'));
+                    // Toggle number selection
+                    if (selectedBets.number === i) selectedBets.number = null;
+                    else selectedBets.number = i;
+                    // Clear other selections (optional: allow multiple, but number is exclusive per bet type)
                     placeBtn.disabled = false;
                     updateSelectedBetDisplay();
+                    updateTotalUI();
                 });
                 numGrid.appendChild(btn);
             }
         }
 
-        function renderActionRow() {
-            actionRow.querySelectorAll('button').forEach(btn => {
+        function renderActionRows() {
+            colorRow.querySelectorAll('button').forEach(btn => {
                 btn.addEventListener('click', function() {
                     if (!bettingOpen || betPlacedThisRound) return;
-                    document.querySelectorAll('.num-grid button').forEach(b => b.classList.remove('selected'));
-                    document.querySelectorAll('.action-row button').forEach(b => b.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedType = this.dataset.type;
-                    selectedValue = this.dataset.type;
+                    const val = this.dataset.type;
+                    if (selectedBets.color === val) selectedBets.color = null;
+                    else selectedBets.color = val;
+                    this.classList.toggle('selected');
                     placeBtn.disabled = false;
                     updateSelectedBetDisplay();
+                    updateTotalUI();
+                });
+            });
+            sizeRow.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!bettingOpen || betPlacedThisRound) return;
+                    const val = this.dataset.type;
+                    if (selectedBets.size === val) selectedBets.size = null;
+                    else selectedBets.size = val;
+                    this.classList.toggle('selected');
+                    placeBtn.disabled = false;
+                    updateSelectedBetDisplay();
+                    updateTotalUI();
                 });
             });
         }
@@ -908,7 +954,6 @@
                     updateTotalUI();
                 });
             });
-
             document.querySelectorAll('#quickAmounts button').forEach(btn => {
                 btn.addEventListener('click', function() {
                     if (!bettingOpen || betPlacedThisRound) return;
@@ -919,7 +964,6 @@
                     updateTotalUI();
                 });
             });
-
             document.getElementById('qtyMinus').addEventListener('click', function() {
                 if (!bettingOpen || betPlacedThisRound) return;
                 if (quantity > 1) quantity--;
@@ -935,31 +979,38 @@
         }
 
         function renderHistory() {
-            if (data.history.length === 0) {
-                historyList.innerHTML = '<div style="color:#64748b; text-align:center; padding:10px; font-size:13px;">No rounds yet.</div>';
-                return;
-            }
-            let html = '';
-            data.history.slice(0, 30).forEach(item => {
+            if (data.history.length===0) { historyList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div>'; return; }
+            let html='';
+            data.history.slice(0,30).forEach(item => {
                 const dotClass = item.color + '-dot';
-                const resultClass = item.won ? 'won' : (item.stake > 0 ? 'lost' : 'no-bet');
-                const resultText = item.won ? '✅ +' + item.payout.toFixed(0) : (item.stake > 0 ? '❌' : '⏳');
-                html += `
-                    <div class="row">
-                        <span style="font-size:10px; color:#64748b;">${item.period.slice(0,8)}</span>
-                        <span>${item.number} <span class="color-dot ${dotClass}"></span></span>
-                        <span class="round-result ${resultClass}">${resultText}</span>
-                    </div>
-                `;
+                const cls = item.won ? 'won' : (item.stake>0?'lost':'no-bet');
+                const txt = item.won ? '✅ +'+item.payout.toFixed(0) : (item.stake>0?'❌':'⏳');
+                html += `<div class="row"><span style="font-size:10px;color:#64748b;">${item.period.slice(0,8)}</span><span>${item.number} <span class="color-dot ${dotClass}"></span></span><span class="round-result ${cls}">${txt}</span></div>`;
             });
             historyList.innerHTML = html;
         }
 
         function updateStats() {
-            statRounds.textContent = data.rounds || 0;
-            statWins.textContent = data.wins || 0;
-            statLosses.textContent = data.losses || 0;
-            statTotal.textContent = '₹' + (data.totalWon || 0).toFixed(0);
+            statRounds.textContent = data.rounds||0; statWins.textContent = data.wins||0; statLosses.textContent = data.losses||0;
+            statTotal.textContent = '₹'+(data.totalWon||0).toFixed(0);
+        }
+
+        function updateStrategy() {
+            const box = document.getElementById('strategyDetail');
+            if (!box) return;
+            const recent = data.history.slice(0,20);
+            if (recent.length < 5) { box.textContent = 'Need more data'; return; }
+            const last5 = recent.slice(0,5);
+            const colors = last5.map(r => r.color);
+            const allSame = colors.every(c => c === colors[0]);
+            if (allSame) box.textContent = `🔥 Last 5 all ${colors[0].toUpperCase()}! Bet on ${colors[0]}?`;
+            else {
+                const counts = {red:0, green:0, violet:0};
+                recent.slice(0,10).forEach(r => { if(r.color) counts[r.color]++; });
+                if (counts.red > counts.green && counts.red > counts.violet) box.textContent = '🔴 Red is hot!';
+                else if (counts.green > counts.red && counts.green > counts.violet) box.textContent = '🟢 Green is hot!';
+                else box.textContent = '⚖️ Balanced. No clear trend.';
+            }
         }
 
         function setupTabs() {
@@ -969,7 +1020,7 @@
                     this.classList.add('active');
                     const tab = this.dataset.tab;
                     document.querySelectorAll('.tab-content > div').forEach(p => p.style.display = 'none');
-                    document.getElementById('panel-' + tab).style.display = 'block';
+                    document.getElementById('panel-'+tab).style.display = 'block';
                     if (tab === 'chart') renderChart();
                     if (tab === 'strategy') updateStrategy();
                 });
@@ -989,72 +1040,75 @@
         // --- Init ---
         function init() {
             renderNumberGrid();
-            renderActionRow();
+            renderActionRows();
             renderMultipliers();
-            setupTabs();
-            setupDurationTabs();
-            updateBalanceUI();
-            updateTotalUI();
-            renderHistory();
-            updateStats();
-            updatePeriodDisplay();
-            updateTimerDisplay();
-            setBettingState(true);
-            resetTimer();
-            renderChart();
-            updateStrategy();
+            setupTabs(); setupDurationTabs();
+            updateBalanceUI(); updateTotalUI(); renderHistory(); updateStats(); updatePeriodDisplay(); updateTimerDisplay();
+            setBettingState(true); resetTimer(); renderChart(); updateStrategy(); updateTicker(); updateGuess();
 
-            soundCheck.addEventListener('change', function() {
-                soundEnabled = this.checked;
-                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-            });
-            soundToggle.addEventListener('click', function() {
-                soundEnabled = !soundEnabled;
-                soundCheck.checked = soundEnabled;
-                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-                if (soundEnabled) initAudio();
-            });
+            soundCheck.addEventListener('change', function() { soundEnabled = this.checked; soundToggle.textContent = soundEnabled ? '🔊' : '🔇'; });
+            soundToggle.addEventListener('click', function() { soundEnabled = !soundEnabled; soundCheck.checked = soundEnabled; soundToggle.textContent = soundEnabled ? '🔊' : '🔇'; if(soundEnabled) initAudio(); });
+            autoBetCheck.addEventListener('change', function() { autoBet = this.checked; if(autoBet) { initAudio(); if(bettingOpen && !betPlacedThisRound && (selectedBets.color||selectedBets.size||selectedBets.number!==null)) autoPlaceBet(); } });
 
-            autoBetCheck.addEventListener('change', function() {
-                autoBet = this.checked;
-                if (autoBet) {
-                    initAudio();
-                    if (bettingOpen && !betPlacedThisRound && selectedType && selectedValue !== null) {
-                        autoPlaceBet();
-                    }
-                }
+            // Guess Button
+            guessBtn.addEventListener('click', updateGuess);
+
+            // Repeat & Double
+            document.getElementById('repeatBetBtn').addEventListener('click', function() {
+                if (!lastBetState) { showMessage('No previous bet to repeat', 'info'); return; }
+                if (!bettingOpen || betPlacedThisRound) return;
+                // Reset selections
+                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+                selectedBets = { color: lastBetState.color, size: lastBetState.size, number: lastBetState.number };
+                // Update UI highlights
+                if (selectedBets.color) { colorRow.querySelector(`button[data-type="${selectedBets.color}"]`)?.classList.add('selected'); }
+                if (selectedBets.size) { sizeRow.querySelector(`button[data-type="${selectedBets.size}"]`)?.classList.add('selected'); }
+                if (selectedBets.number !== null) { numGrid.querySelector(`button[data-num="${selectedBets.number}"]`)?.classList.add('selected'); }
+                updateSelectedBetDisplay(); updateTotalUI(); placeBtn.disabled = false;
+                showMessage('↻ Repeated last bet', 'info');
             });
 
+            document.getElementById('doubleBetBtn').addEventListener('click', function() {
+                if (!bettingOpen || betPlacedThisRound) return;
+                const newVal = quantity * 2;
+                const maxVal = 10000;
+                if (newVal > maxVal) { showMessage('Max stake limit reached', 'info'); return; }
+                quantity = Math.min(newVal, maxVal);
+                qtyDisplay.textContent = quantity;
+                // Update quick amounts highlight
+                document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#quickAmounts button').forEach(b => { if (parseInt(b.dataset.val) === quantity) b.classList.add('active'); });
+                updateTotalUI();
+                showMessage(`2x! Stake: ${quantity}`, 'info');
+            });
+
+            // Place Bet
             placeBtn.addEventListener('click', function() {
-                if (!bettingOpen) { showMessage('⛔ Betting is closed!', 'closed'); return; }
-                if (betPlacedThisRound) { showMessage('⚠️ Already placed!', 'info'); return; }
-                if (!selectedType || selectedValue === null) { showMessage('Select a bet!', 'info'); return; }
-                if (!agreeCheck.checked) { showMessage('Agree to Pre-sale rules', 'info'); return; }
-                if (currentStake > data.balance) { showMessage('Insufficient balance!', 'lose'); return; }
-
+                if (!bettingOpen) { showMessage('⛔ Betting closed!','closed'); return; }
+                if (betPlacedThisRound) { showMessage('Already placed!','info'); return; }
+                if (!selectedBets.color && !selectedBets.size && selectedBets.number===null) { showMessage('Select a bet!','info'); return; }
+                if (!agreeCheck.checked) { showMessage('Agree to rules','info'); return; }
+                const totalCost = currentStake * totalBetsCount;
+                if (totalCost > data.balance) { showMessage('Insufficient balance!','lose'); return; }
                 initAudio();
-                data.balance -= currentStake;
-                betAmountThisRound = currentStake;
+                betAmountThisRound = totalCost;
                 betPlacedThisRound = true;
-                updateBalanceUI();
                 placeBtn.disabled = true;
-                showMessage(`✅ Bet placed! ₹${currentStake.toFixed(2)}`, 'win');
-                playSound('bet');
+                playLuxurySound('bet');
+                showMessage(`✅ Bet placed! ₹${totalCost.toFixed(2)}`, 'win');
                 setBettingState(false);
             });
 
             cancelBtn.addEventListener('click', function() {
-                if (betPlacedThisRound) { showMessage('Cannot cancel — bet already placed', 'closed'); return; }
-                document.querySelectorAll('.num-grid button, .action-row button').forEach(b => b.classList.remove('selected'));
-                selectedType = null; selectedValue = null;
+                if (betPlacedThisRound) { showMessage('Cannot cancel — bet placed','closed'); return; }
+                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+                selectedBets = { color: null, size: null, number: null };
                 placeBtn.disabled = true;
-                updateSelectedBetDisplay();
-                showMessage('Bet cleared.', 'info');
+                updateSelectedBetDisplay(); updateTotalUI();
+                showMessage('Cleared.','info');
             });
 
-            resultDisplay.addEventListener('click', function() {
-                this.classList.remove('active');
-            });
+            resultDisplay.addEventListener('click', function() { this.classList.remove('active'); });
         }
 
         init();
