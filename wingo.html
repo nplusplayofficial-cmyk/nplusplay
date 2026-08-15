@@ -38,6 +38,7 @@
         .timer-box .status-label { font-size: 8px; font-weight: 700; color: #22c55e; letter-spacing: 0.5px; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes spinReveal { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
 
         .duration-tabs { display: flex; gap: 4px; background: #0f172a; padding: 3px; border-radius: 10px; margin-bottom: 10px; }
         .duration-tabs button { flex: 1; padding: 5px; border-radius: 8px; border: none; background: transparent; color: #94a3b8; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
@@ -49,7 +50,6 @@
         .game-info-row .left span { color: #f5c518; }
         .game-info-row .right { font-size: 20px; font-weight: 900; font-family: 'Courier New', monospace; color: #f5c518; }
         .game-info-row .right .sec { font-size: 14px; color: #94a3b8; }
-        .game-info-row .period-id { font-size: 10px; color: #64748b; font-family: monospace; text-align: right; }
 
         .num-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 8px; }
         .num-grid button {
@@ -139,7 +139,14 @@
             overflow: hidden;
         }
         .result-display.active { display: block; }
-        .result-display .number { font-size: 40px; font-weight: 900; }
+        .result-display .number {
+            font-size: 48px; font-weight: 900;
+            font-family: 'Courier New', monospace;
+            transition: none;
+        }
+        .result-display .number.spinning {
+            animation: spinReveal 0.1s infinite alternate;
+        }
         .result-display .color-name { font-size: 16px; font-weight: 700; }
         .result-display .win { color: #10b981; }
         .result-display .lose { color: #ef4444; }
@@ -362,7 +369,7 @@
 
 <script>
     // ============================================================
-    // WINGO — ALL FEATURES: Sound, Auto-Bet, Turbo, Confetti, Chart, Strategy
+    // WINGO — FULL FEATURES WITH SLOT-STYLE SPIN ANIMATION
     // ============================================================
     (function() {
         'use strict';
@@ -370,7 +377,6 @@
         const STORAGE_KEY = 'wingo_data';
         const ROUND_STATE_KEY = 'wingo_round_state';
 
-        // --- Data ---
         let data = loadData();
         let timer = 15;
         let totalDuration = 15;
@@ -381,7 +387,6 @@
         let resultShown = false;
         let roundStartTimestamp = Date.now();
 
-        // Bet state
         let selectedType = null;
         let selectedValue = null;
         let quantity = 1;
@@ -390,11 +395,9 @@
         let betPlacedThisRound = false;
         let betAmountThisRound = 0;
 
-        // Options
         let autoBet = false;
         let soundEnabled = true;
 
-        // DOM refs
         const balanceEl = document.getElementById('balanceDisplay');
         const timerEl = document.getElementById('timerDisplay');
         const timerLarge = document.getElementById('timerLarge');
@@ -424,7 +427,6 @@
         const soundCheck = document.getElementById('soundCheck');
         const soundToggle = document.getElementById('soundToggle');
 
-        // Audio context for sounds
         let audioCtx = null;
         function initAudio() {
             if (!audioCtx) {
@@ -449,7 +451,6 @@
                     gain.gain.value = 0.2;
                     osc.start(audioCtx.currentTime);
                     osc.stop(audioCtx.currentTime + 0.3);
-                    // second tone
                     setTimeout(() => {
                         const osc2 = audioCtx.createOscillator();
                         const gain2 = audioCtx.createGain();
@@ -475,7 +476,6 @@
             } catch(e) {}
         }
 
-        // --- Confetti ---
         function launchConfetti() {
             const canvas = document.getElementById('confettiCanvas');
             const rect = canvas.parentElement.getBoundingClientRect();
@@ -520,7 +520,6 @@
             animate();
         }
 
-        // --- Chart ---
         function renderChart() {
             const canvas = document.getElementById('chartCanvas');
             if (!canvas) return;
@@ -530,8 +529,6 @@
             canvas.height = rect.height || 120;
             const w = canvas.width, h = canvas.height;
             ctx.clearRect(0, 0, w, h);
-
-            // Get last 100 numbers
             const recent = data.history.slice(0, 100);
             const freq = Array(10).fill(0);
             recent.forEach(item => {
@@ -555,7 +552,6 @@
             });
         }
 
-        // --- Strategy ---
         function updateStrategy() {
             const box = document.getElementById('strategyDetail');
             if (!box) return;
@@ -575,7 +571,6 @@
             } else if (allSameNumber) {
                 suggestion = `🔥 Last 5 all ${nums[0]}! Bet on Number ${nums[0]}?`;
             } else {
-                // count frequency
                 const colorCount = { green:0, violet:0 };
                 recent.slice(0, 10).forEach(r => { if (r.color) colorCount[r.color] = (colorCount[r.color]||0)+1; });
                 if (colorCount.green > colorCount.violet) suggestion = '🟢 Green appearing more often. Consider Green.';
@@ -585,14 +580,12 @@
             box.innerHTML = suggestion;
         }
 
-        // --- Load/Save ---
         function loadData() {
             try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
             return { balance: 1000, history: [], rounds: 0, wins: 0, losses: 0, totalWon: 0 };
         }
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
         function generatePeriod() { return 'WG' + Date.now().toString(36).toUpperCase().slice(0, 12); }
-
         function formatTime(sec) {
             const m = Math.floor(sec / 60);
             const s = sec % 60;
@@ -668,19 +661,60 @@
 
         function checkRedWin(num) { return num === 0 || num === 9; }
 
-        // --- Auto-Bet ---
         function autoPlaceBet() {
             if (!autoBet) return;
             if (!bettingOpen || betPlacedThisRound) return;
             if (!selectedType || selectedValue === null) return;
             if (currentStake > data.balance) return;
             if (!agreeCheck.checked) return;
-            // Simulate click
             placeBtn.click();
         }
 
-        // --- Process Result ---
-        function processResult(result) {
+        // --- MAIN UPGRADE: Slot-Style Spin Animation ---
+        function showResultWithSpin(result, won, payout, multiplier) {
+            resultDisplay.classList.add('active');
+            
+            // Start spinning animation
+            const finalNumber = result.number;
+            let spinCount = 0;
+            const maxSpins = 15 + Math.floor(Math.random() * 10); // 15-25 spins for variety
+            
+            // Disable number interaction during spin
+            resultNumber.classList.add('spinning');
+            
+            // Get the color display elements ready
+            const emoji = result.color === 'green' ? '🟢' : '🟣';
+            const colorName = result.color.toUpperCase();
+            
+            // We will update the number rapidly
+            const spinInterval = setInterval(() => {
+                const randomNum = Math.floor(Math.random() * 10);
+                resultNumber.textContent = randomNum;
+                spinCount++;
+                if (spinCount >= maxSpins) {
+                    clearInterval(spinInterval);
+                    // Stop spinning, show final result
+                    resultNumber.classList.remove('spinning');
+                    resultNumber.textContent = finalNumber;
+                    resultColor.textContent = emoji + ' ' + colorName;
+                    
+                    if (won) {
+                        resultBetResult.textContent = `✅ Won ${payout.toFixed(2)}! (${multiplier}x)`;
+                        resultBetResult.style.color = '#10b981';
+                    } else if (betPlacedThisRound) {
+                        resultBetResult.textContent = '❌ Lost';
+                        resultBetResult.style.color = '#ef4444';
+                    } else {
+                        resultBetResult.textContent = '⏳ No Bet';
+                        resultBetResult.style.color = '#64748b';
+                    }
+                    // Done with animation
+                }
+            }, 70); // Fast refresh rate for slot feel
+        }
+
+        // --- Modified Process Result to use spin animation ---
+        function processResultWithSpin(result) {
             let won = false;
             let multiplier = 0;
 
@@ -705,21 +739,33 @@
                 data.wins++;
                 data.totalWon += payout;
                 updateBalanceUI();
-                showMessage(`🎉 Won! ${result.color.toUpperCase()} ${result.number} (${multiplier}x)`, 'win');
                 playSound('win');
-                launchConfetti();
+                setTimeout(launchConfetti, 200); // confetti after spin starts
             } else if (betPlacedThisRound) {
                 data.losses++;
-                showMessage(`😞 Lost. ${result.color.toUpperCase()} ${result.number}`, 'lose');
                 playSound('lose');
-            } else {
-                showMessage('⏳ No bet placed.', 'info');
             }
+
+            // Show result with spin animation
+            showResultWithSpin(result, won, payout, multiplier);
+            
+            // Show message after spin completes (we'll let the spin handle UI, but we need message)
+            // Since the spin takes ~1.5s, we delay the message a bit, but we'll show it now.
+            // But to avoid conflict, we'll show it after spin.
+            setTimeout(() => {
+                if (won) {
+                    showMessage(`🎉 Won! ${result.color.toUpperCase()} ${result.number} (${multiplier}x)`, 'win');
+                } else if (betPlacedThisRound) {
+                    showMessage(`😞 Lost. ${result.color.toUpperCase()} ${result.number}`, 'lose');
+                } else {
+                    showMessage('⏳ No bet placed.', 'info');
+                }
+            }, 300);
 
             return { won, payout, multiplier };
         }
 
-        // --- Round Logic ---
+        // --- Complete Round (Modified) ---
         function completeRound() {
             if (roundActive && resultShown) return;
             roundActive = true;
@@ -727,7 +773,7 @@
             setBettingState(false);
 
             const result = generateResult();
-            const { won, payout, multiplier } = processResult(result);
+            const { won, payout, multiplier } = processResultWithSpin(result);
 
             data.rounds++;
             data.history.unshift({
@@ -745,25 +791,7 @@
             if (data.history.length > 200) data.history.pop();
             saveData();
 
-            // Show result
-            resultDisplay.classList.add('active');
-            resultNumber.textContent = result.number;
-            const emoji = result.color === 'green' ? '🟢' : '🟣';
-            resultColor.textContent = emoji + ' ' + result.color.toUpperCase();
-            if (won) {
-                resultBetResult.textContent = `✅ Won ${payout.toFixed(2)}! (${multiplier}x)`;
-                resultBetResult.style.color = '#10b981';
-            } else if (betPlacedThisRound) {
-                resultBetResult.textContent = '❌ Lost';
-                resultBetResult.style.color = '#ef4444';
-            } else {
-                resultBetResult.textContent = '⏳ No Bet';
-                resultBetResult.style.color = '#64748b';
-            }
-
-            resultShown = true;
-
-            // Reset selections (but keep for auto-bet)
+            // Reset selections
             if (!autoBet) {
                 document.querySelectorAll('.num-grid button, .action-row button').forEach(b => b.classList.remove('selected'));
                 selectedType = null; selectedValue = null;
@@ -771,11 +799,9 @@
                 placeBtn.disabled = true;
                 updateSelectedBetDisplay();
             } else {
-                // Auto-bet: keep selection, clear bet placed flag
                 betPlacedThisRound = false;
                 betAmountThisRound = 0;
                 placeBtn.disabled = false;
-                // If auto-bet, place again next round
             }
 
             renderHistory();
@@ -789,11 +815,10 @@
                 resetTimer();
                 setBettingState(true);
                 setTimeout(() => { resultDisplay.classList.remove('active'); }, 2500);
-                // Auto-bet after round start
                 if (autoBet) {
                     setTimeout(autoPlaceBet, 500);
                 }
-            }, 4500);
+            }, 5000); // Increased to accommodate spin time
         }
 
         // --- Timer ---
@@ -836,7 +861,7 @@
             }, 1000);
         }
 
-        // --- UI ---
+        // --- UI Renderers ---
         function renderNumberGrid() {
             numGrid.innerHTML = '';
             for (let i = 0; i <= 9; i++) {
@@ -979,7 +1004,6 @@
             renderChart();
             updateStrategy();
 
-            // Sound toggle
             soundCheck.addEventListener('change', function() {
                 soundEnabled = this.checked;
                 soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
@@ -991,19 +1015,16 @@
                 if (soundEnabled) initAudio();
             });
 
-            // Auto-bet
             autoBetCheck.addEventListener('change', function() {
                 autoBet = this.checked;
                 if (autoBet) {
                     initAudio();
-                    // If round is open and betting allowed, place bet immediately
                     if (bettingOpen && !betPlacedThisRound && selectedType && selectedValue !== null) {
                         autoPlaceBet();
                     }
                 }
             });
 
-            // Place bet
             placeBtn.addEventListener('click', function() {
                 if (!bettingOpen) { showMessage('⛔ Betting is closed!', 'closed'); return; }
                 if (betPlacedThisRound) { showMessage('⚠️ Already placed!', 'info'); return; }
@@ -1031,7 +1052,6 @@
                 showMessage('Bet cleared.', 'info');
             });
 
-            // Click on result to dismiss
             resultDisplay.addEventListener('click', function() {
                 this.classList.remove('active');
             });
