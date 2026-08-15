@@ -1212,6 +1212,1025 @@
         // --- Placeholder for quick and dirty — I'll just put the full script with all refactors. Since this is a long code, I'll provide the final code directly. 
         // To avoid repetition, I'll output the full HTML file now with the complete script. 
     })();
+    <script>
+    // ============================================================
+    // WINGO — COMPLETE GAME ENGINE
+    // ============================================================
+    (function() {
+        'use strict';
+
+        const STORAGE_KEY = 'wingo_data';
+
+        // --- Load Data ---
+        let data = loadData();
+
+        // --- State ---
+        let selectedBets = { colors: [], size: null, numbers: [] };
+        let quantity = 1;
+        let stakeMultiplier = 1;
+        let currentStake = 1;
+        let totalBetsCount = 0;
+        let betPlacedThisRound = false;
+        let betAmountThisRound = 0;
+        let autoBet = false;
+        let soundEnabled = true;
+        let lastBetState = null;
+        let currentStreak = 0;
+        let streakType = null;
+
+        let duration = 30;
+        let timerInterval = null;
+        let roundActive = false;
+        let bettingOpen = true;
+        let resultShown = false;
+        let currentPeriod = '';
+        let nextRoundStart = 0;
+
+        // --- DOM Refs ---
+        const balanceEl = document.getElementById('balanceDisplay');
+        const timerEl = document.getElementById('timerDisplay');
+        const timerLarge = document.getElementById('timerLarge');
+        const periodEl = document.getElementById('periodDisplay');
+        const periodLarge = document.getElementById('periodDisplayLarge');
+        const statusLabel = document.getElementById('statusLabel');
+        const bettingClosedEl = document.getElementById('bettingClosed');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const resultNumber = document.getElementById('resultNumber');
+        const resultColor = document.getElementById('resultColor');
+        const resultBetResult = document.getElementById('resultBetResult');
+        const resultHash = document.getElementById('resultHash');
+        const numRow1 = document.getElementById('numRow1');
+        const numRow2 = document.getElementById('numRow2');
+        const colorRow = document.getElementById('colorRow');
+        const sizeRow = document.getElementById('sizeRow');
+        const qtyDisplay = document.getElementById('qtyDisplay');
+        const totalAmount = document.getElementById('totalAmount');
+        const messageEl = document.getElementById('message');
+        const historyList = document.getElementById('historyList');
+        const statRounds = document.getElementById('statRounds');
+        const statWins = document.getElementById('statWins');
+        const statLosses = document.getElementById('statLosses');
+        const statTotal = document.getElementById('statTotal');
+        const placeBtn = document.getElementById('placeBet');
+        const cancelBtn = document.getElementById('cancelBet');
+        const selectedBetDisplay = document.getElementById('selectedBetDisplay');
+        const agreeCheck = document.getElementById('agreeCheck');
+        const autoBetCheck = document.getElementById('autoBetCheck');
+        const soundCheck = document.getElementById('soundCheck');
+        const soundToggle = document.getElementById('soundToggle');
+        const tickerText = document.getElementById('tickerText');
+        const guessBtn = document.getElementById('guessBtn');
+        const guessResult = document.getElementById('guessResult');
+        const streakBox = document.getElementById('streakBox');
+        const winnerFeed = document.getElementById('winnerFeed');
+        const statPanel = document.getElementById('statPanel');
+        const previewContent = document.getElementById('previewContent');
+
+        // --- Audio ---
+        let audioCtx = null;
+        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+        function playSound(type) {
+            if(!soundEnabled || !audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const gain = audioCtx.createGain();
+                gain.connect(audioCtx.destination);
+                gain.gain.value = 0.12;
+                if(type==='win') {
+                    [523.25,659.25,783.99].forEach((f,i)=>{
+                        const o=audioCtx.createOscillator(); o.connect(gain); o.type='sine'; o.frequency.value=f;
+                        const g=audioCtx.createGain(); g.gain.value=0.15; o.connect(g); g.connect(audioCtx.destination);
+                        o.start(now+i*0.12); o.stop(now+i*0.12+0.2); g.gain.exponentialRampToValueAtTime(0.001, now+i*0.12+0.2);
+                    });
+                } else if(type==='lose') {
+                    [400,300,200].forEach((f,i)=>{
+                        const o=audioCtx.createOscillator(); o.connect(gain); o.type='sine'; o.frequency.value=f;
+                        o.start(now+i*0.1); o.stop(now+i*0.1+0.15);
+                    });
+                } else if(type==='spin') {
+                    for(let i=0;i<5;i++){
+                        const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.frequency.value=800+Math.random()*400; g.gain.value=0.03;
+                        o.start(now+i*0.04); o.stop(now+i*0.04+0.02);
+                    }
+                } else if(type==='bet') {
+                    const o=audioCtx.createOscillator(); o.connect(gain); o.type='square'; o.frequency.value=600;
+                    o.start(now); o.stop(now+0.08);
+                }
+                if (navigator.vibrate && (type==='win' || type==='lose')) {
+                    navigator.vibrate(type==='win' ? [30,50,30] : [50]);
+                }
+            } catch(e) {}
+        }
+
+        // --- Confetti ---
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            if(!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width; canvas.height = rect.height;
+            const ctx = canvas.getContext('2d');
+            const pieces = [];
+            const colors = ['#f5c518','#ef4444','#22c55e','#a855f7','#3b82f6'];
+            for(let i=0;i<60;i++) {
+                pieces.push({
+                    x: Math.random()*canvas.width, y: Math.random()*canvas.height-20,
+                    w: Math.random()*8+4, h: Math.random()*4+2,
+                    color: colors[Math.floor(Math.random()*colors.length)],
+                    vx: (Math.random()-0.5)*4, vy: Math.random()*3+1, rot: Math.random()*360, rv: (Math.random()-0.5)*6
+                });
+            }
+            let frames=0;
+            function animate() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                pieces.forEach(p=>{
+                    p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.rot+=p.rv;
+                    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+                    ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+                    ctx.restore();
+                });
+                frames++;
+                if(frames<60) requestAnimationFrame(animate);
+                else ctx.clearRect(0,0,canvas.width,canvas.height);
+            }
+            animate();
+        }
+
+        // --- Chart ---
+        function renderChart() {
+            const canvas = document.getElementById('chartCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width||400; canvas.height = rect.height||120;
+            const w=canvas.width, h=canvas.height;
+            ctx.clearRect(0,0,w,h);
+            const recent = data.history.slice(0,100);
+            const freq = Array(10).fill(0);
+            recent.forEach(item=>{ if(item.number!==undefined) freq[item.number]=(freq[item.number]||0)+1; });
+            const maxFreq = Math.max(...freq,1);
+            const pad=2, barWidth = w/10 - pad;
+            const colors = ['#ef4444','#22c55e','#ef4444','#22c55e','#ef4444','#a855f7','#ef4444','#22c55e','#ef4444','#22c55e'];
+            ctx.fillStyle='#1a1a2e';
+            ctx.fillRect(0,0,w,h);
+            freq.forEach((val,i)=>{
+                const barH=(val/maxFreq)*(h-20);
+                ctx.fillStyle=colors[i]||'#f5c518';
+                ctx.fillRect(i*(barWidth+pad)+pad, h-barH-10, barWidth, barH);
+                ctx.fillStyle='#94a3b8';
+                ctx.font='8px sans-serif';
+                ctx.textAlign='center';
+                ctx.fillText(i, i*(barWidth+pad)+pad+barWidth/2, h-2);
+            });
+        }
+
+        // --- Ticker ---
+        function updateTicker() {
+            const recent = data.history.slice(0,5);
+            if(recent.length===0){ tickerText.textContent='🔥 LIVE WINS: Waiting...'; return; }
+            let text = '🔥 LIVE WINS: ';
+            recent.forEach(item=>{
+                if(item.won && item.payout>0) {
+                    text += `User ***${String(Math.floor(Math.random()*1000)).padStart(3,'0')} won ₹${item.payout.toFixed(0)} on ${(item.betType||'bet').toUpperCase()} • `;
+                }
+            });
+            if(text==='🔥 LIVE WINS: ') text += 'Recent wins coming soon...';
+            tickerText.textContent = text;
+        }
+
+        // --- Winner Feed ---
+        function addWinnerFeed(name, amount, game) {
+            const el = document.createElement('div');
+            el.className = 'item';
+            el.innerHTML = `${name} won <span class="amount">₹${amount.toFixed(0)}</span> on <span class="game">${game}</span>`;
+            winnerFeed.appendChild(el);
+            setTimeout(() => { if(el.parentNode) el.remove(); }, 3500);
+            if(winnerFeed.children.length > 5) winnerFeed.firstChild.remove();
+        }
+
+        // --- Guess ---
+        function updateGuess() {
+            if(data.history.length<3){ guessResult.textContent='Need more data'; return; }
+            const last = data.history[0];
+            const isCorrect = Math.random() < 0.05;
+            let guess = isCorrect ? last.colors?.[0]?.toUpperCase() || 'RED' :
+                (['RED','GREEN','VIOLET'].filter(c=>c!==last.colors?.[0]?.toUpperCase())[Math.floor(Math.random()*2)]);
+            guessResult.textContent = `💡 ${guess} (${isCorrect ? '✅' : '❌'})`;
+            guessResult.style.color = isCorrect ? '#10b981' : '#ef4444';
+        }
+
+        // --- Stats Panel ---
+        function renderStats() {
+            const last100 = data.history.slice(0,100);
+            const freq = Array(10).fill(0);
+            const lastSeen = Array(10).fill(-1);
+            const gaps = Array.from({length:10}, ()=>[]);
+            let maxConsecutive = Array(10).fill(0);
+            let currentConsecutive = Array(10).fill(0);
+            last100.forEach((item, idx) => {
+                if(item.number!==undefined) {
+                    const n = item.number;
+                    freq[n]++;
+                    if(lastSeen[n] !== -1) { gaps[n].push(idx - lastSeen[n] - 1); }
+                    lastSeen[n] = idx;
+                    if(idx > 0 && last100[idx-1]?.number === n) currentConsecutive[n]++;
+                    else currentConsecutive[n] = 1;
+                    if(currentConsecutive[n] > maxConsecutive[n]) maxConsecutive[n] = currentConsecutive[n];
+                }
+            });
+            const missing = lastSeen.map((v, i) => {
+                if(v === -1) return 100;
+                return last100.length - v - 1;
+            });
+            const avgMissing = gaps.map(g => g.length > 0 ? Math.round(g.reduce((a,b)=>a+b,0)/g.length) : 0);
+
+            let html = '';
+            for(let i=0; i<10; i++) {
+                html += `<div class="col">
+                    <div class="label">${i}</div>
+                    <div class="value missing">${missing[i]}</div>
+                    <div class="value" style="font-size:7px;color:#94a3b8;">${avgMissing[i]}</div>
+                    <div class="value freq">${freq[i]}</div>
+                    <div class="value" style="font-size:7px;color:#94a3b8;">${maxConsecutive[i]}</div>
+                </div>`;
+            }
+            statPanel.innerHTML = html;
+        }
+
+        // --- Streak ---
+        function updateStreak(won) {
+            if(won) {
+                if(streakType === 'win') currentStreak++;
+                else { currentStreak = 1; streakType = 'win'; }
+            } else {
+                if(streakType === 'lose') currentStreak++;
+                else { currentStreak = 1; streakType = 'lose'; }
+            }
+            if(currentStreak >= 3) {
+                streakBox.textContent = streakType === 'win' ? `🔥 ${currentStreak} Wins in a row!` : `💀 ${currentStreak} Losses in a row!`;
+                streakBox.className = 'streak-box ' + streakType;
+                streakBox.style.display = 'block';
+            } else {
+                streakBox.className = 'streak-box';
+                streakBox.style.display = 'none';
+            }
+        }
+
+        // --- Data ---
+        function loadData() {
+            try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
+            return { balance: 1000, history: [], rounds: 0, wins: 0, losses: 0, totalWon: 0 };
+        }
+        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+        function updateBalanceUI() {
+            balanceEl.textContent='₹'+data.balance.toFixed(2);
+            saveData();
+        }
+
+        // --- Timer ---
+        function getNextRoundStart(durationSec) {
+            const now = Date.now();
+            const remainder = Math.floor(now / 1000) % durationSec;
+            return now + (durationSec - remainder) * 1000;
+        }
+
+        function updateTimerDisplay() {
+            const now = Date.now();
+            const remaining = Math.max(0, (nextRoundStart - now) / 1000);
+            const secs = Math.ceil(remaining);
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            const formatted = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+            timerEl.textContent = formatted;
+            timerLarge.textContent = formatted;
+
+            const d = new Date();
+            const pad = n => String(n).padStart(2,'0');
+            currentPeriod = d.getFullYear() +
+                           pad(d.getMonth()+1) +
+                           pad(d.getDate()) +
+                           pad(d.getHours()) +
+                           pad(d.getMinutes()) +
+                           pad(d.getSeconds()) +
+                           String(d.getMilliseconds()).padStart(3,'0');
+            periodEl.textContent = currentPeriod.slice(0,14);
+            periodLarge.textContent = currentPeriod;
+
+            if (secs <= 5 && bettingOpen) {
+                setBettingState(false);
+                if (secs === 5) { playSound('spin'); showMessage('⛔ Betting Closed!', 'closed'); }
+            } else if (secs > 5 && !bettingOpen && !roundActive) {
+                setBettingState(true);
+            }
+
+            if (secs <= 0 && !roundActive) {
+                completeRound();
+            }
+        }
+
+        function startTimerLoop() {
+            if (timerInterval) clearInterval(timerInterval);
+            nextRoundStart = getNextRoundStart(duration);
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 200);
+        }
+
+        // --- Violet Rule ---
+        function getNumberColor(num) {
+            if (num === 0 || num === 2 || num === 4 || num === 6 || num === 8) return 'red';
+            if (num === 1 || num === 3 || num === 7 || num === 9) return 'green';
+            return 'green';
+        }
+        function isVioletSpecial(num) { return num === 0 || num === 5; }
+
+        function generateResult() {
+            const num = Math.floor(Math.random() * 10);
+            const baseColor = getNumberColor(num);
+            let resultColors = [baseColor];
+            if (isVioletSpecial(num) && Math.random() < 0.3) { // 30% chance of violet
+                const additionalColor = Math.random() < 0.5 ? 'red' : 'green';
+                resultColors = [additionalColor, 'violet'];
+            }
+            return { number: num, colors: resultColors };
+        }
+
+        // --- Process Bet ---
+        function processResult(result) {
+            const { number, colors } = result;
+            let totalPayout = 0;
+            let totalWon = false;
+            let betResults = [];
+
+            const activeCount = selectedBets.colors.length + (selectedBets.size ? 1 : 0) + selectedBets.numbers.length;
+            if (activeCount === 0) return { totalPayout: 0, totalWon: false };
+            const totalBetAmount = currentStake * activeCount;
+            if (betPlacedThisRound) data.balance -= totalBetAmount;
+
+            const checkWin = (type, val) => {
+                if (type === 'color') {
+                    if (val === 'violet') return colors.includes('violet');
+                    return colors.includes(val);
+                }
+                if (type === 'size') {
+                    const isBig = number >= 5;
+                    return (val === 'big' && isBig) || (val === 'small' && !isBig);
+                }
+                if (type === 'number') return number === val;
+                return false;
+            };
+
+            const getMultiplier = (type, val) => {
+                if (type === 'color') return val === 'violet' ? 14 : 2;
+                if (type === 'size') return 2;
+                if (type === 'number') return 9;
+                return 2;
+            };
+
+            selectedBets.colors.forEach(c => {
+                const won = checkWin('color', c);
+                const mult = getMultiplier('color', c);
+                betResults.push({ type: 'color', val: c, won, multiplier: mult });
+                if (won) totalWon = true;
+            });
+
+            if (selectedBets.size) {
+                const won = checkWin('size', selectedBets.size);
+                const mult = getMultiplier('size', selectedBets.size);
+                betResults.push({ type: 'size', val: selectedBets.size, won, multiplier: mult });
+                if (won) totalWon = true;
+            }
+
+            selectedBets.numbers.forEach(n => {
+                const won = checkWin('number', n);
+                const mult = getMultiplier('number', n);
+                betResults.push({ type: 'number', val: n, won, multiplier: mult });
+                if (won) totalWon = true;
+            });
+
+            betResults.forEach(b => {
+                if (b.won) {
+                    const rawPayout = currentStake * b.multiplier;
+                    const payout = rawPayout * 0.985; // 1.5% house edge
+                    totalPayout += payout;
+                    data.balance += payout;
+                }
+            });
+
+            if (totalPayout > 0) {
+                data.wins++;
+                data.totalWon += totalPayout;
+                updateBalanceUI();
+                playSound('win');
+                launchConfetti();
+                showMessage(`🎉 Won ₹${totalPayout.toFixed(2)}!`, 'win');
+                updateStreak(true);
+                const names = ['Mem***JVN','Su***aj','Kap***oor','Mem***H3M','Me***er'];
+                addWinnerFeed(names[Math.floor(Math.random()*names.length)], totalPayout, colors.join('+').toUpperCase());
+            } else if (betPlacedThisRound) {
+                data.losses++;
+                playSound('lose');
+                showMessage(`😞 Lost. ${colors.join('+').toUpperCase()} ${number}`, 'lose');
+                updateStreak(false);
+            } else {
+                showMessage('⏳ No bet placed.', 'info');
+            }
+
+            return { totalPayout, totalWon, betResults };
+        }
+
+        // --- Show Result ---
+        function showResultWithSpin(result, payout, won) {
+            resultDisplay.classList.add('active');
+            const { number, colors } = result;
+            let spinCount = 0;
+            const maxSpins = 15 + Math.floor(Math.random() * 10);
+            resultNumber.classList.add('spinning');
+            const interval = setInterval(() => {
+                resultNumber.textContent = Math.floor(Math.random() * 10);
+                spinCount++;
+                if (spinCount >= maxSpins) {
+                    clearInterval(interval);
+                    resultNumber.classList.remove('spinning');
+                    resultNumber.textContent = number;
+                    const colorStr = colors.map(c => {
+                        if (c === 'red') return '🔴';
+                        if (c === 'green') return '🟢';
+                        if (c === 'violet') return '🟣';
+                        return '';
+                    }).join(' ');
+                    const colorNameStr = colors.map(c => c.charAt(0).toUpperCase()+c.slice(1)).join('+');
+                    resultColor.innerHTML = colorStr + ' ' + colorNameStr;
+                    if (won) {
+                        resultBetResult.textContent = `✅ Won ₹${payout.toFixed(2)}!`;
+                        resultBetResult.style.color = '#10b981';
+                    } else if (betPlacedThisRound) {
+                        resultBetResult.textContent = '❌ Lost';
+                        resultBetResult.style.color = '#ef4444';
+                    } else {
+                        resultBetResult.textContent = '⏳ No Bet';
+                        resultBetResult.style.color = '#64748b';
+                    }
+                    const hash = '0x'+Array.from({length:10},()=>Math.floor(Math.random()*16).toString(16)).join('');
+                    resultHash.textContent = '🔐 Hash: '+hash;
+                }
+            }, 70);
+            playSound('spin');
+        }
+
+        // --- Complete Round ---
+        function completeRound() {
+            if (roundActive) return;
+            roundActive = true;
+            setBettingState(false);
+            const result = generateResult();
+            const { totalPayout, totalWon } = processResult(result);
+
+            data.rounds++;
+            const betStr = selectedBets.colors.join(',') + (selectedBets.size||'') + selectedBets.numbers.join(',');
+            data.history.unshift({
+                period: currentPeriod,
+                number: result.number,
+                colors: result.colors,
+                betType: betStr || 'none',
+                stake: betPlacedThisRound ? currentStake : 0,
+                payout: totalPayout,
+                won: totalWon,
+                timestamp: Date.now()
+            });
+            if (data.history.length > 500) data.history.pop();
+            saveData();
+
+            showResultWithSpin(result, totalPayout, totalWon);
+            if (betPlacedThisRound) {
+                lastBetState = {
+                    colors: [...selectedBets.colors],
+                    size: selectedBets.size,
+                    numbers: [...selectedBets.numbers]
+                };
+            }
+
+            if (!autoBet) {
+                selectedBets = { colors: [], size: null, numbers: [] };
+                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+                betPlacedThisRound = false;
+                placeBtn.disabled = true;
+                updateSelectedBetDisplay();
+                updatePreview();
+            } else {
+                betPlacedThisRound = false;
+                placeBtn.disabled = false;
+            }
+
+            renderHistory(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats();
+            updateBalanceUI();
+
+            roundActive = false;
+            nextRoundStart = getNextRoundStart(duration);
+            setTimeout(() => {
+                setBettingState(true);
+                resultDisplay.classList.remove('active');
+                if (autoBet && !betPlacedThisRound && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
+                    setTimeout(autoPlaceBet, 500);
+                }
+            }, 4000);
+        }
+
+        // --- Auto Bet ---
+        function autoPlaceBet() {
+            if (!autoBet || !bettingOpen || betPlacedThisRound) return;
+            if (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) return;
+            const totalCost = currentStake * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
+            if (totalCost > data.balance) return;
+            if (!agreeCheck.checked) return;
+            placeBtn.click();
+        }
+
+        // --- UI ---
+        function setBettingState(open) {
+            bettingOpen = open;
+            const disabled = !open || betPlacedThisRound;
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .multiplier-row button, #quickAmounts button, .qty-box button, #cancelBtn').forEach(el => {
+                if(el) el.disabled = disabled;
+            });
+            placeBtn.disabled = disabled || (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) || currentStake > data.balance || betPlacedThisRound;
+            if(open && !betPlacedThisRound){
+                bettingClosedEl.classList.remove('active');
+                statusLabel.textContent = '● Betting Open';
+                statusLabel.style.color = '#22c55e';
+            } else {
+                bettingClosedEl.classList.add('active');
+                statusLabel.textContent = '● Betting Closed';
+                statusLabel.style.color = '#ef4444';
+            }
+            updateTotalUI();
+            updatePreview();
+        }
+
+        function updateTotalUI() {
+            const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+            totalBetsCount = activeCount || 1;
+            currentStake = quantity * stakeMultiplier;
+            const totalStake = currentStake * (activeCount || 1);
+            totalAmount.textContent = '₹' + totalStake.toFixed(2);
+        }
+
+        function updateSelectedBetDisplay() {
+            let parts = [];
+            if (selectedBets.colors.length) parts.push(selectedBets.colors.join('+').toUpperCase());
+            if (selectedBets.size) parts.push(selectedBets.size.toUpperCase());
+            if (selectedBets.numbers.length) parts.push('#'+selectedBets.numbers.join(','));
+            if (parts.length===0) selectedBetDisplay.textContent = 'Select Bets';
+            else selectedBetDisplay.textContent = parts.join(' + ');
+        }
+
+        function showMessage(text,type='info') {
+            messageEl.textContent=text;
+            messageEl.className='message '+type;
+            messageEl.style.display='block';
+            if(type!=='closed') setTimeout(()=>{messageEl.style.display='none';},3500);
+        }
+
+        // --- Preview ---
+        function updatePreview() {
+            const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+            if (activeCount === 0) {
+                previewContent.innerHTML = '<div style="color:#64748b; font-size:10px;">Select bets to see preview</div>';
+                return;
+            }
+            let html = '';
+            const getMult = (type, val) => {
+                if (type === 'color') return val === 'violet' ? 14 : 2;
+                if (type === 'size') return 2;
+                if (type === 'number') return 9;
+                return 2;
+            };
+            selectedBets.colors.forEach(c => {
+                const mult = getMult('color', c);
+                const win = (currentStake * mult * 0.985).toFixed(2);
+                html += `<div class="preview-item"><span>${c.toUpperCase()}</span><span>${mult}x → ₹${win}</span></div>`;
+            });
+            if (selectedBets.size) {
+                const mult = getMult('size', selectedBets.size);
+                const win = (currentStake * mult * 0.985).toFixed(2);
+                html += `<div class="preview-item"><span>${selectedBets.size.toUpperCase()}</span><span>${mult}x → ₹${win}</span></div>`;
+            }
+            selectedBets.numbers.forEach(n => {
+                const mult = getMult('number', n);
+                const win = (currentStake * mult * 0.985).toFixed(2);
+                html += `<div class="preview-item"><span>#${n}</span><span>${mult}x → ₹${win}</span></div>`;
+            });
+            const totalStake = currentStake * activeCount;
+            const totalWin = (currentStake * 9 * 0.985 * activeCount).toFixed(2); // rough max
+            html += `<div class="preview-total">Total Stake: ₹${totalStake.toFixed(2)} | Potential Win: ₹${totalWin}</div>`;
+            previewContent.innerHTML = html;
+        }
+
+        // --- History ---
+        function renderHistory() {
+            if(data.history.length===0){ historyList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div>'; return; }
+            let html='';
+            data.history.slice(0,30).forEach(item=>{
+                const colors = item.colors || ['red'];
+                const dotHtml = colors.map(c => `<span class="color-dot ${c}-dot"></span>`).join('');
+                const cls = item.won ? 'won' : (item.stake>0?'lost':'no-bet');
+                const txt = item.won ? '✅ +'+item.payout.toFixed(0) : (item.stake>0?'❌':'⏳');
+                html += `<div class="row">
+                    <span style="font-size:10px;color:#64748b;">${(item.period||'').slice(0,8)}</span>
+                    <span>${item.number} ${dotHtml}</span>
+                    <span class="round-result ${cls}">${txt}</span>
+                </div>`;
+            });
+            historyList.innerHTML = html;
+        }
+
+        function updateStats() {
+            statRounds.textContent=data.rounds||0;
+            statWins.textContent=data.wins||0;
+            statLosses.textContent=data.losses||0;
+            statTotal.textContent='₹'+(data.totalWon||0).toFixed(0);
+        }
+
+        function updateStrategy() {
+            const box = document.getElementById('strategyDetail');
+            if(!box) return;
+            const recent = data.history.slice(0,20);
+            if(recent.length<5){ box.textContent='Need more data'; return; }
+            const last5 = recent.slice(0,5);
+            const colors = last5.map(r => r.colors?.[0] || 'red');
+            if(colors.every(c=>c===colors[0])) box.textContent=`🔥 Last 5 all ${colors[0].toUpperCase()}! Bet on ${colors[0]}?`;
+            else {
+                const counts = {red:0, green:0, violet:0};
+                recent.slice(0,10).forEach(r => {
+                    if(r.colors) r.colors.forEach(c => { if(counts[c]!==undefined) counts[c]++; });
+                });
+                if(counts.red>counts.green && counts.red>counts.violet) box.textContent='🔴 Red is hot!';
+                else if(counts.green>counts.red && counts.green>counts.violet) box.textContent='🟢 Green is hot!';
+                else box.textContent='⚖️ Balanced. No clear trend.';
+            }
+        }
+
+        // --- Presets ---
+        function applyPreset(type) {
+            if(!bettingOpen || betPlacedThisRound) return;
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+            selectedBets = { colors: [], size: null, numbers: [] };
+
+            if(type === 'greenSmall') {
+                selectedBets.colors = ['green'];
+                selectedBets.size = 'small';
+                colorRow.querySelector('button[data-type="green"]')?.classList.add('selected');
+                sizeRow.querySelector('button[data-type="small"]')?.classList.add('selected');
+            } else if(type === 'redBig') {
+                selectedBets.colors = ['red'];
+                selectedBets.size = 'big';
+                colorRow.querySelector('button[data-type="red"]')?.classList.add('selected');
+                sizeRow.querySelector('button[data-type="big"]')?.classList.add('selected');
+            } else if(type === 'violet5') {
+                selectedBets.colors = ['violet'];
+                selectedBets.numbers = [5];
+                colorRow.querySelector('button[data-type="violet"]')?.classList.add('selected');
+                numRow1.querySelector('button[data-num="5"]')?.classList.add('selected');
+            }
+            placeBtn.disabled = false;
+            updateSelectedBetDisplay();
+            updateTotalUI();
+            updatePreview();
+        }
+
+        // --- Render Number Grid ---
+        function renderNumberGrid() {
+            numRow1.innerHTML = '';
+            numRow2.innerHTML = '';
+            const n1 = [0,1,2,3,4];
+            const n2 = [5,6,7,8,9];
+            const colorMap = ['red','green','red','green','red','green','red','green','red','green'];
+            const special = [true,false,false,false,false,true,false,false,false,false];
+            n1.forEach(i => {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.dataset.num = i;
+                let cls = colorMap[i]+'-num';
+                if(special[i]) cls+=' violet-special';
+                btn.className = cls;
+                btn.addEventListener('click', function() {
+                    if(!bettingOpen || betPlacedThisRound) return;
+                    const num = parseInt(this.dataset.num);
+                    if(selectedBets.numbers.includes(num)) {
+                        selectedBets.numbers = selectedBets.numbers.filter(n => n !== num);
+                        this.classList.remove('selected');
+                    } else {
+                        if(selectedBets.numbers.length >= 5) {
+                            showMessage('Max 5 numbers only!', 'info');
+                            return;
+                        }
+                        selectedBets.numbers.push(num);
+                        this.classList.add('selected');
+                    }
+                    placeBtn.disabled = false;
+                    updateSelectedBetDisplay();
+                    updateTotalUI();
+                    updatePreview();
+                });
+                numRow1.appendChild(btn);
+            });
+            n2.forEach(i => {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.dataset.num = i;
+                let cls = colorMap[i]+'-num';
+                if(special[i]) cls+=' violet-special';
+                btn.className = cls;
+                btn.addEventListener('click', function() {
+                    if(!bettingOpen || betPlacedThisRound) return;
+                    const num = parseInt(this.dataset.num);
+                    if(selectedBets.numbers.includes(num)) {
+                        selectedBets.numbers = selectedBets.numbers.filter(n => n !== num);
+                        this.classList.remove('selected');
+                    } else {
+                        if(selectedBets.numbers.length >= 5) {
+                            showMessage('Max 5 numbers only!', 'info');
+                            return;
+                        }
+                        selectedBets.numbers.push(num);
+                        this.classList.add('selected');
+                    }
+                    placeBtn.disabled = false;
+                    updateSelectedBetDisplay();
+                    updateTotalUI();
+                    updatePreview();
+                });
+                numRow2.appendChild(btn);
+            });
+        }
+
+        // --- Render Action Rows ---
+        function renderActionRows() {
+            colorRow.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if(!bettingOpen || betPlacedThisRound) return;
+                    const color = this.dataset.type;
+                    if(selectedBets.colors.includes(color)) {
+                        selectedBets.colors = selectedBets.colors.filter(c => c !== color);
+                        this.classList.remove('selected');
+                    } else {
+                        if(selectedBets.colors.length >= 2) {
+                            showMessage('Max 2 colors only!', 'info');
+                            return;
+                        }
+                        selectedBets.colors.push(color);
+                        this.classList.add('selected');
+                    }
+                    placeBtn.disabled = false;
+                    updateSelectedBetDisplay();
+                    updateTotalUI();
+                    updatePreview();
+                });
+            });
+            sizeRow.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if(!bettingOpen || betPlacedThisRound) return;
+                    const size = this.dataset.type;
+                    if(selectedBets.size === size) {
+                        selectedBets.size = null;
+                        this.classList.remove('selected');
+                    } else {
+                        selectedBets.size = size;
+                        this.classList.add('selected');
+                    }
+                    placeBtn.disabled = false;
+                    updateSelectedBetDisplay();
+                    updateTotalUI();
+                    updatePreview();
+                });
+            });
+        }
+
+        // --- Render Multipliers ---
+        function renderMultipliers() {
+            document.querySelectorAll('#betMultipliers button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if(!bettingOpen || betPlacedThisRound) return;
+                    document.querySelectorAll('#betMultipliers button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    stakeMultiplier = parseInt(this.dataset.mult);
+                    updateTotalUI();
+                    updatePreview();
+                });
+            });
+            document.querySelectorAll('#quickAmounts button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if(!bettingOpen || betPlacedThisRound) return;
+                    if(this.dataset.val === 'max') {
+                        const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+                        quantity = Math.floor(data.balance / (currentStake * (activeCount||1)));
+                        if(quantity < 1) quantity = 1;
+                        document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        qtyDisplay.textContent = quantity;
+                        updateTotalUI();
+                        updatePreview();
+                        return;
+                    }
+                    document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    quantity = parseInt(this.dataset.val);
+                    qtyDisplay.textContent = quantity;
+                    updateTotalUI();
+                    updatePreview();
+                });
+            });
+            document.getElementById('qtyMinus').addEventListener('click', function() {
+                if(!bettingOpen || betPlacedThisRound) return;
+                if(quantity>1) quantity--;
+                qtyDisplay.textContent=quantity;
+                updateTotalUI();
+                updatePreview();
+            });
+            document.getElementById('qtyPlus').addEventListener('click', function() {
+                if(!bettingOpen || betPlacedThisRound) return;
+                quantity++;
+                qtyDisplay.textContent=quantity;
+                updateTotalUI();
+                updatePreview();
+            });
+        }
+
+        // --- Setup Tabs ---
+        function setupTabs() {
+            document.querySelectorAll('.info-tabs button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.info-tabs button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const tab=this.dataset.tab;
+                    document.querySelectorAll('.tab-content > div').forEach(p => p.style.display='none');
+                    document.getElementById('panel-'+tab).style.display='block';
+                    if(tab==='chart') renderChart();
+                    if(tab==='strategy') updateStrategy();
+                    if(tab==='stats') renderStats();
+                });
+            });
+        }
+
+        // --- Setup Duration Tabs ---
+        function setupDurationTabs() {
+            document.querySelectorAll('.duration-tabs button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.duration-tabs button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    duration = parseInt(this.dataset.dur);
+                    if (timerInterval) clearInterval(timerInterval);
+                    roundActive = false;
+                    resultShown = false;
+                    nextRoundStart = getNextRoundStart(duration);
+                    setBettingState(true);
+                    resultDisplay.classList.remove('active');
+                    startTimerLoop();
+                });
+            });
+        }
+
+        // --- Init ---
+        function init() {
+            renderNumberGrid();
+            renderActionRows();
+            renderMultipliers();
+            setupTabs();
+            setupDurationTabs();
+            updateBalanceUI();
+            updateTotalUI();
+            renderHistory();
+            updateStats();
+            renderChart();
+            updateStrategy();
+            updateTicker();
+            updateGuess();
+            renderStats();
+            updatePreview();
+
+            // Sound
+            soundCheck.addEventListener('change', function() {
+                soundEnabled = this.checked;
+                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+            });
+            soundToggle.addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                soundCheck.checked = soundEnabled;
+                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+                if(soundEnabled) initAudio();
+            });
+
+            // Auto-bet
+            autoBetCheck.addEventListener('change', function() {
+                autoBet = this.checked;
+                if(autoBet) {
+                    initAudio();
+                    if(bettingOpen && !betPlacedThisRound && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
+                        setTimeout(autoPlaceBet, 300);
+                    }
+                }
+            });
+
+            // Presets
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    applyPreset(this.dataset.preset);
+                });
+            });
+
+            // Guess
+            guessBtn.addEventListener('click', updateGuess);
+
+            // Repeat
+            document.getElementById('repeatBetBtn').addEventListener('click', function() {
+                if(!lastBetState){ showMessage('No previous bet','info'); return; }
+                if(!bettingOpen || betPlacedThisRound) return;
+                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+                selectedBets = {
+                    colors: lastBetState.colors || [],
+                    size: lastBetState.size || null,
+                    numbers: lastBetState.numbers || []
+                };
+                selectedBets.colors.forEach(c => {
+                    colorRow.querySelector(`button[data-type="${c}"]`)?.classList.add('selected');
+                });
+                if(selectedBets.size) {
+                    sizeRow.querySelector(`button[data-type="${selectedBets.size}"]`)?.classList.add('selected');
+                }
+                selectedBets.numbers.forEach(n => {
+                    numRow1.querySelector(`button[data-num="${n}"]`)?.classList.add('selected');
+                    numRow2.querySelector(`button[data-num="${n}"]`)?.classList.add('selected');
+                });
+                placeBtn.disabled = false;
+                updateSelectedBetDisplay();
+                updateTotalUI();
+                updatePreview();
+                showMessage('↻ Repeated last bet','info');
+            });
+
+            // Double
+            document.getElementById('doubleBetBtn').addEventListener('click', function() {
+                if(!bettingOpen || betPlacedThisRound) return;
+                const newVal = quantity * 2;
+                if(newVal > 10000){ showMessage('Max limit reached','info'); return; }
+                quantity = Math.min(newVal, 10000);
+                qtyDisplay.textContent = quantity;
+                document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#quickAmounts button').forEach(b => {
+                    if(parseInt(b.dataset.val)===quantity) b.classList.add('active');
+                });
+                updateTotalUI();
+                updatePreview();
+                showMessage(`2x! Stake: ${quantity}`,'info');
+            });
+
+            // Place Bet
+            placeBtn.addEventListener('click', function() {
+                if(!bettingOpen){ showMessage('⛔ Betting closed!','closed'); return; }
+                if(betPlacedThisRound){ showMessage('Already placed!','info'); return; }
+                if(selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) {
+                    showMessage('Select a bet!','info');
+                    return;
+                }
+                if(!agreeCheck.checked){ showMessage('Agree to rules','info'); return; }
+                const totalCost = currentStake * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
+                if(totalCost > data.balance){ showMessage('Insufficient balance!','lose'); return; }
+                initAudio();
+                betAmountThisRound = totalCost;
+                betPlacedThisRound = true;
+                placeBtn.disabled = true;
+                playSound('bet');
+                showMessage(`✅ Bet placed! ₹${totalCost.toFixed(2)}`,'win');
+                setBettingState(false);
+            });
+
+            // Cancel
+            cancelBtn.addEventListener('click', function() {
+                if(betPlacedThisRound){ showMessage('Cannot cancel','closed'); return; }
+                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+                selectedBets = { colors: [], size: null, numbers: [] };
+                placeBtn.disabled = true;
+                updateSelectedBetDisplay();
+                updateTotalUI();
+                updatePreview();
+                showMessage('Cleared.','info');
+            });
+
+            // Result display click to dismiss
+            resultDisplay.addEventListener('click', function() {
+                this.classList.remove('active');
+            });
+
+            // Start timer
+            startTimerLoop();
+        }
+
+        // --- Run ---
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
 </script>
-</body>
-</html>
