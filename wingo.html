@@ -624,8 +624,7 @@
 
 <script>
     // ============================================================
-    // WINGO — SUPER POWERFUL TIMER FIX
-    // Recalculates every tick using Date.now(), never freezes.
+    // WINGO — FINAL FIX: Balance deducts immediately, timer never freezes.
     // ============================================================
     (function() {
         'use strict';
@@ -652,6 +651,7 @@
         let resultShown = false;
         let currentPeriod = '';
         let lastBeepSecond = -1;
+        let roundResult = null; // store result for the current round
 
         const balanceEl = document.getElementById('balanceDisplay');
         const timerEl = document.getElementById('timerDisplay');
@@ -704,7 +704,6 @@
 
         function updateTimerDisplay() {
             const now = Date.now();
-            // Recalculate next start every single tick for absolute accuracy
             const nextStart = getNextRoundStart(currentDuration);
             const remaining = Math.max(0, (nextStart - now) / 1000);
             const secs = Math.ceil(remaining);
@@ -715,14 +714,12 @@
             timerEl.textContent = formatted;
             timerLarge.textContent = formatted;
 
-            // Beep logic
             if (secs >= 1 && secs <= 5 && secs !== lastBeepSecond) {
                 lastBeepSecond = secs;
                 if (soundEnabled) playSingleBeep();
             }
             if (secs > 5) lastBeepSecond = -1;
 
-            // Betting state management
             if (secs <= 5 && bettingOpen) {
                 setBettingState(false);
                 if (secs === 5) {
@@ -742,15 +739,12 @@
 
         function startTimerLoop() {
             if (timerInterval) clearInterval(timerInterval);
-            updateTimerDisplay(); // immediate update
+            updateTimerDisplay();
             timerInterval = setInterval(updateTimerDisplay, 200);
         }
 
-        // --- Page Visibility Listener (Snap to correct time on tab return) ---
         document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                updateTimerDisplay();
-            }
+            if (!document.hidden) updateTimerDisplay();
         });
 
         // --- Period Generation ---
@@ -1079,6 +1073,34 @@
             updateModalPreview();
         }
 
+        // --- Bet Placement (immediate balance deduction) ---
+        function placeBetNow() {
+            if (!bettingOpen) { showMessage('⛔ Betting closed!','closed'); return false; }
+            if (betPlacedThisRound) { showMessage('Already placed!','info'); return false; }
+            if (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) {
+                showMessage('Select a bet!','info'); return false;
+            }
+            if (!modalAgree.checked) { showMessage('Agree to rules','info'); return false; }
+            const totalCost = getCurrentStake() * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
+            if (totalCost > balance) { showMessage('Insufficient balance!','lose'); return false; }
+
+            initAudio();
+            // Deduct balance immediately
+            balance -= totalCost;
+            betAmountThisRound = totalCost;
+            betPlacedThisRound = true;
+            playSound('bet');
+            saveBalance();
+            updateBalanceUI();
+            closeBetModal();
+            showMessage(`✅ Bet placed! ₹${totalCost.toFixed(2)} deducted`, 'win');
+            setBettingState(false); // prevent further bets this round
+            autoBet = modalAutoBet.checked;
+            document.getElementById('autoBetCheck').checked = autoBet;
+            return true;
+        }
+
+        // --- Process Result (add payout if win) ---
         function processResult(result) {
             const { number, colors } = result;
             let totalPayout = 0;
@@ -1086,11 +1108,10 @@
             let betResults = [];
 
             const activeCount = selectedBets.colors.length + (selectedBets.size ? 1 : 0) + selectedBets.numbers.length;
-            if (activeCount === 0) return { totalPayout: 0, totalWon: false, betResults: [] };
+            if (activeCount === 0 || !betPlacedThisRound) return { totalPayout: 0, totalWon: false, betResults: [], totalBetAmount: 0, netChange: 0 };
             
             const perBetStake = getCurrentStake();
             const totalBetAmount = perBetStake * activeCount;
-            if (betPlacedThisRound) balance -= totalBetAmount;
 
             const checkWin = (type, val) => {
                 if (type === 'color') {
@@ -1133,8 +1154,7 @@
                 if (won) totalWonRound = true;
             });
 
-            let netChange = -totalBetAmount;
-
+            let netChange = 0;
             betResults.forEach(b => {
                 if (b.won) {
                     const rawPayout = perBetStake * b.multiplier;
@@ -1148,7 +1168,6 @@
                 netChange = totalPayout - totalBetAmount;
                 wins++;
                 totalWon += netChange;
-                saveBalance();
                 playSound('win');
                 launchConfetti();
                 updateStreak(true);
@@ -1165,6 +1184,7 @@
             }
 
             saveBalance();
+            updateBalanceUI();
             return { totalPayout, totalWon: totalWonRound, betResults, totalBetAmount, netChange };
         }
 
@@ -1178,7 +1198,7 @@
 
             let details = `<div><strong>Period:</strong> ${period}</div>`;
             details += `<div><strong>Bet:</strong> ${betDetails}</div>`;
-            details += `<div><strong>Total Stake:</strong> ₹${betAmountThisRound.toFixed(2)}</div>`;
+            details += `<div><strong>Stake:</strong> ₹${betAmountThisRound.toFixed(2)}</div>`;
             details += `<div><strong>Result:</strong> ${resultColors.join(' + ').toUpperCase()}</div>`;
             if (won) {
                 details += `<div><strong>Payout:</strong> ₹${payout.toFixed(2)}</div>`;
@@ -1211,7 +1231,7 @@
                 stake: betPlacedThisRound ? totalBetAmount : 0,
                 payout: totalPayout,
                 won: totalWon,
-                netChange: netChange,
+                netChange: netChange || 0,
                 timestamp: Date.now()
             });
             if (history.length > 50) history.pop();
@@ -1639,24 +1659,7 @@
             });
 
             modalPlaceBet.addEventListener('click', function() {
-                if(!bettingOpen){ showMessage('⛔ Betting closed!','closed'); return; }
-                if(betPlacedThisRound){ showMessage('Already placed!','info'); return; }
-                if(selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) {
-                    showMessage('Select a bet!','info');
-                    return;
-                }
-                if(!modalAgree.checked){ showMessage('Agree to rules','info'); return; }
-                const totalCost = getCurrentStake() * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
-                if(totalCost > balance){ showMessage('Insufficient balance!','lose'); return; }
-                initAudio();
-                betAmountThisRound = totalCost;
-                betPlacedThisRound = true;
-                playSound('bet');
-                closeBetModal();
-                showMessage('✅ Bet placed successfully!', 'win');
-                setBettingState(false);
-                autoBet = modalAutoBet.checked;
-                document.getElementById('autoBetCheck').checked = autoBet;
+                placeBetNow();
             });
 
             document.getElementById('autoBetCheck').addEventListener('change', function() {
