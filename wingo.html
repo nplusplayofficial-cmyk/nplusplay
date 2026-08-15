@@ -228,12 +228,6 @@
         .bet-modal-overlay .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .bet-modal-overlay .title-row .game-name { font-size: 13px; font-weight: 700; color: #f5c518; }
         .bet-modal-overlay .title-row .bet-type { font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 2px 10px; border-radius: 12px; }
-        .bet-modal-overlay .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-        .bet-modal-overlay .row-label { font-size: 11px; color: #94a3b8; font-weight: 600; min-width: 60px; }
-        .bet-modal-overlay .qty-box { display: flex; align-items: center; background: #1a1a2e; border-radius: 6px; overflow: hidden; border: 1px solid #2a2a3a; }
-        .bet-modal-overlay .qty-box button { padding: 4px 12px; background: transparent; border: none; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
-        .bet-modal-overlay .qty-box button:disabled { opacity: 0.3; cursor: not-allowed; }
-        .bet-modal-overlay .qty-box span { padding: 4px 12px; font-size: 15px; font-weight: 700; min-width: 30px; text-align: center; }
         .bet-modal-overlay .stake-input {
             background: #1a1a2e;
             border: 1px solid #2a2a3a;
@@ -246,6 +240,12 @@
             text-align: center;
         }
         .bet-modal-overlay .stake-input:focus { outline: none; border-color: #f5c518; }
+        .bet-modal-overlay .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+        .bet-modal-overlay .row-label { font-size: 11px; color: #94a3b8; font-weight: 600; min-width: 60px; }
+        .bet-modal-overlay .qty-box { display: flex; align-items: center; background: #1a1a2e; border-radius: 6px; overflow: hidden; border: 1px solid #2a2a3a; }
+        .bet-modal-overlay .qty-box button { padding: 4px 12px; background: transparent; border: none; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+        .bet-modal-overlay .qty-box button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .bet-modal-overlay .qty-box span { padding: 4px 12px; font-size: 15px; font-weight: 700; min-width: 30px; text-align: center; }
         .bet-modal-overlay .multiplier-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
         .bet-modal-overlay .multiplier-row button { padding: 4px 10px; border-radius: 4px; border: 1px solid #2a2a3a; background: transparent; color: #94a3b8; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.12s; }
         .bet-modal-overlay .multiplier-row button.active { border-color: #f5c518; background: rgba(245,197,24,0.1); color: #f5c518; }
@@ -430,10 +430,8 @@
 <body>
 <div class="app">
 
-    <!-- Winner Feed -->
     <div class="winner-feed" id="winnerFeed"></div>
 
-    <!-- Top Bar: Back Arrow, N+ PLAY, Sound/18+ -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <button class="back-btn" onclick="window.location.href='index.html'">←</button>
         <span style="font-size:20px; font-weight:900; color:#f5c518;">N+ PLAY</span>
@@ -504,14 +502,13 @@
         <button class="preset-btn" data-preset="violet5">🟣 Violet + #5</button>
     </div>
 
-    <!-- ============ UPDATED BET SLIP MODAL ============ -->
+    <!-- ============ BET SLIP MODAL ============ -->
     <div class="bet-modal-overlay" id="betModal">
         <div class="bet-slip-inner">
             <div class="title-row">
                 <span class="game-name">WinGo</span>
                 <span class="bet-type" id="modalBetDisplay">Select Bets</span>
             </div>
-            <!-- Editable Amount Row -->
             <div class="row">
                 <span class="row-label">Amount</span>
                 <input type="number" id="modalStakeInput" class="stake-input" value="1" min="0.1" step="0.1">
@@ -627,8 +624,8 @@
 
 <script>
     // ============================================================
-    // WINGO — FINAL ULTIMATE VERSION
-    // Fixed Net Profit, Removed MAX, Added Editable Amount Input.
+    // WINGO — SUPER POWERFUL TIMER FIX
+    // Recalculates every tick using Date.now(), never freezes.
     // ============================================================
     (function() {
         'use strict';
@@ -654,7 +651,6 @@
         let bettingOpen = true;
         let resultShown = false;
         let currentPeriod = '';
-        let nextRoundStart = 0;
         let lastBeepSecond = -1;
 
         const balanceEl = document.getElementById('balanceDisplay');
@@ -699,6 +695,65 @@
         const getHistoryKey = (dur) => `wingo_history_${dur}`;
         const getCounterKey = (dur) => `wingo_counter_${dur}`;
 
+        // --- TIMER ENGINE (Rock Solid) ---
+        function getNextRoundStart(durationSec) {
+            const now = Date.now();
+            const remainder = Math.floor(now / 1000) % durationSec;
+            return now + (durationSec - remainder) * 1000;
+        }
+
+        function updateTimerDisplay() {
+            const now = Date.now();
+            // Recalculate next start every single tick for absolute accuracy
+            const nextStart = getNextRoundStart(currentDuration);
+            const remaining = Math.max(0, (nextStart - now) / 1000);
+            const secs = Math.ceil(remaining);
+            
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            const formatted = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+            timerEl.textContent = formatted;
+            timerLarge.textContent = formatted;
+
+            // Beep logic
+            if (secs >= 1 && secs <= 5 && secs !== lastBeepSecond) {
+                lastBeepSecond = secs;
+                if (soundEnabled) playSingleBeep();
+            }
+            if (secs > 5) lastBeepSecond = -1;
+
+            // Betting state management
+            if (secs <= 5 && bettingOpen) {
+                setBettingState(false);
+                if (secs === 5) {
+                    showMessage('⛔ Betting Closed!', 'closed');
+                    if (betModal.classList.contains('active')) {
+                        closeBetModal();
+                    }
+                }
+            } else if (secs > 5 && !bettingOpen && !roundActive) {
+                setBettingState(true);
+            }
+
+            if (secs <= 0 && !roundActive) {
+                completeRound();
+            }
+        }
+
+        function startTimerLoop() {
+            if (timerInterval) clearInterval(timerInterval);
+            updateTimerDisplay(); // immediate update
+            timerInterval = setInterval(updateTimerDisplay, 200);
+        }
+
+        // --- Page Visibility Listener (Snap to correct time on tab return) ---
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateTimerDisplay();
+            }
+        });
+
+        // --- Period Generation ---
         function generateNextPeriod(duration) {
             const today = new Date();
             const y = today.getFullYear();
@@ -748,6 +803,7 @@
             periodLarge.textContent = currentPeriod;
         }
 
+        // --- Data ---
         function loadBalance() {
             try {
                 const val = localStorage.getItem(BALANCE_KEY);
@@ -992,52 +1048,6 @@
             }
         }
 
-        function getNextRoundStart(durationSec) {
-            const now = Date.now();
-            const remainder = Math.floor(now / 1000) % durationSec;
-            return now + (durationSec - remainder) * 1000;
-        }
-
-        function updateTimerDisplay() {
-            const now = Date.now();
-            const remaining = Math.max(0, (nextRoundStart - now) / 1000);
-            const secs = Math.ceil(remaining);
-            const m = Math.floor(secs / 60);
-            const s = secs % 60;
-            const formatted = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-            timerEl.textContent = formatted;
-            timerLarge.textContent = formatted;
-
-            if (secs >= 1 && secs <= 5 && secs !== lastBeepSecond) {
-                lastBeepSecond = secs;
-                if (soundEnabled) playSingleBeep();
-            }
-            if (secs > 5) lastBeepSecond = -1;
-
-            if (secs <= 5 && bettingOpen) {
-                setBettingState(false);
-                if (secs === 5) {
-                    showMessage('⛔ Betting Closed!', 'closed');
-                    if (betModal.classList.contains('active')) {
-                        closeBetModal();
-                    }
-                }
-            } else if (secs > 5 && !bettingOpen && !roundActive) {
-                setBettingState(true);
-            }
-
-            if (secs <= 0 && !roundActive) {
-                completeRound();
-            }
-        }
-
-        function startTimerLoop() {
-            if (timerInterval) clearInterval(timerInterval);
-            nextRoundStart = getNextRoundStart(currentDuration);
-            updateTimerDisplay();
-            timerInterval = setInterval(updateTimerDisplay, 200);
-        }
-
         function getNumberColor(num) {
             if (num === 0 || num === 2 || num === 4 || num === 6 || num === 8) return 'red';
             if (num === 1 || num === 3 || num === 7 || num === 9) return 'green';
@@ -1060,10 +1070,6 @@
             let stake = parseFloat(modalStakeInput.value);
             if (isNaN(stake) || stake <= 0) stake = 1;
             return stake * quantity * stakeMultiplier;
-        }
-
-        function getBaseStake() {
-            return parseFloat(modalStakeInput.value) || 1;
         }
 
         function updateTotalUI() {
@@ -1127,7 +1133,7 @@
                 if (won) totalWonRound = true;
             });
 
-            let netChange = -totalBetAmount; // start with loss of stake
+            let netChange = -totalBetAmount;
 
             betResults.forEach(b => {
                 if (b.won) {
@@ -1141,7 +1147,7 @@
             if (totalPayout > 0) {
                 netChange = totalPayout - totalBetAmount;
                 wins++;
-                totalWon += netChange; // NET PROFIT UPDATE
+                totalWon += netChange;
                 saveBalance();
                 playSound('win');
                 launchConfetti();
@@ -1151,7 +1157,7 @@
                 showMessage(`🎉 Won! Net +₹${netChange.toFixed(2)}`, 'win');
             } else if (betPlacedThisRound) {
                 netChange = -totalBetAmount;
-                totalWon += netChange; // NET PROFIT UPDATE (negative)
+                totalWon += netChange;
                 losses++;
                 playSound('lose');
                 updateStreak(false);
@@ -1159,7 +1165,7 @@
             }
 
             saveBalance();
-            return { totalPayout, totalWon: totalWonRound, betResults, totalBetAmount };
+            return { totalPayout, totalWon: totalWonRound, betResults, totalBetAmount, netChange };
         }
 
         function showResultPopup(won, payout, period, betDetails, resultColors, netChange) {
@@ -1193,8 +1199,7 @@
             roundActive = true;
             setBettingState(false);
             const result = generateResult();
-            const { totalPayout, totalWon, betResults, totalBetAmount } = processResult(result);
-            const netChange = totalWon ? totalPayout - totalBetAmount : -totalBetAmount;
+            const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processResult(result);
 
             rounds++;
             const betStr = selectedBets.colors.join(',') + (selectedBets.size||'') + selectedBets.numbers.join(',');
@@ -1230,7 +1235,6 @@
             updateBalanceUI();
 
             roundActive = false;
-            nextRoundStart = getNextRoundStart(currentDuration);
             setTimeout(() => {
                 currentPeriod = generateNextPeriod(currentDuration);
                 updatePeriodDisplay();
@@ -1252,7 +1256,6 @@
             modalBetDisplay.textContent = parts.join(' + ') || 'Select Bets';
 
             modalQtyDisplay.textContent = quantity;
-            // Set input to current base stake (if default)
             if (!modalStakeInput.value || parseFloat(modalStakeInput.value) <= 0) modalStakeInput.value = '1';
             updateTotalUI();
             updateModalPreview();
@@ -1279,24 +1282,25 @@
                 if (type === 'number') return 9;
                 return 2;
             };
-            const perBet = getBaseStake() * quantity * stakeMultiplier;
-            let totalStake = perBet * activeCount;
+            const perBet = parseFloat(modalStakeInput.value) || 1;
+            const stake = perBet * quantity * stakeMultiplier;
+            let totalStake = stake * activeCount;
             let totalWin = 0;
             selectedBets.colors.forEach(c => {
                 const mult = getMult('color', c);
-                const win = (perBet * mult * 0.985).toFixed(2);
+                const win = (stake * mult * 0.985).toFixed(2);
                 totalWin += parseFloat(win);
                 html += `<div class="preview-item"><span>${c.toUpperCase()}</span><span>${mult}x → ₹${win}</span></div>`;
             });
             if (selectedBets.size) {
                 const mult = getMult('size', selectedBets.size);
-                const win = (perBet * mult * 0.985).toFixed(2);
+                const win = (stake * mult * 0.985).toFixed(2);
                 totalWin += parseFloat(win);
                 html += `<div class="preview-item"><span>${selectedBets.size.toUpperCase()}</span><span>${mult}x → ₹${win}</span></div>`;
             }
             selectedBets.numbers.forEach(n => {
                 const mult = getMult('number', n);
-                const win = (perBet * mult * 0.985).toFixed(2);
+                const win = (stake * mult * 0.985).toFixed(2);
                 totalWin += parseFloat(win);
                 html += `<div class="preview-item"><span>#${n}</span><span>${mult}x → ₹${win}</span></div>`;
             });
@@ -1371,7 +1375,6 @@
             if (timerInterval) clearInterval(timerInterval);
             roundActive = false;
             resultShown = false;
-            nextRoundStart = getNextRoundStart(currentDuration);
             setBettingState(true);
             startTimerLoop();
         }
@@ -1570,7 +1573,7 @@
             updateStrategy();
             renderStats();
 
-            // Modal Input Listeners
+            // Modal listeners
             modalStakeInput.addEventListener('input', function() {
                 let val = parseFloat(this.value);
                 if (isNaN(val) || val <= 0) this.value = 1;
