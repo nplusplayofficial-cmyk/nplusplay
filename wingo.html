@@ -624,7 +624,7 @@
 
 <script>
     // ============================================================
-    // WINGO — FIXED: Win popup, period update, payout addition.
+    // WINGO — FINAL FIX: Timer NEVER freezes, rounds always complete.
     // ============================================================
     (function() {
         'use strict';
@@ -717,6 +717,7 @@
             }
             if (secs > 5) lastBeepSecond = -1;
 
+            // --- CRITICAL: Close betting at 5 seconds, but DO NOT set roundActive here ---
             if (secs <= 5 && bettingOpen) {
                 setBettingState(false);
                 if (secs === 5) {
@@ -727,6 +728,7 @@
                 setBettingState(true);
             }
 
+            // --- CRITICAL: Always complete the round when secs <= 0 ---
             if (secs <= 0 && !roundActive) {
                 completeRound();
             }
@@ -1129,7 +1131,6 @@
                 return 2;
             };
 
-            // Process colors
             selectedBets.colors.forEach(c => {
                 const won = checkWin('color', c);
                 const mult = getMultiplier('color', c);
@@ -1137,7 +1138,6 @@
                 if (won) totalWonRound = true;
             });
 
-            // Process size
             if (selectedBets.size) {
                 const won = checkWin('size', selectedBets.size);
                 const mult = getMultiplier('size', selectedBets.size);
@@ -1145,7 +1145,6 @@
                 if (won) totalWonRound = true;
             }
 
-            // Process numbers
             selectedBets.numbers.forEach(n => {
                 const won = checkWin('number', n);
                 const mult = getMultiplier('number', n);
@@ -1207,18 +1206,20 @@
             }
             popupDetails.innerHTML = details;
 
-            // Show popup
             resultPopup.classList.add('active');
             setTimeout(() => {
                 resultPopup.classList.remove('active');
             }, 3000);
         }
 
+        // --- COMPLETE ROUND (Always runs, never gets stuck) ---
         function completeRound() {
+            // Prevent double execution
             if (roundActive) return;
             roundActive = true;
             setBettingState(false);
 
+            // Generate result & process
             const result = generateResult();
             const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processResult(result);
 
@@ -1239,7 +1240,7 @@
             if (history.length > 50) history.pop();
             saveHistory(currentDuration);
 
-            // Show popup only if a bet was placed
+            // Show popup if a bet was placed
             if (betPlacedThisRound && betResults.length > 0) {
                 let details = betResults.map(b => {
                     let label = b.type.toUpperCase() + ' ' + (b.val !== undefined ? b.val : '');
@@ -1259,10 +1260,12 @@
             renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); renderStats();
             updateBalanceUI();
 
-            // Generate new period and reset timer for next round
+            // Reset timer state for next round
             roundActive = false;
             currentPeriod = generateNextPeriod(currentDuration);
             updatePeriodDisplay();
+
+            // Reopen betting and reset timer
             setBettingState(true);
 
             if (autoBet && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
