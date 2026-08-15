@@ -155,8 +155,6 @@
         .action-row-size button.selected { border-color: #f5c518; background: rgba(245, 197, 24, 0.12); }
         .action-row-size button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .random-label { text-align: center; font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 4px; }
-
         .preset-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
         .preset-btn {
             padding: 6px 0; border-radius: 8px; border: 1px solid #2a2a3a;
@@ -164,39 +162,215 @@
         }
         .preset-btn:hover { border-color: #f5c518; color: #f5c518; background: rgba(245,197,24,0.05); }
 
-        .bet-slip { padding: 14px; }
-        .bet-slip .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .bet-slip .title-row .game-name { font-size: 13px; font-weight: 700; color: #f5c518; }
-        .bet-slip .title-row .bet-type { font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 2px 10px; border-radius: 12px; display: none; }
-        .bet-slip .title-row .bet-type.visible { display: inline-block; }
-
-        .bet-slip .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-        .bet-slip .row-label { font-size: 11px; color: #94a3b8; font-weight: 600; min-width: 60px; }
-        .bet-slip .qty-box { display: flex; align-items: center; background: #1a1a2e; border-radius: 6px; overflow: hidden; border: 1px solid #2a2a3a; }
-        .bet-slip .qty-box button { padding: 4px 12px; background: transparent; border: none; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
-        .bet-slip .qty-box button:disabled { opacity: 0.3; cursor: not-allowed; }
-        .bet-slip .qty-box span { padding: 4px 12px; font-size: 15px; font-weight: 700; min-width: 30px; text-align: center; }
-        .bet-slip .quick-amounts { display: flex; gap: 4px; flex-wrap: wrap; }
-        .bet-slip .quick-amounts button { padding: 3px 10px; border-radius: 4px; border: 1px solid #2a2a3a; background: transparent; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 600; }
-        .bet-slip .quick-amounts button.active { border-color: #f5c518; color: #f5c518; background: rgba(245,197,24,0.08); }
-        .bet-slip .quick-amounts button:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        .bet-slip .multiplier-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
-        .bet-slip .multiplier-row button {
-            padding: 4px 10px; border-radius: 4px; border: 1px solid #2a2a3a;
-            background: transparent; color: #94a3b8; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.12s;
+        /* ===== BET SLIP MODAL / POPUP ===== */
+        .bet-modal-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 8, 8, 0.9);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 215, 0, 0.15);
+            padding: 16px 16px 20px;
+            z-index: 200;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            max-width: 480px;
+            margin: 0 auto;
+            border-radius: 16px 16px 0 0;
         }
-        .bet-slip .multiplier-row button.active { border-color: #f5c518; background: rgba(245,197,24,0.1); color: #f5c518; }
-        .bet-slip .multiplier-row button:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        .bet-slip .options-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
-        .bet-slip .options-row label { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; cursor: pointer; }
-        .bet-slip .options-row input[type="checkbox"] { accent-color: #f5c518; width: 14px; height: 14px; }
-        .bet-slip .options-row .action-btns { display: flex; gap: 4px; }
-        .bet-slip .options-row .action-btns button { padding: 2px 10px; border-radius: 4px; border: 1px solid #2a2a3a; background: transparent; color: #94a3b8; font-size: 10px; font-weight: 700; cursor: pointer; }
-        .bet-slip .options-row .action-btns button:hover { border-color: #f5c518; color: #f5c518; }
-
-        .preview-box {
+        .bet-modal-overlay.active {
+            transform: translateY(0);
+        }
+        .bet-modal-overlay .bet-slip-inner {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .bet-modal-overlay .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .bet-modal-overlay .title-row .game-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f5c518;
+        }
+        .bet-modal-overlay .title-row .bet-type {
+            font-size: 11px;
+            color: #94a3b8;
+            background: rgba(255,255,255,0.05);
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+        .bet-modal-overlay .row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .bet-modal-overlay .row-label {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            min-width: 60px;
+        }
+        .bet-modal-overlay .qty-box {
+            display: flex;
+            align-items: center;
+            background: #1a1a2e;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #2a2a3a;
+        }
+        .bet-modal-overlay .qty-box button {
+            padding: 4px 12px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .bet-modal-overlay .qty-box button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .bet-modal-overlay .qty-box span {
+            padding: 4px 12px;
+            font-size: 15px;
+            font-weight: 700;
+            min-width: 30px;
+            text-align: center;
+        }
+        .bet-modal-overlay .quick-amounts {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .bet-modal-overlay .quick-amounts button {
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid #2a2a3a;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .bet-modal-overlay .quick-amounts button.active {
+            border-color: #f5c518;
+            color: #f5c518;
+            background: rgba(245,197,24,0.08);
+        }
+        .bet-modal-overlay .quick-amounts button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .bet-modal-overlay .multiplier-row {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .bet-modal-overlay .multiplier-row button {
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid #2a2a3a;
+            background: transparent;
+            color: #94a3b8;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.12s;
+        }
+        .bet-modal-overlay .multiplier-row button.active {
+            border-color: #f5c518;
+            background: rgba(245,197,24,0.1);
+            color: #f5c518;
+        }
+        .bet-modal-overlay .multiplier-row button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .bet-modal-overlay .options-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .bet-modal-overlay .options-row label {
+            font-size: 11px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+        .bet-modal-overlay .options-row input[type="checkbox"] {
+            accent-color: #f5c518;
+            width: 14px;
+            height: 14px;
+        }
+        .bet-modal-overlay .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #1a1a2e;
+            padding-top: 10px;
+            margin-top: 4px;
+        }
+        .bet-modal-overlay .total-row .total-label {
+            font-size: 10px;
+            color: #64748b;
+        }
+        .bet-modal-overlay .total-row .total-amount {
+            font-size: 18px;
+            font-weight: 800;
+            color: #10b981;
+        }
+        .bet-modal-overlay .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .bet-modal-overlay .actions .cancel {
+            padding: 6px 14px;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 6px;
+            color: #ef4444;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .bet-modal-overlay .actions .cancel:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .bet-modal-overlay .actions .place {
+            padding: 6px 18px;
+            background: #f5c518;
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .bet-modal-overlay .actions .place:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .bet-modal-overlay .agree {
+            font-size: 9px;
+            color: #64748b;
+            text-align: center;
+            margin-top: 4px;
+        }
+        .bet-modal-overlay .preview-box {
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid rgba(255, 215, 0, 0.1);
             border-radius: 8px;
@@ -205,19 +379,22 @@
             font-size: 11px;
             color: #94a3b8;
         }
-        .preview-box .preview-item { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .preview-box .preview-item:last-child { border-bottom: none; }
-        .preview-box .preview-total { font-weight: 700; color: #f5c518; border-top: 1px solid rgba(255,215,0,0.15); padding-top: 4px; margin-top: 4px; }
-
-        .bet-slip .total-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1a1a2e; padding-top: 10px; margin-top: 4px; }
-        .bet-slip .total-row .total-label { font-size: 10px; color: #64748b; }
-        .bet-slip .total-row .total-amount { font-size: 18px; font-weight: 800; color: #10b981; }
-        .bet-slip .actions { display: flex; gap: 6px; }
-        .bet-slip .actions .cancel { padding: 6px 14px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 6px; color: #ef4444; font-weight: 700; font-size: 12px; cursor: pointer; }
-        .bet-slip .actions .cancel:disabled { opacity: 0.3; cursor: not-allowed; }
-        .bet-slip .actions .place { padding: 6px 18px; background: #f5c518; border: none; border-radius: 6px; color: #000; font-weight: 800; font-size: 13px; cursor: pointer; }
-        .bet-slip .actions .place:disabled { opacity: 0.4; cursor: not-allowed; }
-        .bet-slip .agree { font-size: 9px; color: #64748b; text-align: center; margin-top: 6px; }
+        .bet-modal-overlay .preview-box .preview-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .bet-modal-overlay .preview-box .preview-item:last-child {
+            border-bottom: none;
+        }
+        .bet-modal-overlay .preview-box .preview-total {
+            font-weight: 700;
+            color: #f5c518;
+            border-top: 1px solid rgba(255,215,0,0.15);
+            padding-top: 4px;
+            margin-top: 4px;
+        }
 
         .betting-closed {
             background: rgba(239, 68, 68, 0.08);
@@ -310,6 +487,7 @@
             .winner-feed { width: 100px; right: 4px; }
             .winner-feed .item { font-size: 8px; padding: 4px 6px; }
             .stat-panel { font-size: 7px; gap: 2px; }
+            .bet-modal-overlay { padding: 12px; }
         }
     </style>
 </head>
@@ -404,80 +582,74 @@
         <button data-type="small">Small</button>
     </div>
 
-    <!-- Random Label -->
-    <div class="random-label">🎲 Random</div>
-
-    <!-- Quick Presets -->
+    <!-- Presets -->
     <div class="preset-row" id="presetRow">
         <button class="preset-btn" data-preset="greenSmall">🟢 Green + Small</button>
         <button class="preset-btn" data-preset="redBig">🔴 Red + Big</button>
         <button class="preset-btn" data-preset="violet5">🟣 Violet + #5</button>
     </div>
 
-    <!-- Bet Slip -->
-    <div class="glass-card bet-slip">
-        <div class="title-row">
-            <span class="game-name">WinGo</span>
-            <span class="bet-type" id="selectedBetDisplay">Select Bets</span>
-        </div>
-
-        <div class="row">
-            <span class="row-label">Balance</span>
-            <div class="quick-amounts" id="quickAmounts">
-                <button data-val="1" class="active">1</button>
-                <button data-val="10">10</button>
-                <button data-val="100">100</button>
-                <button data-val="1000">1000</button>
-                <button data-val="max" style="color:#f5c518;">MAX</button>
+    <!-- ===== BET SLIP MODAL ===== -->
+    <div class="bet-modal-overlay" id="betModal">
+        <div class="bet-slip-inner">
+            <div class="title-row">
+                <span class="game-name">WinGo</span>
+                <span class="bet-type" id="modalBetDisplay">Select Bets</span>
             </div>
-        </div>
 
-        <div class="row">
-            <span class="row-label">Quantity</span>
-            <div class="qty-box">
-                <button id="qtyMinus">−</button>
-                <span id="qtyDisplay">1</span>
-                <button id="qtyPlus">+</button>
+            <div class="row">
+                <span class="row-label">Balance</span>
+                <div class="quick-amounts" id="modalQuickAmounts">
+                    <button data-val="1" class="active">1</button>
+                    <button data-val="10">10</button>
+                    <button data-val="100">100</button>
+                    <button data-val="1000">1000</button>
+                    <button data-val="max" style="color:#f5c518;">MAX</button>
+                </div>
             </div>
-        </div>
 
-        <div class="multiplier-row" id="betMultipliers">
-            <button data-mult="1" class="active">X1</button>
-            <button data-mult="5">X5</button>
-            <button data-mult="10">X10</button>
-            <button data-mult="20">X20</button>
-            <button data-mult="50">X50</button>
-            <button data-mult="100">X100</button>
-        </div>
-
-        <!-- Bet Slip Preview -->
-        <div class="preview-box" id="previewBox">
-            <div style="color:#64748b; font-size:10px;">Preview your potential wins</div>
-            <div id="previewContent"></div>
-        </div>
-
-        <div class="options-row">
-            <label><input type="checkbox" id="agreeCheck" checked> I agree</label>
-            <label><input type="checkbox" id="autoBetCheck"> 🤖 Auto</label>
-            <label><input type="checkbox" id="soundCheck" checked> 🔇</label>
-            <div class="action-btns">
-                <button id="repeatBetBtn">↻ Repeat</button>
-                <button id="doubleBetBtn">2x</button>
+            <div class="row">
+                <span class="row-label">Quantity</span>
+                <div class="qty-box">
+                    <button id="modalQtyMinus">−</button>
+                    <span id="modalQtyDisplay">1</span>
+                    <button id="modalQtyPlus">+</button>
+                </div>
             </div>
-        </div>
 
-        <div class="total-row">
-            <div>
-                <div class="total-label">Total amount</div>
-                <div class="total-amount" id="totalAmount">₹1.00</div>
+            <div class="multiplier-row" id="modalMultipliers">
+                <button data-mult="1" class="active">X1</button>
+                <button data-mult="5">X5</button>
+                <button data-mult="10">X10</button>
+                <button data-mult="20">X20</button>
+                <button data-mult="50">X50</button>
+                <button data-mult="100">X100</button>
             </div>
-            <div class="actions">
-                <button class="cancel" id="cancelBet">Cancel</button>
-                <button class="place" id="placeBet">Bet</button>
-            </div>
-        </div>
 
-        <div id="message" class="message" style="display:none;"></div>
+            <!-- Preview -->
+            <div class="preview-box" id="modalPreviewBox">
+                <div style="color:#64748b; font-size:10px;">Preview your potential wins</div>
+                <div id="modalPreviewContent"></div>
+            </div>
+
+            <div class="options-row">
+                <label><input type="checkbox" id="modalAgree" checked> I agree</label>
+                <label><input type="checkbox" id="modalAutoBet"> 🤖 Auto</label>
+            </div>
+
+            <div class="total-row">
+                <div>
+                    <div class="total-label">Total amount</div>
+                    <div class="total-amount" id="modalTotalAmount">₹1.00</div>
+                </div>
+                <div class="actions">
+                    <button class="cancel" id="modalCancel">Cancel</button>
+                    <button class="place" id="modalPlaceBet">Bet</button>
+                </div>
+            </div>
+            <div class="agree">I agree 《Pre-sale rules》</div>
+            <div id="modalMessage" class="message" style="display:none; margin-top:6px;"></div>
+        </div>
     </div>
 
     <!-- Tabs -->
@@ -525,7 +697,7 @@
 
 <script>
     // ============================================================
-    // WINGO — FINAL VERSION (Game Tab Removed, Select Bets only appears on selection)
+    // WINGO — FINAL: Random removed, Bet Slip as Popup, Bet on Button Click
     // ============================================================
     (function() {
         'use strict';
@@ -574,27 +746,28 @@
         const numRow2 = document.getElementById('numRow2');
         const colorRow = document.getElementById('colorRow');
         const sizeRow = document.getElementById('sizeRow');
-        const qtyDisplay = document.getElementById('qtyDisplay');
-        const totalAmount = document.getElementById('totalAmount');
-        const messageEl = document.getElementById('message');
         const historyList = document.getElementById('historyList');
         const myBetsList = document.getElementById('myBetsList');
         const statRounds = document.getElementById('statRounds');
         const statWins = document.getElementById('statWins');
         const statLosses = document.getElementById('statLosses');
         const statTotal = document.getElementById('statTotal');
-        const placeBtn = document.getElementById('placeBet');
-        const cancelBtn = document.getElementById('cancelBet');
-        const selectedBetDisplay = document.getElementById('selectedBetDisplay');
-        const agreeCheck = document.getElementById('agreeCheck');
-        const autoBetCheck = document.getElementById('autoBetCheck');
-        const soundCheck = document.getElementById('soundCheck');
-        const soundToggle = document.getElementById('soundToggle');
         const tickerText = document.getElementById('tickerText');
         const streakBox = document.getElementById('streakBox');
         const winnerFeed = document.getElementById('winnerFeed');
         const statPanel = document.getElementById('statPanel');
-        const previewContent = document.getElementById('previewContent');
+
+        // Modal refs
+        const betModal = document.getElementById('betModal');
+        const modalBetDisplay = document.getElementById('modalBetDisplay');
+        const modalQtyDisplay = document.getElementById('modalQtyDisplay');
+        const modalTotalAmount = document.getElementById('modalTotalAmount');
+        const modalPreviewContent = document.getElementById('modalPreviewContent');
+        const modalAgree = document.getElementById('modalAgree');
+        const modalAutoBet = document.getElementById('modalAutoBet');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalPlaceBet = document.getElementById('modalPlaceBet');
+        const modalMessage = document.getElementById('modalMessage');
 
         // --- Storage Keys ---
         const BALANCE_KEY = 'wingo_balance';
@@ -656,7 +829,7 @@
             periodLarge.textContent = currentPeriod;
         }
 
-        // --- Data Functions ---
+        // --- Data ---
         function loadBalance() {
             try {
                 const val = localStorage.getItem(BALANCE_KEY);
@@ -986,7 +1159,7 @@
             betResults.forEach(b => {
                 if (b.won) {
                     const rawPayout = currentStake * b.multiplier;
-                    const payout = rawPayout * 0.985; // 1.5% house edge
+                    const payout = rawPayout * 0.985;
                     totalPayout += payout;
                     balance += payout;
                 }
@@ -1054,23 +1227,69 @@
             playSound('spin');
         }
 
-        // --- Bet Display Update ---
-        function updateBetDisplay() {
+        // --- Modal Management ---
+        function openBetModal() {
             const hasBet = selectedBets.colors.length > 0 || selectedBets.size || selectedBets.numbers.length > 0;
-            if (hasBet) {
-                let parts = [];
-                if (selectedBets.colors.length) parts.push(selectedBets.colors.join('+').toUpperCase());
-                if (selectedBets.size) parts.push(selectedBets.size.toUpperCase());
-                if (selectedBets.numbers.length) parts.push('#'+selectedBets.numbers.join(','));
-                selectedBetDisplay.textContent = parts.join(' + ');
-                selectedBetDisplay.className = 'bet-type visible';
-            } else {
-                selectedBetDisplay.className = 'bet-type';
-                selectedBetDisplay.textContent = '';
-            }
+            if (!hasBet || !bettingOpen || betPlacedThisRound) return;
+
+            // Update modal display
+            let parts = [];
+            if (selectedBets.colors.length) parts.push(selectedBets.colors.join('+').toUpperCase());
+            if (selectedBets.size) parts.push(selectedBets.size.toUpperCase());
+            if (selectedBets.numbers.length) parts.push('#'+selectedBets.numbers.join(','));
+            modalBetDisplay.textContent = parts.join(' + ') || 'Select Bets';
+
+            // Reset modal state to match main state
+            modalQtyDisplay.textContent = quantity;
+            modalTotalAmount.textContent = '₹' + (quantity * stakeMultiplier * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length || 1)).toFixed(2);
+            updateModalPreview();
+            modalAgree.checked = true;
+            modalAutoBet.checked = autoBet;
+            modalMessage.style.display = 'none';
+
+            betModal.classList.add('active');
         }
 
-        // --- Render History Helpers ---
+        function closeBetModal() {
+            betModal.classList.remove('active');
+        }
+
+        function updateModalPreview() {
+            const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+            if (activeCount === 0) {
+                modalPreviewContent.innerHTML = '<div style="color:#64748b; font-size:10px;">Select bets to see preview</div>';
+                return;
+            }
+            let html = '';
+            const getMult = (type, val) => {
+                if (type === 'color') return val === 'violet' ? 14 : 2;
+                if (type === 'size') return 2;
+                if (type === 'number') return 9;
+                return 2;
+            };
+            const stake = quantity * stakeMultiplier;
+            selectedBets.colors.forEach(c => {
+                const mult = getMult('color', c);
+                const win = (stake * mult * 0.985).toFixed(2);
+                html += `<div class="preview-item"><span>${c.toUpperCase()}</span><span>${mult}x → ₹${win}</span></div>`;
+            });
+            if (selectedBets.size) {
+                const mult = getMult('size', selectedBets.size);
+                const win = (stake * mult * 0.985).toFixed(2);
+                html += `<div class="preview-item"><span>${selectedBets.size.toUpperCase()}</span><span>${mult}x → ₹${win}</span></div>`;
+            }
+            selectedBets.numbers.forEach(n => {
+                const mult = getMult('number', n);
+                const win = (stake * mult * 0.985).toFixed(2);
+                html += `<div class="preview-item"><span>#${n}</span><span>${mult}x → ₹${win}</span></div>`;
+            });
+            const totalStake = stake * activeCount;
+            const totalWin = (stake * 9 * 0.985 * activeCount).toFixed(2);
+            html += `<div class="preview-total">Total Stake: ₹${totalStake.toFixed(2)} | Potential Win: ₹${totalWin}</div>`;
+            modalPreviewContent.innerHTML = html;
+        }
+
+        // --- History ---
         function renderAllHistory() {
             if(history.length===0){ historyList.innerHTML='<div style="color:#64748b; text-align:center; padding:10px;">No rounds yet.</div>'; return; }
             let html='';
@@ -1164,17 +1383,11 @@
                 };
             }
 
-            if (!autoBet) {
-                selectedBets = { colors: [], size: null, numbers: [] };
-                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
-                betPlacedThisRound = false;
-                placeBtn.disabled = true;
-                updateBetDisplay();
-                updatePreview();
-            } else {
-                betPlacedThisRound = false;
-                placeBtn.disabled = false;
-            }
+            // Reset bets
+            selectedBets = { colors: [], size: null, numbers: [] };
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+            betPlacedThisRound = false;
+            closeBetModal();
 
             renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats();
             updateBalanceUI();
@@ -1184,33 +1397,21 @@
             setTimeout(() => {
                 currentPeriod = generateNextPeriod(currentDuration);
                 updatePeriodDisplay();
-                
                 setBettingState(true);
                 resultDisplay.classList.remove('active');
-                if (autoBet && !betPlacedThisRound && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
-                    setTimeout(autoPlaceBet, 500);
+                if (autoBet && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
+                    setTimeout(openBetModal, 500);
                 }
             }, 4000);
-        }
-
-        // --- Auto Bet ---
-        function autoPlaceBet() {
-            if (!autoBet || !bettingOpen || betPlacedThisRound) return;
-            if (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) return;
-            const totalCost = currentStake * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
-            if (totalCost > balance) return;
-            if (!agreeCheck.checked) return;
-            placeBtn.click();
         }
 
         // --- UI ---
         function setBettingState(open) {
             bettingOpen = open;
             const disabled = !open || betPlacedThisRound;
-            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .multiplier-row button, #quickAmounts button, .qty-box button, #cancelBet').forEach(el => {
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .preset-btn').forEach(el => {
                 if(el) el.disabled = disabled;
             });
-            placeBtn.disabled = disabled || (selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) || currentStake > balance || betPlacedThisRound;
             if(open && !betPlacedThisRound){
                 bettingClosedEl.classList.remove('active');
                 statusLabel.textContent = '● Betting Open';
@@ -1220,58 +1421,14 @@
                 statusLabel.textContent = '● Betting Closed';
                 statusLabel.style.color = '#ef4444';
             }
-            updateTotalUI();
-            updatePreview();
-        }
-
-        function updateTotalUI() {
-            const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
-            totalBetsCount = activeCount || 1;
-            currentStake = quantity * stakeMultiplier;
-            const totalStake = currentStake * (activeCount || 1);
-            totalAmount.textContent = '₹' + totalStake.toFixed(2);
         }
 
         function showMessage(text,type='info') {
-            messageEl.textContent=text;
-            messageEl.className='message '+type;
-            messageEl.style.display='block';
-            if(type!=='closed') setTimeout(()=>{messageEl.style.display='none';},3500);
-        }
-
-        // --- Preview ---
-        function updatePreview() {
-            const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
-            if (activeCount === 0) {
-                previewContent.innerHTML = '<div style="color:#64748b; font-size:10px;">Select bets to see preview</div>';
-                return;
-            }
-            let html = '';
-            const getMult = (type, val) => {
-                if (type === 'color') return val === 'violet' ? 14 : 2;
-                if (type === 'size') return 2;
-                if (type === 'number') return 9;
-                return 2;
-            };
-            selectedBets.colors.forEach(c => {
-                const mult = getMult('color', c);
-                const win = (currentStake * mult * 0.985).toFixed(2);
-                html += `<div class="preview-item"><span>${c.toUpperCase()}</span><span>${mult}x → ₹${win}</span></div>`;
-            });
-            if (selectedBets.size) {
-                const mult = getMult('size', selectedBets.size);
-                const win = (currentStake * mult * 0.985).toFixed(2);
-                html += `<div class="preview-item"><span>${selectedBets.size.toUpperCase()}</span><span>${mult}x → ₹${win}</span></div>`;
-            }
-            selectedBets.numbers.forEach(n => {
-                const mult = getMult('number', n);
-                const win = (currentStake * mult * 0.985).toFixed(2);
-                html += `<div class="preview-item"><span>#${n}</span><span>${mult}x → ₹${win}</span></div>`;
-            });
-            const totalStake = currentStake * activeCount;
-            const totalWin = (currentStake * 9 * 0.985 * activeCount).toFixed(2);
-            html += `<div class="preview-total">Total Stake: ₹${totalStake.toFixed(2)} | Potential Win: ₹${totalWin}</div>`;
-            previewContent.innerHTML = html;
+            const el = document.getElementById('message');
+            el.textContent=text;
+            el.className='message '+type;
+            el.style.display='block';
+            if(type!=='closed') setTimeout(()=>{el.style.display='none';},3500);
         }
 
         // --- Presets ---
@@ -1297,10 +1454,7 @@
                 const btn5 = document.querySelector('.num-grid button[data-num="5"]');
                 if(btn5) btn5.classList.add('selected');
             }
-            placeBtn.disabled = false;
-            updateBetDisplay();
-            updateTotalUI();
-            updatePreview();
+            openBetModal();
         }
 
         // --- Switch Duration ---
@@ -1311,8 +1465,11 @@
             loadHistory(currentDuration);
             currentPeriod = getInitialPeriod(currentDuration);
             updatePeriodDisplay();
-            resetGameState();
-            renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats(); updatePreview();
+            selectedBets = { colors: [], size: null, numbers: [] };
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+            betPlacedThisRound = false;
+            closeBetModal();
+            renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); updateTicker(); renderStats();
             if (timerInterval) clearInterval(timerInterval);
             roundActive = false;
             resultShown = false;
@@ -1320,19 +1477,6 @@
             setBettingState(true);
             resultDisplay.classList.remove('active');
             startTimerLoop();
-        }
-
-        function resetGameState() {
-            selectedBets = { colors: [], size: null, numbers: [] };
-            betPlacedThisRound = false;
-            placeBtn.disabled = true;
-            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
-            updateBetDisplay();
-            updateTotalUI();
-            currentStreak = 0;
-            streakType = null;
-            streakBox.className = 'streak-box';
-            streakBox.style.display = 'none';
         }
 
         // --- Render Number Grid ---
@@ -1357,8 +1501,7 @@
                         selectedBets.numbers.push(num);
                         this.classList.add('selected');
                     }
-                    placeBtn.disabled = false;
-                    updateBetDisplay(); updateTotalUI(); updatePreview();
+                    openBetModal();
                 });
                 numRow1.appendChild(btn);
             });
@@ -1378,8 +1521,7 @@
                         selectedBets.numbers.push(num);
                         this.classList.add('selected');
                     }
-                    placeBtn.disabled = false;
-                    updateBetDisplay(); updateTotalUI(); updatePreview();
+                    openBetModal();
                 });
                 numRow2.appendChild(btn);
             });
@@ -1399,8 +1541,7 @@
                         selectedBets.colors.push(color);
                         this.classList.add('selected');
                     }
-                    placeBtn.disabled = false;
-                    updateBetDisplay(); updateTotalUI(); updatePreview();
+                    openBetModal();
                 });
             });
             sizeRow.querySelectorAll('button').forEach(btn => {
@@ -1409,54 +1550,8 @@
                     const size = this.dataset.type;
                     if(selectedBets.size === size) { selectedBets.size = null; this.classList.remove('selected'); }
                     else { selectedBets.size = size; this.classList.add('selected'); }
-                    placeBtn.disabled = false;
-                    updateBetDisplay(); updateTotalUI(); updatePreview();
+                    openBetModal();
                 });
-            });
-        }
-
-        // --- Render Multipliers ---
-        function renderMultipliers() {
-            document.querySelectorAll('#betMultipliers button').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if(!bettingOpen || betPlacedThisRound) return;
-                    document.querySelectorAll('#betMultipliers button').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    stakeMultiplier = parseInt(this.dataset.mult);
-                    updateTotalUI(); updatePreview();
-                });
-            });
-            document.querySelectorAll('#quickAmounts button').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if(!bettingOpen || betPlacedThisRound) return;
-                    if(this.dataset.val === 'max') {
-                        const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
-                        quantity = Math.floor(balance / (currentStake * (activeCount||1)));
-                        if(quantity < 1) quantity = 1;
-                        document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        qtyDisplay.textContent = quantity;
-                        updateTotalUI(); updatePreview();
-                        return;
-                    }
-                    document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    quantity = parseInt(this.dataset.val);
-                    qtyDisplay.textContent = quantity;
-                    updateTotalUI(); updatePreview();
-                });
-            });
-            document.getElementById('qtyMinus').addEventListener('click', function() {
-                if(!bettingOpen || betPlacedThisRound) return;
-                if(quantity>1) quantity--;
-                qtyDisplay.textContent=quantity;
-                updateTotalUI(); updatePreview();
-            });
-            document.getElementById('qtyPlus').addEventListener('click', function() {
-                if(!bettingOpen || betPlacedThisRound) return;
-                quantity++;
-                qtyDisplay.textContent=quantity;
-                updateTotalUI(); updatePreview();
             });
         }
 
@@ -1497,11 +1592,9 @@
 
             renderNumberGrid();
             renderActionRows();
-            renderMultipliers();
             setupTabs();
             setupDurationTabs();
             updateBalanceUI();
-            updateTotalUI();
             renderAllHistory();
             renderMyBets();
             updateStats();
@@ -1509,110 +1602,112 @@
             updateStrategy();
             updateTicker();
             renderStats();
-            updatePreview();
 
-            soundCheck.addEventListener('change', function() {
-                soundEnabled = this.checked;
-                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-            });
-            soundToggle.addEventListener('click', function() {
-                soundEnabled = !soundEnabled;
-                soundCheck.checked = soundEnabled;
-                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-                if(soundEnabled) initAudio();
-            });
-
-            autoBetCheck.addEventListener('change', function() {
-                autoBet = this.checked;
-                if(autoBet) {
-                    initAudio();
-                    if(bettingOpen && !betPlacedThisRound && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
-                        setTimeout(autoPlaceBet, 300);
-                    }
-                }
-            });
-
+            // Presets
             document.querySelectorAll('.preset-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     applyPreset(this.dataset.preset);
                 });
             });
 
-            document.getElementById('repeatBetBtn').addEventListener('click', function() {
-                if(!lastBetState){ showMessage('No previous bet','info'); return; }
+            // Sound
+            document.getElementById('soundToggle').addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                this.textContent = soundEnabled ? '🔊' : '🔇';
+                document.getElementById('soundCheck').checked = soundEnabled;
+                if(soundEnabled) initAudio();
+            });
+
+            // Modal controls
+            // Quick amounts inside modal
+            document.querySelectorAll('#modalQuickAmounts button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if(!bettingOpen || betPlacedThisRound) return;
+                    if(this.dataset.val === 'max') {
+                        const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+                        quantity = Math.floor(balance / (currentStake * (activeCount||1)));
+                        if(quantity < 1) quantity = 1;
+                    } else {
+                        quantity = parseInt(this.dataset.val);
+                    }
+                    document.querySelectorAll('#modalQuickAmounts button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    modalQtyDisplay.textContent = quantity;
+                    const activeCount2 = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+                    const totalStake = (quantity * stakeMultiplier) * (activeCount2 || 1);
+                    modalTotalAmount.textContent = '₹' + totalStake.toFixed(2);
+                    updateModalPreview();
+                });
+            });
+
+            document.getElementById('modalQtyMinus').addEventListener('click', function() {
                 if(!bettingOpen || betPlacedThisRound) return;
+                if(quantity>1) quantity--;
+                modalQtyDisplay.textContent = quantity;
+                const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+                const totalStake = (quantity * stakeMultiplier) * (activeCount || 1);
+                modalTotalAmount.textContent = '₹' + totalStake.toFixed(2);
+                updateModalPreview();
+            });
+            document.getElementById('modalQtyPlus').addEventListener('click', function() {
+                if(!bettingOpen || betPlacedThisRound) return;
+                quantity++;
+                modalQtyDisplay.textContent = quantity;
+                const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+                const totalStake = (quantity * stakeMultiplier) * (activeCount || 1);
+                modalTotalAmount.textContent = '₹' + totalStake.toFixed(2);
+                updateModalPreview();
+            });
+
+            document.querySelectorAll('#modalMultipliers button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if(!bettingOpen || betPlacedThisRound) return;
+                    document.querySelectorAll('#modalMultipliers button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    stakeMultiplier = parseInt(this.dataset.mult);
+                    const activeCount = selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length;
+                    const totalStake = (quantity * stakeMultiplier) * (activeCount || 1);
+                    modalTotalAmount.textContent = '₹' + totalStake.toFixed(2);
+                    updateModalPreview();
+                });
+            });
+
+            modalCancel.addEventListener('click', function() {
+                closeBetModal();
+                // Clear selection
                 document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
-                selectedBets = {
-                    colors: lastBetState.colors || [],
-                    size: lastBetState.size || null,
-                    numbers: lastBetState.numbers || []
-                };
-                selectedBets.colors.forEach(c => {
-                    colorRow.querySelector(`button[data-type="${c}"]`)?.classList.add('selected');
-                });
-                if(selectedBets.size) {
-                    sizeRow.querySelector(`button[data-type="${selectedBets.size}"]`)?.classList.add('selected');
-                }
-                selectedBets.numbers.forEach(n => {
-                    const btn = document.querySelector(`.num-grid button[data-num="${n}"]`);
-                    if(btn) btn.classList.add('selected');
-                });
-                placeBtn.disabled = false;
-                updateBetDisplay();
-                updateTotalUI();
-                updatePreview();
-                showMessage('↻ Repeated last bet','info');
+                selectedBets = { colors: [], size: null, numbers: [] };
             });
 
-            document.getElementById('doubleBetBtn').addEventListener('click', function() {
-                if(!bettingOpen || betPlacedThisRound) return;
-                const newVal = quantity * 2;
-                if(newVal > 10000){ showMessage('Max limit reached','info'); return; }
-                quantity = Math.min(newVal, 10000);
-                qtyDisplay.textContent = quantity;
-                document.querySelectorAll('#quickAmounts button').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('#quickAmounts button').forEach(b => {
-                    if(parseInt(b.dataset.val)===quantity) b.classList.add('active');
-                });
-                updateTotalUI();
-                updatePreview();
-                showMessage(`2x! Stake: ${quantity}`,'info');
-            });
-
-            placeBtn.addEventListener('click', function() {
+            modalPlaceBet.addEventListener('click', function() {
                 if(!bettingOpen){ showMessage('⛔ Betting closed!','closed'); return; }
                 if(betPlacedThisRound){ showMessage('Already placed!','info'); return; }
                 if(selectedBets.colors.length===0 && !selectedBets.size && selectedBets.numbers.length===0) {
                     showMessage('Select a bet!','info');
                     return;
                 }
-                if(!agreeCheck.checked){ showMessage('Agree to rules','info'); return; }
-                const totalCost = currentStake * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
+                if(!modalAgree.checked){ showMessage('Agree to rules','info'); return; }
+                const totalCost = (quantity * stakeMultiplier) * (selectedBets.colors.length + (selectedBets.size?1:0) + selectedBets.numbers.length);
                 if(totalCost > balance){ showMessage('Insufficient balance!','lose'); return; }
                 initAudio();
+                currentStake = quantity * stakeMultiplier;
                 betAmountThisRound = totalCost;
                 betPlacedThisRound = true;
-                placeBtn.disabled = true;
                 playSound('bet');
                 showMessage(`✅ Bet placed! ₹${totalCost.toFixed(2)}`,'win');
                 setBettingState(false);
+                closeBetModal();
+                autoBet = modalAutoBet.checked;
+                document.getElementById('autoBetCheck').checked = autoBet;
             });
 
-            cancelBtn.addEventListener('click', function() {
-                if(betPlacedThisRound){ showMessage('Cannot cancel','closed'); return; }
-                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
-                selectedBets = { colors: [], size: null, numbers: [] };
-                placeBtn.disabled = true;
-                updateBetDisplay();
-                updateTotalUI();
-                updatePreview();
-                showMessage('Cleared.','info');
+            // Auto-bet from main
+            document.getElementById('autoBetCheck').addEventListener('change', function() {
+                autoBet = this.checked;
+                modalAutoBet.checked = autoBet;
             });
 
-            resultDisplay.addEventListener('click', function() {
-                this.classList.remove('active');
-            });
-
+            // Start timer
             startTimerLoop();
         }
 
