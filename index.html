@@ -2,713 +2,812 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N+ PLAY - Ultimate Gaming & Prediction Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>N+ PLAY - Premium Gaming Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* ==========================================
-           1. MODERN DARK GAMING THEME & GLASSMORPHISM
-           ========================================== */
-        :root {
-            --bg-dark: #070a12;
-            --bg-surface: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.65);
-            --card-border: rgba(255, 255, 255, 0.1);
-            
-            --gold-neon: #f59e0b;
-            --gold-glow: rgba(245, 158, 11, 0.35);
-            --red-vibrant: #e63946;
-            --red-glow: rgba(230, 57, 70, 0.4);
-            --green-glow: #10b981;
-
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: rgba(15, 23, 42, 0.8);
-        }
-
+        /* ============================================================
+           ROOT VARIABLES — Daman Style with Gold Accents
+           ============================================================ */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #0a0808;
+            --bg-secondary: #141010;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --border-card: rgba(255, 215, 0, 0.12);
+            --gold: #f5c518;
+            --gold-dark: #b8860b;
+            --gold-glow: rgba(245, 197, 24, 0.25);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --red: #e63946;
+            --green: #10b981;
+            --radius: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            background-image: 
-                radial-gradient(circle at 10% 15%, var(--red-glow) 0%, transparent 40%),
-                radial-gradient(circle at 90% 85%, var(--gold-glow) 0%, transparent 40%),
-                linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
-            background-attachment: fixed;
-            padding: 10px 10px 80px 10px;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(230, 57, 70, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(245, 197, 24, 0.08) 0%, transparent 50%);
         }
 
-        .app-viewport {
-            width: 100%;
+        /* ============================================================
+           SCROLLBAR
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+        /* ============================================================
+           UTILITY
+           ============================================================ */
+        .container {
             max-width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            position: relative;
-        }
-
-        /* 18+ AGE & RISK WARNING MODAL */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 7, 18, 0.85);
-            backdrop-filter: blur(16px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            padding: 20px;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal-card {
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid var(--red-vibrant);
-            border-radius: 24px;
-            padding: 24px;
-            max-width: 420px;
-            width: 100%;
-            box-shadow: 0 20px 50px rgba(230, 57, 70, 0.3);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            animation: modalPop 0.3s ease;
-        }
-
-        @keyframes modalPop {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .warning-badge {
-            width: 50px;
-            height: 50px;
-            background: rgba(230, 57, 70, 0.15);
-            border: 2px solid var(--red-vibrant);
-            color: var(--red-vibrant);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: 900;
             margin: 0 auto;
+            padding: 0 16px;
         }
 
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 900;
-            color: #fff;
+        .gold-text {
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmerGold 4s ease-in-out infinite;
         }
 
-        .modal-body {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-            text-align: left;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
+        @keyframes shimmerGold {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .modal-checkbox {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            text-align: left;
-            font-size: 0.78rem;
-            color: var(--text-main);
-        }
-
-        .modal-checkbox input {
-            accent-color: var(--red-vibrant);
-            width: 18px; height: 18px;
-            margin-top: 2px;
-        }
-
-        .btn-modal-agree {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+            font-weight: 800;
             border: none;
-            border-radius: 14px;
-            color: #fff;
-            font-size: 0.95rem;
-            font-weight: 900;
+            padding: 12px 28px;
+            border-radius: 12px;
             cursor: pointer;
-            box-shadow: 0 4px 15px var(--red-glow);
-            transition: transform 0.2s;
+            transition: var(--transition);
+            box-shadow: 0 4px 20px var(--gold-glow);
+        }
+        .btn-gold:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 30px var(--gold-glow);
         }
 
-        .btn-modal-agree:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            box-shadow: none;
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+        .glass-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 0 30px var(--gold-glow);
+            transform: translateY(-2px);
         }
 
-        /* HEADER */
-        .app-header {
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: var(--gold);
+            border-radius: 4px;
+        }
+
+        .view-all {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .view-all:hover {
+            color: var(--gold);
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-card);
+            position: sticky;
+            top: 0;
+            background: rgba(10, 8, 8, 0.92);
+            backdrop-filter: blur(16px);
             z-index: 100;
         }
-
-        .brand-logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 1px;
             text-decoration: none;
         }
-
-        .logo-box {
-            width: 34px; height: 34px;
-            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 1rem; color: #000;
-            box-shadow: 0 0 12px var(--gold-glow);
+        .logo span {
+            color: var(--gold);
         }
-
-        .brand-title {
-            font-size: 1.2rem;
-            font-weight: 900;
-            background: linear-gradient(90deg, #fff, var(--gold-neon));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header-actions {
+        .header-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
-
-        .wallet-pill {
+        .balance-pill {
             background: rgba(16, 185, 129, 0.15);
             border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--green-glow);
-            padding: 6px 12px;
-            border-radius: 20px;
+            color: var(--green);
+            padding: 6px 14px;
+            border-radius: 100px;
             font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .age-badge {
+            background: rgba(230, 57, 70, 0.15);
+            border: 1px solid rgba(230, 57, 70, 0.3);
+            color: var(--red);
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
             font-weight: 800;
         }
 
-        /* PROMOTIONAL BANNER CAROUSEL */
-        .promo-banner {
-            width: 100%;
-            height: 160px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, #1e1b4b, #311b92, #4c1d95);
-            border: 1px solid var(--card-border);
-            padding: 20px;
+        /* ============================================================
+           CATEGORY TABS
+           ============================================================ */
+        .category-tabs {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 14px 0 10px;
+            scrollbar-width: none;
+        }
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .category-tab {
+            flex: 0 0 auto;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .category-tab.active {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+        .category-tab:hover:not(.active) {
+            color: #fff;
+            border-color: var(--border-card);
+        }
+
+        /* ============================================================
+           PROMO BANNER
+           ============================================================ */
+        .promo-banner {
+            background: linear-gradient(135deg, #1a1040, #2d1b69, #4a1a8a);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            margin: 16px 0;
+            border: 1px solid var(--border-card);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 30px rgba(74, 26, 138, 0.3);
+        }
+        .promo-banner::after {
+            content: '🎰';
+            position: absolute;
+            right: -10px;
+            bottom: -10px;
+            font-size: 80px;
+            opacity: 0.15;
+            transform: rotate(-15deg);
+        }
+        .promo-banner h2 {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+        .promo-banner p {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 14px;
+        }
+        .promo-banner .btn-banner {
+            display: inline-block;
+            padding: 10px 24px;
+            background: var(--gold);
+            color: #000;
+            font-weight: 800;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 20px var(--gold-glow);
+            transition: var(--transition);
+        }
+        .promo-banner .btn-banner:hover {
+            transform: scale(1.04);
         }
 
-        .promo-title {
-            font-size: 1.4rem; font-weight: 900; margin-bottom: 4px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .promo-subtitle {
-            font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-bottom: 12px;
-        }
-
-        .btn-banner {
-            align-self: flex-start;
-            padding: 8px 16px;
-            background: var(--gold-neon);
-            color: #000; font-weight: 800; font-size: 0.8rem;
-            border-radius: 10px; text-decoration: none;
-            box-shadow: 0 4px 12px var(--gold-glow);
-        }
-
-        /* LIVE SCROLLING WINNINGS TICKER */
+        /* ============================================================
+           LIVE TICKER
+           ============================================================ */
         .live-ticker {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
             border-radius: 12px;
-            padding: 8px 14px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             overflow: hidden;
-            font-size: 0.78rem;
+            margin-bottom: 8px;
         }
-
         .ticker-tag {
             background: rgba(230, 57, 70, 0.2);
-            color: var(--red-vibrant);
-            font-weight: 900;
-            padding: 2px 8px;
+            color: var(--red);
+            font-weight: 800;
+            font-size: 0.7rem;
+            padding: 3px 10px;
             border-radius: 6px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
-
-        .ticker-content {
+        .ticker-text {
             white-space: nowrap;
-            color: var(--text-muted);
-            animation: tickerScroll 15s linear infinite;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            animation: tickerScroll 18s linear infinite;
         }
-
+        .ticker-text span {
+            color: var(--gold);
+            font-weight: 700;
+        }
         @keyframes tickerScroll {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
         }
 
-        /* SECTION HEADERS */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 6px;
-        }
-
-        .section-title {
-            font-size: 1.05rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title::before {
-            content: '';
-            width: 4px; height: 16px;
-            background: var(--gold-neon);
-            border-radius: 2px;
-        }
-
-        .view-all-link {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-
-        .view-all-link:hover {
-            color: var(--gold-neon);
-        }
-
-        /* GAME GRID & CARDS */
+        /* ============================================================
+           GAME GRID
+           ============================================================ */
         .game-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
+            margin-bottom: 8px;
         }
-
         .game-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 14px;
+            padding: 16px 14px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 120px;
+            min-height: 110px;
             text-decoration: none;
-            color: var(--text-main);
+            color: var(--text-primary);
             position: relative;
-            overflow: hidden;
-            transition: all 0.2s ease;
+            cursor: pointer;
         }
-
-        .game-card:hover {
-            border-color: var(--gold-neon);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        }
-
-        .game-card .game-icon {
+        .game-card .icon {
             font-size: 2rem;
+            margin-bottom: 4px;
         }
-
-        .game-card .game-name {
+        .game-card .name {
             font-size: 0.9rem;
             font-weight: 800;
         }
-
-        .game-card .game-badge {
-            position: absolute;
-            top: 10px; right: 10px;
-            font-size: 0.62rem;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 6px;
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--gold-neon);
-        }
-
-        .game-card .game-rtp {
+        .game-card .rtp {
             font-size: 0.65rem;
-            color: var(--text-muted);
+            color: var(--text-secondary);
         }
-
+        .game-card .badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 100px;
+            background: rgba(245, 197, 24, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(245, 197, 24, 0.2);
+        }
+        .game-card .badge.hot {
+            background: rgba(230, 57, 70, 0.15);
+            color: var(--red);
+            border-color: rgba(230, 57, 70, 0.2);
+        }
+        .game-card .badge.new {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
         .game-card.span-2 {
             grid-column: span 2;
         }
 
-        /* LEADERBOARD / EARNING CHART */
-        .leaderboard-section {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
+        /* ============================================================
+           RECOMMENDATION SCROLL
+           ============================================================ */
+        .rec-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 0 14px;
+            scrollbar-width: none;
+        }
+        .rec-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .rec-card {
+            flex: 0 0 110px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+        .rec-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px var(--gold-glow);
+        }
+        .rec-card .icon {
+            font-size: 2rem;
+            margin-bottom: 4px;
+        }
+        .rec-card .name {
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .rec-card .rtp {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        /* ============================================================
+           LEADERBOARD
+           ============================================================ */
+        .leaderboard {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius);
             padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
-
-        .leaderboard-item {
+        .lb-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 10px;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transition: var(--transition);
         }
-
-        .user-info {
+        .lb-item:hover {
+            border-color: var(--border-card);
+        }
+        .lb-item .rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.75rem;
+            flex-shrink: 0;
         }
-
-        .rank-badge {
-            width: 26px; height: 26px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 0.75rem;
-        }
-
         .rank-1 { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; }
         .rank-2 { background: linear-gradient(135deg, #c0c0c0, #708090); color: #000; }
         .rank-3 { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
-        .rank-other { background: rgba(255,255,255,0.1); color: var(--text-muted); }
-
-        .user-phone { font-size: 0.82rem; font-weight: 700; }
-        .user-win { font-size: 0.85rem; font-weight: 800; color: var(--green-glow); }
-
-        /* FOOTER INFO LINKS */
-        .footer-links {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 16px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            font-size: 0.8rem;
+        .rank-other { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+        .lb-item .name {
+            flex: 1;
+            padding-left: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .lb-item .amount {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--gold);
         }
 
-        .footer-link-item {
-            color: var(--text-muted);
+        /* ============================================================
+           FOOTER
+           ============================================================ */
+        .footer {
+            margin-top: 24px;
+            padding: 20px 0 12px;
+            border-top: 1px solid var(--border-card);
+        }
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px 14px;
+            margin-bottom: 16px;
+        }
+        .footer-links a {
+            color: var(--text-secondary);
             text-decoration: none;
+            font-size: 0.75rem;
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 6px;
-            border-radius: 8px;
-            transition: color 0.2s;
+            padding: 6px 0;
+            transition: var(--transition);
         }
-
-        .footer-link-item:hover { color: var(--gold-neon); }
-        .footer-link-item.admin-link {
-            color: var(--gold-neon);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            border-radius: 12px;
-            padding: 6px 12px;
-            text-align: center;
+        .footer-links a:hover {
+            color: var(--gold);
+        }
+        .footer-links .admin-link {
             grid-column: span 2;
             justify-content: center;
+            color: var(--gold);
+            border: 1px solid rgba(245, 197, 24, 0.2);
+            border-radius: 10px;
+            padding: 8px;
             font-weight: 700;
+            margin-top: 4px;
         }
-        .footer-link-item.admin-link:hover {
-            background: rgba(245, 158, 11, 0.1);
+        .footer-links .admin-link:hover {
+            background: rgba(245, 197, 24, 0.08);
+        }
+        .footer-disclaimer {
+            text-align: center;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            border-top: 1px solid var(--border-card);
+            padding-top: 12px;
+        }
+        .footer-disclaimer .gold {
+            color: var(--gold);
         }
 
-        /* FIXED BOTTOM NAVIGATION BAR */
+        /* ============================================================
+           BOTTOM NAV
+           ============================================================ */
         .bottom-nav {
             position: fixed;
-            bottom: 0; left: 50%;
+            bottom: 0;
+            left: 50%;
             transform: translateX(-50%);
-            width: 100%; max-width: 480px;
-            background: rgba(15, 23, 42, 0.95);
+            width: 100%;
+            max-width: 480px;
+            background: rgba(10, 8, 8, 0.96);
             backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
+            border-top: 1px solid var(--border-card);
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
+            padding: 8px 0 10px;
             z-index: 1000;
         }
-
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
-            color: var(--text-muted);
+            gap: 2px;
+            color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .nav-item.active { color: var(--gold-neon); }
-        .nav-item .nav-icon { font-size: 1.2rem; }
-
-        /* ADMIN PANEL - Hidden link (only visible on hover) */
-        .admin-hidden {
-            position: fixed;
-            bottom: 80px;
-            right: 10px;
-            z-index: 999;
-            opacity: 0.3;
-            transition: opacity 0.3s;
-        }
-        .admin-hidden:hover {
-            opacity: 1;
-        }
-        .admin-hidden a {
-            color: var(--text-muted);
             font-size: 0.6rem;
-            text-decoration: none;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 8px;
-            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+            position: relative;
         }
-        .admin-hidden a:hover {
-            color: var(--gold-neon);
+        .nav-item .nav-icon {
+            font-size: 1.3rem;
+        }
+        .nav-item.active {
+            color: var(--gold);
+        }
+        .nav-item .badge-nav {
+            position: absolute;
+            top: -4px;
+            right: -12px;
+            background: var(--red);
+            color: #fff;
+            font-size: 0.5rem;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 100px;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (min-width: 768px) {
+            .container { max-width: 700px; }
+            .game-grid { grid-template-columns: repeat(3, 1fr); }
+            .game-card.span-2 { grid-column: span 2; }
+            .bottom-nav { max-width: 700px; }
+        }
+        @media (min-width: 1024px) {
+            .container { max-width: 1000px; }
+            .game-grid { grid-template-columns: repeat(4, 1fr); }
+            .game-card.span-2 { grid-column: span 2; }
+            .bottom-nav { max-width: 1000px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 18+ AGE RESTRICTION & RISK WARNING MODAL -->
-    <div class="modal-overlay" id="riskModal">
-        <div class="modal-card">
-            <div class="warning-badge">18+</div>
-            <h2 class="modal-title">Age & Risk Disclaimer</h2>
-            <div class="modal-body">
-                N+ PLAY is strictly restricted to users aged <strong>18 years or older</strong>.
-                <br><br>
-                <strong>Financial Loss Warning:</strong> Online gaming & prediction involves financial risk and may be addictive. Please play responsibly and at your own risk. The platform holds no liability for personal financial losses.
-            </div>
-            <div class="modal-checkbox">
-                <input type="checkbox" id="modalAgreeCheck" onchange="toggleAgreeBtn()">
-                <label for="modalAgreeCheck">I am 18+ years old and accept full responsibility for all financial risks.</label>
-            </div>
-            <button class="btn-modal-agree" id="btnAgree" disabled onclick="dismissModal()">I AGREE / ENTER PLATFORM</button>
-        </div>
-    </div>
+    <!-- ============================================================
+    MAIN CONTAINER
+    ============================================================ -->
+    <div class="container">
 
-    <!-- ADMIN HIDDEN LINK (Quick access to Admin Panel) -->
-    <div class="admin-hidden">
-        <a href="https://nplus-play.vercel.app/admin" target="_blank">🔐 Admin</a>
-    </div>
-
-    <!-- MAIN APP CONTAINER -->
-    <div class="app-viewport">
-        <!-- HEADER -->
-        <header class="app-header">
-            <a href="index.html" class="brand-logo">
-                <div class="logo-box">N+</div>
-                <span class="brand-title">PLAY</span>
-            </a>
-            <div class="header-actions">
-                <div class="wallet-pill">₹1,000.00</div>
+        <!-- ======== HEADER ======== -->
+        <header class="header">
+            <a href="#" class="logo gold-text">N+ PLAY</a>
+            <div class="header-right">
+                <span class="balance-pill">💰 ₹1,000</span>
+                <span class="age-badge">18+</span>
             </div>
         </header>
 
-        <!-- PROMOTIONAL HERO BANNER -->
-        <div class="promo-banner">
-            <h2 class="promo-title">Win Go 30s</h2>
-            <p class="promo-subtitle">Predict Color & Multiply Your Wealth Instant 9X</p>
-            <a href="https://nplus-play.vercel.app/game/wingo" class="btn-banner">Play Win Go ➔</a>
+        <!-- ======== CATEGORY TABS ======== -->
+        <div class="category-tabs">
+            <span class="category-tab active">Popular</span>
+            <span class="category-tab">Lottery</span>
+            <span class="category-tab">Casino</span>
+            <span class="category-tab">Slots</span>
+            <span class="category-tab">Sports</span>
+            <span class="category-tab">Rummy</span>
+            <span class="category-tab">Fishing</span>
+            <span class="category-tab">Original</span>
         </div>
 
-        <!-- LIVE WINNINGS TICKER -->
+        <!-- ======== PROMO BANNER ======== -->
+        <div class="promo-banner">
+            <h2>Win Go 30s</h2>
+            <p>Predict Color & Multiply Your Wealth — Instant 9X</p>
+            <a href="https://nplus-play.vercel.app/game/wingo" class="btn-banner">Play Now ➔</a>
+        </div>
+
+        <!-- ======== LIVE TICKER ======== -->
         <div class="live-ticker">
-            <span class="ticker-tag">LIVE WINS</span>
-            <div class="ticker-content" id="tickerFeed">
-                User ***8891 won ₹340.00 in Win Go • User ***2203 won ₹1,200.00 in Aviator • User ***7712 won ₹850.00 in K3 • User ***4401 won ₹450.00 in 5D
+            <span class="ticker-tag">🔥 LIVE</span>
+            <div class="ticker-text">
+                User ***8891 won <span>₹340</span> in Win Go &bull;
+                User ***2203 won <span>₹1,200</span> in Aviator &bull;
+                User ***7712 won <span>₹850</span> in K3 &bull;
+                User ***4401 won <span>₹450</span> in 5D
             </div>
         </div>
 
-        <!-- 1. LOTTERY SECTION (5 GAMES) -->
-        <div class="section-header">
-            <h3 class="section-title">Lottery Games</h3>
-            <a href="https://nplus-play.vercel.app/" class="view-all-link">View All →</a>
+        <!-- ======== PLATFORM RECOMMENDATION ======== -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0 8px;">
+            <h3 class="section-title" style="margin-bottom:0;">⭐ Platform Recommendation</h3>
+            <a href="#" class="view-all">All 6 →</a>
+        </div>
+        <div class="rec-scroll">
+            <a href="https://nplus-play.vercel.app/game/aviator" class="rec-card">
+                <div class="icon">✈️</div>
+                <div class="name">Aviator</div>
+                <div class="rtp">RTP 97.06%</div>
+            </a>
+            <a href="https://nplus-play.vercel.app/game/wingo" class="rec-card">
+                <div class="icon">🎰</div>
+                <div class="name">WINGO</div>
+                <div class="rtp">RTP 96.64%</div>
+            </a>
+            <a href="https://nplus-play.vercel.app/game/vortex" class="rec-card">
+                <div class="icon">🌀</div>
+                <div class="name">Vortex</div>
+                <div class="rtp">RTP 97.65%</div>
+            </a>
+            <a href="https://nplus-play.vercel.app/game/chicken" class="rec-card">
+                <div class="icon">🐔</div>
+                <div class="name">Chicken Road 2</div>
+                <div class="rtp">RTP 96.46%</div>
+            </a>
+            <a href="https://nplus-play.vercel.app/game/crazy" class="rec-card">
+                <div class="icon">🎡</div>
+                <div class="name">Crazy Time</div>
+                <div class="rtp">RTP 96.00%</div>
+            </a>
+            <a href="https://nplus-play.vercel.app/game/trx" class="rec-card">
+                <div class="icon">🔗</div>
+                <div class="name">TRX WIN GO</div>
+                <div class="rtp">RTP 97.10%</div>
+            </a>
+        </div>
+
+        <!-- ======== LOTTERY GAMES ======== -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 8px;">
+            <h3 class="section-title" style="margin-bottom:0;">🎲 Lottery Games</h3>
+            <a href="#" class="view-all">All 5 →</a>
         </div>
         <div class="game-grid">
-            <a href="https://nplus-play.vercel.app/game/wingo" class="game-card">
-                <span class="game-badge">HOT ⚡</span>
-                <div class="game-icon">🎰</div>
-                <div class="game-name">Win Go</div>
-                <div class="game-rtp">RTP 96.64%</div>
+            <a href="https://nplus-play.vercel.app/game/wingo" class="game-card glass-card">
+                <span class="badge hot">HOT ⚡</span>
+                <div class="icon">🎰</div>
+                <div class="name">Win Go</div>
+                <div class="rtp">RTP 96.64%</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/wingo" class="game-card">
-                <span class="game-badge">30s</span>
-                <div class="game-icon">🏍️</div>
-                <div class="game-name">MotoRace</div>
-                <div class="game-rtp">Coming Soon</div>
+            <a href="https://nplus-play.vercel.app/game/wingo" class="game-card glass-card">
+                <span class="badge">30s</span>
+                <div class="icon">🏍️</div>
+                <div class="name">MotoRace</div>
+                <div class="rtp">Coming Soon</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/k3" class="game-card">
-                <span class="game-badge">Dice</span>
-                <div class="game-icon">🎲</div>
-                <div class="game-name">K3</div>
-                <div class="game-rtp">RTP 96.20%</div>
+            <a href="https://nplus-play.vercel.app/game/k3" class="game-card glass-card">
+                <span class="badge">Dice</span>
+                <div class="icon">🎲</div>
+                <div class="name">K3</div>
+                <div class="rtp">RTP 96.20%</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/5d" class="game-card">
-                <span class="game-badge">5 Digits</span>
-                <div class="game-icon">🎯</div>
-                <div class="game-name">5D</div>
-                <div class="game-rtp">RTP 96.50%</div>
+            <a href="https://nplus-play.vercel.app/game/5d" class="game-card glass-card">
+                <span class="badge">5 Digits</span>
+                <div class="icon">🎯</div>
+                <div class="name">5D</div>
+                <div class="rtp">RTP 96.50%</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/trx" class="game-card span-2">
-                <span class="game-badge">TRX Crypto</span>
-                <div class="game-icon">🔗</div>
-                <div class="game-name">Trx Win Go</div>
-                <div class="game-rtp">RTP 97.10%</div>
+            <a href="https://nplus-play.vercel.app/game/trx" class="game-card glass-card span-2">
+                <span class="badge new">TRX Crypto</span>
+                <div class="icon">🔗</div>
+                <div class="name">Trx Win Go</div>
+                <div class="rtp">RTP 97.10%</div>
             </a>
         </div>
 
-        <!-- 2. PLATFORM RECOMMENDATION (4 GAMES) -->
-        <div class="section-header">
-            <h3 class="section-title">Platform Recommendation</h3>
-            <a href="https://nplus-play.vercel.app/" class="view-all-link">All 6 →</a>
+        <!-- ======== CASINO GAMES ======== -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 8px;">
+            <h3 class="section-title" style="margin-bottom:0;">🎰 Casino Games</h3>
+            <a href="#" class="view-all">All 4 →</a>
         </div>
         <div class="game-grid">
-            <a href="https://nplus-play.vercel.app/game/aviator" class="game-card">
-                <span class="game-badge">Crash</span>
-                <div class="game-icon">✈️</div>
-                <div class="game-name">Aviator</div>
-                <div class="game-rtp">RTP 97.06%</div>
+            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card glass-card">
+                <span class="badge">Live</span>
+                <div class="icon">🎡</div>
+                <div class="name">Crazy Time</div>
+                <div class="rtp">RTP 96.00%</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/wingo" class="game-card">
-                <span class="game-badge">Popular</span>
-                <div class="game-icon">🎨</div>
-                <div class="game-name">Wingo</div>
-                <div class="game-rtp">RTP 96.64%</div>
+            <a href="#" class="game-card glass-card">
+                <span class="badge">Auto</span>
+                <div class="icon">🔴</div>
+                <div class="name">Auto Roulette</div>
+                <div class="rtp">Coming Soon</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/vortex" class="game-card">
-                <span class="game-badge">New</span>
-                <div class="game-icon">🌀</div>
-                <div class="game-name">Vortex</div>
-                <div class="game-rtp">RTP 97.65%</div>
+            <a href="#" class="game-card glass-card">
+                <span class="badge">Classic</span>
+                <div class="icon">🎰</div>
+                <div class="name">Am. Roulette</div>
+                <div class="rtp">Coming Soon</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/chicken" class="game-card">
-                <span class="game-badge">Fun</span>
-                <div class="game-icon">🐔</div>
-                <div class="game-name">Chicken Road 2</div>
-                <div class="game-rtp">RTP 96.46%</div>
+            <a href="#" class="game-card glass-card">
+                <span class="badge">VIP</span>
+                <div class="icon">👑</div>
+                <div class="name">Roulette</div>
+                <div class="rtp">Coming Soon</div>
             </a>
         </div>
 
-        <!-- 3. CASINO SECTION (4 GAMES) -->
-        <div class="section-header">
-            <h3 class="section-title">Casino Games</h3>
-            <a href="https://nplus-play.vercel.app/" class="view-all-link">View All →</a>
+        <!-- ======== RUMMY GAMES ======== -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 8px;">
+            <h3 class="section-title" style="margin-bottom:0;">🃏 Rummy Cards</h3>
+            <a href="#" class="view-all">All 3 →</a>
         </div>
         <div class="game-grid">
-            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card">
-                <span class="game-badge">Live</span>
-                <div class="game-icon">🎡</div>
-                <div class="game-name">Crazy Time</div>
-                <div class="game-rtp">RTP 96.00%</div>
+            <a href="#" class="game-card glass-card">
+                <span class="badge">Cards</span>
+                <div class="icon">🃏</div>
+                <div class="name">365 Rummy</div>
+                <div class="rtp">Coming Soon</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card">
-                <span class="game-badge">Auto</span>
-                <div class="game-icon">🔴</div>
-                <div class="game-name">Auto Roulette</div>
-                <div class="game-rtp">Coming Soon</div>
+            <a href="#" class="game-card glass-card">
+                <span class="badge">Poker</span>
+                <div class="icon">♠️</div>
+                <div class="name">V8 Poker</div>
+                <div class="rtp">Coming Soon</div>
             </a>
-            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card">
-                <span class="game-badge">Classic</span>
-                <div class="game-icon">🎰</div>
-                <div class="game-name">American Roulette</div>
-                <div class="game-rtp">Coming Soon</div>
-            </a>
-            <a href="https://nplus-play.vercel.app/game/crazy" class="game-card">
-                <span class="game-badge">VIP</span>
-                <div class="game-icon">👑</div>
-                <div class="game-name">Roulette</div>
-                <div class="game-rtp">Coming Soon</div>
+            <a href="#" class="game-card glass-card span-2">
+                <span class="badge">Kool</span>
+                <div class="icon">♦️</div>
+                <div class="name">Koolbet</div>
+                <div class="rtp">Coming Soon</div>
             </a>
         </div>
 
-        <!-- 4. RUMMY SECTION (3 GAMES) -->
-        <div class="section-header">
-            <h3 class="section-title">Rummy Cards</h3>
-            <a href="https://nplus-play.vercel.app/" class="view-all-link">View All →</a>
+        <!-- ======== TODAY'S EARNING CHART ======== -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 16px;">
+            <h3 class="section-title" style="margin-bottom:0;">🏆 Today's Earnings Chart</h3>
         </div>
-        <div class="game-grid">
-            <a href="https://nplus-play.vercel.app/" class="game-card">
-                <span class="game-badge">Cards</span>
-                <div class="game-icon">🃏</div>
-                <div class="game-name">365 Rummy</div>
-                <div class="game-rtp">Coming Soon</div>
-            </a>
-            <a href="https://nplus-play.vercel.app/" class="game-card">
-                <span class="game-badge">Poker</span>
-                <div class="game-icon">♠️</div>
-                <div class="game-name">V8 Poker Rummy</div>
-                <div class="game-rtp">Coming Soon</div>
-            </a>
-            <a href="https://nplus-play.vercel.app/" class="game-card span-2">
-                <span class="game-badge">Kool</span>
-                <div class="game-icon">♦️</div>
-                <div class="game-name">Koolbet Rummy</div>
-                <div class="game-rtp">Coming Soon</div>
-            </a>
+        <div class="leaderboard">
+            <div class="lb-item"><div class="rank rank-1">1</div><div class="name">Mem***JVN</div><div class="amount">₹14,850</div></div>
+            <div class="lb-item"><div class="rank rank-2">2</div><div class="name">Su***aj</div><div class="amount">₹11,200</div></div>
+            <div class="lb-item"><div class="rank rank-3">3</div><div class="name">Kap***oor</div><div class="amount">₹9,450</div></div>
+            <div class="lb-item"><div class="rank rank-other">4</div><div class="name">Mem***H3M</div><div class="amount">₹7,800</div></div>
+            <div class="lb-item"><div class="rank rank-other">5</div><div class="name">Me***er</div><div class="amount">₹6,150</div></div>
+            <div class="lb-item"><div class="rank rank-other">6</div><div class="name">HAR***ARA</div><div class="amount">₹5,400</div></div>
+            <div class="lb-item"><div class="rank rank-other">7</div><div class="name">Mem***yV9</div><div class="amount">₹4,900</div></div>
+            <div class="lb-item"><div class="rank rank-other">8</div><div class="name">Mem***IAE</div><div class="amount">₹3,850</div></div>
+            <div class="lb-item"><div class="rank rank-other">9</div><div class="name">Rs***gh</div><div class="amount">₹3,100</div></div>
+            <div class="lb-item"><div class="rank rank-other">10</div><div class="name">Mem***XZ2</div><div class="amount">₹2,750</div></div>
         </div>
 
-        <!-- TODAY'S EARNING CHART (LEADERBOARD TOP 10) -->
-        <div class="section-header">
-            <h3 class="section-title">Today's Earning Chart</h3>
-        </div>
-        <div class="leaderboard-section" id="leaderboardList">
-            <!-- Dynamic Top 10 List -->
-        </div>
+        <!-- ======== FOOTER ======== -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#"><i class="fas fa-globe"></i> Language</a>
+                <a href="#"><i class="fas fa-bullhorn"></i> Announcements</a>
+                <a href="#"><i class="fas fa-headset"></i> 24/7 Support</a>
+                <a href="#"><i class="fas fa-book"></i> Beginner Guide</a>
+                <a href="#"><i class="fas fa-info-circle"></i> About Us</a>
+                <a href="#"><i class="fas fa-download"></i> Download App</a>
+                <a href="https://nplus-play.vercel.app/admin" target="_blank" class="admin-link">
+                    <i class="fas fa-lock"></i> 🔐 Admin Panel
+                </a>
+            </div>
+            <div class="footer-disclaimer">
+                <p>Gambling can be addictive, please play rationally.</p>
+                <p>Welcome to <span class="gold">N+ PLAY</span> — only accepts customers above 18 years.</p>
+                <p style="margin-top:6px; color:#444;">© 2026 N+ PLAY. All rights reserved.</p>
+            </div>
+        </footer>
 
-        <!-- FOOTER INFO LINKS -->
-        <div class="footer-links">
-            <a href="#" class="footer-link-item" onclick="alert('Terms & Conditions')">📄 Terms & Conditions</a>
-            <a href="#" class="footer-link-item" onclick="alert('Language: English')">🌐 Language</a>
-            <a href="#" class="footer-link-item" onclick="alert('No new announcements')">📢 Announcement</a>
-            <a href="#" class="footer-link-item" onclick="alert('Customer Support: support@nplusplay.com')">🎧 24/7 Customer Service</a>
-            <a href="#" class="footer-link-item" onclick="alert('Beginner Guide: Predict colors to win 2x to 9x multipliers.')">📖 Beginner Guide</a>
-            <a href="#" class="footer-link-item" onclick="alert('N+ PLAY Official Gaming Platform')">ℹ️ About Us</a>
-            <a href="#" class="footer-link-item" style="grid-column: span 2;" onclick="alert('Downloading N+ PLAY Android APK...')">📲 Download App</a>
-            <a href="https://nplus-play.vercel.app/admin" target="_blank" class="footer-link-item admin-link">
-                🔐 Admin Panel
-            </a>
-        </div>
     </div>
 
-    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
+    <!-- ============================================================
+    BOTTOM NAVIGATION
+    ============================================================ -->
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
+        <a href="#" class="nav-item active">
             <span class="nav-icon">🏠</span>
             <span>Home</span>
         </a>
@@ -718,6 +817,11 @@
         </a>
         <a href="https://nplus-play.vercel.app/bonus" class="nav-item">
             <span class="nav-icon">🎁</span>
+            <span>Get ₹500</span>
+            <span class="badge-nav">NEW</span>
+        </a>
+        <a href="https://nplus-play.vercel.app/promotion" class="nav-item">
+            <span class="nav-icon">📢</span>
             <span>Promotion</span>
         </a>
         <a href="https://nplus-play.vercel.app/account" class="nav-item">
@@ -726,60 +830,5 @@
         </a>
     </nav>
 
-    <!-- ==========================================
-       JAVASCRIPT DYNAMIC ENGINE & MODAL LOGIC
-       ========================================== -->
-    <script>
-        // --- 18+ MODAL CONTROL ---
-        function toggleAgreeBtn() {
-            const check = document.getElementById('modalAgreeCheck');
-            document.getElementById('btnAgree').disabled = !check.checked;
-        }
-
-        function dismissModal() {
-            document.getElementById('riskModal').style.display = 'none';
-        }
-
-        // --- TOP 10 EARNING CHART GENERATOR ---
-        const topWinners = [
-            { phone: "***9812", amount: "$14,850.00", rank: 1 },
-            { phone: "***4401", amount: "$11,200.00", rank: 2 },
-            { phone: "***7723", amount: "$9,450.00", rank: 3 },
-            { phone: "***1109", amount: "$7,800.00", rank: 4 },
-            { phone: "***3342", amount: "$6,150.00", rank: 5 },
-            { phone: "***8890", amount: "$5,400.00", rank: 6 },
-            { phone: "***2218", amount: "$4,900.00", rank: 7 },
-            { phone: "***6654", amount: "$3,850.00", rank: 8 },
-            { phone: "***0012", amount: "$3,100.00", rank: 9 },
-            { phone: "***5531", amount: "$2,750.00", rank: 10 }
-        ];
-
-        function renderLeaderboard() {
-            const leaderboardContainer = document.getElementById('leaderboardList');
-            leaderboardContainer.innerHTML = topWinners.map(item => {
-                let badgeClass = "rank-other";
-                let badgeText = item.rank;
-
-                if (item.rank === 1) { badgeClass = "rank-1"; badgeText = "🥇"; }
-                else if (item.rank === 2) { badgeClass = "rank-2"; badgeText = "🥈"; }
-                else if (item.rank === 3) { badgeClass = "rank-3"; badgeText = "🥉"; }
-
-                return `
-                    <div class="leaderboard-item">
-                        <div class="user-info">
-                            <div class="rank-badge ${badgeClass}">${badgeText}</div>
-                            <div class="user-phone">User ${item.phone}</div>
-                        </div>
-                        <div class="user-win">${item.amount}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Initialize Page Engine
-        window.onload = () => {
-            renderLeaderboard();
-        };
-    </script>
 </body>
 </html>
