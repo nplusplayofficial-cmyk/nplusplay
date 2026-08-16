@@ -623,9 +623,6 @@
 </div>
 
 <script>
-    // ============================================================
-    // WINGO — FINAL FIX: Timer starts immediately, never freezes.
-    // ============================================================
     (function() {
         'use strict';
 
@@ -641,7 +638,6 @@
         let betAmountThisRound = 0;
         let autoBet = false;
         let soundEnabled = true;
-        let lastBetState = null;
         let currentStreak = 0;
         let streakType = null;
 
@@ -693,13 +689,91 @@
         const getHistoryKey = (dur) => `wingo_history_${dur}`;
         const getCounterKey = (dur) => `wingo_counter_${dur}`;
 
-        // --- TIMER ENGINE (Rock Solid) ---
+        // --- TIMER ENGINE ---
         function getNextRoundStart(durationSec) {
             const now = Date.now();
             const remainder = Math.floor(now / 1000) % durationSec;
             return now + (durationSec - remainder) * 1000;
         }
 
+        function getDurationPrefix(duration) {
+            if (duration === 30) return '';
+            if (duration === 60) return '1';
+            if (duration === 180) return '3';
+            if (duration === 300) return '5';
+            return '';
+        }
+
+        // --- PERIOD GENERATION (FIXED: Separate counters for each duration) ---
+        function generateNextPeriod(duration) {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            const dateStr = y + m + d;
+
+            const key = getCounterKey(duration);
+            let meta = { date: dateStr, count: 0 };
+
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.date === dateStr) {
+                        meta = parsed;
+                    } else {
+                        meta = { date: dateStr, count: 0 };
+                    }
+                }
+            } catch(e) {}
+
+            meta.count += 1;
+            localStorage.setItem(key, JSON.stringify(meta));
+
+            // Format counter: always 2 digits with leading zero
+            const counterStr = String(meta.count).padStart(2, '0');
+            const prefix = getDurationPrefix(duration);
+
+            return dateStr + prefix + counterStr;
+        }
+
+        function getInitialPeriod(duration) {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            const dateStr = y + m + d;
+
+            const key = getCounterKey(duration);
+            let meta = { date: dateStr, count: 0 };
+
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.date === dateStr) {
+                        meta = parsed;
+                    }
+                }
+            } catch(e) {}
+
+            if (meta.count === 0) {
+                meta.count = 1;
+                localStorage.setItem(key, JSON.stringify(meta));
+            }
+
+            const counterStr = String(meta.count).padStart(2, '0');
+            const prefix = getDurationPrefix(duration);
+
+            return dateStr + prefix + counterStr;
+        }
+
+        function updatePeriodDisplay() {
+            periodEl.textContent = currentPeriod.slice(0, 14);
+            periodLarge.textContent = currentPeriod;
+        }
+
+        // --- TIMER DISPLAY ---
         function updateTimerDisplay() {
             const now = Date.now();
             const nextStart = getNextRoundStart(currentDuration);
@@ -727,9 +801,9 @@
                 setBettingState(true);
             }
 
-            // 🔥 SAFETY CHECK: If timer hits 0 but round is still active, force reset
+            // SAFETY CHECK: If timer hits 0 but round is still active, force reset
             if (secs <= 0 && roundActive) {
-                console.warn("⚠️ Timer hit 0 but roundActive is true! Force resetting...");
+                console.warn("⚠️ Force resetting stuck round...");
                 roundActive = false;
                 completeRound();
                 return;
@@ -753,57 +827,7 @@
             }
         });
 
-        // --- Period Generation ---
-        function generateNextPeriod(duration) {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            const dateStr = y + m + d;
-            const key = getCounterKey(duration);
-            let meta = { date: dateStr, count: 0 };
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed.date === dateStr) { meta = parsed; }
-                    else { meta = { date: dateStr, count: 0 }; }
-                }
-            } catch(e) {}
-            meta.count += 1;
-            localStorage.setItem(key, JSON.stringify(meta));
-            return dateStr + meta.count;
-        }
-
-        function getInitialPeriod(duration) {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            const dateStr = y + m + d;
-            const key = getCounterKey(duration);
-            let meta = { date: dateStr, count: 0 };
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed.date === dateStr) { meta = parsed; }
-                }
-            } catch(e) {}
-            if (meta.count === 0) {
-                meta.count = 1;
-                localStorage.setItem(key, JSON.stringify(meta));
-                return dateStr + '1';
-            }
-            return dateStr + meta.count;
-        }
-
-        function updatePeriodDisplay() {
-            periodEl.textContent = currentPeriod.slice(0,14);
-            periodLarge.textContent = currentPeriod;
-        }
-
-        // --- Data ---
+        // --- DATA ---
         function loadBalance() {
             try {
                 const val = localStorage.getItem(BALANCE_KEY);
@@ -812,6 +836,7 @@
             } catch(e) { balance = 1000; }
             updateBalanceUI();
         }
+
         function saveBalance() {
             localStorage.setItem(BALANCE_KEY, String(balance));
         }
@@ -846,7 +871,7 @@
             const now = Date.now();
             const oneDay = 24 * 60 * 60 * 1000;
             let changed = false;
-            const durs = [30,60,180,300];
+            const durs = [30, 60, 180, 300];
             durs.forEach(dur => {
                 const key = getHistoryKey(dur);
                 try {
@@ -878,6 +903,7 @@
             }
         }
 
+        // --- AUDIO ---
         let audioCtx = null;
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
 
@@ -925,6 +951,7 @@
             } catch(e) {}
         }
 
+        // --- CONFETTI ---
         function launchConfetti() {
             const canvas = document.getElementById('confettiCanvas');
             if(!canvas) return;
@@ -957,6 +984,7 @@
             animate();
         }
 
+        // --- CHART ---
         function renderChart() {
             const canvas = document.getElementById('chartCanvas');
             if(!canvas) return;
@@ -984,6 +1012,7 @@
             });
         }
 
+        // --- WINNER FEED ---
         function addWinnerFeed(name, amount, game) {
             const el = document.createElement('div');
             el.className = 'item';
@@ -993,6 +1022,7 @@
             if(winnerFeed.children.length > 5) winnerFeed.firstChild.remove();
         }
 
+        // --- STATS ---
         function renderStats() {
             const last100 = history.slice(0,100);
             const freq = Array(10).fill(0);
@@ -1030,6 +1060,7 @@
             statPanel.innerHTML = html;
         }
 
+        // --- STREAK ---
         function updateStreak(won) {
             if(won) {
                 if(streakType === 'win') currentStreak++;
@@ -1048,11 +1079,13 @@
             }
         }
 
+        // --- GAME LOGIC ---
         function getNumberColor(num) {
             if (num === 0 || num === 2 || num === 4 || num === 6 || num === 8) return 'red';
             if (num === 1 || num === 3 || num === 7 || num === 9) return 'green';
             return 'green';
         }
+
         function isVioletSpecial(num) { return num === 0 || num === 5; }
 
         function generateResult() {
@@ -1079,7 +1112,7 @@
             updateModalPreview();
         }
 
-        // --- Place Bet (immediate deduction) ---
+        // --- PLACE BET ---
         function placeBetNow() {
             if (!bettingOpen) { showMessage('⛔ Betting closed!','closed'); return false; }
             if (betPlacedThisRound) { showMessage('Already placed!','info'); return false; }
@@ -1101,11 +1134,10 @@
             showMessage(`✅ Bet placed! ₹${totalCost.toFixed(2)} deducted`, 'win');
             setBettingState(false);
             autoBet = modalAutoBet.checked;
-            document.getElementById('autoBetCheck').checked = autoBet;
             return true;
         }
 
-        // --- Process Result (add payout if win) ---
+        // --- PROCESS RESULT ---
         function processResult(result) {
             const { number, colors } = result;
             let totalPayout = 0;
@@ -1195,6 +1227,7 @@
             return { totalPayout, totalWon: totalWonRound, betResults, totalBetAmount, netChange };
         }
 
+        // --- RESULT POPUP ---
         function showResultPopup(won, payout, period, betDetails, resultColors, netChange) {
             const icon = won ? '🎉' : '😞';
             const title = won ? 'You Win!' : 'You Lose';
@@ -1221,9 +1254,9 @@
             }, 3000);
         }
 
-        // --- COMPLETE ROUND (FIXED: Period updates every round) ---
+        // --- COMPLETE ROUND (FIXED) ---
         function completeRound() {
-            console.log("🔄 completeRound() triggered."); // Debug
+            console.log("🔄 completeRound() triggered.");
             if (roundActive) {
                 console.warn("⚠️ Round already active, skipping.");
                 return;
@@ -1237,7 +1270,6 @@
 
                 rounds++;
 
-                // Fixed the syntax bug (removed the semicolon)
                 const betStr = selectedBets.colors.join(' ') + (selectedBets.size || '') + selectedBets.numbers.join(' ');
 
                 history.unshift({
@@ -1256,7 +1288,6 @@
                 saveHistory(currentDuration);
 
                 if (betPlacedThisRound && betResults.length > 0) {
-                    // ✅ Fixed syntax: added missing parentheses
                     let details = betResults.map(b => {
                         return b.type.toUpperCase() + ' (' + (b.val !== undefined ? b.val : '') + ')';
                     }).join(' + ');
@@ -1281,24 +1312,19 @@
                 }
 
             } catch (error) {
-                console.error("❌ WINGO Round Error (Auto-Recovered):", error);
+                console.error("❌ WINGO Round Error:", error);
                 showMessage('⚠️ Round auto-recovered.', 'info');
             } finally {
-                // 🔥 THIS IS THE KEY FIX — ALWAYS RUNS
-                console.log("🔒 Finally block: Resetting round...");
+                // ✅ ALWAYS RUNS - Guaranteed period update
                 roundActive = false;
-
-                // Generate the NEW Period Number
                 currentPeriod = generateNextPeriod(currentDuration);
-                console.log("📅 New Period Generated:", currentPeriod);
-
                 updatePeriodDisplay();
                 setBettingState(true);
-                console.log("✅ Round reset complete. New Period:", currentPeriod);
+                console.log("✅ New Period:", currentPeriod);
             }
         }
 
-        // --- Modal functions ---
+        // --- MODAL FUNCTIONS ---
         function openBetModal() {
             const hasBet = selectedBets.colors.length > 0 || selectedBets.size || selectedBets.numbers.length > 0;
             if (!hasBet || !bettingOpen || betPlacedThisRound) return;
@@ -1364,7 +1390,7 @@
             modalTotalAmount.textContent = '₹' + totalStake.toFixed(2);
         }
 
-        // --- UI helpers ---
+        // --- UI HELPERS ---
         function setBettingState(open) {
             bettingOpen = open;
             const disabled = !open || betPlacedThisRound;
@@ -1383,14 +1409,15 @@
         }
 
         function showMessage(text,type='info') {
-            const el = document.getElementById('message');
+            const el = document.getElementById('modalMessage');
+            if(!el) return;
             el.textContent=text;
             el.className='message '+type;
             el.style.display='block';
             if(type!=='closed') setTimeout(()=>{el.style.display='none';},3500);
         }
 
-        // --- Presets ---
+        // --- PRESETS ---
         function applyPreset(type) {
             if(!bettingOpen || betPlacedThisRound) return;
             document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
@@ -1416,7 +1443,7 @@
             openBetModal();
         }
 
-        // --- Switch duration ---
+        // --- SWITCH DURATION ---
         function switchDuration(newDuration) {
             if (newDuration === currentDuration) return;
             saveHistory(currentDuration);
@@ -1435,7 +1462,7 @@
             startTimerLoop();
         }
 
-        // --- Render functions ---
+        // --- RENDER FUNCTIONS ---
         function renderNumberGrid() {
             numRow1.innerHTML = ''; numRow2.innerHTML = '';
             const n1 = [0,1,2,3,4]; const n2 = [5,6,7,8,9];
@@ -1585,6 +1612,7 @@
             }
         }
 
+        // --- TABS ---
         function setupTabs() {
             document.querySelectorAll('.info-tabs button').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1611,7 +1639,7 @@
             });
         }
 
-        // --- Init ---
+        // --- INIT ---
         function init() {
             cleanHistory();
             loadBalance();
@@ -1631,7 +1659,6 @@
             updateStrategy();
             renderStats();
 
-            // --- FIX: Force timer to start immediately, even on initial load ---
             if (timerInterval) clearInterval(timerInterval);
             startTimerLoop();
 
@@ -1652,7 +1679,6 @@
             document.getElementById('soundToggle').addEventListener('click', function() {
                 soundEnabled = !soundEnabled;
                 this.textContent = soundEnabled ? '🔊' : '🔇';
-                document.getElementById('soundCheck').checked = soundEnabled;
                 if(soundEnabled) initAudio();
             });
 
@@ -1666,7 +1692,6 @@
                 if (e.target === this) rulesOverlay.classList.remove('active');
             });
 
-            // Qty
             document.getElementById('modalQtyMinus').addEventListener('click', function() {
                 if(!bettingOpen || betPlacedThisRound) return;
                 if(quantity>1) quantity--;
@@ -1682,7 +1707,6 @@
                 updateModalPreview();
             });
 
-            // Multipliers
             document.querySelectorAll('#modalMultipliers button').forEach(btn => {
                 btn.addEventListener('click', function() {
                     if(!bettingOpen || betPlacedThisRound) return;
