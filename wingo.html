@@ -624,7 +624,7 @@
 
 <script>
     // ============================================================
-    // WINGO — FINAL FIX: Timer NEVER freezes, rounds always complete.
+    // WINGO — FINAL FIX: Timer starts immediately, never freezes.
     // ============================================================
     (function() {
         'use strict';
@@ -717,7 +717,6 @@
             }
             if (secs > 5) lastBeepSecond = -1;
 
-            // --- CRITICAL: Close betting at 5 seconds, but DO NOT set roundActive here ---
             if (secs <= 5 && bettingOpen) {
                 setBettingState(false);
                 if (secs === 5) {
@@ -728,7 +727,6 @@
                 setBettingState(true);
             }
 
-            // --- CRITICAL: Always complete the round when secs <= 0 ---
             if (secs <= 0 && !roundActive) {
                 completeRound();
             }
@@ -741,7 +739,10 @@
         }
 
         document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) updateTimerDisplay();
+            if (!document.hidden) {
+                if (timerInterval) clearInterval(timerInterval);
+                startTimerLoop();
+            }
         });
 
         // --- Period Generation ---
@@ -1214,16 +1215,13 @@
 
         // --- COMPLETE ROUND (Always runs, never gets stuck) ---
         function completeRound() {
-            // Prevent double execution
             if (roundActive) return;
             roundActive = true;
             setBettingState(false);
 
-            // Generate result & process
             const result = generateResult();
             const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processResult(result);
 
-            // Update history
             rounds++;
             const betStr = selectedBets.colors.join(',') + (selectedBets.size||'') + selectedBets.numbers.join(',');
             history.unshift({
@@ -1240,7 +1238,6 @@
             if (history.length > 50) history.pop();
             saveHistory(currentDuration);
 
-            // Show popup if a bet was placed
             if (betPlacedThisRound && betResults.length > 0) {
                 let details = betResults.map(b => {
                     let label = b.type.toUpperCase() + ' ' + (b.val !== undefined ? b.val : '');
@@ -1250,22 +1247,17 @@
                 showResultPopup(totalWon, totalPayout, currentPeriod, details, result.colors, netChange);
             }
 
-            // Reset bets
             selectedBets = { colors: [], size: null, numbers: [] };
             document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
             betPlacedThisRound = false;
             closeBetModal();
 
-            // Update UI
             renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); renderStats();
             updateBalanceUI();
 
-            // Reset timer state for next round
             roundActive = false;
             currentPeriod = generateNextPeriod(currentDuration);
             updatePeriodDisplay();
-
-            // Reopen betting and reset timer
             setBettingState(true);
 
             if (autoBet && (selectedBets.colors.length>0 || selectedBets.size || selectedBets.numbers.length>0)) {
@@ -1606,6 +1598,10 @@
             updateStrategy();
             renderStats();
 
+            // --- FIX: Force timer to start immediately, even on initial load ---
+            if (timerInterval) clearInterval(timerInterval);
+            startTimerLoop();
+
             // Modal listeners
             modalStakeInput.addEventListener('input', function() {
                 let val = parseFloat(this.value);
@@ -1679,8 +1675,6 @@
                 autoBet = this.checked;
                 modalAutoBet.checked = autoBet;
             });
-
-            startTimerLoop();
         }
 
         if (document.readyState === 'loading') {
