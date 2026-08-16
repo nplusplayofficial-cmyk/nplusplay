@@ -727,6 +727,14 @@
                 setBettingState(true);
             }
 
+            // 🔥 SAFETY CHECK: If timer hits 0 but round is still active, force reset
+            if (secs <= 0 && roundActive) {
+                console.warn("⚠️ Timer hit 0 but roundActive is true! Force resetting...");
+                roundActive = false;
+                completeRound();
+                return;
+            }
+
             if (secs <= 0 && !roundActive) {
                 completeRound();
             }
@@ -1215,7 +1223,11 @@
 
         // --- COMPLETE ROUND (FIXED: Period updates every round) ---
         function completeRound() {
-            if (roundActive) return;
+            console.log("🔄 completeRound() triggered."); // Debug
+            if (roundActive) {
+                console.warn("⚠️ Round already active, skipping.");
+                return;
+            }
             roundActive = true;
             setBettingState(false);
 
@@ -1225,7 +1237,7 @@
 
                 rounds++;
 
-                // ✅ FIXED: Removed the semicolon bug
+                // Fixed the syntax bug (removed the semicolon)
                 const betStr = selectedBets.colors.join(' ') + (selectedBets.size || '') + selectedBets.numbers.join(' ');
 
                 history.unshift({
@@ -1244,15 +1256,13 @@
                 saveHistory(currentDuration);
 
                 if (betPlacedThisRound && betResults.length > 0) {
+                    // ✅ Fixed syntax: added missing parentheses
                     let details = betResults.map(b => {
-                        let label = b.type.toUpperCase() + ' (' + (b.val !== undefined ? b.val : '');
-                        return label;
+                        return b.type.toUpperCase() + ' (' + (b.val !== undefined ? b.val : '') + ')';
                     }).join(' + ');
-                    let colorNames = result.colors.map(c => c.toUpperCase()).join(' + ');
                     showResultPopup(totalWon, totalPayout, currentPeriod, details, result.colors, netChange);
                 }
 
-                // Reset bets
                 selectedBets = { colors: [], size: null, numbers: [] };
                 document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
                 betPlacedThisRound = false;
@@ -1271,16 +1281,20 @@
                 }
 
             } catch (error) {
-                // Logs error but doesn't crash the game
-                console.error("WINGO Round Error (Auto-Recovered):", error);
+                console.error("❌ WINGO Round Error (Auto-Recovered):", error);
                 showMessage('⚠️ Round auto-recovered.', 'info');
             } finally {
-                // ✅ THIS IS THE FIX: Always runs, even if an error occurs
+                // 🔥 THIS IS THE KEY FIX — ALWAYS RUNS
+                console.log("🔒 Finally block: Resetting round...");
                 roundActive = false;
+
+                // Generate the NEW Period Number
                 currentPeriod = generateNextPeriod(currentDuration);
+                console.log("📅 New Period Generated:", currentPeriod);
+
                 updatePeriodDisplay();
                 setBettingState(true);
-                console.log("✅ New Period Generated:", currentPeriod);
+                console.log("✅ Round reset complete. New Period:", currentPeriod);
             }
         }
 
