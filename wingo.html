@@ -704,7 +704,7 @@
             return '';
         }
 
-        // --- PERIOD GENERATION (FIXED: Separate counters for each duration) ---
+        // --- PERIOD GENERATION ---
         function generateNextPeriod(duration) {
             const today = new Date();
             const y = today.getFullYear();
@@ -730,7 +730,6 @@
             meta.count += 1;
             localStorage.setItem(key, JSON.stringify(meta));
 
-            // Format counter: always 2 digits with leading zero
             const counterStr = String(meta.count).padStart(2, '0');
             const prefix = getDurationPrefix(duration);
 
@@ -801,7 +800,6 @@
                 setBettingState(true);
             }
 
-            // SAFETY CHECK: If timer hits 0 but round is still active, force reset
             if (secs <= 0 && roundActive) {
                 console.warn("⚠️ Force resetting stuck round...");
                 roundActive = false;
@@ -823,6 +821,8 @@
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
                 if (timerInterval) clearInterval(timerInterval);
+                // Catch up missed rounds when tab becomes visible again
+                catchUpRounds();
                 startTimerLoop();
             }
         });
@@ -1254,7 +1254,7 @@
             }, 3000);
         }
 
-        // --- COMPLETE ROUND (FIXED) ---
+        // --- COMPLETE ROUND (UPDATED: History limit increased to 500) ---
         function completeRound() {
             console.log("🔄 completeRound() triggered.");
             if (roundActive) {
@@ -1284,7 +1284,8 @@
                     timestamp: Date.now()
                 });
 
-                if (history.length > 50) history.pop();
+                // ✅ HISTORY LIMIT UPDATED TO 500
+                if (history.length > 500) history.pop();
                 saveHistory(currentDuration);
 
                 if (betPlacedThisRound && betResults.length > 0) {
@@ -1315,13 +1316,67 @@
                 console.error("❌ WINGO Round Error:", error);
                 showMessage('⚠️ Round auto-recovered.', 'info');
             } finally {
-                // ✅ ALWAYS RUNS - Guaranteed period update
                 roundActive = false;
                 currentPeriod = generateNextPeriod(currentDuration);
                 updatePeriodDisplay();
                 setBettingState(true);
                 console.log("✅ New Period:", currentPeriod);
             }
+        }
+
+        // ===== CATCH UP MISSED ROUNDS (NEW FEATURE) =====
+        function catchUpRounds() {
+            const lastItem = history.length > 0 ? history[0] : null;
+            if (!lastItem || !lastItem.timestamp) {
+                currentPeriod = generateNextPeriod(currentDuration);
+                updatePeriodDisplay();
+                return;
+            }
+
+            const now = Date.now();
+            const elapsedMs = now - lastItem.timestamp;
+            const elapsedSecs = elapsedMs / 1000;
+
+            if (elapsedSecs < currentDuration * 0.5) return;
+
+            const missedRounds = Math.min(Math.floor(elapsedSecs / currentDuration), 500);
+            if (missedRounds <= 0) return;
+
+            console.log(`🔄 Catching up ${missedRounds} missed rounds...`);
+
+            for (let i = 0; i < missedRounds; i++) {
+                const result = generateResult();
+                const period = generateNextPeriod(currentDuration);
+                history.unshift({
+                    period: period,
+                    number: result.number,
+                    colors: result.colors,
+                    betType: 'none',
+                    stake: 0,
+                    payout: 0,
+                    won: false,
+                    netChange: 0,
+                    timestamp: now - (missedRounds - i) * currentDuration * 1000
+                });
+                if (history.length > 500) history.pop();
+            }
+
+            // Recalculate stats
+            rounds = history.length;
+            wins = history.filter(h => h.won === true && h.stake > 0).length;
+            losses = history.filter(h => h.won === false && h.stake > 0).length;
+            totalWon = history.reduce((sum, h) => sum + (h.netChange || 0), 0);
+
+            saveHistory(currentDuration);
+            renderAllHistory();
+            renderMyBets();
+            updateStats();
+            renderChart();
+            updateStrategy();
+            renderStats();
+
+            currentPeriod = generateNextPeriod(currentDuration);
+            updatePeriodDisplay();
         }
 
         // --- MODAL FUNCTIONS ---
@@ -1552,7 +1607,7 @@
             let html = `<table>
                 <thead><tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr></thead>
                 <tbody>`;
-            history.slice(0,50).forEach(item => {
+            history.slice(0,100).forEach(item => {
                 const colors = item.colors || ['red'];
                 let colorHtml = '';
                 if (colors.includes('violet')) {
@@ -1578,7 +1633,7 @@
             let html = `<table>
                 <thead><tr><th>Period</th><th>Number</th><th>Bet</th><th>Result</th></tr></thead>
                 <tbody>`;
-            myBets.slice(0,50).forEach(item => {
+            myBets.slice(0,100).forEach(item => {
                 const resultText = item.won ? '✅ Won' : '❌ Lost';
                 html += `<tr><td>${item.period || ''}</td><td>${item.number}</td><td>₹${item.stake.toFixed(0)}</td><td>${resultText}</td></tr>`;
             });
@@ -1644,6 +1699,10 @@
             cleanHistory();
             loadBalance();
             loadHistory(currentDuration);
+            
+            // ✅ NEW: Catch up any missed rounds since last visit
+            catchUpRounds();
+
             currentPeriod = getInitialPeriod(currentDuration);
             updatePeriodDisplay();
 
