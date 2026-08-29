@@ -1,806 +1,657 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>N+ PLAY - Premium Gaming Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        /* ============================================================
-           ROOT VARIABLES — Daman Style with Gold Accents
-           ============================================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#070707">
+<meta name="description" content="N+ PLAY — Premium gaming lobby">
+<title>N+ PLAY — Premium Gaming</title>
 
-        :root {
-            --bg-primary: #0a0808;
-            --bg-secondary: #141010;
-            --bg-card: rgba(255, 255, 255, 0.04);
-            --border-card: rgba(255, 215, 0, 0.12);
-            --gold: #f5c518;
-            --gold-dark: #b8860b;
-            --gold-glow: rgba(245, 197, 24, 0.25);
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --text-muted: #666666;
-            --red: #e63946;
-            --green: #10b981;
-            --radius: 16px;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-        html {
-            scroll-behavior: smooth;
-        }
+<style>
+:root{
+    --bg:#070707;
+    --bg-2:#0c0c0c;
+    --surface:rgba(255,255,255,.045);
+    --surface-2:rgba(255,255,255,.07);
+    --line:rgba(255,255,255,.09);
+    --line-gold:rgba(245,197,24,.22);
+    --gold:#f5c518;
+    --gold-2:#ffe48a;
+    --gold-dark:#9d7200;
+    --white:#fff;
+    --muted:#989898;
+    --muted-2:#626262;
+    --green:#23d39a;
+    --red:#ff5260;
+    --radius:18px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+    min-height:100vh;
+    overflow-x:hidden;
+    color:var(--white);
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(650px 350px at 50% -80px,rgba(245,197,24,.11),transparent 70%),
+      radial-gradient(500px 400px at -15% 45%,rgba(245,197,24,.045),transparent 70%),
+      linear-gradient(180deg,#090909 0%,#050505 100%);
+    padding-bottom:92px;
+}
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.22;
+    background-image:radial-gradient(rgba(255,255,255,.12) .5px,transparent .5px);
+    background-size:5px 5px;
+    mask-image:linear-gradient(to bottom,black,transparent 75%);
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.page{width:min(100%,560px);margin:auto;padding:0 14px}
+@media(min-width:900px){.page{max-width:1180px}}
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding-bottom: 80px;
-            overflow-x: hidden;
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(230, 57, 70, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 90% 80%, rgba(245, 197, 24, 0.08) 0%, transparent 50%);
-        }
+.gold-text{
+    background:linear-gradient(110deg,#9b7000 0%,#fff0a1 26%,#f5c518 52%,#fff2a9 72%,#9b7000 100%);
+    background-size:220% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:goldSweep 6s linear infinite;
+}
+@keyframes goldSweep{to{background-position:220% center}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,197,24,.0)}50%{box-shadow:0 0 0 7px rgba(245,197,24,.07)}}
 
-        /* ============================================================
-           SCROLLBAR
-           ============================================================ */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 10px;
-        }
+.header{
+    position:sticky;top:0;z-index:100;
+    margin:0 -14px;
+    padding:13px 14px 11px;
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(7,7,7,.76);
+    backdrop-filter:blur(22px) saturate(140%);
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-mark{
+    width:34px;height:34px;border-radius:11px;
+    display:grid;place-items:center;
+    font-size:11px;font-weight:900;letter-spacing:-.5px;
+    color:#090909;
+    background:linear-gradient(145deg,#fff1a0,#f5c518 48%,#8f6500);
+    box-shadow:0 5px 24px rgba(245,197,24,.18);
+}
+.brand-name{font-size:1.18rem;font-weight:900;letter-spacing:.9px}
+.header-right{display:flex;align-items:center;gap:8px}
+.wallet{
+    display:flex;align-items:center;gap:7px;
+    padding:7px 11px;border:1px solid rgba(35,211,154,.2);
+    border-radius:999px;background:rgba(35,211,154,.07);
+}
+.wallet-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.wallet-value{font-size:.76rem;font-weight:800;color:#bff8e5}
+.age{font-size:.62rem;font-weight:900;color:#ff8b94;padding:6px 8px;border:1px solid rgba(255,82,96,.2);border-radius:999px;background:rgba(255,82,96,.06)}
 
-        /* ============================================================
-           UTILITY
-           ============================================================ */
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 0 16px;
-        }
+.categories{
+    display:flex;gap:7px;overflow:auto;scrollbar-width:none;
+    padding:12px 1px 8px;
+}
+.categories::-webkit-scrollbar{display:none}
+.cat{
+    flex:0 0 auto;padding:8px 14px;border-radius:999px;
+    border:1px solid transparent;color:var(--muted);
+    font-size:.72rem;font-weight:700;cursor:pointer;
+    transition:.28s var(--ease);
+}
+.cat:hover{color:#fff;border-color:var(--line)}
+.cat.active{
+    color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));
+    border-color:var(--gold);
+    box-shadow:0 5px 22px rgba(245,197,24,.17);
+}
 
-        .gold-text {
-            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmerGold 4s ease-in-out infinite;
-        }
+.hero{
+    position:relative;overflow:hidden;
+    min-height:260px;margin:10px 0 15px;
+    border:1px solid var(--line-gold);
+    border-radius:24px;
+    background:
+      radial-gradient(circle at 78% 25%,rgba(245,197,24,.22),transparent 25%),
+      radial-gradient(circle at 90% 100%,rgba(120,72,0,.2),transparent 42%),
+      linear-gradient(135deg,#16130b,#0b0b0b 58%,#090909);
+    box-shadow:var(--shadow);
+    isolation:isolate;
+}
+.hero:before{
+    content:"N+";
+    position:absolute;right:-25px;bottom:-55px;
+    font-size:220px;line-height:1;font-weight:900;
+    color:rgba(245,197,24,.035);
+    transform:rotate(-8deg);
+}
+.hero:after{
+    content:"";
+    position:absolute;inset:-1px;
+    background:linear-gradient(115deg,transparent 35%,rgba(255,240,160,.08) 50%,transparent 65%);
+    transform:translateX(-120%);
+    animation:heroShine 7s var(--ease) infinite;
+}
+@keyframes heroShine{55%,100%{transform:translateX(120%)}}
+.hero-content{position:relative;z-index:2;padding:25px 22px}
+.eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    color:var(--gold-2);font-size:.61rem;font-weight:900;letter-spacing:1.6px;
+    text-transform:uppercase;
+}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+.hero h1{max-width:330px;margin:10px 0 7px;font-size:2.05rem;line-height:1.04;letter-spacing:-1.6px}
+.hero p{max-width:300px;color:#aaa;font-size:.76rem;line-height:1.6}
+.hero-actions{display:flex;gap:9px;margin-top:18px}
+.primary,.secondary{
+    border-radius:12px;padding:10px 16px;font-size:.74rem;font-weight:900;
+    transition:.28s var(--ease);display:inline-flex;align-items:center;gap:7px;
+}
+.primary{color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));box-shadow:0 8px 26px rgba(245,197,24,.2)}
+.secondary{border:1px solid var(--line-gold);background:rgba(255,255,255,.035);color:#eee}
+.primary:hover,.secondary:hover{transform:translateY(-2px)}
 
-        @keyframes shimmerGold {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+.live{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;margin-bottom:20px;
+    border:1px solid var(--line);border-radius:14px;
+    background:rgba(255,255,255,.025);overflow:hidden;
+}
+.live-label{display:flex;align-items:center;gap:6px;flex:0 0 auto;color:#ff7781;font-size:.62rem;font-weight:900}
+.live-label span{width:6px;height:6px;border-radius:50%;background:#ff5260;box-shadow:0 0 12px #ff5260}
+.live-track{overflow:hidden;white-space:nowrap;color:#999;font-size:.67rem}
+.live-track b{color:var(--gold-2)}
 
-        .btn-gold {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: #000;
-            font-weight: 800;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 20px var(--gold-glow);
-        }
-        .btn-gold:hover {
-            transform: scale(1.04);
-            box-shadow: 0 8px 30px var(--gold-glow);
-        }
+.section{margin:0 0 23px}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px}
+.section-title{display:flex;align-items:center;gap:9px;font-size:.94rem;font-weight:900;letter-spacing:-.3px}
+.section-title:before{content:"";width:3px;height:16px;border-radius:5px;background:linear-gradient(var(--gold-2),var(--gold-dark));box-shadow:0 0 12px rgba(245,197,24,.35)}
+.section-sub{margin-top:4px;margin-left:12px;color:var(--muted-2);font-size:.6rem}
+.view{color:#888;font-size:.65rem;font-weight:700}
+.view:hover{color:var(--gold)}
 
-        .glass-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius);
-            transition: var(--transition);
-        }
-        .glass-card:hover {
-            border-color: var(--gold);
-            box-shadow: 0 0 30px var(--gold-glow);
-            transform: translateY(-2px);
-        }
+.recommendations{
+    display:grid;grid-auto-flow:column;grid-auto-columns:112px;
+    gap:10px;overflow-x:auto;scrollbar-width:none;padding:2px 1px 5px;
+}
+.recommendations::-webkit-scrollbar{display:none}
+.rec{
+    position:relative;aspect-ratio:1;border-radius:17px;overflow:hidden;
+    border:1px solid var(--line);background:#0b0b0b;
+    transition:.3s var(--ease);
+}
+.rec:after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(0,0,0,.5),transparent 45%);
+    pointer-events:none;
+}
+.rec:hover{transform:translateY(-4px);border-color:var(--line-gold);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.rec img{width:100%;height:100%;display:block;object-fit:cover}
+.rec .rec-name{position:absolute;z-index:2;left:9px;bottom:8px;font-size:.62rem;font-weight:900;text-shadow:0 2px 7px #000}
 
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 18px;
-            background: var(--gold);
-            border-radius: 4px;
-        }
+.game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.game{
+    position:relative;min-width:0;aspect-ratio:1.08;
+    overflow:hidden;border-radius:17px;background:#0b0b0b;
+    border:1px solid var(--line);
+    transition:.32s var(--ease);
+}
+.game:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(0,0,0,.72),transparent 55%)}
+.game img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s var(--ease)}
+.game:hover{transform:translateY(-3px);border-color:var(--line-gold);box-shadow:0 14px 32px rgba(0,0,0,.48)}
+.game:hover img{transform:scale(1.045)}
+.game-info{position:absolute;z-index:2;left:11px;right:11px;bottom:10px}
+.game-name{font-size:.72rem;font-weight:900}
+.game-meta{margin-top:3px;color:#aaa;font-size:.56rem}
+.badge{
+    position:absolute;z-index:3;top:9px;left:9px;
+    padding:4px 7px;border-radius:7px;
+    font-size:.5rem;font-weight:900;letter-spacing:.5px;
+    color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));
+}
+.badge.new{background:linear-gradient(135deg,#bff8e5,#23d39a)}
+.badge.hot{color:#fff;background:linear-gradient(135deg,#ff7b83,#c92536)}
 
-        .view-all {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        .view-all:hover {
-            color: var(--gold);
-        }
+.champions{
+    border:1px solid var(--line);border-radius:19px;overflow:hidden;
+    background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+    box-shadow:var(--shadow);
+}
+.champion{
+    display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;
+    padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.045);
+}
+.champion:last-child{border-bottom:0}
+.rank{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.66rem;font-weight:900;background:rgba(255,255,255,.06);color:#999}
+.rank.top{color:#080808;background:linear-gradient(145deg,#fff0a0,var(--gold))}
+.rank.second{color:#111;background:linear-gradient(145deg,#eee,#888)}
+.rank.third{color:#fff;background:linear-gradient(145deg,#d99555,#74421f)}
+.player{font-size:.68rem;font-weight:800}.player small{display:block;margin-top:2px;color:#666;font-size:.5rem;font-weight:500}
+.amount{font-size:.68rem;font-weight:900;color:var(--gold-2)}
 
-        /* ============================================================
-           HEADER
-           ============================================================ */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border-card);
-            position: sticky;
-            top: 0;
-            background: rgba(10, 8, 8, 0.92);
-            backdrop-filter: blur(16px);
-            z-index: 100;
-        }
-        .logo {
-            font-size: 1.6rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-            text-decoration: none;
-        }
-        .logo span {
-            color: var(--gold);
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .balance-pill {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--green);
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
-        .age-badge {
-            background: rgba(230, 57, 70, 0.15);
-            border: 1px solid rgba(230, 57, 70, 0.3);
-            color: var(--red);
-            padding: 4px 10px;
-            border-radius: 100px;
-            font-size: 0.7rem;
-            font-weight: 800;
-        }
+.footer{padding:8px 0 18px;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:15px}
+.footer-links a{color:#777;font-size:.61rem}.footer-links a:hover{color:var(--gold)}
+.disclaimer{padding-top:14px;border-top:1px solid rgba(255,255,255,.06);color:#505050;font-size:.53rem;line-height:1.65}
+.disclaimer strong{color:#8a6e12}
 
-        /* ============================================================
-           CATEGORY TABS
-           ============================================================ */
-        .category-tabs {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding: 14px 0 10px;
-            scrollbar-width: none;
-        }
-        .category-tabs::-webkit-scrollbar {
-            display: none;
-        }
-        .category-tab {
-            flex: 0 0 auto;
-            padding: 6px 16px;
-            border-radius: 100px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: var(--transition);
-            white-space: nowrap;
-        }
-        .category-tab.active {
-            background: var(--gold);
-            color: #000;
-            border-color: var(--gold);
-            box-shadow: 0 0 20px var(--gold-glow);
-        }
-        .category-tab:hover:not(.active) {
-            color: #fff;
-            border-color: var(--border-card);
-        }
+.bottom-nav{
+    position:fixed;z-index:200;bottom:0;left:50%;transform:translateX(-50%);
+    width:min(100%,560px);padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:repeat(5,1fr);gap:3px;
+    background:rgba(8,8,8,.84);backdrop-filter:blur(24px) saturate(140%);
+    border:1px solid rgba(255,255,255,.08);border-bottom:0;
+    border-radius:20px 20px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.45);
+}
+.nav-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;color:#666;font-size:.52rem;font-weight:700;transition:.25s var(--ease)}
+.nav-icon{font-size:1rem;line-height:1}
+.nav-item.active{color:var(--gold)}
+.nav-item.active:before{content:"";position:absolute;top:-9px;width:25px;height:2px;border-radius:2px;background:var(--gold);box-shadow:0 0 14px rgba(245,197,24,.7)}
+.nav-badge{position:absolute;top:1px;margin-left:25px;padding:2px 5px;border-radius:999px;background:var(--red);color:#fff;font-size:.42rem;font-weight:900}
 
-        /* ============================================================
-           PROMO BANNER
-           ============================================================ */
-        .promo-banner {
-            background: linear-gradient(135deg, #1a1040, #2d1b69, #4a1a8a);
-            border-radius: var(--radius);
-            padding: 24px 20px;
-            margin: 16px 0;
-            border: 1px solid var(--border-card);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 8px 30px rgba(74, 26, 138, 0.3);
-        }
-        .promo-banner::after {
-            content: '🎰';
-            position: absolute;
-            right: -10px;
-            bottom: -10px;
-            font-size: 80px;
-            opacity: 0.15;
-            transform: rotate(-15deg);
-        }
-        .promo-banner h2 {
-            font-size: 1.4rem;
-            font-weight: 900;
-            margin-bottom: 4px;
-        }
-        .promo-banner p {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 14px;
-        }
-        .promo-banner .btn-banner {
-            display: inline-block;
-            padding: 10px 24px;
-            background: var(--gold);
-            color: #000;
-            font-weight: 800;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            box-shadow: 0 4px 20px var(--gold-glow);
-            transition: var(--transition);
-        }
-        .promo-banner .btn-banner:hover {
-            transform: scale(1.04);
-        }
+@media(min-width:700px){
+    .header{margin:0;padding-left:0;padding-right:0}
+    .game-grid{grid-template-columns:repeat(4,1fr)}
+    .hero{min-height:310px}.hero-content{padding:40px}
+    .hero h1{font-size:2.7rem}
+    .recommendations{grid-auto-columns:145px}
+    .game{aspect-ratio:1.15}
+}
+@media(prefers-reduced-motion:reduce){
+    *,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}
+}
+</style>
+<style>
 
-        /* ============================================================
-           LIVE TICKER
-           ============================================================ */
-        .live-ticker {
-            background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: 12px;
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        .ticker-tag {
-            background: rgba(230, 57, 70, 0.2);
-            color: var(--red);
-            font-weight: 800;
-            font-size: 0.7rem;
-            padding: 3px 10px;
-            border-radius: 6px;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .ticker-text {
-            white-space: nowrap;
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            animation: tickerScroll 18s linear infinite;
-        }
-        .ticker-text span {
-            color: var(--gold);
-            font-weight: 700;
-        }
-        @keyframes tickerScroll {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+/* ========================= N+ PLAY V3 — LUXURY UI LAYER ========================= */
+:root{
+    --bg:#030303;
+    --bg-2:#070707;
+    --gold:#f5c518;
+    --gold-hi:#fff1a3;
+    --gold-deep:#8c6200;
+    --glass:rgba(255,255,255,.045);
+    --glass-hi:rgba(255,255,255,.075);
+    --stroke:rgba(255,255,255,.075);
+    --gold-stroke:rgba(245,197,24,.24);
+    --lux-shadow:0 24px 90px rgba(0,0,0,.72);
+    --lux-ease:cubic-bezier(.16,1,.3,1);
+}
+body{
+    background:
+      radial-gradient(900px 430px at 50% -100px,rgba(245,197,24,.12),transparent 67%),
+      radial-gradient(700px 520px at 110% 30%,rgba(245,197,24,.055),transparent 68%),
+      radial-gradient(620px 500px at -10% 70%,rgba(255,188,25,.035),transparent 70%),
+      #030303;
+}
+body:after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+    background:
+      linear-gradient(90deg,transparent 0 49.8%,rgba(255,255,255,.012) 50%,transparent 50.2%),
+      radial-gradient(circle at 50% 0,rgba(255,255,255,.035),transparent 36%);
+}
+.page{max-width:590px}
+@media(min-width:900px){.page{max-width:1220px}}
 
-        /* ============================================================
-           GAME GRID
-           ============================================================ */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        .game-card {
-            padding: 16px 14px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 110px;
-            text-decoration: none;
-            color: var(--text-primary);
-            position: relative;
-            cursor: pointer;
-        }
-        .game-card .icon {
-            font-size: 2rem;
-            margin-bottom: 4px;
-        }
-        .game-card .name {
-            font-size: 0.9rem;
-            font-weight: 800;
-        }
-        .game-card .rtp {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-        }
-        .game-card .badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 0.6rem;
-            font-weight: 800;
-            padding: 2px 10px;
-            border-radius: 100px;
-            background: rgba(245, 197, 24, 0.15);
-            color: var(--gold);
-            border: 1px solid rgba(245, 197, 24, 0.2);
-        }
-        .game-card .badge.hot {
-            background: rgba(230, 57, 70, 0.15);
-            color: var(--red);
-            border-color: rgba(230, 57, 70, 0.2);
-        }
-        .game-card .badge.new {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--green);
-            border-color: rgba(16, 185, 129, 0.2);
-        }
-        .game-card.span-2 {
-            grid-column: span 2;
-        }
+.header{
+    background:linear-gradient(180deg,rgba(4,4,4,.94),rgba(4,4,4,.72));
+    border-bottom:1px solid rgba(245,197,24,.10);
+    box-shadow:0 12px 35px rgba(0,0,0,.25);
+}
+.brand-mark{
+    position:relative;
+    width:38px;height:38px;border-radius:12px;
+    background:linear-gradient(145deg,#fff9d4 0%,#f5c518 45%,#a66f00 100%);
+    box-shadow:0 0 0 1px rgba(255,240,150,.18),0 8px 32px rgba(245,197,24,.22);
+}
+.brand-mark:after{
+    content:"";position:absolute;inset:-5px;border-radius:15px;
+    border:1px solid rgba(245,197,24,.10);
+}
+.brand-name{
+    font-size:1.28rem;letter-spacing:1.2px;
+    text-shadow:0 0 25px rgba(245,197,24,.12);
+}
+.wallet{
+    border-color:rgba(35,211,154,.24);
+    box-shadow:inset 0 0 20px rgba(35,211,154,.025);
+}
 
-        /* ============================================================
-           RECOMMENDATION SCROLL
-           ============================================================ */
-        .rec-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 4px 0 14px;
-            scrollbar-width: none;
-        }
-        .rec-scroll::-webkit-scrollbar {
-            display: none;
-        }
-        .rec-card {
-            flex: 0 0 110px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: 14px;
-            padding: 14px 10px;
-            text-align: center;
-            text-decoration: none;
-            color: var(--text-primary);
-            transition: var(--transition);
-        }
-        .rec-card:hover {
-            border-color: var(--gold);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px var(--gold-glow);
-        }
-        .rec-card .icon {
-            font-size: 2rem;
-            margin-bottom: 4px;
-        }
-        .rec-card .name {
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-        .rec-card .rtp {
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-        }
+.categories{
+    padding-top:14px;padding-bottom:10px;
+    mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+}
+.cat{padding:9px 15px}
+.cat.active{
+    box-shadow:0 0 0 1px rgba(255,239,150,.18),0 7px 28px rgba(245,197,24,.19),inset 0 1px rgba(255,255,255,.55);
+}
 
-        /* ============================================================
-           LEADERBOARD
-           ============================================================ */
-        .leaderboard {
-            background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius);
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .lb-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
-            border: 1px solid transparent;
-            transition: var(--transition);
-        }
-        .lb-item:hover {
-            border-color: var(--border-card);
-        }
-        .lb-item .rank {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 0.75rem;
-            flex-shrink: 0;
-        }
-        .rank-1 { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; }
-        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #708090); color: #000; }
-        .rank-3 { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
-        .rank-other { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
-        .lb-item .name {
-            flex: 1;
-            padding-left: 10px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .lb-item .amount {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--gold);
-        }
+.hero{
+    min-height:300px;
+    border-color:rgba(245,197,24,.25);
+    border-radius:28px;
+    background:
+      radial-gradient(500px 270px at 78% 20%,rgba(255,225,103,.19),transparent 55%),
+      radial-gradient(340px 340px at 95% 100%,rgba(156,93,0,.22),transparent 62%),
+      linear-gradient(125deg,#18130a 0%,#0b0b0a 45%,#050505 100%);
+    box-shadow:0 28px 100px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.10);
+}
+.hero:before{
+    font-size:260px;
+    color:rgba(245,197,24,.045);
+    text-shadow:0 0 100px rgba(245,197,24,.08);
+}
+.hero:after{
+    background:linear-gradient(110deg,transparent 30%,rgba(255,243,170,.13) 48%,rgba(255,255,255,.035) 51%,transparent 70%);
+    animation-duration:8s;
+}
+.hero-content{
+    padding:32px 25px;
+}
+.hero h1{
+    font-size:2.35rem;
+    text-shadow:0 12px 45px rgba(245,197,24,.10);
+}
+.hero p{color:#b5b5b5}
+.primary{
+    box-shadow:0 10px 35px rgba(245,197,24,.22),inset 0 1px rgba(255,255,255,.6);
+}
+.secondary{
+    box-shadow:inset 0 1px rgba(255,255,255,.06);
+}
 
-        /* ============================================================
-           FOOTER
-           ============================================================ */
-        .footer {
-            margin-top: 24px;
-            padding: 20px 0 12px;
-            border-top: 1px solid var(--border-card);
-        }
-        .footer-links {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px 14px;
-            margin-bottom: 16px;
-        }
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 0;
-            transition: var(--transition);
-        }
-        .footer-links a:hover {
-            color: var(--gold);
-        }
-        .footer-links .admin-link {
-            grid-column: span 2;
-            justify-content: center;
-            color: var(--gold);
-            border: 1px solid rgba(245, 197, 24, 0.2);
-            border-radius: 10px;
-            padding: 8px;
-            font-weight: 700;
-            margin-top: 4px;
-        }
-        .footer-links .admin-link:hover {
-            background: rgba(245, 197, 24, 0.08);
-        }
-        .footer-disclaimer {
-            text-align: center;
-            font-size: 0.6rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-            border-top: 1px solid var(--border-card);
-            padding-top: 12px;
-        }
-        .footer-disclaimer .gold {
-            color: var(--gold);
-        }
+.live{
+    border-color:rgba(245,197,24,.10);
+    background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.015));
+    box-shadow:inset 0 1px rgba(255,255,255,.05);
+}
 
-        /* ============================================================
-           BOTTOM NAV
-           ============================================================ */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            background: rgba(10, 8, 8, 0.96);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-card);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0 10px;
-            z-index: 1000;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.6rem;
-            font-weight: 600;
-            transition: var(--transition);
-            position: relative;
-        }
-        .nav-item .nav-icon {
-            font-size: 1.3rem;
-        }
-        .nav-item.active {
-            color: var(--gold);
-        }
-        .nav-item .badge-nav {
-            position: absolute;
-            top: -4px;
-            right: -12px;
-            background: var(--red);
-            color: #fff;
-            font-size: 0.5rem;
-            font-weight: 800;
-            padding: 1px 6px;
-            border-radius: 100px;
-        }
+.section{margin-bottom:30px}
+.section-title{
+    font-size:1rem;
+    letter-spacing:-.4px;
+}
+.section-title:before{
+    width:4px;height:19px;
+    box-shadow:0 0 18px rgba(245,197,24,.45);
+}
+.section-sub{font-size:.61rem;color:#686868}
 
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
-        @media (min-width: 768px) {
-            .container { max-width: 700px; }
-            .game-grid { grid-template-columns: repeat(3, 1fr); }
-            .game-card.span-2 { grid-column: span 2; }
-            .bottom-nav { max-width: 700px; }
-        }
-        @media (min-width: 1024px) {
-            .container { max-width: 1000px; }
-            .game-grid { grid-template-columns: repeat(4, 1fr); }
-            .game-card.span-2 { grid-column: span 2; }
-            .bottom-nav { max-width: 1000px; }
-        }
-    </style>
+.recommendations{
+    grid-auto-columns:120px;
+    gap:12px;
+}
+.rec{
+    border-radius:19px;
+    border-color:rgba(255,255,255,.095);
+    box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.08);
+}
+.rec:before{
+    content:"";position:absolute;z-index:2;inset:0;
+    background:linear-gradient(125deg,rgba(255,255,255,.13),transparent 23%,transparent 72%,rgba(245,197,24,.05));
+    pointer-events:none;
+}
+.rec:hover{
+    border-color:rgba(245,197,24,.32);
+    box-shadow:0 20px 45px rgba(0,0,0,.55),0 0 25px rgba(245,197,24,.07);
+}
+.rec img{filter:saturate(1.04) contrast(1.03)}
+
+.game{
+    border-radius:19px;
+    border-color:rgba(255,255,255,.085);
+    box-shadow:0 15px 35px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.075);
+}
+.game:after{
+    content:"";position:absolute;inset:0;z-index:2;
+    pointer-events:none;
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
+}
+.game:hover{
+    border-color:rgba(245,197,24,.30);
+    box-shadow:0 22px 50px rgba(0,0,0,.60),0 0 30px rgba(245,197,24,.06);
+}
+.game-info{bottom:12px}
+.game-name{text-shadow:0 2px 12px #000;font-size:.75rem}
+.badge{
+    box-shadow:0 4px 16px rgba(0,0,0,.28);
+}
+
+.champions{
+    border-radius:21px;
+    border-color:rgba(245,197,24,.12);
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+    box-shadow:0 25px 65px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.07);
+}
+.champion{padding:13px 15px}
+.amount{text-shadow:0 0 18px rgba(245,197,24,.14)}
+
+.bottom-nav{
+    border-color:rgba(245,197,24,.13);
+    background:linear-gradient(180deg,rgba(12,12,12,.84),rgba(4,4,4,.94));
+    box-shadow:0 -20px 55px rgba(0,0,0,.65),inset 0 1px rgba(255,255,255,.055);
+}
+.nav-item.active{color:var(--gold-hi)}
+.nav-item.active:before{
+    width:32px;height:3px;
+    box-shadow:0 0 18px rgba(245,197,24,.75);
+}
+
+.footer{padding-top:4px}
+.footer-links a{transition:.25s var(--lux-ease)}
+.footer-links a:hover{transform:translateY(-1px)}
+
+@media(min-width:700px){
+    .hero{min-height:360px}
+    .hero-content{padding:48px}
+    .hero h1{font-size:3.35rem;max-width:500px}
+    .hero p{font-size:.82rem;max-width:420px}
+    .recommendations{grid-auto-columns:165px}
+    .game{aspect-ratio:1.22}
+}
+
+</style>
 </head>
+
 <body>
+<main class="page">
 
-    <!-- ============================================================
-    MAIN CONTAINER
-    ============================================================ -->
-    <div class="container">
+<header class="header">
+    <a href="index.html" class="brand" aria-label="N+ PLAY home">
+        <span class="brand-mark">N+</span>
+        <span class="brand-name gold-text">PLAY</span>
+    </a>
+    <div class="header-right">
+        <div class="wallet"><span class="wallet-dot"></span><span class="wallet-value">₹1,000</span></div>
+        <span class="age">18+</span>
+    </div>
+</header>
 
-        <!-- ======== HEADER ======== -->
-        <header class="header">
-            <a href="index.html" class="logo gold-text">N+ PLAY</a>
-            <div class="header-right">
-                <span class="balance-pill">💰 ₹1,000</span>
-                <span class="age-badge">18+</span>
-            </div>
-        </header>
+<nav class="categories" aria-label="Game categories">
+    <a class="cat active" href="#popular">Popular</a>
+    <a class="cat" href="#lottery">Lottery</a>
+    <a class="cat" href="#casino">Casino</a>
+    <a class="cat" href="#slots">Slots</a>
+    <a class="cat" href="#sports">Sports</a>
+    <a class="cat" href="#rummy">Rummy</a>
+    <a class="cat" href="#fishing">Fishing</a>
+    <a class="cat" href="#original">Original</a>
+</nav>
 
-        <!-- ======== CATEGORY TABS ======== -->
-        <div class="category-tabs">
-            <span class="category-tab active">Popular</span>
-            <span class="category-tab">Lottery</span>
-            <span class="category-tab">Casino</span>
-            <span class="category-tab">Slots</span>
-            <span class="category-tab">Sports</span>
-            <span class="category-tab">Rummy</span>
-            <span class="category-tab">Fishing</span>
-            <span class="category-tab">Original</span>
+<section class="hero" id="popular">
+    <div class="hero-content">
+        <div class="eyebrow"><i></i> N+ PLAY ORIGINAL</div>
+        <h1 class="gold-text">Enter the next level.</h1>
+        <p>A cinematic gaming lobby built around speed, clarity and a premium digital experience.</p>
+        <div class="hero-actions">
+            <a href="wingo.html" class="primary">Explore WINGO <span>→</span></a>
+            <a href="#recommendations" class="secondary">Explore Games</a>
         </div>
+    </div>
+</section>
 
-        <!-- ======== PROMO BANNER ======== -->
-        <div class="promo-banner">
-            <h2>Win Go 30s</h2>
-            <p>Predict Color & Multiply Your Wealth — Instant 9X</p>
-            <a href="wingo.html" class="btn-banner">Play Now ➔</a>
-        </div>
-
-        <!-- ======== LIVE TICKER ======== -->
-        <div class="live-ticker">
-            <span class="ticker-tag">🔥 LIVE</span>
-            <div class="ticker-text">
-                User ***8891 won <span>₹340</span> in Win Go &bull;
-                User ***2203 won <span>₹1,200</span> in Aviator &bull;
-                User ***7712 won <span>₹850</span> in K3 &bull;
-                User ***4401 won <span>₹450</span> in 5D
-            </div>
-        </div>
-
-        <!-- ======== PLATFORM RECOMMENDATION ======== -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0 8px;">
-            <h3 class="section-title" style="margin-bottom:0;">⭐ Platform Recommendation</h3>
-            <a href="#" class="view-all">All 6 →</a>
-        </div>
-        <div class="rec-scroll">
-            <a href="aviator.html" class="rec-card" style="padding: 0; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; background: #0a0808; border-radius: 14px; overflow: hidden; flex-shrink: 0;">
-    <img src="aviator.png" alt="Aviator" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-</a>
-            <a href="wingo.html" class="rec-card" style="padding: 0; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; background: #0a0808; border-radius: 14px; overflow: hidden; flex-shrink: 0;">
-    <img src="wingo.png" alt="WINGO" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-</a>
-            <a href="vortex.html" class="rec-card" style="padding: 0; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; background: #0a0808; border-radius: 14px; overflow: hidden; flex-shrink: 0;">
-    <img src="vortex.png" alt="Vortex" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-</a>
-            <a href="chicken-road-2.html" class="rec-card" style="padding: 0; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; background: #0a0808; border-radius: 14px; overflow: hidden; flex-shrink: 0;">
-    <img src="chicken-road-2.png" alt="Chicken Road 2" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-</a>
-            <a href="crazy-time.html" class="rec-card" style="padding: 0; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; background: #0a0808; border-radius: 14px; overflow: hidden; flex-shrink: 0;">
-    <img src="crazy-time.png" alt="Crazy Time" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-</a>
-            <a href="trx-wingo.html" class="rec-card" style="padding: 0; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; background: #0a0808; border-radius: 14px; overflow: hidden; flex-shrink: 0;">
-    <img src="trx-win-go.png" alt="Trx Win Go" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-</a>
-        </div>
-
-       <!-- ======== LOTTERY GAMES ======== -->
-<div style="display:flex; justify-content:space-between; align-items:center; margin-top: 8px;">
-    <h3 class="section-title" style="margin-bottom:0;">🎲 Lottery Games</h3>
-    <a href="#" class="view-all">All 5 →</a>
-</div>
-<div class="game-grid">
-    <!-- 1. WINGO (Full Box) -->
-    <a href="wingo.html" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="wingo.png" alt="Win Go" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 2. MotoRace (Full Box) -->
-    <a href="motorace.html" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="motorace.png" alt="MotoRace" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 3. K3 (Full Box) -->
-    <a href="k3.html" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="k3.png" alt="K3" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 4. 5D (Full Box) -->
-    <a href="5d.html" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="5d.png" alt="5D" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 5. Trx Win Go (Full Box - 2 Columns Wide) -->
-    <a href="trx-wingo.html" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="trx-win-go.png" alt="Trx Win Go" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-</div>
-        <!-- ======== CASINO GAMES ======== -->
-<div style="display:flex; justify-content:space-between; align-items:center; margin-top: 8px;">
-    <h3 class="section-title" style="margin-bottom:0;">🎰 Casino Games</h3>
-    <a href="#" class="view-all">All 4 →</a>
-</div>
-<div class="game-grid">
-    <!-- 1. Crazy Time (Full Box) -->
-    <a href="crazy-time.html" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="crazy-time.png" alt="Crazy Time" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 2. Auto Roulette (Full Box) -->
-    <a href="#" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="auto-roulette.png" alt="Auto Roulette" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 3. Am. Roulette (Full Box) -->
-    <a href="#" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="american-roulette.png" alt="Am. Roulette" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 4. Roulette (Full Box) -->
-    <a href="#" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="roulette.png" alt="Roulette" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
+<div class="live" aria-label="Demo activity">
+    <div class="live-label"><span></span> LIVE</div>
+    <div class="live-track">
+        <span>Demo activity • </span>
+        <b>Aviator</b> <span>• </span><b>WINGO</b> <span>• </span><b>K3</b> <span>• </span><b>5D</b>
+    </div>
 </div>
 
-        <!-- ======== RUMMY GAMES ======== -->
-<div style="display:flex; justify-content:space-between; align-items:center; margin-top: 8px;">
-    <h3 class="section-title" style="margin-bottom:0;">🃏 Rummy Cards</h3>
-    <a href="#" class="view-all">All 3 →</a>
-</div>
-<div class="game-grid">
-    <!-- 1. 365 Rummy (Full Box) -->
-    <a href="#" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="365-rummy.png" alt="365 Rummy" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 2. V8 Poker (Full Box) -->
-    <a href="#" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="v8-poker.png" alt="V8 Poker" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-    
-    <!-- 3. Koolbet (Full Box - 2 Columns Wide) -->
-    <a href="#" class="game-card glass-card" style="padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 110px;">
-        <img src="koolbet.png" alt="Koolbet" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-    </a>
-</div>
-
-        <!-- ======== TODAY'S EARNING CHART ======== -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 16px;">
-            <h3 class="section-title" style="margin-bottom:0;">🏆 Today's Earnings Chart</h3>
+<section class="section" id="recommendations">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Platform Recommendation</h2>
+            <p class="section-sub">Curated experiences for you</p>
         </div>
-        <div class="leaderboard">
-            <div class="lb-item"><div class="rank rank-1">1</div><div class="name">Mem***JVN</div><div class="amount">₹14,850</div></div>
-            <div class="lb-item"><div class="rank rank-2">2</div><div class="name">Su***aj</div><div class="amount">₹11,200</div></div>
-            <div class="lb-item"><div class="rank rank-3">3</div><div class="name">Kap***oor</div><div class="amount">₹9,450</div></div>
-            <div class="lb-item"><div class="rank rank-other">4</div><div class="name">Mem***H3M</div><div class="amount">₹7,800</div></div>
-            <div class="lb-item"><div class="rank rank-other">5</div><div class="name">Me***er</div><div class="amount">₹6,150</div></div>
-            <div class="lb-item"><div class="rank rank-other">6</div><div class="name">HAR***ARA</div><div class="amount">₹5,400</div></div>
-            <div class="lb-item"><div class="rank rank-other">7</div><div class="name">Mem***yV9</div><div class="amount">₹4,900</div></div>
-            <div class="lb-item"><div class="rank rank-other">8</div><div class="name">Mem***IAE</div><div class="amount">₹3,850</div></div>
-            <div class="lb-item"><div class="rank rank-other">9</div><div class="name">Rs***gh</div><div class="amount">₹3,100</div></div>
-            <div class="lb-item"><div class="rank rank-other">10</div><div class="name">Mem***XZ2</div><div class="amount">₹2,750</div></div>
-        </div>
-
-        <!-- ======== FOOTER ======== -->
-        <footer class="footer">
-            <div class="footer-links">
-                <a href="#"><i class="fas fa-globe"></i> Language</a>
-                <a href="#"><i class="fas fa-bullhorn"></i> Announcements</a>
-                <a href="#"><i class="fas fa-headset"></i> 24/7 Support</a>
-                <a href="#"><i class="fas fa-book"></i> Beginner Guide</a>
-                <a href="#"><i class="fas fa-info-circle"></i> About Us</a>
-                <a href="#"><i class="fas fa-download"></i> Download App</a>
-                <a href="admin.html" target="_blank" class="admin-link">
-                    <i class="fas fa-lock"></i> 🔐 Admin Panel
-                </a>
-            </div>
-            <div class="footer-disclaimer">
-                <p>Gambling can be addictive, please play rationally.</p>
-                <p>Welcome to <span class="gold">N+ PLAY</span> — only accepts customers above 18 years.</p>
-                <p style="margin-top:6px; color:#444;">© 2026 N+ PLAY. All rights reserved.</p>
-            </div>
-        </footer>
-
+        <a href="#lottery" class="view">VIEW ALL →</a>
     </div>
 
-    <!-- ============================================================
-    BOTTOM NAVIGATION (All internal)
-    ============================================================ -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <span class="nav-icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="activity.html" class="nav-item">
-            <span class="nav-icon">🔥</span>
-            <span>Activity</span>
-        </a>
-        <a href="bonus.html" class="nav-item">
-            <span class="nav-icon">🎁</span>
-            <span>Get ₹500</span>
-            <span class="badge-nav">NEW</span>
-        </a>
-        <a href="promotion.html" class="nav-item">
-            <span class="nav-icon">📢</span>
-            <span>Promotion</span>
-        </a>
-        <a href="account.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            <span>Account</span>
-        </a>
-    </nav>
+    <div class="recommendations">
+        <a class="rec" href="aviator.html"><img src="aviator.png" alt="Aviator" loading="eager"><span class="rec-name">AVIATOR</span></a>
+        <a class="rec" href="wingo.html"><img src="wingo.png" alt="WINGO" loading="eager"><span class="rec-name">WINGO</span></a>
+        <a class="rec" href="vortex.html"><img src="vortex.png" alt="Vortex" loading="lazy"><span class="rec-name">VORTEX</span></a>
+        <a class="rec" href="chicken-road-2.html"><img src="chicken-road-2.png" alt="Chicken Road 2" loading="lazy"><span class="rec-name">CHICKEN ROAD 2</span></a>
+        <a class="rec" href="crazy-time.html"><img src="crazy-time.png" alt="Crazy Time" loading="lazy"><span class="rec-name">CRAZY TIME</span></a>
+        <a class="rec" href="trx-wingo.html"><img src="trx-win-go.png" alt="TRX Win Go" loading="lazy"><span class="rec-name">TRX WIN GO</span></a>
+    </div>
+</section>
 
+<section class="section" id="lottery">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Lottery Games</h2>
+            <p class="section-sub">Fast, focused experiences</p>
+        </div>
+        <span class="view">5 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="wingo.html"><span class="badge hot">HOT</span><img src="wingo.png" alt="Win Go" loading="lazy"><div class="game-info"><div class="game-name">Win Go</div><div class="game-meta">30s • Demo</div></div></a>
+        <a class="game" href="motorace.html"><span class="badge">FEATURED</span><img src="motorace.png" alt="MotoRace" loading="lazy"><div class="game-info"><div class="game-name">MotoRace</div><div class="game-meta">Quick Play • Demo</div></div></a>
+        <a class="game" href="k3.html"><img src="k3.png" alt="K3" loading="lazy"><div class="game-info"><div class="game-name">K3</div><div class="game-meta">Dice • Demo</div></div></a>
+        <a class="game" href="5d.html"><span class="badge new">NEW</span><img src="5d.png" alt="5D" loading="lazy"><div class="game-info"><div class="game-name">5D</div><div class="game-meta">Lottery • Demo</div></div></a>
+        <a class="game" href="trx-wingo.html"><img src="trx-win-go.png" alt="TRX Win Go" loading="lazy"><div class="game-info"><div class="game-name">TRX Win Go</div><div class="game-meta">Fast Play • Demo</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="casino">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Casino Games</h2>
+            <p class="section-sub">Classic table experiences</p>
+        </div>
+        <span class="view">4 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="crazy-time.html"><span class="badge hot">HOT</span><img src="crazy-time.png" alt="Crazy Time" loading="lazy"><div class="game-info"><div class="game-name">Crazy Time</div><div class="game-meta">Demo Experience</div></div></a>
+        <a class="game" href="#"><img src="auto-roulette.png" alt="Auto Roulette" loading="lazy"><div class="game-info"><div class="game-name">Auto Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="american-roulette.png" alt="American Roulette" loading="lazy"><div class="game-info"><div class="game-name">Am. Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="roulette.png" alt="Roulette" loading="lazy"><div class="game-info"><div class="game-name">Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="rummy">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Rummy Cards</h2>
+            <p class="section-sub">Cards, tables & strategy</p>
+        </div>
+        <span class="view">3 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="#"><img src="365-rummy.png" alt="365 Rummy" loading="lazy"><div class="game-info"><div class="game-name">365 Rummy</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="v8-poker.png" alt="V8 Poker" loading="lazy"><div class="game-info"><div class="game-name">V8 Poker</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="koolbet.png" alt="Koolbet" loading="lazy"><div class="game-info"><div class="game-name">Koolbet</div><div class="game-meta">Coming Soon</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="slots">
+    <div class="section-head"><div><h2 class="section-title">Slots</h2><p class="section-sub">A dedicated space for future releases</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Premium slot experiences coming soon.</div>
+</section>
+
+<section class="section" id="sports">
+    <div class="section-head"><div><h2 class="section-title">Sports</h2><p class="section-sub">Your future sports hub</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Sports experiences coming soon.</div>
+</section>
+
+<section class="section" id="fishing">
+    <div class="section-head"><div><h2 class="section-title">Fishing</h2><p class="section-sub">Your future fishing hub</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Fishing experiences coming soon.</div>
+</section>
+
+<section class="section" id="original">
+    <div class="section-head"><div><h2 class="section-title">N+ Originals</h2><p class="section-sub">Experiences designed for N+ PLAY</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Original experiences coming soon.</div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Today's Champions</h2>
+            <p class="section-sub">Demo leaderboard</p>
+        </div>
+    </div>
+    <div class="champions">
+        <div class="champion"><div class="rank top">1</div><div class="player">Mem***JVN<small>Top demo score</small></div><div class="amount">₹14,850</div></div>
+        <div class="champion"><div class="rank second">2</div><div class="player">Su***aj<small>Demo player</small></div><div class="amount">₹11,200</div></div>
+        <div class="champion"><div class="rank third">3</div><div class="player">Kap***oor<small>Demo player</small></div><div class="amount">₹9,450</div></div>
+        <div class="champion"><div class="rank">4</div><div class="player">Mem***H3M<small>Demo player</small></div><div class="amount">₹7,800</div></div>
+        <div class="champion"><div class="rank">5</div><div class="player">Me***er<small>Demo player</small></div><div class="amount">₹6,150</div></div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="#">Language</a>
+        <a href="#">Support</a>
+        <a href="#">Beginner Guide</a>
+        <a href="#">About N+ PLAY</a>
+    </div>
+    <div class="disclaimer">
+        <p><strong>18+ | DEMO EXPERIENCE</strong></p>
+        <p>N+ PLAY is a premium gaming interface prototype. Play responsibly.</p>
+        <p>© 2026 N+ PLAY. All rights reserved.</p>
+    </div>
+</footer>
+</main>
+
+<nav class="bottom-nav" aria-label="Primary navigation">
+    <a href="index.html" class="nav-item active"><span class="nav-icon">⌂</span><span>Home</span></a>
+    <a href="activity.html" class="nav-item"><span class="nav-icon">◷</span><span>Activity</span></a>
+    <a href="bonus.html" class="nav-item"><span class="nav-icon">✦</span><span>Bonus</span><span class="nav-badge">NEW</span></a>
+    <a href="promotion.html" class="nav-item"><span class="nav-icon">◇</span><span>Promotion</span></a>
+    <a href="account.html" class="nav-item"><span class="nav-icon">◯</span><span>Account</span></a>
+</nav>
+
+<script>
+document.querySelectorAll('.cat').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+        document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
+        tab.classList.add('active');
+    });
+});
+</script>
 </body>
 </html>
