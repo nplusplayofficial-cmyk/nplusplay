@@ -469,6 +469,224 @@ body:after{
 }
 
 </style>
+<style>
+
+/* ====================== N+ PLAY V4 — SIGNATURE MOTION SYSTEM ====================== */
+.signature-hero{
+    min-height:390px;
+    isolation:isolate;
+    overflow:hidden;
+    transform:translateZ(0);
+}
+.signature-hero .hero-content{
+    position:relative;
+    z-index:5;
+    max-width:720px;
+}
+.hero-kicker{
+    margin-top:14px;
+    color:rgba(255,255,255,.43);
+    font-size:.56rem;
+    font-weight:800;
+    letter-spacing:3px;
+}
+.signature-hero h1{
+    margin:9px 0 12px;
+    font-size:clamp(3rem,13vw,5.6rem);
+    line-height:.84;
+    letter-spacing:-5px;
+    font-weight:900;
+}
+.hero-line{
+    display:block;
+}
+.signature-hero .hero-line:first-child{
+    color:#f3f3f0;
+    text-shadow:0 20px 60px rgba(255,255,255,.08);
+}
+.signature-hero .gold-text{
+    text-shadow:0 18px 65px rgba(245,197,24,.15);
+}
+.signature-hero p{
+    max-width:490px;
+    font-size:.78rem;
+    color:#a8a8a8;
+}
+.hero-grid{
+    position:absolute;
+    z-index:1;
+    inset:0;
+    opacity:.22;
+    background-image:
+      linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(circle at 72% 42%,black,transparent 67%);
+    transform:perspective(700px) rotateX(62deg) scale(1.6) translateY(85px);
+    transform-origin:center bottom;
+}
+.hero-glow{
+    position:absolute;
+    z-index:2;
+    width:390px;height:390px;
+    right:-80px;top:-100px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(245,197,24,.22),rgba(245,197,24,.055) 30%,transparent 68%);
+    filter:blur(5px);
+    animation:heroBreath 6s ease-in-out infinite;
+}
+@keyframes heroBreath{
+    0%,100%{transform:scale(.94);opacity:.72}
+    50%{transform:scale(1.08);opacity:1}
+}
+.hero-orbit{
+    position:absolute;
+    z-index:3;
+    border:1px solid rgba(245,197,24,.16);
+    border-radius:50%;
+    pointer-events:none;
+}
+.orbit-one{
+    width:430px;height:170px;
+    right:-120px;top:50px;
+    transform:rotate(-24deg);
+    box-shadow:0 0 50px rgba(245,197,24,.035);
+    animation:orbitFloat 9s ease-in-out infinite;
+}
+.orbit-two{
+    width:330px;height:120px;
+    right:-65px;top:120px;
+    transform:rotate(-24deg);
+    border-color:rgba(255,255,255,.07);
+    animation:orbitFloat 11s ease-in-out infinite reverse;
+}
+@keyframes orbitFloat{
+    0%,100%{translate:0 0}
+    50%{translate:-12px 9px}
+}
+.hero-metrics{
+    display:flex;
+    gap:22px;
+    margin-top:25px;
+}
+.hero-metrics div{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+.hero-metrics strong{
+    font-size:.86rem;
+    font-weight:900;
+    color:#f3f0df;
+}
+.hero-metrics span{
+    color:#5f5f5f;
+    font-size:.45rem;
+    font-weight:800;
+    letter-spacing:1.2px;
+}
+.hero-corner{
+    position:absolute;
+    z-index:6;
+    color:rgba(255,255,255,.27);
+    font-size:.43rem;
+    font-weight:800;
+    letter-spacing:1.5px;
+}
+.hero-corner-tl{top:17px;left:20px}
+.hero-corner-br{right:20px;bottom:18px}
+
+.primary,.secondary{
+    position:relative;
+    overflow:hidden;
+}
+.primary:before,.secondary:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.24) 48%,transparent 70%);
+    transform:translateX(-120%);
+    transition:transform .7s var(--lux-ease);
+}
+.primary:hover:before,.secondary:hover:before{
+    transform:translateX(120%);
+}
+.primary span,.secondary span{
+    transition:transform .35s var(--lux-ease);
+}
+.primary:hover span,.secondary:hover span{transform:translate(2px,-2px)}
+
+.rec,.game{
+    will-change:transform;
+    transform:translateZ(0);
+}
+.rec:after,.game:after{
+    transition:opacity .35s ease;
+}
+.rec:before{
+    opacity:.7;
+    transition:opacity .35s ease,transform .55s var(--lux-ease);
+}
+.rec:hover:before{
+    opacity:1;
+    transform:translate3d(8px,-5px,0);
+}
+.game:after{
+    opacity:.75;
+}
+.game:hover:after{
+    opacity:1;
+}
+.game:before{
+    transition:opacity .4s ease;
+}
+.game:hover:before{opacity:.9}
+
+/* A restrained moving highlight that gives cards a luxury glass finish. */
+.rec,.game,.champions,.live{
+    background-clip:padding-box;
+}
+.rec:hover,.game:hover{
+    animation:cardLift .45s var(--lux-ease) both;
+}
+@keyframes cardLift{
+    from{filter:brightness(1)}
+    50%{filter:brightness(1.08)}
+    to{filter:brightness(1.02)}
+}
+
+/* Staggered entrance: content feels staged instead of appearing all at once. */
+.hero,.live,.section{
+    animation:sectionReveal .7s var(--lux-ease) both;
+}
+.live{animation-delay:.06s}
+.section:nth-of-type(3){animation-delay:.10s}
+.section:nth-of-type(4){animation-delay:.15s}
+.section:nth-of-type(5){animation-delay:.20s}
+@keyframes sectionReveal{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:none}
+}
+
+@media(min-width:700px){
+    .signature-hero{min-height:450px}
+    .signature-hero .hero-content{padding:58px}
+    .hero-metrics{margin-top:32px;gap:34px}
+}
+@media(max-width:430px){
+    .signature-hero{min-height:385px}
+    .signature-hero h1{letter-spacing:-3.4px}
+    .hero-metrics{gap:16px}
+    .hero-metrics strong{font-size:.78rem}
+}
+@media(prefers-reduced-motion:reduce){
+    .signature-hero *, .hero, .live, .section, .rec, .game{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+
+</style>
 </head>
 
 <body>
@@ -496,16 +714,28 @@ body:after{
     <a class="cat" href="#original">Original</a>
 </nav>
 
-<section class="hero" id="popular">
+<section class="hero signature-hero" id="popular">
+    <div class="hero-orbit orbit-one"></div>
+    <div class="hero-orbit orbit-two"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-grid"></div>
     <div class="hero-content">
-        <div class="eyebrow"><i></i> N+ PLAY ORIGINAL</div>
-        <h1 class="gold-text">Enter the next level.</h1>
-        <p>A cinematic gaming lobby built around speed, clarity and a premium digital experience.</p>
+        <div class="eyebrow"><i></i> N+ PLAY ORIGINAL • PREMIUM LOBBY</div>
+        <div class="hero-kicker">THE NEXT DIGITAL PLAYGROUND</div>
+        <h1><span class="hero-line">PLAY</span><span class="gold-text hero-line">BEYOND</span></h1>
+        <p>Enter a cinematic gaming universe engineered with precision, atmosphere and a signature N+ experience.</p>
         <div class="hero-actions">
-            <a href="wingo.html" class="primary">Explore WINGO <span>→</span></a>
-            <a href="#recommendations" class="secondary">Explore Games</a>
+            <a href="wingo.html" class="primary">Enter Experience <span>↗</span></a>
+            <a href="#recommendations" class="secondary">Discover Games <span>↓</span></a>
+        </div>
+        <div class="hero-metrics">
+            <div><strong>09</strong><span>EXPERIENCES</span></div>
+            <div><strong>24/7</strong><span>LOBBY ACCESS</span></div>
+            <div><strong>N+</strong><span>ORIGINAL UI</span></div>
         </div>
     </div>
+    <div class="hero-corner hero-corner-tl">N+ / 01</div>
+    <div class="hero-corner hero-corner-br">EST. 2026</div>
 </section>
 
 <div class="live" aria-label="Demo activity">
