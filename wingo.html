@@ -426,6 +426,31 @@
             .bet-modal-overlay { padding: 12px; }
         }
     </style>
+
+<style>
+/* N+ PLAY WINGO — FINAL LUXURY SKIN */
+body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),transparent 68%),#050505!important;}
+.app{filter:drop-shadow(0 20px 70px rgba(0,0,0,.4));}
+.header{background:linear-gradient(180deg,rgba(8,8,8,.97),rgba(8,8,8,.82));border-color:rgba(245,197,24,.16)!important;box-shadow:0 14px 50px rgba(0,0,0,.45);}
+.balance{box-shadow:0 0 25px rgba(34,197,94,.08),inset 0 1px rgba(255,255,255,.08);}
+.duration-tabs{background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px rgba(255,255,255,.05),0 12px 35px rgba(0,0,0,.25);}
+.duration-tabs button.active{background:linear-gradient(135deg,#fff1a0,#f5c518,#b37a00)!important;box-shadow:0 8px 25px rgba(245,197,24,.22),inset 0 1px rgba(255,255,255,.7);}
+.timer-card,.game-card,.info-card,.bet-modal .bet-slip-inner,.result-popup{border-color:rgba(245,197,24,.14)!important;box-shadow:0 24px 65px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.055);}
+.timer-box .time,.game-info-row .right{ text-shadow:0 0 25px rgba(245,197,24,.24);}
+.num-grid button,.action-row-colors button,.action-row-size button{box-shadow:inset 0 1px rgba(255,255,255,.28),0 10px 25px rgba(0,0,0,.25)!important;}
+.num-grid button.selected,.action-row-colors button.selected,.action-row-size button.selected{outline:2px solid rgba(255,244,176,.85);outline-offset:1px;box-shadow:0 0 35px rgba(245,197,24,.4),inset 0 1px rgba(255,255,255,.7)!important;}
+.preset-btn{border-color:rgba(245,197,24,.12)!important;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important;transition:.25s ease;}
+.preset-btn:hover{transform:translateY(-2px);border-color:rgba(245,197,24,.3)!important;}
+.bet-modal-overlay{backdrop-filter:blur(14px);}
+.bet-slip-inner{background:linear-gradient(145deg,rgba(20,18,12,.98),rgba(7,7,7,.99))!important;}
+.modal-place{background:linear-gradient(135deg,#fff2a4,#f5c518 50%,#b67b00)!important;box-shadow:0 14px 40px rgba(245,197,24,.25),inset 0 1px rgba(255,255,255,.7);}
+.result-popup.active{animation:wingoResultIn .45s cubic-bezier(.16,1,.3,1) both;}
+@keyframes wingoResultIn{from{opacity:0;transform:translate(-50%,-45%) scale(.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.info-tabs button.active{color:#fff!important;text-shadow:0 0 18px rgba(245,197,24,.3);}
+.history-list table tr:hover{background:rgba(245,197,24,.025);}
+@media(max-width:480px){.app{width:100%;}.timer-box .time{font-size:21px}.game-info-row .right{font-size:18px;}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition:none!important;}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -690,10 +715,40 @@
         const getCounterKey = (dur) => `wingo_counter_${dur}`;
 
         // --- TIMER ENGINE ---
+        function getRoundStart(durationSec, now = Date.now()) {
+            return Math.floor(now / (durationSec * 1000)) * durationSec * 1000;
+        }
+
         function getNextRoundStart(durationSec) {
-            const now = Date.now();
-            const remainder = Math.floor(now / 1000) % durationSec;
-            return now + (durationSec - remainder) * 1000;
+            return getRoundStart(durationSec) + durationSec * 1000;
+        }
+
+        function getRoundPeriod(duration, roundStart) {
+            const d = new Date(roundStart);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const midnight = new Date(y, d.getMonth(), d.getDate()).getTime();
+            const count = Math.floor((roundStart - midnight) / (duration * 1000)) + 1;
+            return `${y}${m}${day}${getDurationPrefix(duration)}${String(count).padStart(2, '0')}`;
+        }
+
+        function getRoundStateKey(duration) { return `wingo_round_state_${duration}`; }
+
+        function loadRoundState(duration) {
+            try {
+                const raw = localStorage.getItem(getRoundStateKey(duration));
+                return raw ? JSON.parse(raw) : null;
+            } catch(e) { return null; }
+        }
+
+        function saveRoundState(duration, lastCompletedStart) {
+            try {
+                localStorage.setItem(getRoundStateKey(duration), JSON.stringify({
+                    lastCompletedStart,
+                    updatedAt: Date.now()
+                }));
+            } catch(e) {}
         }
 
         function getDurationPrefix(duration) {
@@ -706,66 +761,13 @@
 
         // --- PERIOD GENERATION ---
         function generateNextPeriod(duration) {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            const dateStr = y + m + d;
-
-            const key = getCounterKey(duration);
-            let meta = { date: dateStr, count: 0 };
-
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed.date === dateStr) {
-                        meta = parsed;
-                    } else {
-                        meta = { date: dateStr, count: 0 };
-                    }
-                }
-            } catch(e) {}
-
-            meta.count += 1;
-            localStorage.setItem(key, JSON.stringify(meta));
-
-            const counterStr = String(meta.count).padStart(2, '0');
-            const prefix = getDurationPrefix(duration);
-
-            return dateStr + prefix + counterStr;
+            return getRoundPeriod(duration, getRoundStart(duration));
         }
 
         function getInitialPeriod(duration) {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            const dateStr = y + m + d;
-
-            const key = getCounterKey(duration);
-            let meta = { date: dateStr, count: 0 };
-
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed.date === dateStr) {
-                        meta = parsed;
-                    }
-                }
-            } catch(e) {}
-
-            if (meta.count === 0) {
-                meta.count = 1;
-                localStorage.setItem(key, JSON.stringify(meta));
-            }
-
-            const counterStr = String(meta.count).padStart(2, '0');
-            const prefix = getDurationPrefix(duration);
-
-            return dateStr + prefix + counterStr;
+            return getRoundPeriod(duration, getRoundStart(duration));
         }
+
 
         function updatePeriodDisplay() {
             periodEl.textContent = currentPeriod.slice(0, 14);
@@ -775,14 +777,18 @@
         // --- TIMER DISPLAY ---
         function updateTimerDisplay() {
             const now = Date.now();
-            const nextStart = getNextRoundStart(currentDuration);
-            const remaining = Math.max(0, (nextStart - now) / 1000);
-            const secs = Math.ceil(remaining);
+            const currentStart = getRoundStart(currentDuration, now);
+            const nextStart = currentStart + currentDuration * 1000;
+            const remaining = Math.max(0, nextStart - now);
+            const secs = Math.ceil(remaining / 1000);
             const m = Math.floor(secs / 60);
-            const s = secs % 60;
-            const formatted = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+            const sec = secs % 60;
+            const formatted = String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+
             timerEl.textContent = formatted;
             timerLarge.textContent = formatted;
+            currentPeriod = getRoundPeriod(currentDuration, currentStart);
+            updatePeriodDisplay();
 
             if (secs >= 1 && secs <= 5 && secs !== lastBeepSecond) {
                 lastBeepSecond = secs;
@@ -790,25 +796,11 @@
             }
             if (secs > 5) lastBeepSecond = -1;
 
-            if (secs <= 5 && bettingOpen) {
-                setBettingState(false);
-                if (secs === 5) {
-                    showMessage('⛔ Betting Closed!', 'closed');
-                    if (betModal.classList.contains('active')) closeBetModal();
-                }
-            } else if (secs > 5 && !bettingOpen && !roundActive) {
-                setBettingState(true);
-            }
+            const open = secs > 5 && !roundActive;
+            if (bettingOpen !== open && !roundActive) setBettingState(open);
 
-            if (secs <= 0 && roundActive) {
-                console.warn("⚠️ Force resetting stuck round...");
-                roundActive = false;
-                completeRound();
-                return;
-            }
-
-            if (secs <= 0 && !roundActive) {
-                completeRound();
+            if (now >= nextStart - 80) {
+                catchUpRounds();
             }
         }
 
@@ -868,39 +860,19 @@
         }
 
         function cleanHistory() {
-            const now = Date.now();
-            const oneDay = 24 * 60 * 60 * 1000;
-            let changed = false;
             const durs = [30, 60, 180, 300];
             durs.forEach(dur => {
-                const key = getHistoryKey(dur);
                 try {
+                    const key = getHistoryKey(dur);
                     const raw = localStorage.getItem(key);
-                    if (raw) {
-                        const data = JSON.parse(raw);
-                        if (data.history && data.history.length) {
-                            const filtered = data.history.filter(item => {
-                                if (!item.timestamp) return true;
-                                return (now - item.timestamp) < oneDay;
-                            });
-                            if (filtered.length !== data.history.length) {
-                                data.history = filtered;
-                                localStorage.setItem(key, JSON.stringify(data));
-                                changed = true;
-                            }
-                        }
+                    if (!raw) return;
+                    const data = JSON.parse(raw);
+                    if (Array.isArray(data.history) && data.history.length > 500) {
+                        data.history = data.history.slice(0, 500);
+                        localStorage.setItem(key, JSON.stringify(data));
                     }
                 } catch(e) {}
             });
-            if (changed) {
-                loadHistory(currentDuration);
-                renderAllHistory();
-                renderMyBets();
-                updateStats();
-                renderChart();
-                updateStrategy();
-                renderStats();
-            }
         }
 
         // --- AUDIO ---
@@ -1255,48 +1227,60 @@
         }
 
         // --- COMPLETE ROUND (UPDATED: History limit increased to 500) ---
-        function completeRound() {
-            console.log("🔄 completeRound() triggered.");
-            if (roundActive) {
-                console.warn("⚠️ Round already active, skipping.");
-                return;
-            }
+        function completeRound(roundStart = getRoundStart(currentDuration, Date.now()) - currentDuration * 1000, isCatchup = false) {
+            if (roundActive) return false;
             roundActive = true;
             setBettingState(false);
 
+            const period = getRoundPeriod(currentDuration, roundStart);
+            const savedSelections = {
+                colors: [...selectedBets.colors],
+                size: selectedBets.size,
+                numbers: [...selectedBets.numbers]
+            };
+            const hadBet = betPlacedThisRound;
+
             try {
                 const result = generateResult();
-                const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processResult(result);
-
+                const processed = processResult(result);
+                const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processed;
                 rounds++;
 
-                const betStr = selectedBets.colors.join(' ') + (selectedBets.size || '') + selectedBets.numbers.join(' ');
+                const betStr = [
+                    ...savedSelections.colors.map(c => c.toUpperCase()),
+                    ...(savedSelections.size ? [savedSelections.size.toUpperCase()] : []),
+                    ...savedSelections.numbers.map(n => '#' + n)
+                ].join(' + ');
 
                 history.unshift({
-                    period: currentPeriod,
+                    period,
                     number: result.number,
                     colors: result.colors,
                     betType: betStr || 'none',
-                    stake: betPlacedThisRound ? totalBetAmount : 0,
+                    stake: hadBet ? totalBetAmount : 0,
                     payout: totalPayout,
                     won: totalWon,
                     netChange: netChange || 0,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    roundStart
                 });
 
-                // ✅ HISTORY LIMIT UPDATED TO 500
-                if (history.length > 500) history.pop();
+                if (history.length > 500) history = history.slice(0, 500);
                 saveHistory(currentDuration);
+                saveRoundState(currentDuration, roundStart);
 
-                if (betPlacedThisRound && betResults.length > 0) {
-                    let details = betResults.map(b => {
-                        return b.type.toUpperCase() + ' (' + (b.val !== undefined ? b.val : '') + ')';
-                    }).join(' + ');
-                    showResultPopup(totalWon, totalPayout, currentPeriod, details, result.colors, netChange);
+                if (!isCatchup && hadBet && betResults.length > 0) {
+                    const details = betResults.map(b => `${b.type.toUpperCase()} (${b.val !== undefined ? b.val : ''})`).join(' + ');
+                    showResultPopup(totalWon, totalPayout, period, details, result.colors, netChange);
+                }
+
+                if (hadBet) {
+                    betAmountThisRound = 0;
                 }
 
                 selectedBets = { colors: [], size: null, numbers: [] };
-                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button')
+                    .forEach(b => b.classList.remove('selected'));
                 betPlacedThisRound = false;
                 closeBetModal();
 
@@ -1308,75 +1292,75 @@
                 renderStats();
                 updateBalanceUI();
 
-                if (autoBet && (selectedBets.colors.length > 0 || selectedBets.size || selectedBets.numbers.length > 0)) {
-                    setTimeout(openBetModal, 500);
-                }
-
+                return true;
             } catch (error) {
-                console.error("❌ WINGO Round Error:", error);
-                showMessage('⚠️ Round auto-recovered.', 'info');
+                console.error('WINGO round error:', error);
+                return false;
             } finally {
                 roundActive = false;
-                currentPeriod = generateNextPeriod(currentDuration);
-                updatePeriodDisplay();
-                setBettingState(true);
-                console.log("✅ New Period:", currentPeriod);
             }
         }
 
         // ===== CATCH UP MISSED ROUNDS (NEW FEATURE) =====
         function catchUpRounds() {
-            const lastItem = history.length > 0 ? history[0] : null;
-            if (!lastItem || !lastItem.timestamp) {
-                currentPeriod = generateNextPeriod(currentDuration);
-                updatePeriodDisplay();
-                return;
-            }
+            if (roundActive) return;
 
             const now = Date.now();
-            const elapsedMs = now - lastItem.timestamp;
-            const elapsedSecs = elapsedMs / 1000;
+            const currentStart = getRoundStart(currentDuration, now);
+            const state = loadRoundState(currentDuration);
+            let lastCompleted = state && Number.isFinite(state.lastCompletedStart)
+                ? state.lastCompletedStart
+                : null;
 
-            if (elapsedSecs < currentDuration * 0.5) return;
-
-            const missedRounds = Math.min(Math.floor(elapsedSecs / currentDuration), 500);
-            if (missedRounds <= 0) return;
-
-            console.log(`🔄 Catching up ${missedRounds} missed rounds...`);
-
-            for (let i = 0; i < missedRounds; i++) {
-                const result = generateResult();
-                const period = generateNextPeriod(currentDuration);
-                history.unshift({
-                    period: period,
-                    number: result.number,
-                    colors: result.colors,
-                    betType: 'none',
-                    stake: 0,
-                    payout: 0,
-                    won: false,
-                    netChange: 0,
-                    timestamp: now - (missedRounds - i) * currentDuration * 1000
-                });
-                if (history.length > 500) history.pop();
+            if (lastCompleted === null) {
+                const latest = history.find(h => Number.isFinite(h.roundStart));
+                if (latest) lastCompleted = latest.roundStart;
+                else {
+                    const legacyLatest = history[0];
+                    if (legacyLatest && legacyLatest.timestamp) {
+                        lastCompleted = getRoundStart(currentDuration, legacyLatest.timestamp);
+                    } else {
+                        // First-ever visit: start tracking from the current round.
+                        lastCompleted = currentStart;
+                        saveRoundState(currentDuration, lastCompleted);
+                    }
+                }
             }
 
-            // Recalculate stats
-            rounds = history.length;
-            wins = history.filter(h => h.won === true && h.stake > 0).length;
-            losses = history.filter(h => h.won === false && h.stake > 0).length;
-            totalWon = history.reduce((sum, h) => sum + (h.netChange || 0), 0);
+            // Remove impossible future state caused by clock changes.
+            if (lastCompleted > currentStart) lastCompleted = currentStart;
 
-            saveHistory(currentDuration);
-            renderAllHistory();
-            renderMyBets();
-            updateStats();
-            renderChart();
-            updateStrategy();
-            renderStats();
+            let nextCompleted = lastCompleted + currentDuration * 1000;
+            const maxCatchup = 500;
+            let count = 0;
 
-            currentPeriod = generateNextPeriod(currentDuration);
+            while (nextCompleted < currentStart && count < maxCatchup) {
+                completeRound(nextCompleted, true);
+                lastCompleted = nextCompleted;
+                nextCompleted += currentDuration * 1000;
+                count++;
+            }
+
+            if (count > 0) {
+                saveRoundState(currentDuration, lastCompleted);
+                // Re-sync stats after catch-up without generating another period.
+                rounds = history.length;
+                wins = history.filter(h => h.won === true && h.stake > 0).length;
+                losses = history.filter(h => h.won === false && h.stake > 0).length;
+                totalWon = history.reduce((sum, h) => sum + (Number(h.netChange) || 0), 0);
+                saveHistory(currentDuration);
+                renderAllHistory();
+                renderMyBets();
+                updateStats();
+                renderChart();
+                updateStrategy();
+                renderStats();
+            }
+
+            currentPeriod = getRoundPeriod(currentDuration, currentStart);
             updatePeriodDisplay();
+            const seconds = Math.ceil((currentStart + currentDuration * 1000 - now) / 1000);
+            if (!betPlacedThisRound) setBettingState(seconds > 5);
         }
 
         // --- MODAL FUNCTIONS ---
@@ -1504,16 +1488,25 @@
             saveHistory(currentDuration);
             currentDuration = newDuration;
             loadHistory(currentDuration);
-            currentPeriod = getInitialPeriod(currentDuration);
-            updatePeriodDisplay();
             selectedBets = { colors: [], size: null, numbers: [] };
-            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button')
+                .forEach(b => b.classList.remove('selected'));
             betPlacedThisRound = false;
+            betAmountThisRound = 0;
             closeBetModal();
-            renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); renderStats();
-            if (timerInterval) clearInterval(timerInterval);
             roundActive = false;
-            setBettingState(true);
+
+            catchUpRounds();
+            currentPeriod = getRoundPeriod(currentDuration, getRoundStart(currentDuration));
+            updatePeriodDisplay();
+            renderAllHistory();
+            renderMyBets();
+            updateStats();
+            renderChart();
+            updateStrategy();
+            renderStats();
+
+            if (timerInterval) clearInterval(timerInterval);
             startTimerLoop();
         }
 
@@ -1650,21 +1643,21 @@
 
         function updateStrategy() {
             const box = document.getElementById('strategyDetail');
-            if(!box) return;
-            const recent = history.slice(0,20);
-            if(recent.length<5){ box.textContent='Need more data'; return; }
-            const last5 = recent.slice(0,5);
-            const colors = last5.map(r => r.colors?.[0] || 'red');
-            if(colors.every(c=>c===colors[0])) box.textContent=`🔥 Last 5 all ${colors[0].toUpperCase()}! Bet on ${colors[0]}?`;
-            else {
-                const counts = {red:0, green:0, violet:0};
-                recent.slice(0,10).forEach(r => {
-                    if(r.colors) r.colors.forEach(c => { if(counts[c]!==undefined) counts[c]++; });
-                });
-                if(counts.red>counts.green && counts.red>counts.violet) box.textContent='🔴 Red is hot!';
-                else if(counts.green>counts.red && counts.green>counts.violet) box.textContent='🟢 Green is hot!';
-                else box.textContent='⚖️ Balanced. No clear trend.';
+            if (!box) return;
+            const recent = history.slice(0, 20);
+            if (recent.length < 5) {
+                box.textContent = 'Need more historical data';
+                return;
             }
+            const counts = { red: 0, green: 0, violet: 0 };
+            recent.slice(0, 10).forEach(r => {
+                (r.colors || []).forEach(c => { if (counts[c] !== undefined) counts[c]++; });
+            });
+            const ordered = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+            const total = ordered.reduce((sum, [,v]) => sum + v, 0) || 1;
+            const top = ordered[0];
+            const pct = Math.round((top[1] / total) * 100);
+            box.textContent = `Recent 10-round distribution: ${top[0].toUpperCase()} ${pct}% · Historical data only — no outcome is guaranteed.`;
         }
 
         // --- TABS ---
@@ -1699,12 +1692,10 @@
             cleanHistory();
             loadBalance();
             loadHistory(currentDuration);
-            
-            // ✅ NEW: Catch up any missed rounds since last visit
-            catchUpRounds();
 
             currentPeriod = getInitialPeriod(currentDuration);
             updatePeriodDisplay();
+            catchUpRounds();
 
             renderNumberGrid();
             renderActionRows();
@@ -1787,9 +1778,8 @@
                 placeBetNow();
             });
 
-            document.getElementById('autoBetCheck').addEventListener('change', function() {
+            modalAutoBet.addEventListener('change', function() {
                 autoBet = this.checked;
-                modalAutoBet.checked = autoBet;
             });
         }
 
