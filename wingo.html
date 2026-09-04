@@ -189,24 +189,6 @@
         .action-row-size button.selected { border-color: #f5c518; box-shadow: 0 0 25px rgba(245,197,24,0.5); transform: scale(1.05); }
         .action-row-size button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
-        .preset-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
-        .preset-btn {
-            padding: 6px 0; border-radius: 8px; border: 2px solid #2a2a3a;
-            background: #1a1a2e;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            color: #94a3b8;
-            text-shadow: 0 0 4px rgba(0,0,0,0.3);
-        }
-        .preset-btn[data-preset="greenSmall"] { border-color: #22c55e; color: #22c55e; background: rgba(34,197,94,0.15); box-shadow: 0 0 10px rgba(34,197,94,0.2); }
-        .preset-btn[data-preset="greenSmall"]:hover { background: rgba(34,197,94,0.3); box-shadow: 0 0 20px rgba(34,197,94,0.5); }
-        .preset-btn[data-preset="redBig"] { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.15); box-shadow: 0 0 10px rgba(239,68,68,0.2); }
-        .preset-btn[data-preset="redBig"]:hover { background: rgba(239,68,68,0.3); box-shadow: 0 0 20px rgba(239,68,68,0.5); }
-        .preset-btn[data-preset="violet5"] { border-color: #a855f7; color: #a855f7; background: rgba(168,85,247,0.15); box-shadow: 0 0 10px rgba(168,85,247,0.2); }
-        .preset-btn[data-preset="violet5"]:hover { background: rgba(168,85,247,0.3); box-shadow: 0 0 20px rgba(168,85,247,0.5); }
-
         .bet-modal-overlay {
             position: fixed;
             bottom: 0;
@@ -425,399 +407,53 @@
             .stat-panel { font-size: 7px; gap: 2px; }
             .bet-modal-overlay { padding: 12px; }
         }
-    </style>
+    
+/* ===== N+ PLAY V8 PREMIUM EXPERIENCE ===== */
+:root{--npx-gold:#f5c518;--npx-gold2:#ffe78a;--npx-bg:#050506;--npx-panel:rgba(16,16,20,.72);--npx-line:rgba(245,197,24,.16)}
+html{background:#050506;scroll-behavior:smooth}
+body{background:radial-gradient(circle at 50% -10%,rgba(245,197,24,.09),transparent 32%),radial-gradient(circle at 0% 55%,rgba(124,58,237,.055),transparent 28%),#050506;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.014) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,#000,transparent 82%);z-index:-1}
+.app{filter:drop-shadow(0 20px 70px rgba(0,0,0,.45))}
+.glass-card{background:linear-gradient(145deg,rgba(24,24,28,.78),rgba(8,8,10,.74));border-color:var(--npx-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 16px 45px rgba(0,0,0,.25)}
+.top-bar{padding:5px 2px 10px;border-bottom-color:rgba(245,197,24,.12)}
+.duration-tabs{background:linear-gradient(180deg,#15151a,#0b0b0e);border:1px solid rgba(255,255,255,.055);box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 10px 30px rgba(0,0,0,.28)}
+.duration-tabs button.active{background:linear-gradient(135deg,#fff0a0,#f5c518 55%,#c99700);box-shadow:0 0 28px rgba(245,197,24,.25),inset 0 1px 0 rgba(255,255,255,.55)}
+.timer-box .time{font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(245,197,24,.24)}
+.timer-box .period{opacity:.82}
+.game-info-row .right{text-shadow:0 0 18px rgba(245,197,24,.2);font-variant-numeric:tabular-nums}
+.num-grid button,.action-row-colors button,.action-row-size button,.preset-btn{transition:transform .16s ease,box-shadow .2s ease,filter .2s ease,opacity .2s ease}
+.num-grid button:not(:disabled):hover,.action-row-colors button:not(:disabled):hover,.action-row-size button:not(:disabled):hover,.preset-btn:not(:disabled):hover{transform:translateY(-2px);filter:saturate(1.12)}
+.num-grid button.selected,.action-row-colors button.selected,.action-row-size button.selected{outline:2px solid rgba(245,197,24,.9);outline-offset:1px}
+.bet-modal-overlay{backdrop-filter:blur(18px);background:rgba(0,0,0,.58)}
+.bet-modal-overlay .bet-slip-inner{background:linear-gradient(145deg,#171719,#09090b);border:1px solid rgba(245,197,24,.18);box-shadow:0 -20px 70px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.035);padding:16px 14px 14px;border-radius:20px 20px 0 0}
+.bet-modal-overlay .actions .place{background:linear-gradient(135deg,#fff0a0,#f5c518 55%,#d5a600);box-shadow:0 8px 24px rgba(245,197,24,.18)}
+.result-popup{backdrop-filter:blur(16px)}
+.result-popup .result-box{background:linear-gradient(145deg,#171719,#09090b);border-color:rgba(245,197,24,.2);box-shadow:0 25px 90px rgba(0,0,0,.7),0 0 50px rgba(245,197,24,.07)}
+.info-tabs{position:sticky;top:0;z-index:5;background:rgba(8,8,10,.82);backdrop-filter:blur(14px)}
+.history-list{max-height:390px;overflow:auto;scrollbar-width:thin}
+.history-list table tr{transition:background .15s ease}
+.history-list table tbody tr:hover{background:rgba(245,197,24,.035)}
+.betting-closed{box-shadow:0 0 24px rgba(239,68,68,.08);animation:pulseClosed 1.2s ease-in-out infinite}
+@keyframes pulseClosed{50%{opacity:.72}}
+@media(max-width:480px){body{padding-left:5px;padding-right:5px}.app{max-width:480px}.winner-feed{display:none}.bet-modal-overlay .bet-slip-inner{padding-bottom:calc(14px + env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
 
-<style>
-/* =========================================================
-   N+ PLAY WINGO — FINAL PREMIUM UI
-   One restrained luxury system: obsidian + liquid gold + glass.
-   ========================================================= */
-:root{
-  --np-bg:#020202;
-  --np-bg2:#070707;
-  --np-card:rgba(14,14,16,.84);
-  --np-card2:rgba(23,23,26,.92);
-  --np-line:rgba(255,255,255,.075);
-  --np-gold:#f5c518;
-  --np-gold-hi:#fff2a2;
-  --np-green:#18d48a;
-  --np-red:#ff5966;
-  --np-purple:#a869ff;
-  --np-muted:#787a80;
-  --np-text:#f4f3ef;
-  --np-ease:cubic-bezier(.16,1,.3,1);
-}
-
-body{
-  background:
-    radial-gradient(720px 420px at 50% -100px,rgba(245,197,24,.115),transparent 67%),
-    radial-gradient(420px 340px at 100% 42%,rgba(168,105,255,.04),transparent 70%),
-    radial-gradient(420px 340px at 0 72%,rgba(24,212,138,.025),transparent 70%),
-    #020202;
-}
-body::before{
-  opacity:.12!important;
-  background-image:radial-gradient(rgba(255,255,255,.09) .42px,transparent .42px)!important;
-  background-size:5px 5px!important;
-}
-.app{max-width:520px!important}
-
-.app::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:-1;
-  background:linear-gradient(180deg,transparent 0 62%,rgba(245,197,24,.015));
-}
-
-.wingo-top{
-  position:sticky;
-  top:0;
-  z-index:180;
-  display:grid;
-  grid-template-columns:40px 1fr auto;
-  align-items:center;
-  gap:10px;
-  padding:9px 2px 11px;
-  margin-bottom:8px;
-  background:linear-gradient(180deg,rgba(2,2,2,.97),rgba(2,2,2,.74));
-  backdrop-filter:blur(24px);
-  border-bottom:1px solid rgba(245,197,24,.08);
-}
-.wingo-back{
-  width:38px!important;height:38px!important;
-  padding:0!important;
-  border:1px solid var(--np-line)!important;
-  border-radius:12px!important;
-  background:rgba(255,255,255,.025)!important;
-  color:#b9babd!important;
-  font-size:20px!important;
-}
-.wingo-brand{text-align:center}
-.wingo-brand strong{
-  display:block;
-  color:#f3f2ed;
-  font-size:1rem;
-  font-weight:900;
-  letter-spacing:1px;
-}
-.wingo-brand span{
-  display:block;
-  margin-top:2px;
-  color:rgba(245,197,24,.68);
-  font-size:.46rem;
-  font-weight:900;
-  letter-spacing:2px;
-}
-.wingo-tools{display:flex;align-items:center;gap:6px}
-.wingo-tool{
-  width:32px!important;height:32px!important;
-  padding:0!important;
-  border:1px solid var(--np-line)!important;
-  border-radius:10px!important;
-  background:rgba(255,255,255,.025)!important;
-}
-.wingo-age{
-  padding:5px 7px;
-  border-radius:999px;
-  border:1px solid rgba(255,82,96,.2);
-  color:#ff8992;
-  font-size:.5rem;
-  font-weight:900;
-}
-
-.wallet-sync{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:6px;
-  margin:-1px 0 6px;
-  color:#6f7278;
-  font-size:.44rem;
-  font-weight:900;
-  letter-spacing:1.15px;
-}
-.wallet-sync i{
-  width:5px;height:5px;border-radius:50%;
-  background:var(--np-green);
-  box-shadow:0 0 11px rgba(24,212,138,.6);
-}
-
-.top-bar{
-  display:grid!important;
-  grid-template-columns:auto 1fr;
-  align-items:center;
-  gap:8px;
-  padding:10px 0!important;
-}
-.balance-box{
-  min-width:128px;
-  padding:9px 12px!important;
-  border-radius:16px!important;
-  border-color:rgba(24,212,138,.17)!important;
-  background:linear-gradient(145deg,rgba(24,212,138,.055),rgba(255,255,255,.014))!important;
-  box-shadow:inset 0 1px rgba(255,255,255,.04),0 15px 36px rgba(0,0,0,.32);
-}
-.balance-box .label{
-  color:#6d746f!important;
-  font-size:.47rem!important;
-  letter-spacing:1px!important;
-}
-.balance-box .amount{
-  color:#c3ffe9!important;
-  font-size:1.03rem!important;
-  text-shadow:0 0 20px rgba(24,212,138,.1);
-}
-.header-actions{
-  justify-content:flex-end;
-  gap:6px!important;
-}
-.header-actions .action-btn{
-  min-height:32px;
-  padding:7px 9px!important;
-  border-radius:10px!important;
-  background:rgba(255,255,255,.02)!important;
-  font-size:.5rem!important;
-}
-.timer-box{
-  min-width:110px;
-  padding:9px 10px!important;
-  border-radius:16px!important;
-  border-color:rgba(245,197,24,.24)!important;
-  background:radial-gradient(circle at 50% 0,rgba(245,197,24,.09),transparent 70%),rgba(255,255,255,.015)!important;
-  box-shadow:inset 0 1px rgba(255,255,255,.05),0 14px 35px rgba(0,0,0,.3);
-}
-.timer-box .time{
-  color:var(--np-gold-hi)!important;
-  font-size:1.36rem!important;
-  text-shadow:0 0 28px rgba(245,197,24,.19);
-}
-.timer-box .period{color:#686a70!important;font-size:.47rem!important}
-.timer-box .status-label{color:var(--np-green)!important;font-size:.45rem!important}
-
-.duration-tabs{
-  margin-bottom:10px!important;
-  padding:4px!important;
-  border-radius:14px!important;
-  background:linear-gradient(145deg,rgba(255,255,255,.043),rgba(255,255,255,.013))!important;
-  border:1px solid var(--np-line)!important;
-}
-.duration-tabs button{
-  min-height:33px;
-  padding:7px 5px!important;
-  border-radius:10px!important;
-  font-size:.61rem!important;
-}
-.duration-tabs button.active{
-  background:linear-gradient(135deg,#fff0a0,#f5c518)!important;
-  box-shadow:0 8px 24px rgba(245,197,24,.2),inset 0 1px rgba(255,255,255,.62);
-}
-
-.game-info-row{
-  margin-top:8px!important;
-  padding:9px 11px!important;
-  border-radius:14px!important;
-  border:1px solid var(--np-line)!important;
-  background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012))!important;
-}
-.game-info-row .left{font-size:.6rem!important}
-.game-info-row .right{
-  color:var(--np-gold-hi)!important;
-  font-size:1.18rem!important;
-  text-shadow:0 0 24px rgba(245,197,24,.16);
-}
-#periodDisplayLarge{
-  color:#60636a!important;
-  letter-spacing:1px!important;
-}
-
-.betting-closed.active{
-  border-color:rgba(255,89,102,.24)!important;
-  background:linear-gradient(90deg,rgba(255,89,102,.08),rgba(255,255,255,.014))!important;
-  box-shadow:0 0 28px rgba(255,89,102,.035);
-}
-
-/* Number board */
-.num-grid{
-  gap:7px!important;
-  margin-top:13px!important;
-}
-.num-grid .row{gap:7px!important}
-.num-grid button{
-  position:relative;
-  min-height:58px;
-  border-radius:15px!important;
-  border-width:1px!important;
-  box-shadow:inset 0 1px rgba(255,255,255,.18),0 11px 25px rgba(0,0,0,.3)!important;
-  transition:transform .3s var(--np-ease),filter .3s ease,box-shadow .3s var(--np-ease)!important;
-}
-.num-grid button::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
-  background:linear-gradient(125deg,rgba(255,255,255,.11),transparent 30%,transparent 73%,rgba(0,0,0,.1));
-  pointer-events:none;
-}
-.num-grid button:hover{
-  transform:translateY(-2px) scale(1.014);
-  filter:brightness(1.05);
-}
-.num-grid button.selected{
-  border-color:#fff8cd!important;
-  transform:translateY(-2px) scale(1.035)!important;
-  box-shadow:0 0 0 2px rgba(245,197,24,.24),0 0 35px rgba(245,197,24,.2),inset 0 1px rgba(255,255,255,.28)!important;
-}
-.color-labels{
-  margin:9px 1px 8px!important;
-  font-size:.45rem!important;
-}
-
-.action-row-colors,.action-row-size,.preset-row{gap:7px!important}
-.action-row-colors button,.action-row-size button{
-  min-height:46px;
-  border-radius:14px!important;
-  border-width:1px!important;
-  box-shadow:inset 0 1px rgba(255,255,255,.16),0 10px 24px rgba(0,0,0,.28)!important;
-  transition:transform .3s var(--np-ease),box-shadow .3s var(--np-ease)!important;
-}
-.action-row-colors button:hover,.action-row-size button:hover{transform:translateY(-2px)}
-.action-row-colors button.selected,.action-row-size button.selected{
-  border-color:#fff8cd!important;
-  box-shadow:0 0 0 2px rgba(245,197,24,.22),0 0 30px rgba(245,197,24,.16)!important;
-}
-.preset-btn{
-  min-height:38px;
-  border-radius:12px!important;
-  border-width:1px!important;
-  background:linear-gradient(145deg,rgba(255,255,255,.043),rgba(255,255,255,.014))!important;
-}
-
-/* Bet slip */
-.bet-modal-overlay{
-  border-radius:24px 24px 0 0!important;
-  border-top-color:rgba(245,197,24,.24)!important;
-  background:linear-gradient(180deg,rgba(10,10,11,.96),rgba(2,2,2,.985))!important;
-  box-shadow:0 -30px 90px rgba(0,0,0,.8),inset 0 1px rgba(255,255,255,.06);
-}
-.bet-modal-overlay::before{
-  content:"";
-  display:block;
-  width:44px;height:3px;
-  margin:0 auto 13px;
-  border-radius:99px;
-  background:rgba(255,255,255,.13);
-}
-.bet-modal-overlay .title-row{
-  padding-bottom:11px!important;
-  border-bottom:1px solid rgba(255,255,255,.055);
-}
-.bet-modal-overlay .title-row .game-name{
-  color:var(--np-gold-hi)!important;
-  font-size:.84rem!important;
-}
-.bet-modal-overlay .title-row .bet-type{
-  border:1px solid rgba(245,197,24,.11)!important;
-  background:rgba(245,197,24,.045)!important;
-}
-.bet-modal-overlay .stake-input{
-  height:40px!important;
-  border-radius:11px!important;
-  background:rgba(255,255,255,.04)!important;
-  border-color:rgba(255,255,255,.085)!important;
-}
-.bet-modal-overlay .qty-box{
-  border-radius:11px!important;
-  background:rgba(255,255,255,.04)!important;
-  border-color:rgba(255,255,255,.085)!important;
-}
-.bet-modal-overlay .multiplier-row button{border-radius:9px!important}
-.bet-modal-overlay .preview-box{
-  border-radius:13px!important;
-  background:rgba(255,255,255,.022)!important;
-  border-color:rgba(245,197,24,.09)!important;
-}
-.bet-modal-overlay .actions .cancel,
-.bet-modal-overlay .actions .place{
-  min-height:43px!important;
-  border-radius:12px!important;
-}
-.bet-modal-overlay .actions .place{
-  background:linear-gradient(135deg,#fff0a0,#f5c518)!important;
-  box-shadow:0 9px 30px rgba(245,197,24,.2),inset 0 1px rgba(255,255,255,.72);
-}
-
-.result-popup-overlay,.rules-overlay{
-  backdrop-filter:blur(20px)!important;
-  background:rgba(0,0,0,.72)!important;
-}
-.result-popup,.rules-box{
-  border-radius:24px!important;
-  background:linear-gradient(145deg,#121214,#060606)!important;
-  border-color:rgba(245,197,24,.22)!important;
-  box-shadow:0 40px 110px rgba(0,0,0,.82),0 0 55px rgba(245,197,24,.07);
-}
-
-.glass-card{
-  background:linear-gradient(145deg,rgba(255,255,255,.043),rgba(255,255,255,.014))!important;
-  border-color:rgba(255,255,255,.07)!important;
-  box-shadow:0 20px 60px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.05);
-}
-.info-tabs{
-  padding:3px!important;
-  border:1px solid rgba(255,255,255,.05)!important;
-  border-radius:13px!important;
-  background:rgba(255,255,255,.017)!important;
-}
-.info-tabs button{border-radius:10px!important}
-.info-tabs button.active{
-  border-bottom-color:transparent!important;
-  background:linear-gradient(135deg,rgba(245,197,24,.15),rgba(245,197,24,.04))!important;
-  color:var(--np-gold-hi)!important;
-}
-.stats-grid .stat-item{
-  padding:9px 6px!important;
-  border:1px solid rgba(255,255,255,.05);
-  border-radius:12px!important;
-  background:linear-gradient(145deg,rgba(255,255,255,.043),rgba(255,255,255,.014))!important;
-}
-
-@media(max-width:420px){
-  .wingo-top{grid-template-columns:38px 1fr auto}
-  .top-bar{grid-template-columns:1fr auto!important}
-  .balance-box{min-width:112px}
-  .timer-box{min-width:104px}
-  .num-grid button{min-height:53px}
-  .action-row-colors button,.action-row-size button{min-height:44px}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*:before,*:after{
-    animation:none!important;
-    transition:none!important;
-  }
-}
 </style>
-
 </head>
 <body>
 <div class="app">
 
     <div class="winner-feed" id="winnerFeed"></div>
 
-    <div class="wingo-top">
-        <button class="wingo-back back-btn" onclick="window.location.href='index.html'" aria-label="Back to lobby">←</button>
-        <div class="wingo-brand">
-            <strong>N+ PLAY</strong>
-            <span>WINGO EXPERIENCE</span>
-        </div>
-        <div class="wingo-tools">
-            <button id="soundToggle" class="wingo-tool sound-toggle" title="Toggle Sound" aria-label="Toggle sound">🔊</button>
-            <span class="wingo-age">18+</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+        <span style="font-size:20px; font-weight:900; color:#f5c518;">N+ PLAY</span>
+        <div>
+            <button id="soundToggle" class="sound-toggle" title="Toggle Sound">🔊</button>
+            <span style="font-size:10px; border:1px solid #2a2a3a; padding:1px 10px; border-radius:20px; color:#94a3b8;">18+</span>
         </div>
     </div>
 
-    <div class="wallet-sync"><i></i> SHARED PLAY-MONEY WALLET</div>
     <div class="top-bar">
         <div class="balance-box">
             <div class="label">Wallet Balance</div>
@@ -850,7 +486,7 @@ body::before{
 
     <div style="text-align:center; font-size:10px; color:#64748b; font-family:monospace; margin-bottom:6px;" id="periodDisplayLarge">---</div>
 
-    <div class="betting-closed" id="bettingClosed">⛔ Betting Closed — Final 3 seconds</div>
+    <div class="betting-closed" id="bettingClosed">⛔ Betting Closed — Round in progress</div>
 
     <div class="num-grid" id="numGrid">
         <div class="row" id="numRow1"></div>
@@ -873,18 +509,12 @@ body::before{
         <button data-type="small">Small</button>
     </div>
 
-    <div class="preset-row" id="presetRow">
-        <button class="preset-btn" data-preset="greenSmall">🟢 Green + Small</button>
-        <button class="preset-btn" data-preset="redBig">🔴 Red + Big</button>
-        <button class="preset-btn" data-preset="violet5">🟣 Violet + #5</button>
-    </div>
-
     <!-- BET SLIP MODAL -->
     <div class="bet-modal-overlay" id="betModal">
         <div class="bet-slip-inner">
             <div class="title-row">
-                <span class="game-name">WINGO • PLAY-MONEY</span>
-                <span class="bet-type" id="modalBetDisplay">Review Selection</span>
+                <span class="game-name">WinGo</span>
+                <span class="bet-type" id="modalBetDisplay">Select Bets</span>
             </div>
             <div class="row">
                 <span class="row-label">Amount</span>
@@ -906,11 +536,7 @@ body::before{
                 <button data-mult="50">X50</button>
                 <button data-mult="100">X100</button>
             </div>
-            <div id="selectionSummary" class="preview-box" style="margin-bottom:8px;">
-            <div style="color:#6d6f75;font-size:10px;text-transform:uppercase;letter-spacing:.7px;">Selected</div>
-            <div id="selectionSummaryText" style="margin-top:4px;color:#fff;font-weight:800;">Choose a color, number, or size</div>
-        </div>
-        <div class="preview-box" id="modalPreviewBox">
+            <div class="preview-box" id="modalPreviewBox">
                 <div style="color:#64748b; font-size:10px;">Preview your potential wins</div>
                 <div id="modalPreviewContent"></div>
             </div>
@@ -1066,214 +692,182 @@ body::before{
         const rulesClose = document.getElementById('rulesClose');
         const rulesTrigger = document.getElementById('rulesTrigger');
 
-        const BALANCE_KEY = 'nplusplay_wallet_v1';
+        const BALANCE_KEY = 'wingo_balance';
         const getHistoryKey = (dur) => `wingo_history_${dur}`;
         const getCounterKey = (dur) => `wingo_counter_${dur}`;
 
-        // --- TIMER ENGINE ---
-        function getNextRoundStart(durationSec) {
-            const now = Date.now();
-            const remainder = Math.floor(now / 1000) % durationSec;
-            return now + (durationSec - remainder) * 1000;
+        // --- V6/V7 ROUND ENGINE ---
+        // Periods are derived from the real clock, not a local counter.
+        // This prevents duplicate/skipped periods after refresh, tab close, or duration switching.
+        const DURATION_META = {
+            30:  { code: '1000', label: '30s' },
+            60:  { code: '2000', label: '1 Min' },
+            180: { code: '3000', label: '3 Min' },
+            300: { code: '4000', label: '5 Min' }
+        };
+        const BET_CLOSE_MS = 3000;
+        let currentRoundStartMs = 0;
+        let currentRoundIndex = 0;
+        let lastSettledRoundKey = null;
+
+        function pad2(n) { return String(n).padStart(2, '0'); }
+        function localDateParts(ms) {
+            const d = new Date(ms);
+            return {
+                y: d.getFullYear(),
+                m: pad2(d.getMonth() + 1),
+                day: pad2(d.getDate()),
+                midnightMs: new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+            };
         }
 
-        function getDurationPrefix(duration) {
-            if (duration === 30) return '';
-            if (duration === 60) return '1';
-            if (duration === 180) return '3';
-            if (duration === 300) return '5';
-            return '';
+        function getRoundIndex(duration, roundStartMs) {
+            const { midnightMs } = localDateParts(roundStartMs);
+            return Math.floor((roundStartMs - midnightMs) / (duration * 1000)) + 1;
         }
 
-        // --- PERIOD GENERATION ---
-        function generateNextPeriod(duration) {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            const dateStr = y + m + d;
-
-            const key = getCounterKey(duration);
-            let meta = { date: dateStr, count: 0 };
-
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed.date === dateStr) {
-                        meta = parsed;
-                    } else {
-                        meta = { date: dateStr, count: 0 };
-                    }
-                }
-            } catch(e) {}
-
-            meta.count += 1;
-            localStorage.setItem(key, JSON.stringify(meta));
-
-            const counterStr = String(meta.count).padStart(2, '0');
-            const prefix = getDurationPrefix(duration);
-
-            return dateStr + prefix + counterStr;
+        function getRoundStartMs(duration, ms = Date.now()) {
+            return Math.floor(ms / (duration * 1000)) * duration * 1000;
         }
 
-        function getInitialPeriod(duration) {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            const dateStr = y + m + d;
+        function getRoundEndMs(duration, roundStartMs = getRoundStartMs(duration)) {
+            return roundStartMs + duration * 1000;
+        }
 
-            const key = getCounterKey(duration);
-            let meta = { date: dateStr, count: 0 };
+        function periodFromRound(duration, roundStartMs) {
+            const meta = DURATION_META[duration];
+            const { y, m, day } = localDateParts(roundStartMs);
+            const index = getRoundIndex(duration, roundStartMs);
+            return `${y}${m}${day}${meta.code}${String(index).padStart(5, '0')}`;
+        }
 
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed.date === dateStr) {
-                        meta = parsed;
-                    }
-                }
-            } catch(e) {}
+        function periodInfo(duration, ms = Date.now()) {
+            const start = getRoundStartMs(duration, ms);
+            return {
+                start,
+                end: getRoundEndMs(duration, start),
+                index: getRoundIndex(duration, start),
+                period: periodFromRound(duration, start),
+                key: `${duration}:${start}`
+            };
+        }
 
-            if (meta.count === 0) {
-                meta.count = 1;
-                localStorage.setItem(key, JSON.stringify(meta));
-            }
-
-            const counterStr = String(meta.count).padStart(2, '0');
-            const prefix = getDurationPrefix(duration);
-
-            return dateStr + prefix + counterStr;
+        function updateCurrentRound(duration = currentDuration, ms = Date.now()) {
+            const info = periodInfo(duration, ms);
+            currentRoundStartMs = info.start;
+            currentRoundIndex = info.index;
+            currentPeriod = info.period;
+            return info;
         }
 
         function updatePeriodDisplay() {
-            periodEl.textContent = currentPeriod.slice(0, 14);
+            periodEl.textContent = currentPeriod;
             periodLarge.textContent = currentPeriod;
+        }
+
+        // Stable demo result: the same period always produces the same result.
+        // Duration is part of the seed, so the four games have independent result streams.
+        function hashSeed(text) {
+            let h = 2166136261;
+            for (let i = 0; i < text.length; i++) {
+                h ^= text.charCodeAt(i);
+                h = Math.imul(h, 16777619);
+            }
+            h += h << 13; h ^= h >>> 7; h += h << 3; h ^= h >>> 17; h += h << 5;
+            return h >>> 0;
+        }
+
+        function deterministicNumber(duration, roundStartMs) {
+            const seed = `${duration}|${roundStartMs}|NPLUSPLAY-WINGO-V7`;
+            return hashSeed(seed) % 10;
+        }
+
+        function deterministicVioletSide(duration, roundStartMs) {
+            return hashSeed(`${duration}|${roundStartMs}|violet-side`) % 2 === 0 ? 'red' : 'green';
         }
 
         // --- TIMER DISPLAY ---
         function updateTimerDisplay() {
-            const now = Date.now();
-            const nextStart = getNextRoundStart(currentDuration);
-            const remaining = Math.max(0, (nextStart - now) / 1000);
-            const secs = Math.ceil(remaining);
+            const info = periodInfo(currentDuration);
+            if (info.key !== `${currentDuration}:${currentRoundStartMs}`) {
+                updateCurrentRound(currentDuration);
+                updatePeriodDisplay();
+            }
+
+            const remainingMs = Math.max(0, info.end - Date.now());
+            const secs = Math.ceil(remainingMs / 1000);
             const m = Math.floor(secs / 60);
             const s = secs % 60;
-            const formatted = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+            const formatted = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
             timerEl.textContent = formatted;
             timerLarge.textContent = formatted;
 
-            if (secs >= 1 && secs <= 3 && secs !== lastBeepSecond) {
+            if (secs >= 1 && secs <= 5 && secs !== lastBeepSecond) {
                 lastBeepSecond = secs;
                 if (soundEnabled) playSingleBeep();
             }
             if (secs > 5) lastBeepSecond = -1;
 
-            if (secs <= 3 && bettingOpen) {
-                setBettingState(false);
-                if (secs === 3) {
-                    showMessage('⛔ Betting Closed!', 'closed');
+            // Final 3 seconds are locked. No bet can be opened or submitted.
+            if (remainingMs <= BET_CLOSE_MS) {
+                if (bettingOpen) {
+                    setBettingState(false);
                     if (betModal.classList.contains('active')) closeBetModal();
                 }
-            } else if (secs > 3 && !bettingOpen && !roundActive) {
-                setBettingState(true);
+                if (secs <= 3 && !bettingClosedEl.dataset.notified) {
+                    bettingClosedEl.dataset.notified = '1';
+                }
+            } else {
+                bettingClosedEl.dataset.notified = '';
+                if (!bettingOpen && !roundActive) setBettingState(true);
             }
 
-            if (secs <= 0 && roundActive) {
-                console.warn("⚠️ Force resetting stuck round...");
-                roundActive = false;
-                completeRound();
-                return;
-            }
-
-            if (secs <= 0 && !roundActive) {
-                completeRound();
-            }
+            if (remainingMs <= 0) settleCurrentRoundIfNeeded();
         }
 
         function startTimerLoop() {
             if (timerInterval) clearInterval(timerInterval);
+            updateCurrentRound(currentDuration);
+            updatePeriodDisplay();
             updateTimerDisplay();
             timerInterval = setInterval(updateTimerDisplay, 200);
         }
 
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                if (timerInterval) clearInterval(timerInterval);
-                // Catch up missed rounds when tab becomes visible again
-                catchUpRounds();
-                startTimerLoop();
-            }
-        });
+        function settleCurrentRoundIfNeeded() {
+            const info = periodInfo(currentDuration, Math.max(currentRoundStartMs, Date.now() - 1));
+            const targetKey = `${currentDuration}:${info.start}`;
+            if (lastSettledRoundKey === targetKey || roundActive) return;
+            lastSettledRoundKey = targetKey;
+            completeRound(info);
+        }
 
         // --- DATA ---
         function loadBalance() {
             try {
-                const raw = localStorage.getItem(BALANCE_KEY);
-                if (raw === null) {
-                    balance = 1000;
-                    saveBalance();
-                } else {
-                    let parsed = Number.NaN;
-                    try {
-                        const obj = JSON.parse(raw);
-                        parsed = (obj && typeof obj === 'object') ? Number(obj.balance) : Number(obj);
-                    } catch (_) {
-                        parsed = Number(raw);
-                    }
-                    balance = Number.isFinite(parsed) && parsed >= 0 ? parsed : 1000;
-                }
-            } catch (e) {
-                balance = 1000;
-            }
+                const val = localStorage.getItem(BALANCE_KEY);
+                if (val !== null) balance = parseFloat(val) || 1000;
+                else balance = 1000;
+            } catch(e) { balance = 1000; }
             updateBalanceUI();
         }
 
         function saveBalance() {
-            try {
-                localStorage.setItem(BALANCE_KEY, JSON.stringify({
-                    balance: Number(Math.max(0, balance).toFixed(2)),
-                    updatedAt: Date.now()
-                }));
-            } catch (e) {
-                console.warn('Wallet save failed:', e);
-            }
+            localStorage.setItem(BALANCE_KEY, String(balance));
         }
-
-        function syncBalanceFromStorage() {
-            try {
-                const raw = localStorage.getItem(BALANCE_KEY);
-                if (!raw) return;
-                let next = Number.NaN;
-                try {
-                    const obj = JSON.parse(raw);
-                    next = (obj && typeof obj === 'object') ? Number(obj.balance) : Number(obj);
-                } catch (_) {
-                    next = Number(raw);
-                }
-                if (Number.isFinite(next) && next >= 0) {
-                    balance = next;
-                    updateBalanceUI();
-                }
-            } catch (_) {}
-        }
-
-        window.addEventListener('storage', (event) => {
-            if (event.key === BALANCE_KEY) syncBalanceFromStorage();
-        });
 
         function loadHistory(duration) {
             try {
                 const raw = localStorage.getItem(getHistoryKey(duration));
                 if (raw) {
                     const d = JSON.parse(raw);
-                    history = d.history || [];
-                    rounds = d.rounds || 0;
+                    history = Array.isArray(d.history) ? d.history : [];
+                    rounds = d.rounds || history.length || 0;
                     wins = d.wins || 0;
                     losses = d.losses || 0;
                     totalWon = d.totalWon || 0;
+                    // Normalize ordering: newest period first.
+                    history.sort((a,b) => Number(b.roundStartMs || b.timestamp || 0) - Number(a.roundStartMs || a.timestamp || 0));
+                    if (history.length > 500) history.length = 500;
                     return;
                 }
             } catch(e) {}
@@ -1291,39 +885,20 @@ body::before{
         }
 
         function cleanHistory() {
-            const now = Date.now();
-            const oneDay = 24 * 60 * 60 * 1000;
-            let changed = false;
+            // Keep the user's requested 500-round history. Do not delete valid old rounds by age.
             const durs = [30, 60, 180, 300];
             durs.forEach(dur => {
-                const key = getHistoryKey(dur);
                 try {
-                    const raw = localStorage.getItem(key);
-                    if (raw) {
-                        const data = JSON.parse(raw);
-                        if (data.history && data.history.length) {
-                            const filtered = data.history.filter(item => {
-                                if (!item.timestamp) return true;
-                                return (now - item.timestamp) < oneDay;
-                            });
-                            if (filtered.length !== data.history.length) {
-                                data.history = filtered;
-                                localStorage.setItem(key, JSON.stringify(data));
-                                changed = true;
-                            }
-                        }
+                    const raw = localStorage.getItem(getHistoryKey(dur));
+                    if (!raw) return;
+                    const data = JSON.parse(raw);
+                    if (Array.isArray(data.history)) {
+                        data.history.sort((a,b) => Number(b.roundStartMs || b.timestamp || 0) - Number(a.roundStartMs || a.timestamp || 0));
+                        data.history = data.history.slice(0, 500);
+                        localStorage.setItem(getHistoryKey(dur), JSON.stringify(data));
                     }
                 } catch(e) {}
             });
-            if (changed) {
-                loadHistory(currentDuration);
-                renderAllHistory();
-                renderMyBets();
-                updateStats();
-                renderChart();
-                updateStrategy();
-                renderStats();
-            }
         }
 
         // --- AUDIO ---
@@ -1511,13 +1086,12 @@ body::before{
 
         function isVioletSpecial(num) { return num === 0 || num === 5; }
 
-        function generateResult() {
-            const num = Math.floor(Math.random() * 10);
+        function generateResult(duration = currentDuration, roundStartMs = currentRoundStartMs) {
+            const num = deterministicNumber(duration, roundStartMs);
             const baseColor = getNumberColor(num);
             let resultColors = [baseColor];
             if (isVioletSpecial(num)) {
-                const additionalColor = Math.random() < 0.5 ? 'red' : 'green';
-                resultColors = [additionalColor, 'violet'];
+                resultColors = [deterministicVioletSide(duration, roundStartMs), 'violet'];
             }
             return { number: num, colors: resultColors };
         }
@@ -1677,60 +1251,46 @@ body::before{
             }, 3000);
         }
 
-        // --- COMPLETE ROUND (UPDATED: History limit increased to 500) ---
-        function completeRound() {
-            console.log("🔄 completeRound() triggered.");
-            if (roundActive) {
-                console.warn("⚠️ Round already active, skipping.");
-                return;
-            }
+        // --- COMPLETE / SETTLE ROUND ---
+        function completeRound(roundInfo = periodInfo(currentDuration, currentRoundStartMs)) {
+            if (roundActive) return;
             roundActive = true;
             setBettingState(false);
 
             try {
-                const result = generateResult();
-                const autoBetSelection = {
-                    colors: [...selectedBets.colors],
-                    size: selectedBets.size,
-                    numbers: [...selectedBets.numbers]
-                };
-                const shouldAutoBet = autoBet && (
-                    autoBetSelection.colors.length > 0 ||
-                    !!autoBetSelection.size ||
-                    autoBetSelection.numbers.length > 0
-                );
+                const result = generateResult(currentDuration, roundInfo.start);
                 const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processResult(result);
-
-                rounds++;
-
+                const hadBet = betPlacedThisRound;
                 const betStr = selectedBets.colors.join(' ') + (selectedBets.size || '') + selectedBets.numbers.join(' ');
 
+                rounds++;
                 history.unshift({
-                    period: currentPeriod,
+                    period: roundInfo.period,
                     number: result.number,
                     colors: result.colors,
                     betType: betStr || 'none',
-                    stake: betPlacedThisRound ? totalBetAmount : 0,
+                    stake: hadBet ? totalBetAmount : 0,
                     payout: totalPayout,
                     won: totalWon,
                     netChange: netChange || 0,
-                    timestamp: Date.now()
+                    timestamp: roundInfo.end,
+                    roundStartMs: roundInfo.start,
+                    duration: currentDuration
                 });
 
-                // ✅ HISTORY LIMIT UPDATED TO 500
-                if (history.length > 500) history.pop();
+                history.sort((a,b) => Number(b.roundStartMs || b.timestamp || 0) - Number(a.roundStartMs || a.timestamp || 0));
+                if (history.length > 500) history.length = 500;
                 saveHistory(currentDuration);
 
-                if (betPlacedThisRound && betResults.length > 0) {
-                    let details = betResults.map(b => {
-                        return b.type.toUpperCase() + ' (' + (b.val !== undefined ? b.val : '') + ')';
-                    }).join(' + ');
-                    showResultPopup(totalWon, totalPayout, currentPeriod, details, result.colors, netChange);
+                if (hadBet && betResults.length > 0) {
+                    const details = betResults.map(b => b.type.toUpperCase() + ' (' + (b.val !== undefined ? b.val : '') + ')').join(' + ');
+                    showResultPopup(totalWon, totalPayout, roundInfo.period, details, result.colors, netChange);
                 }
 
                 selectedBets = { colors: [], size: null, numbers: [] };
                 document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
                 betPlacedThisRound = false;
+                betAmountThisRound = 0;
                 closeBetModal();
 
                 renderAllHistory();
@@ -1740,84 +1300,81 @@ body::before{
                 updateStrategy();
                 renderStats();
                 updateBalanceUI();
-
-                if (shouldAutoBet) {
-                    selectedBets = {
-                        colors: [...autoBetSelection.colors],
-                        size: autoBetSelection.size,
-                        numbers: [...autoBetSelection.numbers]
-                    };
-                    setTimeout(openBetModal, 500);
-                }
-
             } catch (error) {
-                console.error("❌ WINGO Round Error:", error);
-                showMessage('⚠️ Round auto-recovered.', 'info');
+                console.error('WINGO round error:', error);
             } finally {
                 roundActive = false;
-                currentPeriod = generateNextPeriod(currentDuration);
+                updateCurrentRound(currentDuration, Date.now());
                 updatePeriodDisplay();
-                setBettingState(true);
-                console.log("✅ New Period:", currentPeriod);
+                setBettingState(periodInfo(currentDuration).end - Date.now() > BET_CLOSE_MS);
             }
         }
 
-        // ===== CATCH UP MISSED ROUNDS (NEW FEATURE) =====
+        // Fill every completed round that happened while the page was closed.
+        // Current/live round is never inserted until its end time is reached.
         function catchUpRounds() {
-            const lastItem = history.length > 0 ? history[0] : null;
-            if (!lastItem || !lastItem.timestamp) {
-                currentPeriod = generateNextPeriod(currentDuration);
-                updatePeriodDisplay();
-                return;
-            }
-
             const now = Date.now();
-            const elapsedMs = now - lastItem.timestamp;
-            const elapsedSecs = elapsedMs / 1000;
+            const duration = currentDuration;
+            const currentInfo = periodInfo(duration, now);
+            const completedEnd = currentInfo.start;
+            const maxStored = 500;
 
-            if (elapsedSecs < currentDuration * 0.5) return;
+            const byPeriod = new Map();
+            history.forEach(h => {
+                if (h && h.period) byPeriod.set(String(h.period), h);
+            });
 
-            const missedRounds = Math.min(Math.floor(elapsedSecs / currentDuration), 500);
-            if (missedRounds <= 0) return;
+            // Always reconstruct the latest completed window from the clock.
+            // This guarantees no missing periods inside the stored 500-round window,
+            // while preserving any existing user bet/settlement data for a period.
+            const firstStart = Math.max(
+                localDateParts(completedEnd).midnightMs,
+                completedEnd - (maxStored * duration * 1000)
+            );
 
-            console.log(`🔄 Catching up ${missedRounds} missed rounds...`);
-
-            for (let i = 0; i < missedRounds; i++) {
-                const result = generateResult();
-                const period = generateNextPeriod(currentDuration);
-                history.unshift({
-                    period: period,
-                    number: result.number,
-                    colors: result.colors,
-                    betType: 'none',
-                    stake: 0,
-                    payout: 0,
-                    won: false,
-                    netChange: 0,
-                    timestamp: now - (missedRounds - i) * currentDuration * 1000
-                });
-                if (history.length > 500) history.pop();
+            for (let t = firstStart; t < completedEnd; t += duration * 1000) {
+                const p = periodFromRound(duration, t);
+                if (!byPeriod.has(p)) {
+                    const result = generateResult(duration, t);
+                    byPeriod.set(p, {
+                        period: p,
+                        number: result.number,
+                        colors: result.colors,
+                        betType: 'none',
+                        stake: 0,
+                        payout: 0,
+                        won: false,
+                        netChange: 0,
+                        timestamp: t + duration * 1000,
+                        roundStartMs: t,
+                        duration
+                    });
+                }
             }
 
-            // Recalculate stats
-            rounds = history.length;
-            wins = history.filter(h => h.won === true && h.stake > 0).length;
-            losses = history.filter(h => h.won === false && h.stake > 0).length;
-            totalWon = history.reduce((sum, h) => sum + (h.netChange || 0), 0);
+            history = Array.from(byPeriod.values())
+                .filter(h => Number(h.roundStartMs || 0) < completedEnd)
+                .sort((a,b) => Number(b.roundStartMs || 0) - Number(a.roundStartMs || 0))
+                .slice(0, maxStored);
 
-            saveHistory(currentDuration);
+            rounds = history.length;
+            wins = history.filter(h => h.won === true && Number(h.stake || 0) > 0).length;
+            losses = history.filter(h => h.won === false && Number(h.stake || 0) > 0).length;
+            totalWon = history.reduce((sum, h) => sum + Number(h.netChange || 0), 0);
+            saveHistory(duration);
+
+            updateCurrentRound(duration, now);
+            updatePeriodDisplay();
             renderAllHistory();
             renderMyBets();
             updateStats();
             renderChart();
             updateStrategy();
             renderStats();
-
-            currentPeriod = generateNextPeriod(currentDuration);
-            updatePeriodDisplay();
         }
 
         // --- MODAL FUNCTIONS ---
+        // V10: Any valid color/number/size selection opens this modal immediately.
         function openBetModal() {
             const hasBet = selectedBets.colors.length > 0 || selectedBets.size || selectedBets.numbers.length > 0;
             if (!hasBet || !bettingOpen || betPlacedThisRound) return;
@@ -1887,7 +1444,7 @@ body::before{
         function setBettingState(open) {
             bettingOpen = open;
             const disabled = !open || betPlacedThisRound;
-            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button, .preset-btn').forEach(el => {
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(el => {
                 if(el) el.disabled = disabled;
             });
             if(open && !betPlacedThisRound){
@@ -1909,49 +1466,25 @@ body::before{
             el.style.display='block';
             if(type!=='closed') setTimeout(()=>{el.style.display='none';},3500);
         }
-
-        // --- PRESETS ---
-        function applyPreset(type) {
-            if(!bettingOpen || betPlacedThisRound) return;
-            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
-            selectedBets = { colors: [], size: null, numbers: [] };
-
-            if(type === 'greenSmall') {
-                selectedBets.colors = ['green'];
-                selectedBets.size = 'small';
-                colorRow.querySelector('button[data-type="green"]')?.classList.add('selected');
-                sizeRow.querySelector('button[data-type="small"]')?.classList.add('selected');
-            } else if(type === 'redBig') {
-                selectedBets.colors = ['red'];
-                selectedBets.size = 'big';
-                colorRow.querySelector('button[data-type="red"]')?.classList.add('selected');
-                sizeRow.querySelector('button[data-type="big"]')?.classList.add('selected');
-            } else if(type === 'violet5') {
-                selectedBets.colors = ['violet'];
-                selectedBets.numbers = [5];
-                colorRow.querySelector('button[data-type="violet"]')?.classList.add('selected');
-                const btn5 = document.querySelector('.num-grid button[data-num="5"]');
-                if(btn5) btn5.classList.add('selected');
-            }
-            openBetModal();
-        }
-
         // --- SWITCH DURATION ---
         function switchDuration(newDuration) {
-            if (newDuration === currentDuration) return;
+            if (!DURATION_META[newDuration] || newDuration === currentDuration) return;
             saveHistory(currentDuration);
             currentDuration = newDuration;
+            localStorage.setItem('wingo_active_duration', String(newDuration));
             loadHistory(currentDuration);
-            currentPeriod = getInitialPeriod(currentDuration);
-            updatePeriodDisplay();
             selectedBets = { colors: [], size: null, numbers: [] };
             document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
             betPlacedThisRound = false;
-            closeBetModal();
-            renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); renderStats();
-            if (timerInterval) clearInterval(timerInterval);
+            betAmountThisRound = 0;
             roundActive = false;
-            setBettingState(true);
+            lastSettledRoundKey = null;
+            closeBetModal();
+            catchUpRounds();
+            updateCurrentRound(currentDuration);
+            updatePeriodDisplay();
+            renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); renderStats();
+            setBettingState(periodInfo(currentDuration).end - Date.now() > BET_CLOSE_MS);
             startTimerLoop();
         }
 
@@ -1980,7 +1513,8 @@ body::before{
                         selectedBets.numbers.push(num);
                         this.classList.add('selected');
                     }
-                    openBetModal();
+                    if (selectedBets.numbers.length > 0) openBetModal();
+                    else if (!selectedBets.colors.length && !selectedBets.size) closeBetModal();
                 });
                 numRow1.appendChild(btn);
             });
@@ -2004,7 +1538,8 @@ body::before{
                         selectedBets.numbers.push(num);
                         this.classList.add('selected');
                     }
-                    openBetModal();
+                    if (selectedBets.numbers.length > 0) openBetModal();
+                    else if (!selectedBets.colors.length && !selectedBets.size) closeBetModal();
                 });
                 numRow2.appendChild(btn);
             });
@@ -2015,6 +1550,7 @@ body::before{
                 btn.addEventListener('click', function() {
                     if(!bettingOpen || betPlacedThisRound) return;
                     const color = this.dataset.type;
+                    let added = false;
                     if(selectedBets.colors.includes(color)) {
                         selectedBets.colors = selectedBets.colors.filter(c => c !== color);
                         this.classList.remove('selected');
@@ -2022,17 +1558,27 @@ body::before{
                         if(selectedBets.colors.length >= 2) { showMessage('Max 2 colors only!', 'info'); return; }
                         selectedBets.colors.push(color);
                         this.classList.add('selected');
+                        added = true;
                     }
-                    openBetModal();
+                    if (added) openBetModal();
+                    else if (!selectedBets.colors.length && !selectedBets.size && !selectedBets.numbers.length) closeBetModal();
                 });
             });
             sizeRow.querySelectorAll('button').forEach(btn => {
                 btn.addEventListener('click', function() {
                     if(!bettingOpen || betPlacedThisRound) return;
                     const size = this.dataset.type;
-                    if(selectedBets.size === size) { selectedBets.size = null; this.classList.remove('selected'); }
-                    else { selectedBets.size = size; this.classList.add('selected'); }
-                    openBetModal();
+                    const wasSelected = selectedBets.size === size;
+                    if(wasSelected) {
+                        selectedBets.size = null;
+                        this.classList.remove('selected');
+                    } else {
+                        selectedBets.size = size;
+                        this.classList.add('selected');
+                    }
+                    if (!wasSelected) openBetModal();
+                    else if (!selectedBets.colors.length && !selectedBets.size && !selectedBets.numbers.length) closeBetModal();
+                    else updateModalPreview();
                 });
             });
         }
@@ -2132,16 +1678,43 @@ body::before{
             });
         }
 
+        // --- CROSS-TAB / PERSISTENT STATE SYNC ---
+        window.addEventListener('storage', function(e) {
+            if (e.key === BALANCE_KEY) {
+                const next = parseFloat(e.newValue);
+                if (Number.isFinite(next)) {
+                    balance = next;
+                    updateBalanceUI();
+                }
+            }
+            if (e.key === getHistoryKey(currentDuration)) {
+                loadHistory(currentDuration);
+                catchUpRounds();
+            }
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                loadBalance();
+                catchUpRounds();
+                updateCurrentRound(currentDuration, Date.now());
+                updatePeriodDisplay();
+                updateTimerDisplay();
+            }
+        });
+
         // --- INIT ---
         function init() {
             cleanHistory();
             loadBalance();
+            const savedDuration = parseInt(localStorage.getItem('wingo_active_duration'), 10);
+            if (DURATION_META[savedDuration]) currentDuration = savedDuration;
+            document.querySelectorAll('.duration-tabs button').forEach(b => b.classList.toggle('active', parseInt(b.dataset.dur,10) === currentDuration));
             loadHistory(currentDuration);
             
-            // ✅ NEW: Catch up any missed rounds since last visit
+            // Rebuild the period directly from the clock and fill only completed missed rounds.
             catchUpRounds();
-
-            currentPeriod = getInitialPeriod(currentDuration);
+            updateCurrentRound(currentDuration);
             updatePeriodDisplay();
 
             renderNumberGrid();
@@ -2165,12 +1738,6 @@ body::before{
                 if (isNaN(val) || val <= 0) this.value = 1;
                 updateTotalUI();
                 updateModalPreview();
-            });
-
-            document.querySelectorAll('.preset-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    applyPreset(this.dataset.preset);
-                });
             });
 
             document.getElementById('soundToggle').addEventListener('click', function() {
@@ -2225,7 +1792,8 @@ body::before{
                 placeBetNow();
             });
 
-            document.getElementById('autoBetCheck')?.addEventListener('change', function() {
+            const autoBetCheck = document.getElementById('autoBetCheck');
+            if (autoBetCheck) autoBetCheck.addEventListener('change', function() {
                 autoBet = this.checked;
                 modalAutoBet.checked = autoBet;
             });
@@ -2238,30 +1806,5 @@ body::before{
         }
     })();
 </script>
-
-<script>
-(() => {
-  function syncSelectionSummary(){
-    const out = document.getElementById('selectionSummaryText');
-    if(!out) return;
-
-    const parts = [];
-    document.querySelectorAll('.action-row-colors button.selected').forEach(b => parts.push(b.dataset.type.toUpperCase()));
-    document.querySelectorAll('.action-row-size button.selected').forEach(b => parts.push(b.dataset.type.toUpperCase()));
-    document.querySelectorAll('.num-grid button.selected').forEach(b => parts.push('#' + b.dataset.num));
-
-    out.textContent = parts.length ? parts.join(' • ') : 'Choose a color, number, or size';
-  }
-
-  document.addEventListener('click', e => {
-    if(e.target.closest('.num-grid button,.action-row-colors button,.action-row-size button,.preset-btn')){
-      setTimeout(syncSelectionSummary, 0);
-    }
-  });
-
-  syncSelectionSummary();
-})();
-</script>
-
 </body>
 </html>
