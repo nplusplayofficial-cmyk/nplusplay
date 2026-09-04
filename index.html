@@ -687,6 +687,575 @@ body:after{
 }
 
 </style>
+
+<style>
+/* =========================================================
+   N+ PLAY FINAL — LUXURY CINEMATIC LOBBY
+   Existing game links, sections and navigation preserved.
+   ========================================================= */
+
+:root{
+    --n-gold:#f5c518;
+    --n-gold-hi:#fff3aa;
+    --n-gold-deep:#8f6400;
+    --n-black:#020202;
+    --n-panel:rgba(255,255,255,.035);
+    --n-line:rgba(255,255,255,.075);
+    --n-ease:cubic-bezier(.16,1,.3,1);
+}
+
+body{
+    background:
+        radial-gradient(900px 520px at 50% -160px,rgba(245,197,24,.14),transparent 65%),
+        radial-gradient(700px 520px at 105% 35%,rgba(245,197,24,.055),transparent 70%),
+        radial-gradient(650px 520px at -10% 70%,rgba(245,197,24,.035),transparent 70%),
+        #020202;
+}
+
+body:after{
+    background:
+        linear-gradient(90deg,transparent 0 49.9%,rgba(255,255,255,.009) 50%,transparent 50.1%),
+        radial-gradient(circle at 50% 0,rgba(255,255,255,.03),transparent 42%);
+}
+
+.page{max-width:590px}
+@media(min-width:900px){.page{max-width:1220px}}
+
+.header{
+    background:linear-gradient(180deg,rgba(3,3,3,.96),rgba(3,3,3,.78));
+    border-bottom-color:rgba(245,197,24,.12);
+    box-shadow:0 16px 45px rgba(0,0,0,.35);
+}
+
+.brand-mark{
+    width:40px;height:40px;border-radius:13px;
+    background:linear-gradient(145deg,#fff8c9 0%,#f5c518 45%,#966600 100%);
+    box-shadow:0 0 0 1px rgba(255,240,150,.2),
+               0 9px 34px rgba(245,197,24,.24);
+}
+
+.brand-name{
+    font-size:1.3rem;
+    letter-spacing:1.3px;
+}
+
+.wallet{
+    border-color:rgba(35,211,154,.27);
+    box-shadow:inset 0 0 25px rgba(35,211,154,.035),0 5px 25px rgba(0,0,0,.2);
+}
+
+/* Category rail */
+.categories{
+    padding:15px 1px 11px;
+    gap:8px;
+}
+
+.cat{
+    position:relative;
+    padding:9px 15px;
+    border-color:transparent;
+    transition:all .35s var(--n-ease);
+}
+
+.cat.active{
+    box-shadow:
+        0 0 0 1px rgba(255,241,160,.22),
+        0 8px 28px rgba(245,197,24,.2),
+        inset 0 1px rgba(255,255,255,.6);
+}
+
+/* ================= FINAL HERO ================= */
+.final-hero{
+    min-height:535px;
+    margin:9px 0 17px;
+    border-radius:30px;
+    border:1px solid rgba(245,197,24,.27);
+    background:
+        radial-gradient(620px 440px at 78% 26%,rgba(245,197,24,.14),transparent 55%),
+        radial-gradient(420px 420px at 94% 92%,rgba(138,84,0,.2),transparent 62%),
+        linear-gradient(135deg,#141109 0%,#080807 50%,#030303 100%);
+    box-shadow:
+        0 38px 120px rgba(0,0,0,.82),
+        inset 0 1px rgba(255,255,255,.11);
+    isolation:isolate;
+}
+
+.final-hero:before{
+    content:"N+";
+    right:-40px;
+    bottom:-85px;
+    font-size:290px;
+    color:rgba(245,197,24,.035);
+    text-shadow:0 0 100px rgba(245,197,24,.08);
+}
+
+.hero-art-wrap{
+    position:absolute;
+    z-index:0;
+    inset:-3% -7% -5% 37%;
+    display:grid;
+    place-items:center;
+    pointer-events:none;
+}
+
+.hero-art-glow{
+    position:absolute;
+    width:92%;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(245,197,24,.26),rgba(245,197,24,.055) 32%,transparent 69%);
+    filter:blur(13px);
+    animation:finalHeroBreath 6s ease-in-out infinite;
+}
+
+.hero-game-art{
+    width:min(510px,94%);
+    height:min(510px,94%);
+    object-fit:contain;
+    filter:
+        saturate(1.08)
+        contrast(1.06)
+        drop-shadow(0 38px 60px rgba(0,0,0,.9));
+    opacity:.94;
+    transform:translate3d(18px,0,0) rotate(2deg) scale(1.03);
+    animation:finalHeroFloat 7s ease-in-out infinite;
+}
+
+@keyframes finalHeroFloat{
+    0%,100%{transform:translate3d(18px,5px,0) rotate(2deg) scale(1.03)}
+    50%{transform:translate3d(8px,-10px,0) rotate(-1deg) scale(1.065)}
+}
+
+@keyframes finalHeroBreath{
+    0%,100%{transform:scale(.94);opacity:.7}
+    50%{transform:scale(1.08);opacity:1}
+}
+
+.hero-vignette{
+    position:absolute;
+    z-index:1;
+    inset:0;
+    background:
+        linear-gradient(90deg,#030303 0%,rgba(3,3,3,.96) 21%,rgba(3,3,3,.78) 43%,rgba(3,3,3,.3) 72%,rgba(3,3,3,.62) 100%),
+        linear-gradient(0deg,rgba(0,0,0,.85),transparent 40%,rgba(0,0,0,.22));
+    pointer-events:none;
+}
+
+.hero-grid-final{
+    position:absolute;
+    z-index:2;
+    inset:0;
+    opacity:.2;
+    background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+    background-size:45px 45px;
+    mask-image:radial-gradient(circle at 78% 48%,black,transparent 65%);
+    transform:perspective(700px) rotateX(62deg) scale(1.55) translateY(105px);
+    transform-origin:center bottom;
+    pointer-events:none;
+}
+
+.hero-orbit{
+    z-index:3;
+    border-color:rgba(245,197,24,.17);
+}
+
+.orbit-one{
+    width:500px;height:205px;
+    right:-155px;top:82px;
+    transform:rotate(-25deg);
+    box-shadow:0 0 65px rgba(245,197,24,.04);
+}
+
+.orbit-two{
+    width:380px;height:145px;
+    right:-92px;top:154px;
+    transform:rotate(-25deg);
+    border-color:rgba(255,255,255,.065);
+}
+
+.hero-light-sweep{
+    position:absolute;
+    z-index:4;
+    top:-30%;
+    left:-45%;
+    width:22%;
+    height:170%;
+    background:linear-gradient(90deg,transparent,rgba(255,245,190,.12),transparent);
+    transform:rotate(18deg);
+    animation:finalLightSweep 9s ease-in-out infinite;
+    pointer-events:none;
+}
+
+@keyframes finalLightSweep{
+    0%,56%{left:-45%;opacity:0}
+    64%{opacity:1}
+    90%,100%{left:130%;opacity:0}
+}
+
+.final-hero .hero-content{
+    position:relative;
+    z-index:6;
+    max-width:650px;
+    padding:60px 42px 40px;
+}
+
+.final-hero .eyebrow{
+    color:var(--n-gold-hi);
+    letter-spacing:2px;
+}
+
+.final-hero .hero-kicker{
+    margin-top:15px;
+    color:rgba(245,197,24,.72);
+    font-size:.58rem;
+    font-weight:900;
+    letter-spacing:2.7px;
+}
+
+.final-hero h1{
+    margin:13px 0 14px;
+    max-width:510px;
+    font-size:clamp(4rem,11vw,6.5rem);
+    line-height:.82;
+    letter-spacing:-5px;
+    font-weight:900;
+}
+
+.final-hero .hero-line:first-child{
+    color:#f4f3ef;
+    text-shadow:0 20px 65px rgba(255,255,255,.08);
+}
+
+.final-hero .gold-text{
+    text-shadow:0 18px 75px rgba(245,197,24,.2);
+}
+
+.final-hero p{
+    max-width:455px;
+    color:#aaa;
+    font-size:.8rem;
+    line-height:1.7;
+}
+
+.final-hero .hero-actions{
+    margin-top:23px;
+}
+
+.final-hero .primary,
+.final-hero .secondary{
+    min-height:43px;
+    padding:11px 17px;
+    border-radius:13px;
+}
+
+.final-hero .primary{
+    box-shadow:
+        0 12px 38px rgba(245,197,24,.25),
+        inset 0 1px rgba(255,255,255,.7);
+}
+
+.hero-metrics{
+    margin-top:32px;
+    gap:30px;
+}
+
+.hero-metrics strong{
+    font-size:.9rem;
+}
+
+.hero-metrics span{
+    font-size:.46rem;
+    letter-spacing:1.4px;
+}
+
+.hero-dots{
+    position:absolute;
+    z-index:8;
+    right:24px;
+    bottom:25px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.hero-dot{
+    width:7px;height:7px;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:rgba(255,255,255,.22);
+    cursor:pointer;
+    transition:all .35s var(--n-ease);
+}
+
+.hero-dot.active{
+    width:27px;
+    border-radius:99px;
+    background:linear-gradient(90deg,#a97400,#fff0a1,#e4ae16);
+    box-shadow:0 0 18px rgba(245,197,24,.55);
+}
+
+.final-hero.is-changing .hero-game-art{
+    animation:finalHeroSwap .55s var(--n-ease) both;
+}
+
+@keyframes finalHeroSwap{
+    0%{opacity:.15;transform:translate3d(55px,0,0) scale(.94) rotate(5deg)}
+    100%{opacity:.94;transform:translate3d(18px,0,0) scale(1.03) rotate(2deg)}
+}
+
+/* ================= GAME CARDS ================= */
+.recommendations{
+    grid-auto-columns:124px;
+    gap:13px;
+    padding:3px 2px 8px;
+}
+
+.rec{
+    border-radius:20px;
+    border-color:rgba(255,255,255,.095);
+    box-shadow:
+        0 14px 34px rgba(0,0,0,.48),
+        inset 0 1px rgba(255,255,255,.09);
+    transition:transform .42s var(--n-ease),border-color .35s ease,box-shadow .42s var(--n-ease);
+}
+
+.rec:before{
+    background:
+        linear-gradient(125deg,rgba(255,255,255,.16),transparent 22%,transparent 70%,rgba(245,197,24,.08)),
+        linear-gradient(180deg,transparent 45%,rgba(0,0,0,.08));
+}
+
+.rec:after{
+    background:linear-gradient(0deg,rgba(0,0,0,.72),transparent 58%);
+}
+
+.rec img{
+    object-fit:cover;
+    transform:scale(1.001);
+    transition:transform .55s var(--n-ease),filter .45s ease;
+}
+
+.rec:hover{
+    transform:translateY(-7px) scale(1.015);
+    border-color:rgba(245,197,24,.38);
+    box-shadow:
+        0 25px 55px rgba(0,0,0,.62),
+        0 0 32px rgba(245,197,24,.08);
+}
+
+.rec:hover img{
+    transform:scale(1.07);
+    filter:saturate(1.12) contrast(1.05);
+}
+
+.rec .rec-name{
+    left:10px;
+    bottom:9px;
+    font-size:.61rem;
+    letter-spacing:.2px;
+}
+
+/* Lottery/Casino/Rummy cards */
+.game{
+    aspect-ratio:1.08;
+    border-radius:20px;
+    border-color:rgba(255,255,255,.09);
+    box-shadow:
+        0 16px 38px rgba(0,0,0,.48),
+        inset 0 1px rgba(255,255,255,.08);
+    transition:transform .42s var(--n-ease),border-color .35s ease,box-shadow .42s var(--n-ease);
+}
+
+.game:after{
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.035);
+}
+
+.game img{
+    transition:transform .55s var(--n-ease),filter .45s ease;
+}
+
+.game:hover{
+    transform:translateY(-6px) scale(1.012);
+    border-color:rgba(245,197,24,.34);
+    box-shadow:
+        0 25px 55px rgba(0,0,0,.62),
+        0 0 28px rgba(245,197,24,.07);
+}
+
+.game:hover img{
+    transform:scale(1.065);
+    filter:saturate(1.1) contrast(1.04);
+}
+
+.badge{
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 5px 18px rgba(0,0,0,.35);
+}
+
+/* Section hierarchy */
+.section{margin-bottom:34px}
+
+.section-head{
+    margin-bottom:13px;
+}
+
+.section-title{
+    font-size:1rem;
+    letter-spacing:-.35px;
+}
+
+.section-title:before{
+    width:4px;
+    height:20px;
+    box-shadow:0 0 20px rgba(245,197,24,.48);
+}
+
+.section-sub{
+    margin-top:5px;
+    color:#696969;
+}
+
+.view{
+    letter-spacing:.4px;
+}
+
+/* Empty future sections */
+.champions{
+    border-radius:21px;
+    border-color:rgba(245,197,24,.12);
+    box-shadow:0 24px 70px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.065);
+}
+
+/* Leaderboard */
+.champion{
+    padding:14px 15px;
+    transition:background .25s ease;
+}
+
+.champion:hover{
+    background:rgba(245,197,24,.025);
+}
+
+.amount{
+    text-shadow:0 0 20px rgba(245,197,24,.18);
+}
+
+/* Bottom nav */
+.bottom-nav{
+    width:min(100%,590px);
+    border-color:rgba(245,197,24,.14);
+    background:linear-gradient(180deg,rgba(12,12,12,.87),rgba(3,3,3,.96));
+    box-shadow:
+        0 -22px 65px rgba(0,0,0,.72),
+        inset 0 1px rgba(255,255,255,.055);
+}
+
+.nav-item.active{
+    color:var(--n-gold-hi);
+}
+
+.nav-item.active:before{
+    width:34px;
+    height:3px;
+    box-shadow:0 0 20px rgba(245,197,24,.8);
+}
+
+/* Entrance */
+.header,.categories,.final-hero,.live,.section{
+    animation:finalReveal .7s var(--n-ease) both;
+}
+
+.categories{animation-delay:.03s}
+.final-hero{animation-delay:.06s}
+.live{animation-delay:.11s}
+.section:nth-of-type(3){animation-delay:.15s}
+.section:nth-of-type(4){animation-delay:.19s}
+.section:nth-of-type(5){animation-delay:.23s}
+
+@keyframes finalReveal{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:none}
+}
+
+@media(min-width:700px){
+    .final-hero{min-height:575px}
+    .final-hero .hero-content{padding:72px 60px}
+    .hero-art-wrap{inset:-7% -2% -9% 39%}
+    .hero-game-art{width:550px;height:550px}
+    .recommendations{grid-auto-columns:170px}
+    .game{aspect-ratio:1.16}
+}
+
+@media(max-width:520px){
+    .final-hero{
+        min-height:500px;
+        border-radius:27px;
+    }
+
+    .hero-art-wrap{
+        inset:4% -24% 24% 38%;
+        opacity:.54;
+    }
+
+    .hero-game-art{
+        width:350px;
+        height:350px;
+    }
+
+    .hero-vignette{
+        background:
+            linear-gradient(90deg,#030303 0%,rgba(3,3,3,.95) 40%,rgba(3,3,3,.58) 100%),
+            linear-gradient(0deg,rgba(0,0,0,.86),transparent 45%);
+    }
+
+    .final-hero .hero-content{
+        padding:40px 22px 32px;
+    }
+
+    .final-hero h1{
+        font-size:clamp(3.45rem,16vw,5.2rem);
+        letter-spacing:-3.7px;
+    }
+
+    .final-hero p{
+        max-width:330px;
+        font-size:.75rem;
+    }
+
+    .hero-metrics{
+        gap:17px;
+    }
+
+    .hero-dots{
+        right:19px;
+        bottom:20px;
+    }
+
+    .recommendations{
+        grid-auto-columns:116px;
+    }
+}
+
+@media(max-width:380px){
+    .final-hero{min-height:480px}
+    .final-hero .hero-content{padding:37px 18px 28px}
+    .hero-actions{flex-wrap:wrap}
+    .hero-metrics{gap:13px}
+}
+
+@media(prefers-reduced-motion:reduce){
+    .final-hero *,
+    .header,.categories,.final-hero,.live,.section,.rec,.game{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+</style>
+
 </head>
 
 <body>
@@ -714,28 +1283,50 @@ body:after{
     <a class="cat" href="#original">Original</a>
 </nav>
 
-<section class="hero signature-hero" id="popular">
+<section class="hero signature-hero final-hero" id="popular">
+    <div class="hero-art-wrap">
+        <div class="hero-art-glow"></div>
+        <img id="heroGameArt" class="hero-game-art" src="aviator.png" alt="Aviator">
+    </div>
+    <div class="hero-vignette"></div>
+    <div class="hero-grid-final"></div>
     <div class="hero-orbit orbit-one"></div>
     <div class="hero-orbit orbit-two"></div>
-    <div class="hero-glow"></div>
-    <div class="hero-grid"></div>
+    <div class="hero-light-sweep"></div>
+
     <div class="hero-content">
-        <div class="eyebrow"><i></i> N+ PLAY ORIGINAL • PREMIUM LOBBY</div>
-        <div class="hero-kicker">THE NEXT DIGITAL PLAYGROUND</div>
-        <h1><span class="hero-line">PLAY</span><span class="gold-text hero-line">BEYOND</span></h1>
-        <p>Enter a cinematic gaming universe engineered with precision, atmosphere and a signature N+ experience.</p>
+        <div class="eyebrow"><i></i> N+ PLAY • FEATURED EXPERIENCE</div>
+        <div class="hero-kicker" id="heroKicker">AVIATOR / SIGNATURE PICK</div>
+
+        <h1>
+            <span class="hero-line">PLAY</span>
+            <span class="gold-text hero-line" id="heroTitle">BEYOND</span>
+        </h1>
+
+        <p id="heroDescription">
+            A cinematic gaming experience designed to feel fast, focused and unmistakably N+.
+        </p>
+
         <div class="hero-actions">
-            <a href="wingo.html" class="primary">Enter Experience <span>↗</span></a>
+            <a href="aviator.html" class="primary" id="heroPrimary">Enter Aviator <span>↗</span></a>
             <a href="#recommendations" class="secondary">Discover Games <span>↓</span></a>
         </div>
+
         <div class="hero-metrics">
-            <div><strong>09</strong><span>EXPERIENCES</span></div>
+            <div><strong id="heroIndex">01</strong><span>FEATURED</span></div>
             <div><strong>24/7</strong><span>LOBBY ACCESS</span></div>
             <div><strong>N+</strong><span>ORIGINAL UI</span></div>
         </div>
     </div>
-    <div class="hero-corner hero-corner-tl">N+ / 01</div>
-    <div class="hero-corner hero-corner-br">EST. 2026</div>
+
+    <div class="hero-dots" aria-label="Featured game selector">
+        <button class="hero-dot active" data-index="0" aria-label="Aviator"></button>
+        <button class="hero-dot" data-index="1" aria-label="WINGO"></button>
+        <button class="hero-dot" data-index="2" aria-label="Vortex"></button>
+    </div>
+
+    <div class="hero-corner hero-corner-tl">N+ / 05</div>
+    <div class="hero-corner hero-corner-br">SIGNATURE LOBBY</div>
 </section>
 
 <div class="live" aria-label="Demo activity">
@@ -883,5 +1474,90 @@ document.querySelectorAll('.cat').forEach(tab=>{
     });
 });
 </script>
+
+<script>
+(() => {
+    const slides = [
+        {
+            art:"aviator.png",
+            href:"aviator.html",
+            name:"Aviator",
+            kicker:"AVIATOR / SIGNATURE PICK",
+            title:"BEYOND",
+            desc:"A cinematic gaming experience designed to feel fast, focused and unmistakably N+.",
+            index:"01"
+        },
+        {
+            art:"wingo.png",
+            href:"wingo.html",
+            name:"WINGO",
+            kicker:"WINGO / LIVE PICK",
+            title:"PREDICT",
+            desc:"A sharp, colorful prediction experience presented through the N+ PLAY luxury interface.",
+            index:"02"
+        },
+        {
+            art:"vortex.png",
+            href:"vortex.html",
+            name:"Vortex",
+            kicker:"VORTEX / FEATURED",
+            title:"SPIN",
+            desc:"A high-energy experience wrapped in layered motion, depth and the signature N+ atmosphere.",
+            index:"03"
+        }
+    ];
+
+    const hero = document.querySelector(".final-hero");
+    const art = document.getElementById("heroGameArt");
+    const primary = document.getElementById("heroPrimary");
+    const kicker = document.getElementById("heroKicker");
+    const title = document.getElementById("heroTitle");
+    const desc = document.getElementById("heroDescription");
+    const index = document.getElementById("heroIndex");
+    const dots = [...document.querySelectorAll(".hero-dot")];
+
+    if(!hero || !art || !primary || !kicker || !title || !desc || !index) return;
+
+    let current = 0;
+    let timer = null;
+
+    function render(i){
+        current = i;
+        const s = slides[i];
+
+        hero.classList.remove("is-changing");
+        void hero.offsetWidth;
+
+        art.src = s.art;
+        art.alt = s.name;
+        primary.href = s.href;
+        primary.innerHTML = "Enter " + s.name + ' <span>↗</span>';
+        kicker.textContent = s.kicker;
+        title.textContent = s.title;
+        desc.textContent = s.desc;
+        index.textContent = s.index;
+
+        dots.forEach((dot,n) => dot.classList.toggle("active",n === i));
+        hero.classList.add("is-changing");
+    }
+
+    function restart(){
+        clearInterval(timer);
+        timer = setInterval(() => {
+            render((current + 1) % slides.length);
+        },6500);
+    }
+
+    dots.forEach((dot,i) => {
+        dot.addEventListener("click",() => {
+            render(i);
+            restart();
+        });
+    });
+
+    restart();
+})();
+</script>
+
 </body>
 </html>
