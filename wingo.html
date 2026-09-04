@@ -428,44 +428,396 @@
     </style>
 
 <style>
-/* N+ PLAY WINGO — FINAL LUXURY SKIN */
-body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),transparent 68%),#050505!important;}
-.app{filter:drop-shadow(0 20px 70px rgba(0,0,0,.4));}
-.header{background:linear-gradient(180deg,rgba(8,8,8,.97),rgba(8,8,8,.82));border-color:rgba(245,197,24,.16)!important;box-shadow:0 14px 50px rgba(0,0,0,.45);}
-.balance{box-shadow:0 0 25px rgba(34,197,94,.08),inset 0 1px rgba(255,255,255,.08);}
-.duration-tabs{background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px rgba(255,255,255,.05),0 12px 35px rgba(0,0,0,.25);}
-.duration-tabs button.active{background:linear-gradient(135deg,#fff1a0,#f5c518,#b37a00)!important;box-shadow:0 8px 25px rgba(245,197,24,.22),inset 0 1px rgba(255,255,255,.7);}
-.timer-card,.game-card,.info-card,.bet-modal .bet-slip-inner,.result-popup{border-color:rgba(245,197,24,.14)!important;box-shadow:0 24px 65px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.055);}
-.timer-box .time,.game-info-row .right{ text-shadow:0 0 25px rgba(245,197,24,.24);}
-.num-grid button,.action-row-colors button,.action-row-size button{box-shadow:inset 0 1px rgba(255,255,255,.28),0 10px 25px rgba(0,0,0,.25)!important;}
-.num-grid button.selected,.action-row-colors button.selected,.action-row-size button.selected{outline:2px solid rgba(255,244,176,.85);outline-offset:1px;box-shadow:0 0 35px rgba(245,197,24,.4),inset 0 1px rgba(255,255,255,.7)!important;}
-.preset-btn{border-color:rgba(245,197,24,.12)!important;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important;transition:.25s ease;}
-.preset-btn:hover{transform:translateY(-2px);border-color:rgba(245,197,24,.3)!important;}
-.bet-modal-overlay{backdrop-filter:blur(14px);}
-.bet-slip-inner{background:linear-gradient(145deg,rgba(20,18,12,.98),rgba(7,7,7,.99))!important;}
-.modal-place{background:linear-gradient(135deg,#fff2a4,#f5c518 50%,#b67b00)!important;box-shadow:0 14px 40px rgba(245,197,24,.25),inset 0 1px rgba(255,255,255,.7);}
-.result-popup.active{animation:wingoResultIn .45s cubic-bezier(.16,1,.3,1) both;}
-@keyframes wingoResultIn{from{opacity:0;transform:translate(-50%,-45%) scale(.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-.info-tabs button.active{color:#fff!important;text-shadow:0 0 18px rgba(245,197,24,.3);}
-.history-list table tr:hover{background:rgba(245,197,24,.025);}
-@media(max-width:480px){.app{width:100%;}.timer-box .time{font-size:21px}.game-info-row .right{font-size:18px;}}
-@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition:none!important;}}
+/* =========================================================
+   N+ PLAY WINGO — FINAL PREMIUM UI
+   One restrained luxury system: obsidian + liquid gold + glass.
+   ========================================================= */
+:root{
+  --np-bg:#020202;
+  --np-bg2:#070707;
+  --np-card:rgba(14,14,16,.84);
+  --np-card2:rgba(23,23,26,.92);
+  --np-line:rgba(255,255,255,.075);
+  --np-gold:#f5c518;
+  --np-gold-hi:#fff2a2;
+  --np-green:#18d48a;
+  --np-red:#ff5966;
+  --np-purple:#a869ff;
+  --np-muted:#787a80;
+  --np-text:#f4f3ef;
+  --np-ease:cubic-bezier(.16,1,.3,1);
+}
+
+body{
+  background:
+    radial-gradient(720px 420px at 50% -100px,rgba(245,197,24,.115),transparent 67%),
+    radial-gradient(420px 340px at 100% 42%,rgba(168,105,255,.04),transparent 70%),
+    radial-gradient(420px 340px at 0 72%,rgba(24,212,138,.025),transparent 70%),
+    #020202;
+}
+body::before{
+  opacity:.12!important;
+  background-image:radial-gradient(rgba(255,255,255,.09) .42px,transparent .42px)!important;
+  background-size:5px 5px!important;
+}
+.app{max-width:520px!important}
+
+.app::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:linear-gradient(180deg,transparent 0 62%,rgba(245,197,24,.015));
+}
+
+.wingo-top{
+  position:sticky;
+  top:0;
+  z-index:180;
+  display:grid;
+  grid-template-columns:40px 1fr auto;
+  align-items:center;
+  gap:10px;
+  padding:9px 2px 11px;
+  margin-bottom:8px;
+  background:linear-gradient(180deg,rgba(2,2,2,.97),rgba(2,2,2,.74));
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(245,197,24,.08);
+}
+.wingo-back{
+  width:38px!important;height:38px!important;
+  padding:0!important;
+  border:1px solid var(--np-line)!important;
+  border-radius:12px!important;
+  background:rgba(255,255,255,.025)!important;
+  color:#b9babd!important;
+  font-size:20px!important;
+}
+.wingo-brand{text-align:center}
+.wingo-brand strong{
+  display:block;
+  color:#f3f2ed;
+  font-size:1rem;
+  font-weight:900;
+  letter-spacing:1px;
+}
+.wingo-brand span{
+  display:block;
+  margin-top:2px;
+  color:rgba(245,197,24,.68);
+  font-size:.46rem;
+  font-weight:900;
+  letter-spacing:2px;
+}
+.wingo-tools{display:flex;align-items:center;gap:6px}
+.wingo-tool{
+  width:32px!important;height:32px!important;
+  padding:0!important;
+  border:1px solid var(--np-line)!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.025)!important;
+}
+.wingo-age{
+  padding:5px 7px;
+  border-radius:999px;
+  border:1px solid rgba(255,82,96,.2);
+  color:#ff8992;
+  font-size:.5rem;
+  font-weight:900;
+}
+
+.wallet-sync{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  margin:-1px 0 6px;
+  color:#6f7278;
+  font-size:.44rem;
+  font-weight:900;
+  letter-spacing:1.15px;
+}
+.wallet-sync i{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--np-green);
+  box-shadow:0 0 11px rgba(24,212,138,.6);
+}
+
+.top-bar{
+  display:grid!important;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:8px;
+  padding:10px 0!important;
+}
+.balance-box{
+  min-width:128px;
+  padding:9px 12px!important;
+  border-radius:16px!important;
+  border-color:rgba(24,212,138,.17)!important;
+  background:linear-gradient(145deg,rgba(24,212,138,.055),rgba(255,255,255,.014))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.04),0 15px 36px rgba(0,0,0,.32);
+}
+.balance-box .label{
+  color:#6d746f!important;
+  font-size:.47rem!important;
+  letter-spacing:1px!important;
+}
+.balance-box .amount{
+  color:#c3ffe9!important;
+  font-size:1.03rem!important;
+  text-shadow:0 0 20px rgba(24,212,138,.1);
+}
+.header-actions{
+  justify-content:flex-end;
+  gap:6px!important;
+}
+.header-actions .action-btn{
+  min-height:32px;
+  padding:7px 9px!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.02)!important;
+  font-size:.5rem!important;
+}
+.timer-box{
+  min-width:110px;
+  padding:9px 10px!important;
+  border-radius:16px!important;
+  border-color:rgba(245,197,24,.24)!important;
+  background:radial-gradient(circle at 50% 0,rgba(245,197,24,.09),transparent 70%),rgba(255,255,255,.015)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.05),0 14px 35px rgba(0,0,0,.3);
+}
+.timer-box .time{
+  color:var(--np-gold-hi)!important;
+  font-size:1.36rem!important;
+  text-shadow:0 0 28px rgba(245,197,24,.19);
+}
+.timer-box .period{color:#686a70!important;font-size:.47rem!important}
+.timer-box .status-label{color:var(--np-green)!important;font-size:.45rem!important}
+
+.duration-tabs{
+  margin-bottom:10px!important;
+  padding:4px!important;
+  border-radius:14px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.043),rgba(255,255,255,.013))!important;
+  border:1px solid var(--np-line)!important;
+}
+.duration-tabs button{
+  min-height:33px;
+  padding:7px 5px!important;
+  border-radius:10px!important;
+  font-size:.61rem!important;
+}
+.duration-tabs button.active{
+  background:linear-gradient(135deg,#fff0a0,#f5c518)!important;
+  box-shadow:0 8px 24px rgba(245,197,24,.2),inset 0 1px rgba(255,255,255,.62);
+}
+
+.game-info-row{
+  margin-top:8px!important;
+  padding:9px 11px!important;
+  border-radius:14px!important;
+  border:1px solid var(--np-line)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012))!important;
+}
+.game-info-row .left{font-size:.6rem!important}
+.game-info-row .right{
+  color:var(--np-gold-hi)!important;
+  font-size:1.18rem!important;
+  text-shadow:0 0 24px rgba(245,197,24,.16);
+}
+#periodDisplayLarge{
+  color:#60636a!important;
+  letter-spacing:1px!important;
+}
+
+.betting-closed.active{
+  border-color:rgba(255,89,102,.24)!important;
+  background:linear-gradient(90deg,rgba(255,89,102,.08),rgba(255,255,255,.014))!important;
+  box-shadow:0 0 28px rgba(255,89,102,.035);
+}
+
+/* Number board */
+.num-grid{
+  gap:7px!important;
+  margin-top:13px!important;
+}
+.num-grid .row{gap:7px!important}
+.num-grid button{
+  position:relative;
+  min-height:58px;
+  border-radius:15px!important;
+  border-width:1px!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.18),0 11px 25px rgba(0,0,0,.3)!important;
+  transition:transform .3s var(--np-ease),filter .3s ease,box-shadow .3s var(--np-ease)!important;
+}
+.num-grid button::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:linear-gradient(125deg,rgba(255,255,255,.11),transparent 30%,transparent 73%,rgba(0,0,0,.1));
+  pointer-events:none;
+}
+.num-grid button:hover{
+  transform:translateY(-2px) scale(1.014);
+  filter:brightness(1.05);
+}
+.num-grid button.selected{
+  border-color:#fff8cd!important;
+  transform:translateY(-2px) scale(1.035)!important;
+  box-shadow:0 0 0 2px rgba(245,197,24,.24),0 0 35px rgba(245,197,24,.2),inset 0 1px rgba(255,255,255,.28)!important;
+}
+.color-labels{
+  margin:9px 1px 8px!important;
+  font-size:.45rem!important;
+}
+
+.action-row-colors,.action-row-size,.preset-row{gap:7px!important}
+.action-row-colors button,.action-row-size button{
+  min-height:46px;
+  border-radius:14px!important;
+  border-width:1px!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.16),0 10px 24px rgba(0,0,0,.28)!important;
+  transition:transform .3s var(--np-ease),box-shadow .3s var(--np-ease)!important;
+}
+.action-row-colors button:hover,.action-row-size button:hover{transform:translateY(-2px)}
+.action-row-colors button.selected,.action-row-size button.selected{
+  border-color:#fff8cd!important;
+  box-shadow:0 0 0 2px rgba(245,197,24,.22),0 0 30px rgba(245,197,24,.16)!important;
+}
+.preset-btn{
+  min-height:38px;
+  border-radius:12px!important;
+  border-width:1px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.043),rgba(255,255,255,.014))!important;
+}
+
+/* Bet slip */
+.bet-modal-overlay{
+  border-radius:24px 24px 0 0!important;
+  border-top-color:rgba(245,197,24,.24)!important;
+  background:linear-gradient(180deg,rgba(10,10,11,.96),rgba(2,2,2,.985))!important;
+  box-shadow:0 -30px 90px rgba(0,0,0,.8),inset 0 1px rgba(255,255,255,.06);
+}
+.bet-modal-overlay::before{
+  content:"";
+  display:block;
+  width:44px;height:3px;
+  margin:0 auto 13px;
+  border-radius:99px;
+  background:rgba(255,255,255,.13);
+}
+.bet-modal-overlay .title-row{
+  padding-bottom:11px!important;
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+.bet-modal-overlay .title-row .game-name{
+  color:var(--np-gold-hi)!important;
+  font-size:.84rem!important;
+}
+.bet-modal-overlay .title-row .bet-type{
+  border:1px solid rgba(245,197,24,.11)!important;
+  background:rgba(245,197,24,.045)!important;
+}
+.bet-modal-overlay .stake-input{
+  height:40px!important;
+  border-radius:11px!important;
+  background:rgba(255,255,255,.04)!important;
+  border-color:rgba(255,255,255,.085)!important;
+}
+.bet-modal-overlay .qty-box{
+  border-radius:11px!important;
+  background:rgba(255,255,255,.04)!important;
+  border-color:rgba(255,255,255,.085)!important;
+}
+.bet-modal-overlay .multiplier-row button{border-radius:9px!important}
+.bet-modal-overlay .preview-box{
+  border-radius:13px!important;
+  background:rgba(255,255,255,.022)!important;
+  border-color:rgba(245,197,24,.09)!important;
+}
+.bet-modal-overlay .actions .cancel,
+.bet-modal-overlay .actions .place{
+  min-height:43px!important;
+  border-radius:12px!important;
+}
+.bet-modal-overlay .actions .place{
+  background:linear-gradient(135deg,#fff0a0,#f5c518)!important;
+  box-shadow:0 9px 30px rgba(245,197,24,.2),inset 0 1px rgba(255,255,255,.72);
+}
+
+.result-popup-overlay,.rules-overlay{
+  backdrop-filter:blur(20px)!important;
+  background:rgba(0,0,0,.72)!important;
+}
+.result-popup,.rules-box{
+  border-radius:24px!important;
+  background:linear-gradient(145deg,#121214,#060606)!important;
+  border-color:rgba(245,197,24,.22)!important;
+  box-shadow:0 40px 110px rgba(0,0,0,.82),0 0 55px rgba(245,197,24,.07);
+}
+
+.glass-card{
+  background:linear-gradient(145deg,rgba(255,255,255,.043),rgba(255,255,255,.014))!important;
+  border-color:rgba(255,255,255,.07)!important;
+  box-shadow:0 20px 60px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.05);
+}
+.info-tabs{
+  padding:3px!important;
+  border:1px solid rgba(255,255,255,.05)!important;
+  border-radius:13px!important;
+  background:rgba(255,255,255,.017)!important;
+}
+.info-tabs button{border-radius:10px!important}
+.info-tabs button.active{
+  border-bottom-color:transparent!important;
+  background:linear-gradient(135deg,rgba(245,197,24,.15),rgba(245,197,24,.04))!important;
+  color:var(--np-gold-hi)!important;
+}
+.stats-grid .stat-item{
+  padding:9px 6px!important;
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:12px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.043),rgba(255,255,255,.014))!important;
+}
+
+@media(max-width:420px){
+  .wingo-top{grid-template-columns:38px 1fr auto}
+  .top-bar{grid-template-columns:1fr auto!important}
+  .balance-box{min-width:112px}
+  .timer-box{min-width:104px}
+  .num-grid button{min-height:53px}
+  .action-row-colors button,.action-row-size button{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    animation:none!important;
+    transition:none!important;
+  }
+}
 </style>
+
 </head>
 <body>
 <div class="app">
 
     <div class="winner-feed" id="winnerFeed"></div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <button class="back-btn" onclick="window.location.href='index.html'">←</button>
-        <span style="font-size:20px; font-weight:900; color:#f5c518;">N+ PLAY</span>
-        <div>
-            <button id="soundToggle" class="sound-toggle" title="Toggle Sound">🔊</button>
-            <span style="font-size:10px; border:1px solid #2a2a3a; padding:1px 10px; border-radius:20px; color:#94a3b8;">18+</span>
+    <div class="wingo-top">
+        <button class="wingo-back back-btn" onclick="window.location.href='index.html'" aria-label="Back to lobby">←</button>
+        <div class="wingo-brand">
+            <strong>N+ PLAY</strong>
+            <span>WINGO EXPERIENCE</span>
+        </div>
+        <div class="wingo-tools">
+            <button id="soundToggle" class="wingo-tool sound-toggle" title="Toggle Sound" aria-label="Toggle sound">🔊</button>
+            <span class="wingo-age">18+</span>
         </div>
     </div>
 
+    <div class="wallet-sync"><i></i> SHARED PLAY-MONEY WALLET</div>
     <div class="top-bar">
         <div class="balance-box">
             <div class="label">Wallet Balance</div>
@@ -498,7 +850,7 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
 
     <div style="text-align:center; font-size:10px; color:#64748b; font-family:monospace; margin-bottom:6px;" id="periodDisplayLarge">---</div>
 
-    <div class="betting-closed" id="bettingClosed">⛔ Betting Closed — Round in progress</div>
+    <div class="betting-closed" id="bettingClosed">⛔ Betting Closed — Final 3 seconds</div>
 
     <div class="num-grid" id="numGrid">
         <div class="row" id="numRow1"></div>
@@ -531,8 +883,8 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
     <div class="bet-modal-overlay" id="betModal">
         <div class="bet-slip-inner">
             <div class="title-row">
-                <span class="game-name">WinGo</span>
-                <span class="bet-type" id="modalBetDisplay">Select Bets</span>
+                <span class="game-name">WINGO • PLAY-MONEY</span>
+                <span class="bet-type" id="modalBetDisplay">Review Selection</span>
             </div>
             <div class="row">
                 <span class="row-label">Amount</span>
@@ -554,7 +906,11 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
                 <button data-mult="50">X50</button>
                 <button data-mult="100">X100</button>
             </div>
-            <div class="preview-box" id="modalPreviewBox">
+            <div id="selectionSummary" class="preview-box" style="margin-bottom:8px;">
+            <div style="color:#6d6f75;font-size:10px;text-transform:uppercase;letter-spacing:.7px;">Selected</div>
+            <div id="selectionSummaryText" style="margin-top:4px;color:#fff;font-weight:800;">Choose a color, number, or size</div>
+        </div>
+        <div class="preview-box" id="modalPreviewBox">
                 <div style="color:#64748b; font-size:10px;">Preview your potential wins</div>
                 <div id="modalPreviewContent"></div>
             </div>
@@ -710,45 +1066,15 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
         const rulesClose = document.getElementById('rulesClose');
         const rulesTrigger = document.getElementById('rulesTrigger');
 
-        const BALANCE_KEY = 'wingo_balance';
+        const BALANCE_KEY = 'nplusplay_wallet_v1';
         const getHistoryKey = (dur) => `wingo_history_${dur}`;
         const getCounterKey = (dur) => `wingo_counter_${dur}`;
 
         // --- TIMER ENGINE ---
-        function getRoundStart(durationSec, now = Date.now()) {
-            return Math.floor(now / (durationSec * 1000)) * durationSec * 1000;
-        }
-
         function getNextRoundStart(durationSec) {
-            return getRoundStart(durationSec) + durationSec * 1000;
-        }
-
-        function getRoundPeriod(duration, roundStart) {
-            const d = new Date(roundStart);
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const midnight = new Date(y, d.getMonth(), d.getDate()).getTime();
-            const count = Math.floor((roundStart - midnight) / (duration * 1000)) + 1;
-            return `${y}${m}${day}${getDurationPrefix(duration)}${String(count).padStart(2, '0')}`;
-        }
-
-        function getRoundStateKey(duration) { return `wingo_round_state_${duration}`; }
-
-        function loadRoundState(duration) {
-            try {
-                const raw = localStorage.getItem(getRoundStateKey(duration));
-                return raw ? JSON.parse(raw) : null;
-            } catch(e) { return null; }
-        }
-
-        function saveRoundState(duration, lastCompletedStart) {
-            try {
-                localStorage.setItem(getRoundStateKey(duration), JSON.stringify({
-                    lastCompletedStart,
-                    updatedAt: Date.now()
-                }));
-            } catch(e) {}
+            const now = Date.now();
+            const remainder = Math.floor(now / 1000) % durationSec;
+            return now + (durationSec - remainder) * 1000;
         }
 
         function getDurationPrefix(duration) {
@@ -761,13 +1087,66 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
 
         // --- PERIOD GENERATION ---
         function generateNextPeriod(duration) {
-            return getRoundPeriod(duration, getRoundStart(duration));
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            const dateStr = y + m + d;
+
+            const key = getCounterKey(duration);
+            let meta = { date: dateStr, count: 0 };
+
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.date === dateStr) {
+                        meta = parsed;
+                    } else {
+                        meta = { date: dateStr, count: 0 };
+                    }
+                }
+            } catch(e) {}
+
+            meta.count += 1;
+            localStorage.setItem(key, JSON.stringify(meta));
+
+            const counterStr = String(meta.count).padStart(2, '0');
+            const prefix = getDurationPrefix(duration);
+
+            return dateStr + prefix + counterStr;
         }
 
         function getInitialPeriod(duration) {
-            return getRoundPeriod(duration, getRoundStart(duration));
-        }
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            const dateStr = y + m + d;
 
+            const key = getCounterKey(duration);
+            let meta = { date: dateStr, count: 0 };
+
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.date === dateStr) {
+                        meta = parsed;
+                    }
+                }
+            } catch(e) {}
+
+            if (meta.count === 0) {
+                meta.count = 1;
+                localStorage.setItem(key, JSON.stringify(meta));
+            }
+
+            const counterStr = String(meta.count).padStart(2, '0');
+            const prefix = getDurationPrefix(duration);
+
+            return dateStr + prefix + counterStr;
+        }
 
         function updatePeriodDisplay() {
             periodEl.textContent = currentPeriod.slice(0, 14);
@@ -777,30 +1156,40 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
         // --- TIMER DISPLAY ---
         function updateTimerDisplay() {
             const now = Date.now();
-            const currentStart = getRoundStart(currentDuration, now);
-            const nextStart = currentStart + currentDuration * 1000;
-            const remaining = Math.max(0, nextStart - now);
-            const secs = Math.ceil(remaining / 1000);
+            const nextStart = getNextRoundStart(currentDuration);
+            const remaining = Math.max(0, (nextStart - now) / 1000);
+            const secs = Math.ceil(remaining);
             const m = Math.floor(secs / 60);
-            const sec = secs % 60;
-            const formatted = String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
-
+            const s = secs % 60;
+            const formatted = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
             timerEl.textContent = formatted;
             timerLarge.textContent = formatted;
-            currentPeriod = getRoundPeriod(currentDuration, currentStart);
-            updatePeriodDisplay();
 
-            if (secs >= 1 && secs <= 5 && secs !== lastBeepSecond) {
+            if (secs >= 1 && secs <= 3 && secs !== lastBeepSecond) {
                 lastBeepSecond = secs;
                 if (soundEnabled) playSingleBeep();
             }
             if (secs > 5) lastBeepSecond = -1;
 
-            const open = secs > 5 && !roundActive;
-            if (bettingOpen !== open && !roundActive) setBettingState(open);
+            if (secs <= 3 && bettingOpen) {
+                setBettingState(false);
+                if (secs === 3) {
+                    showMessage('⛔ Betting Closed!', 'closed');
+                    if (betModal.classList.contains('active')) closeBetModal();
+                }
+            } else if (secs > 3 && !bettingOpen && !roundActive) {
+                setBettingState(true);
+            }
 
-            if (now >= nextStart - 80) {
-                catchUpRounds();
+            if (secs <= 0 && roundActive) {
+                console.warn("⚠️ Force resetting stuck round...");
+                roundActive = false;
+                completeRound();
+                return;
+            }
+
+            if (secs <= 0 && !roundActive) {
+                completeRound();
             }
         }
 
@@ -822,16 +1211,58 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
         // --- DATA ---
         function loadBalance() {
             try {
-                const val = localStorage.getItem(BALANCE_KEY);
-                if (val !== null) balance = parseFloat(val) || 1000;
-                else balance = 1000;
-            } catch(e) { balance = 1000; }
+                const raw = localStorage.getItem(BALANCE_KEY);
+                if (raw === null) {
+                    balance = 1000;
+                    saveBalance();
+                } else {
+                    let parsed = Number.NaN;
+                    try {
+                        const obj = JSON.parse(raw);
+                        parsed = (obj && typeof obj === 'object') ? Number(obj.balance) : Number(obj);
+                    } catch (_) {
+                        parsed = Number(raw);
+                    }
+                    balance = Number.isFinite(parsed) && parsed >= 0 ? parsed : 1000;
+                }
+            } catch (e) {
+                balance = 1000;
+            }
             updateBalanceUI();
         }
 
         function saveBalance() {
-            localStorage.setItem(BALANCE_KEY, String(balance));
+            try {
+                localStorage.setItem(BALANCE_KEY, JSON.stringify({
+                    balance: Number(Math.max(0, balance).toFixed(2)),
+                    updatedAt: Date.now()
+                }));
+            } catch (e) {
+                console.warn('Wallet save failed:', e);
+            }
         }
+
+        function syncBalanceFromStorage() {
+            try {
+                const raw = localStorage.getItem(BALANCE_KEY);
+                if (!raw) return;
+                let next = Number.NaN;
+                try {
+                    const obj = JSON.parse(raw);
+                    next = (obj && typeof obj === 'object') ? Number(obj.balance) : Number(obj);
+                } catch (_) {
+                    next = Number(raw);
+                }
+                if (Number.isFinite(next) && next >= 0) {
+                    balance = next;
+                    updateBalanceUI();
+                }
+            } catch (_) {}
+        }
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === BALANCE_KEY) syncBalanceFromStorage();
+        });
 
         function loadHistory(duration) {
             try {
@@ -860,19 +1291,39 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
         }
 
         function cleanHistory() {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            let changed = false;
             const durs = [30, 60, 180, 300];
             durs.forEach(dur => {
+                const key = getHistoryKey(dur);
                 try {
-                    const key = getHistoryKey(dur);
                     const raw = localStorage.getItem(key);
-                    if (!raw) return;
-                    const data = JSON.parse(raw);
-                    if (Array.isArray(data.history) && data.history.length > 500) {
-                        data.history = data.history.slice(0, 500);
-                        localStorage.setItem(key, JSON.stringify(data));
+                    if (raw) {
+                        const data = JSON.parse(raw);
+                        if (data.history && data.history.length) {
+                            const filtered = data.history.filter(item => {
+                                if (!item.timestamp) return true;
+                                return (now - item.timestamp) < oneDay;
+                            });
+                            if (filtered.length !== data.history.length) {
+                                data.history = filtered;
+                                localStorage.setItem(key, JSON.stringify(data));
+                                changed = true;
+                            }
+                        }
                     }
                 } catch(e) {}
             });
+            if (changed) {
+                loadHistory(currentDuration);
+                renderAllHistory();
+                renderMyBets();
+                updateStats();
+                renderChart();
+                updateStrategy();
+                renderStats();
+            }
         }
 
         // --- AUDIO ---
@@ -1227,60 +1678,58 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
         }
 
         // --- COMPLETE ROUND (UPDATED: History limit increased to 500) ---
-        function completeRound(roundStart = getRoundStart(currentDuration, Date.now()) - currentDuration * 1000, isCatchup = false) {
-            if (roundActive) return false;
+        function completeRound() {
+            console.log("🔄 completeRound() triggered.");
+            if (roundActive) {
+                console.warn("⚠️ Round already active, skipping.");
+                return;
+            }
             roundActive = true;
             setBettingState(false);
 
-            const period = getRoundPeriod(currentDuration, roundStart);
-            const savedSelections = {
-                colors: [...selectedBets.colors],
-                size: selectedBets.size,
-                numbers: [...selectedBets.numbers]
-            };
-            const hadBet = betPlacedThisRound;
-
             try {
                 const result = generateResult();
-                const processed = processResult(result);
-                const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processed;
+                const autoBetSelection = {
+                    colors: [...selectedBets.colors],
+                    size: selectedBets.size,
+                    numbers: [...selectedBets.numbers]
+                };
+                const shouldAutoBet = autoBet && (
+                    autoBetSelection.colors.length > 0 ||
+                    !!autoBetSelection.size ||
+                    autoBetSelection.numbers.length > 0
+                );
+                const { totalPayout, totalWon, betResults, totalBetAmount, netChange } = processResult(result);
+
                 rounds++;
 
-                const betStr = [
-                    ...savedSelections.colors.map(c => c.toUpperCase()),
-                    ...(savedSelections.size ? [savedSelections.size.toUpperCase()] : []),
-                    ...savedSelections.numbers.map(n => '#' + n)
-                ].join(' + ');
+                const betStr = selectedBets.colors.join(' ') + (selectedBets.size || '') + selectedBets.numbers.join(' ');
 
                 history.unshift({
-                    period,
+                    period: currentPeriod,
                     number: result.number,
                     colors: result.colors,
                     betType: betStr || 'none',
-                    stake: hadBet ? totalBetAmount : 0,
+                    stake: betPlacedThisRound ? totalBetAmount : 0,
                     payout: totalPayout,
                     won: totalWon,
                     netChange: netChange || 0,
-                    timestamp: Date.now(),
-                    roundStart
+                    timestamp: Date.now()
                 });
 
-                if (history.length > 500) history = history.slice(0, 500);
+                // ✅ HISTORY LIMIT UPDATED TO 500
+                if (history.length > 500) history.pop();
                 saveHistory(currentDuration);
-                saveRoundState(currentDuration, roundStart);
 
-                if (!isCatchup && hadBet && betResults.length > 0) {
-                    const details = betResults.map(b => `${b.type.toUpperCase()} (${b.val !== undefined ? b.val : ''})`).join(' + ');
-                    showResultPopup(totalWon, totalPayout, period, details, result.colors, netChange);
-                }
-
-                if (hadBet) {
-                    betAmountThisRound = 0;
+                if (betPlacedThisRound && betResults.length > 0) {
+                    let details = betResults.map(b => {
+                        return b.type.toUpperCase() + ' (' + (b.val !== undefined ? b.val : '') + ')';
+                    }).join(' + ');
+                    showResultPopup(totalWon, totalPayout, currentPeriod, details, result.colors, netChange);
                 }
 
                 selectedBets = { colors: [], size: null, numbers: [] };
-                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button')
-                    .forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
                 betPlacedThisRound = false;
                 closeBetModal();
 
@@ -1292,75 +1741,80 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
                 renderStats();
                 updateBalanceUI();
 
-                return true;
+                if (shouldAutoBet) {
+                    selectedBets = {
+                        colors: [...autoBetSelection.colors],
+                        size: autoBetSelection.size,
+                        numbers: [...autoBetSelection.numbers]
+                    };
+                    setTimeout(openBetModal, 500);
+                }
+
             } catch (error) {
-                console.error('WINGO round error:', error);
-                return false;
+                console.error("❌ WINGO Round Error:", error);
+                showMessage('⚠️ Round auto-recovered.', 'info');
             } finally {
                 roundActive = false;
+                currentPeriod = generateNextPeriod(currentDuration);
+                updatePeriodDisplay();
+                setBettingState(true);
+                console.log("✅ New Period:", currentPeriod);
             }
         }
 
         // ===== CATCH UP MISSED ROUNDS (NEW FEATURE) =====
         function catchUpRounds() {
-            if (roundActive) return;
+            const lastItem = history.length > 0 ? history[0] : null;
+            if (!lastItem || !lastItem.timestamp) {
+                currentPeriod = generateNextPeriod(currentDuration);
+                updatePeriodDisplay();
+                return;
+            }
 
             const now = Date.now();
-            const currentStart = getRoundStart(currentDuration, now);
-            const state = loadRoundState(currentDuration);
-            let lastCompleted = state && Number.isFinite(state.lastCompletedStart)
-                ? state.lastCompletedStart
-                : null;
+            const elapsedMs = now - lastItem.timestamp;
+            const elapsedSecs = elapsedMs / 1000;
 
-            if (lastCompleted === null) {
-                const latest = history.find(h => Number.isFinite(h.roundStart));
-                if (latest) lastCompleted = latest.roundStart;
-                else {
-                    const legacyLatest = history[0];
-                    if (legacyLatest && legacyLatest.timestamp) {
-                        lastCompleted = getRoundStart(currentDuration, legacyLatest.timestamp);
-                    } else {
-                        // First-ever visit: start tracking from the current round.
-                        lastCompleted = currentStart;
-                        saveRoundState(currentDuration, lastCompleted);
-                    }
-                }
+            if (elapsedSecs < currentDuration * 0.5) return;
+
+            const missedRounds = Math.min(Math.floor(elapsedSecs / currentDuration), 500);
+            if (missedRounds <= 0) return;
+
+            console.log(`🔄 Catching up ${missedRounds} missed rounds...`);
+
+            for (let i = 0; i < missedRounds; i++) {
+                const result = generateResult();
+                const period = generateNextPeriod(currentDuration);
+                history.unshift({
+                    period: period,
+                    number: result.number,
+                    colors: result.colors,
+                    betType: 'none',
+                    stake: 0,
+                    payout: 0,
+                    won: false,
+                    netChange: 0,
+                    timestamp: now - (missedRounds - i) * currentDuration * 1000
+                });
+                if (history.length > 500) history.pop();
             }
 
-            // Remove impossible future state caused by clock changes.
-            if (lastCompleted > currentStart) lastCompleted = currentStart;
+            // Recalculate stats
+            rounds = history.length;
+            wins = history.filter(h => h.won === true && h.stake > 0).length;
+            losses = history.filter(h => h.won === false && h.stake > 0).length;
+            totalWon = history.reduce((sum, h) => sum + (h.netChange || 0), 0);
 
-            let nextCompleted = lastCompleted + currentDuration * 1000;
-            const maxCatchup = 500;
-            let count = 0;
+            saveHistory(currentDuration);
+            renderAllHistory();
+            renderMyBets();
+            updateStats();
+            renderChart();
+            updateStrategy();
+            renderStats();
 
-            while (nextCompleted < currentStart && count < maxCatchup) {
-                completeRound(nextCompleted, true);
-                lastCompleted = nextCompleted;
-                nextCompleted += currentDuration * 1000;
-                count++;
-            }
-
-            if (count > 0) {
-                saveRoundState(currentDuration, lastCompleted);
-                // Re-sync stats after catch-up without generating another period.
-                rounds = history.length;
-                wins = history.filter(h => h.won === true && h.stake > 0).length;
-                losses = history.filter(h => h.won === false && h.stake > 0).length;
-                totalWon = history.reduce((sum, h) => sum + (Number(h.netChange) || 0), 0);
-                saveHistory(currentDuration);
-                renderAllHistory();
-                renderMyBets();
-                updateStats();
-                renderChart();
-                updateStrategy();
-                renderStats();
-            }
-
-            currentPeriod = getRoundPeriod(currentDuration, currentStart);
+            currentPeriod = generateNextPeriod(currentDuration);
             updatePeriodDisplay();
-            const seconds = Math.ceil((currentStart + currentDuration * 1000 - now) / 1000);
-            if (!betPlacedThisRound) setBettingState(seconds > 5);
         }
 
         // --- MODAL FUNCTIONS ---
@@ -1488,25 +1942,16 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
             saveHistory(currentDuration);
             currentDuration = newDuration;
             loadHistory(currentDuration);
-            selectedBets = { colors: [], size: null, numbers: [] };
-            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button')
-                .forEach(b => b.classList.remove('selected'));
-            betPlacedThisRound = false;
-            betAmountThisRound = 0;
-            closeBetModal();
-            roundActive = false;
-
-            catchUpRounds();
-            currentPeriod = getRoundPeriod(currentDuration, getRoundStart(currentDuration));
+            currentPeriod = getInitialPeriod(currentDuration);
             updatePeriodDisplay();
-            renderAllHistory();
-            renderMyBets();
-            updateStats();
-            renderChart();
-            updateStrategy();
-            renderStats();
-
+            selectedBets = { colors: [], size: null, numbers: [] };
+            document.querySelectorAll('.num-grid button, .action-row-colors button, .action-row-size button').forEach(b => b.classList.remove('selected'));
+            betPlacedThisRound = false;
+            closeBetModal();
+            renderAllHistory(); renderMyBets(); updateStats(); renderChart(); updateStrategy(); renderStats();
             if (timerInterval) clearInterval(timerInterval);
+            roundActive = false;
+            setBettingState(true);
             startTimerLoop();
         }
 
@@ -1643,21 +2088,21 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
 
         function updateStrategy() {
             const box = document.getElementById('strategyDetail');
-            if (!box) return;
-            const recent = history.slice(0, 20);
-            if (recent.length < 5) {
-                box.textContent = 'Need more historical data';
-                return;
+            if(!box) return;
+            const recent = history.slice(0,20);
+            if(recent.length<5){ box.textContent='Need more data'; return; }
+            const last5 = recent.slice(0,5);
+            const colors = last5.map(r => r.colors?.[0] || 'red');
+            if(colors.every(c=>c===colors[0])) box.textContent=`🔥 Last 5 all ${colors[0].toUpperCase()}! Bet on ${colors[0]}?`;
+            else {
+                const counts = {red:0, green:0, violet:0};
+                recent.slice(0,10).forEach(r => {
+                    if(r.colors) r.colors.forEach(c => { if(counts[c]!==undefined) counts[c]++; });
+                });
+                if(counts.red>counts.green && counts.red>counts.violet) box.textContent='🔴 Red is hot!';
+                else if(counts.green>counts.red && counts.green>counts.violet) box.textContent='🟢 Green is hot!';
+                else box.textContent='⚖️ Balanced. No clear trend.';
             }
-            const counts = { red: 0, green: 0, violet: 0 };
-            recent.slice(0, 10).forEach(r => {
-                (r.colors || []).forEach(c => { if (counts[c] !== undefined) counts[c]++; });
-            });
-            const ordered = Object.entries(counts).sort((a,b) => b[1] - a[1]);
-            const total = ordered.reduce((sum, [,v]) => sum + v, 0) || 1;
-            const top = ordered[0];
-            const pct = Math.round((top[1] / total) * 100);
-            box.textContent = `Recent 10-round distribution: ${top[0].toUpperCase()} ${pct}% · Historical data only — no outcome is guaranteed.`;
         }
 
         // --- TABS ---
@@ -1692,10 +2137,12 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
             cleanHistory();
             loadBalance();
             loadHistory(currentDuration);
+            
+            // ✅ NEW: Catch up any missed rounds since last visit
+            catchUpRounds();
 
             currentPeriod = getInitialPeriod(currentDuration);
             updatePeriodDisplay();
-            catchUpRounds();
 
             renderNumberGrid();
             renderActionRows();
@@ -1778,8 +2225,9 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
                 placeBetNow();
             });
 
-            modalAutoBet.addEventListener('change', function() {
+            document.getElementById('autoBetCheck')?.addEventListener('change', function() {
                 autoBet = this.checked;
+                modalAutoBet.checked = autoBet;
             });
         }
 
@@ -1790,5 +2238,30 @@ body{background:radial-gradient(700px 420px at 50% -120px,rgba(245,197,24,.10),t
         }
     })();
 </script>
+
+<script>
+(() => {
+  function syncSelectionSummary(){
+    const out = document.getElementById('selectionSummaryText');
+    if(!out) return;
+
+    const parts = [];
+    document.querySelectorAll('.action-row-colors button.selected').forEach(b => parts.push(b.dataset.type.toUpperCase()));
+    document.querySelectorAll('.action-row-size button.selected').forEach(b => parts.push(b.dataset.type.toUpperCase()));
+    document.querySelectorAll('.num-grid button.selected').forEach(b => parts.push('#' + b.dataset.num));
+
+    out.textContent = parts.length ? parts.join(' • ') : 'Choose a color, number, or size';
+  }
+
+  document.addEventListener('click', e => {
+    if(e.target.closest('.num-grid button,.action-row-colors button,.action-row-size button,.preset-btn')){
+      setTimeout(syncSelectionSummary, 0);
+    }
+  });
+
+  syncSelectionSummary();
+})();
+</script>
+
 </body>
 </html>
