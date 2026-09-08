@@ -70,7 +70,7 @@ a{text-decoration:none;color:inherit}button{font:inherit}
 <div class="app">
 <header class="header">
   <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
-  <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="age">18+</span></div>
+  <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="sync-pill"><i></i>LIVE</span><span class="age">18+</span></div>
 </header>
 
 <section class="hero">
@@ -83,7 +83,7 @@ a{text-decoration:none;color:inherit}button{font:inherit}
     <div class="sync"><i></i><span id="syncText">SYNCED</span></div>
   </div>
   <div class="balance">
-    <div><small>AVAILABLE DEMO CREDITS</small><strong id="heroBalance">₹1,000.00</strong></div>
+    <div><small>AVAILABLE BALANCE</small><strong id="heroBalance">₹1,000.00</strong></div>
     <button class="mini" id="refreshBtn">↻ Refresh</button>
   </div>
 </section>
@@ -175,10 +175,6 @@ a{text-decoration:none;color:inherit}button{font:inherit}
    <button class="filter" data-filter="win">WINS</button>
    <button class="filter" data-filter="loss">LOSSES</button>
    <button class="filter" data-filter="pending">PENDING</button>
-   <button class="filter" data-filter="30">30 SEC</button>
-   <button class="filter" data-filter="60">1 MIN</button>
-   <button class="filter" data-filter="180">3 MIN</button>
-   <button class="filter" data-filter="300">5 MIN</button>
    <button class="filter" data-filter="game">GAMES</button>
  </div>
  <div class="search"><span>⌕</span><input id="search" placeholder="Search period, game or selection"></div>
@@ -221,7 +217,7 @@ a{text-decoration:none;color:inherit}button{font:inherit}
 <section class="section">
  <div class="sectionhead"><h2>Quick Actions</h2><span class="view">N+ PLAY</span></div>
  <div class="actions">
-   <a href="wingo.html"><span>◎</span><b>Continue Playing</b><small>Open your latest game</small></a>
+   <a href="wingo.html"><span>◎</span><b>Play Now</b><small>Explore your games</small></a>
    <a href="index.html"><span>✦</span><b>Discover Games</b><small>Explore the N+ lobby</small></a>
    <a href="account.html"><span>◯</span><b>Account</b><small>Profile & settings</small></a>
    <a href="bonus.html"><span>◇</span><b>Rewards</b><small>View bonus center</small></a>
@@ -229,8 +225,8 @@ a{text-decoration:none;color:inherit}button{font:inherit}
 </section>
 
 <footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:4px 0 20px">
-  <strong style="color:#7d6a3d">18+ · VIRTUAL CREDIT DEMO</strong><br>
-  N+ PLAY prototype · No real-money transactions.
+  <strong style="color:#7d6a3d">18+ · PLAY MODE</strong><br>
+  N+ PLAY prototype · Platform activity mode.
 </footer>
 </div>
 ght:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.045);font-size:.75rem}
@@ -289,20 +285,27 @@ background:radial-gradient(circle at 82% 40%,rgba(201,165,91,.16),transparent 35
 .gamehub span{display:block;color:#666861;font-size:.46rem;letter-spacing:.5px}.gamehub b{display:block;margin-top:6px;color:#e9e3d4;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gamehub small{display:block;margin-top:3px;color:#60635c;font-size:.46rem}
 @media(max-width:430px){.gamehub{grid-template-columns:1fr 1fr}.gamehub>div:last-child{grid-column:1/-1}}
 
+
+.sync-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(77,224,172,.18);background:rgba(77,224,172,.055);color:#8be6c4;border-radius:999px;padding:7px 9px;font-size:.45rem;font-weight:900;letter-spacing:.6px}.sync-pill i{width:5px;height:5px;border-radius:50%;background:#4de0ac;box-shadow:0 0 9px #4de0ac}
+.hero{background:radial-gradient(circle at 88% 20%,rgba(201,165,91,.08),transparent 35%),linear-gradient(145deg,#11120f,#090a08)!important}
+.section{margin-top:21px}
+.sectionhead h2{letter-spacing:-.2px}
+.item{transition:transform .18s,border-color .18s,background .18s}.item:active{transform:scale(.992)}
+
 </style>
 </head>
 <body>
 <div class="app">
 <header class="header">
   <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
-  <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="age">18+</span></div>
+  <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="sync-pill"><i></i>LIVE</span><span class="age">18+</span></div>
 </header>
 
 <section class="hero">
   <div class="kicker">N+ PLAY • Activity Center</div>
   <h1>Your Activity</h1>
-  <p>N+ PLAY demo activity, results and progress — all in one clean view.</p>
-  <div class="balance"><div><small>AVAILABLE DEMO CREDITS</small><strong id="heroBalance">₹1,000.00</strong></div><div class="sync"><i></i> SYNCED</div></div>
+  <p>Your N+ PLAY activity, results and progress — all in one clean view.</p>
+  <div class="balance"><div><small>AVAILABLE BALANCE</small><strong id="heroBalance">₹1,000.00</strong></div><div class="sync"><i></i> SYNCED</div></div>
 </section>
 
 <section class="section">
@@ -320,10 +323,6 @@ background:radial-gradient(circle at 82% 40%,rgba(201,165,91,.16),transparent 35
    <button class="filter active" data-filter="all">ALL</button>
    <button class="filter" data-filter="win">WINS</button>
    <button class="filter" data-filter="loss">LOSSES</button>
-   <button class="filter" data-filter="30">30 SEC</button>
-   <button class="filter" data-filter="60">1 MIN</button>
-   <button class="filter" data-filter="180">3 MIN</button>
-   <button class="filter" data-filter="300">5 MIN</button>
    <button class="filter" data-filter="game">GAMES</button>
  </div>
  <div class="list" id="activityList" style="margin-top:9px"></div>
@@ -342,14 +341,14 @@ background:radial-gradient(circle at 82% 40%,rgba(201,165,91,.16),transparent 35
 <section class="section">
  <div class="sectionhead"><h2>Featured</h2><span class="view">EXPLORE</span></div>
  <div class="rewards">
-   <a class="reward" href="wingo.html"><span class="rIcon">◎</span><span class="tag">WINGO</span><h3>Continue Playing</h3><p>Return to your latest game and continue your session.</p></a>
+   <a class="reward" href="wingo.html"><span class="rIcon">◎</span><span class="tag">WINGO</span><h3>Play Now</h3><p>Return to your latest game and continue your session.</p></a>
    <a class="reward" href="index.html"><span class="rIcon">✦</span><span class="tag">N+ PLAY</span><h3>Discover Games</h3><p>Browse the rest of the N+ PLAY game collection.</p></a>
  </div>
 </section>
 
 <footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:4px 0 20px">
-  <strong style="color:#7d6a3d">18+ · VIRTUAL CREDIT DEMO</strong><br>
-  N+ PLAY prototype · No real-money transactions.
+  <strong style="color:#7d6a3d">18+ · PLAY MODE</strong><br>
+  N+ PLAY prototype · Platform activity mode.
 </footer>
 </div>
 
@@ -366,6 +365,7 @@ background:radial-gradient(circle at 82% 40%,rgba(201,165,91,.16),transparent 35
 <script>
 (()=>{"use strict";
 const STORE="nplusplay_wingo_ultra_final_v2";
+const LEGACY_WALLET="nplusplay_wallet_v1";
 const modes=[30,60,180,300];
 let filter="all", range="all", query="", visible=25, lastBalance=null;
 
@@ -374,16 +374,39 @@ const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:
 const secLabel=s=>({30:"30 SEC",60:"1 MIN",180:"3 MIN",300:"5 MIN"})[Number(s)]||"WINGO";
 const load=()=>{try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}};
 
+
+function platformExtraBets(){
+  const out=[];
+  const keys=["nplusplay_activity_v1","nplusplay_game_activity_v1","nplusplay_bets_v1"];
+  for(const key of keys){
+    try{
+      const raw=JSON.parse(localStorage.getItem(key)||"[]");
+      const arr=Array.isArray(raw)?raw:(Array.isArray(raw?.bets)?raw.bets:[]);
+      for(const b of arr) if(b&&typeof b==="object") out.push({...b,gameName:b.gameName||b.game||b.gameCode||"N+ PLAY GAME"});
+    }catch{}
+  }
+  return out;
+}
+
 function allBets(){
   const x=load(), out=[];
   for(const sec of modes){
     const arr=Array.isArray(x.bets?.[sec])?x.bets[sec]:[];
     for(const b of arr) out.push({...b,sec:Number(b.sec||sec)});
   }
-  return out.sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0));
+  out.push(...platformExtraBets());
+  const seen=new Set();
+  return out.filter(b=>{
+    const k=String(b.id||b.period||((b.gameName||b.game||"game")+"_"+(b.ts||b.timestamp||"")));
+    if(seen.has(k)) return false; seen.add(k); return true;
+  }).sort((a,b)=>(b.settledAt||b.ts||b.timestamp||0)-(a.settledAt||a.ts||a.timestamp||0));
 }
 function getBalance(){
-  const n=Number(load().balance); return Number.isFinite(n)?n:1000;
+  const x=load();
+  const primary=Number(x.balance);
+  if(Number.isFinite(primary)) return primary;
+  const legacy=Number(localStorage.getItem(LEGACY_WALLET));
+  return Number.isFinite(legacy)?legacy:1000;
 }
 function inRange(b){
   if(range==="all") return true;
@@ -402,7 +425,7 @@ function filtered(){
     if(filter==="loss"&&s!=="lost")return false;
     if(filter==="pending"&&s!=="pending")return false;
     if(["30","60","180","300"].includes(filter)&&Number(b.sec)!==Number(filter))return false;
-    if(filter==="game" && !b.game && !b.gameName && String(b.type||"").toLowerCase()==="")return false;
+    if(filter==="game" && !b.game && !b.gameName && !b.gameCode && !b.source)return false;
     if(query){
       const hay=[b.gameName,b.game,b.period,b.type,b.value,b.result,b.sec].join(" ").toLowerCase();
       if(!hay.includes(query.toLowerCase()))return false;
@@ -550,7 +573,8 @@ document.querySelectorAll(".range-btn").forEach(b=>b.onclick=()=>{document.query
 $("#search").addEventListener("input",e=>{query=e.target.value.trim();visible=25;render()});
 $("#loadMore").onclick=()=>{visible+=25;render()};
 $("#refreshBtn").onclick=()=>{render();$("#syncText").textContent="REFRESHED";setTimeout(()=>$("#syncText").textContent="SYNCED",800)};
-window.addEventListener("storage",e=>{if(e.key===STORE)render()});
+window.addEventListener("storage",e=>{if(e.key===STORE||e.key===LEGACY_WALLET)render()});
+window.addEventListener("pageshow",()=>render());
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});
 setInterval(render,1500);render();
 })();
