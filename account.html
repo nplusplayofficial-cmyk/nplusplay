@@ -1,568 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N+ PLAY - User Account</title>
-    <style>
-        /* ==========================================
-           1. MODERN DARK GAMING THEME & GLASSMORPHISM
-           ========================================== */
-        :root {
-            --bg-dark: #070a12;
-            --bg-surface: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.65);
-            --card-border: rgba(255, 255, 255, 0.1);
-            
-            --gold-neon: #f59e0b;
-            --gold-glow: rgba(245, 158, 11, 0.35);
-            --red-vibrant: #e63946;
-            --red-glow: rgba(230, 57, 70, 0.4);
-            --green-glow: #10b981;
-
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: rgba(15, 23, 42, 0.85);
-            --input-border: rgba(255, 255, 255, 0.12);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            background-image: 
-                radial-gradient(circle at 15% 15%, var(--gold-glow) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, var(--red-glow) 0%, transparent 45%),
-                linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
-            background-attachment: fixed;
-            padding: 10px 10px 80px 10px; /* Space for bottom nav */
-        }
-
-        .app-viewport {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            position: relative;
-        }
-
-        /* USER PROFILE BANNER HEADER */
-        .profile-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-            border: 1px solid var(--card-border);
-            border-radius: 22px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .user-avatar {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            box-shadow: 0 0 15px var(--gold-glow);
-            flex-shrink: 0;
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .user-phone {
-            font-size: 1.05rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-uid {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .vip-badge {
-            align-self: flex-start;
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--gold-neon);
-            border: 1px solid rgba(245, 158, 11, 0.4);
-            font-size: 0.68rem;
-            font-weight: 900;
-            padding: 2px 8px;
-            border-radius: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        /* MAIN WALLET BALANCE CARD */
-        .wallet-card {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid var(--gold-neon);
-            border-radius: 16px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 0 15px var(--gold-glow);
-        }
-
-        .wallet-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .wallet-title {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .wallet-amount {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--green-glow);
-        }
-
-        .wallet-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-wallet-action {
-            flex: 1;
-            height: 44px;
-            border-radius: 12px;
-            border: none;
-            font-size: 0.88rem;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: transform 0.2s;
-        }
-
-        .btn-deposit {
-            background: linear-gradient(135deg, var(--gold-neon), #d97706);
-            color: #000;
-            box-shadow: 0 4px 12px var(--gold-glow);
-        }
-
-        .btn-withdraw {
-            background: rgba(230, 57, 70, 0.2);
-            border: 1px solid var(--red-vibrant);
-            color: var(--red-vibrant);
-        }
-
-        .btn-wallet-action:active {
-            transform: scale(0.96);
-        }
-
-        /* VIP PROGRESS BAR */
-        .vip-progress-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 14px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .vip-progress-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: rgba(15, 23, 42, 0.9);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            width: 65%;
-            background: linear-gradient(90deg, var(--gold-neon), var(--red-vibrant));
-            border-radius: 8px;
-        }
-
-        /* SECTION HEADER */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 4px;
-        }
-
-        .section-title {
-            font-size: 1.05rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 16px;
-            background: var(--gold-neon);
-            border-radius: 2px;
-        }
-
-        /* QUICK ACCESS MENU CARDS */
-        .menu-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .menu-item {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            text-decoration: none;
-            color: var(--text-main);
-            transition: border-color 0.2s, transform 0.2s;
-        }
-
-        .menu-item:hover {
-            border-color: var(--gold-neon);
-            transform: translateY(-2px);
-        }
-
-        .menu-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .menu-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--card-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-
-        .menu-label {
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
-        .menu-status {
-            font-size: 0.72rem;
-            color: var(--green-glow);
-            font-weight: 700;
-            margin-right: 6px;
-        }
-
-        .menu-arrow {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* LOGOUT BUTTON */
-        .btn-logout {
-            width: 100%;
-            height: 50px;
-            background: rgba(230, 57, 70, 0.15);
-            border: 1px solid var(--red-vibrant);
-            color: var(--red-vibrant);
-            border-radius: 16px;
-            font-size: 0.95rem;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            margin-top: 6px;
-        }
-
-        .btn-logout:hover {
-            background: var(--red-vibrant);
-            color: #ffffff;
-            box-shadow: 0 6px 18px var(--red-glow);
-        }
-
-        .btn-logout:active {
-            transform: scale(0.98);
-        }
-
-        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .nav-item.active {
-            color: var(--gold-neon);
-        }
-
-        .nav-icon {
-            font-size: 1.2rem;
-        }
-
-        /* TOAST NOTIFICATION */
-        .toast {
-            position: fixed;
-            top: 24px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--green-glow);
-            color: #6ee7b7;
-            padding: 12px 22px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 2000;
-            white-space: nowrap;
-        }
-
-        .toast.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080908">
+<title>N+ PLAY — Account</title>
+<style>
+:root{
+ --bg:#080908;--panel:#11130f;--panel2:#151713;--line:rgba(255,255,255,.075);
+ --text:#f4f1e8;--muted:#777a72;--gold:#c9a55b;--gold2:#f0dfb5;
+ --green:#42d9a5;--red:#ff6d77;--shadow:0 25px 80px rgba(0,0,0,.55)
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}
+body{min-height:100vh;color:var(--text);background:
+ radial-gradient(650px 450px at 50% -160px,rgba(201,165,91,.075),transparent 68%),
+ radial-gradient(500px 500px at 100% 45%,rgba(255,255,255,.025),transparent 70%),#080908;padding-bottom:90px}
+a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer}
+.app{width:min(100%,760px);margin:auto;padding:0 14px}
+.header{height:70px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,165,91,.09)}
+.brand{display:flex;align-items:center;gap:10px}.mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+ background:linear-gradient(145deg,#f2e5c3,#c9a55b 52%,#70582b);color:#11100c;font-size:11px;font-weight:950;
+ box-shadow:0 8px 28px rgba(201,165,91,.14)}.brand b{font-size:1.25rem;letter-spacing:1px}
+.headright{display:flex;align-items:center;gap:7px}.wallet{padding:9px 12px;border:1px solid rgba(66,217,165,.2);border-radius:999px;background:rgba(66,217,165,.055);color:#bdf4df;font-size:.72rem;font-weight:900}
+.live{display:flex;align-items:center;gap:5px;color:#85e4c2;font-size:.48rem;font-weight:900}.live i{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 10px var(--green)}
+.age{font-size:.55rem;color:#ff929a;border:1px solid rgba(255,109,119,.2);border-radius:999px;padding:6px 8px;font-weight:900}
+.profile{margin-top:18px;padding:20px;border-radius:24px;border:1px solid rgba(201,165,91,.16);
+ background:radial-gradient(circle at 85% 15%,rgba(201,165,91,.12),transparent 34%),linear-gradient(145deg,#171813,#0c0d0b);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.profile:after{content:"N+";position:absolute;right:-15px;bottom:-38px;font-size:145px;line-height:1;font-weight:950;color:rgba(201,165,91,.025)}
+.profile-row{display:flex;align-items:center;gap:14px;position:relative;z-index:2}.avatar{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;
+ background:linear-gradient(145deg,#f0dfb5,#c9a55b);color:#17140d;font-size:1.2rem;font-weight:950;box-shadow:0 12px 35px rgba(201,165,91,.16)}
+.profile-info{min-width:0}.profile-info h1{font-size:1.15rem}.profile-info p{margin-top:4px;color:#777a72;font-size:.57rem}.verified{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:5px 8px;border-radius:999px;background:rgba(66,217,165,.055);border:1px solid rgba(66,217,165,.16);color:#8ae4c4;font-size:.47rem;font-weight:900}
+.profile-edit{margin-left:auto;width:36px;height:36px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);color:#aaa99f}
+.profile-balance{margin-top:18px;padding-top:15px;border-top:1px solid rgba(255,255,255,.065);display:flex;justify-content:space-between;align-items:end;position:relative;z-index:2}
+.profile-balance small{display:block;color:#62655e;font-size:.48rem;letter-spacing:1px}.profile-balance strong{display:block;margin-top:4px;font-size:1.55rem}.sync{font-size:.48rem;color:#79dfb7;display:flex;gap:5px;align-items:center}.sync i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green)}
+.section{margin-top:22px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.sectionhead h2{font-size:.9rem}.sectionhead h2:before{content:"";display:inline-block;width:3px;height:15px;border-radius:5px;background:linear-gradient(var(--gold2),var(--gold));margin-right:8px;vertical-align:-2px}.view{font-size:.48rem;color:#686b64}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.quick a{padding:14px 7px;text-align:center;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.022);transition:.2s}.quick a:hover{transform:translateY(-2px);border-color:rgba(201,165,91,.2)}
+.qicon{width:38px;height:38px;margin:auto;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#ead9ad,#a98542);color:#18150d;font-weight:950}.quick b{display:block;margin-top:8px;font-size:.53rem}.quick small{display:block;margin-top:3px;color:#62655e;font-size:.44rem}
+.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ov{padding:13px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.022)}.ov span{font-size:.46rem;color:#646760}.ov strong{display:block;margin-top:6px;font-size:.78rem}.ov.green strong{color:#83e5c2}.ov.red strong{color:#ff858e}
+.menu{border:1px solid var(--line);border-radius:19px;overflow:hidden;background:rgba(255,255,255,.018)}
+.menu a,.menu button{width:100%;display:flex;align-items:center;gap:12px;padding:14px;border:0;border-bottom:1px solid rgba(255,255,255,.055);background:transparent;color:inherit;text-align:left}.menu>*:last-child{border-bottom:0}
+.menu-icon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06);color:#d5bd86;font-size:.8rem}.menu-copy{flex:1}.menu-copy b{display:block;font-size:.61rem}.menu-copy small{display:block;margin-top:3px;color:#666961;font-size:.47rem}.arrow{color:#686b64;font-size:.75rem}
+.notice{padding:14px;border:1px solid rgba(201,165,91,.13);border-radius:17px;background:linear-gradient(145deg,rgba(201,165,91,.06),rgba(255,255,255,.018));font-size:.55rem;color:#85877f;line-height:1.55}.notice b{color:#d7c18e}
+.bottom{position:fixed;z-index:100;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,590px);display:grid;grid-template-columns:repeat(5,1fr);
+padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.92);backdrop-filter:blur(24px);border:1px solid rgba(201,165,91,.1);border-bottom:0;border-radius:20px 20px 0 0;box-shadow:0 -18px 55px rgba(0,0,0,.62)}
+.nav{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;color:#666860;font-size:.51rem;font-weight:800}.nav .ni{font-size:1rem}.nav.active{color:var(--gold2)}.nav.active:before{content:"";position:absolute;top:-9px;width:30px;height:3px;border-radius:5px;background:var(--gold);box-shadow:0 0 16px rgba(201,165,91,.6)}
+.toast{position:fixed;z-index:300;left:50%;bottom:98px;transform:translate(-50%,15px);opacity:0;pointer-events:none;padding:10px 14px;border-radius:12px;background:#171916;border:1px solid rgba(201,165,91,.2);font-size:.58rem;transition:.25s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;z-index:250;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(12px)}.modal.show{display:grid}.modal-card{width:min(100%,430px);padding:21px;border-radius:22px;background:#11130f;border:1px solid rgba(201,165,91,.2);box-shadow:0 30px 100px rgba(0,0,0,.8);position:relative}.modal-card h2{font-size:1rem}.modal-card p{margin-top:7px;color:#777a72;font-size:.58rem;line-height:1.55}.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border:1px solid var(--line);border-radius:50%;background:#171916;color:#aaa}.modal-list{margin-top:15px;display:grid;gap:7px}.modal-list div{padding:11px;border-radius:12px;background:rgba(255,255,255,.03);font-size:.55rem;color:#7a7d75}.modal-list b{color:#e8e1d1}.done{width:100%;margin-top:14px;padding:11px;border:0;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;font-size:.58rem}
+@media(max-width:460px){.quick{grid-template-columns:repeat(2,1fr)}.overview{grid-template-columns:1fr 1fr}.overview .ov:last-child{grid-column:1/-1}}
+</style>
 </head>
 <body>
+<div class="app">
+<header class="header">
+ <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
+ <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="live"><i></i>LIVE</span><span class="age">18+</span></div>
+</header>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Notification Message</div>
+<section class="profile">
+ <div class="profile-row">
+  <div class="avatar">N+</div>
+  <div class="profile-info"><h1>Welcome to N+ PLAY</h1><p>Your gaming profile & preferences</p><span class="verified">● ACCOUNT ACTIVE</span></div>
+  <button class="profile-edit" id="editProfile">✎</button>
+ </div>
+ <div class="profile-balance"><div><small>AVAILABLE BALANCE</small><strong id="balance">₹1,000.00</strong></div><div class="sync"><i></i><span id="syncText">SYNCED</span></div></div>
+</section>
 
-    <!-- MAIN APP CONTAINER -->
-    <div class="app-viewport">
-        
-        <!-- PROFILE & VIP HEADER BANNER -->
-        <div class="profile-card">
-            <div class="profile-header">
-                <div class="user-avatar">👤</div>
-                <div class="user-details">
-                    <div class="user-phone">
-                        +91 98***1234
-                        <span class="vip-badge">VIP 3</span>
-                    </div>
-                    <div class="user-uid">UID: 889102</div>
-                </div>
-            </div>
+<section class="section">
+ <div class="sectionhead"><h2>Quick Access</h2><span class="view">ACCOUNT</span></div>
+ <div class="quick">
+  <a href="activity.html"><span class="qicon">◷</span><b>Activity</b><small>Game history</small></a>
+  <a href="bonus.html"><span class="qicon">✦</span><b>Rewards</b><small>Bonus center</small></a>
+  <a href="promotion.html"><span class="qicon">◇</span><b>Promotion</b><small>Latest offers</small></a>
+  <a href="index.html"><span class="qicon">⌂</span><b>Games</b><small>Explore lobby</small></a>
+ </div>
+</section>
 
-            <!-- MAIN WALLET BALANCE CARD -->
-            <div class="wallet-card">
-                <div class="wallet-top">
-                    <span class="wallet-title">Main Wallet Balance</span>
-                    <span style="font-size: 0.75rem; color: var(--gold-neon); cursor: pointer;" onclick="showToast('Wallet Refreshed!')">🔄 Refresh</span>
-                </div>
-                <div class="wallet-amount">$1,000.00</div>
-                <div class="wallet-actions">
-                    <button class="btn-wallet-action btn-deposit" onclick="showToast('Redirecting to Payment Gateway...')">
-                        <span>💳 Deposit</span>
-                    </button>
-                    <button class="btn-wallet-action btn-withdraw" onclick="showToast('Withdrawal Portal Opened')">
-                        <span>⚡ Withdrawal</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+<section class="section">
+ <div class="sectionhead"><h2>Gaming Overview</h2><span class="view">ALL GAMES</span></div>
+ <div class="overview">
+  <div class="ov"><span>TOTAL GAMES</span><strong id="totalGames">0</strong></div>
+  <div class="ov green"><span>WINS</span><strong id="wins">0</strong></div>
+  <div class="ov red"><span>LOSSES</span><strong id="losses">0</strong></div>
+ </div>
+</section>
 
-        <!-- VIP PROGRESS LEVEL CARD -->
-        <div class="vip-progress-card">
-            <div class="vip-progress-header">
-                <span>VIP 3 Level Progress</span>
-                <span style="color: var(--gold-neon);">Exp: 6,500 / 10,000</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill"></div>
-            </div>
-        </div>
+<section class="section">
+ <div class="sectionhead"><h2>Account & Security</h2><span class="view">SETTINGS</span></div>
+ <div class="menu">
+  <button data-modal="profileModal"><span class="menu-icon">♙</span><span class="menu-copy"><b>Profile</b><small>Manage your account details</small></span><span class="arrow">›</span></button>
+  <button data-modal="securityModal"><span class="menu-icon">⌁</span><span class="menu-copy"><b>Security</b><small>Password, device and account protection</small></span><span class="arrow">›</span></button>
+  <button data-modal="notifyModal"><span class="menu-icon">◉</span><span class="menu-copy"><b>Notifications</b><small>Manage activity alerts</small></span><span class="arrow">›</span></button>
+  <button data-modal="appearanceModal"><span class="menu-icon">◐</span><span class="menu-copy"><b>App Preferences</b><small>Sound, display and experience</small></span><span class="arrow">›</span></button>
+ </div>
+</section>
 
-        <!-- MENU SECTIONS -->
-        <div class="section-header">
-            <h3 class="section-title">Quick Services</h3>
-        </div>
+<section class="section">
+ <div class="sectionhead"><h2>Help & Information</h2><span class="view">SUPPORT</span></div>
+ <div class="menu">
+  <button data-modal="helpModal"><span class="menu-icon">?</span><span class="menu-copy"><b>Help Center</b><small>Find answers and guidance</small></span><span class="arrow">›</span></button>
+  <button data-modal="rulesModal"><span class="menu-icon">≡</span><span class="menu-copy"><b>Game Rules</b><small>View game information</small></span><span class="arrow">›</span></button>
+  <button data-modal="termsModal"><span class="menu-icon">§</span><span class="menu-copy"><b>Terms & Privacy</b><small>Platform policies</small></span><span class="arrow">›</span></button>
+ </div>
+</section>
 
-        <div class="menu-list">
-            <!-- Betting History -->
-            <a href="#" class="menu-item" onclick="showToast('Opening Betting History...')">
-                <div class="menu-left">
-                    <div class="menu-icon" style="color: var(--gold-neon);">📊</div>
-                    <span class="menu-label">Betting History</span>
-                </div>
-                <span class="menu-arrow">➔</span>
-            </a>
+<section class="section">
+ <div class="notice"><b>18+ · PLAY RESPONSIBLY</b><br>N+ PLAY account and activity features are presented in the current virtual-credit platform mode. Balance shown here is synchronised with the shared demo wallet used by supported game pages.</div>
+</section>
 
-            <!-- Transaction Records -->
-            <a href="#" class="menu-item" onclick="showToast('Opening Transaction Logs...')">
-                <div class="menu-left">
-                    <div class="menu-icon" style="color: var(--green-glow);">📝</div>
-                    <span class="menu-label">Transaction Records</span>
-                </div>
-                <span class="menu-arrow">➔</span>
-            </a>
+<footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:18px 0 20px">
+ <strong style="color:#7d6a3d">N+ PLAY</strong><br>Account Center · Platform mode
+</footer>
+</div>
 
-            <!-- Bank Card Binding -->
-            <a href="#" class="menu-item" onclick="showToast('Bank Account Bound')">
-                <div class="menu-left">
-                    <div class="menu-icon" style="color: #60a5fa;">🏦</div>
-                    <span class="menu-label">Bank Card Binding</span>
-                </div>
-                <div>
-                    <span class="menu-status">Bound 🟢</span>
-                    <span class="menu-arrow">➔</span>
-                </div>
-            </a>
+<nav class="bottom">
+ <a class="nav" href="index.html"><span class="ni">⌂</span>Home</a>
+ <a class="nav" href="activity.html"><span class="ni">◷</span>Activity</a>
+ <a class="nav" href="bonus.html"><span class="ni">✦</span>Bonus</a>
+ <a class="nav" href="promotion.html"><span class="ni">◇</span>Promotion</a>
+ <a class="nav active" href="account.html"><span class="ni">◯</span>Account</a>
+</nav>
 
-            <!-- Security & Password -->
-            <a href="forgot-password.html" class="menu-item">
-                <div class="menu-left">
-                    <div class="menu-icon" style="color: var(--red-vibrant);">🔒</div>
-                    <span class="menu-label">Security / Password Change</span>
-                </div>
-                <span class="menu-arrow">➔</span>
-            </a>
+<div class="toast" id="toast"></div>
+<div class="modal" id="profileModal"><div class="modal-card"><button class="close">×</button><h2>Profile</h2><p>Your N+ PLAY profile is ready for the next platform modules.</p><div class="modal-list"><div>Account <b>Active</b></div><div>Profile ID <b>NPLUS-PLAYER</b></div><div>Balance sync <b>Live</b></div></div><button class="done">DONE</button></div></div>
+<div class="modal" id="securityModal"><div class="modal-card"><button class="close">×</button><h2>Security</h2><p>Keep your account protected with secure credentials and trusted devices.</p><div class="modal-list"><div>Session status <b>Active</b></div><div>Device check <b>Protected</b></div><div>Security status <b>Good</b></div></div><button class="done">DONE</button></div></div>
+<div class="modal" id="notifyModal"><div class="modal-card"><button class="close">×</button><h2>Notifications</h2><p>Notification controls will manage game results, rewards and platform updates.</p><div class="modal-list"><div>Game results <b>ON</b></div><div>Rewards <b>ON</b></div><div>Promotions <b>ON</b></div></div><button class="done">DONE</button></div></div>
+<div class="modal" id="appearanceModal"><div class="modal-card"><button class="close">×</button><h2>App Preferences</h2><p>Your current N+ PLAY experience uses the dark premium interface.</p><div class="modal-list"><div>Theme <b>Dark Premium</b></div><div>Interface <b>Compact</b></div><div>Motion <b>Standard</b></div></div><button class="done">DONE</button></div></div>
+<div class="modal" id="helpModal"><div class="modal-card"><button class="close">×</button><h2>Help Center</h2><p>Use Activity for settled game records, WINGO for supported game rounds, and the account page for platform preferences.</p><button class="done">DONE</button></div></div>
+<div class="modal" id="rulesModal"><div class="modal-card"><button class="close">×</button><h2>Game Rules</h2><p>Game-specific rules are available from each supported game page. Always review the rules before using a game.</p><button class="done">DONE</button></div></div>
+<div class="modal" id="termsModal"><div class="modal-card"><button class="close">×</button><h2>Terms & Privacy</h2><p>Platform terms and privacy controls can be connected here when the full account backend is introduced.</p><button class="done">DONE</button></div></div>
 
-            <!-- Customer Service -->
-            <a href="agent-chat.html" class="menu-item">
-                <div class="menu-left">
-                    <div class="menu-icon" style="color: var(--gold-neon);">🎧</div>
-                    <span class="menu-label">24/7 Customer Service</span>
-                </div>
-                <div>
-                    <span class="menu-status">Online 🟢</span>
-                    <span class="menu-arrow">➔</span>
-                </div>
-            </a>
-        </div>
-
-        <!-- LOGOUT BUTTON -->
-        <button class="btn-logout" onclick="handleLogout()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            <span>LOG OUT ACCOUNT</span>
-        </button>
-    </div>
-
-    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="activity.html" class="nav-item">
-            <span class="nav-icon">🔥</span>
-            <span>Activity</span>
-        </a>
-        <a href="promotion.html" class="nav-item">
-            <span class="nav-icon">🎁</span>
-            <span>Promotion</span>
-        </a>
-        <a href="account.html" class="nav-item active">
-            <span class="nav-icon">👤</span>
-            <span>Account</span>
-        </a>
-    </nav>
-
-    <!-- ==========================================
-       JAVASCRIPT LOGIC
-       ========================================== -->
-    <script>
-        // LUXURY TOAST POPUP SYSTEM
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.className = 'toast show';
-
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 2500);
-        }
-
-        // LOGOUT HANDLER
-        function handleLogout() {
-            localStorage.removeItem('nplus_user');
-            showToast('🚪 Logged out successfully! Redirecting...');
-
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1200);
-        }
-    </script>
+<script>
+(()=>{
+"use strict";
+const STORE="nplusplay_wingo_ultra_final_v2", LEGACY="nplusplay_wallet_v1";
+const modes=[30,60,180,300];
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+function read(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}}
+function bets(){
+ const x=read(),out=[];
+ for(const sec of modes) if(Array.isArray(x.bets?.[sec])) out.push(...x.bets[sec].map(b=>({...b,sec:Number(b.sec||sec)})));
+ return out.sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0));
+}
+function balance(){
+ const n=Number(read().balance);if(Number.isFinite(n))return n;
+ const l=Number(localStorage.getItem(LEGACY));return Number.isFinite(l)?l:1000;
+}
+let last=null;
+function render(){
+ const b=balance();document.querySelector("#wallet").textContent=money(b);document.querySelector("#balance").textContent=money(b);
+ if(last!==null&&last!==b){document.querySelector("#syncText").textContent="UPDATED";setTimeout(()=>document.querySelector("#syncText").textContent="SYNCED",900)} last=b;
+ const a=bets(),settled=a.filter(x=>["WON","LOST"].includes(String(x.status).toUpperCase()));
+ document.querySelector("#totalGames").textContent=new Set(a.map(x=>x.gameName||x.game||"N+ PLAY GAME")).size;
+ document.querySelector("#wins").textContent=settled.filter(x=>String(x.status).toUpperCase()==="WON").length;
+ document.querySelector("#losses").textContent=settled.filter(x=>String(x.status).toUpperCase()==="LOST").length;
+}
+document.querySelectorAll("[data-modal]").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.modal).classList.add("show"));
+document.querySelectorAll(".modal").forEach(m=>{m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")});m.querySelector(".close").onclick=()=>m.classList.remove("show");m.querySelector(".done").onclick=()=>m.classList.remove("show")});
+document.querySelector("#editProfile").onclick=()=>document.getElementById("profileModal").classList.add("show");
+window.addEventListener("storage",e=>{if(e.key===STORE||e.key===LEGACY)render()});
+window.addEventListener("pageshow",render);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});
+setInterval(render,1500);render();
+})();
+</script>
 </body>
 </html>
