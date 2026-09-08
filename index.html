@@ -1,2325 +1,1563 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#050505">
-    <title>WINGO — N+ PLAY</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #050505;
-            --bg-2: #0a0a0a;
-            --surface: rgba(255, 255, 255, 0.04);
-            --surface-2: rgba(255, 255, 255, 0.07);
-            --line: rgba(255, 255, 255, 0.08);
-            --line-gold: rgba(245, 197, 24, 0.25);
-            --gold: #f5c518;
-            --gold-hi: #fff1a3;
-            --gold-deep: #8c6200;
-            --white: #fff;
-            --muted: #989898;
-            --muted-2: #626262;
-            --green: #23d39a;
-            --red: #ff5260;
-            --violet: #a855f7;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --ease: cubic-bezier(.16, 1, .3, 1);
-            --shadow: 0 20px 60px rgba(0, 0, 0, .65);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#070707">
+<meta name="description" content="N+ PLAY — Premium gaming lobby">
+<title>N+ PLAY — Premium Gaming</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-        body {
-            min-height: 100vh;
-            overflow-x: hidden;
-            color: var(--white);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: radial-gradient(900px 520px at 50% -160px, rgba(245, 197, 24, .12), transparent 65%),
-                radial-gradient(700px 520px at 105% 35%, rgba(245, 197, 24, .055), transparent 70%),
-                radial-gradient(650px 520px at -10% 70%, rgba(245, 197, 24, .035), transparent 70%),
-                #050505;
-            padding-bottom: calc(80px + var(--safe-bottom));
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+<style>
+:root{
+    --bg:#070707;
+    --bg-2:#0c0c0c;
+    --surface:rgba(255,255,255,.045);
+    --surface-2:rgba(255,255,255,.07);
+    --line:rgba(255,255,255,.09);
+    --line-gold:rgba(245,197,24,.22);
+    --gold:#f5c518;
+    --gold-2:#ffe48a;
+    --gold-dark:#9d7200;
+    --white:#fff;
+    --muted:#989898;
+    --muted-2:#626262;
+    --green:#23d39a;
+    --red:#ff5260;
+    --radius:18px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+    min-height:100vh;
+    overflow-x:hidden;
+    color:var(--white);
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(650px 350px at 50% -80px,rgba(245,197,24,.11),transparent 70%),
+      radial-gradient(500px 400px at -15% 45%,rgba(245,197,24,.045),transparent 70%),
+      linear-gradient(180deg,#090909 0%,#050505 100%);
+    padding-bottom:92px;
+}
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.22;
+    background-image:radial-gradient(rgba(255,255,255,.12) .5px,transparent .5px);
+    background-size:5px 5px;
+    mask-image:linear-gradient(to bottom,black,transparent 75%);
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.page{width:min(100%,560px);margin:auto;padding:0 14px}
+@media(min-width:900px){.page{max-width:1180px}}
 
-        body:before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            opacity: .2;
-            background-image: radial-gradient(rgba(255, 255, 255, .1) .5px, transparent .5px);
-            background-size: 5px 5px;
-            mask-image: linear-gradient(to bottom, black, transparent 75%);
-            z-index: -1;
-        }
+.gold-text{
+    background:linear-gradient(110deg,#9b7000 0%,#fff0a1 26%,#f5c518 52%,#fff2a9 72%,#9b7000 100%);
+    background-size:220% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:goldSweep 6s linear infinite;
+}
+@keyframes goldSweep{to{background-position:220% center}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,197,24,.0)}50%{box-shadow:0 0 0 7px rgba(245,197,24,.07)}}
 
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-        button {
-            font: inherit;
-            cursor: pointer;
-            border: none;
-            background: none;
-            color: inherit;
-        }
-        input {
-            font: inherit;
-            border: none;
-            background: none;
-            color: inherit;
-        }
+.header{
+    position:sticky;top:0;z-index:100;
+    margin:0 -14px;
+    padding:13px 14px 11px;
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(7,7,7,.76);
+    backdrop-filter:blur(22px) saturate(140%);
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-mark{
+    width:34px;height:34px;border-radius:11px;
+    display:grid;place-items:center;
+    font-size:11px;font-weight:900;letter-spacing:-.5px;
+    color:#090909;
+    background:linear-gradient(145deg,#fff1a0,#f5c518 48%,#8f6500);
+    box-shadow:0 5px 24px rgba(245,197,24,.18);
+}
+.brand-name{font-size:1.18rem;font-weight:900;letter-spacing:.9px}
+.header-right{display:flex;align-items:center;gap:8px}
+.wallet{
+    display:flex;align-items:center;gap:7px;
+    padding:7px 11px;border:1px solid rgba(35,211,154,.2);
+    border-radius:999px;background:rgba(35,211,154,.07);
+}
+.wallet-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.wallet-value{font-size:.76rem;font-weight:800;color:#bff8e5}
+.age{font-size:.62rem;font-weight:900;color:#ff8b94;padding:6px 8px;border:1px solid rgba(255,82,96,.2);border-radius:999px;background:rgba(255,82,96,.06)}
 
-        .page {
-            width: min(100%, 560px);
-            margin: 0 auto;
-            padding: 0 14px;
-        }
-        @media (min-width: 768px) {
-            .page {
-                max-width: 720px;
-                padding: 0 20px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .page {
-                max-width: 860px;
-            }
-        }
+.categories{
+    display:flex;gap:7px;overflow:auto;scrollbar-width:none;
+    padding:12px 1px 8px;
+}
+.categories::-webkit-scrollbar{display:none}
+.cat{
+    flex:0 0 auto;padding:8px 14px;border-radius:999px;
+    border:1px solid transparent;color:var(--muted);
+    font-size:.72rem;font-weight:700;cursor:pointer;
+    transition:.28s var(--ease);
+}
+.cat:hover{color:#fff;border-color:var(--line)}
+.cat.active{
+    color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));
+    border-color:var(--gold);
+    box-shadow:0 5px 22px rgba(245,197,24,.17);
+}
 
-        .gold-text {
-            background: linear-gradient(110deg, #9b7000 0%, #fff0a1 26%, #f5c518 52%, #fff2a9 72%, #9b7000 100%);
-            background-size: 220% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: goldSweep 6s linear infinite;
-        }
-        @keyframes goldSweep {
-            to {
-                background-position: 220% center;
-            }
-        }
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: none;
-            }
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(245, 197, 24, 0);
-            }
-            50% {
-                box-shadow: 0 0 0 6px rgba(245, 197, 24, .08);
-            }
-        }
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-            to {
-                transform: none;
-            }
-        }
-        @keyframes resultReveal {
-            0% {
-                opacity: 0;
-                transform: scale(.6) rotate(-3deg);
-            }
-            50% {
-                transform: scale(1.08) rotate(1deg);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-            }
-        }
-        @keyframes countdownPulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: .55;
-            }
-        }
-        @keyframes shimmer {
-            0% {
-                background-position: -200% 0;
-            }
-            100% {
-                background-position: 200% 0;
-            }
-        }
+.hero{
+    position:relative;overflow:hidden;
+    min-height:260px;margin:10px 0 15px;
+    border:1px solid var(--line-gold);
+    border-radius:24px;
+    background:
+      radial-gradient(circle at 78% 25%,rgba(245,197,24,.22),transparent 25%),
+      radial-gradient(circle at 90% 100%,rgba(120,72,0,.2),transparent 42%),
+      linear-gradient(135deg,#16130b,#0b0b0b 58%,#090909);
+    box-shadow:var(--shadow);
+    isolation:isolate;
+}
+.hero:before{
+    content:"N+";
+    position:absolute;right:-25px;bottom:-55px;
+    font-size:220px;line-height:1;font-weight:900;
+    color:rgba(245,197,24,.035);
+    transform:rotate(-8deg);
+}
+.hero:after{
+    content:"";
+    position:absolute;inset:-1px;
+    background:linear-gradient(115deg,transparent 35%,rgba(255,240,160,.08) 50%,transparent 65%);
+    transform:translateX(-120%);
+    animation:heroShine 7s var(--ease) infinite;
+}
+@keyframes heroShine{55%,100%{transform:translateX(120%)}}
+.hero-content{position:relative;z-index:2;padding:25px 22px}
+.eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    color:var(--gold-2);font-size:.61rem;font-weight:900;letter-spacing:1.6px;
+    text-transform:uppercase;
+}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+.hero h1{max-width:330px;margin:10px 0 7px;font-size:2.05rem;line-height:1.04;letter-spacing:-1.6px}
+.hero p{max-width:300px;color:#aaa;font-size:.76rem;line-height:1.6}
+.hero-actions{display:flex;gap:9px;margin-top:18px}
+.primary,.secondary{
+    border-radius:12px;padding:10px 16px;font-size:.74rem;font-weight:900;
+    transition:.28s var(--ease);display:inline-flex;align-items:center;gap:7px;
+}
+.primary{color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));box-shadow:0 8px 26px rgba(245,197,24,.2)}
+.secondary{border:1px solid var(--line-gold);background:rgba(255,255,255,.035);color:#eee}
+.primary:hover,.secondary:hover{transform:translateY(-2px)}
 
-        /* HEADER */
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            margin: 0 -14px;
-            padding: 10px 14px 9px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: linear-gradient(180deg, rgba(5, 5, 5, .97), rgba(5, 5, 5, .86));
-            backdrop-filter: blur(20px) saturate(140%);
-            border-bottom: 1px solid rgba(245, 197, 24, .12);
-            box-shadow: 0 10px 35px rgba(0, 0, 0, .4);
-        }
-        @media (min-width: 768px) {
-            .header {
-                margin: 0 -20px;
-                padding: 12px 20px 10px;
-            }
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 0 0 auto;
-        }
-        .back-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            color: var(--muted);
-            font-size: 1.3rem;
-            transition: .25s var(--ease);
-        }
-        .back-btn:hover {
-            color: var(--gold);
-            background: rgba(245, 197, 24, .08);
-        }
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 1.05rem;
-            font-weight: 900;
-            letter-spacing: .8px;
-        }
-        .header-brand .brand-mark {
-            width: 28px;
-            height: 28px;
-            border-radius: 9px;
-            display: grid;
-            place-items: center;
-            font-size: 8px;
-            font-weight: 900;
-            color: #090909;
-            background: linear-gradient(145deg, #fff8c9, #f5c518 55%, #966600);
-            box-shadow: 0 4px 16px rgba(245, 197, 24, .25);
-        }
-        .header-center {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1px;
-            flex: 1;
-            min-width: 0;
-        }
-        .header-title {
-            font-size: .85rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-        }
-        .header-live {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: .55rem;
-            font-weight: 700;
-            color: var(--green);
-            letter-spacing: 1px;
-        }
-        .header-live span {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--green);
-            animation: pulse 1.8s infinite;
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex: 0 0 auto;
-        }
-        .icon-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            font-size: .85rem;
-            color: var(--muted);
-            transition: .25s var(--ease);
-            position: relative;
-        }
-        .icon-btn:hover {
-            color: var(--gold);
-            background: rgba(245, 197, 24, .08);
-        }
-        .age-badge {
-            font-size: .55rem;
-            font-weight: 900;
-            color: #ff8b94;
-            padding: 4px 8px;
-            border: 1px solid rgba(255, 82, 96, .25);
-            border-radius: 999px;
-            background: rgba(255, 82, 96, .07);
-        }
+.live{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;margin-bottom:20px;
+    border:1px solid var(--line);border-radius:14px;
+    background:rgba(255,255,255,.025);overflow:hidden;
+}
+.live-label{display:flex;align-items:center;gap:6px;flex:0 0 auto;color:#ff7781;font-size:.62rem;font-weight:900}
+.live-label span{width:6px;height:6px;border-radius:50%;background:#ff5260;box-shadow:0 0 12px #ff5260}
+.live-track{overflow:hidden;white-space:nowrap;color:#999;font-size:.67rem}
+.live-track b{color:var(--gold-2)}
 
-        /* WALLET CARD */
-        .wallet-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 16px;
-            margin: 12px 0 10px;
-            border-radius: var(--radius);
-            border: 1px solid rgba(245, 197, 24, .18);
-            background: linear-gradient(145deg, rgba(24, 24, 28, .8), rgba(8, 8, 10, .7));
-            box-shadow: inset 0 1px rgba(255, 255, 255, .04), 0 12px 35px rgba(0, 0, 0, .35);
-            animation: fadeInUp .5s var(--ease) both;
-        }
-        .wallet-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .wallet-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            background: rgba(245, 197, 24, .12);
-            border: 1px solid rgba(245, 197, 24, .2);
-            font-size: 1.1rem;
-        }
-        .wallet-info .wallet-label {
-            font-size: .55rem;
-            font-weight: 700;
-            color: var(--muted-2);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-        .wallet-info .wallet-amount {
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: var(--gold-hi);
-            letter-spacing: -.3px;
-            font-variant-numeric: tabular-nums;
-            transition: .3s ease;
-        }
-        .wallet-actions {
-            display: flex;
-            gap: 6px;
-        }
-        .wallet-btn {
-            padding: 7px 12px;
-            border-radius: 8px;
-            font-size: .6rem;
-            font-weight: 800;
-            letter-spacing: .5px;
-            transition: .25s var(--ease);
-            text-transform: uppercase;
-        }
-        .wallet-btn.deposit {
-            color: #080808;
-            background: linear-gradient(135deg, #fff0a0, #f5c518);
-            box-shadow: 0 5px 18px rgba(245, 197, 24, .25);
-        }
-        .wallet-btn.withdraw {
-            color: #ff8b94;
-            border: 1px solid rgba(255, 82, 96, .25);
-            background: rgba(255, 82, 96, .05);
-        }
-        .wallet-btn:hover {
-            transform: translateY(-1px);
-        }
+.section{margin:0 0 23px}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px}
+.section-title{display:flex;align-items:center;gap:9px;font-size:.94rem;font-weight:900;letter-spacing:-.3px}
+.section-title:before{content:"";width:3px;height:16px;border-radius:5px;background:linear-gradient(var(--gold-2),var(--gold-dark));box-shadow:0 0 12px rgba(245,197,24,.35)}
+.section-sub{margin-top:4px;margin-left:12px;color:var(--muted-2);font-size:.6rem}
+.view{color:#888;font-size:.65rem;font-weight:700}
+.view:hover{color:var(--gold)}
 
-        /* DURATION TABS */
-        .duration-tabs {
-            display: flex;
-            gap: 5px;
-            padding: 4px;
-            margin: 8px 0 10px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, .025);
-            border: 1px solid rgba(255, 255, 255, .05);
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .duration-tabs::-webkit-scrollbar {
-            display: none;
-        }
-        .duration-tab {
-            flex: 1;
-            min-width: 55px;
-            padding: 8px 6px;
-            border-radius: 9px;
-            font-size: .6rem;
-            font-weight: 800;
-            letter-spacing: .5px;
-            color: var(--muted);
-            transition: .3s var(--ease);
-            white-space: nowrap;
-            text-transform: uppercase;
-        }
-        .duration-tab.active {
-            color: #080808;
-            background: linear-gradient(135deg, #fff0a0, #f5c518 55%, #c99700);
-            box-shadow: 0 4px 16px rgba(245, 197, 24, .3);
-        }
-        .duration-tab:not(.active):hover {
-            color: var(--white);
-            background: rgba(255, 255, 255, .04);
-        }
+.recommendations{
+    display:grid;grid-auto-flow:column;grid-auto-columns:112px;
+    gap:10px;overflow-x:auto;scrollbar-width:none;padding:2px 1px 5px;
+}
+.recommendations::-webkit-scrollbar{display:none}
+.rec{
+    position:relative;aspect-ratio:1;border-radius:17px;overflow:hidden;
+    border:1px solid var(--line);background:#0b0b0b;
+    transition:.3s var(--ease);
+}
+.rec:after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(0,0,0,.5),transparent 45%);
+    pointer-events:none;
+}
+.rec:hover{transform:translateY(-4px);border-color:var(--line-gold);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.rec img{width:100%;height:100%;display:block;object-fit:cover}
+.rec .rec-name{position:absolute;z-index:2;left:9px;bottom:8px;font-size:.62rem;font-weight:900;text-shadow:0 2px 7px #000}
 
-        /* ROUND INFO */
-        .round-card {
-            text-align: center;
-            padding: 16px 14px;
-            margin-bottom: 12px;
-            border-radius: var(--radius);
-            border: 1px solid rgba(245, 197, 24, .15);
-            background: linear-gradient(145deg, rgba(20, 20, 24, .75), rgba(6, 6, 8, .65));
-            box-shadow: inset 0 1px rgba(255, 255, 255, .03), 0 10px 30px rgba(0, 0, 0, .3);
-            animation: fadeInUp .55s var(--ease) both;
-            position: relative;
-            overflow: hidden;
-        }
-        .round-card:before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(110deg, transparent 30%, rgba(255, 243, 170, .05) 48%, transparent 70%);
-            pointer-events: none;
-        }
-        .period-label {
-            font-size: .55rem;
-            font-weight: 700;
-            color: var(--muted-2);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .period-id {
-            font-size: .75rem;
-            font-weight: 800;
-            color: var(--muted);
-            font-family: 'Courier New', monospace;
-            letter-spacing: .5px;
-            margin-bottom: 10px;
-        }
-        .timer-display {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: var(--gold-hi);
-            letter-spacing: -2px;
-            font-variant-numeric: tabular-nums;
-            text-shadow: 0 0 35px rgba(245, 197, 24, .25);
-            transition: color .3s ease;
-            line-height: 1;
-        }
-        .timer-display.danger {
-            color: var(--red);
-            text-shadow: 0 0 35px rgba(255, 82, 96, .3);
-            animation: countdownPulse 1s infinite;
-        }
-        .round-progress {
-            width: 100%;
-            height: 3px;
-            border-radius: 2px;
-            background: rgba(255, 255, 255, .06);
-            margin-top: 12px;
-            overflow: hidden;
-        }
-        .round-progress-bar {
-            height: 100%;
-            border-radius: 2px;
-            background: linear-gradient(90deg, var(--gold-deep), var(--gold-hi));
-            transition: width .3s linear;
-        }
-        .betting-closed-badge {
-            display: none;
-            margin-top: 8px;
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: .55rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: var(--red);
-            background: rgba(255, 82, 96, .08);
-            border: 1px solid rgba(255, 82, 96, .2);
-            text-transform: uppercase;
-        }
-        .betting-closed-badge.active {
-            display: inline-block;
-            animation: pulse 1.2s infinite;
-        }
+.game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.game{
+    position:relative;min-width:0;aspect-ratio:1.08;
+    overflow:hidden;border-radius:17px;background:#0b0b0b;
+    border:1px solid var(--line);
+    transition:.32s var(--ease);
+}
+.game:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(0,0,0,.72),transparent 55%)}
+.game img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s var(--ease)}
+.game:hover{transform:translateY(-3px);border-color:var(--line-gold);box-shadow:0 14px 32px rgba(0,0,0,.48)}
+.game:hover img{transform:scale(1.045)}
+.game-info{position:absolute;z-index:2;left:11px;right:11px;bottom:10px}
+.game-name{font-size:.72rem;font-weight:900}
+.game-meta{margin-top:3px;color:#aaa;font-size:.56rem}
+.badge{
+    position:absolute;z-index:3;top:9px;left:9px;
+    padding:4px 7px;border-radius:7px;
+    font-size:.5rem;font-weight:900;letter-spacing:.5px;
+    color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));
+}
+.badge.new{background:linear-gradient(135deg,#bff8e5,#23d39a)}
+.badge.hot{color:#fff;background:linear-gradient(135deg,#ff7b83,#c92536)}
 
-        /* GAME SECTIONS */
-        .game-section {
-            margin-bottom: 16px;
-            animation: fadeInUp .6s var(--ease) both;
-        }
-        .game-section-title {
-            font-size: .65rem;
-            font-weight: 800;
-            color: var(--muted-2);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
+.champions{
+    border:1px solid var(--line);border-radius:19px;overflow:hidden;
+    background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+    box-shadow:var(--shadow);
+}
+.champion{
+    display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;
+    padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.045);
+}
+.champion:last-child{border-bottom:0}
+.rank{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.66rem;font-weight:900;background:rgba(255,255,255,.06);color:#999}
+.rank.top{color:#080808;background:linear-gradient(145deg,#fff0a0,var(--gold))}
+.rank.second{color:#111;background:linear-gradient(145deg,#eee,#888)}
+.rank.third{color:#fff;background:linear-gradient(145deg,#d99555,#74421f)}
+.player{font-size:.68rem;font-weight:800}.player small{display:block;margin-top:2px;color:#666;font-size:.5rem;font-weight:500}
+.amount{font-size:.68rem;font-weight:900;color:var(--gold-2)}
 
-        /* NUMBER GRID */
-        .num-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-        }
-        .num-tile {
-            aspect-ratio: 1;
-            border-radius: 14px;
-            display: grid;
-            place-items: center;
-            font-size: 1.3rem;
-            font-weight: 900;
-            color: #fff;
-            cursor: pointer;
-            transition: .25s var(--ease);
-            border: 2px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-        .num-tile:before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, .08), transparent 50%);
-            pointer-events: none;
-            opacity: 0;
-            transition: .3s ease;
-        }
-        .num-tile:hover:before {
-            opacity: 1;
-        }
-        .num-tile.red {
-            background: linear-gradient(145deg, #2a0f0f, #1a0808);
-            border-color: rgba(239, 68, 68, .35);
-        }
-        .num-tile.green {
-            background: linear-gradient(145deg, #0f2a1a, #081a10);
-            border-color: rgba(34, 197, 94, .35);
-        }
-        .num-tile.violet {
-            background: linear-gradient(145deg, #2a0f2a, #1a081a);
-            border-color: rgba(168, 85, 247, .35);
-        }
-        .num-tile.selected {
-            border-color: var(--gold);
-            box-shadow: 0 0 25px rgba(245, 197, 24, .3);
-            transform: scale(1.04);
-        }
-        .num-tile:disabled {
-            opacity: .35;
-            cursor: not-allowed;
-            transform: none !important;
-        }
+.footer{padding:8px 0 18px;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:15px}
+.footer-links a{color:#777;font-size:.61rem}.footer-links a:hover{color:var(--gold)}
+.disclaimer{padding-top:14px;border-top:1px solid rgba(255,255,255,.06);color:#505050;font-size:.53rem;line-height:1.65}
+.disclaimer strong{color:#8a6e12}
 
-        /* COLOR SELECTOR */
-        .color-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-        .color-card {
-            padding: 14px 8px;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: .3s var(--ease);
-            border: 2px solid transparent;
-            font-weight: 800;
-            font-size: .75rem;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-            position: relative;
-        }
-        .color-card .color-icon {
-            font-size: 1.4rem;
-            margin-bottom: 4px;
-            display: block;
-        }
-        .color-card.red {
-            background: linear-gradient(145deg, #2a0f0f, #1a0808);
-            border-color: rgba(239, 68, 68, .3);
-            color: #ff7777;
-        }
-        .color-card.green {
-            background: linear-gradient(145deg, #0f2a1a, #081a10);
-            border-color: rgba(34, 197, 94, .3);
-            color: #77ffa8;
-        }
-        .color-card.violet {
-            background: linear-gradient(145deg, #2a0f2a, #1a081a);
-            border-color: rgba(168, 85, 247, .3);
-            color: #d477ff;
-        }
-        .color-card.selected {
-            border-color: var(--gold);
-            box-shadow: 0 0 25px rgba(245, 197, 24, .25);
-            transform: translateY(-2px);
-        }
-        .color-card:disabled {
-            opacity: .35;
-            cursor: not-allowed;
-            transform: none !important;
-        }
+.bottom-nav{
+    position:fixed;z-index:200;bottom:0;left:50%;transform:translateX(-50%);
+    width:min(100%,560px);padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:repeat(5,1fr);gap:3px;
+    background:rgba(8,8,8,.84);backdrop-filter:blur(24px) saturate(140%);
+    border:1px solid rgba(255,255,255,.08);border-bottom:0;
+    border-radius:20px 20px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.45);
+}
+.nav-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;color:#666;font-size:.52rem;font-weight:700;transition:.25s var(--ease)}
+.nav-icon{font-size:1rem;line-height:1}
+.nav-item.active{color:var(--gold)}
+.nav-item.active:before{content:"";position:absolute;top:-9px;width:25px;height:2px;border-radius:2px;background:var(--gold);box-shadow:0 0 14px rgba(245,197,24,.7)}
+.nav-badge{position:absolute;top:1px;margin-left:25px;padding:2px 5px;border-radius:999px;background:var(--red);color:#fff;font-size:.42rem;font-weight:900}
 
-        /* BIG/SMALL */
-        .size-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .size-card {
-            padding: 16px 8px;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: .3s var(--ease);
-            border: 2px solid rgba(255, 255, 255, .08);
-            background: rgba(255, 255, 255, .025);
-            font-weight: 800;
-            font-size: .8rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-        .size-card .size-icon {
-            font-size: 1.5rem;
-            margin-bottom: 4px;
-            display: block;
-        }
-        .size-card .size-desc {
-            font-size: .55rem;
-            font-weight: 600;
-            color: var(--muted-2);
-            margin-top: 2px;
-            letter-spacing: .5px;
-        }
-        .size-card.selected {
-            border-color: var(--gold);
-            background: rgba(245, 197, 24, .07);
-            color: var(--gold-hi);
-            box-shadow: 0 0 25px rgba(245, 197, 24, .2);
-        }
-        .size-card:disabled {
-            opacity: .35;
-            cursor: not-allowed;
-        }
+@media(min-width:700px){
+    .header{margin:0;padding-left:0;padding-right:0}
+    .game-grid{grid-template-columns:repeat(4,1fr)}
+    .hero{min-height:310px}.hero-content{padding:40px}
+    .hero h1{font-size:2.7rem}
+    .recommendations{grid-auto-columns:145px}
+    .game{aspect-ratio:1.15}
+}
+@media(prefers-reduced-motion:reduce){
+    *,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}
+}
+</style>
+<style>
 
-        /* RECENT RESULTS STRIP */
-        .recent-strip {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding: 6px 0;
-            scrollbar-width: none;
-        }
-        .recent-strip::-webkit-scrollbar {
-            display: none;
-        }
-        .recent-chip {
-            flex: 0 0 auto;
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            font-size: .85rem;
-            font-weight: 800;
-            cursor: default;
-            transition: .25s ease;
-        }
-        .recent-chip.red {
-            background: rgba(239, 68, 68, .12);
-            color: #ff7777;
-            border: 1px solid rgba(239, 68, 68, .2);
-        }
-        .recent-chip.green {
-            background: rgba(34, 197, 94, .12);
-            color: #77ffa8;
-            border: 1px solid rgba(34, 197, 94, .2);
-        }
-        .recent-chip.violet {
-            background: rgba(168, 85, 247, .12);
-            color: #d477ff;
-            border: 1px solid rgba(168, 85, 247, .2);
-        }
+/* ========================= N+ PLAY V3 — LUXURY UI LAYER ========================= */
+:root{
+    --bg:#030303;
+    --bg-2:#070707;
+    --gold:#f5c518;
+    --gold-hi:#fff1a3;
+    --gold-deep:#8c6200;
+    --glass:rgba(255,255,255,.045);
+    --glass-hi:rgba(255,255,255,.075);
+    --stroke:rgba(255,255,255,.075);
+    --gold-stroke:rgba(245,197,24,.24);
+    --lux-shadow:0 24px 90px rgba(0,0,0,.72);
+    --lux-ease:cubic-bezier(.16,1,.3,1);
+}
+body{
+    background:
+      radial-gradient(900px 430px at 50% -100px,rgba(245,197,24,.12),transparent 67%),
+      radial-gradient(700px 520px at 110% 30%,rgba(245,197,24,.055),transparent 68%),
+      radial-gradient(620px 500px at -10% 70%,rgba(255,188,25,.035),transparent 70%),
+      #030303;
+}
+body:after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+    background:
+      linear-gradient(90deg,transparent 0 49.8%,rgba(255,255,255,.012) 50%,transparent 50.2%),
+      radial-gradient(circle at 50% 0,rgba(255,255,255,.035),transparent 36%);
+}
+.page{max-width:590px}
+@media(min-width:900px){.page{max-width:1220px}}
 
-        /* BET POPUP */
-        .bet-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            background: rgba(0, 0, 0, .7);
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .3s ease;
-        }
-        .bet-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .bet-overlay.active .bet-sheet {
-            transform: none;
-        }
-        .bet-sheet {
-            width: 100%;
-            max-width: 520px;
-            background: linear-gradient(180deg, #161619, #09090b);
-            border-radius: 20px 20px 0 0;
-            border-top: 1px solid rgba(245, 197, 24, .2);
-            padding: 20px 18px calc(16px + var(--safe-bottom));
-            box-shadow: 0 -20px 70px rgba(0, 0, 0, .6);
-            transform: translateY(100%);
-            transition: transform .4s var(--ease);
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        @media (min-width: 768px) {
-            .bet-overlay {
-                align-items: center;
-            }
-            .bet-sheet {
-                border-radius: 20px;
-                border: 1px solid rgba(245, 197, 24, .2);
-                transform: translateY(40px);
-                max-height: 80vh;
-            }
-        }
-        .bet-sheet-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-        .bet-sheet-title {
-            font-size: .9rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-        }
-        .bet-sheet-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            font-size: 1.1rem;
-            color: var(--muted);
-            transition: .2s ease;
-        }
-        .bet-sheet-close:hover {
-            color: var(--gold);
-            background: rgba(245, 197, 24, .08);
-        }
-        .selected-display {
-            padding: 12px 14px;
-            border-radius: 10px;
-            background: rgba(245, 197, 24, .06);
-            border: 1px solid rgba(245, 197, 24, .15);
-            margin-bottom: 14px;
-            font-size: .85rem;
-            color: var(--gold-hi);
-            font-weight: 700;
-            text-align: center;
-            letter-spacing: .5px;
-        }
-        .bet-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        .bet-label {
-            font-size: .6rem;
-            font-weight: 800;
-            color: var(--muted-2);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            min-width: 60px;
-        }
-        .amount-input {
-            flex: 1;
-            min-width: 90px;
-            padding: 9px 12px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, .05);
-            border: 1px solid rgba(255, 255, 255, .08);
-            color: var(--white);
-            font-weight: 700;
-            font-size: .9rem;
-            outline: none;
-            transition: .25s ease;
-        }
-        .amount-input:focus {
-            border-color: var(--gold);
-            background: rgba(255, 255, 255, .07);
-        }
-        .qty-btn {
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
-            display: grid;
-            place-items: center;
-            background: rgba(255, 255, 255, .05);
-            border: 1px solid rgba(255, 255, 255, .08);
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--white);
-            transition: .2s ease;
-        }
-        .qty-btn:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-        .qty-display {
-            padding: 0 10px;
-            font-weight: 700;
-            font-size: .9rem;
-            min-width: 24px;
-            text-align: center;
-        }
-        .mult-row {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-        .mult-btn {
-            padding: 6px 11px;
-            border-radius: 7px;
-            font-size: .65rem;
-            font-weight: 800;
-            color: var(--muted);
-            background: rgba(255, 255, 255, .03);
-            border: 1px solid rgba(255, 255, 255, .07);
-            transition: .2s ease;
-            letter-spacing: .3px;
-        }
-        .mult-btn.active {
-            border-color: var(--gold);
-            color: var(--gold);
-            background: rgba(245, 197, 24, .07);
-        }
-        .mult-btn:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-        .quick-amounts {
-            display: flex;
-            gap: 5px;
-            overflow-x: auto;
-            padding: 4px 0;
-            margin-bottom: 12px;
-            scrollbar-width: none;
-        }
-        .quick-amounts::-webkit-scrollbar {
-            display: none;
-        }
-        .quick-btn {
-            flex: 0 0 auto;
-            padding: 6px 12px;
-            border-radius: 7px;
-            font-size: .65rem;
-            font-weight: 800;
-            color: var(--muted);
-            background: rgba(255, 255, 255, .03);
-            border: 1px solid rgba(255, 255, 255, .07);
-            transition: .2s ease;
-        }
-        .quick-btn:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-            background: rgba(245, 197, 24, .05);
-        }
-        .bet-total-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-top: 1px solid rgba(255, 255, 255, .06);
-            margin-bottom: 12px;
-        }
-        .bet-total-label {
-            font-size: .6rem;
-            font-weight: 700;
-            color: var(--muted-2);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .bet-total-amount {
-            font-size: 1.1rem;
-            font-weight: 900;
-            color: var(--gold-hi);
-            font-variant-numeric: tabular-nums;
-        }
-        .bet-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .btn-cancel {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: .7rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--red);
-            border: 1px solid rgba(255, 82, 96, .25);
-            background: rgba(255, 82, 96, .05);
-            transition: .25s ease;
-        }
-        .btn-cancel:hover {
-            background: rgba(255, 82, 96, .1);
-        }
-        .btn-confirm {
-            flex: 2;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: .7rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #080808;
-            background: linear-gradient(135deg, #fff0a0, #f5c518 55%, #c99700);
-            box-shadow: 0 6px 22px rgba(245, 197, 24, .25);
-            transition: .25s ease;
-        }
-        .btn-confirm:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 28px rgba(245, 197, 24, .35);
-        }
-        .btn-confirm:disabled {
-            opacity: .4;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .agree-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 10px;
-            font-size: .65rem;
-            color: var(--muted);
-            cursor: pointer;
-        }
-        .agree-row input[type="checkbox"] {
-            accent-color: var(--gold);
-            width: 14px;
-            height: 14px;
-            cursor: pointer;
-        }
-        .bet-error {
-            display: none;
-            padding: 8px 10px;
-            border-radius: 7px;
-            background: rgba(255, 82, 96, .08);
-            border: 1px solid rgba(255, 82, 96, .2);
-            font-size: .65rem;
-            font-weight: 700;
-            color: var(--red);
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .bet-error.active {
-            display: block;
-        }
+.header{
+    background:linear-gradient(180deg,rgba(4,4,4,.94),rgba(4,4,4,.72));
+    border-bottom:1px solid rgba(245,197,24,.10);
+    box-shadow:0 12px 35px rgba(0,0,0,.25);
+}
+.brand-mark{
+    position:relative;
+    width:38px;height:38px;border-radius:12px;
+    background:linear-gradient(145deg,#fff9d4 0%,#f5c518 45%,#a66f00 100%);
+    box-shadow:0 0 0 1px rgba(255,240,150,.18),0 8px 32px rgba(245,197,24,.22);
+}
+.brand-mark:after{
+    content:"";position:absolute;inset:-5px;border-radius:15px;
+    border:1px solid rgba(245,197,24,.10);
+}
+.brand-name{
+    font-size:1.28rem;letter-spacing:1.2px;
+    text-shadow:0 0 25px rgba(245,197,24,.12);
+}
+.wallet{
+    border-color:rgba(35,211,154,.24);
+    box-shadow:inset 0 0 20px rgba(35,211,154,.025);
+}
 
-        /* RESULT OVERLAY */
-        .result-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 400;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, .8);
-            backdrop-filter: blur(12px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .35s ease;
-        }
-        .result-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .result-card {
-            width: min(90%, 360px);
-            text-align: center;
-            padding: 28px 22px;
-            border-radius: 20px;
-            border: 1px solid rgba(245, 197, 24, .25);
-            background: linear-gradient(160deg, #1a1a1e, #0a0a0c);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, .7), 0 0 50px rgba(245, 197, 24, .08);
-            animation: resultReveal .6s var(--ease) both;
-        }
-        .result-card .result-label {
-            font-size: .55rem;
-            font-weight: 800;
-            color: var(--muted-2);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        .result-card .result-number {
-            font-size: 4.5rem;
-            font-weight: 900;
-            color: var(--gold-hi);
-            letter-spacing: -3px;
-            text-shadow: 0 0 50px rgba(245, 197, 24, .3);
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-        .result-card .result-meta {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            font-size: .7rem;
-            font-weight: 700;
-            color: var(--muted);
-            margin-bottom: 16px;
-        }
-        .result-card .result-period {
-            font-size: .6rem;
-            color: var(--muted-2);
-            font-family: 'Courier New', monospace;
-            margin-bottom: 16px;
-        }
-        .result-card .result-close-hint {
-            font-size: .55rem;
-            color: var(--muted-2);
-        }
+.categories{
+    padding-top:14px;padding-bottom:10px;
+    mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+}
+.cat{padding:9px 15px}
+.cat.active{
+    box-shadow:0 0 0 1px rgba(255,239,150,.18),0 7px 28px rgba(245,197,24,.19),inset 0 1px rgba(255,255,255,.55);
+}
 
-        /* INFO TABS */
-        .info-tabs {
-            display: flex;
-            gap: 2px;
-            border-bottom: 1px solid rgba(255, 255, 255, .06);
-            overflow-x: auto;
-            scrollbar-width: none;
-            margin-bottom: 10px;
-        }
-        .info-tabs::-webkit-scrollbar {
-            display: none;
-        }
-        .info-tab {
-            flex: 0 0 auto;
-            padding: 10px 14px;
-            font-size: .6rem;
-            font-weight: 700;
-            color: var(--muted);
-            letter-spacing: .5px;
-            border-bottom: 2px solid transparent;
-            transition: .25s ease;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-        .info-tab.active {
-            color: var(--gold);
-            border-bottom-color: var(--gold);
-        }
-        .info-tab:hover {
-            color: var(--white);
-        }
+.hero{
+    min-height:300px;
+    border-color:rgba(245,197,24,.25);
+    border-radius:28px;
+    background:
+      radial-gradient(500px 270px at 78% 20%,rgba(255,225,103,.19),transparent 55%),
+      radial-gradient(340px 340px at 95% 100%,rgba(156,93,0,.22),transparent 62%),
+      linear-gradient(125deg,#18130a 0%,#0b0b0a 45%,#050505 100%);
+    box-shadow:0 28px 100px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.10);
+}
+.hero:before{
+    font-size:260px;
+    color:rgba(245,197,24,.045);
+    text-shadow:0 0 100px rgba(245,197,24,.08);
+}
+.hero:after{
+    background:linear-gradient(110deg,transparent 30%,rgba(255,243,170,.13) 48%,rgba(255,255,255,.035) 51%,transparent 70%);
+    animation-duration:8s;
+}
+.hero-content{
+    padding:32px 25px;
+}
+.hero h1{
+    font-size:2.35rem;
+    text-shadow:0 12px 45px rgba(245,197,24,.10);
+}
+.hero p{color:#b5b5b5}
+.primary{
+    box-shadow:0 10px 35px rgba(245,197,24,.22),inset 0 1px rgba(255,255,255,.6);
+}
+.secondary{
+    box-shadow:inset 0 1px rgba(255,255,255,.06);
+}
 
-        .tab-content {
-            padding: 8px 0;
-            min-height: 150px;
-            max-height: 320px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(245, 197, 24, .2) transparent;
-        }
-        .tab-content::-webkit-scrollbar {
-            width: 3px;
-        }
-        .tab-content::-webkit-scrollbar-thumb {
-            background: rgba(245, 197, 24, .2);
-            border-radius: 2px;
-        }
+.live{
+    border-color:rgba(245,197,24,.10);
+    background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.015));
+    box-shadow:inset 0 1px rgba(255,255,255,.05);
+}
 
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: .65rem;
-        }
-        .history-table th {
-            text-align: left;
-            padding: 7px 6px;
-            font-weight: 700;
-            color: var(--muted-2);
-            border-bottom: 1px solid rgba(255, 255, 255, .06);
-            font-size: .55rem;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-        }
-        .history-table td {
-            padding: 7px 6px;
-            border-bottom: 1px solid rgba(255, 255, 255, .025);
-            color: var(--muted);
-        }
-        .history-table tr:hover td {
-            background: rgba(245, 197, 24, .02);
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-size: .5rem;
-            font-weight: 800;
-            letter-spacing: .5px;
-        }
-        .status-badge.won {
-            background: rgba(34, 197, 94, .12);
-            color: var(--green);
-        }
-        .status-badge.lost {
-            background: rgba(255, 82, 96, .12);
-            color: var(--red);
-        }
-        .status-badge.pending {
-            background: rgba(245, 197, 24, .12);
-            color: var(--gold);
-        }
+.section{margin-bottom:30px}
+.section-title{
+    font-size:1rem;
+    letter-spacing:-.4px;
+}
+.section-title:before{
+    width:4px;height:19px;
+    box-shadow:0 0 18px rgba(245,197,24,.45);
+}
+.section-sub{font-size:.61rem;color:#686868}
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-        .stat-card {
-            padding: 10px 6px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, .025);
-            border: 1px solid rgba(255, 255, 255, .05);
-            text-align: center;
-        }
-        .stat-card .stat-value {
-            font-size: .95rem;
-            font-weight: 900;
-            color: var(--gold-hi);
-        }
-        .stat-card .stat-label {
-            font-size: .5rem;
-            font-weight: 700;
-            color: var(--muted-2);
-            letter-spacing: .5px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
+.recommendations{
+    grid-auto-columns:120px;
+    gap:12px;
+}
+.rec{
+    border-radius:19px;
+    border-color:rgba(255,255,255,.095);
+    box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.08);
+}
+.rec:before{
+    content:"";position:absolute;z-index:2;inset:0;
+    background:linear-gradient(125deg,rgba(255,255,255,.13),transparent 23%,transparent 72%,rgba(245,197,24,.05));
+    pointer-events:none;
+}
+.rec:hover{
+    border-color:rgba(245,197,24,.32);
+    box-shadow:0 20px 45px rgba(0,0,0,.55),0 0 25px rgba(245,197,24,.07);
+}
+.rec img{filter:saturate(1.04) contrast(1.03)}
 
-        .chart-container {
-            width: 100%;
-            height: 130px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, .02);
-            border: 1px solid rgba(255, 255, 255, .04);
-            overflow: hidden;
-            display: flex;
-            align-items: flex-end;
-            gap: 4px;
-            padding: 8px 10px;
-        }
-        .chart-bar {
-            flex: 1;
-            border-radius: 3px 3px 0 0;
-            transition: height .5s var(--ease);
-            min-height: 2px;
-        }
+.game{
+    border-radius:19px;
+    border-color:rgba(255,255,255,.085);
+    box-shadow:0 15px 35px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.075);
+}
+.game:after{
+    content:"";position:absolute;inset:0;z-index:2;
+    pointer-events:none;
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
+}
+.game:hover{
+    border-color:rgba(245,197,24,.30);
+    box-shadow:0 22px 50px rgba(0,0,0,.60),0 0 30px rgba(245,197,24,.06);
+}
+.game-info{bottom:12px}
+.game-name{text-shadow:0 2px 12px #000;font-size:.75rem}
+.badge{
+    box-shadow:0 4px 16px rgba(0,0,0,.28);
+}
 
-        .auto-bet-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, .025);
-            border: 1px solid rgba(255, 255, 255, .05);
-            margin-bottom: 12px;
-        }
-        .auto-bet-row .auto-label {
-            font-size: .6rem;
-            font-weight: 800;
-            color: var(--muted);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .auto-toggle {
-            width: 40px;
-            height: 22px;
-            border-radius: 11px;
-            background: rgba(255, 255, 255, .08);
-            border: 1px solid rgba(255, 255, 255, .1);
-            position: relative;
-            cursor: pointer;
-            transition: .3s ease;
-            flex-shrink: 0;
-        }
-        .auto-toggle.active {
-            background: rgba(245, 197, 24, .2);
-            border-color: var(--gold);
-        }
-        .auto-toggle:before {
-            content: "";
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--muted);
-            transition: .3s ease;
-        }
-        .auto-toggle.active:before {
-            left: 20px;
-            background: var(--gold);
-        }
-        .auto-status {
-            font-size: .55rem;
-            font-weight: 700;
-            color: var(--muted-2);
-        }
+.champions{
+    border-radius:21px;
+    border-color:rgba(245,197,24,.12);
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+    box-shadow:0 25px 65px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.07);
+}
+.champion{padding:13px 15px}
+.amount{text-shadow:0 0 18px rgba(245,197,24,.14)}
 
-        .rules-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, .8);
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .3s ease;
-        }
-        .rules-modal.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .rules-box {
-            width: min(90%, 420px);
-            max-height: 80vh;
-            overflow-y: auto;
-            padding: 24px 20px;
-            border-radius: 18px;
-            background: #141416;
-            border: 1px solid rgba(245, 197, 24, .2);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, .7);
-            position: relative;
-        }
-        .rules-box h3 {
-            font-size: 1rem;
-            font-weight: 900;
-            color: var(--gold-hi);
-            margin-bottom: 14px;
-        }
-        .rules-box ul {
-            list-style: none;
-            padding: 0;
-        }
-        .rules-box ul li {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, .04);
-            font-size: .65rem;
-            color: var(--muted);
-            line-height: 1.6;
-        }
-        .rules-box ul li strong {
-            color: var(--gold);
-        }
-        .rules-close {
-            position: absolute;
-            top: 12px;
-            right: 14px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            font-size: 1rem;
-            color: var(--muted);
-            cursor: pointer;
-            transition: .2s ease;
-        }
-        .rules-close:hover {
-            color: var(--gold);
-        }
+.bottom-nav{
+    border-color:rgba(245,197,24,.13);
+    background:linear-gradient(180deg,rgba(12,12,12,.84),rgba(4,4,4,.94));
+    box-shadow:0 -20px 55px rgba(0,0,0,.65),inset 0 1px rgba(255,255,255,.055);
+}
+.nav-item.active{color:var(--gold-hi)}
+.nav-item.active:before{
+    width:32px;height:3px;
+    box-shadow:0 0 18px rgba(245,197,24,.75);
+}
 
-        .toast {
-            position: fixed;
-            bottom: calc(90px + var(--safe-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 600;
-            padding: 10px 18px;
-            border-radius: 10px;
-            background: rgba(20, 20, 24, .9);
-            border: 1px solid rgba(245, 197, 24, .2);
-            font-size: .65rem;
-            font-weight: 700;
-            color: var(--white);
-            opacity: 0;
-            pointer-events: none;
-            transition: .3s ease;
-            white-space: nowrap;
-        }
-        .toast.active {
-            opacity: 1;
-            pointer-events: all;
-        }
+.footer{padding-top:4px}
+.footer-links a{transition:.25s var(--lux-ease)}
+.footer-links a:hover{transform:translateY(-1px)}
 
-        /* BOTTOM NAV */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 200;
-            width: min(100%, 560px);
-            padding: 8px 10px calc(8px + var(--safe-bottom));
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 3px;
-            background: linear-gradient(180deg, rgba(12, 12, 12, .87), rgba(3, 3, 3, .96));
-            backdrop-filter: blur(24px) saturate(140%);
-            border: 1px solid rgba(245, 197, 24, .12);
-            border-bottom: 0;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -22px 65px rgba(0, 0, 0, .7), inset 0 1px rgba(255, 255, 255, .05);
-        }
-        .nav-item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            padding: 6px 2px;
-            color: #666;
-            font-size: .5rem;
-            font-weight: 700;
-            transition: .25s var(--ease);
-        }
-        .nav-item .nav-icon {
-            font-size: .95rem;
-            line-height: 1;
-        }
-        .nav-item.active {
-            color: var(--gold-hi);
-        }
-        .nav-item.active:before {
-            content: "";
-            position: absolute;
-            top: -7px;
-            width: 28px;
-            height: 2px;
-            border-radius: 2px;
-            background: var(--gold);
-            box-shadow: 0 0 16px rgba(245, 197, 24, .7);
-        }
-        .nav-badge {
-            position: absolute;
-            top: 1px;
-            margin-left: 22px;
-            padding: 1px 4px;
-            border-radius: 999px;
-            background: var(--red);
-            color: #fff;
-            font-size: .4rem;
-            font-weight: 900;
-        }
+@media(min-width:700px){
+    .hero{min-height:360px}
+    .hero-content{padding:48px}
+    .hero h1{font-size:3.35rem;max-width:500px}
+    .hero p{font-size:.82rem;max-width:420px}
+    .recommendations{grid-auto-columns:165px}
+    .game{aspect-ratio:1.22}
+}
 
-        @media (max-width: 380px) {
-            .timer-display {
-                font-size: 2.8rem;
-            }
-            .num-grid {
-                gap: 5px;
-            }
-            .num-tile {
-                font-size: 1rem;
-                border-radius: 10px;
-            }
-            .color-card {
-                padding: 10px 4px;
-                font-size: .65rem;
-            }
-            .size-card {
-                padding: 12px 6px;
-                font-size: .7rem;
-            }
-        }
-        @media (min-width: 768px) {
-            .num-grid {
-                gap: 10px;
-            }
-            .num-tile {
-                font-size: 1.6rem;
-                border-radius: 16px;
-            }
-            .color-card {
-                padding: 18px 10px;
-                font-size: .85rem;
-            }
-            .size-card {
-                padding: 20px 10px;
-                font-size: .9rem;
-            }
-            .timer-display {
-                font-size: 4.5rem;
-            }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *:before,
-            *:after {
-                animation: none !important;
-                transition: none !important;
-            }
-        }
-    </style>
+</style>
+<style>
+
+/* ====================== N+ PLAY V4 — SIGNATURE MOTION SYSTEM ====================== */
+.signature-hero{
+    min-height:390px;
+    isolation:isolate;
+    overflow:hidden;
+    transform:translateZ(0);
+}
+.signature-hero .hero-content{
+    position:relative;
+    z-index:5;
+    max-width:720px;
+}
+.hero-kicker{
+    margin-top:14px;
+    color:rgba(255,255,255,.43);
+    font-size:.56rem;
+    font-weight:800;
+    letter-spacing:3px;
+}
+.signature-hero h1{
+    margin:9px 0 12px;
+    font-size:clamp(3rem,13vw,5.6rem);
+    line-height:.84;
+    letter-spacing:-5px;
+    font-weight:900;
+}
+.hero-line{
+    display:block;
+}
+.signature-hero .hero-line:first-child{
+    color:#f3f3f0;
+    text-shadow:0 20px 60px rgba(255,255,255,.08);
+}
+.signature-hero .gold-text{
+    text-shadow:0 18px 65px rgba(245,197,24,.15);
+}
+.signature-hero p{
+    max-width:490px;
+    font-size:.78rem;
+    color:#a8a8a8;
+}
+.hero-grid{
+    position:absolute;
+    z-index:1;
+    inset:0;
+    opacity:.22;
+    background-image:
+      linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(circle at 72% 42%,black,transparent 67%);
+    transform:perspective(700px) rotateX(62deg) scale(1.6) translateY(85px);
+    transform-origin:center bottom;
+}
+.hero-glow{
+    position:absolute;
+    z-index:2;
+    width:390px;height:390px;
+    right:-80px;top:-100px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(245,197,24,.22),rgba(245,197,24,.055) 30%,transparent 68%);
+    filter:blur(5px);
+    animation:heroBreath 6s ease-in-out infinite;
+}
+@keyframes heroBreath{
+    0%,100%{transform:scale(.94);opacity:.72}
+    50%{transform:scale(1.08);opacity:1}
+}
+.hero-orbit{
+    position:absolute;
+    z-index:3;
+    border:1px solid rgba(245,197,24,.16);
+    border-radius:50%;
+    pointer-events:none;
+}
+.orbit-one{
+    width:430px;height:170px;
+    right:-120px;top:50px;
+    transform:rotate(-24deg);
+    box-shadow:0 0 50px rgba(245,197,24,.035);
+    animation:orbitFloat 9s ease-in-out infinite;
+}
+.orbit-two{
+    width:330px;height:120px;
+    right:-65px;top:120px;
+    transform:rotate(-24deg);
+    border-color:rgba(255,255,255,.07);
+    animation:orbitFloat 11s ease-in-out infinite reverse;
+}
+@keyframes orbitFloat{
+    0%,100%{translate:0 0}
+    50%{translate:-12px 9px}
+}
+.hero-metrics{
+    display:flex;
+    gap:22px;
+    margin-top:25px;
+}
+.hero-metrics div{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+.hero-metrics strong{
+    font-size:.86rem;
+    font-weight:900;
+    color:#f3f0df;
+}
+.hero-metrics span{
+    color:#5f5f5f;
+    font-size:.45rem;
+    font-weight:800;
+    letter-spacing:1.2px;
+}
+.hero-corner{
+    position:absolute;
+    z-index:6;
+    color:rgba(255,255,255,.27);
+    font-size:.43rem;
+    font-weight:800;
+    letter-spacing:1.5px;
+}
+.hero-corner-tl{top:17px;left:20px}
+.hero-corner-br{right:20px;bottom:18px}
+
+.primary,.secondary{
+    position:relative;
+    overflow:hidden;
+}
+.primary:before,.secondary:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.24) 48%,transparent 70%);
+    transform:translateX(-120%);
+    transition:transform .7s var(--lux-ease);
+}
+.primary:hover:before,.secondary:hover:before{
+    transform:translateX(120%);
+}
+.primary span,.secondary span{
+    transition:transform .35s var(--lux-ease);
+}
+.primary:hover span,.secondary:hover span{transform:translate(2px,-2px)}
+
+.rec,.game{
+    will-change:transform;
+    transform:translateZ(0);
+}
+.rec:after,.game:after{
+    transition:opacity .35s ease;
+}
+.rec:before{
+    opacity:.7;
+    transition:opacity .35s ease,transform .55s var(--lux-ease);
+}
+.rec:hover:before{
+    opacity:1;
+    transform:translate3d(8px,-5px,0);
+}
+.game:after{
+    opacity:.75;
+}
+.game:hover:after{
+    opacity:1;
+}
+.game:before{
+    transition:opacity .4s ease;
+}
+.game:hover:before{opacity:.9}
+
+/* A restrained moving highlight that gives cards a luxury glass finish. */
+.rec,.game,.champions,.live{
+    background-clip:padding-box;
+}
+.rec:hover,.game:hover{
+    animation:cardLift .45s var(--lux-ease) both;
+}
+@keyframes cardLift{
+    from{filter:brightness(1)}
+    50%{filter:brightness(1.08)}
+    to{filter:brightness(1.02)}
+}
+
+/* Staggered entrance: content feels staged instead of appearing all at once. */
+.hero,.live,.section{
+    animation:sectionReveal .7s var(--lux-ease) both;
+}
+.live{animation-delay:.06s}
+.section:nth-of-type(3){animation-delay:.10s}
+.section:nth-of-type(4){animation-delay:.15s}
+.section:nth-of-type(5){animation-delay:.20s}
+@keyframes sectionReveal{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:none}
+}
+
+@media(min-width:700px){
+    .signature-hero{min-height:450px}
+    .signature-hero .hero-content{padding:58px}
+    .hero-metrics{margin-top:32px;gap:34px}
+}
+@media(max-width:430px){
+    .signature-hero{min-height:385px}
+    .signature-hero h1{letter-spacing:-3.4px}
+    .hero-metrics{gap:16px}
+    .hero-metrics strong{font-size:.78rem}
+}
+@media(prefers-reduced-motion:reduce){
+    .signature-hero *, .hero, .live, .section, .rec, .game{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+
+</style>
+
+<style>
+/* =========================================================
+   N+ PLAY FINAL — LUXURY CINEMATIC LOBBY
+   Existing game links, sections and navigation preserved.
+   ========================================================= */
+
+:root{
+    --n-gold:#f5c518;
+    --n-gold-hi:#fff3aa;
+    --n-gold-deep:#8f6400;
+    --n-black:#020202;
+    --n-panel:rgba(255,255,255,.035);
+    --n-line:rgba(255,255,255,.075);
+    --n-ease:cubic-bezier(.16,1,.3,1);
+}
+
+body{
+    background:
+        radial-gradient(900px 520px at 50% -160px,rgba(245,197,24,.14),transparent 65%),
+        radial-gradient(700px 520px at 105% 35%,rgba(245,197,24,.055),transparent 70%),
+        radial-gradient(650px 520px at -10% 70%,rgba(245,197,24,.035),transparent 70%),
+        #020202;
+}
+
+body:after{
+    background:
+        linear-gradient(90deg,transparent 0 49.9%,rgba(255,255,255,.009) 50%,transparent 50.1%),
+        radial-gradient(circle at 50% 0,rgba(255,255,255,.03),transparent 42%);
+}
+
+.page{max-width:590px}
+@media(min-width:900px){.page{max-width:1220px}}
+
+.header{
+    background:linear-gradient(180deg,rgba(3,3,3,.96),rgba(3,3,3,.78));
+    border-bottom-color:rgba(245,197,24,.12);
+    box-shadow:0 16px 45px rgba(0,0,0,.35);
+}
+
+.brand-mark{
+    width:40px;height:40px;border-radius:13px;
+    background:linear-gradient(145deg,#fff8c9 0%,#f5c518 45%,#966600 100%);
+    box-shadow:0 0 0 1px rgba(255,240,150,.2),
+               0 9px 34px rgba(245,197,24,.24);
+}
+
+.brand-name{
+    font-size:1.3rem;
+    letter-spacing:1.3px;
+}
+
+.wallet{
+    border-color:rgba(35,211,154,.27);
+    box-shadow:inset 0 0 25px rgba(35,211,154,.035),0 5px 25px rgba(0,0,0,.2);
+}
+
+/* Category rail */
+.categories{
+    padding:15px 1px 11px;
+    gap:8px;
+}
+
+.cat{
+    position:relative;
+    padding:9px 15px;
+    border-color:transparent;
+    transition:all .35s var(--n-ease);
+}
+
+.cat.active{
+    box-shadow:
+        0 0 0 1px rgba(255,241,160,.22),
+        0 8px 28px rgba(245,197,24,.2),
+        inset 0 1px rgba(255,255,255,.6);
+}
+
+/* ================= FINAL HERO ================= */
+.final-hero{
+    min-height:535px;
+    margin:9px 0 17px;
+    border-radius:30px;
+    border:1px solid rgba(245,197,24,.27);
+    background:
+        radial-gradient(620px 440px at 78% 26%,rgba(245,197,24,.14),transparent 55%),
+        radial-gradient(420px 420px at 94% 92%,rgba(138,84,0,.2),transparent 62%),
+        linear-gradient(135deg,#141109 0%,#080807 50%,#030303 100%);
+    box-shadow:
+        0 38px 120px rgba(0,0,0,.82),
+        inset 0 1px rgba(255,255,255,.11);
+    isolation:isolate;
+}
+
+.final-hero:before{
+    content:"N+";
+    right:-40px;
+    bottom:-85px;
+    font-size:290px;
+    color:rgba(245,197,24,.035);
+    text-shadow:0 0 100px rgba(245,197,24,.08);
+}
+
+.hero-art-wrap{
+    position:absolute;
+    z-index:0;
+    inset:-3% -7% -5% 37%;
+    display:grid;
+    place-items:center;
+    pointer-events:none;
+}
+
+.hero-art-glow{
+    position:absolute;
+    width:92%;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(245,197,24,.26),rgba(245,197,24,.055) 32%,transparent 69%);
+    filter:blur(13px);
+    animation:finalHeroBreath 6s ease-in-out infinite;
+}
+
+.hero-game-art{
+    width:min(510px,94%);
+    height:min(510px,94%);
+    object-fit:contain;
+    filter:
+        saturate(1.08)
+        contrast(1.06)
+        drop-shadow(0 38px 60px rgba(0,0,0,.9));
+    opacity:.94;
+    transform:translate3d(18px,0,0) rotate(2deg) scale(1.03);
+    animation:finalHeroFloat 7s ease-in-out infinite;
+}
+
+@keyframes finalHeroFloat{
+    0%,100%{transform:translate3d(18px,5px,0) rotate(2deg) scale(1.03)}
+    50%{transform:translate3d(8px,-10px,0) rotate(-1deg) scale(1.065)}
+}
+
+@keyframes finalHeroBreath{
+    0%,100%{transform:scale(.94);opacity:.7}
+    50%{transform:scale(1.08);opacity:1}
+}
+
+.hero-vignette{
+    position:absolute;
+    z-index:1;
+    inset:0;
+    background:
+        linear-gradient(90deg,#030303 0%,rgba(3,3,3,.96) 21%,rgba(3,3,3,.78) 43%,rgba(3,3,3,.3) 72%,rgba(3,3,3,.62) 100%),
+        linear-gradient(0deg,rgba(0,0,0,.85),transparent 40%,rgba(0,0,0,.22));
+    pointer-events:none;
+}
+
+.hero-grid-final{
+    position:absolute;
+    z-index:2;
+    inset:0;
+    opacity:.2;
+    background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+    background-size:45px 45px;
+    mask-image:radial-gradient(circle at 78% 48%,black,transparent 65%);
+    transform:perspective(700px) rotateX(62deg) scale(1.55) translateY(105px);
+    transform-origin:center bottom;
+    pointer-events:none;
+}
+
+.hero-orbit{
+    z-index:3;
+    border-color:rgba(245,197,24,.17);
+}
+
+.orbit-one{
+    width:500px;height:205px;
+    right:-155px;top:82px;
+    transform:rotate(-25deg);
+    box-shadow:0 0 65px rgba(245,197,24,.04);
+}
+
+.orbit-two{
+    width:380px;height:145px;
+    right:-92px;top:154px;
+    transform:rotate(-25deg);
+    border-color:rgba(255,255,255,.065);
+}
+
+.hero-light-sweep{
+    position:absolute;
+    z-index:4;
+    top:-30%;
+    left:-45%;
+    width:22%;
+    height:170%;
+    background:linear-gradient(90deg,transparent,rgba(255,245,190,.12),transparent);
+    transform:rotate(18deg);
+    animation:finalLightSweep 9s ease-in-out infinite;
+    pointer-events:none;
+}
+
+@keyframes finalLightSweep{
+    0%,56%{left:-45%;opacity:0}
+    64%{opacity:1}
+    90%,100%{left:130%;opacity:0}
+}
+
+.final-hero .hero-content{
+    position:relative;
+    z-index:6;
+    max-width:650px;
+    padding:60px 42px 40px;
+}
+
+.final-hero .eyebrow{
+    color:var(--n-gold-hi);
+    letter-spacing:2px;
+}
+
+.final-hero .hero-kicker{
+    margin-top:15px;
+    color:rgba(245,197,24,.72);
+    font-size:.58rem;
+    font-weight:900;
+    letter-spacing:2.7px;
+}
+
+.final-hero h1{
+    margin:13px 0 14px;
+    max-width:510px;
+    font-size:clamp(4rem,11vw,6.5rem);
+    line-height:.82;
+    letter-spacing:-5px;
+    font-weight:900;
+}
+
+.final-hero .hero-line:first-child{
+    color:#f4f3ef;
+    text-shadow:0 20px 65px rgba(255,255,255,.08);
+}
+
+.final-hero .gold-text{
+    text-shadow:0 18px 75px rgba(245,197,24,.2);
+}
+
+.final-hero p{
+    max-width:455px;
+    color:#aaa;
+    font-size:.8rem;
+    line-height:1.7;
+}
+
+.final-hero .hero-actions{
+    margin-top:23px;
+}
+
+.final-hero .primary,
+.final-hero .secondary{
+    min-height:43px;
+    padding:11px 17px;
+    border-radius:13px;
+}
+
+.final-hero .primary{
+    box-shadow:
+        0 12px 38px rgba(245,197,24,.25),
+        inset 0 1px rgba(255,255,255,.7);
+}
+
+.hero-metrics{
+    margin-top:32px;
+    gap:30px;
+}
+
+.hero-metrics strong{
+    font-size:.9rem;
+}
+
+.hero-metrics span{
+    font-size:.46rem;
+    letter-spacing:1.4px;
+}
+
+.hero-dots{
+    position:absolute;
+    z-index:8;
+    right:24px;
+    bottom:25px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.hero-dot{
+    width:7px;height:7px;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:rgba(255,255,255,.22);
+    cursor:pointer;
+    transition:all .35s var(--n-ease);
+}
+
+.hero-dot.active{
+    width:27px;
+    border-radius:99px;
+    background:linear-gradient(90deg,#a97400,#fff0a1,#e4ae16);
+    box-shadow:0 0 18px rgba(245,197,24,.55);
+}
+
+.final-hero.is-changing .hero-game-art{
+    animation:finalHeroSwap .55s var(--n-ease) both;
+}
+
+@keyframes finalHeroSwap{
+    0%{opacity:.15;transform:translate3d(55px,0,0) scale(.94) rotate(5deg)}
+    100%{opacity:.94;transform:translate3d(18px,0,0) scale(1.03) rotate(2deg)}
+}
+
+/* ================= GAME CARDS ================= */
+.recommendations{
+    grid-auto-columns:124px;
+    gap:13px;
+    padding:3px 2px 8px;
+}
+
+.rec{
+    border-radius:20px;
+    border-color:rgba(255,255,255,.095);
+    box-shadow:
+        0 14px 34px rgba(0,0,0,.48),
+        inset 0 1px rgba(255,255,255,.09);
+    transition:transform .42s var(--n-ease),border-color .35s ease,box-shadow .42s var(--n-ease);
+}
+
+.rec:before{
+    background:
+        linear-gradient(125deg,rgba(255,255,255,.16),transparent 22%,transparent 70%,rgba(245,197,24,.08)),
+        linear-gradient(180deg,transparent 45%,rgba(0,0,0,.08));
+}
+
+.rec:after{
+    background:linear-gradient(0deg,rgba(0,0,0,.72),transparent 58%);
+}
+
+.rec img{
+    object-fit:cover;
+    transform:scale(1.001);
+    transition:transform .55s var(--n-ease),filter .45s ease;
+}
+
+.rec:hover{
+    transform:translateY(-7px) scale(1.015);
+    border-color:rgba(245,197,24,.38);
+    box-shadow:
+        0 25px 55px rgba(0,0,0,.62),
+        0 0 32px rgba(245,197,24,.08);
+}
+
+.rec:hover img{
+    transform:scale(1.07);
+    filter:saturate(1.12) contrast(1.05);
+}
+
+.rec .rec-name{
+    left:10px;
+    bottom:9px;
+    font-size:.61rem;
+    letter-spacing:.2px;
+}
+
+/* Lottery/Casino/Rummy cards */
+.game{
+    aspect-ratio:1.08;
+    border-radius:20px;
+    border-color:rgba(255,255,255,.09);
+    box-shadow:
+        0 16px 38px rgba(0,0,0,.48),
+        inset 0 1px rgba(255,255,255,.08);
+    transition:transform .42s var(--n-ease),border-color .35s ease,box-shadow .42s var(--n-ease);
+}
+
+.game:after{
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.035);
+}
+
+.game img{
+    transition:transform .55s var(--n-ease),filter .45s ease;
+}
+
+.game:hover{
+    transform:translateY(-6px) scale(1.012);
+    border-color:rgba(245,197,24,.34);
+    box-shadow:
+        0 25px 55px rgba(0,0,0,.62),
+        0 0 28px rgba(245,197,24,.07);
+}
+
+.game:hover img{
+    transform:scale(1.065);
+    filter:saturate(1.1) contrast(1.04);
+}
+
+.badge{
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 5px 18px rgba(0,0,0,.35);
+}
+
+/* Section hierarchy */
+.section{margin-bottom:34px}
+
+.section-head{
+    margin-bottom:13px;
+}
+
+.section-title{
+    font-size:1rem;
+    letter-spacing:-.35px;
+}
+
+.section-title:before{
+    width:4px;
+    height:20px;
+    box-shadow:0 0 20px rgba(245,197,24,.48);
+}
+
+.section-sub{
+    margin-top:5px;
+    color:#696969;
+}
+
+.view{
+    letter-spacing:.4px;
+}
+
+/* Empty future sections */
+.champions{
+    border-radius:21px;
+    border-color:rgba(245,197,24,.12);
+    box-shadow:0 24px 70px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.065);
+}
+
+/* Leaderboard */
+.champion{
+    padding:14px 15px;
+    transition:background .25s ease;
+}
+
+.champion:hover{
+    background:rgba(245,197,24,.025);
+}
+
+.amount{
+    text-shadow:0 0 20px rgba(245,197,24,.18);
+}
+
+/* Bottom nav */
+.bottom-nav{
+    width:min(100%,590px);
+    border-color:rgba(245,197,24,.14);
+    background:linear-gradient(180deg,rgba(12,12,12,.87),rgba(3,3,3,.96));
+    box-shadow:
+        0 -22px 65px rgba(0,0,0,.72),
+        inset 0 1px rgba(255,255,255,.055);
+}
+
+.nav-item.active{
+    color:var(--n-gold-hi);
+}
+
+.nav-item.active:before{
+    width:34px;
+    height:3px;
+    box-shadow:0 0 20px rgba(245,197,24,.8);
+}
+
+/* Entrance */
+.header,.categories,.final-hero,.live,.section{
+    animation:finalReveal .7s var(--n-ease) both;
+}
+
+.categories{animation-delay:.03s}
+.final-hero{animation-delay:.06s}
+.live{animation-delay:.11s}
+.section:nth-of-type(3){animation-delay:.15s}
+.section:nth-of-type(4){animation-delay:.19s}
+.section:nth-of-type(5){animation-delay:.23s}
+
+@keyframes finalReveal{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:none}
+}
+
+@media(min-width:700px){
+    .final-hero{min-height:575px}
+    .final-hero .hero-content{padding:72px 60px}
+    .hero-art-wrap{inset:-7% -2% -9% 39%}
+    .hero-game-art{width:550px;height:550px}
+    .recommendations{grid-auto-columns:170px}
+    .game{aspect-ratio:1.16}
+}
+
+@media(max-width:520px){
+    .final-hero{
+        min-height:500px;
+        border-radius:27px;
+    }
+
+    .hero-art-wrap{
+        inset:4% -24% 24% 38%;
+        opacity:.54;
+    }
+
+    .hero-game-art{
+        width:350px;
+        height:350px;
+    }
+
+    .hero-vignette{
+        background:
+            linear-gradient(90deg,#030303 0%,rgba(3,3,3,.95) 40%,rgba(3,3,3,.58) 100%),
+            linear-gradient(0deg,rgba(0,0,0,.86),transparent 45%);
+    }
+
+    .final-hero .hero-content{
+        padding:40px 22px 32px;
+    }
+
+    .final-hero h1{
+        font-size:clamp(3.45rem,16vw,5.2rem);
+        letter-spacing:-3.7px;
+    }
+
+    .final-hero p{
+        max-width:330px;
+        font-size:.75rem;
+    }
+
+    .hero-metrics{
+        gap:17px;
+    }
+
+    .hero-dots{
+        right:19px;
+        bottom:20px;
+    }
+
+    .recommendations{
+        grid-auto-columns:116px;
+    }
+}
+
+@media(max-width:380px){
+    .final-hero{min-height:480px}
+    .final-hero .hero-content{padding:37px 18px 28px}
+    .hero-actions{flex-wrap:wrap}
+    .hero-metrics{gap:13px}
+}
+
+@media(prefers-reduced-motion:reduce){
+    .final-hero *,
+    .header,.categories,.final-hero,.live,.section,.rec,.game{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+</style>
+
 </head>
+
 <body>
+<main class="page">
 
-    <!-- ===== HEADER ===== -->
-    <header class="header">
-        <div class="header-left">
-            <button class="back-btn" onclick="history.back()" aria-label="Back">←</button>
-            <div class="header-brand">
-                <span class="brand-mark">N+</span>
-                <span class="gold-text">PLAY</span>
-            </div>
-        </div>
-        <div class="header-center">
-            <span class="header-title gold-text">WINGO</span>
-            <span class="header-live"><span></span>LIVE</span>
-        </div>
-        <div class="header-right">
-            <button class="icon-btn" id="soundToggle" aria-label="Sound">🔊</button>
-            <button class="icon-btn" id="rulesBtn" aria-label="Rules">📜</button>
-            <span class="age-badge">18+</span>
-        </div>
-    </header>
+<header class="header">
+    <a href="index.html" class="brand" aria-label="N+ PLAY home">
+        <span class="brand-mark">N+</span>
+        <span class="brand-name gold-text">PLAY</span>
+    </a>
+    <div class="header-right">
+        <div class="wallet"><span class="wallet-dot"></span><span class="wallet-value">₹1,000</span></div>
+        <span class="age">18+</span>
+    </div>
+</header>
 
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="page" id="gameApp">
+<nav class="categories" aria-label="Game categories">
+    <a class="cat active" href="#popular">Popular</a>
+    <a class="cat" href="#lottery">Lottery</a>
+    <a class="cat" href="#casino">Casino</a>
+    <a class="cat" href="#slots">Slots</a>
+    <a class="cat" href="#sports">Sports</a>
+    <a class="cat" href="#rummy">Rummy</a>
+    <a class="cat" href="#fishing">Fishing</a>
+    <a class="cat" href="#original">Original</a>
+</nav>
 
-        <!-- WALLET CARD -->
-        <div class="wallet-card">
-            <div class="wallet-left">
-                <div class="wallet-icon">💰</div>
-                <div class="wallet-info">
-                    <div class="wallet-label">Available Balance</div>
-                    <div class="wallet-amount" id="walletBalance">₹1,000.00</div>
-                </div>
-            </div>
-            <div class="wallet-actions">
-                <button class="wallet-btn deposit" onclick="toast('Deposit — demo mode')">Deposit</button>
-                <button class="wallet-btn withdraw" onclick="toast('Withdraw — demo mode')">Withdraw</button>
-            </div>
-        </div>
+<section class="hero signature-hero final-hero" id="popular">
+    <div class="hero-art-wrap">
+        <div class="hero-art-glow"></div>
+        <img id="heroGameArt" class="hero-game-art" src="aviator.png" alt="Aviator">
+    </div>
+    <div class="hero-vignette"></div>
+    <div class="hero-grid-final"></div>
+    <div class="hero-orbit orbit-one"></div>
+    <div class="hero-orbit orbit-two"></div>
+    <div class="hero-light-sweep"></div>
 
-        <!-- DURATION TABS -->
-        <div class="duration-tabs" id="durationTabs">
-            <button class="duration-tab active" data-dur="30">30s</button>
-            <button class="duration-tab" data-dur="60">1m</button>
-            <button class="duration-tab" data-dur="180">3m</button>
-            <button class="duration-tab" data-dur="300">5m</button>
-        </div>
+    <div class="hero-content">
+        <div class="eyebrow"><i></i> N+ PLAY • FEATURED EXPERIENCE</div>
+        <div class="hero-kicker" id="heroKicker">AVIATOR / SIGNATURE PICK</div>
 
-        <!-- ROUND CARD -->
-        <div class="round-card">
-            <div class="period-label">Current Period</div>
-            <div class="period-id" id="periodId">---</div>
-            <div class="timer-display" id="timerDisplay">--:--</div>
-            <div class="round-progress">
-                <div class="round-progress-bar" id="progressBar" style="width:100%"></div>
-            </div>
-            <div class="betting-closed-badge" id="bettingClosedBadge">⛔ Betting Closed</div>
+        <h1>
+            <span class="hero-line">PLAY</span>
+            <span class="gold-text hero-line" id="heroTitle">BEYOND</span>
+        </h1>
+
+        <p id="heroDescription">
+            A cinematic gaming experience designed to feel fast, focused and unmistakably N+.
+        </p>
+
+        <div class="hero-actions">
+            <a href="aviator.html" class="primary" id="heroPrimary">Enter Aviator <span>↗</span></a>
+            <a href="#recommendations" class="secondary">Discover Games <span>↓</span></a>
         </div>
 
-        <!-- RECENT RESULTS STRIP -->
-        <div class="game-section">
-            <div class="game-section-title">Recent Results</div>
-            <div class="recent-strip" id="recentStrip"></div>
-        </div>
-
-        <!-- NUMBER SELECTION -->
-        <div class="game-section">
-            <div class="game-section-title">Make Your Selection — Number</div>
-            <div class="num-grid" id="numGrid"></div>
-        </div>
-
-        <!-- COLOR SELECTION -->
-        <div class="game-section">
-            <div class="game-section-title">Color</div>
-            <div class="color-row" id="colorRow">
-                <button class="color-card red" data-color="red">
-                    <span class="color-icon">🔴</span> Red
-                </button>
-                <button class="color-card green" data-color="green">
-                    <span class="color-icon">🟢</span> Green
-                </button>
-                <button class="color-card violet" data-color="violet">
-                    <span class="color-icon">🟣</span> Violet
-                </button>
-            </div>
-        </div>
-
-        <!-- BIG / SMALL -->
-        <div class="game-section">
-            <div class="game-section-title">Size</div>
-            <div class="size-row" id="sizeRow">
-                <button class="size-card" data-size="big">
-                    <span class="size-icon">📈</span> Big
-                    <span class="size-desc">Numbers 5–9</span>
-                </button>
-                <button class="size-card" data-size="small">
-                    <span class="size-icon">📉</span> Small
-                    <span class="size-desc">Numbers 0–4</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- AUTO BET -->
-        <div class="auto-bet-row">
-            <span class="auto-label">Auto Bet</span>
-            <div class="auto-toggle" id="autoToggle"></div>
-            <span class="auto-status" id="autoStatus">OFF</span>
-        </div>
-
-        <!-- INFO TABS -->
-        <div class="info-tabs" id="infoTabs">
-            <button class="info-tab active" data-tab="history">Game History</button>
-            <button class="info-tab" data-tab="mybets">My Bets</button>
-            <button class="info-tab" data-tab="chart">Chart</button>
-            <button class="info-tab" data-tab="strategy">Strategy</button>
-            <button class="info-tab" data-tab="stats">Stats</button>
-        </div>
-        <div class="tab-content" id="tabContent"></div>
-    </main>
-
-    <!-- ===== BET POPUP ===== -->
-    <div class="bet-overlay" id="betOverlay">
-        <div class="bet-sheet">
-            <div class="bet-sheet-header">
-                <span class="bet-sheet-title gold-text">Bet Confirmation</span>
-                <button class="bet-sheet-close" id="betCloseBtn">✕</button>
-            </div>
-            <div class="selected-display" id="selectedDisplay">No selection</div>
-            <div class="bet-row">
-                <span class="bet-label">Amount</span>
-                <input type="number" class="amount-input" id="betAmount" value="10" min="0.1" step="0.1">
-            </div>
-            <div class="bet-row">
-                <span class="bet-label">Quantity</span>
-                <button class="qty-btn" id="qtyMinus">−</button>
-                <span class="qty-display" id="qtyDisplay">1</span>
-                <button class="qty-btn" id="qtyPlus">+</button>
-            </div>
-            <div class="bet-row">
-                <span class="bet-label">Multiplier</span>
-                <div class="mult-row" id="multRow">
-                    <button class="mult-btn active" data-mult="1">X1</button>
-                    <button class="mult-btn" data-mult="5">X5</button>
-                    <button class="mult-btn" data-mult="10">X10</button>
-                    <button class="mult-btn" data-mult="20">X20</button>
-                    <button class="mult-btn" data-mult="50">X50</button>
-                    <button class="mult-btn" data-mult="100">X100</button>
-                </div>
-            </div>
-            <div class="quick-amounts" id="quickAmounts">
-                <button class="quick-btn" data-amount="10">₹10</button>
-                <button class="quick-btn" data-amount="50">₹50</button>
-                <button class="quick-btn" data-amount="100">₹100</button>
-                <button class="quick-btn" data-amount="500">₹500</button>
-                <button class="quick-btn" data-amount="1000">₹1,000</button>
-            </div>
-            <div class="bet-total-row">
-                <span class="bet-total-label">Total Amount</span>
-                <span class="bet-total-amount" id="totalAmount">₹10.00</span>
-            </div>
-            <div class="agree-row">
-                <input type="checkbox" id="agreeRules" checked>
-                <label for="agreeRules">I agree to the demo game rules</label>
-            </div>
-            <div class="bet-error" id="betError">Insufficient balance or betting closed</div>
-            <div class="bet-actions">
-                <button class="btn-cancel" id="cancelBetBtn">Cancel</button>
-                <button class="btn-confirm" id="confirmBetBtn">Confirm Bet</button>
-            </div>
+        <div class="hero-metrics">
+            <div><strong id="heroIndex">01</strong><span>FEATURED</span></div>
+            <div><strong>24/7</strong><span>LOBBY ACCESS</span></div>
+            <div><strong>N+</strong><span>ORIGINAL UI</span></div>
         </div>
     </div>
 
-    <!-- ===== RESULT OVERLAY ===== -->
-    <div class="result-overlay" id="resultOverlay">
-        <div class="result-card">
-            <div class="result-label">Result</div>
-            <div class="result-number" id="resultNumber">5</div>
-            <div class="result-meta" id="resultMeta">
-                <span>🔴 Red</span>
-                <span>📈 Big</span>
-            </div>
-            <div class="result-period" id="resultPeriod">Period: ---</div>
-            <div class="result-close-hint">Next round starting soon...</div>
-        </div>
+    <div class="hero-dots" aria-label="Featured game selector">
+        <button class="hero-dot active" data-index="0" aria-label="Aviator"></button>
+        <button class="hero-dot" data-index="1" aria-label="WINGO"></button>
+        <button class="hero-dot" data-index="2" aria-label="Vortex"></button>
     </div>
 
-    <!-- ===== RULES MODAL ===== -->
-    <div class="rules-modal" id="rulesModal">
-        <div class="rules-box">
-            <button class="rules-close" id="rulesCloseBtn">✕</button>
-            <h3>📜 Game Rules</h3>
-            <ul>
-                <li><strong>Green</strong> — wins on numbers <strong>1, 3, 7, 9</strong> (2x)</li>
-                <li><strong>Red</strong> — wins on numbers <strong>2, 4, 6, 8</strong> (2x)</li>
-                <li><strong>Violet</strong> — wins on numbers <strong>0 or 5</strong> (14x)</li>
-                <li><strong>Big</strong> — wins on numbers <strong>5–9</strong> (2x)</li>
-                <li><strong>Small</strong> — wins on numbers <strong>0–4</strong> (2x)</li>
-                <li><strong>Number</strong> — wins on exact number (9x)</li>
-                <li><strong>House Edge</strong> — 1.5% deducted from every winning payout</li>
-                <li><strong>Betting Cutoff</strong> — Last 5 seconds of each round</li>
-                <li><strong>Demo Mode</strong> — Virtual credits only, no real money</li>
-            </ul>
+    <div class="hero-corner hero-corner-tl">N+ / 05</div>
+    <div class="hero-corner hero-corner-br">SIGNATURE LOBBY</div>
+</section>
+
+<div class="live" aria-label="Demo activity">
+    <div class="live-label"><span></span> LIVE</div>
+    <div class="live-track">
+        <span>Demo activity • </span>
+        <b>Aviator</b> <span>• </span><b>WINGO</b> <span>• </span><b>K3</b> <span>• </span><b>5D</b>
+    </div>
+</div>
+
+<section class="section" id="recommendations">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Platform Recommendation</h2>
+            <p class="section-sub">Curated experiences for you</p>
         </div>
+        <a href="#lottery" class="view">VIEW ALL →</a>
     </div>
 
-    <!-- ===== TOAST ===== -->
-    <div class="toast" id="toast"></div>
+    <div class="recommendations">
+        <a class="rec" href="aviator.html"><img src="aviator.png" alt="Aviator" loading="eager"><span class="rec-name">AVIATOR</span></a>
+        <a class="rec" href="wingo.html"><img src="wingo.png" alt="WINGO" loading="eager"><span class="rec-name">WINGO</span></a>
+        <a class="rec" href="vortex.html"><img src="vortex.png" alt="Vortex" loading="lazy"><span class="rec-name">VORTEX</span></a>
+        <a class="rec" href="chicken-road-2.html"><img src="chicken-road-2.png" alt="Chicken Road 2" loading="lazy"><span class="rec-name">CHICKEN ROAD 2</span></a>
+        <a class="rec" href="crazy-time.html"><img src="crazy-time.png" alt="Crazy Time" loading="lazy"><span class="rec-name">CRAZY TIME</span></a>
+        <a class="rec" href="trx-wingo.html"><img src="trx-win-go.png" alt="TRX Win Go" loading="lazy"><span class="rec-name">TRX WIN GO</span></a>
+    </div>
+</section>
+
+<section class="section" id="lottery">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Lottery Games</h2>
+            <p class="section-sub">Fast, focused experiences</p>
+        </div>
+        <span class="view">5 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="wingo.html"><span class="badge hot">HOT</span><img src="wingo.png" alt="Win Go" loading="lazy"><div class="game-info"><div class="game-name">Win Go</div><div class="game-meta">30s • Demo</div></div></a>
+        <a class="game" href="motorace.html"><span class="badge">FEATURED</span><img src="motorace.png" alt="MotoRace" loading="lazy"><div class="game-info"><div class="game-name">MotoRace</div><div class="game-meta">Quick Play • Demo</div></div></a>
+        <a class="game" href="k3.html"><img src="k3.png" alt="K3" loading="lazy"><div class="game-info"><div class="game-name">K3</div><div class="game-meta">Dice • Demo</div></div></a>
+        <a class="game" href="5d.html"><span class="badge new">NEW</span><img src="5d.png" alt="5D" loading="lazy"><div class="game-info"><div class="game-name">5D</div><div class="game-meta">Lottery • Demo</div></div></a>
+        <a class="game" href="trx-wingo.html"><img src="trx-win-go.png" alt="TRX Win Go" loading="lazy"><div class="game-info"><div class="game-name">TRX Win Go</div><div class="game-meta">Fast Play • Demo</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="casino">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Casino Games</h2>
+            <p class="section-sub">Classic table experiences</p>
+        </div>
+        <span class="view">4 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="crazy-time.html"><span class="badge hot">HOT</span><img src="crazy-time.png" alt="Crazy Time" loading="lazy"><div class="game-info"><div class="game-name">Crazy Time</div><div class="game-meta">Demo Experience</div></div></a>
+        <a class="game" href="#"><img src="auto-roulette.png" alt="Auto Roulette" loading="lazy"><div class="game-info"><div class="game-name">Auto Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="american-roulette.png" alt="American Roulette" loading="lazy"><div class="game-info"><div class="game-name">Am. Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="roulette.png" alt="Roulette" loading="lazy"><div class="game-info"><div class="game-name">Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="rummy">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Rummy Cards</h2>
+            <p class="section-sub">Cards, tables & strategy</p>
+        </div>
+        <span class="view">3 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="#"><img src="365-rummy.png" alt="365 Rummy" loading="lazy"><div class="game-info"><div class="game-name">365 Rummy</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="v8-poker.png" alt="V8 Poker" loading="lazy"><div class="game-info"><div class="game-name">V8 Poker</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="koolbet.png" alt="Koolbet" loading="lazy"><div class="game-info"><div class="game-name">Koolbet</div><div class="game-meta">Coming Soon</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="slots">
+    <div class="section-head"><div><h2 class="section-title">Slots</h2><p class="section-sub">A dedicated space for future releases</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Premium slot experiences coming soon.</div>
+</section>
+
+<section class="section" id="sports">
+    <div class="section-head"><div><h2 class="section-title">Sports</h2><p class="section-sub">Your future sports hub</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Sports experiences coming soon.</div>
+</section>
+
+<section class="section" id="fishing">
+    <div class="section-head"><div><h2 class="section-title">Fishing</h2><p class="section-sub">Your future fishing hub</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Fishing experiences coming soon.</div>
+</section>
+
+<section class="section" id="original">
+    <div class="section-head"><div><h2 class="section-title">N+ Originals</h2><p class="section-sub">Experiences designed for N+ PLAY</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Original experiences coming soon.</div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Today's Champions</h2>
+            <p class="section-sub">Demo leaderboard</p>
+        </div>
+    </div>
+    <div class="champions">
+        <div class="champion"><div class="rank top">1</div><div class="player">Mem***JVN<small>Top demo score</small></div><div class="amount">₹14,850</div></div>
+        <div class="champion"><div class="rank second">2</div><div class="player">Su***aj<small>Demo player</small></div><div class="amount">₹11,200</div></div>
+        <div class="champion"><div class="rank third">3</div><div class="player">Kap***oor<small>Demo player</small></div><div class="amount">₹9,450</div></div>
+        <div class="champion"><div class="rank">4</div><div class="player">Mem***H3M<small>Demo player</small></div><div class="amount">₹7,800</div></div>
+        <div class="champion"><div class="rank">5</div><div class="player">Me***er<small>Demo player</small></div><div class="amount">₹6,150</div></div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="#">Language</a>
+        <a href="#">Support</a>
+        <a href="#">Beginner Guide</a>
+        <a href="#">About N+ PLAY</a>
+    </div>
+    <div class="disclaimer">
+        <p><strong>18+ | DEMO EXPERIENCE</strong></p>
+        <p>N+ PLAY is a premium gaming interface prototype. Play responsibly.</p>
+        <p>© 2026 N+ PLAY. All rights reserved.</p>
+    </div>
+</footer>
+</main>
+
+<nav class="bottom-nav" aria-label="Primary navigation">
+    <a href="index.html" class="nav-item active"><span class="nav-icon">⌂</span><span>Home</span></a>
+    <a href="activity.html" class="nav-item"><span class="nav-icon">◷</span><span>Activity</span></a>
+    <a href="bonus.html" class="nav-item"><span class="nav-icon">✦</span><span>Bonus</span><span class="nav-badge">NEW</span></a>
+    <a href="promotion.html" class="nav-item"><span class="nav-icon">◇</span><span>Promotion</span></a>
+    <a href="account.html" class="nav-item"><span class="nav-icon">◯</span><span>Account</span></a>
+</nav>
+
+<script>
+document.querySelectorAll('.cat').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+        document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
+        tab.classList.add('active');
+    });
+});
+</script>
+
+<script>
+(() => {
+    const slides = [
+        {
+            art:"aviator.png",
+            href:"aviator.html",
+            name:"Aviator",
+            kicker:"AVIATOR / SIGNATURE PICK",
+            title:"BEYOND",
+            desc:"A cinematic gaming experience designed to feel fast, focused and unmistakably N+.",
+            index:"01"
+        },
+        {
+            art:"wingo.png",
+            href:"wingo.html",
+            name:"WINGO",
+            kicker:"WINGO / LIVE PICK",
+            title:"PREDICT",
+            desc:"A sharp, colorful prediction experience presented through the N+ PLAY luxury interface.",
+            index:"02"
+        },
+        {
+            art:"vortex.png",
+            href:"vortex.html",
+            name:"Vortex",
+            kicker:"VORTEX / FEATURED",
+            title:"SPIN",
+            desc:"A high-energy experience wrapped in layered motion, depth and the signature N+ atmosphere.",
+            index:"03"
+        }
+    ];
+
+    const hero = document.querySelector(".final-hero");
+    const art = document.getElementById("heroGameArt");
+    const primary = document.getElementById("heroPrimary");
+    const kicker = document.getElementById("heroKicker");
+    const title = document.getElementById("heroTitle");
+    const desc = document.getElementById("heroDescription");
+    const index = document.getElementById("heroIndex");
+    const dots = [...document.querySelectorAll(".hero-dot")];
+
+    if(!hero || !art || !primary || !kicker || !title || !desc || !index) return;
+
+    let current = 0;
+    let timer = null;
+
+    function render(i){
+        current = i;
+        const s = slides[i];
+
+        hero.classList.remove("is-changing");
+        void hero.offsetWidth;
+
+        art.src = s.art;
+        art.alt = s.name;
+        primary.href = s.href;
+        primary.innerHTML = "Enter " + s.name + ' <span>↗</span>';
+        kicker.textContent = s.kicker;
+        title.textContent = s.title;
+        desc.textContent = s.desc;
+        index.textContent = s.index;
+
+        dots.forEach((dot,n) => dot.classList.toggle("active",n === i));
+        hero.classList.add("is-changing");
+    }
+
+    function restart(){
+        clearInterval(timer);
+        timer = setInterval(() => {
+            render((current + 1) % slides.length);
+        },6500);
+    }
+
+    dots.forEach((dot,i) => {
+        dot.addEventListener("click",() => {
+            render(i);
+            restart();
+        });
+    });
+
+    restart();
+})();
+</script>
 
-    <!-- ===== BOTTOM NAV ===== -->
-    <nav class="bottom-nav" aria-label="Primary navigation">
-        <a href="index.html" class="nav-item"><span class="nav-icon">⌂</span><span>Home</span></a>
-        <a href="activity.html" class="nav-item"><span class="nav-icon">◷</span><span>Activity</span></a>
-        <a href="wingo.html" class="nav-item active"><span class="nav-icon">🎯</span><span>WINGO</span></a>
-        <a href="promotion.html" class="nav-item"><span class="nav-icon">◇</span><span>Promotion</span></a>
-        <a href="account.html" class="nav-item"><span class="nav-icon">◯</span><span>Account</span></a>
-    </nav>
-
-    <script>
-        (function() {
-            'use strict';
-
-            // ============ CONSTANTS ============
-            const BALANCE_KEY = 'nplus_wallet_balance';
-            const BET_CLOSE_SECONDS = 5;
-            const HOUSE_EDGE = 0.985;
-            const MAX_NUMBERS = 5;
-            const MAX_COLORS = 2;
-            const HISTORY_LIMIT = 500;
-
-            const DURATION_MAP = { 30: '1000', 60: '2000', 180: '3000', 300: '4000' };
-
-            // ============ STATE ============
-            let balance = parseFloat(localStorage.getItem(BALANCE_KEY) || '1000');
-            let currentDuration = 30;
-            let roundStartMs = 0;
-            let currentPeriod = '';
-            let bettingOpen = true;
-            let roundActive = false;
-            let roundBetPlaced = false;
-            let roundBetAmount = 0;
-            let lastSettledKey = null;
-
-            let selected = { numbers: [], colors: [], size: null };
-            let betQuantity = 1;
-            let betMultiplier = 1;
-            let autoBet = false;
-            let soundEnabled = true;
-
-            let history = [];
-            let myBets = [];
-            let wins = 0;
-            let losses = 0;
-            let totalWon = 0;
-
-            // ============ DOM REFS ============
-            const walletBalanceEl = document.getElementById('walletBalance');
-            const timerDisplay = document.getElementById('timerDisplay');
-            const periodIdEl = document.getElementById('periodId');
-            const progressBar = document.getElementById('progressBar');
-            const bettingClosedBadge = document.getElementById('bettingClosedBadge');
-            const numGridEl = document.getElementById('numGrid');
-            const colorRowEl = document.getElementById('colorRow');
-            const sizeRowEl = document.getElementById('sizeRow');
-            const recentStrip = document.getElementById('recentStrip');
-            const tabContent = document.getElementById('tabContent');
-            const betOverlay = document.getElementById('betOverlay');
-            const selectedDisplay = document.getElementById('selectedDisplay');
-            const betAmountInput = document.getElementById('betAmount');
-            const qtyDisplay = document.getElementById('qtyDisplay');
-            const totalAmountEl = document.getElementById('totalAmount');
-            const betError = document.getElementById('betError');
-            const agreeRules = document.getElementById('agreeRules');
-            const resultOverlay = document.getElementById('resultOverlay');
-            const rulesModal = document.getElementById('rulesModal');
-            const autoToggle = document.getElementById('autoToggle');
-            const autoStatus = document.getElementById('autoStatus');
-            const toastEl = document.getElementById('toast');
-
-            // ============ UTILITY ============
-            function pad(n) { return n < 10 ? '0' + n : '' + n; }
-
-            function hash(str) {
-                let h = 2166136261;
-                for (let i = 0; i < str.length; i++) {
-                    h ^= str.charCodeAt(i);
-                    h = Math.imul(h, 16777619);
-                }
-                h += h << 13;
-                h ^= h >>> 7;
-                h += h << 3;
-                h ^= h >>> 17;
-                h += h << 5;
-                return h >>> 0;
-            }
-
-            function getRoundStart(ms = Date.now()) {
-                return Math.floor(ms / (currentDuration * 1000)) * currentDuration * 1000;
-            }
-
-            function getPeriodId(startMs) {
-                const d = new Date(startMs);
-                const y = d.getFullYear();
-                const m = pad(d.getMonth() + 1);
-                const day = pad(d.getDate());
-                const midnight = new Date(y, d.getMonth(), d.getDate()).getTime();
-                const secs = Math.floor((startMs - midnight) / 1000);
-                const idx = Math.floor(secs / currentDuration) + 1;
-                return `${y}${m}${day}${DURATION_MAP[currentDuration]}${String(idx).padStart(5, '0')}`;
-            }
-
-            function getRemainingMs() {
-                return (roundStartMs + currentDuration * 1000) - Date.now();
-            }
-
-            function getResultNumber(startMs) {
-                return hash(`wingo-${currentDuration}-${startMs}`) % 10;
-            }
-
-            function getColorForNumber(n) {
-                if (n === 0 || n === 5) return 'violet';
-                if (n % 2 === 0) return 'red';
-                return 'green';
-            }
-
-            function isBig(n) { return n >= 5; }
-
-            function toast(msg) {
-                toastEl.textContent = msg;
-                toastEl.classList.add('active');
-                clearTimeout(toast._t);
-                toast._t = setTimeout(() => toastEl.classList.remove('active'), 2000);
-            }
-
-            function updateBalanceUI() {
-                walletBalanceEl.textContent = '₹' + balance.toFixed(2);
-            }
-
-            function saveBalance() {
-                localStorage.setItem(BALANCE_KEY, String(balance));
-            }
-
-            // ============ HISTORY ============
-            function loadHistory() {
-                try {
-                    const raw = localStorage.getItem('wingo_history_' + currentDuration);
-                    if (raw) {
-                        const data = JSON.parse(raw);
-                        history = data.history || [];
-                        myBets = data.myBets || [];
-                        wins = data.wins || 0;
-                        losses = data.losses || 0;
-                        totalWon = data.totalWon || 0;
-                    }
-                } catch (e) { /* ignore */ }
-            }
-
-            function saveHistory() {
-                try {
-                    localStorage.setItem('wingo_history_' + currentDuration, JSON.stringify({
-                        history,
-                        myBets,
-                        wins,
-                        losses,
-                        totalWon
-                    }));
-                } catch (e) { /* ignore */ }
-            }
-
-            function addHistoryRecord(period, num, betStr, stake, payout, won) {
-                history.unshift({ period, num, color: getColorForNumber(num), size: isBig(num) ? 'big' : 'small',
-                    stake, payout, won, betStr, time: Date.now() });
-                if (history.length > HISTORY_LIMIT) history.length = HISTORY_LIMIT;
-                if (stake > 0) {
-                    if (won) wins++;
-                    else losses++;
-                    totalWon += payout - stake;
-                }
-                saveHistory();
-            }
-
-            function addMyBetRecord(period, num, betStr, amount, qty, total, won, status) {
-                myBets.unshift({ period, num, betStr, amount, qty, total, won, status, time: Date.now() });
-                if (myBets.length > 200) myBets.length = 200;
-                saveHistory();
-            }
-
-            // ============ ROUND ENGINE ============
-            function syncRound() {
-                const newStart = getRoundStart();
-                if (newStart !== roundStartMs) {
-                    roundStartMs = newStart;
-                    currentPeriod = getPeriodId(roundStartMs);
-                    periodIdEl.textContent = currentPeriod;
-                    roundBetPlaced = false;
-                    roundBetAmount = 0;
-                    selected = { numbers: [], colors: [], size: null };
-                    updateSelectionUI();
-                }
-            }
-
-            function updateTimer() {
-                syncRound();
-                const remaining = getRemainingMs();
-                const totalSec = Math.max(0, Math.ceil(remaining / 1000));
-                const mins = Math.floor(totalSec / 60);
-                const secs = totalSec % 60;
-                timerDisplay.textContent = `${pad(mins)}:${pad(secs)}`;
-
-                const progress = Math.min(100, (remaining / (currentDuration * 1000)) * 100);
-                progressBar.style.width = progress + '%';
-
-                if (remaining <= BET_CLOSE_SECONDS * 1000) {
-                    timerDisplay.classList.add('danger');
-                    bettingClosedBadge.classList.add('active');
-                    bettingOpen = false;
-                } else {
-                    timerDisplay.classList.remove('danger');
-                    bettingClosedBadge.classList.remove('active');
-                    bettingOpen = true;
-                }
-
-                if (remaining <= 0) {
-                    settleRound();
-                }
-            }
-
-            function settleRound() {
-                const key = `${currentDuration}:${roundStartMs}`;
-                if (lastSettledKey === key) return;
-                lastSettledKey = key;
-
-                roundActive = true;
-                const num = getResultNumber(roundStartMs);
-                const color = getColorForNumber(num);
-                const size = isBig(num) ? 'big' : 'small';
-
-                // Process bets
-                let totalPayout = 0;
-                let won = false;
-
-                if (roundBetPlaced && roundBetAmount > 0) {
-                    const stake = roundBetAmount;
-                    const betStr = buildBetString();
-
-                    selected.numbers.forEach(n => {
-                        if (n === num) { totalPayout += stake * 9 * HOUSE_EDGE;
-                            won = true; }
-                    });
-                    selected.colors.forEach(c => {
-                        if (c === color) { totalPayout += stake * (c === 'violet' ? 14 : 2) *
-                            HOUSE_EDGE;
-                            won = true; }
-                    });
-                    if (selected.size === size) { totalPayout += stake * 2 * HOUSE_EDGE;
-                        won = true; }
-
-                    if (totalPayout > 0) {
-                        balance += totalPayout;
-                        addMyBetRecord(currentPeriod, num, betStr, betAmountInput.value, betQuantity, stake,
-                            true, 'won');
-                    } else {
-                        addMyBetRecord(currentPeriod, num, betStr, betAmountInput.value, betQuantity, stake,
-                            false, 'lost');
-                    }
-                    addHistoryRecord(currentPeriod, num, betStr, stake, totalPayout, totalPayout > 0);
-                } else {
-                    addHistoryRecord(currentPeriod, num, '', 0, 0, false);
-                }
-
-                saveBalance();
-                updateBalanceUI();
-                renderRecentStrip();
-                renderTabContent();
-
-                // Show result overlay
-                showResult(num, color, size);
-
-                // Reset for next round
-                roundBetPlaced = false;
-                roundBetAmount = 0;
-                selected = { numbers: [], colors: [], size: null };
-                updateSelectionUI();
-                roundActive = false;
-            }
-
-            function showResult(num, color, size) {
-                document.getElementById('resultNumber').textContent = num;
-                document.getElementById('resultMeta').innerHTML = `
-                    <span>${color === 'red' ? '🔴' : color === 'green' ? '🟢' : '🟣'} ${color.toUpperCase()}</span>
-                    <span>${size === 'big' ? '📈 BIG' : '📉 SMALL'}</span>
-                `;
-                document.getElementById('resultPeriod').textContent = 'Period: ' + currentPeriod;
-                resultOverlay.classList.add('active');
-                setTimeout(() => resultOverlay.classList.remove('active'), 2500);
-            }
-
-            function buildBetString() {
-                const parts = [];
-                if (selected.numbers.length) parts.push('#' + selected.numbers.join(','));
-                if (selected.colors.length) parts.push(selected.colors.join('+'));
-                if (selected.size) parts.push(selected.size);
-                return parts.join(' ') || 'none';
-            }
-
-            // ============ UI RENDERING ============
-            function renderNumberGrid() {
-                let html = '';
-                for (let i = 0; i <= 9; i++) {
-                    const colorClass = getColorForNumber(i);
-                    html += `<button class="num-tile ${colorClass}" data-num="${i}">${i}</button>`;
-                }
-                numGridEl.innerHTML = html;
-                numGridEl.querySelectorAll('.num-tile').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        if (!bettingOpen || roundBetPlaced) return;
-                        const n = parseInt(btn.dataset.num);
-                        if (selected.numbers.includes(n)) {
-                            selected.numbers = selected.numbers.filter(x => x !== n);
-                        } else {
-                            if (selected.numbers.length >= MAX_NUMBERS) {
-                                toast('Max 5 numbers');
-                                return;
-                            }
-                            selected.numbers.push(n);
-                        }
-                        updateSelectionUI();
-                        openBetSheet();
-                    });
-                });
-            }
-
-            function updateSelectionUI() {
-                document.querySelectorAll('.num-tile').forEach(b => {
-                    const n = parseInt(b.dataset.num);
-                    b.classList.toggle('selected', selected.numbers.includes(n));
-                });
-                document.querySelectorAll('.color-card').forEach(b => {
-                    b.classList.toggle('selected', selected.colors.includes(b.dataset.color));
-                });
-                document.querySelectorAll('.size-card').forEach(b => {
-                    b.classList.toggle('selected', selected.size === b.dataset.size);
-                });
-                updateSelectedDisplay();
-                updateTotalAmount();
-            }
-
-            function updateSelectedDisplay() {
-                const parts = [];
-                if (selected.numbers.length) parts.push('Number: ' + selected.numbers.join(', '));
-                if (selected.colors.length) parts.push('Color: ' + selected.colors.join(', '));
-                if (selected.size) parts.push('Size: ' + selected.size);
-                selectedDisplay.textContent = parts.join(' | ') || 'No selection';
-            }
-
-            function updateTotalAmount() {
-                const amount = parseFloat(betAmountInput.value) || 0;
-                const total = amount * betQuantity * betMultiplier;
-                totalAmountEl.textContent = '₹' + total.toFixed(2);
-            }
-
-            function renderRecentStrip() {
-                const recent = history.slice(0, 20);
-                let html = '';
-                recent.forEach(h => {
-                    const cls = h.color === 'red' ? 'red' : h.color === 'green' ? 'green' : 'violet';
-                    html += `<div class="recent-chip ${cls}">${h.num}</div>`;
-                });
-                if (!html) html = '<span style="font-size:.6rem;color:var(--muted-2)">No results yet</span>';
-                recentStrip.innerHTML = html;
-            }
-
-            // ============ BET SHEET ============
-            function openBetSheet() {
-                if (!bettingOpen || roundBetPlaced) return;
-                const hasSelection = selected.numbers.length > 0 || selected.colors.length > 0 || selected
-                .size;
-                if (!hasSelection) return;
-                betOverlay.classList.add('active');
-                updateTotalAmount();
-                betError.classList.remove('active');
-            }
-
-            function closeBetSheet() {
-                betOverlay.classList.remove('active');
-            }
-
-            function confirmBet() {
-                if (!bettingOpen || roundBetPlaced) {
-                    betError.textContent = 'Betting closed';
-                    betError.classList.add('active');
-                    return;
-                }
-                if (!agreeRules.checked) {
-                    betError.textContent = 'Please agree to rules';
-                    betError.classList.add('active');
-                    return;
-                }
-                const amount = parseFloat(betAmountInput.value) || 0;
-                const total = amount * betQuantity * betMultiplier;
-                if (amount <= 0) {
-                    betError.textContent = 'Invalid amount';
-                    betError.classList.add('active');
-                    return;
-                }
-                if (total > balance) {
-                    betError.textContent = 'Insufficient balance';
-                    betError.classList.add('active');
-                    return;
-                }
-                balance -= total;
-                roundBetPlaced = true;
-                roundBetAmount = total;
-                saveBalance();
-                updateBalanceUI();
-                closeBetSheet();
-                toast(`Bet placed: ₹${total.toFixed(2)}`);
-            }
-
-            // ============ TABS ============
-            function renderTabContent() {
-                const activeTab = document.querySelector('.info-tab.active')?.dataset.tab || 'history';
-                switch (activeTab) {
-                    case 'history':
-                        renderHistoryTab();
-                        break;
-                    case 'mybets':
-                        renderMyBetsTab();
-                        break;
-                    case 'chart':
-                        renderChartTab();
-                        break;
-                    case 'strategy':
-                        renderStrategyTab();
-                        break;
-                    case 'stats':
-                        renderStatsTab();
-                        break;
-                }
-            }
-
-            function renderHistoryTab() {
-                if (history.length === 0) {
-                    tabContent.innerHTML =
-                        '<div style="text-align:center;padding:20px;color:var(--muted-2);font-size:.65rem;">No history yet</div>';
-                    return;
-                }
-                let html = `<table class="history-table"><thead><tr><th>Period</th><th>Number</th><th>Color</th><th>Size</th></tr></thead><tbody>`;
-                history.slice(0, 50).forEach(h => {
-                    html +=
-                        `<tr><td>${h.period}</td><td>${h.num}</td><td>${h.color}</td><td>${h.size}</td></tr>`;
-                });
-                html += '</tbody></table>';
-                tabContent.innerHTML = html;
-            }
-
-            function renderMyBetsTab() {
-                if (myBets.length === 0) {
-                    tabContent.innerHTML =
-                        '<div style="text-align:center;padding:20px;color:var(--muted-2);font-size:.65rem;">No bets placed yet</div>';
-                    return;
-                }
-                let html = `<table class="history-table"><thead><tr><th>Period</th><th>Bet</th><th>Amount</th><th>Result</th><th>Status</th></tr></thead><tbody>`;
-                myBets.slice(0, 50).forEach(b => {
-                    const statusCls = b.status === 'won' ? 'won' : b.status === 'lost' ? 'lost' : 'pending';
-                    html +=
-                        `<tr><td>${b.period}</td><td>${b.betStr}</td><td>₹${b.total.toFixed(1)}</td><td>${b.num}</td><td><span class="status-badge ${statusCls}">${b.status.toUpperCase()}</span></td></tr>`;
-                });
-                html += '</tbody></table>';
-                tabContent.innerHTML = html;
-            }
-
-            function renderChartTab() {
-                const recent = history.slice(0, 30).reverse();
-                if (recent.length === 0) {
-                    tabContent.innerHTML =
-                        '<div style="text-align:center;padding:20px;color:var(--muted-2);font-size:.65rem;">No data yet</div>';
-                    return;
-                }
-                const maxCount = 10;
-                let html = '<div class="chart-container">';
-                for (let n = 0; n <= 9; n++) {
-                    const count = recent.filter(h => h.num === n).length;
-                    const height = (count / maxCount) * 100;
-                    const color = getColorForNumber(n);
-                    html +=
-                        `<div class="chart-bar" style="height:${Math.max(4, height)}%;background:${color === 'red' ? '#ef4444' : color === 'green' ? '#22c55e' : '#a855f7'}"></div>`;
-                }
-                html += '</div>';
-                html +=
-                '<div style="display:flex;justify-content:space-between;font-size:.5rem;color:var(--muted-2);padding:4px 6px;">';
-                for (let n = 0; n <= 9; n++) html += `<span>${n}</span>`;
-                html += '</div>';
-                tabContent.innerHTML = html;
-            }
-
-            function renderStrategyTab() {
-                if (history.length < 10) {
-                    tabContent.innerHTML =
-                        '<div style="text-align:center;padding:20px;color:var(--muted-2);font-size:.65rem;">Collecting data...</div>';
-                    return;
-                }
-                const recent = history.slice(0, 20);
-                const freq = Array(10).fill(0);
-                recent.forEach(h => freq[h.num]++);
-                const hot = freq.indexOf(Math.max(...freq));
-                const cold = freq.indexOf(Math.min(...freq));
-                const colorCount = { red: 0, green: 0, violet: 0 };
-                recent.forEach(h => colorCount[h.color]++);
-                const sizeCount = { big: 0, small: 0 };
-                recent.forEach(h => sizeCount[h.size]++);
-
-                let html = `
-                    <div style="padding:8px 0;font-size:.65rem;color:var(--muted);line-height:1.8;">
-                        <p><strong style="color:var(--gold)">Last 20 rounds:</strong></p>
-                        <p>🔥 Hot number: <strong>${hot}</strong> (${freq[hot]} times)</p>
-                        <p>❄️ Cold number: <strong>${cold}</strong> (${freq[cold]} times)</p>
-                        <p>🔴 Red: ${colorCount.red} | 🟢 Green: ${colorCount.green} | 🟣 Violet: ${colorCount.violet}</p>
-                        <p>📈 Big: ${sizeCount.big} | 📉 Small: ${sizeCount.small}</p>
-                        <p style="margin-top:8px;color:var(--muted-2);font-size:.55rem;">Statistical information only — past results do not predict future outcomes.</p>
-                    </div>
-                `;
-                tabContent.innerHTML = html;
-            }
-
-            function renderStatsTab() {
-                const totalRounds = history.length;
-                const bigCount = history.filter(h => h.size === 'big').length;
-                const smallCount = history.filter(h => h.size === 'small').length;
-                const redCount = history.filter(h => h.color === 'red').length;
-                const greenCount = history.filter(h => h.color === 'green').length;
-                const violetCount = history.filter(h => h.color === 'violet').length;
-
-                let html = `<div class="stats-grid">
-                    <div class="stat-card"><div class="stat-value">${totalRounds}</div><div class="stat-label">Rounds</div></div>
-                    <div class="stat-card"><div class="stat-value">${bigCount}</div><div class="stat-label">Big</div></div>
-                    <div class="stat-card"><div class="stat-value">${smallCount}</div><div class="stat-label">Small</div></div>
-                    <div class="stat-card"><div class="stat-value">${redCount}</div><div class="stat-label">Red</div></div>
-                    <div class="stat-card"><div class="stat-value">${greenCount}</div><div class="stat-label">Green</div></div>
-                    <div class="stat-card"><div class="stat-value">${violetCount}</div><div class="stat-label">Violet</div></div>
-                </div>`;
-                tabContent.innerHTML = html;
-            }
-
-            // ============ EVENT BINDING ============
-            document.querySelectorAll('.duration-tab').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.duration-tab').forEach(b => b.classList.remove(
-                        'active'));
-                    btn.classList.add('active');
-                    const newDur = parseInt(btn.dataset.dur);
-                    if (newDur !== currentDuration) {
-                        saveHistory();
-                        currentDuration = newDur;
-                        loadHistory();
-                        roundStartMs = getRoundStart();
-                        currentPeriod = getPeriodId(roundStartMs);
-                        periodIdEl.textContent = currentPeriod;
-                        lastSettledKey = null;
-                        roundBetPlaced = false;
-                        roundBetAmount = 0;
-                        selected = { numbers: [], colors: [], size: null };
-                        updateSelectionUI();
-                        renderRecentStrip();
-                        renderTabContent();
-                    }
-                });
-            });
-
-            document.querySelectorAll('.color-card').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (!bettingOpen || roundBetPlaced) return;
-                    const c = btn.dataset.color;
-                    if (selected.colors.includes(c)) {
-                        selected.colors = selected.colors.filter(x => x !== c);
-                    } else {
-                        if (selected.colors.length >= MAX_COLORS) {
-                            toast('Max 2 colors');
-                            return;
-                        }
-                        selected.colors.push(c);
-                    }
-                    updateSelectionUI();
-                    openBetSheet();
-                });
-            });
-
-            document.querySelectorAll('.size-card').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (!bettingOpen || roundBetPlaced) return;
-                    const s = btn.dataset.size;
-                    selected.size = selected.size === s ? null : s;
-                    updateSelectionUI();
-                    openBetSheet();
-                });
-            });
-
-            document.getElementById('qtyMinus').addEventListener('click', () => {
-                if (betQuantity > 1) betQuantity--;
-                qtyDisplay.textContent = betQuantity;
-                updateTotalAmount();
-            });
-            document.getElementById('qtyPlus').addEventListener('click', () => {
-                betQuantity++;
-                qtyDisplay.textContent = betQuantity;
-                updateTotalAmount();
-            });
-
-            document.querySelectorAll('.mult-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove(
-                        'active'));
-                    btn.classList.add('active');
-                    betMultiplier = parseInt(btn.dataset.mult);
-                    updateTotalAmount();
-                });
-            });
-
-            document.querySelectorAll('.quick-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    betAmountInput.value = btn.dataset.amount;
-                    updateTotalAmount();
-                });
-            });
-
-            betAmountInput.addEventListener('input', updateTotalAmount);
-
-            document.getElementById('betCloseBtn').addEventListener('click', closeBetSheet);
-            document.getElementById('cancelBetBtn').addEventListener('click', closeBetSheet);
-            document.getElementById('confirmBetBtn').addEventListener('click', confirmBet);
-
-            betOverlay.addEventListener('click', (e) => {
-                if (e.target === betOverlay) closeBetSheet();
-            });
-
-            document.querySelectorAll('.info-tab').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.info-tab').forEach(b => b.classList.remove(
-                        'active'));
-                    btn.classList.add('active');
-                    renderTabContent();
-                });
-            });
-
-            document.getElementById('rulesBtn').addEventListener('click', () => rulesModal.classList.add(
-                'active'));
-            document.getElementById('rulesCloseBtn').addEventListener('click', () => rulesModal.classList
-                .remove('active'));
-            rulesModal.addEventListener('click', (e) => {
-                if (e.target === rulesModal) rulesModal.classList.remove('active');
-            });
-
-            autoToggle.addEventListener('click', () => {
-                autoBet = !autoBet;
-                autoToggle.classList.toggle('active', autoBet);
-                autoStatus.textContent = autoBet ? 'ON' : 'OFF';
-            });
-
-            document.getElementById('soundToggle').addEventListener('click', function() {
-                soundEnabled = !soundEnabled;
-                this.textContent = soundEnabled ? '🔊' : '🔇';
-            });
-
-            // ============ INIT ============
-            function init() {
-                updateBalanceUI();
-                loadHistory();
-                roundStartMs = getRoundStart();
-                currentPeriod = getPeriodId(roundStartMs);
-                periodIdEl.textContent = currentPeriod;
-                renderNumberGrid();
-                updateSelectionUI();
-                renderRecentStrip();
-                renderTabContent();
-                setInterval(updateTimer, 200);
-            }
-
-            init();
-
-            // ============ PERSISTENCE SYNC ============
-            window.addEventListener('storage', (e) => {
-                if (e.key === BALANCE_KEY) {
-                    balance = parseFloat(e.newValue || '1000');
-                    updateBalanceUI();
-                }
-            });
-
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) {
-                    updateBalanceUI();
-                    syncRound();
-                    updateTimer();
-                    renderRecentStrip();
-                    renderTabContent();
-                }
-            });
-        })();
-    </script>
 </body>
 </html>
