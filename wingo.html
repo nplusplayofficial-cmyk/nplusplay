@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080909">
-<title>N+ PLAY — WINGO ULTRA FINAL</title>
+<title>N+ PLAY — WINGO ULTRA FINAL V2</title>
 <style>
 :root{--bg:#070808;--card:#111311;--card2:#161816;--line:rgba(255,255,255,.085);--txt:#f4f1e9;--muted:#858a84;--gold:#d8b66d;--gold2:#f2d594;--red:#ef5a57;--green:#27bd78;--violet:#a86aee;--blue:#639bea;--danger:#ff706c}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -15%,#302b1d 0,#111310 30%,#070808 65%);color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{display:flex;justify-content:center}.app{width:100%;max-width:520px;min-height:100vh;background:linear-gradient(180deg,rgba(10,11,10,.98),rgba(6,7,7,.99));box-shadow:0 0 90px #000;overflow:hidden}.ambient{position:fixed;width:520px;height:520px;top:-250px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(216,182,109,.12),transparent 68%);pointer-events:none}
@@ -108,13 +108,16 @@ const size=n=>n>=5?"Big":"Small";
 const payoutFor=(b,n)=>{if(b.type==="number")return Number(b.value)===n?9:0;if(b.type==="size")return String(b.value)===size(n)?2:0;if(b.type==="color"){if(b.value==="Violet")return (n===0||n===5)?4.5:0;if(b.value==="Green")return [1,3,7,9].includes(n)?2:n===5?1.5:0;if(b.value==="Red")return [2,4,6,8].includes(n)?2:n===0?1.5:0;}return 0;};
 const money=n=>"₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
-function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||"{}");if(x.balance!=null)state.balance=x.balance;if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets)}catch{}}
+function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||"{}");if(x.balance!=null)state.balance=Number(x.balance);if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets)}catch{}normalizeState()}
 function save(){localStorage.setItem(STORE,JSON.stringify({balance:state.balance,history:state.history,bets:state.bets}))}
-function walletDeltaForWin(b){return b.total*DEMO_RETURN_RATE}
+function walletDeltaForWin(b){return Number((b.total*DEMO_RETURN_RATE).toFixed(2))}
+function normalizeState(){state.balance=Number.isFinite(Number(state.balance))?Number(Number(state.balance).toFixed(2)):1000;for(const sec of modes){state.history[sec]=Array.isArray(state.history[sec])?state.history[sec]:[];state.bets[sec]=Array.isArray(state.bets[sec])?state.bets[sec]:[];state.history[sec].sort((a,b)=>(b.ts||0)-(a.ts||0));state.history[sec]=state.history[sec].slice(0,500);}}
 function periodAt(start,sec){const d=new Date(start),idx=Math.floor(start/(sec*1000)),code={30:"1000",60:"2000",180:"3000",300:"4000"}[sec];const date=d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");return date+code+String(idx%100000).padStart(5,"0")}
 function round(){const now=Date.now(),start=Math.floor(now/(state.sec*1000))*(state.sec*1000),elapsed=Math.floor((now-start)/1000),remaining=state.sec-elapsed;return{now,start,remaining,period:periodAt(start,state.sec)}}
 function resultFor(p){const n=hash(p)%10,c=color(n);return{period:p,number:n,color:c,colorName:cname(c),colors:colorsFor(n),size:size(n)}}
-function ensureHistory(){const r=round(), arr=state.history[state.sec];if(!arr.length){for(let i=1;i<=500;i++){const st=r.start-i*state.sec*1000,p=periodAt(st,state.sec);arr.push({...resultFor(p),ts:st})}save();return}const known=new Set(arr.map(x=>x.period));for(let i=1;i<=500;i++){const st=r.start-i*state.sec*1000,p=periodAt(st,state.sec);if(!known.has(p))arr.push({...resultFor(p),ts:st})}arr.sort((a,b)=>b.ts-a.ts);state.history[state.sec]=arr.slice(0,500);save()}
+function ensureHistory(){const r=round(),arr=state.history[state.sec];const known=new Set(arr.map(x=>x.period));for(let i=1;i<=500;i++){const st=r.start-i*state.sec*1000,p=periodAt(st,state.sec);if(!known.has(p)){arr.push({...resultFor(p),ts:st});known.add(p)}}arr.sort((a,b)=>(b.ts||0)-(a.ts||0));state.history[state.sec]=arr.slice(0,500);save()}
+function settlePastRounds(showPopup=false){const now=Date.now(),arr=state.bets[state.sec]||[];let changed=false,lastSettled=null,wonCredit=0,lostStake=0;for(const b of arr){if(b.status!=="PENDING")continue;const st=periodStartFromPeriod(b.period,state.sec);if(st==null||st+state.sec*1000>now)continue;const x=resultFor(b.period),mult=payoutFor(b,x.number),won=mult>0;b.status=won?"WON":"LOST";b.settledAt=Date.now();b.payoutMultiplier=mult;b.feeRate=0.02;b.contractAmount=Number((b.total*DEMO_RETURN_RATE).toFixed(2));if(won){const credit=Number((b.contractAmount*mult).toFixed(2));b.returnAmount=credit;b.netAmount=Number((credit-b.total).toFixed(2));state.balance+=credit;wonCredit+=credit}else{b.returnAmount=0;b.netAmount=Number((-b.total).toFixed(2));lostStake+=b.total}changed=true;lastSettled={period:b.period,result:x}}if(changed){state.balance=Number(state.balance.toFixed(2));save();renderBalance();renderRecent();renderPanel();if(showPopup&&lastSettled)showResult(lastSettled.period,lastSettled.result,wonCredit,lostStake)}}
+function periodStartFromPeriod(p,sec){const str=String(p||"");if(str.length<13)return null;const y=Number(str.slice(0,4)),m=Number(str.slice(4,6))-1,d=Number(str.slice(6,8));if(!Number.isFinite(y)||!Number.isFinite(m)||!Number.isFinite(d))return null;const dayStart=new Date(y,m,d).getTime(),code={30:"1000",60:"2000",180:"3000",300:"4000"}[sec];if(str.slice(8,12)!==code)return null;const serial=Number(str.slice(12));if(!Number.isFinite(serial))return null;const roundsPerDay=Math.floor(86400000/(sec*1000));const daySerial=Math.floor(dayStart/(sec*1000))%100000;let offset=(serial-daySerial)%roundsPerDay;if(offset<0)offset+=roundsPerDay;return dayStart+offset*sec*1000}
 function renderBalance(){const el=$("#balance");el.textContent=money(state.balance);el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");clearTimeout(window.__balanceTimer);window.__balanceTimer=setTimeout(()=>el.classList.remove("bump"),320)}
 function renderNumbers(){$("#numbers").innerHTML=Array.from({length:10},(_,n)=>`<button class="num ${color(n)} ${state.selection?.type==="number"&&Number(state.selection.value)===n?"active":""}" data-type="number" data-value="${n}">${n}</button>`).join("")}
 function renderRecent(){$("#recent").innerHTML=state.history[state.sec].slice(0,14).map(x=>`<div class="ball ${x.color}" title="${(x.colors||[x.colorName]).join(" + ")}">${x.number}</div>`).join("")}
@@ -125,33 +128,8 @@ else if(state.tab==="chart"){const counts=Array(10).fill(0);h.forEach(x=>counts[
 else if(state.tab==="strategy"){const total=h.length,b=h.filter(x=>x.size==="Big").length,s=total-b,r=h.filter(x=>x.color==="r").length,g=h.filter(x=>x.color==="g").length,v=h.filter(x=>x.color==="v").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${total}</b><span>Rounds</span></div><div class="stat"><b>${b}</b><span>Big</span></div><div class="stat"><b>${s}</b><span>Small</span></div><div class="stat"><b>${r}</b><span>Red</span></div><div class="stat"><b>${g}</b><span>Green</span></div><div class="stat"><b>${v}</b><span>Violet</span></div></div><div class="note">Patterns are historical statistics only and do not predict future results.</div>`}
 else{const total=h.length,b=h.filter(x=>x.size==="Big").length,won=(bets||[]).filter(x=>x.status==="WON").length,lost=(bets||[]).filter(x=>x.status==="LOST").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${total}</b><span>Total rounds</span></div><div class="stat"><b>${b}</b><span>Big</span></div><div class="stat"><b>${total-b}</b><span>Small</span></div><div class="stat"><b>${won}</b><span>Demo wins</span></div><div class="stat"><b>${lost}</b><span>Demo losses</span></div><div class="stat"><b>${bets.length}</b><span>Selections</span></div></div>`}}
 function setMode(sec){state.sec=sec;state.selection=null;$$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));ensureHistory();renderRecent();renderSelection();renderPanel();state.lastRoundStart=null;toast(`WINGO ${sec===30?"30 SEC":sec===60?"1 MIN":sec===180?"3 MIN":"5 MIN"}`)}
-function update(){const r=round(),closed=r.remaining<=5;$("#time").textContent=`00:${String(r.remaining).padStart(2,"0")}`;$("#period").textContent=r.period;$("#bar").style.width=(r.remaining/state.sec*100)+"%";$("#status").textContent=closed?"BETTING CLOSED":"BETTING OPEN";$("#round").classList.toggle("closed",closed);const stage=closed?3:r.remaining<=10?2:r.remaining<=20?1:0;$$("#stage span").forEach((x,i)=>x.classList.toggle("on",i<=stage));if(state.lastRoundStart!==null&&state.lastRoundStart!==r.start)completeRound(state.lastRoundStart);state.lastRoundStart=r.start}
-function completeRound(start){const p=periodAt(start,state.sec),x=resultFor(p),arr=state.history[state.sec];if(!arr.some(a=>a.period===p)){arr.unshift({...x,ts:start});state.history[state.sec]=arr.slice(0,500)}let changed=false;let roundWon=0;let roundLost=0;
-for(const b of state.bets[state.sec]){
-  if(b.period===p&&b.status==="PENDING"){
-    const mult=payoutFor(b,x.number),won=mult>0;
-    b.status=won?"WON":"LOST";
-    b.settledAt=Date.now();
-    b.payoutMultiplier=mult;
-    b.feeRate=0.02;
-    b.contractAmount=Number((b.total*0.98).toFixed(2));
-    if(won){
-      const credit=Number((b.contractAmount*mult).toFixed(2));
-      b.returnAmount=credit;
-      b.netAmount=Number((credit-b.total).toFixed(2));
-      state.balance+=credit;
-      roundWon+=credit;
-    }else{
-      b.returnAmount=0;
-      b.netAmount=-b.total;
-      roundLost+=b.total;
-    }
-    changed=true;
-  }
-}
-state.balance=Number(state.balance.toFixed(2));
-save();renderBalance();renderRecent();renderPanel();
-if(changed||state.bets[state.sec].some(b=>b.period===p))showResult(p,x,roundWon,roundLost)}
+function update(){const r=round(),closed=r.remaining<=5;settlePastRounds(false);$("#time").textContent=`00:${String(r.remaining).padStart(2,"0")}`;$("#period").textContent=r.period;$("#bar").style.width=(r.remaining/state.sec*100)+"%";$("#status").textContent=closed?"BETTING CLOSED":"BETTING OPEN";$("#round").classList.toggle("closed",closed);const stage=closed?3:r.remaining<=10?2:r.remaining<=20?1:0;$$("#stage span").forEach((x,i)=>x.classList.toggle("on",i<=stage));if(state.lastRoundStart!==null&&state.lastRoundStart!==r.start)completeRound(state.lastRoundStart);state.lastRoundStart=r.start}
+function completeRound(start){const p=periodAt(start,state.sec),x=resultFor(p),arr=state.history[state.sec];if(!arr.some(a=>a.period===p)){arr.unshift({...x,ts:start});state.history[state.sec]=arr.slice(0,500)}let changed=false,roundWon=0,roundLost=0;for(const b of state.bets[state.sec]){if(b.period!==p||b.status!=="PENDING")continue;const mult=payoutFor(b,x.number),won=mult>0;b.status=won?"WON":"LOST";b.settledAt=Date.now();b.payoutMultiplier=mult;b.feeRate=0.02;b.contractAmount=Number((b.total*DEMO_RETURN_RATE).toFixed(2));if(won){const credit=Number((b.contractAmount*mult).toFixed(2));b.returnAmount=credit;b.netAmount=Number((credit-b.total).toFixed(2));state.balance+=credit;roundWon+=credit}else{b.returnAmount=0;b.netAmount=Number((-b.total).toFixed(2));roundLost+=b.total}changed=true}state.balance=Number(state.balance.toFixed(2));save();renderRecent();renderPanel();if(changed)showResult(p,x,roundWon,roundLost)}
 function openBet(type,value){const r=round();if(r.remaining<=5){toast("Betting closed for this round");return}state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${type.toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${r.period}</span>`;$("#overlay").classList.add("show");syncSheet()}
 function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>state.balance||round().remaining<=5}
 function closeSheet(){ $("#overlay").classList.remove("show") }
@@ -169,7 +147,7 @@ function showResult(p,x,wonCredit=0,lostStake=0){
   $("#result").classList.add("show");clearTimeout(window.__resultTimer);window.__resultTimer=setTimeout(()=>$("#result").classList.remove("show"),3000);
 }
 function toast(t){const x=$("#toast");x.textContent=t;x.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove("show"),1700)}
-load();ensureHistory();$("#balance").textContent=money(state.balance);renderRecent();renderNumbers();renderSelection();renderPanel();$("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">₹${v}</button>`).join("");$("#multis").innerHTML=[1,5,10,20,50,100].map(v=>`<button class="multi ${v===1?"active":""}" data-m="${v}">X${v}</button>`).join("");
+load();ensureHistory();settlePastRounds(false);$("#balance").textContent=money(state.balance);renderRecent();renderNumbers();renderSelection();renderPanel();$("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">₹${v}</button>`).join("");$("#multis").innerHTML=[1,5,10,20,50,100].map(v=>`<button class="multi ${v===1?"active":""}" data-m="${v}">X${v}</button>`).join("");
 $("#modes").onclick=e=>{const b=e.target.closest(".mode");if(b)setMode(+b.dataset.sec)};
 document.addEventListener("click",e=>{const b=e.target.closest("[data-type]");if(b)openBet(b.dataset.type,b.dataset.value);const m=e.target.closest("[data-m]");if(m){state.multi=+m.dataset.m;$$(".multi").forEach(x=>x.classList.toggle("active",x===m));syncSheet()}const a=e.target.closest("[data-amt]");if(a){$("#amount").value=a.dataset.amt;syncSheet()}});
 $("#random").onclick=()=>openBet("number",Math.floor(Math.random()*10));$("#edit").onclick=()=>state.selection?openBet(state.selection.type,state.selection.value):toast("Choose a selection first");
@@ -178,7 +156,8 @@ $("#amount").oninput=syncSheet;$("#agree").onchange=syncSheet;$("#close").onclic
 $("#confirm").onclick=()=>{const r=round(),total=Number($("#amount").value||0)*state.qty*state.multi;if(r.remaining<=5){toast("Betting is closed");return}if(total>state.balance){toast("Insufficient demo credits");return}const p=r.period;if(state.bets[state.sec].some(b=>b.period===p&&b.type===state.selection.type&&String(b.value)===String(state.selection.value)&&b.total===total)){toast("Duplicate selection blocked");return}state.balance-=total;state.bets[state.sec].unshift({period:p,type:state.selection.type,value:state.selection.value,total,qty:state.qty,multi:state.multi,status:"PENDING",ts:Date.now()});save();renderBalance();renderPanel();closeSheet();toast("✓ Demo selection confirmed")};
 $("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;state.tab=b.dataset.tab;$$(".tab").forEach(x=>x.classList.toggle("active",x===b));renderPanel()};
 $("#rulesBtn").onclick=$("#how").onclick=()=>$("#rules").classList.add("show");$("#ruleClose").onclick=()=>$("#rules").classList.remove("show");$("#deposit").onclick=$("#withdraw").onclick=()=>toast("Virtual-credit demo only");$("#sound").onclick=()=>toast("Sound control ready");$("#back").onclick=()=>history.back();$("#continue").onclick=()=>$("#result").classList.remove("show");
-document.addEventListener("visibilitychange",()=>{if(!document.hidden){ensureHistory();update();renderRecent();renderPanel()}});
+window.addEventListener("storage",e=>{if(e.key!==STORE||!e.newValue)return;try{const x=JSON.parse(e.newValue);if(x.balance!=null)state.balance=Number(x.balance);if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets);normalizeState();ensureHistory();renderRecent();renderPanel();renderBalance()}catch{}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){ensureHistory();settlePastRounds(false);update();renderRecent();renderPanel()}});
 setInterval(update,150);update();
 })();
 </script>
