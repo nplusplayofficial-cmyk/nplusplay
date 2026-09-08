@@ -78,7 +78,7 @@ a{text-decoration:none;color:inherit}button{font:inherit}
   <div class="hero-row">
     <div>
       <h1>Your Activity</h1>
-      <p>Everything from your virtual-credit gaming activity, organised in one premium dashboard.</p>
+      <p>Everything from your N+ PLAY gaming activity, organised in one premium dashboard.</p>
     </div>
     <div class="sync"><i></i><span id="syncText">SYNCED</span></div>
   </div>
@@ -87,6 +87,59 @@ a{text-decoration:none;color:inherit}button{font:inherit}
     <button class="mini" id="refreshBtn">↻ Refresh</button>
   </div>
 </section>
+<section class="reward-summary">
+  <div class="reward-top">
+    <div>
+      <span class="reward-kicker">N+ PLAY • REWARDS</span>
+      <h2>Activity & Rewards</h2>
+      <p>Track your play, bonuses and progress in one place.</p>
+    </div>
+    <div class="reward-balance">
+      <small>AVAILABLE</small>
+      <strong id="rewardBalance">₹1,000.00</strong>
+    </div>
+  </div>
+  <div class="bonus-strip">
+    <div><span>Today's Bonus</span><b id="todayBonus">₹0.00</b></div>
+    <div><span>Total Rewards</span><b id="totalRewards">₹0.00</b></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="sectionhead"><h2>Reward Center</h2><span class="view">EXPLORE</span></div>
+  <div class="reward-shortcuts">
+    <a href="bonus.html"><i>★</i><b>Activity Award</b><small>Rewards</small></a>
+    <a href="promotion.html"><i>＋</i><b>Invitation Bonus</b><small>Invite</small></a>
+    <a href="bonus.html"><i>◈</i><b>Betting Rebate</b><small>Progress</small></a>
+    <a href="bonus.html"><i>◆</i><b>Super Jackpot</b><small>Rewards</small></a>
+    <a href="promotion.html"><i>◎</i><b>Invite Wheel</b><small>Coming soon</small></a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="sectionhead"><h2>Daily Rewards</h2><span class="view">N+ PLAY</span></div>
+  <div class="reward-cards">
+    <a class="reward-card" href="bonus.html">
+      <div class="reward-art gift-art"><span>✦</span></div>
+      <div class="reward-copy"><h3>Gifts</h3><p>Enter a reward code to claim eligible demo rewards.</p></div>
+    </a>
+    <a class="reward-card" href="bonus.html">
+      <div class="reward-art calendar-art"><span>▦</span></div>
+      <div class="reward-copy"><h3>Attendance Bonus</h3><p>Build your activity streak and track your progress.</p></div>
+    </a>
+  </div>
+</section>
+
+<section class="promo-card">
+  <div class="promo-copy">
+    <span>EXCLUSIVE • N+ PLAY</span>
+    <h2>More to discover.</h2>
+    <p>Explore games, rewards and new experiences from your N+ PLAY lobby.</p>
+    <a href="index.html">EXPLORE N+ PLAY ↗</a>
+  </div>
+  <div class="promo-orb"><span>N+</span></div>
+</section>
+
 
 <section class="section">
  <div class="sectionhead"><h2>Performance</h2><span class="view" id="periodLabel">ALL TIME</span></div>
@@ -126,6 +179,7 @@ a{text-decoration:none;color:inherit}button{font:inherit}
    <button class="filter" data-filter="60">1 MIN</button>
    <button class="filter" data-filter="180">3 MIN</button>
    <button class="filter" data-filter="300">5 MIN</button>
+   <button class="filter" data-filter="game">GAMES</button>
  </div>
  <div class="search"><span>⌕</span><input id="search" placeholder="Search period, game or selection"></div>
  <div class="list" id="activityList"></div>
@@ -154,10 +208,20 @@ a{text-decoration:none;color:inherit}button{font:inherit}
  </div>
 </section>
 
+
+<section class="section">
+ <div class="sectionhead"><h2>Game Activity</h2><span class="view">ALL GAMES</span></div>
+ <div class="gamehub">
+   <div><span>ACTIVE GAMES</span><b id="activeGames">0</b><small>games with activity</small></div>
+   <div><span>TOP GAME</span><b id="topGame">—</b><small>most activity</small></div>
+   <div><span>LAST PLAYED</span><b id="lastGame">—</b><small>latest activity</small></div>
+ </div>
+</section>
+
 <section class="section">
  <div class="sectionhead"><h2>Quick Actions</h2><span class="view">N+ PLAY</span></div>
  <div class="actions">
-   <a href="wingo.html"><span>◎</span><b>Continue WINGO</b><small>Open live demo round</small></a>
+   <a href="wingo.html"><span>◎</span><b>Continue Playing</b><small>Open your latest game</small></a>
    <a href="index.html"><span>✦</span><b>Discover Games</b><small>Explore the N+ lobby</small></a>
    <a href="account.html"><span>◯</span><b>Account</b><small>Profile & settings</small></a>
    <a href="bonus.html"><span>◇</span><b>Rewards</b><small>View bonus center</small></a>
@@ -179,6 +243,52 @@ ght:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,
 @media(max-width:430px){.stats-4{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}.hero-row{display:block}.hero-row .sync{margin-top:10px}.actions{grid-template-columns:1fr}}
 @media(min-width:700px){.app{width:min(100% - 40px,760px)}.actions{grid-template-columns:repeat(4,1fr)}}
 
+
+/* ===== REFERENCE-INSPIRED REWARD MODULE ===== */
+.reward-summary{
+  margin:0 0 18px;padding:19px;border-radius:22px;
+  background:linear-gradient(145deg,#171813,#0d0e0c);
+  border:1px solid rgba(201,165,91,.16);box-shadow:0 22px 60px rgba(0,0,0,.42);
+}
+.reward-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.reward-kicker{font-size:.48rem;letter-spacing:1.8px;color:#a99569;font-weight:900}
+.reward-summary h2{margin-top:5px;font-size:1.18rem}.reward-summary p{margin-top:5px;color:#777971;font-size:.57rem;line-height:1.45}
+.reward-balance{text-align:right}.reward-balance small{display:block;color:#62655e;font-size:.45rem;letter-spacing:1px}.reward-balance strong{display:block;margin-top:4px;color:#f0dfb5;font-size:.9rem}
+.bonus-strip{display:grid;grid-template-columns:1fr 1fr;margin-top:15px;border-top:1px solid rgba(255,255,255,.06);padding-top:13px}
+.bonus-strip>div{text-align:center}.bonus-strip>div+div{border-left:1px solid rgba(255,255,255,.07)}
+.bonus-strip span{display:block;color:#686b63;font-size:.48rem}.bonus-strip b{display:block;margin-top:4px;font-size:.78rem;color:#ded7c5}
+.reward-shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.reward-shortcuts a{text-align:center;padding:11px 4px;border:1px solid rgba(255,255,255,.06);border-radius:14px;background:rgba(255,255,255,.022);transition:.2s}
+.reward-shortcuts a:last-child{grid-column:1}
+.reward-shortcuts a:hover{transform:translateY(-1px);border-color:rgba(201,165,91,.2)}
+.reward-shortcuts i{width:35px;height:35px;margin:auto;display:grid;place-items:center;border-radius:11px;font-style:normal;font-size:.9rem;color:#17140e;background:linear-gradient(145deg,#f0dfb5,#c9a55b);box-shadow:0 7px 20px rgba(201,165,91,.1)}
+.reward-shortcuts b{display:block;margin-top:7px;font-size:.49rem}.reward-shortcuts small{display:block;margin-top:3px;color:#62655e;font-size:.43rem}
+.reward-cards{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.reward-card{overflow:hidden;border:1px solid rgba(255,255,255,.07);border-radius:17px;background:#11130f}
+.reward-art{height:88px;display:grid;place-items:center;position:relative;overflow:hidden}
+.reward-art:before,.reward-art:after{content:"";position:absolute;border-radius:50%;filter:blur(2px)}
+.gift-art{background:radial-gradient(circle at 50% 20%,rgba(201,165,91,.28),transparent 55%),linear-gradient(135deg,#292216,#12130f)}
+.calendar-art{background:radial-gradient(circle at 55% 20%,rgba(190,210,190,.14),transparent 55%),linear-gradient(135deg,#182019,#10130f)}
+.reward-art span{position:relative;z-index:2;font-size:2.1rem;color:#ead7a8;text-shadow:0 8px 25px rgba(0,0,0,.5)}
+.reward-copy{padding:11px}.reward-copy h3{font-size:.72rem}.reward-copy p{margin-top:4px;color:#676a62;font-size:.5rem;line-height:1.45}
+.promo-card{margin:0 0 24px;min-height:145px;position:relative;overflow:hidden;border-radius:20px;border:1px solid rgba(201,165,91,.14);
+background:radial-gradient(circle at 82% 40%,rgba(201,165,91,.16),transparent 35%),linear-gradient(135deg,#191811,#0d0e0b 60%,#17130c);padding:19px}
+.promo-copy{position:relative;z-index:2;max-width:68%}.promo-copy span{font-size:.45rem;letter-spacing:1.4px;color:#a99569;font-weight:900}.promo-copy h2{margin-top:6px;font-size:1.1rem}.promo-copy p{margin-top:5px;color:#777971;font-size:.52rem;line-height:1.45}.promo-copy a{display:inline-block;margin-top:11px;color:#f0dfb5;font-size:.5rem;font-weight:950;letter-spacing:.5px}
+.promo-orb{position:absolute;right:-8px;top:13px;width:145px;height:145px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(201,165,91,.18);box-shadow:0 0 70px rgba(201,165,91,.08) inset}
+.promo-orb:before{content:"";position:absolute;inset:16px;border-radius:50%;border:1px solid rgba(201,165,91,.12);background:radial-gradient(circle at 35% 30%,#f0dfb5,#c9a55b 42%,#4d3a1b 100%)}
+.promo-orb span{position:relative;font-size:1.5rem;font-weight:950;color:#19160e}
+@media(max-width:430px){
+  .reward-top{display:block}.reward-balance{text-align:left;margin-top:10px}
+  .reward-shortcuts{grid-template-columns:repeat(4,1fr)}.reward-shortcuts a:last-child{grid-column:1}
+  .reward-shortcuts b{font-size:.43rem}
+}
+
+
+.gamehub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gamehub>div{padding:13px;border:1px solid rgba(255,255,255,.065);border-radius:15px;background:rgba(255,255,255,.022)}
+.gamehub span{display:block;color:#666861;font-size:.46rem;letter-spacing:.5px}.gamehub b{display:block;margin-top:6px;color:#e9e3d4;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gamehub small{display:block;margin-top:3px;color:#60635c;font-size:.46rem}
+@media(max-width:430px){.gamehub{grid-template-columns:1fr 1fr}.gamehub>div:last-child{grid-column:1/-1}}
+
 </style>
 </head>
 <body>
@@ -191,12 +301,12 @@ ght:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,
 <section class="hero">
   <div class="kicker">N+ PLAY • Activity Center</div>
   <h1>Your Activity</h1>
-  <p>WINGO demo activity, results and progress — all in one clean view.</p>
+  <p>N+ PLAY demo activity, results and progress — all in one clean view.</p>
   <div class="balance"><div><small>AVAILABLE DEMO CREDITS</small><strong id="heroBalance">₹1,000.00</strong></div><div class="sync"><i></i> SYNCED</div></div>
 </section>
 
 <section class="section">
- <div class="sectionhead"><h2>WINGO Overview</h2><span class="view">LIVE DATA</span></div>
+ <div class="sectionhead"><h2>Gaming Overview</h2><span class="view">LIVE DATA</span></div>
  <div class="stats">
    <div class="stat"><span>TOTAL BETS</span><strong id="totalBets">0</strong></div>
    <div class="stat win"><span>WINS</span><strong id="wins">0</strong></div>
@@ -214,6 +324,7 @@ ght:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,
    <button class="filter" data-filter="60">1 MIN</button>
    <button class="filter" data-filter="180">3 MIN</button>
    <button class="filter" data-filter="300">5 MIN</button>
+   <button class="filter" data-filter="game">GAMES</button>
  </div>
  <div class="list" id="activityList" style="margin-top:9px"></div>
 </section>
@@ -231,7 +342,7 @@ ght:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,
 <section class="section">
  <div class="sectionhead"><h2>Featured</h2><span class="view">EXPLORE</span></div>
  <div class="rewards">
-   <a class="reward" href="wingo.html"><span class="rIcon">◎</span><span class="tag">WINGO</span><h3>Continue WINGO</h3><p>Return to the live round and continue your demo session.</p></a>
+   <a class="reward" href="wingo.html"><span class="rIcon">◎</span><span class="tag">WINGO</span><h3>Continue Playing</h3><p>Return to your latest game and continue your session.</p></a>
    <a class="reward" href="index.html"><span class="rIcon">✦</span><span class="tag">N+ PLAY</span><h3>Discover Games</h3><p>Browse the rest of the N+ PLAY game collection.</p></a>
  </div>
 </section>
@@ -291,8 +402,9 @@ function filtered(){
     if(filter==="loss"&&s!=="lost")return false;
     if(filter==="pending"&&s!=="pending")return false;
     if(["30","60","180","300"].includes(filter)&&Number(b.sec)!==Number(filter))return false;
+    if(filter==="game" && !b.game && !b.gameName && String(b.type||"").toLowerCase()==="")return false;
     if(query){
-      const hay=[b.period,b.type,b.value,b.result,b.sec].join(" ").toLowerCase();
+      const hay=[b.gameName,b.game,b.period,b.type,b.value,b.result,b.sec].join(" ").toLowerCase();
       if(!hay.includes(query.toLowerCase()))return false;
     }
     return true;
@@ -339,18 +451,19 @@ function renderWallet(){
 function renderList(rows){
   $("#resultCount").textContent=rows.length+" RECORDS";
   const box=$("#activityList");
-  if(!rows.length){box.innerHTML='<div class="empty"><b>No activity found</b>Try another filter or place a demo selection in WINGO.</div>';$("#loadMore").disabled=true;return}
+  if(!rows.length){box.innerHTML='<div class="empty"><b>No activity found</b>Try another filter or play an N+ PLAY game.</div>';$("#loadMore").disabled=true;return}
   const shown=rows.slice(0,visible);
   box.innerHTML=shown.map(b=>{
     const s=String(b.status||"").toUpperCase(),won=s==="WON",pending=s==="PENDING";
-    const title=pending?"WINGO • PENDING":won?"WINGO • WIN":"WINGO • LOSS";
+    const gameName=b.gameName||b.game||"N+ PLAY GAME";
+    const title=(gameName+" • "+(pending?"PENDING":won?"WIN":"LOSS"));
     const icon=pending?"…":won?"✓":"×";
     const sel=((b.type||"selection").toUpperCase()+" "+(b.value!=null?b.value:"")).trim();
     const when=new Date(b.settledAt||b.ts||Date.now()).toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
     const net=netOf(b), ret=Number(b.returnAmount||0);
     return `<button class="item ${won?"win":pending?"":"loss"} activity-open" data-id="${String(b.id||b.period||b.ts||"").replace(/"/g,"&quot;")}">
       <div class="icon">${icon}</div>
-      <div><h3>${title}</h3><p>${secLabel(b.sec)} · ${sel} · ${when}</p></div>
+      <div><h3>${title}</h3><p>${gameName} · ${secLabel(b.sec)} · ${sel} · ${when}</p></div>
       <div class="amt"><strong class="${won?"pos":pending?"":"neg"}">${pending?"—":(net>=0?"+":"−")+money(Math.abs(net))}</strong><small>${pending?"Awaiting result":won?money(ret)+" return":"stake "+money(b.total)}</small></div>
     </button>`;
   }).join("");
@@ -363,11 +476,12 @@ function showDetail(b){
   const s=String(b.status||"").toUpperCase(),won=s==="WON",net=netOf(b);
   const modal=document.createElement("div");modal.className="detail-modal";
   modal.innerHTML=`<div class="detail-card">
-    <button class="detail-close">×</button><div class="detail-kicker">N+ PLAY · WINGO</div>
+    <button class="detail-close">×</button><div class="detail-kicker">N+ PLAY · GAME ACTIVITY</div>
     <div class="detail-status ${won?"won":s==="PENDING"?"pending":"lost"}">${won?"YOU WON":s==="PENDING"?"PENDING":"YOU LOST"}</div>
     <div class="detail-net">${won?"+":"−"}${money(Math.abs(net))}</div>
     <div class="detail-grid">
-      <span>PERIOD<b>${b.period||"—"}</b></span><span>MODE<b>${secLabel(b.sec)}</b></span>
+      <span>GAME<b>${b.gameName||b.game||"N+ PLAY GAME"}</b></span><span>PERIOD<b>${b.period||"—"}</b></span>
+      <span>MODE<b>${secLabel(b.sec)}</b></span>
       <span>SELECTION<b>${(b.type||"—").toUpperCase()} ${b.value??""}</b></span><span>RESULT<b>${b.result??"—"}</b></span>
       <span>STAKE<b>${money(b.total||0)}</b></span><span>RETURN<b>${money(b.returnAmount||0)}</b></span>
       <span>MULTIPLIER<b>${b.payoutMultiplier?("×"+b.payoutMultiplier):"—"}</b></span><span>SETTLED<b>${b.settledAt?new Date(b.settledAt).toLocaleString("en-IN"):"—"}</b></span>
@@ -383,10 +497,10 @@ function renderChart(bets){
 }
 function renderLedger(bets){
   const rows=bets.slice(0,8);const box=$("#ledger");
-  if(!rows.length){box.innerHTML='<div class="empty"><b>Wallet ledger is empty</b>Settled WINGO activity will appear here.</div>';return}
+  if(!rows.length){box.innerHTML='<div class="empty"><b>Wallet ledger is empty</b>Settled game activity will appear here.</div>';return}
   box.innerHTML=rows.map(b=>{
     const n=netOf(b),won=n>=0&&String(b.status).toUpperCase()==="WON";
-    return `<div class="ledger-row"><div class="ledger-icon">${won?"↑":"↓"}</div><div><b>WINGO · ${secLabel(b.sec)}</b><small>${b.period||"—"} · ${String(b.status||"").toUpperCase()}</small></div><div class="ledger-amt ${won?"pos":"neg"}">${won?"+":"−"}${money(Math.abs(n))}</div></div>`;
+    return `<div class="ledger-row"><div class="ledger-icon">${won?"↑":"↓"}</div><div><b>GAME · ${secLabel(b.sec)}</b><small>${b.period||"—"} · ${String(b.status||"").toUpperCase()}</small></div><div class="ledger-amt ${won?"pos":"neg"}">${won?"+":"−"}${money(Math.abs(n))}</div></div>`;
   }).join("");
 }
 function renderMilestones(all){
@@ -398,9 +512,36 @@ function renderMilestones(all){
   set("#mWins",wins.length+" / 10","#mWinsBar",wins.length,10);
   set("#mDays",days+" / 7","#mDaysBar",days,7);
 }
+
+function renderRewardSummary(all){
+  const now=new Date(), start=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  const settled=all.filter(b=>["WON","LOST"].includes(String(b.status).toUpperCase()));
+  const today=settled.filter(b=>Number(b.settledAt||b.ts||0)>=start);
+  const todayNet=today.reduce((a,b)=>a+netOf(b),0);
+  const totalNet=settled.reduce((a,b)=>a+netOf(b),0);
+  const balance=getBalance();
+  const rb=document.getElementById("rewardBalance"), tb=document.getElementById("todayBonus"), tr=document.getElementById("totalRewards");
+  if(rb)rb.textContent=money(balance);
+  if(tb)tb.textContent=(todayNet>=0?"+":"−")+money(Math.abs(todayNet));
+  if(tr)tr.textContent=(totalNet>=0?"+":"−")+money(Math.abs(totalNet));
+}
+
+
+function renderGameHub(all){
+  const names=all.map(b=>b.gameName||b.game||"N+ PLAY GAME");
+  const unique=[...new Set(names)];
+  const counts={}; names.forEach(n=>counts[n]=(counts[n]||0)+1);
+  const top=unique.sort((a,b)=>counts[b]-counts[a])[0]||"—";
+  const last=all[0];
+  const active=document.getElementById("activeGames"), topEl=document.getElementById("topGame"), lastEl=document.getElementById("lastGame");
+  if(active)active.textContent=unique.length;
+  if(topEl)topEl.textContent=top;
+  if(lastEl)lastEl.textContent=last?(last.gameName||last.game||"N+ PLAY GAME"):"—";
+}
+
 function render(){
   const all=allBets(), rows=filtered();
-  renderWallet();renderStats(rows);renderList(rows);renderChart(rows);renderLedger(all);renderMilestones(all);
+  renderWallet();renderStats(rows);renderList(rows);renderChart(rows);renderLedger(all);renderMilestones(all);renderRewardSummary(all);renderGameHub(all);
   $("#periodLabel").textContent=range==="all"?"ALL TIME":range.toUpperCase();
   $("#chartRange").textContent=range.toUpperCase();
 }
