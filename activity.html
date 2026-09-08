@@ -1,653 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N+ PLAY - Activity & Rewards</title>
-    <style>
-        /* ==========================================
-           1. MODERN DARK GAMING THEME & GLASSMORPHISM
-           ========================================== */
-        :root {
-            --bg-dark: #070a12;
-            --bg-surface: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.65);
-            --card-border: rgba(255, 255, 255, 0.1);
-            
-            --gold-neon: #f59e0b;
-            --gold-glow: rgba(245, 158, 11, 0.35);
-            --red-vibrant: #e63946;
-            --red-glow: rgba(230, 57, 70, 0.4);
-            --green-glow: #10b981;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080908">
+<title>N+ PLAY — Activity</title>
+<style>
+:root{
+  --bg:#080908;--panel:#111310;--panel2:#151713;--line:rgba(255,255,255,.08);
+  --text:#f4f1e8;--muted:#898a84;--bronze:#c9a55b;--bronze2:#f0dfb5;
+  --green:#28d39a;--red:#ff5b66;--violet:#b47cff;
+  --shadow:0 22px 70px rgba(0,0,0,.58);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}
+body{min-height:100vh;color:var(--text);background:
+ radial-gradient(650px 420px at 50% -140px,rgba(201,165,91,.075),transparent 68%),
+ radial-gradient(500px 420px at 100% 35%,rgba(255,255,255,.025),transparent 70%),#080908;
+ padding-bottom:88px}
+a{text-decoration:none;color:inherit}button{font:inherit}
+.app{width:min(100%,590px);margin:auto;padding:0 14px}
+.header{position:sticky;top:0;z-index:50;margin:0 -14px;padding:13px 14px;
+ display:flex;align-items:center;justify-content:space-between;background:rgba(8,9,8,.88);
+ backdrop-filter:blur(22px);border-bottom:1px solid rgba(201,165,91,.1)}
+.brand{display:flex;align-items:center;gap:9px}.mark{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;
+ background:linear-gradient(145deg,#f1e3c0,#c9a55b 48%,#70582b);color:#12110d;font-size:11px;font-weight:950;
+ box-shadow:0 7px 25px rgba(201,165,91,.13)}.brand b{font-size:1.2rem;letter-spacing:1px}
+.headright{display:flex;align-items:center;gap:8px}.wallet{padding:8px 12px;border:1px solid rgba(40,211,154,.2);
+ border-radius:999px;background:rgba(40,211,154,.055);color:#baf5df;font-size:.75rem;font-weight:850}
+.age{font-size:.6rem;font-weight:900;color:#ff9299;border:1px solid rgba(255,91,102,.2);padding:6px 8px;border-radius:999px}
+.hero{margin:15px 0 13px;padding:22px;border:1px solid rgba(201,165,91,.16);border-radius:24px;
+ background:linear-gradient(145deg,rgba(201,165,91,.075),rgba(255,255,255,.025) 46%,rgba(0,0,0,.15));
+ box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"ACTIVITY";position:absolute;right:-20px;bottom:-32px;
+ font-size:78px;font-weight:950;letter-spacing:-5px;color:rgba(201,165,91,.025)}
+.kicker{font-size:.58rem;font-weight:900;letter-spacing:2px;color:var(--bronze2);text-transform:uppercase}
+.hero h1{margin-top:7px;font-size:2rem;letter-spacing:-1.4px}.hero p{margin-top:7px;color:#999b95;font-size:.73rem;line-height:1.55}
+.balance{margin-top:17px;display:flex;justify-content:space-between;align-items:end}.balance small{display:block;color:#70716c;font-size:.56rem;letter-spacing:1.3px;font-weight:800}.balance strong{display:block;margin-top:4px;font-size:1.55rem}
+.sync{font-size:.58rem;color:#75ddb7;display:flex;align-items:center;gap:5px}.sync i{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 9px var(--green)}
+.section{margin:0 0 22px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sectionhead h2{font-size:.92rem}.sectionhead h2:before{content:"";display:inline-block;width:3px;height:15px;border-radius:4px;
+ background:linear-gradient(var(--bronze2),var(--bronze));margin-right:8px;vertical-align:-2px}.view{font-size:.58rem;color:#777a73}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{padding:14px 12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
+.stat span{font-size:.56rem;color:#73756f}.stat strong{display:block;margin-top:6px;font-size:1rem}.stat.win strong{color:#8cebc8}.stat.loss strong{color:#ff939a}
+.filters{display:flex;gap:7px;overflow:auto;scrollbar-width:none;padding-bottom:2px}.filters::-webkit-scrollbar{display:none}
+.filter{flex:0 0 auto;border:1px solid var(--line);background:rgba(255,255,255,.025);color:#8b8c86;border-radius:999px;padding:8px 12px;font-size:.6rem;font-weight:800}
+.filter.active{color:#17150f;background:linear-gradient(135deg,#f0dfb5,#c9a55b);border-color:var(--bronze)}
+.list{border:1px solid var(--line);border-radius:19px;overflow:hidden;background:rgba(255,255,255,.025)}
+.item{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:13px;border-bottom:1px solid rgba(255,255,255,.055)}
+.item:last-child{border-bottom:0}.icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:.8rem;font-weight:900;background:rgba(255,255,255,.055);border:1px solid var(--line)}
+.item.win .icon{color:#83e6c4;border-color:rgba(40,211,154,.16);background:rgba(40,211,154,.07)}
+.item.loss .icon{color:#ff858d;border-color:rgba(255,91,102,.14);background:rgba(255,91,102,.06)}
+.item h3{font-size:.68rem}.item p{margin-top:3px;color:#676963;font-size:.54rem}.amt{text-align:right}.amt strong{display:block;font-size:.68rem}.amt small{display:block;margin-top:3px;color:#676963;font-size:.5rem}.pos{color:#86e5c2}.neg{color:#ff858d}
+.empty{padding:25px;text-align:center;color:#73756f;font-size:.65rem}.empty b{display:block;color:#b1b2ac;margin-bottom:5px}
+.rewards{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.reward{min-height:116px;padding:15px;border-radius:18px;border:1px solid var(--line);
+ background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));position:relative;overflow:hidden}
+.reward .ricon{font-size:1.25rem}.reward h3{margin-top:11px;font-size:.7rem}.reward p{margin-top:4px;color:#74766f;font-size:.55rem;line-height:1.45}
+.reward .tag{position:absolute;right:9px;top:9px;font-size:.46rem;color:var(--bronze2);border:1px solid rgba(201,165,91,.18);padding:4px 6px;border-radius:999px}
+.progress{height:7px;background:#22251f;border-radius:99px;overflow:hidden;margin-top:10px}.progress i{display:block;height:100%;width:42%;background:linear-gradient(90deg,#70582b,#c9a55b,#f0dfb5);border-radius:inherit}
+.bottom{position:fixed;z-index:100;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,590px);display:grid;grid-template-columns:repeat(5,1fr);
+ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.91);backdrop-filter:blur(24px);
+ border:1px solid rgba(201,165,91,.1);border-bottom:0;border-radius:20px 20px 0 0;box-shadow:0 -18px 55px rgba(0,0,0,.62)}
+.nav{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;color:#666860;font-size:.51rem;font-weight:800}.nav .ni{font-size:1rem}
+.nav.active{color:var(--bronze2)}.nav.active:before{content:"";position:absolute;top:-9px;width:30px;height:3px;border-radius:5px;background:var(--bronze);box-shadow:0 0 16px rgba(201,165,91,.6)}
+.toast{position:fixed;z-index:200;left:50%;bottom:96px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+ padding:11px 15px;border-radius:12px;background:#171916;border:1px solid rgba(201,165,91,.2);box-shadow:var(--shadow);font-size:.63rem;transition:.3s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:850px){.app{width:min(100% - 40px,760px)}.hero{padding:28px}.hero h1{font-size:2.5rem}.bottom{width:590px}}
 
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: rgba(15, 23, 42, 0.85);
-            --input-border: rgba(255, 255, 255, 0.12);
-        }
+/* ===== ACTIVITY ULTRA
+<div class="app">
+<header class="header">
+  <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
+  <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="age">18+</span></div>
+</header>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+<section class="hero">
+  <div class="kicker">N+ PLAY • ACTIVITY CENTER</div>
+  <div class="hero-row">
+    <div>
+      <h1>Your Activity</h1>
+      <p>Everything from your virtual-credit gaming activity, organised in one premium dashboard.</p>
+    </div>
+    <div class="sync"><i></i><span id="syncText">SYNCED</span></div>
+  </div>
+  <div class="balance">
+    <div><small>AVAILABLE DEMO CREDITS</small><strong id="heroBalance">₹1,000.00</strong></div>
+    <button class="mini" id="refreshBtn">↻ Refresh</button>
+  </div>
+</section>
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            background-image: 
-                radial-gradient(circle at 15% 15%, var(--red-glow) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, var(--gold-glow) 0%, transparent 45%),
-                linear-gradient(180deg, var(--bg-dark) 0%, #030712 100%);
-            background-attachment: fixed;
-            padding: 10px 10px 80px 10px; /* Space for bottom nav */
-        }
+<section class="section">
+ <div class="sectionhead"><h2>Performance</h2><span class="view" id="periodLabel">ALL TIME</span></div>
+ <div class="stats stats-4">
+   <div class="stat"><span>TOTAL BETS</span><strong id="totalBets">0</strong></div>
+   <div class="stat win"><span>WINS</span><strong id="wins">0</strong></div>
+   <div class="stat loss"><span>LOSSES</span><strong id="losses">0</strong></div>
+   <div class="stat"><span>WIN RATE</span><strong id="winRate">0%</strong></div>
+ </div>
+ <div class="metrics">
+   <div><span>NET RESULT</span><strong id="netResult">₹0.00</strong></div>
+   <div><span>TURNOVER</span><strong id="turnover">₹0.00</strong></div>
+   <div><span>BEST WIN</span><strong id="bestWin">₹0.00</strong></div>
+   <div><span>STREAK</span><strong id="streak">0</strong></div>
+ </div>
+</section>
 
-        .app-viewport {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            position: relative;
-        }
+<section class="section">
+ <div class="sectionhead"><h2>Time Range</h2><span class="view">ANALYTICS</span></div>
+ <div class="range" id="ranges">
+   <button class="range-btn active" data-range="all">All</button>
+   <button class="range-btn" data-range="today">Today</button>
+   <button class="range-btn" data-range="yesterday">Yesterday</button>
+   <button class="range-btn" data-range="7d">7 Days</button>
+   <button class="range-btn" data-range="30d">30 Days</button>
+ </div>
+</section>
 
-        /* SLEEK HEADER */
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 18px;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-        }
+<section class="section">
+ <div class="sectionhead"><h2>Activity</h2><span class="view" id="resultCount">0 RECORDS</span></div>
+ <div class="filters" id="filters">
+   <button class="filter active" data-filter="all">ALL</button>
+   <button class="filter" data-filter="win">WINS</button>
+   <button class="filter" data-filter="loss">LOSSES</button>
+   <button class="filter" data-filter="pending">PENDING</button>
+   <button class="filter" data-filter="30">30 SEC</button>
+   <button class="filter" data-filter="60">1 MIN</button>
+   <button class="filter" data-filter="180">3 MIN</button>
+   <button class="filter" data-filter="300">5 MIN</button>
+ </div>
+ <div class="search"><span>⌕</span><input id="search" placeholder="Search period, game or selection"></div>
+ <div class="list" id="activityList"></div>
+ <button class="loadmore" id="loadMore">LOAD MORE</button>
+</section>
 
-        .btn-back {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            color: var(--text-main);
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
+<section class="section">
+ <div class="sectionhead"><h2>Performance Trend</h2><span class="view">SETTLED RESULTS</span></div>
+ <div class="chart-card">
+   <div class="chart-head"><div><small>NET MOVEMENT</small><strong id="chartValue">₹0.00</strong></div><span id="chartRange">ALL</span></div>
+   <div class="chart" id="chart"></div>
+ </div>
+</section>
 
-        .btn-back:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--gold-neon);
-            color: var(--gold-neon);
-        }
+<section class="section">
+ <div class="sectionhead"><h2>Wallet Ledger</h2><span class="view">RECENT MOVEMENT</span></div>
+ <div class="ledger" id="ledger"></div>
+</section>
 
-        .header-title {
-            font-size: 1.15rem;
-            font-weight: 800;
-            letter-spacing: 0.3px;
-            background: linear-gradient(90deg, #ffffff, var(--gold-neon));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+<section class="section">
+ <div class="sectionhead"><h2>Milestones</h2><span class="view">PROGRESS</span></div>
+ <div class="milestones">
+   <div class="milestone"><div class="micon">◎</div><div><b id="mBets">0 / 25</b><span>Demo bets completed</span><div class="bar"><i id="mBetsBar"></i></div></div></div>
+   <div class="milestone"><div class="micon">◆</div><div><b id="mWins">0 / 10</b><span>Demo wins recorded</span><div class="bar"><i id="mWinsBar"></i></div></div></div>
+   <div class="milestone"><div class="micon">↗</div><div><b id="mDays">0 / 7</b><span>Active days</span><div class="bar"><i id="mDaysBar"></i></div></div></div>
+ </div>
+</section>
 
-        /* MYSTERY BOX GIFT CODE CARD */
-        .gift-code-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-            border: 1px solid var(--gold-neon);
-            border-radius: 20px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 8px 25px var(--gold-glow);
-            position: relative;
-            overflow: hidden;
-        }
+<section class="section">
+ <div class="sectionhead"><h2>Quick Actions</h2><span class="view">N+ PLAY</span></div>
+ <div class="actions">
+   <a href="wingo.html"><span>◎</span><b>Continue WINGO</b><small>Open live demo round</small></a>
+   <a href="index.html"><span>✦</span><b>Discover Games</b><small>Explore the N+ lobby</small></a>
+   <a href="account.html"><span>◯</span><b>Account</b><small>Profile & settings</small></a>
+   <a href="bonus.html"><span>◇</span><b>Rewards</b><small>View bonus center</small></a>
+ </div>
+</section>
 
-        .gift-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+<footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:4px 0 20px">
+  <strong style="color:#7d6a3d">18+ · VIRTUAL CREDIT DEMO</strong><br>
+  N+ PLAY prototype · No real-money transactions.
+</footer>
+</div>
+ght:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.045);font-size:.75rem}
+.ledger-row b{font-size:.6rem}.ledger-row small{display:block;margin-top:3px;color:#666961;font-size:.48rem}.ledger-amt{text-align:right;font-size:.62rem;font-weight:900}.ledger-amt.pos{color:#86e5c2}.ledger-amt.neg{color:#ff858d}
+.milestones{display:grid;gap:8px}.milestone{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.02)}
+.micon{width:35px;height:35px;border-radius:10px;display:grid;place-items:center;color:#d8c291;background:rgba(201,165,91,.07);border:1px solid rgba(201,165,91,.12)}
+.milestone b{font-size:.6rem}.milestone span{display:block;margin-top:3px;color:#696b65;font-size:.5rem}.bar{height:5px;background:#23251f;border-radius:9px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#70582b,#c9a55b,#f0dfb5);border-radius:inherit;transition:width .5s}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.actions a{padding:14px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.018));transition:.25s}
+.actions a:hover{border-color:rgba(201,165,91,.24);transform:translateY(-1px)}.actions span{font-size:1rem;color:#d7c08d}.actions b{display:block;margin-top:9px;font-size:.63rem}.actions small{display:block;margin-top:4px;color:#696b65;font-size:.5rem}
+@media(max-width:430px){.stats-4{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}.hero-row{display:block}.hero-row .sync{margin-top:10px}.actions{grid-template-columns:1fr}}
+@media(min-width:700px){.app{width:min(100% - 40px,760px)}.actions{grid-template-columns:repeat(4,1fr)}}
 
-        .gift-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: 0 0 15px var(--gold-glow);
-        }
-
-        .gift-title-text h3 {
-            font-size: 1rem;
-            font-weight: 800;
-        }
-
-        .gift-title-text p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .code-input-box {
-            display: flex;
-            gap: 8px;
-        }
-
-        .code-input {
-            flex: 1;
-            height: 46px;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 12px;
-            padding: 0 14px;
-            color: var(--gold-neon);
-            font-weight: 800;
-            font-size: 0.9rem;
-            outline: none;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .code-input::placeholder {
-            color: rgba(148, 163, 184, 0.5);
-            font-weight: 400;
-            text-transform: none;
-            letter-spacing: 0;
-        }
-
-        .btn-redeem {
-            padding: 0 18px;
-            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
-            border: none;
-            border-radius: 12px;
-            color: #ffffff;
-            font-size: 0.85rem;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 4px 12px var(--red-glow);
-            transition: transform 0.2s;
-        }
-
-        .btn-redeem:active {
-            transform: scale(0.95);
-        }
-
-        /* SECTION HEADER */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 4px;
-        }
-
-        .section-title {
-            font-size: 1.05rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 16px;
-            background: var(--gold-neon);
-            border-radius: 2px;
-        }
-
-        /* DAILY SIGN-IN STREAK GRID */
-        .signin-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .signin-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .day-box {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 10px 6px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            text-align: center;
-            position: relative;
-        }
-
-        .day-box.claimed {
-            border-color: var(--green-glow);
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .day-box.active-day {
-            border-color: var(--gold-neon);
-            box-shadow: 0 0 12px var(--gold-glow);
-        }
-
-        .day-label {
-            font-size: 0.68rem;
-            font-weight: 800;
-            color: var(--text-muted);
-        }
-
-        .day-icon {
-            font-size: 1.2rem;
-        }
-
-        .day-reward {
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: var(--gold-neon);
-        }
-
-        .btn-claim-all {
-            width: 100%;
-            height: 48px;
-            background: linear-gradient(135deg, var(--gold-neon), var(--red-vibrant));
-            border: none;
-            border-radius: 14px;
-            color: #fff;
-            font-size: 0.95rem;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 6px 18px var(--red-glow);
-            transition: transform 0.2s;
-        }
-
-        .btn-claim-all:active {
-            transform: scale(0.98);
-        }
-
-        /* ATTENDANCE PROGRESS STREAK */
-        .attendance-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 10px;
-            background: rgba(15, 23, 42, 0.9);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            width: 70%; /* 5 out of 7 days */
-            background: linear-gradient(90deg, var(--gold-neon), var(--green-glow));
-            border-radius: 10px;
-        }
-
-        /* EXCITING EVENTS LIST */
-        .events-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .event-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 14px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            text-decoration: none;
-            color: var(--text-main);
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .event-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--gold-neon);
-        }
-
-        .event-banner-thumb {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            flex-shrink: 0;
-        }
-
-        .event-details h4 {
-            font-size: 0.9rem;
-            font-weight: 800;
-            margin-bottom: 2px;
-        }
-
-        .event-details p {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-        }
-
-        .badge-bonus {
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 6px;
-            background: rgba(230, 57, 70, 0.2);
-            color: var(--red-vibrant);
-            margin-left: auto;
-        }
-
-        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .nav-item.active {
-            color: var(--gold-neon);
-        }
-
-        .nav-icon {
-            font-size: 1.2rem;
-        }
-
-        /* TOAST NOTIFICATION */
-        .toast {
-            position: fixed;
-            top: 24px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            padding: 12px 22px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 2000;
-            white-space: nowrap;
-        }
-
-        .toast.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .toast.success {
-            border-color: var(--green-glow);
-            color: #6ee7b7;
-        }
-
-        .toast.error {
-            border-color: var(--red-vibrant);
-            color: #fca5a5;
-        }
-    </style>
+</style>
 </head>
 <body>
+<div class="app">
+<header class="header">
+  <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
+  <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="age">18+</span></div>
+</header>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Notification Message</div>
+<section class="hero">
+  <div class="kicker">N+ PLAY • Activity Center</div>
+  <h1>Your Activity</h1>
+  <p>WINGO demo activity, results and progress — all in one clean view.</p>
+  <div class="balance"><div><small>AVAILABLE DEMO CREDITS</small><strong id="heroBalance">₹1,000.00</strong></div><div class="sync"><i></i> SYNCED</div></div>
+</section>
 
-    <!-- MAIN APP CONTAINER -->
-    <div class="app-viewport">
-        <!-- HEADER -->
-        <header class="app-header">
-            <a href="index.html" class="btn-back" title="Back to Home">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <span class="header-title">Activity & Rewards</span>
-            <div style="width: 38px;"></div> <!-- Spacer for symmetry -->
-        </header>
+<section class="section">
+ <div class="sectionhead"><h2>WINGO Overview</h2><span class="view">LIVE DATA</span></div>
+ <div class="stats">
+   <div class="stat"><span>TOTAL BETS</span><strong id="totalBets">0</strong></div>
+   <div class="stat win"><span>WINS</span><strong id="wins">0</strong></div>
+   <div class="stat loss"><span>LOSSES</span><strong id="losses">0</strong></div>
+ </div>
+</section>
 
-        <!-- MYSTERY BOX GIFT CODE REDEMPTION -->
-        <div class="gift-code-card">
-            <div class="gift-header">
-                <div class="gift-icon">🎁</div>
-                <div class="gift-title-text">
-                    <h3>Mystery Box Gift Code</h3>
-                    <p>Enter your secret gift code to claim cash rewards</p>
-                </div>
-            </div>
-            <div class="code-input-box">
-                <input type="text" id="giftCodeInput" class="code-input" placeholder="e.g. NPLUS777" maxlength="15">
-                <button class="btn-redeem" onclick="redeemGiftCode()">Redeem</button>
-            </div>
-        </div>
+<section class="section">
+ <div class="sectionhead"><h2>Activity</h2><span class="view" id="resultCount">0 RECORDS</span></div>
+ <div class="filters" id="filters">
+   <button class="filter active" data-filter="all">ALL</button>
+   <button class="filter" data-filter="win">WINS</button>
+   <button class="filter" data-filter="loss">LOSSES</button>
+   <button class="filter" data-filter="30">30 SEC</button>
+   <button class="filter" data-filter="60">1 MIN</button>
+   <button class="filter" data-filter="180">3 MIN</button>
+   <button class="filter" data-filter="300">5 MIN</button>
+ </div>
+ <div class="list" id="activityList" style="margin-top:9px"></div>
+</section>
 
-        <!-- DAILY SIGN-IN STREAK BONUS -->
-        <div class="section-header">
-            <h3 class="section-title">Daily Sign-In Streak</h3>
-        </div>
-        <div class="signin-card">
-            <div class="signin-grid">
-                <!-- Day 1 -->
-                <div class="day-box claimed">
-                    <span class="day-label">Day 1</span>
-                    <span class="day-icon">✅</span>
-                    <span class="day-reward">$10</span>
-                </div>
-                <!-- Day 2 -->
-                <div class="day-box claimed">
-                    <span class="day-label">Day 2</span>
-                    <span class="day-icon">✅</span>
-                    <span class="day-reward">$20</span>
-                </div>
-                <!-- Day 3 -->
-                <div class="day-box active-day" id="day3Box">
-                    <span class="day-label">Day 3</span>
-                    <span class="day-icon">💰</span>
-                    <span class="day-reward">$30</span>
-                </div>
-                <!-- Day 4 -->
-                <div class="day-box">
-                    <span class="day-label">Day 4</span>
-                    <span class="day-icon">🪙</span>
-                    <span class="day-reward">$50</span>
-                </div>
-                <!-- Day 5 -->
-                <div class="day-box">
-                    <span class="day-label">Day 5</span>
-                    <span class="day-icon">🪙</span>
-                    <span class="day-reward">$80</span>
-                </div>
-                <!-- Day 6 -->
-                <div class="day-box">
-                    <span class="day-label">Day 6</span>
-                    <span class="day-icon">🪙</span>
-                    <span class="day-reward">$100</span>
-                </div>
-                <!-- Day 7 -->
-                <div class="day-box" style="grid-column: span 2; background: rgba(245, 158, 11, 0.1); border-color: var(--gold-neon);">
-                    <span class="day-label">Day 7 (Jackpot)</span>
-                    <span class="day-icon">👑</span>
-                    <span class="day-reward">$200 + Mystery Gift</span>
-                </div>
-            </div>
+<section class="section">
+ <div class="sectionhead"><h2>Weekly Progress</h2><span class="view">DEMO REWARDS</span></div>
+ <div class="reward">
+   <span class="rIcon">◈</span><span class="tag">42%</span>
+   <h3>Consistency Challenge</h3>
+   <p>Keep exploring N+ PLAY this week to complete your demo activity streak.</p>
+   <div class="progress"><i></i></div>
+ </div>
+</section>
 
-            <button class="btn-claim-all" id="btnClaimDaily" onclick="claimDailyReward()">Claim Today's Bonus ($30)</button>
-        </div>
+<section class="section">
+ <div class="sectionhead"><h2>Featured</h2><span class="view">EXPLORE</span></div>
+ <div class="rewards">
+   <a class="reward" href="wingo.html"><span class="rIcon">◎</span><span class="tag">WINGO</span><h3>Continue WINGO</h3><p>Return to the live round and continue your demo session.</p></a>
+   <a class="reward" href="index.html"><span class="rIcon">✦</span><span class="tag">N+ PLAY</span><h3>Discover Games</h3><p>Browse the rest of the N+ PLAY game collection.</p></a>
+ </div>
+</section>
 
-        <!-- ATTENDANCE STREAK PROGRESS -->
-        <div class="section-header">
-            <h3 class="section-title">Weekly Attendance Challenge</h3>
-        </div>
-        <div class="attendance-card">
-            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700;">
-                <span>Consecutive Sign-in: <strong style="color: var(--gold-neon);">3 / 7 Days</strong></span>
-                <span style="color: var(--green-glow);">Progress: 42%</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width: 42%;"></div>
-            </div>
-        </div>
+<footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:4px 0 20px">
+  <strong style="color:#7d6a3d">18+ · VIRTUAL CREDIT DEMO</strong><br>
+  N+ PLAY prototype · No real-money transactions.
+</footer>
+</div>
 
-        <!-- EXCITING GAMING EVENTS & OFFERS -->
-        <div class="section-header">
-            <h3 class="section-title">Hot Promotional Events</h3>
-        </div>
-        <div class="events-list">
-            <!-- Event 1 -->
-            <a href="index.html" class="event-card">
-                <div class="event-banner-thumb" style="background: rgba(230, 57, 70, 0.2);">🔥</div>
-                <div class="event-details">
-                    <h4>First Deposit 100% Bonus</h4>
-                    <p>Double your wallet balance on your first recharge</p>
-                </div>
-                <span class="badge-bonus">100% EXTRA</span>
-            </a>
+<nav class="bottom">
+ <a class="nav" href="index.html"><span class="ni">⌂</span>Home</a>
+ <a class="nav active" href="activity.html"><span class="ni">◷</span>Activity</a>
+ <a class="nav" href="bonus.html"><span class="ni">✦</span>Bonus</a>
+ <a class="nav" href="promotion.html"><span class="ni">◇</span>Promotion</a>
+ <a class="nav" href="account.html"><span class="ni">◯</span>Account</a>
+</nav>
+<div class="toast" id="toast"></div>
 
-            <!-- Event 2 -->
-            <a href="index.html" class="event-card">
-                <div class="event-banner-thumb" style="background: rgba(245, 158, 11, 0.2);">💎</div>
-                <div class="event-details">
-                    <h4>Weekly VIP Loss Cashback</h4>
-                    <p>Get up to 10% cash rebate on all prediction games</p>
-                </div>
-                <span class="badge-bonus">10% CASHBACK</span>
-            </a>
 
-            <!-- Event 3 -->
-            <a href="index.html" class="event-card">
-                <div class="event-banner-thumb" style="background: rgba(16, 185, 129, 0.2);">🏆</div>
-                <div class="event-details">
-                    <h4>Win Streak Challenge</h4>
-                    <p>Win 5 consecutive rounds in Win Go for $500 bonus</p>
-                </div>
-                <span class="badge-bonus">$500 PRIZE</span>
-            </a>
-        </div>
-    </div>
+<script>
+(()=>{"use strict";
+const STORE="nplusplay_wingo_ultra_final_v2";
+const modes=[30,60,180,300];
+let filter="all", range="all", query="", visible=25, lastBalance=null;
 
-    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="activity.html" class="nav-item active">
-            <span class="nav-icon">🔥</span>
-            <span>Activity</span>
-        </a>
-        <a href="promotion.html" class="nav-item">
-            <span class="nav-icon">🎁</span>
-            <span>Promotion</span>
-        </a>
-        <a href="login.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            <span>Account</span>
-        </a>
-    </nav>
+const $=s=>document.querySelector(s);
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const secLabel=s=>({30:"30 SEC",60:"1 MIN",180:"3 MIN",300:"5 MIN"})[Number(s)]||"WINGO";
+const load=()=>{try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}};
 
-    <!-- ==========================================
-       JAVASCRIPT REWARDS & INTERACTIVITY
-       ========================================== -->
-    <script>
-        // LUXURY TOAST POPUP SYSTEM
-        function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.className = `toast show ${type}`;
-
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 2800);
-        }
-
-        // REDEEM MYSTERY GIFT CODE
-        function redeemGiftCode() {
-            const input = document.getElementById('giftCodeInput');
-            const code = input.value.trim().toUpperCase();
-
-            if (!code) {
-                showToast('❌ Please enter a valid gift code', 'error');
-                return;
-            }
-
-            // Simulated Gift Code Redemption Success
-            showToast(`🎉 Code '${code}' Redeemed! $50.00 Added to Wallet`, 'success');
-            input.value = '';
-        }
-
-        // CLAIM DAILY SIGN-IN REWARD
-        function claimDailyReward() {
-            const btn = document.getElementById('btnClaimDaily');
-            const day3Box = document.getElementById('day3Box');
-
-            if (btn.disabled) return;
-
-            day3Box.classList.remove('active-day');
-            day3Box.classList.add('claimed');
-            day3Box.querySelector('.day-icon').innerText = '✅';
-
-            btn.innerText = "Today's Bonus Claimed (Checked 🟢)";
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-
-            showToast('🎉 Day 3 Bonus Claimed: +$30.00 Received!', 'success');
-        }
-    </script>
+function allBets(){
+  const x=load(), out=[];
+  for(const sec of modes){
+    const arr=Array.isArray(x.bets?.[sec])?x.bets[sec]:[];
+    for(const b of arr) out.push({...b,sec:Number(b.sec||sec)});
+  }
+  return out.sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0));
+}
+function getBalance(){
+  const n=Number(load().balance); return Number.isFinite(n)?n:1000;
+}
+function inRange(b){
+  if(range==="all") return true;
+  const t=Number(b.settledAt||b.ts||0), d=new Date(t), now=new Date();
+  if(!t)return false;
+  if(range==="today")return d.toDateString()===now.toDateString();
+  if(range==="yesterday"){const y=new Date(now);y.setDate(now.getDate()-1);return d.toDateString()===y.toDateString()}
+  const days=range==="7d"?7:30;
+  return t>=Date.now()-days*86400000;
+}
+function filtered(){
+  return allBets().filter(b=>{
+    if(!inRange(b))return false;
+    const s=String(b.status||"").toLowerCase();
+    if(filter==="win"&&s!=="won")return false;
+    if(filter==="loss"&&s!=="lost")return false;
+    if(filter==="pending"&&s!=="pending")return false;
+    if(["30","60","180","300"].includes(filter)&&Number(b.sec)!==Number(filter))return false;
+    if(query){
+      const hay=[b.period,b.type,b.value,b.result,b.sec].join(" ").toLowerCase();
+      if(!hay.includes(query.toLowerCase()))return false;
+    }
+    return true;
+  });
+}
+function netOf(b){
+  const total=Number(b.total||0);
+  if(String(b.status).toUpperCase()==="WON") return Number(b.returnAmount||0)-total;
+  if(String(b.status).toUpperCase()==="LOST") return -total;
+  return 0;
+}
+function calcStreak(bets){
+  let streak=0;
+  for(const b of [...bets].sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0))){
+    const s=String(b.status||"").toUpperCase();
+    if(s==="WON")streak++; else if(s==="LOST")break;
+  }
+  return streak;
+}
+function renderStats(bets){
+  const settled=bets.filter(b=>["WON","LOST"].includes(String(b.status).toUpperCase()));
+  const wins=settled.filter(b=>String(b.status).toUpperCase()==="WON").length;
+  const losses=settled.filter(b=>String(b.status).toUpperCase()==="LOST").length;
+  const net=settled.reduce((a,b)=>a+netOf(b),0);
+  const turnover=settled.reduce((a,b)=>a+Number(b.total||0),0);
+  const best=settled.reduce((m,b)=>Math.max(m,netOf(b)),0);
+  $("#totalBets").textContent=bets.length;$("#wins").textContent=wins;$("#losses").textContent=losses;
+  $("#winRate").textContent=(settled.length?Math.round(wins/settled.length*100):0)+"%";
+  $("#netResult").textContent=(net>=0?"+":"−")+money(Math.abs(net));
+  $("#netResult").style.color=net>=0?"#86e5c2":"#ff858d";
+  $("#turnover").textContent=money(turnover);$("#bestWin").textContent=money(best);$("#streak").textContent=calcStreak(settled);
+  $("#chartValue").textContent=(net>=0?"+":"−")+money(Math.abs(net));
+  $("#chartValue").style.color=net>=0?"#86e5c2":"#ff858d";
+}
+function renderWallet(){
+  const value=getBalance();
+  $("#wallet").textContent=money(value);$("#heroBalance").textContent=money(value);
+  if(lastBalance!==null&&lastBalance!==value){
+    $("#syncText").textContent="UPDATED";
+    setTimeout(()=>$("#syncText").textContent="SYNCED",900);
+  }
+  lastBalance=value;
+}
+function renderList(rows){
+  $("#resultCount").textContent=rows.length+" RECORDS";
+  const box=$("#activityList");
+  if(!rows.length){box.innerHTML='<div class="empty"><b>No activity found</b>Try another filter or place a demo selection in WINGO.</div>';$("#loadMore").disabled=true;return}
+  const shown=rows.slice(0,visible);
+  box.innerHTML=shown.map(b=>{
+    const s=String(b.status||"").toUpperCase(),won=s==="WON",pending=s==="PENDING";
+    const title=pending?"WINGO • PENDING":won?"WINGO • WIN":"WINGO • LOSS";
+    const icon=pending?"…":won?"✓":"×";
+    const sel=((b.type||"selection").toUpperCase()+" "+(b.value!=null?b.value:"")).trim();
+    const when=new Date(b.settledAt||b.ts||Date.now()).toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+    const net=netOf(b), ret=Number(b.returnAmount||0);
+    return `<button class="item ${won?"win":pending?"":"loss"} activity-open" data-id="${String(b.id||b.period||b.ts||"").replace(/"/g,"&quot;")}">
+      <div class="icon">${icon}</div>
+      <div><h3>${title}</h3><p>${secLabel(b.sec)} · ${sel} · ${when}</p></div>
+      <div class="amt"><strong class="${won?"pos":pending?"":"neg"}">${pending?"—":(net>=0?"+":"−")+money(Math.abs(net))}</strong><small>${pending?"Awaiting result":won?money(ret)+" return":"stake "+money(b.total)}</small></div>
+    </button>`;
+  }).join("");
+  $("#loadMore").disabled=shown.length>=rows.length;
+  box.querySelectorAll(".activity-open").forEach(el=>el.addEventListener("click",()=>{
+    const b=rows.find(x=>String(x.id||x.period||x.ts||"")===el.dataset.id);if(b)showDetail(b);
+  }));
+}
+function showDetail(b){
+  const s=String(b.status||"").toUpperCase(),won=s==="WON",net=netOf(b);
+  const modal=document.createElement("div");modal.className="detail-modal";
+  modal.innerHTML=`<div class="detail-card">
+    <button class="detail-close">×</button><div class="detail-kicker">N+ PLAY · WINGO</div>
+    <div class="detail-status ${won?"won":s==="PENDING"?"pending":"lost"}">${won?"YOU WON":s==="PENDING"?"PENDING":"YOU LOST"}</div>
+    <div class="detail-net">${won?"+":"−"}${money(Math.abs(net))}</div>
+    <div class="detail-grid">
+      <span>PERIOD<b>${b.period||"—"}</b></span><span>MODE<b>${secLabel(b.sec)}</b></span>
+      <span>SELECTION<b>${(b.type||"—").toUpperCase()} ${b.value??""}</b></span><span>RESULT<b>${b.result??"—"}</b></span>
+      <span>STAKE<b>${money(b.total||0)}</b></span><span>RETURN<b>${money(b.returnAmount||0)}</b></span>
+      <span>MULTIPLIER<b>${b.payoutMultiplier?("×"+b.payoutMultiplier):"—"}</b></span><span>SETTLED<b>${b.settledAt?new Date(b.settledAt).toLocaleString("en-IN"):"—"}</b></span>
+    </div><button class="detail-ok">DONE</button>
+  </div>`;
+  document.body.appendChild(modal);
+  const close=()=>modal.remove();modal.querySelector(".detail-close").onclick=close;modal.querySelector(".detail-ok").onclick=close;modal.addEventListener("click",e=>{if(e.target===modal)close()});
+}
+function renderChart(bets){
+  const settled=bets.filter(b=>["WON","LOST"].includes(String(b.status).toUpperCase())).slice(0,30).reverse();
+  const vals=settled.map(netOf);const max=Math.max(1,...vals.map(v=>Math.abs(v)));
+  $("#chart").innerHTML=vals.length?vals.map(v=>`<i class="bar-chart ${v<0?"neg":""}" style="height:${Math.max(4,Math.round(Math.abs(v)/max*90))}%"></i>`).join(""):'<div class="empty" style="width:100%;align-self:center">No settled data yet</div>';
+}
+function renderLedger(bets){
+  const rows=bets.slice(0,8);const box=$("#ledger");
+  if(!rows.length){box.innerHTML='<div class="empty"><b>Wallet ledger is empty</b>Settled WINGO activity will appear here.</div>';return}
+  box.innerHTML=rows.map(b=>{
+    const n=netOf(b),won=n>=0&&String(b.status).toUpperCase()==="WON";
+    return `<div class="ledger-row"><div class="ledger-icon">${won?"↑":"↓"}</div><div><b>WINGO · ${secLabel(b.sec)}</b><small>${b.period||"—"} · ${String(b.status||"").toUpperCase()}</small></div><div class="ledger-amt ${won?"pos":"neg"}">${won?"+":"−"}${money(Math.abs(n))}</div></div>`;
+  }).join("");
+}
+function renderMilestones(all){
+  const bets=all.filter(b=>["WON","LOST"].includes(String(b.status).toUpperCase()));
+  const wins=bets.filter(b=>String(b.status).toUpperCase()==="WON");
+  const days=new Set(bets.map(b=>new Date(b.settledAt||b.ts||0).toDateString())).size;
+  const set=(id,text,bar,val,max)=>{$(id).textContent=text;$(bar).style.width=Math.min(100,val/max*100)+"%"};
+  set("#mBets",bets.length+" / 25","#mBetsBar",bets.length,25);
+  set("#mWins",wins.length+" / 10","#mWinsBar",wins.length,10);
+  set("#mDays",days+" / 7","#mDaysBar",days,7);
+}
+function render(){
+  const all=allBets(), rows=filtered();
+  renderWallet();renderStats(rows);renderList(rows);renderChart(rows);renderLedger(all);renderMilestones(all);
+  $("#periodLabel").textContent=range==="all"?"ALL TIME":range.toUpperCase();
+  $("#chartRange").textContent=range.toUpperCase();
+}
+document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");filter=b.dataset.filter;visible=25;render()});
+document.querySelectorAll(".range-btn").forEach(b=>b.onclick=()=>{document.querySelectorAll(".range-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");range=b.dataset.range;visible=25;render()});
+$("#search").addEventListener("input",e=>{query=e.target.value.trim();visible=25;render()});
+$("#loadMore").onclick=()=>{visible+=25;render()};
+$("#refreshBtn").onclick=()=>{render();$("#syncText").textContent="REFRESHED";setTimeout(()=>$("#syncText").textContent="SYNCED",800)};
+window.addEventListener("storage",e=>{if(e.key===STORE)render()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});
+setInterval(render,1500);render();
+})();
+</script>
+<style>
+.detail-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);display:grid;place-items:center;padding:18px}
+.detail-card{width:min(100%,430px);border:1px solid rgba(201,165,91,.2);border-radius:23px;background:linear-gradient(145deg,#171813,#0c0d0b);
+box-shadow:0 30px 100px rgba(0,0,0,.8);padding:23px;position:relative}
+.detail-close{position:absolute;right:14px;top:12px;width:30px;height:30px;border:1px solid rgba(255,255,255,.08);border-radius:50%;background:#151713;color:#aaa}
+.detail-kicker{font-size:.52rem;letter-spacing:2px;color:#9b8b67;font-weight:900}.detail-status{text-align:center;margin-top:15px;font-size:.68rem;font-weight:950;letter-spacing:2px}.detail-status.won{color:#79dfb7}.detail-status.lost{color:#ff7e87}.detail-status.pending{color:#c9a55b}
+.detail-net{text-align:center;margin-top:7px;font-size:2rem;font-weight:950}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
+.detail-grid span{padding:11px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.055);font-size:.46rem;color:#676a63}
+.detail-grid b{display:block;margin-top:4px;color:#e9e4d7;font-size:.58rem;overflow:hidden;text-overflow:ellipsis}.detail-ok{width:100%;margin-top:15px;border:0;border-radius:13px;padding:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;font-size:.62rem}
+.activity-open{width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer}
+</style>
 </body>
 </html>
