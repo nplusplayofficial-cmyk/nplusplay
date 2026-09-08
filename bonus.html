@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080908">
+<title>N+ PLAY — Bonus Center</title>
+<style>
+:root{
+ --bg:#080908;--panel:#11130f;--line:rgba(255,255,255,.075);--text:#f4f1e8;--muted:#777a72;
+ --gold:#c9a55b;--gold2:#f0dfb5;--green:#42d9a5;--red:#ff6d77;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}
+body{min-height:100vh;color:var(--text);background:
+radial-gradient(650px 430px at 50% -160px,rgba(201,165,91,.08),transparent 68%),
+radial-gradient(500px 500px at 100% 45%,rgba(255,255,255,.025),transparent 70%),#080908;padding-bottom:92px}
+a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:pointer}
+.app{width:min(100%,760px);margin:auto;padding:0 14px}
+.header{height:70px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,165,91,.09)}
+.brand{display:flex;align-items:center;gap:10px}.mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#f2e5c3,#c9a55b 52%,#70582b);color:#11100c;font-size:11px;font-weight:950;box-shadow:0 8px 28px rgba(201,165,91,.14)}.brand b{font-size:1.25rem;letter-spacing:1px}
+.headright{display:flex;align-items:center;gap:7px}.wallet{padding:9px 12px;border:1px solid rgba(66,217,165,.2);border-radius:999px;background:rgba(66,217,165,.055);color:#bdf4df;font-size:.72rem;font-weight:900}.age{font-size:.55rem;color:#ff929a;border:1px solid rgba(255,109,119,.2);border-radius:999px;padding:6px 8px;font-weight:900}
+.hero{margin-top:18px;padding:22px;border-radius:24px;border:1px solid rgba(201,165,91,.17);background:radial-gradient(circle at 86% 18%,rgba(201,165,91,.13),transparent 35%),linear-gradient(145deg,#171813,#0c0d0b);box-shadow:0 25px 80px rgba(0,0,0,.55);position:relative;overflow:hidden}.hero:after{content:"BONUS";position:absolute;right:-8px;bottom:-34px;font-size:92px;font-weight:950;letter-spacing:-6px;color:rgba(201,165,91,.025)}
+.kicker{font-size:.49rem;letter-spacing:1.8px;color:#a99569;font-weight:900}.hero h1{margin-top:7px;font-size:2rem;letter-spacing:-1.5px}.hero p{margin-top:7px;color:#777a72;font-size:.58rem;line-height:1.5;max-width:530px}
+.balance-row{margin-top:18px;padding-top:15px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:end}.balance-row small{display:block;color:#62655e;font-size:.47rem;letter-spacing:1px}.balance-row strong{display:block;margin-top:4px;font-size:1.45rem}.sync{font-size:.48rem;color:#79dfb7;display:flex;align-items:center;gap:5px}.sync i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green)}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.summary div{padding:13px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.022)}.summary span{font-size:.46rem;color:#646760}.summary b{display:block;margin-top:5px;font-size:.8rem}.summary .positive{color:#83e5c2}
+.section{margin-top:23px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.sectionhead h2{font-size:.9rem}.sectionhead h2:before{content:"";display:inline-block;width:3px;height:15px;border-radius:5px;background:linear-gradient(var(--gold2),var(--gold));margin-right:8px;vertical-align:-2px}.view{font-size:.48rem;color:#686b64}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:9px}.card{min-height:150px;padding:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));position:relative;overflow:hidden}.card:after{content:"";position:absolute;width:100px;height:100px;right:-35px;top:-35px;border-radius:50%;background:rgba(201,165,91,.07);filter:blur(3px)}
+.icon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950}.tag{position:absolute;right:10px;top:10px;border:1px solid rgba(201,165,91,.16);border-radius:999px;padding:5px 7px;color:#d7c18e;font-size:.42rem;font-weight:900}.card h3{margin-top:12px;font-size:.72rem;position:relative;z-index:2}.card p{margin-top:5px;color:#6f726a;font-size:.51rem;line-height:1.45;position:relative;z-index:2}.card .action{display:inline-block;margin-top:11px;color:#ead8a9;font-size:.5rem;font-weight:900;position:relative;z-index:2}
+.progress-card{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.022)}.prog-top{display:flex;justify-content:space-between}.prog-top b{font-size:.65rem}.prog-top span{font-size:.48rem;color:#888a82}.bar{height:7px;background:#242620;border-radius:99px;margin-top:11px;overflow:hidden}.bar i{display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#70582b,#c9a55b,#f0dfb5)}.progress-card p{margin-top:8px;color:#666960;font-size:.5rem}
+.codebox{display:flex;gap:7px}.codebox input{min-width:0;flex:1;border:1px solid var(--line);outline:0;border-radius:13px;background:rgba(255,255,255,.025);color:#eee9dc;padding:12px;font-size:.58rem}.codebox button{border:1px solid rgba(201,165,91,.2);border-radius:13px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;padding:0 15px;font-size:.56rem;font-weight:950}
+.history{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.018)}.history-row{display:grid;grid-template-columns:35px 1fr auto;gap:10px;align-items:center;padding:12px;border-bottom:1px solid rgba(255,255,255,.055)}.history-row:last-child{border-bottom:0}.hicon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(201,165,91,.07);color:#d9c28b}.history-row b{font-size:.59rem}.history-row small{display:block;margin-top:3px;color:#646760;font-size:.47rem}.history-amt{font-size:.61rem;font-weight:900;color:#83e5c2}
+.notice{padding:14px;border:1px solid rgba(201,165,91,.13);border-radius:17px;background:linear-gradient(145deg,rgba(201,165,91,.06),rgba(255,255,255,.018));color:#85877f;font-size:.53rem;line-height:1.55}.notice b{color:#d7c18e}
+.bottom{position:fixed;z-index:100;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,590px);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.92);backdrop-filter:blur(24px);border:1px solid rgba(201,165,91,.1);border-bottom:0;border-radius:20px 20px 0 0;box-shadow:0 -18px 55px rgba(0,0,0,.62)}.nav{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;color:#666860;font-size:.51rem;font-weight:800}.nav .ni{font-size:1rem}.nav.active{color:var(--gold2)}.nav.active:before{content:"";position:absolute;top:-9px;width:30px;height:3px;border-radius:5px;background:var(--gold);box-shadow:0 0 16px rgba(201,165,91,.6)}
+.toast{position:fixed;z-index:300;left:50%;bottom:98px;transform:translate(-50%,15px);opacity:0;pointer-events:none;padding:10px 14px;border-radius:12px;background:#171916;border:1px solid rgba(201,165,91,.2);font-size:.58rem;transition:.25s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;z-index:250;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(12px)}.modal.show{display:grid}.modal-card{width:min(100%,430px);padding:21px;border-radius:22px;background:#11130f;border:1px solid rgba(201,165,91,.2);box-shadow:0 30px 100px rgba(0,0,0,.8)}.modal-card h2{font-size:1rem}.modal-card p{margin-top:7px;color:#777a72;font-size:.58rem;line-height:1.55}.close{float:right;width:30px;height:30px;border:1px solid var(--line);border-radius:50%;background:#171916;color:#aaa}.modal-list{clear:both;padding-top:15px;display:grid;gap:7px}.modal-list div{padding:11px;border-radius:12px;background:rgba(255,255,255,.03);font-size:.54rem;color:#74776f}.modal-list b{color:#e9e2d2}.done{width:100%;margin-top:14px;padding:11px;border:0;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;font-size:.58rem}
+@media(max-width:460px){.summary{grid-template-columns:1fr 1fr}.summary div:last-child{grid-column:1/-1}.cards{grid-template-columns:1fr}.hero h1{font-size:1.75rem}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+ <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
+ <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="age">18+</span></div>
+</header>
+
+<section class="hero">
+ <div class="kicker">N+ PLAY • REWARD CENTER</div>
+ <h1>Bonus & Rewards</h1>
+ <p>Track your available rewards, progress and activity-based bonus opportunities from one place.</p>
+ <div class="balance-row"><div><small>AVAILABLE BALANCE</small><strong id="balance">₹1,000.00</strong></div><div class="sync"><i></i><span id="sync">SYNCED</span></div></div>
+</section>
+
+<section class="summary">
+ <div><span>TODAY'S BONUS</span><b id="today">₹0.00</b></div>
+ <div><span>TOTAL REWARDS</span><b class="positive" id="rewards">₹0.00</b></div>
+ <div><span>ACTIVE REWARDS</span><b id="active">0</b></div>
+</section>
+
+<section class="section">
+ <div class="sectionhead"><h2>Reward Center</h2><span class="view">EXPLORE</span></div>
+ <div class="cards">
+  <a class="card" href="promotion.html"><span class="icon">★</span><span class="tag">POPULAR</span><h3>Activity Award</h3><p>Track platform activity and eligible demo reward progress.</p><span class="action">VIEW DETAILS →</span></a>
+  <a class="card" href="promotion.html"><span class="icon">＋</span><span class="tag">INVITE</span><h3>Invitation Bonus</h3><p>Build your referral activity and follow your reward progress.</p><span class="action">EXPLORE →</span></a>
+  <a class="card" href="promotion.html"><span class="icon">◈</span><span class="tag">REBATE</span><h3>Activity Rebate</h3><p>See eligible activity-based reward progress in one place.</p><span class="action">CHECK →</span></a>
+  <a class="card" href="promotion.html"><span class="icon">◆</span><span class="tag">REWARD</span><h3>Super Jackpot</h3><p>Premium reward campaign information and progress.</p><span class="action">VIEW →</span></a>
+  <a class="card" href="promotion.html"><span class="icon">◎</span><span class="tag">SOON</span><h3>Invite Wheel</h3><p>Reward wheel experience will be available in a future module.</p><span class="action">COMING SOON</span></a>
+  <a class="card" href="promotion.html"><span class="icon">✦</span><span class="tag">NEW</span><h3>Daily Mission</h3><p>Complete platform missions and monitor your progress.</p><span class="action">EXPLORE →</span></a>
+ </div>
+</section>
+
+<section class="section">
+ <div class="sectionhead"><h2>Attendance Progress</h2><span class="view">7 DAY TRACK</span></div>
+ <div class="progress-card">
+  <div class="prog-top"><b>Weekly Activity Streak</b><span id="streakText">3 / 7 days</span></div>
+  <div class="bar"><i id="streakBar"></i></div>
+  <p>Keep your N+ PLAY activity consistent to progress through the demo reward track.</p>
+ </div>
+</section>
+
+<section class="section">
+ <div class="sectionhead"><h2>Redeem Code</h2><span class="view">OPTIONAL</span></div>
+ <div class="codebox"><input id="code" maxlength="24" placeholder="Enter reward code"><button id="redeem">REDEEM</button></div>
+</section>
+
+<section class="section">
+ <div class="sectionhead"><h2>Reward History</h2><span class="view">RECENT</span></div>
+ <div class="history" id="history"></div>
+</section>
+
+<section class="section">
+ <div class="notice"><b>18+ · PLAY RESPONSIBLY</b><br>This Bonus Center is currently a platform-mode reward interface. Reward balances shown here are informational and synchronised with the shared N+ PLAY virtual-credit activity system.</div>
+</section>
+
+<footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:18px 0 20px"><strong style="color:#7d6a3d">N+ PLAY</strong><br>Bonus Center · Platform mode</footer>
+</div>
+
+<nav class="bottom">
+ <a class="nav" href="index.html"><span class="ni">⌂</span>Home</a>
+ <a class="nav" href="activity.html"><span class="ni">◷</span>Activity</a>
+ <a class="nav active" href="bonus.html"><span class="ni">✦</span>Bonus</a>
+ <a class="nav" href="promotion.html"><span class="ni">◇</span>Promotion</a>
+ <a class="nav" href="account.html"><span class="ni">◯</span>Account</a>
+</nav>
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="infoModal"><div class="modal-card"><button class="close" id="closeModal">×</button><h2>Reward Information</h2><p>Reward campaigns and eligibility details can be connected here as the N+ PLAY platform modules are expanded.</p><div class="modal-list"><div>Status <b>Available</b></div><div>Wallet sync <b>Live</b></div><div>Mode <b>Platform</b></div></div><button class="done" id="done">DONE</button></div></div>
+
+<script>
+(()=>{
+"use strict";
+const STORE="nplusplay_wingo_ultra_final_v2",LEGACY="nplusplay_wallet_v1";
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+function read(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}}
+function getBalance(){const n=Number(read().balance);if(Number.isFinite(n))return n;const l=Number(localStorage.getItem(LEGACY));return Number.isFinite(l)?l:1000}
+function allBets(){const x=read(),out=[];for(const sec of [30,60,180,300])if(Array.isArray(x.bets?.[sec]))out.push(...x.bets[sec]);return out.sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0))}
+let last=null;
+function render(){
+ const b=getBalance();document.querySelector("#wallet").textContent=money(b);document.querySelector("#balance").textContent=money(b);
+ if(last!==null&&last!==b){document.querySelector("#sync").textContent="UPDATED";setTimeout(()=>document.querySelector("#sync").textContent="SYNCED",900)}last=b;
+ const bets=allBets(),settled=bets.filter(x=>["WON","LOST"].includes(String(x.status).toUpperCase()));
+ const wins=settled.filter(x=>String(x.status).toUpperCase()==="WON");
+ const todayStart=new Date();todayStart.setHours(0,0,0,0);
+ const todayWins=wins.filter(x=>Number(x.settledAt||x.ts||0)>=todayStart.getTime());
+ const todayReward=todayWins.reduce((s,x)=>s+Math.max(0,Number(x.returnAmount||0)-Number(x.total||0)),0);
+ const totalReward=wins.reduce((s,x)=>s+Math.max(0,Number(x.returnAmount||0)-Number(x.total||0)),0);
+ document.querySelector("#today").textContent=money(todayReward);document.querySelector("#rewards").textContent=money(totalReward);document.querySelector("#active").textContent=bets.length;
+ const days=new Set(settled.map(x=>new Date(x.settledAt||x.ts||0).toDateString())).size;
+ const progress=Math.min(100,days/7*100);document.querySelector("#streakBar").style.width=progress+"%";document.querySelector("#streakText").textContent=Math.min(7,days)+" / 7 days";
+ const hist=document.querySelector("#history");
+ if(!bets.length){hist.innerHTML='<div style="padding:22px;text-align:center;color:#686b64;font-size:.55rem">No reward activity yet.<br>Settled game rewards will appear here.</div>';return}
+ hist.innerHTML=bets.slice(0,8).map(x=>{
+  const won=String(x.status).toUpperCase()==="WON",amount=won?Math.max(0,Number(x.returnAmount||0)-Number(x.total||0)):0;
+  return `<div class="history-row"><div class="hicon">${won?"↑":"•"}</div><div><b>${won?"Game Reward":"Game Activity"}</b><small>${x.gameName||x.game||"N+ PLAY GAME"} · ${x.period||"—"}</small></div><div class="history-amt">${won?"+"+money(amount):"—"}</div></div>`
+ }).join("");
+}
+function toast(msg){const t=document.querySelector("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}
+document.querySelector("#redeem").onclick=()=>{const c=document.querySelector("#code").value.trim();if(!c)return toast("Enter a reward code");toast("Code received — verification module pending")};
+document.querySelectorAll(".card").forEach(c=>c.addEventListener("click",e=>{if(c.getAttribute("href")==="promotion.html")return}));
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
+window.addEventListener("storage",e=>{if(e.key===STORE||e.key===LEGACY)render()});window.addEventListener("pageshow",render);document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});setInterval(render,1500);render();
+})();
+</script>
+</body>
+</html>
