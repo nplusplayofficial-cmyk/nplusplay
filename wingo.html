@@ -1,558 +1,185 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WINGO – N+ PLAY</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/design-system.css">
-    <style>
-        /* Only WINGO-specific rules not covered by design system */
-        .game-container { max-width: 560px; margin: 0 auto; }
-
-        .round-timer { 
-            font-size: 2.8rem; font-weight: 900; color: var(--gold-hi); 
-            text-shadow: 0 0 30px rgba(245,197,24,.3); 
-            font-variant-numeric: tabular-nums; 
-        }
-        .number-pad { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin: 12px 0; }
-        .num-btn { 
-            aspect-ratio:1; border-radius: 14px; background: rgba(255,255,255,.06); 
-            border:1px solid var(--line); font-size:1.3rem; font-weight:900; color:#fff; 
-            cursor:pointer; transition:.25s var(--ease); 
-        }
-        .num-btn:hover { border-color: var(--gold); background: rgba(245,197,24,.08); }
-        .num-btn.selected { border-color: var(--gold); background: rgba(245,197,24,.15); box-shadow:0 0 20px rgba(245,197,24,.25); }
-
-        .color-btn { 
-            padding: 14px; border-radius: 12px; font-weight: 800; 
-            border:1px solid transparent; transition:.25s var(--ease);
-        }
-        .color-red { background: linear-gradient(145deg,#3a0d0d,#1a0404); border-color:#7a2020; color:#ff7777; }
-        .color-green { background: linear-gradient(145deg,#0d3a2a,#041a0f); border-color:#207a4d; color:#77ffa8; }
-        .color-violet { background: linear-gradient(145deg,#2a0d3a,#1a041f); border-color:#6d207a; color:#d477ff; }
-
-        .big-small-btn { background: rgba(255,255,255,.04); border:1px solid var(--line); color:#ccc; }
-        .big-small-btn.selected { border-color: var(--gold); background: rgba(245,197,24,.15); }
-
-        .bet-popup { position:fixed; inset:0; z-index:500; display:none; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.75); backdrop-filter:blur(8px); }
-        .bet-popup.active { display:flex; }
-        .bet-sheet { 
-            width:100%; max-width:500px; background:linear-gradient(180deg,#111,#0a0a0a); 
-            border-radius:24px 24px 0 0; border-top:1px solid rgba(245,197,24,.2); 
-            padding:22px; animation:slideUp .3s var(--ease); 
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: none; } }
-
-        .info-tabs { display:flex; border-bottom:1px solid var(--line); margin-top: 16px; }
-        .info-tabs button { flex:1; padding:10px 0; background:none; border:none; color:var(--muted); font-weight:600; font-size:.75rem; cursor:pointer; border-bottom:2px solid transparent; }
-        .info-tabs button.active { color:var(--gold); border-bottom-color:var(--gold); }
-
-        .tab-content { padding:12px 0; max-height: 300px; overflow-y:auto; }
-
-        .result-reveal { text-align:center; padding:20px; border-radius:16px; background:rgba(245,197,24,.05); border:1px solid var(--line-gold); margin:12px 0; }
-        .result-number { font-size:3.5rem; font-weight:900; color:var(--gold-hi); }
-
-        /* Additional small tweaks */
-        .bet-row { display:flex; gap:8px; margin:8px 0; }
-        .bet-row input[type="number"] { flex:1; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:10px; color:#fff; font-weight:700; }
-        .multiplier-btn { padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer; }
-        .multiplier-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(245,197,24,.08); }
-
-        /* Override design-system .header for game page if needed */
-        .game-page .header { margin-bottom: 0; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080909">
+<title>N+ PLAY — WINGO ULTRA FINAL</title>
+<style>
+:root{--bg:#070808;--card:#111311;--card2:#161816;--line:rgba(255,255,255,.085);--txt:#f4f1e9;--muted:#858a84;--gold:#d8b66d;--gold2:#f2d594;--red:#ef5a57;--green:#27bd78;--violet:#a86aee;--blue:#639bea;--danger:#ff706c}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -15%,#302b1d 0,#111310 30%,#070808 65%);color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{display:flex;justify-content:center}.app{width:100%;max-width:520px;min-height:100vh;background:linear-gradient(180deg,rgba(10,11,10,.98),rgba(6,7,7,.99));box-shadow:0 0 90px #000;overflow:hidden}.ambient{position:fixed;width:520px;height:520px;top:-250px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(216,182,109,.12),transparent 68%);pointer-events:none}
+header{height:64px;position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);background:rgba(8,9,8,.86);backdrop-filter:blur(18px)}.hleft,.hright{display:flex;align-items:center;gap:8px}.brand{display:flex;align-items:center;gap:7px;font-weight:900;letter-spacing:.5px}.mark{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#f4d996,#9c7132);color:#171209;font-size:11px;font-weight:950}.live{font-size:9px;color:#7ee2b0;display:flex;gap:4px;align-items:center}.live i{width:6px;height:6px;border-radius:50%;background:#35cf89;box-shadow:0 0 10px #35cf89}.ib{width:35px;height:35px;border-radius:11px;border:1px solid var(--line);background:#121413;color:#d7d8d2;display:grid;place-items:center}
+main{padding:12px 12px 36px}.wallet{border:1px solid rgba(216,182,109,.2);border-radius:18px;padding:14px;background:linear-gradient(145deg,#29261e,#111310 70%);box-shadow:inset 0 1px rgba(255,255,255,.05),0 15px 35px #0006}.walletrow{display:flex;align-items:center;justify-content:space-between;gap:10px}.label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}.balance{font-size:25px;font-weight:950;margin-top:2px;transition:transform .2s,color .2s}.balance.bump{transform:scale(1.06);color:var(--gold2)}.wa{display:flex;gap:6px}.wa button{border:0;border-radius:10px;padding:9px 10px;font-size:9px;font-weight:900}.dep{background:var(--gold);color:#161209}.wit{background:#252825;color:#ddd;border:1px solid var(--line)!important}.notice{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:10px 0;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:#0f110f;color:#949993;font-size:9px}.notice b{color:#ddd}.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}.mode{border:1px solid var(--line);background:#111312;border-radius:13px;padding:9px 2px;color:#818680}.mode strong{display:block;font-size:10px;color:#d8d9d4}.mode small{font-size:8px}.mode.active{border-color:#b8924c;background:linear-gradient(180deg,#2b2417,#141410);box-shadow:0 8px 24px #d8b66d12}.mode.active strong,.mode.active small{color:var(--gold2)}
+.round{border:1px solid var(--line);border-radius:18px;padding:12px;background:linear-gradient(145deg,#181a18,#0d0f0e);overflow:hidden;position:relative}.round:after{content:"";position:absolute;width:230px;height:130px;top:-90px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,#d8b66d1b,transparent 70%);pointer-events:none}.roundtop{display:flex;justify-content:space-between;position:relative;z-index:1}.how{border:1px solid var(--line);background:#121412;color:#cccfc9;border-radius:9px;padding:7px 9px;font-size:8px;font-weight:800}.timer{text-align:right}.tl{font-size:8px;color:#858983;text-transform:uppercase;letter-spacing:.8px}.time{font-size:27px;line-height:1.1;font-weight:950;letter-spacing:2px;font-variant-numeric:tabular-nums}.closed .time{color:var(--danger)}.period{display:flex;justify-content:space-between;gap:10px;margin-top:9px;align-items:center}.period span{font-size:8px;color:#777b76;text-transform:uppercase}.period code{font:8px ui-monospace,SFMono-Regular,monospace;color:#d7d5ce}.progress{height:3px;border-radius:99px;background:#272a27;overflow:hidden;margin-top:10px}.bar{height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .15s linear}.closed .bar{background:var(--danger)}.status{text-align:center;font-size:8px;font-weight:900;letter-spacing:1.1px;color:#72dfaa;margin-top:8px}.closed .status{color:var(--danger)}.stage{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px}.stage span{height:3px;border-radius:99px;background:#252825}.stage span.on{background:var(--gold)}
+.title{font-size:9px;color:#777c77;text-transform:uppercase;letter-spacing:1.25px;margin:15px 2px 8px}.recent{display:flex;gap:7px;overflow:auto;padding:2px 1px}.recent::-webkit-scrollbar{display:none}.ball{flex:0 0 31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#171918;border:1px solid var(--line);font-size:10px;font-weight:950}.ball.r{color:#ff7773;border-color:#ef5a5750}.ball.g{color:#6bdfac;border-color:#27bd7850}.ball.v{color:#c38af5;border-color:#a86aee55}.choice3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.choice{border:1px solid var(--line);background:#111312;color:#d5d7d2;border-radius:12px;padding:10px 4px;font-size:10px;font-weight:900}.choice small{display:block;color:#717670;font-size:7px;font-weight:500;margin-top:2px}.choice.active.red{border-color:#ef5a57a0;background:#ef5a5715;color:#ff8b87}.choice.active.green{border-color:#27bd78a0;background:#27bd7814;color:#75e4b0}.choice.active.violet{border-color:#a86aeea0;background:#a86aee15;color:#cc9bfb}
+.numbers{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.num{aspect-ratio:1;border-radius:50%;border:1px solid var(--line);background:radial-gradient(circle at 35% 25%,#292c29,#101211 70%);color:#f0f0eb;font-size:16px;font-weight:950;box-shadow:inset 0 1px #fff1,0 5px 14px #0005}.num.active{border:2px solid var(--gold2);box-shadow:0 0 0 3px #d8b66d18,0 0 22px #d8b66d18;transform:scale(1.045)}.num.r{box-shadow:inset 0 0 0 1px #ef5a5730,0 5px 14px #0005}.num.g{box-shadow:inset 0 0 0 1px #27bd7830,0 5px 14px #0005}.num.v{box-shadow:inset 0 0 0 1px #a86aee38,0 5px 14px #0005}.quick{display:flex;gap:6px;overflow:auto;margin-top:9px;padding-bottom:2px}.quick::-webkit-scrollbar{display:none}.quick button{white-space:nowrap;border:1px solid var(--line);background:#111312;color:#8d928c;border-radius:8px;padding:7px 9px;font-size:8px}.quick button.active{background:var(--gold);color:#151109;border-color:var(--gold);font-weight:900}.size{display:grid;grid-template-columns:1fr 1fr;gap:7px}.size button{border:1px solid var(--line);background:#111312;color:#ddd;border-radius:12px;padding:11px;font-size:10px;font-weight:900}.size small{display:block;color:#777c77;font-size:7px;font-weight:500;margin-top:2px}.size button.active.big{background:#e7a14a16;border-color:#e7a14a9c;color:#efb873}.size button.active.small{background:#639bea16;border-color:#639bea9c;color:#88b5f4}
+.selection{margin-top:10px;padding:10px 11px;border:1px solid #d8b66d30;background:linear-gradient(90deg,#d8b66d0b,#111312);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}.selection b{font-size:10px}.selection span{font-size:8px;color:#858a84}.edit{border:1px solid var(--line);background:#171917;color:#d9d8d1;border-radius:8px;padding:6px 8px;font-size:8px}
+.tabs{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:3px;margin-top:15px;border-bottom:1px solid var(--line);padding-bottom:6px}.tab{border:0;background:transparent;color:#777c77;border-radius:8px;padding:8px 2px;font-size:8px;font-weight:900}.tab.active{background:#1a1c1a;color:var(--gold2)}.panel{border:1px solid var(--line);border-radius:15px;background:#0f110f;overflow:hidden;margin-top:8px}.hh,.hr{display:grid;grid-template-columns:1.55fr .5fr .78fr .5fr;align-items:center}.hh{padding:9px 10px;background:#d8b66d0d;color:#858a84;font-size:7px;text-transform:uppercase}.hr{padding:9px 10px;border-top:1px solid #fff0;font-size:9px}.hr.latest{background:#d8b66d08;border-top-color:#d8b66d22}.hr code{font:7px ui-monospace,monospace;color:#80857f}.rn{font-size:15px;font-weight:950}.rn.r{color:#ff706c}.rn.g{color:#63dca5}.rn.v{color:#bd85f3}.st.big{color:#e9ad6b}.st.small{color:#83b2ef}.cd{width:6px;height:6px;border-radius:50%;display:inline-block}.cd.r{background:var(--red)}.cd.g{background:var(--green)}.cd.v{background:var(--violet)}.pagination{display:flex;justify-content:center;align-items:center;gap:13px;padding:11px;color:#777c77;font-size:8px}.pg{width:29px;height:27px;border:1px solid var(--line);background:#151715;color:#ddd;border-radius:8px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;padding:9px}.stat{border:1px solid var(--line);background:#141614;border-radius:11px;padding:11px}.stat b{font-size:18px}.stat span{display:block;font-size:7px;color:#777c77;text-transform:uppercase;margin-top:2px}.bars{padding:11px}.br{display:grid;grid-template-columns:18px 1fr 25px;gap:7px;align-items:center;margin:7px 0;font-size:8px}.track{height:6px;background:#242724;border-radius:99px;overflow:hidden}.fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),#f0dcae)}.note{padding:12px;color:#777c77;text-align:center;font-size:8px}.betsummary{padding:10px}.betitem{display:grid;grid-template-columns:1fr .6fr .7fr;gap:6px;padding:9px;border-bottom:1px solid #fff0;font-size:9px}.betitem:last-child{border:0}.betitem small{display:block;color:#777c77;font-size:7px;margin-top:2px}.statusWon{color:#6ee1aa}.statusLost{color:#ff7773}.statusPending{color:#dfc17e}
+footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display:inline-block;padding:4px 8px;border:1px solid #d8b66d30;border-radius:99px;color:#a99467;margin-bottom:6px}
+.overlay{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;background:#000b;backdrop-filter:blur(8px)}.overlay.show{display:flex}.sheet{width:100%;max-width:520px;border:1px solid #fff1;border-bottom:0;border-radius:23px 23px 0 0;background:linear-gradient(180deg,#1b1d1b,#0c0e0d);padding:15px 15px calc(17px + env(safe-area-inset-bottom));box-shadow:0 -30px 90px #000c;animation:up .2s ease}.grab{width:38px;height:4px;background:#484c48;border-radius:99px;margin:0 auto 13px}.sheettop{display:flex;align-items:center;justify-content:space-between}.sheettop h3{font-size:14px;margin:0}.close{width:29px;height:29px;border:0;border-radius:50%;background:#262925;color:#bbb}.selectedBox{margin:11px 0;padding:10px;border-radius:11px;border:1px solid #d8b66d2b;background:#d8b66d09;color:#aaa;font-size:9px}.selectedBox strong{color:var(--gold2)}.field{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#777c77;margin:11px 0 6px}.amount{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#0e100f;color:#fff;text-align:center;outline:none}.amts{display:flex;gap:5px;overflow:auto;margin-top:6px}.amts button{white-space:nowrap;border:1px solid var(--line);background:#111312;color:#999;border-radius:8px;padding:6px 9px;font-size:8px}.step{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:5px;background:#0e100f}.step button{width:30px;height:30px;border:0;border-radius:8px;background:#202320;color:#ddd}.step span{font-weight:900}.multis{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.multi{border:1px solid var(--line);background:#111312;color:#888;border-radius:8px;padding:7px 2px;font-size:8px}.multi.active{background:var(--gold);border-color:var(--gold);color:#151109;font-weight:900}.tot{display:flex;justify-content:space-between;align-items:center;padding:11px 0;font-size:10px}.tot strong{font-size:19px;color:var(--gold2)}.agree{display:flex;align-items:center;gap:7px;color:#858a84;font-size:8px}.acts{display:grid;grid-template-columns:1fr 1.5fr;gap:7px;margin-top:12px}.acts button{padding:12px;border:0;border-radius:11px;font-size:10px;font-weight:900}.can{background:#242724;color:#ddd}.con{background:linear-gradient(135deg,#f1d38f,#b6873c);color:#151108}.con:disabled{opacity:.4;cursor:not-allowed}
+.result{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:#000c;backdrop-filter:blur(10px);padding:20px}.result.show{display:grid}.rcard{width:min(410px,100%);border:1px solid #d8b66d50;border-radius:25px;background:linear-gradient(145deg,#211f18,#0e100f);padding:26px;text-align:center;box-shadow:0 35px 110px #000d;animation:pop .28s ease}.rlabel{font-size:8px;color:#898d87;text-transform:uppercase;letter-spacing:2px}.outcome{font-size:28px;font-weight:950;margin:9px 0}.outcome.win{color:#7ee2b0}.outcome.loss{color:#ff7773}.outcome.mix{color:var(--gold2)}.resultNum{font-size:74px;font-weight:950;line-height:1;margin:7px 0}.meta{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}.pill{border:1px solid var(--line);background:#181a18;border-radius:99px;padding:7px 9px;font-size:8px;font-weight:900}.pill.r{color:#ff7773}.pill.g{color:#6ce0a8}.pill.v{color:#c18af5}.pill.b{color:#edb06c}.pill.s{color:#83b2ef}.resultInfo{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);font-size:9px;color:#8a8e89}.resultInfo strong{color:#eee}.ring{width:36px;height:36px;border-radius:50%;margin:12px auto 0;border:3px solid #ffffff20;border-top-color:var(--gold2);animation:spin 1s linear infinite}.continue{margin-top:13px;border:0;border-radius:11px;padding:11px 25px;background:var(--gold);color:#151109;font-weight:900;font-size:9px}
+.rules{position:fixed;inset:0;z-index:65;display:none;background:#000c;backdrop-filter:blur(9px);padding:20px;overflow:auto}.rules.show{display:block}.rulecard{max-width:520px;margin:20px auto;background:#111311;border:1px solid var(--line);border-radius:20px;padding:17px}.rulehead{display:flex;justify-content:space-between;align-items:center}.rulehead h2{font-size:17px;margin:0}.rule{border-top:1px solid var(--line);padding:11px 0}.rule b{font-size:10px}.rule p{font-size:9px;line-height:1.55;color:#8d928c;margin:5px 0}.ruleclose{width:30px;height:30px;border:0;border-radius:50%;background:#252825;color:#ddd}
+.toast{position:fixed;left:50%;bottom:22px;z-index:100;transform:translate(-50%,20px);padding:10px 14px;background:#202320;border:1px solid var(--line);border-radius:10px;color:#eee;font-size:9px;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+@keyframes up{from{transform:translateY(25px);opacity:.3}to{transform:none;opacity:1}}@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes spin{to{transform:rotate(360deg)}}
+@media(min-width:700px){body{padding:18px}.app{border:1px solid #fff1;border-radius:24px;min-height:calc(100vh - 36px)}header{border-radius:24px 24px 0 0}}
+.resultInfo strong{color:var(--gold2)}
+.resultInfo{max-height:150px;overflow:auto}.meta{flex-wrap:wrap}.meta .pill.r{color:#ff817d;border-color:#ef5a5755}.meta .pill.g{color:#67dda7;border-color:#27bd7855}.meta .pill.v{color:#c18af5;border-color:#a86aee55}
+</style>
 </head>
 <body>
-
-<!-- ===== HEADER (same as index) ===== -->
-<header class="header">
-    <a href="index.html" class="brand" aria-label="N+ PLAY home">
-        <span class="brand-mark">N+</span>
-        <span class="brand-name gold-text">PLAY</span>
-    </a>
-    <div class="header-right">
-        <div class="wallet"><span class="wallet-dot"></span><span class="wallet-value" id="walletBalanceHeader">₹1,000</span></div>
-        <span class="age">18+</span>
-    </div>
+<div class="ambient"></div>
+<div class="app">
+<header>
+  <div class="hleft"><button class="ib" id="back">‹</button><div class="brand"><div class="mark">N+</div> PLAY</div><span class="live"><i></i>LIVE</span></div>
+  <div class="hright"><button class="ib" id="sound">⌁</button><button class="ib" id="rulesBtn">?</button></div>
 </header>
-
-<!-- ===== MAIN CONTENT ===== -->
-<main class="page game-page">
-    <div class="game-container">
-
-        <!-- Back button and title -->
-        <div style="display:flex; align-items:center; gap:12px; margin:10px 0 4px;">
-            <button onclick="history.back()" style="background:transparent; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer;">←</button>
-            <h1 class="gold-text" style="font-size:1.4rem; font-weight:900;">WINGO</h1>
-            <span style="margin-left:auto; font-size:.7rem; color:var(--muted);">Period <span id="periodId">---</span></span>
-        </div>
-
-        <!-- Timer -->
-        <div style="text-align:center; margin:10px 0 16px;">
-            <div class="round-timer" id="timerDisplay">--:--</div>
-            <div style="font-size:.7rem; color:var(--muted);">Betting closes 3s before round end</div>
-        </div>
-
-        <!-- Betting closed message -->
-        <div id="bettingClosed" style="display:none; text-align:center; padding:8px; background:rgba(255,82,96,.1); border:1px solid rgba(255,82,96,.3); border-radius:8px; margin-bottom:12px; color:var(--red); font-weight:700;">
-            ⛔ Betting Closed
-        </div>
-
-        <!-- Duration selector -->
-        <div style="display:flex; gap:6px; margin-bottom:12px;">
-            <button class="duration-btn active" data-dur="30" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer;">30s</button>
-            <button class="duration-btn" data-dur="60" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer;">1m</button>
-            <button class="duration-btn" data-dur="180" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer;">3m</button>
-            <button class="duration-btn" data-dur="300" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer;">5m</button>
-        </div>
-
-        <!-- Number grid -->
-        <div class="number-pad" id="numberPad">
-            <!-- Numbers 0-9 filled by JS -->
-        </div>
-
-        <!-- Color & Big/Small selections -->
-        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:8px;">
-            <button class="color-btn color-red" data-color="red">Red</button>
-            <button class="color-btn color-green" data-color="green">Green</button>
-            <button class="color-btn color-violet" data-color="violet">Violet</button>
-        </div>
-        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px;">
-            <button class="big-small-btn" data-size="big">Big</button>
-            <button class="big-small-btn" data-size="small">Small</button>
-        </div>
-
-        <!-- Info tabs -->
-        <div class="info-tabs">
-            <button class="active" data-tab="history">History</button>
-            <button data-tab="mybets">My Bets</button>
-            <button data-tab="chart">Chart</button>
-            <button data-tab="strategy">Strategy</button>
-        </div>
-        <div class="tab-content" id="tabContent">
-            <!-- Dynamic content -->
-        </div>
-    </div>
-</main>
-
-<!-- ===== BET POPUP ===== -->
-<div class="bet-popup" id="betPopup">
-    <div class="bet-sheet">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span class="gold-text" style="font-weight:900;">Bet Slip</span>
-            <button onclick="closeBetPopup()" style="background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer;">✕</button>
-        </div>
-        <div id="selectedBetDisplay" style="margin:10px 0; font-size:1.1rem; color:var(--gold-hi);"></div>
-        <div class="bet-row">
-            <label style="font-size:.8rem; color:var(--muted);">Amount</label>
-            <input type="number" id="betAmount" value="1" min="0.1" step="0.1">
-        </div>
-        <div class="bet-row">
-            <label style="font-size:.8rem; color:var(--muted);">Quantity</label>
-            <button class="qty-btn" id="qtyMinus" style="padding:8px 12px; border-radius:6px; border:1px solid var(--line); background:transparent; color:#fff;">−</button>
-            <span id="qtyDisplay" style="padding:0 10px;">1</span>
-            <button class="qty-btn" id="qtyPlus" style="padding:8px 12px; border-radius:6px; border:1px solid var(--line); background:transparent; color:#fff;">+</button>
-        </div>
-        <div class="bet-row">
-            <label style="font-size:.8rem; color:var(--muted);">Multiplier</label>
-            <button class="multiplier-btn active" data-mult="1">x1</button>
-            <button class="multiplier-btn" data-mult="5">x5</button>
-            <button class="multiplier-btn" data-mult="10">x10</button>
-            <button class="multiplier-btn" data-mult="20">x20</button>
-        </div>
-        <div style="display:flex; gap:8px; margin-top:12px;">
-            <button id="cancelBet" class="secondary" style="flex:1;">Cancel</button>
-            <button id="confirmBet" class="primary" style="flex:1;">Place Bet</button>
-        </div>
-        <div id="betError" style="color:var(--red); font-size:.8rem; margin-top:6px; display:none;">Insufficient balance</div>
-    </div>
+<main>
+<section class="wallet"><div class="walletrow"><div><div class="label">Available balance</div><div class="balance" id="balance">₹1,000.00</div></div><div class="wa"><button class="wit" id="withdraw">WITHDRAW</button><button class="dep" id="deposit">DEPOSIT</button></div></div></section>
+<div class="notice"><span>🔊 <b>WINGO LIVE</b> · Virtual-credit experience</span><span>DETAIL ›</span></div>
+<div class="modes" id="modes">
+<button class="mode active" data-sec="30"><strong>WINGO</strong><small>30 SEC</small></button>
+<button class="mode" data-sec="60"><strong>WINGO</strong><small>1 MIN</small></button>
+<button class="mode" data-sec="180"><strong>WINGO</strong><small>3 MIN</small></button>
+<button class="mode" data-sec="300"><strong>WINGO</strong><small>5 MIN</small></button>
 </div>
+<section class="round" id="round">
+<div class="roundtop"><button class="how" id="how">HOW TO PLAY</button><div class="timer"><div class="tl">Time remaining</div><div class="time" id="time">00:30</div></div></div>
+<div class="period"><span>Current period</span><code id="period">—</code></div><div class="progress"><div class="bar" id="bar"></div></div><div class="status" id="status">BETTING OPEN</div>
+<div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div>
+</section>
+<div class="title">Recent results</div><div class="recent" id="recent"></div>
+<div class="title">Choose colour</div>
+<div class="choice3">
+<button class="choice green" data-type="color" data-value="Green">GREEN<small>Demo category</small></button>
+<button class="choice violet" data-type="color" data-value="Violet">VIOLET<small>Demo category</small></button>
+<button class="choice red" data-type="color" data-value="Red">RED<small>Demo category</small></button>
+</div>
+<div class="title">Choose number</div><div class="numbers" id="numbers"></div>
+<div class="quick"><button id="random">RANDOM</button><button class="active" data-multi="1">X1</button><button data-multi="5">X5</button><button data-multi="10">X10</button><button data-multi="20">X20</button><button data-multi="50">X50</button><button data-multi="100">X100</button></div>
+<div class="title">Choose size</div><div class="size"><button class="big" data-type="size" data-value="Big">BIG<small>5–9</small></button><button class="small" data-type="size" data-value="Small">SMALL<small>0–4</small></button></div>
+<div class="selection" id="selection"><div><b>YOUR SELECTION</b><br><span id="selectionText">No selection yet</span></div><button class="edit" id="edit">EDIT</button></div>
+<div class="tabs" id="tabs"><button class="tab active" data-tab="history">HISTORY</button><button class="tab" data-tab="bets">MY BETS</button><button class="tab" data-tab="chart">CHART</button><button class="tab" data-tab="strategy">STRATEGY</button><button class="tab" data-tab="stats">STATS</button></div>
+<section class="panel" id="panel"></section>
+<footer><span class="badge">VIRTUAL CREDIT DEMO</span><br>N+ PLAY · WINGO ULTRA FINAL</footer>
+</main></div>
 
-<!-- ===== BOTTOM NAV (same as index) ===== -->
-<nav class="bottom-nav" aria-label="Primary navigation">
-    <a href="index.html" class="nav-item"><span class="nav-icon">⌂</span><span>Home</span></a>
-    <a href="activity.html" class="nav-item"><span class="nav-icon">◷</span><span>Activity</span></a>
-    <a href="bonus.html" class="nav-item"><span class="nav-icon">✦</span><span>Bonus</span></a>
-    <a href="promotion.html" class="nav-item"><span class="nav-icon">◇</span><span>Promotion</span></a>
-    <a href="account.html" class="nav-item"><span class="nav-icon">◯</span><span>Account</span></a>
-</nav>
+<div class="overlay" id="overlay"><div class="sheet"><div class="grab"></div><div class="sheettop"><h3>Place demo selection</h3><button class="close" id="close">×</button></div>
+<div class="selectedBox" id="selectedBox">Select a number, colour or size.</div>
+<div class="field">Amount</div><input class="amount" id="amount" type="number" min="1" step="1" value="10">
+<div class="amts" id="amts"></div>
+<div class="field">Quantity</div><div class="step"><button id="minus">−</button><span id="qty">1</span><button id="plus">+</button></div>
+<div class="field">Multiplier</div><div class="multis" id="multis"></div>
+<div class="tot"><span>Total demo credits</span><strong id="total">₹10.00</strong></div>
+<label class="agree"><input id="agree" type="checkbox"> I agree to the game rules</label>
+<div class="acts"><button class="can" id="cancel">CANCEL</button><button class="con" id="confirm" disabled>CONFIRM</button></div>
+</div></div>
+
+<div class="result" id="result"><div class="rcard"><div class="rlabel">Round result</div><div class="outcome" id="outcome">YOU WON</div><div class="resultNum" id="resultNum">5</div><div class="meta" id="meta"></div><div class="resultInfo" id="resultInfo"></div><div class="ring" id="ring"></div><button class="continue" id="continue">CONTINUE</button></div></div>
+
+<div class="rules" id="rules"><div class="rulecard"><div class="rulehead"><h2>WINGO · How to Play</h2><button class="ruleclose" id="ruleClose">×</button></div>
+<div class="rule"><b>1. Game overview</b><p>WINGO is a round-based virtual-credit game experience. Each round has a fixed duration and one generated result.</p></div>
+<div class="rule"><b>2. Durations & periods</b><p>Choose 30 SEC, 1 MIN, 3 MIN or 5 MIN. Each duration has its own period sequence and history context.</p></div>
+<div class="rule"><b>3. Timer & betting cutoff</b><p>Selections can be confirmed while the round is open. New confirmations are locked during the final 5 seconds. When the timer reaches zero, the round closes and the result is revealed.</p></div>
+<div class="rule"><b>4. Number & payout</b><p>Select any number from 0 to 9. If the result exactly matches your selected number, the demo return is <strong>contract amount ×9</strong>.</p></div>
+<div class="rule"><b>5. Colour & payout</b><p><strong>Green:</strong> 1,3,7,9 = ×2; 5 = ×1.5. <strong>Red:</strong> 2,4,6,8 = ×2; 0 = ×1.5. <strong>Violet:</strong> 0 or 5 = ×4.5.</p></div>
+<div class="rule"><b>6. Big / Small & payout</b><p><strong>Big = 5–9</strong> and <strong>Small = 0–4</strong>. A correct Big or Small selection returns <strong>contract amount ×2</strong>.</p></div>
+<div class="rule"><b>7. Amount, quantity & multiplier</b><p>Total stake = amount × quantity × multiplier. For settlement, the contract amount is <strong>98%</strong> of the total stake, matching the displayed 2% service-fee example.</p></div>
+<div class="rule"><b>8. Confirmation</b><p>You must agree to the rules. The system checks the current round and prevents confirmation after the cutoff or when demo credits are insufficient.</p></div>
+<div class="rule"><b>9. Result & settlement</b><p>After a round ends, confirmed demo selections are compared with the generated result and marked WON or LOST. The result popup remains for about 3 seconds.</p></div>
+<div class="rule"><b>10. History & My Bets</b><p>Each duration keeps its own recent results and demo selections. Up to 500 recent rounds are retained locally for the prototype.</p></div>
+<div class="rule"><b>11. Charts & statistics</b><p>Charts show historical demo results only. Previous patterns do not guarantee or predict future results.</p></div>
+<div class="rule"><b>12. Sync & reconnect</b><p>The interface uses clock-based round boundaries and restores stored prototype state after reload. A production deployment should use a server-authoritative game engine.</p></div>
+<div class="rule"><b>13. Virtual-credit notice</b><p>This prototype uses virtual credits only. It does not process real-money wagers, payouts, deposits, withdrawals or real-money commission settlement.</p></div>
+</div></div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ===========================
-// WINGO GAME ENGINE (demo)
-// ===========================
-(function(){
-    // ---------- Shared constants ----------
-    const BALANCE_KEY = 'nplus_wallet_balance'; // sync with wallet page
-    const DURATIONS = {30: '30s', 60: '1m', 180: '3m', 300: '5m'};
-    const BET_CLOSE_MS = 3000;
-    const HOUSE_EDGE = 0.985;
-
-    // ---------- State ----------
-    let balance = parseFloat(localStorage.getItem(BALANCE_KEY) || '1000');
-    let currentDuration = 30;
-    let periodId = '';
-    let roundStartMs = 0;
-    let selected = { numbers: [], colors: [], size: null };
-    let betQuantity = 1;
-    let betMultiplier = 1;
-    let roundBetPlaced = false;
-    let roundBetAmount = 0;
-    let roundHistory = [];
-    let myBets = [];
-
-    // DOM elements
-    const balanceHeaderEl = document.getElementById('walletBalanceHeader');
-    const timerDisplay = document.getElementById('timerDisplay');
-    const periodIdEl = document.getElementById('periodId');
-    const bettingClosedEl = document.getElementById('bettingClosed');
-    const numberPadEl = document.getElementById('numberPad');
-    const betPopup = document.getElementById('betPopup');
-    const selectedBetDisplay = document.getElementById('selectedBetDisplay');
-    const betAmountInput = document.getElementById('betAmount');
-    const qtyDisplay = document.getElementById('qtyDisplay');
-    const betError = document.getElementById('betError');
-    const tabContent = document.getElementById('tabContent');
-
-    // ---------- Utility functions ----------
-    function pad(n){ return n < 10 ? '0'+n : ''+n; }
-    function updateBalanceUI(){ balanceHeaderEl.textContent = '₹' + balance.toFixed(2); }
-    function saveBalance(){ localStorage.setItem(BALANCE_KEY, String(balance)); }
-
-    function getPeriodId(ms){
-        const d = new Date(ms);
-        const y = d.getFullYear();
-        const m = pad(d.getMonth()+1);
-        const day = pad(d.getDate());
-        const midnight = new Date(y, d.getMonth(), d.getDate()).getTime();
-        const secondsSinceMidnight = Math.floor((ms - midnight) / 1000);
-        const roundIndex = Math.floor(secondsSinceMidnight / currentDuration) + 1;
-        const code = currentDuration === 30 ? '1000' : currentDuration === 60 ? '2000' : currentDuration === 180 ? '3000' : '4000';
-        return `${y}${m}${day}${code}${String(roundIndex).padStart(5,'0')}`;
+(()=>{"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const STORE="nplusplay_wingo_ultra_final_v2";
+const DEMO_RETURN_RATE=0.98;
+const modes=[30,60,180,300];
+const state={sec:30,balance:1000,qty:1,multi:1,selection:null,history:{30:[],60:[],180:[],300:[]},bets:{30:[],60:[],180:[],300:[]},tab:"history",shownResult:null,lastRoundStart:null};
+const color=n=>n===0||n===5?"v":[1,3,7,9].includes(n)?"g":"r";
+const colorsFor=n=>{const out=[];if([1,3,7,9].includes(n))out.push("Green");if(n===5)out.push("Green","Violet");if([2,4,6,8].includes(n))out.push("Red");if(n===0)out.push("Red","Violet");return [...new Set(out)];};
+const cname=c=>({r:"Red",g:"Green",v:"Violet"})[c];
+const size=n=>n>=5?"Big":"Small";
+const payoutFor=(b,n)=>{if(b.type==="number")return Number(b.value)===n?9:0;if(b.type==="size")return String(b.value)===size(n)?2:0;if(b.type==="color"){if(b.value==="Violet")return (n===0||n===5)?4.5:0;if(b.value==="Green")return [1,3,7,9].includes(n)?2:n===5?1.5:0;if(b.value==="Red")return [2,4,6,8].includes(n)?2:n===0?1.5:0;}return 0;};
+const money=n=>"₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||"{}");if(x.balance!=null)state.balance=x.balance;if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets)}catch{}}
+function save(){localStorage.setItem(STORE,JSON.stringify({balance:state.balance,history:state.history,bets:state.bets}))}
+function walletDeltaForWin(b){return b.total*DEMO_RETURN_RATE}
+function periodAt(start,sec){const d=new Date(start),idx=Math.floor(start/(sec*1000)),code={30:"1000",60:"2000",180:"3000",300:"4000"}[sec];const date=d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");return date+code+String(idx%100000).padStart(5,"0")}
+function round(){const now=Date.now(),start=Math.floor(now/(state.sec*1000))*(state.sec*1000),elapsed=Math.floor((now-start)/1000),remaining=state.sec-elapsed;return{now,start,remaining,period:periodAt(start,state.sec)}}
+function resultFor(p){const n=hash(p)%10,c=color(n);return{period:p,number:n,color:c,colorName:cname(c),colors:colorsFor(n),size:size(n)}}
+function ensureHistory(){const r=round(), arr=state.history[state.sec];if(!arr.length){for(let i=1;i<=500;i++){const st=r.start-i*state.sec*1000,p=periodAt(st,state.sec);arr.push({...resultFor(p),ts:st})}save();return}const known=new Set(arr.map(x=>x.period));for(let i=1;i<=500;i++){const st=r.start-i*state.sec*1000,p=periodAt(st,state.sec);if(!known.has(p))arr.push({...resultFor(p),ts:st})}arr.sort((a,b)=>b.ts-a.ts);state.history[state.sec]=arr.slice(0,500);save()}
+function renderBalance(){const el=$("#balance");el.textContent=money(state.balance);el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");clearTimeout(window.__balanceTimer);window.__balanceTimer=setTimeout(()=>el.classList.remove("bump"),320)}
+function renderNumbers(){$("#numbers").innerHTML=Array.from({length:10},(_,n)=>`<button class="num ${color(n)} ${state.selection?.type==="number"&&Number(state.selection.value)===n?"active":""}" data-type="number" data-value="${n}">${n}</button>`).join("")}
+function renderRecent(){$("#recent").innerHTML=state.history[state.sec].slice(0,14).map(x=>`<div class="ball ${x.color}" title="${(x.colors||[x.colorName]).join(" + ")}">${x.number}</div>`).join("")}
+function renderSelection(){const s=state.selection;$("#selectionText").textContent=s?`${s.type.toUpperCase()} · ${s.value}`:"No selection yet";$$(".choice").forEach(b=>b.classList.toggle("active",s?.type==="color"&&s.value===b.dataset.value));$$(".size button").forEach(b=>b.classList.toggle("active",s?.type==="size"&&s.value===b.dataset.value));renderNumbers()}
+function renderPanel(){const p=$("#panel"),h=state.history[state.sec],bets=state.bets[state.sec]||[];if(state.tab==="history"){p.innerHTML=`<div class="hh"><span>Period</span><span>Number</span><span>Big/Small</span><span>Color</span></div>`+h.slice(0,12).map((x,i)=>`<div class="hr ${i===0?"latest":""}"><code>${x.period}</code><span class="rn ${x.color}">${x.number}</span><span class="st ${x.size.toLowerCase()}">${x.size}</span><span>${(x.colors||[x.colorName]).map(c=>`<i class="cd ${c.toLowerCase()[0]==="r"?"r":c.toLowerCase()[0]==="g"?"g":"v"}"></i>`).join("")}</span></div>`).join("")+`<div class="pagination"><button class="pg">‹</button><span>1 / 50</span><button class="pg">›</button></div>`}
+else if(state.tab==="bets"){p.innerHTML=bets.length?`<div class="betsummary">${bets.slice(0,20).map(b=>`<div class="betitem"><div><b>${b.value}</b><small>${b.type} · ${b.period}</small></div><div>${money(b.total)}<small>x${b.multi} · qty ${b.qty}</small></div><div class="${b.status==="WON"?"statusWon":b.status==="LOST"?"statusLost":"statusPending"}">${b.status}</div></div>`).join("")}</div>`:`<div class="note">No demo selections in this duration.</div>`}
+else if(state.tab==="chart"){const counts=Array(10).fill(0);h.forEach(x=>counts[x.number]++);const max=Math.max(1,...counts);p.innerHTML=`<div class="bars">${counts.map((v,i)=>`<div class="br"><b>${i}</b><div class="track"><div class="fill" style="width:${v/max*100}%"></div></div><span>${v}</span></div>`).join("")}</div><div class="note">Historical demo frequency · not predictive.</div>`}
+else if(state.tab==="strategy"){const total=h.length,b=h.filter(x=>x.size==="Big").length,s=total-b,r=h.filter(x=>x.color==="r").length,g=h.filter(x=>x.color==="g").length,v=h.filter(x=>x.color==="v").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${total}</b><span>Rounds</span></div><div class="stat"><b>${b}</b><span>Big</span></div><div class="stat"><b>${s}</b><span>Small</span></div><div class="stat"><b>${r}</b><span>Red</span></div><div class="stat"><b>${g}</b><span>Green</span></div><div class="stat"><b>${v}</b><span>Violet</span></div></div><div class="note">Patterns are historical statistics only and do not predict future results.</div>`}
+else{const total=h.length,b=h.filter(x=>x.size==="Big").length,won=(bets||[]).filter(x=>x.status==="WON").length,lost=(bets||[]).filter(x=>x.status==="LOST").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${total}</b><span>Total rounds</span></div><div class="stat"><b>${b}</b><span>Big</span></div><div class="stat"><b>${total-b}</b><span>Small</span></div><div class="stat"><b>${won}</b><span>Demo wins</span></div><div class="stat"><b>${lost}</b><span>Demo losses</span></div><div class="stat"><b>${bets.length}</b><span>Selections</span></div></div>`}}
+function setMode(sec){state.sec=sec;state.selection=null;$$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));ensureHistory();renderRecent();renderSelection();renderPanel();state.lastRoundStart=null;toast(`WINGO ${sec===30?"30 SEC":sec===60?"1 MIN":sec===180?"3 MIN":"5 MIN"}`)}
+function update(){const r=round(),closed=r.remaining<=5;$("#time").textContent=`00:${String(r.remaining).padStart(2,"0")}`;$("#period").textContent=r.period;$("#bar").style.width=(r.remaining/state.sec*100)+"%";$("#status").textContent=closed?"BETTING CLOSED":"BETTING OPEN";$("#round").classList.toggle("closed",closed);const stage=closed?3:r.remaining<=10?2:r.remaining<=20?1:0;$$("#stage span").forEach((x,i)=>x.classList.toggle("on",i<=stage));if(state.lastRoundStart!==null&&state.lastRoundStart!==r.start)completeRound(state.lastRoundStart);state.lastRoundStart=r.start}
+function completeRound(start){const p=periodAt(start,state.sec),x=resultFor(p),arr=state.history[state.sec];if(!arr.some(a=>a.period===p)){arr.unshift({...x,ts:start});state.history[state.sec]=arr.slice(0,500)}let changed=false;let roundWon=0;let roundLost=0;
+for(const b of state.bets[state.sec]){
+  if(b.period===p&&b.status==="PENDING"){
+    const mult=payoutFor(b,x.number),won=mult>0;
+    b.status=won?"WON":"LOST";
+    b.settledAt=Date.now();
+    b.payoutMultiplier=mult;
+    b.feeRate=0.02;
+    b.contractAmount=Number((b.total*0.98).toFixed(2));
+    if(won){
+      const credit=Number((b.contractAmount*mult).toFixed(2));
+      b.returnAmount=credit;
+      b.netAmount=Number((credit-b.total).toFixed(2));
+      state.balance+=credit;
+      roundWon+=credit;
+    }else{
+      b.returnAmount=0;
+      b.netAmount=-b.total;
+      roundLost+=b.total;
     }
-
-    function getRoundStart(ms = Date.now()){
-        return Math.floor(ms / (currentDuration*1000)) * currentDuration*1000;
-    }
-
-    function getRemainingMs(){
-        const start = getRoundStart();
-        return (start + currentDuration*1000) - Date.now();
-    }
-
-    // ---------- Deterministic result (same period same result) ----------
-    function hash(str){
-        let h = 2166136261;
-        for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h,16777619); }
-        return h >>> 0;
-    }
-    function getResultForPeriod(startMs){
-        const seed = `wingo-${currentDuration}-${startMs}`;
-        const num = hash(seed) % 10;
-        return { number: num };
-    }
-
-    // ---------- Timer loop ----------
-    function startTimer(){
-        setInterval(()=>{
-            const rem = getRemainingMs();
-            const totalSec = Math.ceil(rem/1000);
-            const mins = Math.floor(totalSec/60);
-            const secs = totalSec % 60;
-            timerDisplay.textContent = `${pad(mins)}:${pad(secs)}`;
-            periodIdEl.textContent = periodId;
-
-            // Lock betting in last 3 seconds
-            if(rem <= BET_CLOSE_MS){
-                bettingClosedEl.style.display = 'block';
-                if(betPopup.classList.contains('active')) closeBetPopup();
-            } else {
-                bettingClosedEl.style.display = 'none';
-            }
-
-            // New round started?
-            const currentStart = getRoundStart();
-            if(currentStart !== roundStartMs){
-                roundStartMs = currentStart;
-                periodId = getPeriodId(roundStartMs);
-                roundBetPlaced = false;
-                roundBetAmount = 0;
-                selected = {numbers:[], colors:[], size:null};
-                updateSelectionUI();
-            }
-
-            // Round ended?
-            if(rem <= 0){
-                settleRound();
-            }
-        }, 200);
-    }
-
-    function settleRound(){
-        const result = getResultForPeriod(roundStartMs);
-        const num = result.number;
-        const isBig = num >= 5;
-        let winAmount = 0;
-        let win = false;
-
-        // Check numbers
-        selected.numbers.forEach(n=>{
-            if(n === num){
-                winAmount += betAmountInput.value * betQuantity * betMultiplier * 9 * HOUSE_EDGE;
-                win = true;
-            }
-        });
-        // Check colors
-        selected.colors.forEach(c=>{
-            let match = false;
-            if(c === 'red' && (num%2===0 && num!==0 && num!==5)) match=true;
-            if(c === 'green' && (num%2===1 && num!==5)) match=true;
-            if(c === 'violet' && (num===0 || num===5)) match=true;
-            if(match){ winAmount += betAmountInput.value * betQuantity * betMultiplier * (c==='violet'?14:2) * HOUSE_EDGE; win=true; }
-        });
-        // Check size
-        if(selected.size){
-            const match = (selected.size === 'big' && isBig) || (selected.size === 'small' && !isBig);
-            if(match){ winAmount += betAmountInput.value * betQuantity * betMultiplier * 2 * HOUSE_EDGE; win=true; }
-        }
-
-        if(winAmount > 0){
-            balance += winAmount;
-            saveBalance();
-            updateBalanceUI();
-            // Add to history and mybets
-            roundHistory.unshift({period: periodId, number: num, result: win ? 'win' : 'loss', amount: winAmount});
-            myBets.unshift({period: periodId, number: num, bet: selected, stake: betAmountInput.value * betQuantity * betMultiplier, win: win, payout: winAmount});
-            if(roundHistory.length > 100) roundHistory.pop();
-            if(myBets.length > 100) myBets.pop();
-            localStorage.setItem('wingo_history', JSON.stringify(roundHistory));
-            localStorage.setItem('wingo_mybets', JSON.stringify(myBets));
-            renderHistory();
-            renderMyBets();
-            showResult(num, winAmount, win);
-        } else if(roundBetPlaced){
-            // Lost
-            roundHistory.unshift({period: periodId, number: num, result: 'loss', amount: -roundBetAmount});
-            myBets.unshift({period: periodId, number: num, bet: selected, stake: roundBetAmount, win: false, payout: 0});
-            saveBalance();
-            updateBalanceUI();
-            localStorage.setItem('wingo_history', JSON.stringify(roundHistory));
-            localStorage.setItem('wingo_mybets', JSON.stringify(myBets));
-            renderHistory();
-            renderMyBets();
-            showResult(num, 0, false);
-        }
-
-        // Reset for next round
-        roundBetPlaced = false;
-        roundBetAmount = 0;
-        selected = {numbers:[], colors:[], size:null};
-        updateSelectionUI();
-    }
-
-    function showResult(num, amount, win){
-        alert(`${win ? '🎉 You Win!' : '😞 You Lose'} Number: ${num} ${win ? '+₹'+amount.toFixed(2) : ''}`);
-    }
-
-    // ---------- UI Rendering ----------
-    function updateSelectionUI(){
-        // Update number pad
-        document.querySelectorAll('.num-btn').forEach(btn=>{
-            const n = parseInt(btn.dataset.num);
-            btn.classList.toggle('selected', selected.numbers.includes(n));
-        });
-        // Update color buttons
-        document.querySelectorAll('.color-btn').forEach(btn=>{
-            btn.classList.toggle('selected', selected.colors.includes(btn.dataset.color));
-        });
-        // Update size buttons
-        document.querySelectorAll('.big-small-btn').forEach(btn=>{
-            btn.classList.toggle('selected', selected.size === btn.dataset.size);
-        });
-    }
-
-    function renderNumberPad(){
-        let html = '';
-        for(let i=0; i<=9; i++){
-            html += `<button class="num-btn" data-num="${i}">${i}</button>`;
-        }
-        numberPadEl.innerHTML = html;
-        document.querySelectorAll('.num-btn').forEach(btn=>{
-            btn.addEventListener('click', ()=>{
-                if(roundBetPlaced || getRemainingMs() <= BET_CLOSE_MS) return;
-                const num = parseInt(btn.dataset.num);
-                if(selected.numbers.includes(num)){
-                    selected.numbers = selected.numbers.filter(n=>n!==num);
-                } else {
-                    if(selected.numbers.length >= 5){ alert('Max 5 numbers'); return; }
-                    selected.numbers.push(num);
-                }
-                updateSelectionUI();
-                openBetPopup();
-            });
-        });
-    }
-
-    function openBetPopup(){
-        if(selected.numbers.length===0 && selected.colors.length===0 && !selected.size) return;
-        selectedBetDisplay.textContent = `Selected: ${selected.numbers.map(n=>'#'+n).join(' ')} ${selected.colors.join(' ')} ${selected.size||''}`;
-        betPopup.classList.add('active');
-        updateBetTotal();
-    }
-
-    function closeBetPopup(){
-        betPopup.classList.remove('active');
-    }
-
-    function updateBetTotal(){
-        const amount = parseFloat(betAmountInput.value) || 1;
-        const total = amount * betQuantity * betMultiplier;
-        betError.style.display = total > balance ? 'block' : 'none';
-    }
-
-    // ---------- Tab content ----------
-    function renderHistory(){
-        const history = JSON.parse(localStorage.getItem('wingo_history') || '[]');
-        let html = '<table style="width:100%; border-collapse:collapse; font-size:.75rem;">';
-        html += '<tr><th>Period</th><th>Number</th><th>Result</th></tr>';
-        history.slice(0,20).forEach(h=>{
-            html += `<tr><td>${h.period}</td><td>${h.number}</td><td style="color:${h.result==='win'?'var(--green)':'var(--red)'}">${h.result}</td></tr>`;
-        });
-        html += '</table>';
-        tabContent.innerHTML = html;
-    }
-
-    function renderMyBets(){
-        const bets = JSON.parse(localStorage.getItem('wingo_mybets') || '[]');
-        let html = '<table style="width:100%; border-collapse:collapse; font-size:.75rem;">';
-        html += '<tr><th>Period</th><th>Number</th><th>Stake</th><th>Win</th></tr>';
-        bets.slice(0,20).forEach(b=>{
-            html += `<tr><td>${b.period}</td><td>${b.number}</td><td>₹${b.stake.toFixed(2)}</td><td>${b.win?'✅':'❌'}</td></tr>`;
-        });
-        html += '</table>';
-        tabContent.innerHTML = html;
-    }
-
-    function renderChart(){
-        const history = JSON.parse(localStorage.getItem('wingo_history') || '[]');
-        const numbers = history.slice(0,30).map(h=>h.number);
-        let html = '<div style="display:flex; gap:4px; align-items:flex-end; height:100px;">';
-        numbers.forEach(n=>{
-            const height = (n+1)*8;
-            html += `<div style="flex:1; background:var(--gold); height:${height}px; border-radius:2px;"></div>`;
-        });
-        html += '</div>';
-        tabContent.innerHTML = html;
-    }
-
-    function renderStrategy(){
-        tabContent.innerHTML = '<div style="color:var(--muted);">Strategy: Follow the trend. Last 5 numbers: ...</div>';
-    }
-
-    // ---------- Tab switching ----------
-    document.querySelectorAll('.info-tabs button').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-            document.querySelectorAll('.info-tabs button').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
-            const tab = btn.dataset.tab;
-            if(tab==='history') renderHistory();
-            else if(tab==='mybets') renderMyBets();
-            else if(tab==='chart') renderChart();
-            else if(tab==='strategy') renderStrategy();
-        });
-    });
-
-    // ---------- Event listeners ----------
-    document.querySelectorAll('.duration-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-            document.querySelectorAll('.duration-btn').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
-            currentDuration = parseInt(btn.dataset.dur);
-            roundStartMs = getRoundStart();
-            periodId = getPeriodId(roundStartMs);
-            periodIdEl.textContent = periodId;
-        });
-    });
-
-    document.querySelectorAll('.color-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-            if(roundBetPlaced || getRemainingMs() <= BET_CLOSE_MS) return;
-            const color = btn.dataset.color;
-            if(selected.colors.includes(color)){
-                selected.colors = selected.colors.filter(c=>c!==color);
-            } else {
-                if(selected.colors.length >= 2){ alert('Max 2 colors'); return; }
-                selected.colors.push(color);
-            }
-            updateSelectionUI();
-            openBetPopup();
-        });
-    });
-
-    document.querySelectorAll('.big-small-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-            if(roundBetPlaced || getRemainingMs() <= BET_CLOSE_MS) return;
-            const size = btn.dataset.size;
-            selected.size = (selected.size === size) ? null : size;
-            updateSelectionUI();
-            openBetPopup();
-        });
-    });
-
-    document.getElementById('qtyMinus').addEventListener('click', ()=>{
-        if(betQuantity>1) betQuantity--;
-        qtyDisplay.textContent = betQuantity;
-        updateBetTotal();
-    });
-    document.getElementById('qtyPlus').addEventListener('click', ()=>{
-        betQuantity++;
-        qtyDisplay.textContent = betQuantity;
-        updateBetTotal();
-    });
-
-    document.querySelectorAll('.multiplier-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-            document.querySelectorAll('.multiplier-btn').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
-            betMultiplier = parseInt(btn.dataset.mult);
-            updateBetTotal();
-        });
-    });
-
-    document.getElementById('cancelBet').addEventListener('click', closeBetPopup);
-    document.getElementById('confirmBet').addEventListener('click', ()=>{
-        const amount = parseFloat(betAmountInput.value) || 1;
-        const total = amount * betQuantity * betMultiplier;
-        if(total > balance){
-            betError.style.display='block';
-            return;
-        }
-        balance -= total;
-        roundBetPlaced = true;
-        roundBetAmount = total;
-        saveBalance();
-        updateBalanceUI();
-        closeBetPopup();
-    });
-
-    document.getElementById('betAmount').addEventListener('input', updateBetTotal);
-
-    // ---------- Init ----------
-    function init(){
-        updateBalanceUI();
-        renderNumberPad();
-        roundStartMs = getRoundStart();
-        periodId = getPeriodId(roundStartMs);
-        periodIdEl.textContent = periodId;
-        updateSelectionUI();
-        renderHistory();
-        startTimer();
-    }
-
-    init();
+    changed=true;
+  }
+}
+state.balance=Number(state.balance.toFixed(2));
+save();renderBalance();renderRecent();renderPanel();
+if(changed||state.bets[state.sec].some(b=>b.period===p))showResult(p,x,roundWon,roundLost)}
+function openBet(type,value){const r=round();if(r.remaining<=5){toast("Betting closed for this round");return}state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${type.toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${r.period}</span>`;$("#overlay").classList.add("show");syncSheet()}
+function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>state.balance||round().remaining<=5}
+function closeSheet(){ $("#overlay").classList.remove("show") }
+function showResult(p,x,wonCredit=0,lostStake=0){
+  const bets=state.bets[state.sec].filter(b=>b.period===p),wins=bets.filter(b=>b.status==="WON"),loss=bets.filter(b=>b.status==="LOST");
+  const wonCount=wins.length,lossCount=loss.length;
+  $("#outcome").textContent=wonCount&&!lossCount?"YOU WON":lossCount&&!wonCount?"YOU LOST":wonCount&&lossCount?"MIXED RESULT":"ROUND RESULT";
+  $("#outcome").className="outcome "+(wonCount&&!lossCount?"win":lossCount&&!wonCount?"loss":"mix");
+  $("#resultNum").textContent=x.number;
+  $("#meta").innerHTML=`${(x.colors||[x.colorName]).map(c=>`<span class="pill ${c.toLowerCase()[0]==="r"?"r":c.toLowerCase()[0]==="g"?"g":"v"}">${c.toUpperCase()}</span>`).join("")}<span class="pill ${x.size==="Big"?"b":"s"}">${x.size.toUpperCase()}</span>`;
+  const details=wins.map(b=>`${String(b.type).toUpperCase()} ${b.value} · x${b.payoutMultiplier} · ${money(b.returnAmount)}`).join("<br>");
+  const net=Number((wonCredit-lostStake).toFixed(2));
+  const walletLine=net>0?`Wallet credited <strong>${money(wonCredit)}</strong>`:net<0?`Wallet reduced by <strong>${money(Math.abs(net))}</strong>`:"Wallet unchanged";
+  $("#resultInfo").innerHTML=`Period <strong>${p}</strong><br>${bets.length?`${wonCount} won · ${lossCount} lost · ${bets.length} selection${bets.length>1?"s":""}${details?`<br>${details}`:""}<br>${walletLine}<br>Balance <strong>${money(state.balance)}</strong>`:"No demo selection this round"}`;
+  $("#result").classList.add("show");clearTimeout(window.__resultTimer);window.__resultTimer=setTimeout(()=>$("#result").classList.remove("show"),3000);
+}
+function toast(t){const x=$("#toast");x.textContent=t;x.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove("show"),1700)}
+load();ensureHistory();$("#balance").textContent=money(state.balance);renderRecent();renderNumbers();renderSelection();renderPanel();$("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">₹${v}</button>`).join("");$("#multis").innerHTML=[1,5,10,20,50,100].map(v=>`<button class="multi ${v===1?"active":""}" data-m="${v}">X${v}</button>`).join("");
+$("#modes").onclick=e=>{const b=e.target.closest(".mode");if(b)setMode(+b.dataset.sec)};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-type]");if(b)openBet(b.dataset.type,b.dataset.value);const m=e.target.closest("[data-m]");if(m){state.multi=+m.dataset.m;$$(".multi").forEach(x=>x.classList.toggle("active",x===m));syncSheet()}const a=e.target.closest("[data-amt]");if(a){$("#amount").value=a.dataset.amt;syncSheet()}});
+$("#random").onclick=()=>openBet("number",Math.floor(Math.random()*10));$("#edit").onclick=()=>state.selection?openBet(state.selection.type,state.selection.value):toast("Choose a selection first");
+$("#minus").onclick=()=>{state.qty=Math.max(1,state.qty-1);$("#qty").textContent=state.qty;syncSheet()};$("#plus").onclick=()=>{state.qty=Math.min(100,state.qty+1);$("#qty").textContent=state.qty;syncSheet()};
+$("#amount").oninput=syncSheet;$("#agree").onchange=syncSheet;$("#close").onclick=closeSheet;$("#cancel").onclick=closeSheet;$("#overlay").onclick=e=>{if(e.target.id==="overlay")closeSheet()};
+$("#confirm").onclick=()=>{const r=round(),total=Number($("#amount").value||0)*state.qty*state.multi;if(r.remaining<=5){toast("Betting is closed");return}if(total>state.balance){toast("Insufficient demo credits");return}const p=r.period;if(state.bets[state.sec].some(b=>b.period===p&&b.type===state.selection.type&&String(b.value)===String(state.selection.value)&&b.total===total)){toast("Duplicate selection blocked");return}state.balance-=total;state.bets[state.sec].unshift({period:p,type:state.selection.type,value:state.selection.value,total,qty:state.qty,multi:state.multi,status:"PENDING",ts:Date.now()});save();renderBalance();renderPanel();closeSheet();toast("✓ Demo selection confirmed")};
+$("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;state.tab=b.dataset.tab;$$(".tab").forEach(x=>x.classList.toggle("active",x===b));renderPanel()};
+$("#rulesBtn").onclick=$("#how").onclick=()=>$("#rules").classList.add("show");$("#ruleClose").onclick=()=>$("#rules").classList.remove("show");$("#deposit").onclick=$("#withdraw").onclick=()=>toast("Virtual-credit demo only");$("#sound").onclick=()=>toast("Sound control ready");$("#back").onclick=()=>history.back();$("#continue").onclick=()=>$("#result").classList.remove("show");
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){ensureHistory();update();renderRecent();renderPanel()}});
+setInterval(update,150);update();
 })();
 </script>
 </body>
