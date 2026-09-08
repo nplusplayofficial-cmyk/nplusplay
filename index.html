@@ -1,2753 +1,1563 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#020202">
-    <meta name="description" content="N+ PLAY — Premium Gaming Ecosystem">
-    <title>N+ PLAY | Premium Gaming</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #020202;
-            --bg-2: #050505;
-            --surface: rgba(255, 255, 255, 0.03);
-            --surface-2: rgba(255, 255, 255, 0.06);
-            --line: rgba(255, 255, 255, 0.08);
-            --line-gold: rgba(245, 197, 24, 0.25);
-            --gold: #f5c518;
-            --gold-hi: #fff3a0;
-            --gold-dark: #8c6200;
-            --white: #ffffff;
-            --muted: #888888;
-            --muted-2: #444444;
-            --green: #23d39a;
-            --green-dim: rgba(35, 211, 154, 0.15);
-            --red: #ff5260;
-            --red-dim: rgba(255, 82, 96, 0.15);
-            --radius: 16px;
-            --radius-lg: 24px;
-            --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-            --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            --shadow-gold: 0 10px 40px rgba(245, 197, 24, 0.15);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            min-height: 100vh;
-            overflow-x: hidden;
-            color: var(--white);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            background-image:
-                radial-gradient(800px 450px at 50% -100px, rgba(245, 197, 24, 0.12), transparent 70%),
-                radial-gradient(600px 500px at 110% 30%, rgba(245, 197, 24, 0.05), transparent 70%),
-                radial-gradient(500px 400px at -10% 70%, rgba(255, 188, 25, 0.03), transparent 70%);
-            padding-bottom: 100px;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            opacity: 0.15;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.1) 0.5px, transparent 0.5px);
-            background-size: 4px 4px;
-            mask-image: linear-gradient(to bottom, black, transparent 60%);
-            z-index: -1;
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        button {
-            font-family: inherit;
-            border: none;
-            outline: none;
-            background: none;
-            cursor: pointer;
-        }
-
-        .page {
-            width: min(100%, 580px);
-            margin: 0 auto;
-            padding: 0 16px;
-        }
-
-        @media (min-width: 900px) {
-            .page {
-                max-width: 1200px;
-                padding: 0 24px;
-            }
-        }
-
-        /* ==================== UTILITIES ==================== */
-        .gold-text {
-            background: linear-gradient(110deg, #9b7000 0%, #fff0a1 26%, #f5c518 52%, #fff2a9 72%, #9b7000 100%);
-            background-size: 220% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: goldSweep 6s linear infinite;
-        }
-
-        @keyframes goldSweep {
-            to {
-                background-position: 220% center;
-            }
-        }
-
-        @keyframes rise {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: none;
-            }
-        }
-
-        @keyframes pulse {
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(245, 197, 24, 0);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(245, 197, 24, 0.08);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: none;
-            }
-        }
-
-        /* ==================== HEADER ==================== */
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            margin: 0 -16px;
-            padding: 12px 16px 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(2, 2, 2, 0.82);
-            backdrop-filter: blur(24px) saturate(150%);
-            border-bottom: 1px solid var(--line);
-            border-bottom-color: rgba(245, 197, 24, 0.12);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .brand-mark {
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            font-size: 12px;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            color: #090909;
-            background: linear-gradient(145deg, #fff1a0, #f5c518 48%, #8f6500);
-            box-shadow: 0 6px 20px rgba(245, 197, 24, 0.2), 0 0 0 1px rgba(255, 240, 150, 0.15);
-            position: relative;
-        }
-
-        .brand-mark::after {
-            content: "";
-            position: absolute;
-            inset: -4px;
-            border-radius: 14px;
-            border: 1px solid rgba(245, 197, 24, 0.1);
-        }
-
-        .brand-name {
-            font-size: 1.2rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .wallet {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            border: 1px solid rgba(35, 211, 154, 0.25);
-            border-radius: 999px;
-            background: var(--green-dim);
-            box-shadow: inset 0 0 20px rgba(35, 211, 154, 0.03);
-            transition: all 0.3s ease;
-        }
-
-        .wallet:hover {
-            border-color: rgba(35, 211, 154, 0.4);
-            box-shadow: 0 0 20px rgba(35, 211, 154, 0.1);
-        }
-
-        .wallet-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--green);
-            box-shadow: 0 0 10px var(--green);
-        }
-
-        .wallet-value {
-            font-size: 0.78rem;
-            font-weight: 800;
-            color: #bff8e5;
-        }
-
-        .age-badge {
-            font-size: 0.6rem;
-            font-weight: 900;
-            color: #ff8b94;
-            padding: 6px 9px;
-            border: 1px solid rgba(255, 82, 96, 0.2);
-            border-radius: 999px;
-            background: rgba(255, 82, 96, 0.06);
-        }
-
-        /* ==================== CATEGORIES ==================== */
-        .categories {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            padding: 14px 2px 10px;
-            mask-image: linear-gradient(90deg, transparent, black 4%, black 96%, transparent);
-            -webkit-mask-image: linear-gradient(90deg, transparent, black 4%, black 96%, transparent);
-        }
-
-        .categories::-webkit-scrollbar {
-            display: none;
-        }
-
-        .cat {
-            flex: 0 0 auto;
-            padding: 9px 16px;
-            border-radius: 999px;
-            border: 1px solid transparent;
-            color: var(--muted);
-            font-size: 0.72rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s var(--ease);
-            position: relative;
-        }
-
-        .cat:hover {
-            color: var(--white);
-            border-color: var(--line);
-            background: var(--surface);
-        }
-
-        .cat.active {
-            color: #080808;
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            border-color: var(--gold);
-            box-shadow: 0 6px 24px rgba(245, 197, 24, 0.18), inset 0 1px rgba(255, 255, 255, 0.5);
-        }
-
-        /* ==================== HERO ==================== */
-        .hero {
-            position: relative;
-            overflow: hidden;
-            min-height: 320px;
-            margin: 12px 0 18px;
-            border: 1px solid var(--line-gold);
-            border-radius: var(--radius-lg);
-            background:
-                radial-gradient(circle at 78% 25%, rgba(245, 197, 24, 0.18), transparent 28%),
-                radial-gradient(circle at 92% 95%, rgba(120, 72, 0, 0.22), transparent 45%),
-                linear-gradient(135deg, #16130b 0%, #0b0b0b 55%, #050505 100%);
-            box-shadow: var(--shadow);
-            isolation: isolate;
-            transition: all 0.4s var(--ease);
-        }
-
-        .hero:hover {
-            border-color: rgba(245, 197, 24, 0.35);
-            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5), 0 0 30px rgba(245, 197, 24, 0.08);
-        }
-
-        .hero::before {
-            content: "N+";
-            position: absolute;
-            right: -30px;
-            bottom: -60px;
-            font-size: 240px;
-            line-height: 1;
-            font-weight: 900;
-            color: rgba(245, 197, 24, 0.04);
-            transform: rotate(-8deg);
-            text-shadow: 0 0 120px rgba(245, 197, 24, 0.1);
-            pointer-events: none;
-        }
-
-        .hero::after {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            background: linear-gradient(115deg, transparent 35%, rgba(255, 240, 160, 0.08) 50%, transparent 65%);
-            transform: translateX(-120%);
-            animation: heroShine 7s var(--ease) infinite;
-            pointer-events: none;
-        }
-
-        @keyframes heroShine {
-            55%,
-            100% {
-                transform: translateX(120%);
-            }
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            padding: 28px 24px;
-        }
-
-        .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--gold-hi);
-            font-size: 0.6rem;
-            font-weight: 900;
-            letter-spacing: 1.8px;
-            text-transform: uppercase;
-        }
-
-        .eyebrow i {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--gold);
-            animation: pulse 2s infinite;
-            box-shadow: 0 0 8px var(--gold);
-        }
-
-        .hero h1 {
-            max-width: 380px;
-            margin: 12px 0 8px;
-            font-size: 2.2rem;
-            line-height: 1.02;
-            letter-spacing: -1.8px;
-        }
-
-        .hero p {
-            max-width: 340px;
-            color: #aaa;
-            font-size: 0.78rem;
-            line-height: 1.65;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .primary,
-        .secondary {
-            border-radius: 12px;
-            padding: 11px 18px;
-            font-size: 0.75rem;
-            font-weight: 900;
-            transition: all 0.3s var(--ease);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .primary::before,
-        .secondary::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.25) 48%, transparent 70%);
-            transform: translateX(-120%);
-            transition: transform 0.6s var(--ease);
-        }
-
-        .primary:hover::before,
-        .secondary:hover::before {
-            transform: translateX(120%);
-        }
-
-        .primary {
-            color: #080808;
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            box-shadow: 0 10px 30px rgba(245, 197, 24, 0.22), inset 0 1px rgba(255, 255, 255, 0.6);
-        }
-
-        .primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 40px rgba(245, 197, 24, 0.3);
-        }
-
-        .secondary {
-            border: 1px solid var(--line-gold);
-            background: var(--surface);
-            color: var(--white);
-        }
-
-        .secondary:hover {
-            transform: translateY(-2px);
-            background: var(--surface-2);
-            border-color: rgba(245, 197, 24, 0.3);
-        }
-
-        .primary span,
-        .secondary span {
-            transition: transform 0.3s var(--ease);
-        }
-
-        .primary:hover span,
-        .secondary:hover span {
-            transform: translate(2px, -2px);
-        }
-
-        /* ==================== LIVE FEED ==================== */
-        .live-feed {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 11px 14px;
-            margin-bottom: 24px;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            background: var(--surface);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .live-label {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            flex: 0 0 auto;
-            color: var(--red);
-            font-size: 0.62rem;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-        }
-
-        .live-label span {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #ff5260;
-            box-shadow: 0 0 12px #ff5260;
-            animation: pulse 1.5s infinite;
-        }
-
-        .live-track {
-            overflow: hidden;
-            white-space: nowrap;
-            color: var(--muted);
-            font-size: 0.68rem;
-            font-weight: 500;
-        }
-
-        .live-track b {
-            color: var(--gold-hi);
-            font-weight: 700;
-        }
-
-        /* ==================== SECTIONS ==================== */
-        .section {
-            margin: 0 0 28px;
-            animation: slideUp 0.6s var(--ease) both;
-        }
-
-        .section:nth-of-type(2) {
-            animation-delay: 0.05s;
-        }
-
-        .section:nth-of-type(3) {
-            animation-delay: 0.1s;
-        }
-
-        .section:nth-of-type(4) {
-            animation-delay: 0.15s;
-        }
-
-        .section-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 14px;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.05rem;
-            font-weight: 900;
-            letter-spacing: -0.4px;
-        }
-
-        .section-title::before {
-            content: "";
-            width: 4px;
-            height: 18px;
-            border-radius: 5px;
-            background: linear-gradient(var(--gold-hi), var(--gold-dark));
-            box-shadow: 0 0 15px rgba(245, 197, 24, 0.4);
-        }
-
-        .section-sub {
-            margin-top: 5px;
-            margin-left: 14px;
-            color: var(--muted-2);
-            font-size: 0.62rem;
-            font-weight: 500;
-        }
-
-        .view {
-            color: var(--muted);
-            font-size: 0.68rem;
-            font-weight: 700;
-            transition: color 0.3s ease;
-        }
-
-        .view:hover {
-            color: var(--gold);
-        }
-
-        /* ==================== GAME CARDS - HORIZONTAL ==================== */
-        .game-row {
-            display: grid;
-            grid-auto-flow: column;
-            grid-auto-columns: 118px;
-            gap: 12px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            padding: 2px 1px 8px;
-        }
-
-        .game-row::-webkit-scrollbar {
-            display: none;
-        }
-
-        .game-card {
-            position: relative;
-            aspect-ratio: 1;
-            border-radius: 18px;
-            overflow: hidden;
-            border: 1px solid var(--line);
-            background: var(--bg-2);
-            transition: all 0.4s var(--ease);
-        }
-
-        .game-card::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent 50%);
-            pointer-events: none;
-        }
-
-        .game-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: 2;
-            background: linear-gradient(125deg, rgba(255, 255, 255, 0.12), transparent 25%, transparent 70%, rgba(245, 197, 24, 0.06));
-            opacity: 0.7;
-            transition: opacity 0.3s ease, transform 0.5s var(--ease);
-            pointer-events: none;
-        }
-
-        .game-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--line-gold);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(245, 197, 24, 0.08);
-        }
-
-        .game-card:hover::before {
-            opacity: 1;
-            transform: translate3d(5px, -3px, 0);
-        }
-
-        .game-card img {
-            width: 100%;
-            height: 100%;
-            display: block;
-            object-fit: cover;
-            transition: transform 0.5s var(--ease), filter 0.4s ease;
-        }
-
-        .game-card:hover img {
-            transform: scale(1.06);
-            filter: saturate(1.1) contrast(1.05);
-        }
-
-        .game-card .rec-name {
-            position: absolute;
-            z-index: 3;
-            left: 10px;
-            bottom: 9px;
-            font-size: 0.62rem;
-            font-weight: 900;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-        }
-
-        /* ==================== GAME GRID ==================== */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-        }
-
-        .game {
-            position: relative;
-            min-width: 0;
-            aspect-ratio: 1.08;
-            overflow: hidden;
-            border-radius: 18px;
-            background: var(--bg-2);
-            border: 1px solid var(--line);
-            transition: all 0.4s var(--ease);
-        }
-
-        .game::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent 58%);
-            pointer-events: none;
-        }
-
-        .game::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            border-radius: inherit;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-        }
-
-        .game img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: transform 0.5s var(--ease), filter 0.4s ease;
-        }
-
-        .game:hover {
-            transform: translateY(-4px);
-            border-color: var(--line-gold);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 28px rgba(245, 197, 24, 0.07);
-        }
-
-        .game:hover img {
-            transform: scale(1.05);
-            filter: saturate(1.08) contrast(1.04);
-        }
-
-        .game-info {
-            position: absolute;
-            z-index: 2;
-            left: 12px;
-            right: 12px;
-            bottom: 11px;
-        }
-
-        .game-name {
-            font-size: 0.74rem;
-            font-weight: 900;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-        }
-
-        .game-meta {
-            margin-top: 4px;
-            color: #999;
-            font-size: 0.58rem;
-            font-weight: 500;
-        }
-
-        .badge {
-            position: absolute;
-            z-index: 3;
-            top: 10px;
-            left: 10px;
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 0.52rem;
-            font-weight: 900;
-            letter-spacing: 0.6px;
-            color: #080808;
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-        }
-
-        .badge.new {
-            color: #080808;
-            background: linear-gradient(135deg, #bff8e5, var(--green));
-        }
-
-        .badge.hot {
-            color: var(--white);
-            background: linear-gradient(135deg, #ff7b83, #c92536);
-        }
-
-        /* ==================== LEADERBOARD ==================== */
-        .champions {
-            border: 1px solid var(--line);
-            border-radius: 20px;
-            overflow: hidden;
-            background: linear-gradient(145deg, var(--surface), rgba(255, 255, 255, 0.015));
-            box-shadow: var(--shadow);
-        }
-
-        .champion {
-            display: grid;
-            grid-template-columns: 32px 1fr auto;
-            align-items: center;
-            gap: 12px;
-            padding: 13px 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            transition: background 0.25s ease;
-        }
-
-        .champion:last-child {
-            border-bottom: none;
-        }
-
-        .champion:hover {
-            background: rgba(245, 197, 24, 0.02);
-        }
-
-        .rank {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            font-size: 0.65rem;
-            font-weight: 900;
-            background: var(--surface);
-            color: var(--muted);
-        }
-
-        .rank.top {
-            color: #080808;
-            background: linear-gradient(145deg, #fff0a0, var(--gold));
-            box-shadow: 0 0 12px rgba(245, 197, 24, 0.3);
-        }
-
-        .rank.second {
-            color: #111;
-            background: linear-gradient(145deg, #eee, #888);
-        }
-
-        .rank.third {
-            color: var(--white);
-            background: linear-gradient(145deg, #d99555, #74421f);
-        }
-
-        .player {
-            font-size: 0.7rem;
-            font-weight: 800;
-        }
-
-        .player small {
-            display: block;
-            margin-top: 2px;
-            color: #666;
-            font-size: 0.52rem;
-            font-weight: 500;
-        }
-
-        .amount {
-            font-size: 0.72rem;
-            font-weight: 900;
-            color: var(--gold-hi);
-            text-shadow: 0 0 15px rgba(245, 197, 24, 0.12);
-        }
-
-        /* ==================== FOOTER ==================== */
-        .footer {
-            padding: 12px 0 20px;
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
-        .footer-links a {
-            color: var(--muted);
-            font-size: 0.62rem;
-            transition: all 0.3s var(--ease);
-        }
-
-        .footer-links a:hover {
-            color: var(--gold);
-            transform: translateY(-1px);
-        }
-
-        .disclaimer {
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            color: var(--muted-2);
-            font-size: 0.54rem;
-            line-height: 1.7;
-        }
-
-        .disclaimer strong {
-            color: #8a6e12;
-        }
-
-        /* ==================== BOTTOM NAV ==================== */
-        .bottom-nav {
-            position: fixed;
-            z-index: 200;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: min(100%, 580px);
-            padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
-            background: rgba(4, 4, 4, 0.88);
-            backdrop-filter: blur(26px) saturate(150%);
-            border: 1px solid rgba(245, 197, 24, 0.12);
-            border-bottom: none;
-            border-radius: 22px 22px 0 0;
-            box-shadow: 0 -15px 45px rgba(0, 0, 0, 0.5), inset 0 1px rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            padding: 8px 4px;
-            color: var(--muted);
-            font-size: 0.54rem;
-            font-weight: 700;
-            transition: all 0.3s var(--ease);
-        }
-
-        .nav-icon {
-            font-size: 1.1rem;
-            line-height: 1;
-            transition: transform 0.3s var(--ease);
-        }
-
-        .nav-item.active {
-            color: var(--gold);
-        }
-
-        .nav-item.active .nav-icon {
-            transform: scale(1.1);
-        }
-
-        .nav-item.active::before {
-            content: "";
-            position: absolute;
-            top: -9px;
-            width: 28px;
-            height: 3px;
-            border-radius: 2px;
-            background: var(--gold);
-            box-shadow: 0 0 15px rgba(245, 197, 24, 0.8);
-        }
-
-        .nav-badge {
-            position: absolute;
-            top: 2px;
-            margin-left: 24px;
-            padding: 2px 6px;
-            border-radius: 999px;
-            background: var(--red);
-            color: var(--white);
-            font-size: 0.44rem;
-            font-weight: 900;
-        }
-
-        /* ==================== RESPONSIVE ==================== */
-        @media (min-width: 700px) {
-            .header {
-                margin: 0;
-                padding-left: 0;
-                padding-right: 0;
-            }
-
-            .game-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .hero {
-                min-height: 380px;
-            }
-
-            .hero-content {
-                padding: 42px;
-            }
-
-            .hero h1 {
-                font-size: 2.8rem;
-                max-width: 450px;
-            }
-
-            .hero p {
-                font-size: 0.82rem;
-                max-width: 400px;
-            }
-
-            .game-row {
-                grid-auto-columns: 155px;
-            }
-
-            .game {
-                aspect-ratio: 1.15;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *:before,
-            *:after {
-                animation: none !important;
-                scroll-behavior: auto !important;
-                transition: none !important;
-            }
-        }
-
-        /* ==================== WINGO GAME PAGE ==================== */
-        .game-page {
-            display: none;
-            padding-bottom: 100px;
-        }
-
-        .game-page.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .lobby-page.hidden {
-            display: none;
-        }
-
-        .wingo-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            margin-bottom: 20px;
-        }
-
-        .wingo-title {
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-        }
-
-        .wingo-back {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--muted);
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 8px 14px;
-            border-radius: 10px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            transition: all 0.3s ease;
-        }
-
-        .wingo-back:hover {
-            color: var(--white);
-            border-color: var(--line-gold);
-            background: var(--surface-2);
-        }
-
-        .wingo-container {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .wingo-period {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 18px;
-            border-radius: 14px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-        }
-
-        .period-label {
-            font-size: 0.72rem;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        .period-id {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--gold-hi);
-        }
-
-        .duration-selector {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            padding-bottom: 4px;
-        }
-
-        .duration-selector::-webkit-scrollbar {
-            display: none;
-        }
-
-        .duration-btn {
-            flex: 0 0 auto;
-            padding: 10px 16px;
-            border-radius: 10px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--muted);
-            font-size: 0.72rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
-
-        .duration-btn:hover {
-            border-color: var(--line-gold);
-            color: var(--white);
-        }
-
-        .duration-btn.active {
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            color: #080808;
-            border-color: var(--gold);
-            box-shadow: 0 4px 16px rgba(245, 197, 24, 0.2);
-        }
-
-        .countdown-container {
-            position: relative;
-            height: 140px;
-            border-radius: 18px;
-            overflow: hidden;
-            background: linear-gradient(135deg, #14130d 0%, #0a0a0a 50%, #050505 100%);
-            border: 1px solid var(--line-gold);
-            box-shadow: var(--shadow);
-        }
-
-        .countdown-display {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-        }
-
-        .countdown-label {
-            font-size: 0.65rem;
-            color: var(--muted);
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .countdown-timer {
-            font-size: 3.5rem;
-            font-weight: 900;
-            letter-spacing: -2px;
-            line-height: 1;
-            color: var(--white);
-            text-shadow: 0 0 30px rgba(245, 197, 24, 0.2);
-        }
-
-        .countdown-timer.locked {
-            color: var(--red);
-            text-shadow: 0 0 20px rgba(255, 82, 96, 0.3);
-        }
-
-        .betting-status {
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            margin-top: 12px;
-            padding: 6px 16px;
-            border-radius: 999px;
-            background: rgba(35, 211, 154, 0.1);
-            color: var(--green);
-            border: 1px solid rgba(35, 211, 154, 0.2);
-        }
-
-        .betting-status.closed {
-            background: var(--red-dim);
-            color: var(--red);
-            border-color: rgba(255, 82, 96, 0.2);
-            animation: pulse 1.5s infinite;
-        }
-
-        .countdown-bg {
-            position: absolute;
-            inset: 0;
-            opacity: 0.15;
-            background: radial-gradient(circle at 50% 50%, rgba(245, 197, 24, 0.3), transparent 70%);
-            pointer-events: none;
-        }
-
-        .number-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            padding: 4px 0;
-        }
-
-        .number-btn {
-            aspect-ratio: 1;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: var(--white);
-            background: var(--surface);
-            border: 1px solid var(--line);
-            transition: all 0.3s var(--ease);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .number-btn::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .number-btn:hover {
-            transform: translateY(-2px);
-            border-color: var(--line-gold);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .number-btn:hover::before {
-            opacity: 1;
-        }
-
-        .number-btn.selected {
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            color: #080808;
-            border-color: var(--gold);
-            box-shadow: 0 0 20px rgba(245, 197, 24, 0.3);
-            transform: scale(1.05);
-        }
-
-        .number-btn .win-color {
-            position: absolute;
-            bottom: 4px;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-        }
-
-        .number-btn .win-color.red {
-            background: var(--red);
-            box-shadow: 0 0 6px var(--red);
-        }
-
-        .number-btn .win-color.green {
-            background: var(--green);
-            box-shadow: 0 0 6px var(--green);
-        }
-
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            padding: 4px 0;
-        }
-
-        .color-btn {
-            padding: 14px;
-            border-radius: 14px;
-            font-size: 0.82rem;
-            font-weight: 800;
-            text-align: center;
-            transition: all 0.3s var(--ease);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .color-btn::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .color-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .color-btn:hover::before {
-            opacity: 1;
-        }
-
-        .color-btn.red {
-            background: linear-gradient(135deg, #ff5260, #c92536);
-            border: 1px solid rgba(255, 82, 96, 0.3);
-            color: var(--white);
-        }
-
-        .color-btn.green {
-            background: linear-gradient(135deg, #23d39a, #18a075);
-            border: 1px solid rgba(35, 211, 154, 0.3);
-            color: var(--white);
-        }
-
-        .color-btn.selected {
-            box-shadow: 0 0 25px rgba(245, 197, 24, 0.4);
-            border-color: var(--gold);
-        }
-
-        .size-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            padding: 4px 0;
-        }
-
-        .size-btn {
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 0.9rem;
-            font-weight: 900;
-            text-align: center;
-            transition: all 0.3s var(--ease);
-            letter-spacing: 1px;
-        }
-
-        .size-btn.small {
-            background: linear-gradient(135deg, #4a90d9, #2a6cb8);
-            border: 1px solid rgba(74, 144, 217, 0.3);
-            color: var(--white);
-        }
-
-        .size-btn.big {
-            background: linear-gradient(135deg, #f5c518, #8c6200);
-            border: 1px solid rgba(245, 197, 24, 0.3);
-            color: #080808;
-        }
-
-        .size-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .size-btn.selected {
-            box-shadow: 0 0 25px rgba(245, 197, 24, 0.4);
-            border-color: var(--gold);
-        }
-
-        .wingo-actions {
-            display: flex;
-            gap: 10px;
-            padding: 4px 0;
-        }
-
-        .wingo-tab {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--muted);
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .wingo-tab:hover {
-            border-color: var(--line-gold);
-            color: var(--white);
-        }
-
-        .wingo-tab.active {
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            color: #080808;
-            border-color: var(--gold);
-            box-shadow: 0 4px 16px rgba(245, 197, 24, 0.2);
-        }
-
-        /* Betting Popup */
-        .bet-popup {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            background: rgba(2, 2, 2, 0.85);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.2s ease;
-        }
-
-        .bet-popup.active {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .bet-popup-content {
-            width: min(100%, 400px);
-            background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
-            border-radius: 24px 24px 0 0;
-            border: 1px solid var(--line-gold);
-            border-bottom: none;
-            padding: 20px;
-            animation: slideUp 0.3s var(--ease);
-        }
-
-        .popup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .popup-title {
-            font-size: 1.1rem;
-            font-weight: 900;
-        }
-
-        .popup-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--muted);
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-        }
-
-        .popup-close:hover {
-            background: var(--red-dim);
-            color: var(--red);
-            border-color: rgba(255, 82, 96, 0.3);
-        }
-
-        .popup-selection {
-            padding: 14px;
-            border-radius: 12px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .popup-selection-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            font-size: 1.1rem;
-            font-weight: 900;
-            background: var(--gold);
-            color: #080808;
-        }
-
-        .popup-selection-text {
-            font-size: 0.85rem;
-            font-weight: 800;
-        }
-
-        .popup-amounts {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .amount-btn {
-            padding: 12px;
-            border-radius: 10px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--muted);
-            font-size: 0.78rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
-
-        .amount-btn:hover {
-            border-color: var(--line-gold);
-            color: var(--white);
-        }
-
-        .amount-btn.active {
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            color: #080808;
-            border-color: var(--gold);
-        }
-
-        .popup-input {
-            width: 100%;
-            padding: 14px 16px;
-            border-radius: 12px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--white);
-            font-size: 0.9rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .popup-input:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.1);
-            outline: none;
-        }
-
-        .popup-total {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-top: 1px solid var(--line);
-            margin-bottom: 16px;
-        }
-
-        .popup-total-label {
-            font-size: 0.82rem;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        .popup-total-value {
-            font-size: 1rem;
-            font-weight: 900;
-            color: var(--gold-hi);
-        }
-
-        .popup-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .popup-cancel {
-            padding: 14px;
-            border-radius: 12px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--muted);
-            font-size: 0.82rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
-
-        .popup-cancel:hover {
-            color: var(--white);
-            border-color: var(--line-gold);
-        }
-
-        .popup-confirm {
-            padding: 14px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            color: #080808;
-            font-size: 0.82rem;
-            font-weight: 900;
-            box-shadow: 0 4px 16px rgba(245, 197, 24, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .popup-confirm:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .popup-confirm:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 197, 24, 0.3);
-        }
-
-        /* Game History */
-        .history-section {
-            margin-top: 20px;
-        }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .history-title {
-            font-size: 0.95rem;
-            font-weight: 800;
-        }
-
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 300px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--line) transparent;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 14px;
-            border-radius: 12px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-        }
-
-        .history-period {
-            font-size: 0.68rem;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        .history-result {
-            font-size: 0.82rem;
-            font-weight: 800;
-        }
-
-        .history-result.red {
-            color: var(--red);
-        }
-
-        .history-result.green {
-            color: var(--green);
-        }
-
-        .history-result.blue {
-            color: #4a90d9;
-        }
-
-        /* ==================== WALLET PAGE ==================== */
-        .wallet-page {
-            display: none;
-            padding-bottom: 100px;
-        }
-
-        .wallet-page.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .wallet-header {
-            padding: 16px 0;
-            margin-bottom: 24px;
-        }
-
-        .wallet-title {
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-        }
-
-        .wallet-balance-card {
-            padding: 24px;
-            border-radius: var(--radius-lg);
-            background: linear-gradient(135deg, #0f0f0f 0%, #080808 50%, #030303 100%);
-            border: 1px solid var(--line-gold);
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .wallet-balance-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 80% 20%, rgba(245, 197, 24, 0.12), transparent 60%);
-            pointer-events: none;
-        }
-
-        .wallet-balance-label {
-            font-size: 0.72rem;
-            color: var(--muted);
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .wallet-balance-value {
-            font-size: 2.4rem;
-            font-weight: 900;
-            color: var(--white);
-            letter-spacing: -1px;
-            margin-bottom: 4px;
-        }
-
-        .wallet-bonus {
-            font-size: 0.72rem;
-            color: var(--green);
-            font-weight: 600;
-        }
-
-        .wallet-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-
-        .wallet-action {
-            padding: 14px;
-            border-radius: 12px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--white);
-            font-size: 0.82rem;
-            font-weight: 700;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .wallet-action:hover {
-            border-color: var(--line-gold);
-            background: var(--surface-2);
-        }
-
-        .wallet-action.primary {
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            color: #080808;
-            border-color: var(--gold);
-            box-shadow: 0 4px 16px rgba(245, 197, 24, 0.2);
-        }
-
-        .wallet-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .wallet-tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .wallet-tab {
-            flex: 0 0 auto;
-            padding: 10px 16px;
-            border-radius: 10px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            color: var(--muted);
-            font-size: 0.72rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
-
-        .wallet-tab:hover {
-            border-color: var(--line-gold);
-            color: var(--white);
-        }
-
-        .wallet-tab.active {
-            background: linear-gradient(135deg, #fff0a0, var(--gold));
-            color: #080808;
-            border-color: var(--gold);
-        }
-
-        .transaction-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .transaction-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px;
-            border-radius: 14px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-        }
-
-        .transaction-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            font-size: 1.1rem;
-            background: var(--surface-2);
-            border: 1px solid var(--line);
-        }
-
-        .transaction-icon.deposit {
-            color: var(--green);
-        }
-
-        .transaction-icon.withdraw {
-            color: var(--red);
-        }
-
-        .transaction-icon.game {
-            color: var(--gold);
-        }
-
-        .transaction-info {
-            flex: 1;
-        }
-
-        .transaction-type {
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
-        .transaction-date {
-            font-size: 0.62rem;
-            color: var(--muted);
-            margin-top: 2px;
-        }
-
-        .transaction-amount {
-            text-align: right;
-        }
-
-        .transaction-amount.positive {
-            color: var(--green);
-        }
-
-        .transaction-amount.negative {
-            color: var(--red);
-        }
-
-        .transaction-amount-value {
-            font-size: 0.82rem;
-            font-weight: 800;
-        }
-
-        .transaction-status {
-            font-size: 0.58rem;
-            font-weight: 600;
-            color: var(--muted);
-            margin-top: 2px;
-        }
-
-        .transaction-status.completed {
-            color: var(--green);
-        }
-
-        .transaction-status.pending {
-            color: var(--gold);
-        }
-
-        /* ==================== NOTIFICATIONS ==================== */
-        .notification {
-            position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 400;
-            padding: 12px 20px;
-            border-radius: 12px;
-            background: rgba(4, 4, 4, 0.92);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--line-gold);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            display: none;
-            animation: slideUp 0.3s var(--ease);
-        }
-
-        .notification.active {
-            display: block;
-        }
-
-        .notification.success {
-            border-color: rgba(35, 211, 154, 0.3);
-        }
-
-        .notification.error {
-            border-color: rgba(255, 82, 96, 0.3);
-        }
-
-        .notification-text {
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-align: center;
-        }
-
-        /* ==================== RESPONSIVE WINGO ==================== */
-        @media (min-width: 700px) {
-            .wingo-container {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
-
-            .number-grid,
-            .color-grid,
-            .size-grid,
-            .wingo-actions {
-                grid-column: 1;
-            }
-
-            .history-section {
-                grid-column: 2;
-            }
-
-            .countdown-container {
-                height: 160px;
-            }
-
-            .countdown-timer {
-                font-size: 4rem;
-            }
-
-            .wallet-balance-value {
-                font-size: 3rem;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .number-grid {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 6px;
-            }
-
-            .number-btn {
-                font-size: 1rem;
-                border-radius: 10px;
-            }
-
-            .popup-amounts {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .wallet-balance-value {
-                font-size: 1.8rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#070707">
+<meta name="description" content="N+ PLAY — Premium gaming lobby">
+<title>N+ PLAY — Premium Gaming</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --bg:#070707;
+    --bg-2:#0c0c0c;
+    --surface:rgba(255,255,255,.045);
+    --surface-2:rgba(255,255,255,.07);
+    --line:rgba(255,255,255,.09);
+    --line-gold:rgba(245,197,24,.22);
+    --gold:#f5c518;
+    --gold-2:#ffe48a;
+    --gold-dark:#9d7200;
+    --white:#fff;
+    --muted:#989898;
+    --muted-2:#626262;
+    --green:#23d39a;
+    --red:#ff5260;
+    --radius:18px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+    min-height:100vh;
+    overflow-x:hidden;
+    color:var(--white);
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(650px 350px at 50% -80px,rgba(245,197,24,.11),transparent 70%),
+      radial-gradient(500px 400px at -15% 45%,rgba(245,197,24,.045),transparent 70%),
+      linear-gradient(180deg,#090909 0%,#050505 100%);
+    padding-bottom:92px;
+}
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.22;
+    background-image:radial-gradient(rgba(255,255,255,.12) .5px,transparent .5px);
+    background-size:5px 5px;
+    mask-image:linear-gradient(to bottom,black,transparent 75%);
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.page{width:min(100%,560px);margin:auto;padding:0 14px}
+@media(min-width:900px){.page{max-width:1180px}}
+
+.gold-text{
+    background:linear-gradient(110deg,#9b7000 0%,#fff0a1 26%,#f5c518 52%,#fff2a9 72%,#9b7000 100%);
+    background-size:220% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:goldSweep 6s linear infinite;
+}
+@keyframes goldSweep{to{background-position:220% center}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,197,24,.0)}50%{box-shadow:0 0 0 7px rgba(245,197,24,.07)}}
+
+.header{
+    position:sticky;top:0;z-index:100;
+    margin:0 -14px;
+    padding:13px 14px 11px;
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(7,7,7,.76);
+    backdrop-filter:blur(22px) saturate(140%);
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-mark{
+    width:34px;height:34px;border-radius:11px;
+    display:grid;place-items:center;
+    font-size:11px;font-weight:900;letter-spacing:-.5px;
+    color:#090909;
+    background:linear-gradient(145deg,#fff1a0,#f5c518 48%,#8f6500);
+    box-shadow:0 5px 24px rgba(245,197,24,.18);
+}
+.brand-name{font-size:1.18rem;font-weight:900;letter-spacing:.9px}
+.header-right{display:flex;align-items:center;gap:8px}
+.wallet{
+    display:flex;align-items:center;gap:7px;
+    padding:7px 11px;border:1px solid rgba(35,211,154,.2);
+    border-radius:999px;background:rgba(35,211,154,.07);
+}
+.wallet-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.wallet-value{font-size:.76rem;font-weight:800;color:#bff8e5}
+.age{font-size:.62rem;font-weight:900;color:#ff8b94;padding:6px 8px;border:1px solid rgba(255,82,96,.2);border-radius:999px;background:rgba(255,82,96,.06)}
+
+.categories{
+    display:flex;gap:7px;overflow:auto;scrollbar-width:none;
+    padding:12px 1px 8px;
+}
+.categories::-webkit-scrollbar{display:none}
+.cat{
+    flex:0 0 auto;padding:8px 14px;border-radius:999px;
+    border:1px solid transparent;color:var(--muted);
+    font-size:.72rem;font-weight:700;cursor:pointer;
+    transition:.28s var(--ease);
+}
+.cat:hover{color:#fff;border-color:var(--line)}
+.cat.active{
+    color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));
+    border-color:var(--gold);
+    box-shadow:0 5px 22px rgba(245,197,24,.17);
+}
+
+.hero{
+    position:relative;overflow:hidden;
+    min-height:260px;margin:10px 0 15px;
+    border:1px solid var(--line-gold);
+    border-radius:24px;
+    background:
+      radial-gradient(circle at 78% 25%,rgba(245,197,24,.22),transparent 25%),
+      radial-gradient(circle at 90% 100%,rgba(120,72,0,.2),transparent 42%),
+      linear-gradient(135deg,#16130b,#0b0b0b 58%,#090909);
+    box-shadow:var(--shadow);
+    isolation:isolate;
+}
+.hero:before{
+    content:"N+";
+    position:absolute;right:-25px;bottom:-55px;
+    font-size:220px;line-height:1;font-weight:900;
+    color:rgba(245,197,24,.035);
+    transform:rotate(-8deg);
+}
+.hero:after{
+    content:"";
+    position:absolute;inset:-1px;
+    background:linear-gradient(115deg,transparent 35%,rgba(255,240,160,.08) 50%,transparent 65%);
+    transform:translateX(-120%);
+    animation:heroShine 7s var(--ease) infinite;
+}
+@keyframes heroShine{55%,100%{transform:translateX(120%)}}
+.hero-content{position:relative;z-index:2;padding:25px 22px}
+.eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    color:var(--gold-2);font-size:.61rem;font-weight:900;letter-spacing:1.6px;
+    text-transform:uppercase;
+}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+.hero h1{max-width:330px;margin:10px 0 7px;font-size:2.05rem;line-height:1.04;letter-spacing:-1.6px}
+.hero p{max-width:300px;color:#aaa;font-size:.76rem;line-height:1.6}
+.hero-actions{display:flex;gap:9px;margin-top:18px}
+.primary,.secondary{
+    border-radius:12px;padding:10px 16px;font-size:.74rem;font-weight:900;
+    transition:.28s var(--ease);display:inline-flex;align-items:center;gap:7px;
+}
+.primary{color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));box-shadow:0 8px 26px rgba(245,197,24,.2)}
+.secondary{border:1px solid var(--line-gold);background:rgba(255,255,255,.035);color:#eee}
+.primary:hover,.secondary:hover{transform:translateY(-2px)}
+
+.live{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;margin-bottom:20px;
+    border:1px solid var(--line);border-radius:14px;
+    background:rgba(255,255,255,.025);overflow:hidden;
+}
+.live-label{display:flex;align-items:center;gap:6px;flex:0 0 auto;color:#ff7781;font-size:.62rem;font-weight:900}
+.live-label span{width:6px;height:6px;border-radius:50%;background:#ff5260;box-shadow:0 0 12px #ff5260}
+.live-track{overflow:hidden;white-space:nowrap;color:#999;font-size:.67rem}
+.live-track b{color:var(--gold-2)}
+
+.section{margin:0 0 23px}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px}
+.section-title{display:flex;align-items:center;gap:9px;font-size:.94rem;font-weight:900;letter-spacing:-.3px}
+.section-title:before{content:"";width:3px;height:16px;border-radius:5px;background:linear-gradient(var(--gold-2),var(--gold-dark));box-shadow:0 0 12px rgba(245,197,24,.35)}
+.section-sub{margin-top:4px;margin-left:12px;color:var(--muted-2);font-size:.6rem}
+.view{color:#888;font-size:.65rem;font-weight:700}
+.view:hover{color:var(--gold)}
+
+.recommendations{
+    display:grid;grid-auto-flow:column;grid-auto-columns:112px;
+    gap:10px;overflow-x:auto;scrollbar-width:none;padding:2px 1px 5px;
+}
+.recommendations::-webkit-scrollbar{display:none}
+.rec{
+    position:relative;aspect-ratio:1;border-radius:17px;overflow:hidden;
+    border:1px solid var(--line);background:#0b0b0b;
+    transition:.3s var(--ease);
+}
+.rec:after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(0,0,0,.5),transparent 45%);
+    pointer-events:none;
+}
+.rec:hover{transform:translateY(-4px);border-color:var(--line-gold);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.rec img{width:100%;height:100%;display:block;object-fit:cover}
+.rec .rec-name{position:absolute;z-index:2;left:9px;bottom:8px;font-size:.62rem;font-weight:900;text-shadow:0 2px 7px #000}
+
+.game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.game{
+    position:relative;min-width:0;aspect-ratio:1.08;
+    overflow:hidden;border-radius:17px;background:#0b0b0b;
+    border:1px solid var(--line);
+    transition:.32s var(--ease);
+}
+.game:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(0,0,0,.72),transparent 55%)}
+.game img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s var(--ease)}
+.game:hover{transform:translateY(-3px);border-color:var(--line-gold);box-shadow:0 14px 32px rgba(0,0,0,.48)}
+.game:hover img{transform:scale(1.045)}
+.game-info{position:absolute;z-index:2;left:11px;right:11px;bottom:10px}
+.game-name{font-size:.72rem;font-weight:900}
+.game-meta{margin-top:3px;color:#aaa;font-size:.56rem}
+.badge{
+    position:absolute;z-index:3;top:9px;left:9px;
+    padding:4px 7px;border-radius:7px;
+    font-size:.5rem;font-weight:900;letter-spacing:.5px;
+    color:#080808;background:linear-gradient(135deg,#fff0a0,var(--gold));
+}
+.badge.new{background:linear-gradient(135deg,#bff8e5,#23d39a)}
+.badge.hot{color:#fff;background:linear-gradient(135deg,#ff7b83,#c92536)}
+
+.champions{
+    border:1px solid var(--line);border-radius:19px;overflow:hidden;
+    background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+    box-shadow:var(--shadow);
+}
+.champion{
+    display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;
+    padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.045);
+}
+.champion:last-child{border-bottom:0}
+.rank{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.66rem;font-weight:900;background:rgba(255,255,255,.06);color:#999}
+.rank.top{color:#080808;background:linear-gradient(145deg,#fff0a0,var(--gold))}
+.rank.second{color:#111;background:linear-gradient(145deg,#eee,#888)}
+.rank.third{color:#fff;background:linear-gradient(145deg,#d99555,#74421f)}
+.player{font-size:.68rem;font-weight:800}.player small{display:block;margin-top:2px;color:#666;font-size:.5rem;font-weight:500}
+.amount{font-size:.68rem;font-weight:900;color:var(--gold-2)}
+
+.footer{padding:8px 0 18px;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:15px}
+.footer-links a{color:#777;font-size:.61rem}.footer-links a:hover{color:var(--gold)}
+.disclaimer{padding-top:14px;border-top:1px solid rgba(255,255,255,.06);color:#505050;font-size:.53rem;line-height:1.65}
+.disclaimer strong{color:#8a6e12}
+
+.bottom-nav{
+    position:fixed;z-index:200;bottom:0;left:50%;transform:translateX(-50%);
+    width:min(100%,560px);padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:repeat(5,1fr);gap:3px;
+    background:rgba(8,8,8,.84);backdrop-filter:blur(24px) saturate(140%);
+    border:1px solid rgba(255,255,255,.08);border-bottom:0;
+    border-radius:20px 20px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.45);
+}
+.nav-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;color:#666;font-size:.52rem;font-weight:700;transition:.25s var(--ease)}
+.nav-icon{font-size:1rem;line-height:1}
+.nav-item.active{color:var(--gold)}
+.nav-item.active:before{content:"";position:absolute;top:-9px;width:25px;height:2px;border-radius:2px;background:var(--gold);box-shadow:0 0 14px rgba(245,197,24,.7)}
+.nav-badge{position:absolute;top:1px;margin-left:25px;padding:2px 5px;border-radius:999px;background:var(--red);color:#fff;font-size:.42rem;font-weight:900}
+
+@media(min-width:700px){
+    .header{margin:0;padding-left:0;padding-right:0}
+    .game-grid{grid-template-columns:repeat(4,1fr)}
+    .hero{min-height:310px}.hero-content{padding:40px}
+    .hero h1{font-size:2.7rem}
+    .recommendations{grid-auto-columns:145px}
+    .game{aspect-ratio:1.15}
+}
+@media(prefers-reduced-motion:reduce){
+    *,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}
+}
+</style>
+<style>
+
+/* ========================= N+ PLAY V3 — LUXURY UI LAYER ========================= */
+:root{
+    --bg:#030303;
+    --bg-2:#070707;
+    --gold:#f5c518;
+    --gold-hi:#fff1a3;
+    --gold-deep:#8c6200;
+    --glass:rgba(255,255,255,.045);
+    --glass-hi:rgba(255,255,255,.075);
+    --stroke:rgba(255,255,255,.075);
+    --gold-stroke:rgba(245,197,24,.24);
+    --lux-shadow:0 24px 90px rgba(0,0,0,.72);
+    --lux-ease:cubic-bezier(.16,1,.3,1);
+}
+body{
+    background:
+      radial-gradient(900px 430px at 50% -100px,rgba(245,197,24,.12),transparent 67%),
+      radial-gradient(700px 520px at 110% 30%,rgba(245,197,24,.055),transparent 68%),
+      radial-gradient(620px 500px at -10% 70%,rgba(255,188,25,.035),transparent 70%),
+      #030303;
+}
+body:after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+    background:
+      linear-gradient(90deg,transparent 0 49.8%,rgba(255,255,255,.012) 50%,transparent 50.2%),
+      radial-gradient(circle at 50% 0,rgba(255,255,255,.035),transparent 36%);
+}
+.page{max-width:590px}
+@media(min-width:900px){.page{max-width:1220px}}
+
+.header{
+    background:linear-gradient(180deg,rgba(4,4,4,.94),rgba(4,4,4,.72));
+    border-bottom:1px solid rgba(245,197,24,.10);
+    box-shadow:0 12px 35px rgba(0,0,0,.25);
+}
+.brand-mark{
+    position:relative;
+    width:38px;height:38px;border-radius:12px;
+    background:linear-gradient(145deg,#fff9d4 0%,#f5c518 45%,#a66f00 100%);
+    box-shadow:0 0 0 1px rgba(255,240,150,.18),0 8px 32px rgba(245,197,24,.22);
+}
+.brand-mark:after{
+    content:"";position:absolute;inset:-5px;border-radius:15px;
+    border:1px solid rgba(245,197,24,.10);
+}
+.brand-name{
+    font-size:1.28rem;letter-spacing:1.2px;
+    text-shadow:0 0 25px rgba(245,197,24,.12);
+}
+.wallet{
+    border-color:rgba(35,211,154,.24);
+    box-shadow:inset 0 0 20px rgba(35,211,154,.025);
+}
+
+.categories{
+    padding-top:14px;padding-bottom:10px;
+    mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+}
+.cat{padding:9px 15px}
+.cat.active{
+    box-shadow:0 0 0 1px rgba(255,239,150,.18),0 7px 28px rgba(245,197,24,.19),inset 0 1px rgba(255,255,255,.55);
+}
+
+.hero{
+    min-height:300px;
+    border-color:rgba(245,197,24,.25);
+    border-radius:28px;
+    background:
+      radial-gradient(500px 270px at 78% 20%,rgba(255,225,103,.19),transparent 55%),
+      radial-gradient(340px 340px at 95% 100%,rgba(156,93,0,.22),transparent 62%),
+      linear-gradient(125deg,#18130a 0%,#0b0b0a 45%,#050505 100%);
+    box-shadow:0 28px 100px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.10);
+}
+.hero:before{
+    font-size:260px;
+    color:rgba(245,197,24,.045);
+    text-shadow:0 0 100px rgba(245,197,24,.08);
+}
+.hero:after{
+    background:linear-gradient(110deg,transparent 30%,rgba(255,243,170,.13) 48%,rgba(255,255,255,.035) 51%,transparent 70%);
+    animation-duration:8s;
+}
+.hero-content{
+    padding:32px 25px;
+}
+.hero h1{
+    font-size:2.35rem;
+    text-shadow:0 12px 45px rgba(245,197,24,.10);
+}
+.hero p{color:#b5b5b5}
+.primary{
+    box-shadow:0 10px 35px rgba(245,197,24,.22),inset 0 1px rgba(255,255,255,.6);
+}
+.secondary{
+    box-shadow:inset 0 1px rgba(255,255,255,.06);
+}
+
+.live{
+    border-color:rgba(245,197,24,.10);
+    background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.015));
+    box-shadow:inset 0 1px rgba(255,255,255,.05);
+}
+
+.section{margin-bottom:30px}
+.section-title{
+    font-size:1rem;
+    letter-spacing:-.4px;
+}
+.section-title:before{
+    width:4px;height:19px;
+    box-shadow:0 0 18px rgba(245,197,24,.45);
+}
+.section-sub{font-size:.61rem;color:#686868}
+
+.recommendations{
+    grid-auto-columns:120px;
+    gap:12px;
+}
+.rec{
+    border-radius:19px;
+    border-color:rgba(255,255,255,.095);
+    box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.08);
+}
+.rec:before{
+    content:"";position:absolute;z-index:2;inset:0;
+    background:linear-gradient(125deg,rgba(255,255,255,.13),transparent 23%,transparent 72%,rgba(245,197,24,.05));
+    pointer-events:none;
+}
+.rec:hover{
+    border-color:rgba(245,197,24,.32);
+    box-shadow:0 20px 45px rgba(0,0,0,.55),0 0 25px rgba(245,197,24,.07);
+}
+.rec img{filter:saturate(1.04) contrast(1.03)}
+
+.game{
+    border-radius:19px;
+    border-color:rgba(255,255,255,.085);
+    box-shadow:0 15px 35px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.075);
+}
+.game:after{
+    content:"";position:absolute;inset:0;z-index:2;
+    pointer-events:none;
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
+}
+.game:hover{
+    border-color:rgba(245,197,24,.30);
+    box-shadow:0 22px 50px rgba(0,0,0,.60),0 0 30px rgba(245,197,24,.06);
+}
+.game-info{bottom:12px}
+.game-name{text-shadow:0 2px 12px #000;font-size:.75rem}
+.badge{
+    box-shadow:0 4px 16px rgba(0,0,0,.28);
+}
+
+.champions{
+    border-radius:21px;
+    border-color:rgba(245,197,24,.12);
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+    box-shadow:0 25px 65px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.07);
+}
+.champion{padding:13px 15px}
+.amount{text-shadow:0 0 18px rgba(245,197,24,.14)}
+
+.bottom-nav{
+    border-color:rgba(245,197,24,.13);
+    background:linear-gradient(180deg,rgba(12,12,12,.84),rgba(4,4,4,.94));
+    box-shadow:0 -20px 55px rgba(0,0,0,.65),inset 0 1px rgba(255,255,255,.055);
+}
+.nav-item.active{color:var(--gold-hi)}
+.nav-item.active:before{
+    width:32px;height:3px;
+    box-shadow:0 0 18px rgba(245,197,24,.75);
+}
+
+.footer{padding-top:4px}
+.footer-links a{transition:.25s var(--lux-ease)}
+.footer-links a:hover{transform:translateY(-1px)}
+
+@media(min-width:700px){
+    .hero{min-height:360px}
+    .hero-content{padding:48px}
+    .hero h1{font-size:3.35rem;max-width:500px}
+    .hero p{font-size:.82rem;max-width:420px}
+    .recommendations{grid-auto-columns:165px}
+    .game{aspect-ratio:1.22}
+}
+
+</style>
+<style>
+
+/* ====================== N+ PLAY V4 — SIGNATURE MOTION SYSTEM ====================== */
+.signature-hero{
+    min-height:390px;
+    isolation:isolate;
+    overflow:hidden;
+    transform:translateZ(0);
+}
+.signature-hero .hero-content{
+    position:relative;
+    z-index:5;
+    max-width:720px;
+}
+.hero-kicker{
+    margin-top:14px;
+    color:rgba(255,255,255,.43);
+    font-size:.56rem;
+    font-weight:800;
+    letter-spacing:3px;
+}
+.signature-hero h1{
+    margin:9px 0 12px;
+    font-size:clamp(3rem,13vw,5.6rem);
+    line-height:.84;
+    letter-spacing:-5px;
+    font-weight:900;
+}
+.hero-line{
+    display:block;
+}
+.signature-hero .hero-line:first-child{
+    color:#f3f3f0;
+    text-shadow:0 20px 60px rgba(255,255,255,.08);
+}
+.signature-hero .gold-text{
+    text-shadow:0 18px 65px rgba(245,197,24,.15);
+}
+.signature-hero p{
+    max-width:490px;
+    font-size:.78rem;
+    color:#a8a8a8;
+}
+.hero-grid{
+    position:absolute;
+    z-index:1;
+    inset:0;
+    opacity:.22;
+    background-image:
+      linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(circle at 72% 42%,black,transparent 67%);
+    transform:perspective(700px) rotateX(62deg) scale(1.6) translateY(85px);
+    transform-origin:center bottom;
+}
+.hero-glow{
+    position:absolute;
+    z-index:2;
+    width:390px;height:390px;
+    right:-80px;top:-100px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(245,197,24,.22),rgba(245,197,24,.055) 30%,transparent 68%);
+    filter:blur(5px);
+    animation:heroBreath 6s ease-in-out infinite;
+}
+@keyframes heroBreath{
+    0%,100%{transform:scale(.94);opacity:.72}
+    50%{transform:scale(1.08);opacity:1}
+}
+.hero-orbit{
+    position:absolute;
+    z-index:3;
+    border:1px solid rgba(245,197,24,.16);
+    border-radius:50%;
+    pointer-events:none;
+}
+.orbit-one{
+    width:430px;height:170px;
+    right:-120px;top:50px;
+    transform:rotate(-24deg);
+    box-shadow:0 0 50px rgba(245,197,24,.035);
+    animation:orbitFloat 9s ease-in-out infinite;
+}
+.orbit-two{
+    width:330px;height:120px;
+    right:-65px;top:120px;
+    transform:rotate(-24deg);
+    border-color:rgba(255,255,255,.07);
+    animation:orbitFloat 11s ease-in-out infinite reverse;
+}
+@keyframes orbitFloat{
+    0%,100%{translate:0 0}
+    50%{translate:-12px 9px}
+}
+.hero-metrics{
+    display:flex;
+    gap:22px;
+    margin-top:25px;
+}
+.hero-metrics div{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+.hero-metrics strong{
+    font-size:.86rem;
+    font-weight:900;
+    color:#f3f0df;
+}
+.hero-metrics span{
+    color:#5f5f5f;
+    font-size:.45rem;
+    font-weight:800;
+    letter-spacing:1.2px;
+}
+.hero-corner{
+    position:absolute;
+    z-index:6;
+    color:rgba(255,255,255,.27);
+    font-size:.43rem;
+    font-weight:800;
+    letter-spacing:1.5px;
+}
+.hero-corner-tl{top:17px;left:20px}
+.hero-corner-br{right:20px;bottom:18px}
+
+.primary,.secondary{
+    position:relative;
+    overflow:hidden;
+}
+.primary:before,.secondary:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.24) 48%,transparent 70%);
+    transform:translateX(-120%);
+    transition:transform .7s var(--lux-ease);
+}
+.primary:hover:before,.secondary:hover:before{
+    transform:translateX(120%);
+}
+.primary span,.secondary span{
+    transition:transform .35s var(--lux-ease);
+}
+.primary:hover span,.secondary:hover span{transform:translate(2px,-2px)}
+
+.rec,.game{
+    will-change:transform;
+    transform:translateZ(0);
+}
+.rec:after,.game:after{
+    transition:opacity .35s ease;
+}
+.rec:before{
+    opacity:.7;
+    transition:opacity .35s ease,transform .55s var(--lux-ease);
+}
+.rec:hover:before{
+    opacity:1;
+    transform:translate3d(8px,-5px,0);
+}
+.game:after{
+    opacity:.75;
+}
+.game:hover:after{
+    opacity:1;
+}
+.game:before{
+    transition:opacity .4s ease;
+}
+.game:hover:before{opacity:.9}
+
+/* A restrained moving highlight that gives cards a luxury glass finish. */
+.rec,.game,.champions,.live{
+    background-clip:padding-box;
+}
+.rec:hover,.game:hover{
+    animation:cardLift .45s var(--lux-ease) both;
+}
+@keyframes cardLift{
+    from{filter:brightness(1)}
+    50%{filter:brightness(1.08)}
+    to{filter:brightness(1.02)}
+}
+
+/* Staggered entrance: content feels staged instead of appearing all at once. */
+.hero,.live,.section{
+    animation:sectionReveal .7s var(--lux-ease) both;
+}
+.live{animation-delay:.06s}
+.section:nth-of-type(3){animation-delay:.10s}
+.section:nth-of-type(4){animation-delay:.15s}
+.section:nth-of-type(5){animation-delay:.20s}
+@keyframes sectionReveal{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:none}
+}
+
+@media(min-width:700px){
+    .signature-hero{min-height:450px}
+    .signature-hero .hero-content{padding:58px}
+    .hero-metrics{margin-top:32px;gap:34px}
+}
+@media(max-width:430px){
+    .signature-hero{min-height:385px}
+    .signature-hero h1{letter-spacing:-3.4px}
+    .hero-metrics{gap:16px}
+    .hero-metrics strong{font-size:.78rem}
+}
+@media(prefers-reduced-motion:reduce){
+    .signature-hero *, .hero, .live, .section, .rec, .game{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+
+</style>
+
+<style>
+/* =========================================================
+   N+ PLAY FINAL — LUXURY CINEMATIC LOBBY
+   Existing game links, sections and navigation preserved.
+   ========================================================= */
+
+:root{
+    --n-gold:#f5c518;
+    --n-gold-hi:#fff3aa;
+    --n-gold-deep:#8f6400;
+    --n-black:#020202;
+    --n-panel:rgba(255,255,255,.035);
+    --n-line:rgba(255,255,255,.075);
+    --n-ease:cubic-bezier(.16,1,.3,1);
+}
+
+body{
+    background:
+        radial-gradient(900px 520px at 50% -160px,rgba(245,197,24,.14),transparent 65%),
+        radial-gradient(700px 520px at 105% 35%,rgba(245,197,24,.055),transparent 70%),
+        radial-gradient(650px 520px at -10% 70%,rgba(245,197,24,.035),transparent 70%),
+        #020202;
+}
+
+body:after{
+    background:
+        linear-gradient(90deg,transparent 0 49.9%,rgba(255,255,255,.009) 50%,transparent 50.1%),
+        radial-gradient(circle at 50% 0,rgba(255,255,255,.03),transparent 42%);
+}
+
+.page{max-width:590px}
+@media(min-width:900px){.page{max-width:1220px}}
+
+.header{
+    background:linear-gradient(180deg,rgba(3,3,3,.96),rgba(3,3,3,.78));
+    border-bottom-color:rgba(245,197,24,.12);
+    box-shadow:0 16px 45px rgba(0,0,0,.35);
+}
+
+.brand-mark{
+    width:40px;height:40px;border-radius:13px;
+    background:linear-gradient(145deg,#fff8c9 0%,#f5c518 45%,#966600 100%);
+    box-shadow:0 0 0 1px rgba(255,240,150,.2),
+               0 9px 34px rgba(245,197,24,.24);
+}
+
+.brand-name{
+    font-size:1.3rem;
+    letter-spacing:1.3px;
+}
+
+.wallet{
+    border-color:rgba(35,211,154,.27);
+    box-shadow:inset 0 0 25px rgba(35,211,154,.035),0 5px 25px rgba(0,0,0,.2);
+}
+
+/* Category rail */
+.categories{
+    padding:15px 1px 11px;
+    gap:8px;
+}
+
+.cat{
+    position:relative;
+    padding:9px 15px;
+    border-color:transparent;
+    transition:all .35s var(--n-ease);
+}
+
+.cat.active{
+    box-shadow:
+        0 0 0 1px rgba(255,241,160,.22),
+        0 8px 28px rgba(245,197,24,.2),
+        inset 0 1px rgba(255,255,255,.6);
+}
+
+/* ================= FINAL HERO ================= */
+.final-hero{
+    min-height:535px;
+    margin:9px 0 17px;
+    border-radius:30px;
+    border:1px solid rgba(245,197,24,.27);
+    background:
+        radial-gradient(620px 440px at 78% 26%,rgba(245,197,24,.14),transparent 55%),
+        radial-gradient(420px 420px at 94% 92%,rgba(138,84,0,.2),transparent 62%),
+        linear-gradient(135deg,#141109 0%,#080807 50%,#030303 100%);
+    box-shadow:
+        0 38px 120px rgba(0,0,0,.82),
+        inset 0 1px rgba(255,255,255,.11);
+    isolation:isolate;
+}
+
+.final-hero:before{
+    content:"N+";
+    right:-40px;
+    bottom:-85px;
+    font-size:290px;
+    color:rgba(245,197,24,.035);
+    text-shadow:0 0 100px rgba(245,197,24,.08);
+}
+
+.hero-art-wrap{
+    position:absolute;
+    z-index:0;
+    inset:-3% -7% -5% 37%;
+    display:grid;
+    place-items:center;
+    pointer-events:none;
+}
+
+.hero-art-glow{
+    position:absolute;
+    width:92%;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(245,197,24,.26),rgba(245,197,24,.055) 32%,transparent 69%);
+    filter:blur(13px);
+    animation:finalHeroBreath 6s ease-in-out infinite;
+}
+
+.hero-game-art{
+    width:min(510px,94%);
+    height:min(510px,94%);
+    object-fit:contain;
+    filter:
+        saturate(1.08)
+        contrast(1.06)
+        drop-shadow(0 38px 60px rgba(0,0,0,.9));
+    opacity:.94;
+    transform:translate3d(18px,0,0) rotate(2deg) scale(1.03);
+    animation:finalHeroFloat 7s ease-in-out infinite;
+}
+
+@keyframes finalHeroFloat{
+    0%,100%{transform:translate3d(18px,5px,0) rotate(2deg) scale(1.03)}
+    50%{transform:translate3d(8px,-10px,0) rotate(-1deg) scale(1.065)}
+}
+
+@keyframes finalHeroBreath{
+    0%,100%{transform:scale(.94);opacity:.7}
+    50%{transform:scale(1.08);opacity:1}
+}
+
+.hero-vignette{
+    position:absolute;
+    z-index:1;
+    inset:0;
+    background:
+        linear-gradient(90deg,#030303 0%,rgba(3,3,3,.96) 21%,rgba(3,3,3,.78) 43%,rgba(3,3,3,.3) 72%,rgba(3,3,3,.62) 100%),
+        linear-gradient(0deg,rgba(0,0,0,.85),transparent 40%,rgba(0,0,0,.22));
+    pointer-events:none;
+}
+
+.hero-grid-final{
+    position:absolute;
+    z-index:2;
+    inset:0;
+    opacity:.2;
+    background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+    background-size:45px 45px;
+    mask-image:radial-gradient(circle at 78% 48%,black,transparent 65%);
+    transform:perspective(700px) rotateX(62deg) scale(1.55) translateY(105px);
+    transform-origin:center bottom;
+    pointer-events:none;
+}
+
+.hero-orbit{
+    z-index:3;
+    border-color:rgba(245,197,24,.17);
+}
+
+.orbit-one{
+    width:500px;height:205px;
+    right:-155px;top:82px;
+    transform:rotate(-25deg);
+    box-shadow:0 0 65px rgba(245,197,24,.04);
+}
+
+.orbit-two{
+    width:380px;height:145px;
+    right:-92px;top:154px;
+    transform:rotate(-25deg);
+    border-color:rgba(255,255,255,.065);
+}
+
+.hero-light-sweep{
+    position:absolute;
+    z-index:4;
+    top:-30%;
+    left:-45%;
+    width:22%;
+    height:170%;
+    background:linear-gradient(90deg,transparent,rgba(255,245,190,.12),transparent);
+    transform:rotate(18deg);
+    animation:finalLightSweep 9s ease-in-out infinite;
+    pointer-events:none;
+}
+
+@keyframes finalLightSweep{
+    0%,56%{left:-45%;opacity:0}
+    64%{opacity:1}
+    90%,100%{left:130%;opacity:0}
+}
+
+.final-hero .hero-content{
+    position:relative;
+    z-index:6;
+    max-width:650px;
+    padding:60px 42px 40px;
+}
+
+.final-hero .eyebrow{
+    color:var(--n-gold-hi);
+    letter-spacing:2px;
+}
+
+.final-hero .hero-kicker{
+    margin-top:15px;
+    color:rgba(245,197,24,.72);
+    font-size:.58rem;
+    font-weight:900;
+    letter-spacing:2.7px;
+}
+
+.final-hero h1{
+    margin:13px 0 14px;
+    max-width:510px;
+    font-size:clamp(4rem,11vw,6.5rem);
+    line-height:.82;
+    letter-spacing:-5px;
+    font-weight:900;
+}
+
+.final-hero .hero-line:first-child{
+    color:#f4f3ef;
+    text-shadow:0 20px 65px rgba(255,255,255,.08);
+}
+
+.final-hero .gold-text{
+    text-shadow:0 18px 75px rgba(245,197,24,.2);
+}
+
+.final-hero p{
+    max-width:455px;
+    color:#aaa;
+    font-size:.8rem;
+    line-height:1.7;
+}
+
+.final-hero .hero-actions{
+    margin-top:23px;
+}
+
+.final-hero .primary,
+.final-hero .secondary{
+    min-height:43px;
+    padding:11px 17px;
+    border-radius:13px;
+}
+
+.final-hero .primary{
+    box-shadow:
+        0 12px 38px rgba(245,197,24,.25),
+        inset 0 1px rgba(255,255,255,.7);
+}
+
+.hero-metrics{
+    margin-top:32px;
+    gap:30px;
+}
+
+.hero-metrics strong{
+    font-size:.9rem;
+}
+
+.hero-metrics span{
+    font-size:.46rem;
+    letter-spacing:1.4px;
+}
+
+.hero-dots{
+    position:absolute;
+    z-index:8;
+    right:24px;
+    bottom:25px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.hero-dot{
+    width:7px;height:7px;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:rgba(255,255,255,.22);
+    cursor:pointer;
+    transition:all .35s var(--n-ease);
+}
+
+.hero-dot.active{
+    width:27px;
+    border-radius:99px;
+    background:linear-gradient(90deg,#a97400,#fff0a1,#e4ae16);
+    box-shadow:0 0 18px rgba(245,197,24,.55);
+}
+
+.final-hero.is-changing .hero-game-art{
+    animation:finalHeroSwap .55s var(--n-ease) both;
+}
+
+@keyframes finalHeroSwap{
+    0%{opacity:.15;transform:translate3d(55px,0,0) scale(.94) rotate(5deg)}
+    100%{opacity:.94;transform:translate3d(18px,0,0) scale(1.03) rotate(2deg)}
+}
+
+/* ================= GAME CARDS ================= */
+.recommendations{
+    grid-auto-columns:124px;
+    gap:13px;
+    padding:3px 2px 8px;
+}
+
+.rec{
+    border-radius:20px;
+    border-color:rgba(255,255,255,.095);
+    box-shadow:
+        0 14px 34px rgba(0,0,0,.48),
+        inset 0 1px rgba(255,255,255,.09);
+    transition:transform .42s var(--n-ease),border-color .35s ease,box-shadow .42s var(--n-ease);
+}
+
+.rec:before{
+    background:
+        linear-gradient(125deg,rgba(255,255,255,.16),transparent 22%,transparent 70%,rgba(245,197,24,.08)),
+        linear-gradient(180deg,transparent 45%,rgba(0,0,0,.08));
+}
+
+.rec:after{
+    background:linear-gradient(0deg,rgba(0,0,0,.72),transparent 58%);
+}
+
+.rec img{
+    object-fit:cover;
+    transform:scale(1.001);
+    transition:transform .55s var(--n-ease),filter .45s ease;
+}
+
+.rec:hover{
+    transform:translateY(-7px) scale(1.015);
+    border-color:rgba(245,197,24,.38);
+    box-shadow:
+        0 25px 55px rgba(0,0,0,.62),
+        0 0 32px rgba(245,197,24,.08);
+}
+
+.rec:hover img{
+    transform:scale(1.07);
+    filter:saturate(1.12) contrast(1.05);
+}
+
+.rec .rec-name{
+    left:10px;
+    bottom:9px;
+    font-size:.61rem;
+    letter-spacing:.2px;
+}
+
+/* Lottery/Casino/Rummy cards */
+.game{
+    aspect-ratio:1.08;
+    border-radius:20px;
+    border-color:rgba(255,255,255,.09);
+    box-shadow:
+        0 16px 38px rgba(0,0,0,.48),
+        inset 0 1px rgba(255,255,255,.08);
+    transition:transform .42s var(--n-ease),border-color .35s ease,box-shadow .42s var(--n-ease);
+}
+
+.game:after{
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.035);
+}
+
+.game img{
+    transition:transform .55s var(--n-ease),filter .45s ease;
+}
+
+.game:hover{
+    transform:translateY(-6px) scale(1.012);
+    border-color:rgba(245,197,24,.34);
+    box-shadow:
+        0 25px 55px rgba(0,0,0,.62),
+        0 0 28px rgba(245,197,24,.07);
+}
+
+.game:hover img{
+    transform:scale(1.065);
+    filter:saturate(1.1) contrast(1.04);
+}
+
+.badge{
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 5px 18px rgba(0,0,0,.35);
+}
+
+/* Section hierarchy */
+.section{margin-bottom:34px}
+
+.section-head{
+    margin-bottom:13px;
+}
+
+.section-title{
+    font-size:1rem;
+    letter-spacing:-.35px;
+}
+
+.section-title:before{
+    width:4px;
+    height:20px;
+    box-shadow:0 0 20px rgba(245,197,24,.48);
+}
+
+.section-sub{
+    margin-top:5px;
+    color:#696969;
+}
+
+.view{
+    letter-spacing:.4px;
+}
+
+/* Empty future sections */
+.champions{
+    border-radius:21px;
+    border-color:rgba(245,197,24,.12);
+    box-shadow:0 24px 70px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.065);
+}
+
+/* Leaderboard */
+.champion{
+    padding:14px 15px;
+    transition:background .25s ease;
+}
+
+.champion:hover{
+    background:rgba(245,197,24,.025);
+}
+
+.amount{
+    text-shadow:0 0 20px rgba(245,197,24,.18);
+}
+
+/* Bottom nav */
+.bottom-nav{
+    width:min(100%,590px);
+    border-color:rgba(245,197,24,.14);
+    background:linear-gradient(180deg,rgba(12,12,12,.87),rgba(3,3,3,.96));
+    box-shadow:
+        0 -22px 65px rgba(0,0,0,.72),
+        inset 0 1px rgba(255,255,255,.055);
+}
+
+.nav-item.active{
+    color:var(--n-gold-hi);
+}
+
+.nav-item.active:before{
+    width:34px;
+    height:3px;
+    box-shadow:0 0 20px rgba(245,197,24,.8);
+}
+
+/* Entrance */
+.header,.categories,.final-hero,.live,.section{
+    animation:finalReveal .7s var(--n-ease) both;
+}
+
+.categories{animation-delay:.03s}
+.final-hero{animation-delay:.06s}
+.live{animation-delay:.11s}
+.section:nth-of-type(3){animation-delay:.15s}
+.section:nth-of-type(4){animation-delay:.19s}
+.section:nth-of-type(5){animation-delay:.23s}
+
+@keyframes finalReveal{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:none}
+}
+
+@media(min-width:700px){
+    .final-hero{min-height:575px}
+    .final-hero .hero-content{padding:72px 60px}
+    .hero-art-wrap{inset:-7% -2% -9% 39%}
+    .hero-game-art{width:550px;height:550px}
+    .recommendations{grid-auto-columns:170px}
+    .game{aspect-ratio:1.16}
+}
+
+@media(max-width:520px){
+    .final-hero{
+        min-height:500px;
+        border-radius:27px;
+    }
+
+    .hero-art-wrap{
+        inset:4% -24% 24% 38%;
+        opacity:.54;
+    }
+
+    .hero-game-art{
+        width:350px;
+        height:350px;
+    }
+
+    .hero-vignette{
+        background:
+            linear-gradient(90deg,#030303 0%,rgba(3,3,3,.95) 40%,rgba(3,3,3,.58) 100%),
+            linear-gradient(0deg,rgba(0,0,0,.86),transparent 45%);
+    }
+
+    .final-hero .hero-content{
+        padding:40px 22px 32px;
+    }
+
+    .final-hero h1{
+        font-size:clamp(3.45rem,16vw,5.2rem);
+        letter-spacing:-3.7px;
+    }
+
+    .final-hero p{
+        max-width:330px;
+        font-size:.75rem;
+    }
+
+    .hero-metrics{
+        gap:17px;
+    }
+
+    .hero-dots{
+        right:19px;
+        bottom:20px;
+    }
+
+    .recommendations{
+        grid-auto-columns:116px;
+    }
+}
+
+@media(max-width:380px){
+    .final-hero{min-height:480px}
+    .final-hero .hero-content{padding:37px 18px 28px}
+    .hero-actions{flex-wrap:wrap}
+    .hero-metrics{gap:13px}
+}
+
+@media(prefers-reduced-motion:reduce){
+    .final-hero *,
+    .header,.categories,.final-hero,.live,.section,.rec,.game{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+</style>
+
 </head>
 
 <body>
-    <!-- Notification -->
-    <div class="notification" id="notification">
-        <div class="notification-text" id="notificationText"></div>
+<main class="page">
+
+<header class="header">
+    <a href="index.html" class="brand" aria-label="N+ PLAY home">
+        <span class="brand-mark">N+</span>
+        <span class="brand-name gold-text">PLAY</span>
+    </a>
+    <div class="header-right">
+        <div class="wallet"><span class="wallet-dot"></span><span class="wallet-value">₹1,000</span></div>
+        <span class="age">18+</span>
     </div>
+</header>
 
-    <!-- ==================== LOBBY PAGE ==================== -->
-    <div class="lobby-page" id="lobbyPage">
-        <main class="page">
-            <!-- Header -->
-            <header class="header">
-                <a href="#" class="brand" aria-label="N+ PLAY home">
-                    <span class="brand-mark">N+</span>
-                    <span class="brand-name gold-text">PLAY</span>
-                </a>
-                <div class="header-right">
-                    <div class="wallet" onclick="switchPage('wallet')">
-                        <span class="wallet-dot"></span>
-                        <span class="wallet-value">₹1,000</span>
-                    </div>
-                    <span class="age-badge">18+</span>
-                </div>
-            </header>
+<nav class="categories" aria-label="Game categories">
+    <a class="cat active" href="#popular">Popular</a>
+    <a class="cat" href="#lottery">Lottery</a>
+    <a class="cat" href="#casino">Casino</a>
+    <a class="cat" href="#slots">Slots</a>
+    <a class="cat" href="#sports">Sports</a>
+    <a class="cat" href="#rummy">Rummy</a>
+    <a class="cat" href="#fishing">Fishing</a>
+    <a class="cat" href="#original">Original</a>
+</nav>
 
-            <!-- Categories -->
-            <nav class="categories" aria-label="Game categories">
-                <a class="cat active" data-filter="popular">Popular</a>
-                <a class="cat" data-filter="lottery">Lottery</a>
-                <a class="cat" data-filter="casino">Casino</a>
-                <a class="cat" data-filter="arcade">Arcade</a>
-                <a class="cat" data-filter="sports">Sports</a>
-                <a class="cat" data-filter="skill">Skill</a>
-                <a class="cat" data-filter="social">Social</a>
-            </nav>
-
-            <!-- Hero -->
-            <section class="hero" id="heroSection">
-                <div class="hero-content">
-                    <div class="eyebrow"><i></i> N+ PLAY • FEATURED EXPERIENCE</div>
-                    <h1>
-                        <span>PLAY</span>
-                        <span class="gold-text">BEYOND</span>
-                    </h1>
-                    <p>A cinematic gaming experience designed to feel fast, focused and unmistakably N+.</p>
-                    <div class="hero-actions">
-                        <a href="#" class="primary" onclick="switchPage('wingo'); return false;">Enter WINGO <span>↗</span></a>
-                        <a href="#recommendations" class="secondary">Discover Games <span>↓</span></a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Live Feed -->
-            <div class="live-feed" aria-label="Demo activity">
-                <div class="live-label"><span></span> LIVE</div>
-                <div class="live-track">
-                    <span>Demo activity • </span>
-                    <b>Aviator</b> <span>• </span><b>WINGO</b> <span>• </span><b>K3</b> <span>• </span><b>5D</b>
-                </div>
-            </div>
-
-            <!-- Recommendations -->
-            <section class="section" id="recommendations">
-                <div class="section-head">
-                    <div>
-                        <h2 class="section-title">Platform Recommendations</h2>
-                        <p class="section-sub">Curated experiences for you</p>
-                    </div>
-                    <a href="#" class="view">VIEW ALL →</a>
-                </div>
-                <div class="game-row">
-                    <a class="game-card" href="#" onclick="switchPage('wingo'); return false;">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23f5c518' font-size='24' font-family='Inter' font-weight='900'%3EWINGO%3C/text%3E%3C/svg%3E" alt="WINGO" loading="eager">
-                        <span class="rec-name">WINGO</span>
-                    </a>
-                    <a class="game-card" href="#">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='24' font-family='Inter' font-weight='900'%3EAVIATOR%3C/text%3E%3C/svg%3E" alt="Aviator" loading="eager">
-                        <span class="rec-name">AVIATOR</span>
-                    </a>
-                    <a class="game-card" href="#">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='24' font-family='Inter' font-weight='900'%3EVORTEX%3C/text%3E%3C/svg%3E" alt="Vortex" loading="lazy">
-                        <span class="rec-name">VORTEX</span>
-                    </a>
-                    <a class="game-card" href="#">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='24' font-family='Inter' font-weight='900'%3ECHICKEN%3C/text%3E%3C/svg%3E" alt="Chicken Road" loading="lazy">
-                        <span class="rec-name">CHICKEN ROAD</span>
-                    </a>
-                    <a class="game-card" href="#">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='24' font-family='Inter' font-weight='900'%3ECRAZY TIME%3C/text%3E%3C/svg%3E" alt="Crazy Time" loading="lazy">
-                        <span class="rec-name">CRAZY TIME</span>
-                    </a>
-                </div>
-            </section>
-
-            <!-- Lottery Games -->
-            <section class="section" id="lottery">
-                <div class="section-head">
-                    <div>
-                        <h2 class="section-title">Lottery Games</h2>
-                        <p class="section-sub">Fast, focused experiences</p>
-                    </div>
-                    <span class="view">5 GAMES</span>
-                </div>
-                <div class="game-grid">
-                    <a class="game" href="#" onclick="switchPage('wingo'); return false;">
-                        <span class="badge hot">HOT</span>
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23f5c518' font-size='20' font-family='Inter' font-weight='900'%3EWINGO%3C/text%3E%3C/svg%3E" alt="Win Go" loading="lazy">
-                        <div class="game-info">
-                            <div class="game-name">Win Go</div>
-                            <div class="game-meta">30s • Demo</div>
-                        </div>
-                    </a>
-                    <a class="game" href="#">
-                        <span class="badge">FEATURED</span>
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='18' font-family='Inter' font-weight='900'%3EMOTORACE%3C/text%3E%3C/svg%3E" alt="MotoRace" loading="lazy">
-                        <div class="game-info">
-                            <div class="game-name">MotoRace</div>
-                            <div class="game-meta">Quick Play • Demo</div>
-                        </div>
-                    </a>
-                    <a class="game" href="#">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='24' font-family='Inter' font-weight='900'%3EK3%3C/text%3E%3C/svg%3E" alt="K3" loading="lazy">
-                        <div class="game-info">
-                            <div class="game-name">K3</div>
-                            <div class="game-meta">Dice • Demo</div>
-                        </div>
-                    </a>
-                    <a class="game" href="#">
-                        <span class="badge new">NEW</span>
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='24' font-family='Inter' font-weight='900'%3E5D%3C/text%3E%3C/svg%3E" alt="5D" loading="lazy">
-                        <div class="game-info">
-                            <div class="game-name">5D</div>
-                            <div class="game-meta">Lottery • Demo</div>
-                        </div>
-                    </a>
-                </div>
-            </section>
-
-            <!-- Casino -->
-            <section class="section" id="casino">
-                <div class="section-head">
-                    <div>
-                        <h2 class="section-title">Casino Games</h2>
-                        <p class="section-sub">Classic table experiences</p>
-                    </div>
-                    <span class="view">4 GAMES</span>
-                </div>
-                <div class="game-grid">
-                    <a class="game" href="#">
-                        <span class="badge hot">HOT</span>
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='16' font-family='Inter' font-weight='900'%3ECRAZY TIME%3C/text%3E%3C/svg%3E" alt="Crazy Time" loading="lazy">
-                        <div class="game-info">
-                            <div class="game-name">Crazy Time</div>
-                            <div class="game-meta">Demo Experience</div>
-                        </div>
-                    </a>
-                    <a class="game" href="#">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='20' font-family='Inter' font-weight='900'%3EROULETTE%3C/text%3E%3C/svg%3E" alt="Roulette" loading="lazy">
-                        <div class="game-info">
-                            <div class="game-name">Roulette</div>
-                            <div class="game-meta">Classic Table</div>
-                        </div>
-                    </a>
-                    <a class="game" href="#">
-                        <span class="badge new">NEW</span>
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='20' font-family='Inter' font-weight='900'%3EBACKAROUND%3C/text%3E%3C/svg%3E" alt="Baccarat" loading="lazy">
-                        <div class="game-info">
-                            <div class="game-name">Baccarat</div>
-                            <div class="game-meta">Table Game</div>
-                        </div>
-                    </a>
-                    <a class="game" href="#">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23fff' font-size='20' font-family='Inter' font-weight='900'%3EBLACKJACK%3C/text%3E%3C/svg%3E" alt="Blackjack" loading="lazy">
-                        <div class="game-info">
-                            <div class="game-name">Blackjack</div>
-                            <div class="game-meta">Card Game</div>
-                        </div>
-                    </a>
-                </div>
-            </section>
-
-            <!-- Leaderboard -->
-            <section class="section" id="leaderboard">
-                <div class="section-head">
-                    <div>
-                        <h2 class="section-title">Champions</h2>
-                        <p class="section-sub">Top winners this week</p>
-                    </div>
-                </div>
-                <div class="champions">
-                    <div class="champion">
-                        <div class="rank top">1</div>
-                        <div class="player">Player_7X <small>WINGO • 12 wins</small></div>
-                        <div class="amount">₹45,200</div>
-                    </div>
-                    <div class="champion">
-                        <div class="rank second">2</div>
-                        <div class="player">GoldRush <small>AVIATOR • 8 wins</small></div>
-                        <div class="amount">₹32,800</div>
-                    </div>
-                    <div class="champion">
-                        <div class="rank third">3</div>
-                        <div class="player">NinjaPro <small>CASINO • 15 wins</small></div>
-                        <div class="amount">₹28,500</div>
-                    </div>
-                    <div class="champion">
-                        <div class="rank">4</div>
-                        <div class="player">LuckyStar <small>SLOTS • 22 wins</small></div>
-                        <div class="amount">₹21,300</div>
-                    </div>
-                    <div class="champion">
-                        <div class="rank">5</div>
-                        <div class="player">AceKing <small>POKER • 6 wins</small></div>
-                        <div class="amount">₹18,750</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Footer -->
-            <footer class="footer">
-                <div class="footer-links">
-                    <a href="#">About</a>
-                    <a href="#">Terms</a>
-                    <a href="#">Privacy</a>
-                    <a href="#">Support</a>
-                    <a href="#">FAQ</a>
-                </div>
-                <div class="disclaimer">
-                    <strong>N+ PLAY</strong> is a premium gaming entertainment platform. All games are in demo mode with virtual credits.
-                    <br>© 2025 N+ PLAY. All rights reserved.
-                </div>
-            </footer>
-        </main>
+<section class="hero signature-hero final-hero" id="popular">
+    <div class="hero-art-wrap">
+        <div class="hero-art-glow"></div>
+        <img id="heroGameArt" class="hero-game-art" src="aviator.png" alt="Aviator">
     </div>
+    <div class="hero-vignette"></div>
+    <div class="hero-grid-final"></div>
+    <div class="hero-orbit orbit-one"></div>
+    <div class="hero-orbit orbit-two"></div>
+    <div class="hero-light-sweep"></div>
 
-    <!-- ==================== WINGO GAME PAGE ==================== -->
-    <div class="game-page" id="wingoPage">
-        <main class="page">
-            <header class="header">
-                <a href="#" class="brand" onclick="switchPage('lobby'); return false;">
-                    <span class="brand-mark">N+</span>
-                    <span class="brand-name gold-text">PLAY</span>
-                </a>
-                <div class="header-right">
-                    <div class="wallet" onclick="switchPage('wallet')">
-                        <span class="wallet-dot"></span>
-                        <span class="wallet-value" id="wingoBalance">₹1,000</span>
-                    </div>
-                </div>
-            </header>
+    <div class="hero-content">
+        <div class="eyebrow"><i></i> N+ PLAY • FEATURED EXPERIENCE</div>
+        <div class="hero-kicker" id="heroKicker">AVIATOR / SIGNATURE PICK</div>
 
-            <div class="wingo-header">
-                <h1 class="wingo-title">WINGO</h1>
-                <button class="wingo-back" onclick="switchPage('lobby')">
-                    <span>←</span> Back
-                </button>
-            </div>
+        <h1>
+            <span class="hero-line">PLAY</span>
+            <span class="gold-text hero-line" id="heroTitle">BEYOND</span>
+        </h1>
 
-            <div class="wingo-container">
-                <div class="wingo-main">
-                    <!-- Period & Duration -->
-                    <div class="wingo-period">
-                        <div>
-                            <div class="period-label">Period</div>
-                            <div class="period-id" id="periodId">20250101001</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div class="period-label">Duration</div>
-                            <div style="display: flex; gap: 4px; margin-top: 4px;">
-                                <button class="duration-btn active" data-duration="30">30s</button>
-                                <button class="duration-btn" data-duration="60">1m</button>
-                                <button class="duration-btn" data-duration="180">3m</button>
-                                <button class="duration-btn" data-duration="300">5m</button>
-                            </div>
-                        </div>
-                    </div>
+        <p id="heroDescription">
+            A cinematic gaming experience designed to feel fast, focused and unmistakably N+.
+        </p>
 
-                    <!-- Countdown -->
-                    <div class="countdown-container">
-                        <div class="countdown-bg"></div>
-                        <div class="countdown-display">
-                            <div class="countdown-label">TIME REMAINING</div>
-                            <div class="countdown-timer" id="countdownTimer">30</div>
-                            <div class="betting-status" id="bettingStatus">BETTING OPEN</div>
-                        </div>
-                    </div>
+        <div class="hero-actions">
+            <a href="aviator.html" class="primary" id="heroPrimary">Enter Aviator <span>↗</span></a>
+            <a href="#recommendations" class="secondary">Discover Games <span>↓</span></a>
+        </div>
 
-                    <!-- Number Grid -->
-                    <div class="number-grid" id="numberGrid">
-                        <!-- Generated by JS -->
-                    </div>
-
-                    <!-- Color Grid -->
-                    <div class="color-grid">
-                        <button class="color-btn red" data-color="red" onclick="selectBet('color', 'red')">
-                            Red
-                        </button>
-                        <button class="color-btn green" data-color="green" onclick="selectBet('color', 'green')">
-                            Green
-                        </button>
-                        <button class="color-btn violet" data-color="violet" onclick="selectBet('color', 'violet')" style="background: linear-gradient(135deg, #9b59b6, #6c3483); border-color: rgba(155, 89, 182, 0.3); color: #fff;">
-                            Violet
-                        </button>
-                    </div>
-
-                    <!-- Size Grid -->
-                    <div class="size-grid">
-                        <button class="size-btn small" data-size="small" onclick="selectBet('size', 'small')">
-                            Small (0-4)
-                        </button>
-                        <button class="size-btn big" data-size="big" onclick="selectBet('size', 'big')">
-                            Big (5-9)
-                        </button>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="wingo-actions">
-                        <button class="wingo-tab active" data-tab="history" onclick="switchWingoTab('history')">History</button>
-                        <button class="wingo-tab" data-tab="mybets" onclick="switchWingoTab('mybets')">My Bets</button>
-                        <button class="wingo-tab" data-tab="stats" onclick="switchWingoTab('stats')">Stats</button>
-                    </div>
-
-                    <!-- History -->
-                    <div class="history-section" id="historyPanel">
-                        <div class="history-header">
-                            <h3 class="history-title">Recent Results</h3>
-                        </div>
-                        <div class="history-list" id="historyList">
-                            <!-- Generated by JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- ==================== WALLET PAGE ==================== -->
-    <div class="wallet-page" id="walletPage">
-        <main class="page">
-            <header class="header">
-                <a href="#" class="brand" onclick="switchPage('lobby'); return false;">
-                    <span class="brand-mark">N+</span>
-                    <span class="brand-name gold-text">PLAY</span>
-                </a>
-                <div class="header-right">
-                    <button class="wingo-back" onclick="switchPage('lobby')">
-                        <span>←</span> Back
-                    </button>
-                </div>
-            </header>
-
-            <div class="wallet-header">
-                <h1 class="wallet-title">Wallet</h1>
-            </div>
-
-            <!-- Balance Card -->
-            <div class="wallet-balance-card">
-                <div class="wallet-balance-label">AVAILABLE BALANCE</div>
-                <div class="wallet-balance-value" id="walletBalance">₹1,000.00</div>
-                <div class="wallet-bonus">Bonus: ₹0.00</div>
-            </div>
-
-            <!-- Actions -->
-            <div class="wallet-actions">
-                <button class="wallet-action primary" onclick="showNotification('Deposit feature coming soon', 'success')">
-                    + Deposit
-                </button>
-                <button class="wallet-action" onclick="showNotification('Withdraw feature coming soon', 'success')">
-                    - Withdraw
-                </button>
-            </div>
-
-            <!-- Tabs -->
-            <div class="wallet-tabs">
-                <button class="wallet-tab active" data-tab="all" onclick="switchWalletTab('all')">All</button>
-                <button class="wallet-tab" data-tab="deposit" onclick="switchWalletTab('deposit')">Deposits</button>
-                <button class="wallet-tab" data-tab="withdraw" onclick="switchWalletTab('withdraw')">Withdrawals</button>
-                <button class="wallet-tab" data-tab="game" onclick="switchWalletTab('game')">Games</button>
-            </div>
-
-            <!-- Transactions -->
-            <div class="transaction-list" id="transactionList">
-                <!-- Generated by JS -->
-            </div>
-        </main>
-    </div>
-
-    <!-- ==================== BET POPUP ==================== -->
-    <div class="bet-popup" id="betPopup">
-        <div class="bet-popup-content">
-            <div class="popup-header">
-                <h3 class="popup-title">Place Your Bet</h3>
-                <button class="popup-close" onclick="closeBetPopup()">×</button>
-            </div>
-
-            <div class="popup-selection">
-                <div class="popup-selection-icon" id="popupSelectionIcon">7</div>
-                <div class="popup-selection-text" id="popupSelectionText">Number: 7</div>
-            </div>
-
-            <div class="popup-amounts">
-                <button class="amount-btn active" data-amount="10">₹10</button>
-                <button class="amount-btn" data-amount="100">₹100</button>
-                <button class="amount-btn" data-amount="500">₹500</button>
-                <button class="amount-btn" data-amount="1000">₹1K</button>
-            </div>
-
-            <input type="number" class="popup-input" id="customAmount" placeholder="Or enter custom amount" min="1">
-
-            <div class="popup-total">
-                <span class="popup-total-label">Total Bet</span>
-                <span class="popup-total-value" id="popupTotal">₹10</span>
-            </div>
-
-            <div class="popup-actions">
-                <button class="popup-cancel" onclick="closeBetPopup()">Cancel</button>
-                <button class="popup-confirm" id="popupConfirm" onclick="confirmBet()" disabled>Confirm</button>
-            </div>
+        <div class="hero-metrics">
+            <div><strong id="heroIndex">01</strong><span>FEATURED</span></div>
+            <div><strong>24/7</strong><span>LOBBY ACCESS</span></div>
+            <div><strong>N+</strong><span>ORIGINAL UI</span></div>
         </div>
     </div>
 
-    <!-- ==================== BOTTOM NAV ==================== -->
-    <nav class="bottom-nav" id="bottomNav">
-        <a class="nav-item active" data-page="lobby" onclick="switchPage('lobby')">
-            <span class="nav-icon">🏠</span>
-            <span>Lobby</span>
-        </a>
-        <a class="nav-item" data-page="wingo" onclick="switchPage('wingo')">
-            <span class="nav-icon">🎯</span>
-            <span>WINGO</span>
-        </a>
-        <a class="nav-item" data-page="wallet" onclick="switchPage('wallet')">
-            <span class="nav-icon">💰</span>
-            <span>Wallet</span>
-        </a>
-        <a class="nav-item" data-page="promotions">
-            <span class="nav-icon">🎁</span>
-            <span>Promos</span>
-        </a>
-        <a class="nav-item" data-page="profile">
-            <span class="nav-icon">👤</span>
-            <span>Profile</span>
-        </a>
-    </nav>
+    <div class="hero-dots" aria-label="Featured game selector">
+        <button class="hero-dot active" data-index="0" aria-label="Aviator"></button>
+        <button class="hero-dot" data-index="1" aria-label="WINGO"></button>
+        <button class="hero-dot" data-index="2" aria-label="Vortex"></button>
+    </div>
 
-    <script>
-        // ==================== PAGE SWITCHING ====================
-        function switchPage(page) {
-            const lobbyPage = document.getElementById('lobbyPage');
-            const wingoPage = document.getElementById('wingoPage');
-            const walletPage = document.getElementById('walletPage');
-            const bottomNav = document.getElementById('bottomNav');
+    <div class="hero-corner hero-corner-tl">N+ / 05</div>
+    <div class="hero-corner hero-corner-br">SIGNATURE LOBBY</div>
+</section>
 
-            // Hide all pages
-            lobbyPage.classList.add('hidden');
-            wingoPage.classList.remove('active');
-            walletPage.classList.remove('active');
+<div class="live" aria-label="Demo activity">
+    <div class="live-label"><span></span> LIVE</div>
+    <div class="live-track">
+        <span>Demo activity • </span>
+        <b>Aviator</b> <span>• </span><b>WINGO</b> <span>• </span><b>K3</b> <span>• </span><b>5D</b>
+    </div>
+</div>
 
-            // Show selected page
-            switch (page) {
-                case 'lobby':
-                    lobbyPage.classList.remove('hidden');
-                    bottomNav.style.display = 'grid';
-                    break;
-                case 'wingo':
-                    wingoPage.classList.add('active');
-                    bottomNav.style.display = 'grid';
-                    startWingoGame();
-                    break;
-                case 'wallet':
-                    walletPage.classList.add('active');
-                    bottomNav.style.display = 'none';
-                    break;
-            }
+<section class="section" id="recommendations">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Platform Recommendation</h2>
+            <p class="section-sub">Curated experiences for you</p>
+        </div>
+        <a href="#lottery" class="view">VIEW ALL →</a>
+    </div>
 
-            // Update nav active state
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.page === page) {
-                    item.classList.add('active');
-                }
-            });
+    <div class="recommendations">
+        <a class="rec" href="aviator.html"><img src="aviator.png" alt="Aviator" loading="eager"><span class="rec-name">AVIATOR</span></a>
+        <a class="rec" href="wingo.html"><img src="wingo.png" alt="WINGO" loading="eager"><span class="rec-name">WINGO</span></a>
+        <a class="rec" href="vortex.html"><img src="vortex.png" alt="Vortex" loading="lazy"><span class="rec-name">VORTEX</span></a>
+        <a class="rec" href="chicken-road-2.html"><img src="chicken-road-2.png" alt="Chicken Road 2" loading="lazy"><span class="rec-name">CHICKEN ROAD 2</span></a>
+        <a class="rec" href="crazy-time.html"><img src="crazy-time.png" alt="Crazy Time" loading="lazy"><span class="rec-name">CRAZY TIME</span></a>
+        <a class="rec" href="trx-wingo.html"><img src="trx-win-go.png" alt="TRX Win Go" loading="lazy"><span class="rec-name">TRX WIN GO</span></a>
+    </div>
+</section>
+
+<section class="section" id="lottery">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Lottery Games</h2>
+            <p class="section-sub">Fast, focused experiences</p>
+        </div>
+        <span class="view">5 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="wingo.html"><span class="badge hot">HOT</span><img src="wingo.png" alt="Win Go" loading="lazy"><div class="game-info"><div class="game-name">Win Go</div><div class="game-meta">30s • Demo</div></div></a>
+        <a class="game" href="motorace.html"><span class="badge">FEATURED</span><img src="motorace.png" alt="MotoRace" loading="lazy"><div class="game-info"><div class="game-name">MotoRace</div><div class="game-meta">Quick Play • Demo</div></div></a>
+        <a class="game" href="k3.html"><img src="k3.png" alt="K3" loading="lazy"><div class="game-info"><div class="game-name">K3</div><div class="game-meta">Dice • Demo</div></div></a>
+        <a class="game" href="5d.html"><span class="badge new">NEW</span><img src="5d.png" alt="5D" loading="lazy"><div class="game-info"><div class="game-name">5D</div><div class="game-meta">Lottery • Demo</div></div></a>
+        <a class="game" href="trx-wingo.html"><img src="trx-win-go.png" alt="TRX Win Go" loading="lazy"><div class="game-info"><div class="game-name">TRX Win Go</div><div class="game-meta">Fast Play • Demo</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="casino">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Casino Games</h2>
+            <p class="section-sub">Classic table experiences</p>
+        </div>
+        <span class="view">4 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="crazy-time.html"><span class="badge hot">HOT</span><img src="crazy-time.png" alt="Crazy Time" loading="lazy"><div class="game-info"><div class="game-name">Crazy Time</div><div class="game-meta">Demo Experience</div></div></a>
+        <a class="game" href="#"><img src="auto-roulette.png" alt="Auto Roulette" loading="lazy"><div class="game-info"><div class="game-name">Auto Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="american-roulette.png" alt="American Roulette" loading="lazy"><div class="game-info"><div class="game-name">Am. Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="roulette.png" alt="Roulette" loading="lazy"><div class="game-info"><div class="game-name">Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="rummy">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Rummy Cards</h2>
+            <p class="section-sub">Cards, tables & strategy</p>
+        </div>
+        <span class="view">3 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="#"><img src="365-rummy.png" alt="365 Rummy" loading="lazy"><div class="game-info"><div class="game-name">365 Rummy</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="v8-poker.png" alt="V8 Poker" loading="lazy"><div class="game-info"><div class="game-name">V8 Poker</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="#"><img src="koolbet.png" alt="Koolbet" loading="lazy"><div class="game-info"><div class="game-name">Koolbet</div><div class="game-meta">Coming Soon</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="slots">
+    <div class="section-head"><div><h2 class="section-title">Slots</h2><p class="section-sub">A dedicated space for future releases</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Premium slot experiences coming soon.</div>
+</section>
+
+<section class="section" id="sports">
+    <div class="section-head"><div><h2 class="section-title">Sports</h2><p class="section-sub">Your future sports hub</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Sports experiences coming soon.</div>
+</section>
+
+<section class="section" id="fishing">
+    <div class="section-head"><div><h2 class="section-title">Fishing</h2><p class="section-sub">Your future fishing hub</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Fishing experiences coming soon.</div>
+</section>
+
+<section class="section" id="original">
+    <div class="section-head"><div><h2 class="section-title">N+ Originals</h2><p class="section-sub">Experiences designed for N+ PLAY</p></div></div>
+    <div class="champions" style="padding:22px;text-align:center;color:#777;font-size:.68rem">Original experiences coming soon.</div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Today's Champions</h2>
+            <p class="section-sub">Demo leaderboard</p>
+        </div>
+    </div>
+    <div class="champions">
+        <div class="champion"><div class="rank top">1</div><div class="player">Mem***JVN<small>Top demo score</small></div><div class="amount">₹14,850</div></div>
+        <div class="champion"><div class="rank second">2</div><div class="player">Su***aj<small>Demo player</small></div><div class="amount">₹11,200</div></div>
+        <div class="champion"><div class="rank third">3</div><div class="player">Kap***oor<small>Demo player</small></div><div class="amount">₹9,450</div></div>
+        <div class="champion"><div class="rank">4</div><div class="player">Mem***H3M<small>Demo player</small></div><div class="amount">₹7,800</div></div>
+        <div class="champion"><div class="rank">5</div><div class="player">Me***er<small>Demo player</small></div><div class="amount">₹6,150</div></div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="#">Language</a>
+        <a href="#">Support</a>
+        <a href="#">Beginner Guide</a>
+        <a href="#">About N+ PLAY</a>
+    </div>
+    <div class="disclaimer">
+        <p><strong>18+ | DEMO EXPERIENCE</strong></p>
+        <p>N+ PLAY is a premium gaming interface prototype. Play responsibly.</p>
+        <p>© 2026 N+ PLAY. All rights reserved.</p>
+    </div>
+</footer>
+</main>
+
+<nav class="bottom-nav" aria-label="Primary navigation">
+    <a href="index.html" class="nav-item active"><span class="nav-icon">⌂</span><span>Home</span></a>
+    <a href="activity.html" class="nav-item"><span class="nav-icon">◷</span><span>Activity</span></a>
+    <a href="bonus.html" class="nav-item"><span class="nav-icon">✦</span><span>Bonus</span><span class="nav-badge">NEW</span></a>
+    <a href="promotion.html" class="nav-item"><span class="nav-icon">◇</span><span>Promotion</span></a>
+    <a href="account.html" class="nav-item"><span class="nav-icon">◯</span><span>Account</span></a>
+</nav>
+
+<script>
+document.querySelectorAll('.cat').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+        document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
+        tab.classList.add('active');
+    });
+});
+</script>
+
+<script>
+(() => {
+    const slides = [
+        {
+            art:"aviator.png",
+            href:"aviator.html",
+            name:"Aviator",
+            kicker:"AVIATOR / SIGNATURE PICK",
+            title:"BEYOND",
+            desc:"A cinematic gaming experience designed to feel fast, focused and unmistakably N+.",
+            index:"01"
+        },
+        {
+            art:"wingo.png",
+            href:"wingo.html",
+            name:"WINGO",
+            kicker:"WINGO / LIVE PICK",
+            title:"PREDICT",
+            desc:"A sharp, colorful prediction experience presented through the N+ PLAY luxury interface.",
+            index:"02"
+        },
+        {
+            art:"vortex.png",
+            href:"vortex.html",
+            name:"Vortex",
+            kicker:"VORTEX / FEATURED",
+            title:"SPIN",
+            desc:"A high-energy experience wrapped in layered motion, depth and the signature N+ atmosphere.",
+            index:"03"
         }
+    ];
 
-        // ==================== WINGO GAME ENGINE ====================
-        let wingoState = {
-            duration: 30,
-            timeRemaining: 30,
-            periodId: '',
-            selectedBet: null,
-            selectedNumber: null,
-            selectedColor: null,
-            selectedSize: null,
-            betAmount: 10,
-            isLocked: false,
-            history: [],
-            myBets: [],
-            timer: null,
-            balance: 1000
-        };
+    const hero = document.querySelector(".final-hero");
+    const art = document.getElementById("heroGameArt");
+    const primary = document.getElementById("heroPrimary");
+    const kicker = document.getElementById("heroKicker");
+    const title = document.getElementById("heroTitle");
+    const desc = document.getElementById("heroDescription");
+    const index = document.getElementById("heroIndex");
+    const dots = [...document.querySelectorAll(".hero-dot")];
 
-        function generatePeriodId() {
-            const now = new Date();
-            const date = now.getFullYear().toString() +
-                (now.getMonth() + 1).toString().padStart(2, '0') +
-                now.getDate().toString().padStart(2, '0');
-            const seconds = Math.floor(now.getTime() / 1000) % 1000;
-            return `${date}${seconds.toString().padStart(3, '0')}`;
-        }
+    if(!hero || !art || !primary || !kicker || !title || !desc || !index) return;
 
-        function getNumberColor(num) {
-            if (num === 0) return 'green';
-            if (num === 5) return 'green';
-            const reds = [1, 3, 7, 8];
-            const blues = [2, 4, 6, 9];
-            if (reds.includes(num)) return 'red';
-            if (blues.includes(num)) return 'blue';
-            return 'green';
-        }
+    let current = 0;
+    let timer = null;
 
-        function initNumberGrid() {
-            const grid = document.getElementById('numberGrid');
-            grid.innerHTML = '';
-            for (let i = 0; i <= 9; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'number-btn';
-                btn.dataset.number = i;
-                btn.innerHTML = `${i}<div class="win-color ${getNumberColor(i)}"></div>`;
-                btn.onclick = () => selectBet('number', i);
-                grid.appendChild(btn);
-            }
-        }
+    function render(i){
+        current = i;
+        const s = slides[i];
 
-        function selectBet(type, value) {
-            if (wingoState.isLocked) {
-                showNotification('Betting is locked for this round', 'error');
-                return;
-            }
+        hero.classList.remove("is-changing");
+        void hero.offsetWidth;
 
-            // Clear previous selections
-            document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
-            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
-            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('selected'));
+        art.src = s.art;
+        art.alt = s.name;
+        primary.href = s.href;
+        primary.innerHTML = "Enter " + s.name + ' <span>↗</span>';
+        kicker.textContent = s.kicker;
+        title.textContent = s.title;
+        desc.textContent = s.desc;
+        index.textContent = s.index;
 
-            // Set new selection
-            switch (type) {
-                case 'number':
-                    document.querySelector(`.number-btn[data-number="${value}"]`)?.classList.add('selected');
-                    wingoState.selectedNumber = value;
-                    wingoState.selectedBet = `Number: ${value}`;
-                    break;
-                case 'color':
-                    document.querySelector(`.color-btn[data-color="${value}"]`)?.classList.add('selected');
-                    wingoState.selectedColor = value;
-                    wingoState.selectedBet = `Color: ${value.charAt(0).toUpperCase() + value.slice(1)}`;
-                    break;
-                case 'size':
-                    document.querySelector(`.size-btn[data-size="${value}"]`)?.classList.add('selected');
-                    wingoState.selectedSize = value;
-                    wingoState.selectedBet = `Size: ${value.charAt(0).toUpperCase() + value.slice(1)}`;
-                    break;
-            }
+        dots.forEach((dot,n) => dot.classList.toggle("active",n === i));
+        hero.classList.add("is-changing");
+    }
 
-            wingoState.selectedBetType = type;
+    function restart(){
+        clearInterval(timer);
+        timer = setInterval(() => {
+            render((current + 1) % slides.length);
+        },6500);
+    }
 
-            // Open bet popup
-            openBetPopup();
-        }
-
-        function openBetPopup() {
-            const popup = document.getElementById('betPopup');
-            popup.classList.add('active');
-
-            // Update popup content
-            const icon = document.getElementById('popupSelectionIcon');
-            const text = document.getElementById('popupSelectionText');
-
-            if (wingoState.selectedBetType === 'number') {
-                icon.textContent = wingoState.selectedNumber;
-                text.textContent = wingoState.selectedBet;
-            } else {
-                icon.textContent = wingoState.selectedBet.charAt(0);
-                text.textContent = wingoState.selectedBet;
-            }
-
-            // Reset amount buttons
-            document.querySelectorAll('.amount-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.amount == wingoState.betAmount) {
-                    btn.classList.add('active');
-                }
-            });
-
-            document.getElementById('popupTotal').textContent = `₹${wingoState.betAmount}`;
-            document.getElementById('popupConfirm').disabled = false;
-        }
-
-        function closeBetPopup() {
-            document.getElementById('betPopup').classList.remove('active');
-        }
-
-        function confirmBet() {
-            if (!wingoState.selectedBet) {
-                showNotification('Please select a bet type first', 'error');
-                return;
-            }
-
-            if (wingoState.betAmount > wingoState.balance) {
-                showNotification('Insufficient balance', 'error');
-                return;
-            }
-
-            // Deduct balance
-            wingoState.balance -= wingoState.betAmount;
-            updateBalanceDisplay();
-
-            // Add to my bets
-            wingoState.myBets.push({
-                periodId: wingoState.periodId,
-                bet: wingoState.selectedBet,
-                amount: wingoState.betAmount,
-                time: new Date().toLocaleTimeString()
-            });
-
-            showNotification(`Bet placed: ${wingoState.selectedBet} for ₹${wingoState.betAmount}`, 'success');
-            closeBetPopup();
-        }
-
-        function updateBalanceDisplay() {
-            document.getElementById('wingoBalance').textContent = `₹${wingoState.balance.toLocaleString()}`;
-            document.getElementById('walletBalance').textContent = `₹${wingoState.balance.toLocaleString()}.00`;
-        }
-
-        function updateCountdown() {
-            const timerEl = document.getElementById('countdownTimer');
-            const statusEl = document.getElementById('bettingStatus');
-
-            if (wingoState.timeRemaining <= 5 && wingoState.timeRemaining > 0) {
-                wingoState.isLocked = true;
-                timerEl.classList.add('locked');
-                statusEl.textContent = 'BETTING CLOSED';
-                statusEl.classList.add('closed');
-            } else {
-                wingoState.isLocked = false;
-                timerEl.classList.remove('locked');
-                statusEl.textContent = 'BETTING OPEN';
-                statusEl.classList.remove('closed');
-            }
-
-            if (wingoState.timeRemaining <= 0) {
-                // Round ends
-                const result = Math.floor(Math.random() * 10);
-                addHistoryResult(wingoState.periodId, result);
-                wingoState.timeRemaining = wingoState.duration;
-                wingoState.periodId = generatePeriodId();
-                document.getElementById('periodId').textContent = wingoState.periodId;
-            } else {
-                timerEl.textContent = wingoState.timeRemaining;
-            }
-        }
-
-        function addHistoryResult(periodId, result) {
-            const color = getNumberColor(result);
-            wingoState.history.unshift({ periodId, result, color });
-            renderHistory();
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('historyList');
-            list.innerHTML = '';
-
-            wingoState.history.slice(0, 20).forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <div class="history-period">#${item.periodId.slice(-6)}</div>
-                    <div class="history-result ${item.color}">${item.result}</div>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        function startWingoGame() {
-            if (wingoState.timer) clearInterval(wingoState.timer);
-
-            wingoState.periodId = generatePeriodId();
-            wingoState.timeRemaining = wingoState.duration;
-            document.getElementById('periodId').textContent = wingoState.periodId;
-
-            initNumberGrid();
-
-            // Add some initial history
-            if (wingoState.history.length === 0) {
-                for (let i = 0; i < 10; i++) {
-                    const period = `20250101${(100 - i).toString().padStart(3, '0')}`;
-                    const result = Math.floor(Math.random() * 10);
-                    addHistoryResult(period, result);
-                }
-            }
-
-            wingoState.timer = setInterval(() => {
-                wingoState.timeRemaining--;
-                updateCountdown();
-            }, 1000);
-
-            updateCountdown();
-        }
-
-        function switchWingoTab(tab) {
-            document.querySelectorAll('.wingo-tab').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.tab === tab) {
-                    btn.classList.add('active');
-                }
-            });
-
-            // Update panels visibility
-            const panels = ['historyPanel', 'myBetsPanel', 'statsPanel'];
-            panels.forEach(panelId => {
-                const panel = document.getElementById(panelId);
-                if (panel) {
-                    panel.style.display = panelId === `${tab}Panel` ? 'block' : 'none';
-                }
-            });
-        }
-
-        // Duration selector
-        document.querySelectorAll('.duration-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                wingoState.duration = parseInt(btn.dataset.duration);
-                wingoState.timeRemaining = wingoState.duration;
-            });
+    dots.forEach((dot,i) => {
+        dot.addEventListener("click",() => {
+            render(i);
+            restart();
         });
+    });
 
-        // Amount buttons
-        document.querySelectorAll('.amount-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                wingoState.betAmount = parseInt(btn.dataset.amount);
-                document.getElementById('popupTotal').textContent = `₹${wingoState.betAmount}`;
-                document.getElementById('customAmount').value = '';
-            });
-        });
+    restart();
+})();
+</script>
 
-        // Custom amount input
-        document.getElementById('customAmount').addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            if (val > 0) {
-                wingoState.betAmount = val;
-                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById('popupTotal').textContent = `₹${val}`;
-            }
-        });
-
-        // Category filtering
-        document.querySelectorAll('.cat').forEach(cat => {
-            cat.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.querySelectorAll('.cat').forEach(c => c.classList.remove('active'));
-                cat.classList.add('active');
-            });
-        });
-
-        // ==================== WALLET SYSTEM ====================
-        function generateTransactions() {
-            const transactions = [
-                { type: 'deposit', icon: '↓', label: 'Deposit', amount: 500, status: 'completed', date: '2025-01-01 10:30' },
-                { type: 'game', icon: '🎯', label: 'WINGO Bet', amount: -50, status: 'completed', date: '2025-01-01 11:15' },
-                { type: 'game', icon: '🎯', label: 'WINGO Win', amount: 100, status: 'completed', date: '2025-01-01 11:15' },
-                { type: 'withdraw', icon: '↑', label: 'Withdrawal', amount: -200, status: 'pending', date: '2025-01-01 12:00' },
-                { type: 'game', icon: '🎰', label: 'Aviator Bet', amount: -100, status: 'completed', date: '2025-01-01 13:30' },
-                { type: 'deposit', icon: '↓', label: 'Deposit', amount: 1000, status: 'completed', date: '2025-01-01 14:00' },
-            ];
-
-            const list = document.getElementById('transactionList');
-            list.innerHTML = '';
-
-            transactions.forEach(tx => {
-                const div = document.createElement('div');
-                div.className = 'transaction-item';
-                div.dataset.type = tx.type;
-                div.innerHTML = `
-                    <div class="transaction-icon ${tx.type}">${tx.icon}</div>
-                    <div class="transaction-info">
-                        <div class="transaction-type">${tx.label}</div>
-                        <div class="transaction-date">${tx.date}</div>
-                    </div>
-                    <div class="transaction-amount ${tx.amount > 0 ? 'positive' : 'negative'}">
-                        <div class="transaction-amount-value">${tx.amount > 0 ? '+' : ''}₹${Math.abs(tx.amount)}</div>
-                        <div class="transaction-status ${tx.status}">${tx.status}</div>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        function switchWalletTab(tab) {
-            document.querySelectorAll('.wallet-tab').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.tab === tab) {
-                    btn.classList.add('active');
-                }
-            });
-
-            // Filter transactions
-            const items = document.querySelectorAll('.transaction-item');
-            items.forEach(item => {
-                if (tab === 'all') {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = item.dataset.type === tab ? 'flex' : 'none';
-                }
-            });
-        }
-
-        // ==================== NOTIFICATIONS ====================
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            const text = document.getElementById('notificationText');
-
-            text.textContent = message;
-            notification.className = `notification ${type} active`;
-
-            setTimeout(() => {
-                notification.classList.remove('active');
-            }, 3000);
-        }
-
-        // ==================== INITIALIZATION ====================
-        document.addEventListener('DOMContentLoaded', () => {
-            generateTransactions();
-            switchPage('lobby');
-        });
-    </script>
 </body>
 </html>
