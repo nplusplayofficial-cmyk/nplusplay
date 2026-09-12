@@ -47,6 +47,17 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 .toast{position:fixed;z-index:300;left:50%;bottom:98px;transform:translate(-50%,15px);opacity:0;pointer-events:none;padding:10px 14px;border-radius:12px;background:#171916;border:1px solid rgba(201,165,91,.2);font-size:.58rem;transition:.25s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
 .modal{position:fixed;z-index:250;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(12px)}.modal.show{display:grid}.modal-card{width:min(100%,430px);padding:21px;border-radius:22px;background:#11130f;border:1px solid rgba(201,165,91,.2);box-shadow:0 30px 100px rgba(0,0,0,.8);position:relative}.modal-card h2{font-size:1rem}.modal-card p{margin-top:7px;color:#777a72;font-size:.58rem;line-height:1.55}.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border:1px solid var(--line);border-radius:50%;background:#171916;color:#aaa}.modal-list{margin-top:15px;display:grid;gap:7px}.modal-list div{padding:11px;border-radius:12px;background:rgba(255,255,255,.03);font-size:.55rem;color:#7a7d75}.modal-list b{color:#e8e1d1}.done{width:100%;margin-top:14px;padding:11px;border:0;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;font-size:.58rem}
 @media(max-width:460px){.quick{grid-template-columns:repeat(2,1fr)}.overview{grid-template-columns:1fr 1fr}.overview .ov:last-child{grid-column:1/-1}}
+.wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.wallet-action{min-width:0;display:flex;align-items:center;gap:10px;padding:13px 12px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.025);color:inherit;text-align:left}
+.wallet-action:hover{transform:translateY(-2px);border-color:rgba(201,165,91,.22)}
+.wallet-action .wa-icon{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#ead9ad,#a98542);color:#18150d;font-size:1.05rem;font-weight:950}
+.wallet-action.withdraw .wa-icon{background:linear-gradient(145deg,#dcefe8,#42b991)}
+.wallet-action span:nth-child(2){flex:1;min-width:0}
+.wallet-action b{display:block;font-size:.58rem}
+.wallet-action small{display:block;margin-top:3px;color:#666961;font-size:.43rem}
+.wallet-action .arrow{font-size:.75rem;color:#686b64}
+@media(max-width:460px){.wallet-actions{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -63,6 +74,18 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
   <button class="profile-edit" id="editProfile">✎</button>
  </div>
  <div class="profile-balance"><div><small>AVAILABLE BALANCE</small><strong id="balance">₹1,000.00</strong></div><div class="sync"><i></i><span id="syncText">SYNCED</span></div></div>
+</section>
+
+<section class="section wallet-section">
+ <div class="sectionhead"><h2>Wallet</h2><span class="view">BALANCE</span></div>
+ <div class="wallet-actions">
+  <button class="wallet-action" id="depositBtn" type="button">
+   <span class="wa-icon">＋</span><span><b>Deposit</b><small>Add demo credits</small></span><span class="arrow">›</span>
+  </button>
+  <button class="wallet-action withdraw" id="withdrawBtn" type="button">
+   <span class="wa-icon">↗</span><span><b>Withdraw</b><small>Demo request</small></span><span class="arrow">›</span>
+  </button>
+ </div>
 </section>
 
 <section class="section">
@@ -163,5 +186,53 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()})
 setInterval(render,1500);render();
 })();
 </script>
+<!-- N+ PLAY CORE v1 -->
+<script src="core/config.js"></script>
+<script src="core/storage.js"></script>
+<script src="core/user.js"></script>
+<script src="core/wallet.js"></script>
+<script src="core/activity.js"></script>
+<script src="core/games.js"></script>
+
+<script>
+(()=>{
+  "use strict";
+
+  const modal=document.getElementById("walletDemoModal");
+  const title=document.getElementById("walletDemoTitle");
+  const text=document.getElementById("walletDemoText");
+
+  function openWalletNotice(kind){
+    title.textContent=kind==="deposit"?"Deposit":"Withdraw";
+    text.textContent=kind==="deposit"
+      ? "Deposit UI is prepared for the future backend. In the current virtual-credit mode, no real payment is processed."
+      : "Withdraw UI is prepared for the future backend. In the current virtual-credit mode, no real-money withdrawal is processed.";
+    modal.classList.add("show");
+  }
+
+  document.getElementById("depositBtn").onclick=()=>openWalletNotice("deposit");
+  document.getElementById("withdrawBtn").onclick=()=>openWalletNotice("withdraw");
+
+  document.getElementById("walletDemoClose").onclick=()=>modal.classList.remove("show");
+  document.getElementById("walletDemoDone").onclick=()=>modal.classList.remove("show");
+  modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("show")});
+
+  function syncCore(){
+    if(!window.NPLUS?.Wallet) return;
+    const value=NPLUS.Wallet.getBalance();
+    const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+    const wallet=document.getElementById("wallet");
+    const balance=document.getElementById("balance");
+    if(wallet) wallet.textContent=money(value);
+    if(balance) balance.textContent=money(value);
+  }
+
+  window.addEventListener("nplus:wallet-updated",syncCore);
+  window.addEventListener("pageshow",syncCore);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncCore()});
+  syncCore();
+})();
+</script>
+
 </body>
 </html>
