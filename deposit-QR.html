@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#080908"><title>N+ PLAY — NEXT STEP</title>
+<style>
+:root{--bg:#080908;--line:rgba(201,165,91,.18);--gold:#c9a55b;--gold2:#f0dfb5;--text:#f4f1e8;--muted:#777a72}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(650px 450px at 50% -160px,rgba(201,165,91,.075),transparent 68%),#080908;color:var(--text);font-family:Inter,Segoe UI,system-ui,sans-serif}
+.app{width:min(100%,590px);margin:auto;padding:0 16px 35px}.header{height:70px;display:flex;align-items:center;border-bottom:1px solid rgba(201,165,91,.09)}
+.back{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#11120f;color:#ddd;font-size:22px;cursor:pointer}.brand{margin-left:10px;font-weight:950;letter-spacing:1px}.mark{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#f2e5c3,#c9a55b);color:#111;font-size:11px;margin-right:8px}
+.card{margin-top:28px;padding:22px;border-radius:24px;border:1px solid rgba(201,165,91,.16);background:linear-gradient(145deg,#171813,#0c0d0b);box-shadow:0 25px 80px rgba(0,0,0,.5)}
+.kicker{font-size:9px;color:var(--gold);letter-spacing:2px;font-weight:900}h1{font-size:27px;margin:7px 0}.sub{color:var(--muted);font-size:11px;line-height:1.6}
+.row{display:flex;align-items:center;gap:13px;padding:15px;border:1px solid rgba(255,255,255,.07);background:#10110f;border-radius:16px;margin-top:16px}.icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#ead9ad,#a98542);color:#18150d;font-weight:1000}.green{background:linear-gradient(145deg,#dcefe8,#42b991)}.copy{flex:1}.copy b{font-size:12px}.copy small{display:block;color:#666961;font-size:9px;margin-top:3px}.amount{font-size:14px;font-weight:950;color:var(--gold2)}
+.note{margin-top:14px;padding:13px;border-radius:13px;background:rgba(201,165,91,.045);border:1px solid rgba(201,165,91,.1);color:#777a72;font-size:9px;line-height:1.55}
+.cta{width:100%;margin-top:18px;border:0;border-radius:15px;padding:15px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:12px;cursor:pointer}.backlink{display:block;text-align:center;margin-top:18px;color:#8b8e86;font-size:10px;text-decoration:none}
+
+.amount-box{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding:14px 15px;border:1px solid rgba(201,165,91,.13);border-radius:15px;background:rgba(201,165,91,.045)}
+.amount-box span{font-size:8px;letter-spacing:1.2px;color:#777a72;font-weight:900}.amount-box strong{font-size:18px;color:var(--gold2)}
+.qr-wrap{margin:18px auto 0;text-align:center}.qr-label{font-size:8px;color:#777a72;letter-spacing:1.5px;font-weight:900;margin-bottom:9px}
+.qr{position:relative;width:190px;height:190px;margin:auto;background:#f7f4ea;border-radius:13px;padding:17px;overflow:hidden;box-shadow:0 12px 35px rgba(0,0,0,.35)}
+.finder{position:absolute;width:42px;height:42px;background:#111;border:8px solid #111;box-shadow:inset 0 0 0 6px #f7f4ea}
+.f1{left:15px;top:15px}.f2{right:15px;top:15px}.f3{left:15px;bottom:15px}
+.cells{position:absolute;left:67px;top:17px;width:106px;height:156px;display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.cells i{display:block;background:#111;border-radius:1px}.cells i:nth-child(3n),.cells i:nth-child(5n){opacity:.15}
+.qr-wrap small{display:block;margin-top:9px;color:#646760;font-size:8px}
+.ref-section{margin-top:20px}.ref-section label{display:block;margin-bottom:8px;font-size:9px;color:#aaa99f;font-weight:900;letter-spacing:.8px}
+.ref-section input{width:100%;height:48px;padding:0 13px;border-radius:14px;border:1px solid rgba(255,255,255,.09);outline:0;background:#0b0c0a;color:#fff;font-size:12px;font-weight:700}
+.ref-section input:focus{border-color:rgba(201,165,91,.55);box-shadow:0 0 0 3px rgba(201,165,91,.07)}
+</style></head><body><div class="app">
+<header class="header"><button class="back" onclick="location.href='deposit.html'">‹</button><div class="brand"><span class="mark">N+</span>PLAY</div></header>
+<section class="card">
+<div class="kicker">DEPOSIT · DEMO PAYMENT</div>
+<h1>Scan & Submit</h1>
+<p class="sub">Scan the demo QR and enter your reference number below.</p>
+
+<div class="amount-box">
+  <span>DEPOSIT AMOUNT</span>
+  <strong id="amount">₹0.00</strong>
+</div>
+
+<div class="qr-wrap">
+  <div class="qr-label">N+ PLAY · DEMO QR</div>
+  <div class="qr">
+    <div class="finder f1"></div><div class="finder f2"></div><div class="finder f3"></div>
+    <div class="cells">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+  </div>
+  <small>DEMO QR · NO REAL PAYMENT</small>
+</div>
+
+<div class="ref-section">
+  <label for="reference">REFERENCE NUMBER</label>
+  <input id="reference" type="text" inputmode="text" autocomplete="off"
+         placeholder="Enter reference / UTR number" maxlength="40">
+</div>
+
+<div class="note"><b>Demo mode:</b> QR and reference submission are UI-only. No real-money payment is processed and no wallet balance is credited.</div>
+
+<button class="cta" id="submitBtn">SUBMIT REFERENCE</button>
+<a class="backlink" href="deposit.html">← Change deposit method</a>
+</section></div>
+<script>
+const q=new URLSearchParams(location.search),a=Number(q.get("amount")||0);
+document.getElementById("amount").textContent="₹"+a.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+document.getElementById("submitBtn").onclick=()=>{
+ const ref=document.getElementById("reference").value.trim();
+ if(!ref){alert("Please enter the reference number.");return}
+ alert("Reference submitted in demo mode. No real payment was processed.");
+};
+</script>
+<script>const q2=new URLSearchParams(location.search),a2=Number(q2.get("amount")||0);</script>
+</body></html>
