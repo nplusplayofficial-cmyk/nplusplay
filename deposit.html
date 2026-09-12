@@ -52,7 +52,7 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 .modal-card{width:min(100%,420px);background:#11130f;border:1px solid var(--line);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000}
 .close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa;cursor:pointer}
 .modal-card h2{font-size:18px;margin:2px 0 8px}.modal-card p{font-size:10px;color:#777a72;line-height:1.6}
-.demo{padding:12px;border:1px solid rgba(66,214,160,.15);background:rgba(66,214,160,.04);border-radius:12px;color:#86d7bd;font-size:10px;line-height:1.5}
+.{padding:12px;border:1px solid rgba(66,214,160,.15);background:rgba(66,214,160,.04);border-radius:12px;color:#86d7bd;font-size:10px;line-height:1.5}
 .done{width:100%;margin-top:14px;border:0;border-radius:12px;padding:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950;cursor:pointer}
 @media(max-width:430px){.presets{grid-template-columns:repeat(2,1fr)}h1{font-size:25px}}
 </style>
@@ -89,10 +89,10 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 
   <div class="methods">
     <div class="section-title">SELECT METHOD</div>
-    <div class="method selected" data-method="Demo Wallet">
-      <div class="method-icon">+</div><div><b>Demo Wallet</b><small>Virtual credit mode</small></div><span class="radio"></span>
+    <div class="method selected" data-method=" Wallet" id="Method">
+      <div class="method-icon">+</div><div><b> Wallet</b><small>Virtual credit mode</small></div><span class="radio"></span>
     </div>
-    <div class="method" data-method="Future Payment Gateway">
+    <div class="method" data-method="Future Payment Gateway" id="gatewayMethod">
       <div class="method-icon">▣</div><div><b>Payment Gateway</b><small>Backend integration placeholder</small></div><span class="radio"></span>
     </div>
   </div>
@@ -113,7 +113,7 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
   <button class="close" id="close">×</button>
   <h2>Deposit Ready</h2>
   <p id="modalText">Your deposit request is ready.</p>
-  <div class="demo">Virtual-credit mode active. No real-money transaction has been processed.</div>
+  <div class="">Virtual-credit mode active. No real-money transaction has been processed.</div>
   <button class="done" id="done">DONE</button>
  </div>
 </div>
@@ -140,12 +140,20 @@ const modal=document.querySelector("#modal");
 function close(){modal.classList.remove("show")}
 document.querySelector("#close").onclick=close;document.querySelector("#done").onclick=close;
 modal.onclick=e=>{if(e.target===modal)close()};
+let selectedMethod=" Wallet";
 document.querySelector("#depositBtn").onclick=()=>{
  const amount=Number(document.querySelector("#amount").value);
  if(!Number.isFinite(amount)||amount<=0){alert("Please enter a valid amount.");return}
- document.querySelector("#modalText").textContent=`Deposit amount selected: ${money(amount)}. Choose a production payment flow when the compliant backend is connected.`;
- modal.classList.add("show");
+ const params=new URLSearchParams({amount:String(amount),method:selectedMethod});
+ location.href=(selectedMethod===" Wallet"?"deposit-QR.html?":"deposit-gateway.html?")+params.toString();
 };
+function chooseMethod(method){
+ selectedMethod=method;
+ document.querySelectorAll(".method").forEach(x=>x.classList.remove("selected"));
+ document.getElementById(method===" Wallet"?"Method":"gatewayMethod").classList.add("selected");
+}
+document.getElementById("Method").onclick=()=>chooseMethod(" Wallet");
+document.getElementById("gatewayMethod").onclick=()=>chooseMethod("Future Payment Gateway");
 window.addEventListener("storage",render);window.addEventListener("pageshow",render);render();
 })();
 </script>
