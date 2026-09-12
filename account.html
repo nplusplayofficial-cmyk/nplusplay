@@ -79,10 +79,10 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 <section class="section wallet-section">
  <div class="sectionhead"><h2>Wallet</h2><span class="view">BALANCE</span></div>
  <div class="wallet-actions">
-  <button class="wallet-action" id="depositBtn" type="button">
+  <button class="wallet-action" id="depositBtn" type="button" onclick="location.href='deposit.html'">
    <span class="wa-icon">＋</span><span><b>Deposit</b><small>Add Credits</small></span><span class="arrow">›</span>
   </button>
-  <button class="wallet-action withdraw" id="withdrawBtn" type="button">
+  <button class="wallet-action withdraw" id="withdrawBtn" type="button" onclick="location.href='withdraw.html'">
    <span class="wa-icon">↗</span><span><b>Withdraw</b><small>Withdraw Request</small></span><span class="arrow">›</span>
   </button>
  </div>
@@ -194,45 +194,6 @@ setInterval(render,1500);render();
 <script src="core/activity.js"></script>
 <script src="core/games.js"></script>
 
-<script>
-(()=>{
-  "use strict";
-
-  const modal=document.getElementById("walletDemoModal");
-  const title=document.getElementById("walletDemoTitle");
-  const text=document.getElementById("walletDemoText");
-
-  function openWalletNotice(kind){
-    title.textContent=kind==="deposit"?"Deposit":"Withdraw";
-    text.textContent=kind==="deposit"
-      ? "Deposit UI is prepared for the future backend. In the current virtual-credit mode, no real payment is processed."
-      : "Withdraw UI is prepared for the future backend. In the current virtual-credit mode, no real-money withdrawal is processed.";
-    modal.classList.add("show");
-  }
-
-  document.getElementById("depositBtn").onclick=()=>openWalletNotice("deposit");
-  document.getElementById("withdrawBtn").onclick=()=>openWalletNotice("withdraw");
-
-  document.getElementById("walletDemoClose").onclick=()=>modal.classList.remove("show");
-  document.getElementById("walletDemoDone").onclick=()=>modal.classList.remove("show");
-  modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("show")});
-
-  function syncCore(){
-    if(!window.NPLUS?.Wallet) return;
-    const value=NPLUS.Wallet.getBalance();
-    const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-    const wallet=document.getElementById("wallet");
-    const balance=document.getElementById("balance");
-    if(wallet) wallet.textContent=money(value);
-    if(balance) balance.textContent=money(value);
-  }
-
-  window.addEventListener("nplus:wallet-updated",syncCore);
-  window.addEventListener("pageshow",syncCore);
-  document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncCore()});
-  syncCore();
-})();
-</script>
 
 </body>
 </html>
