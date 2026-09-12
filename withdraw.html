@@ -1,72 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#080908">
-<title>N+ PLAY — Withdraw</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#080908"><title>N+ PLAY — Withdraw</title>
 <style>
-:root{--bg:#080908;--panel:#11130f;--line:rgba(255,255,255,.075);--text:#f4f1e8;--muted:#777a72;--gold:#c9a55b;--gold2:#f0dfb5;--green:#42d9a5}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}
-body{min-height:100vh;color:var(--text);background:radial-gradient(650px 450px at 50% -160px,rgba(201,165,91,.075),transparent 68%),#080908}
-button{font:inherit;cursor:pointer}.app{width:min(100%,590px);margin:auto;padding:0 14px 35px}
-.header{height:70px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,165,91,.09)}
-.left{display:flex;align-items:center;gap:9px}.back{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#11120f;color:#ddd;font-size:22px}
-.brand{display:flex;align-items:center;gap:9px;font-weight:950;letter-spacing:1px}.mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#f2e5c3,#c9a55b);color:#111;font-size:11px}
-.wallet{padding:9px 12px;border:1px solid rgba(66,217,165,.2);border-radius:999px;background:rgba(66,217,165,.055);color:#bdf4df;font-size:.72rem;font-weight:900}
-.hero{padding:28px 2px 18px}.kicker{font-size:9px;color:var(--gold);letter-spacing:2px;font-weight:900}h1{font-size:28px;margin:7px 0 5px}.hero p{color:var(--muted);font-size:12px}
-.card{background:linear-gradient(145deg,#171813,#0c0d0b);border:1px solid rgba(201,165,91,.16);border-radius:24px;padding:20px;box-shadow:0 25px 80px rgba(0,0,0,.5)}
-.label{font-size:9px;color:#62655e;letter-spacing:1.2px}.balance{font-size:29px;font-weight:950;margin-top:5px}
-.amount-label{display:block;margin:22px 0 8px;font-size:10px;color:#aaa99f;font-weight:800}
-.amount-wrap{display:flex;align-items:center;border:1px solid rgba(255,255,255,.09);background:#0b0c0a;border-radius:15px;padding:0 14px}
-.amount-wrap span{font-size:19px;color:var(--gold);font-weight:900}input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:24px;font-weight:900;padding:15px 10px}
-.method{display:flex;align-items:center;gap:12px;margin-top:20px;padding:14px;border:1px solid rgba(255,255,255,.07);border-radius:15px;background:#10110f}
-.icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#dcefe8,#42b991);color:#13251e;font-weight:1000}
-.method b{font-size:11px}.method small{display:block;margin-top:3px;color:#666961;font-size:9px}
-.cta{width:100%;margin-top:18px;border:0;border-radius:15px;padding:15px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:12px}
-.note{margin-top:14px;padding:13px;border-radius:13px;background:rgba(201,165,91,.045);border:1px solid rgba(201,165,91,.10);color:#777a72;font-size:9px;line-height:1.55}
-.modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);z-index:50}.modal.show{display:grid}
-.modal-card{width:min(100%,420px);background:#11130f;border:1px solid rgba(201,165,91,.2);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000}
-.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa}.modal-card h2{font-size:18px}.modal-card p{margin-top:8px;font-size:10px;color:#777a72;line-height:1.6}
-.done{width:100%;margin-top:14px;border:0;border-radius:12px;padding:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950}
+:root{--bg:#080908;--panel:#11130f;--line:rgba(255,255,255,.075);--gold:#c9a55b;--gold2:#f0dfb5;--text:#f4f1e8;--muted:#777a72;--green:#42d9a5}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}body{min-height:100vh;color:var(--text);background:radial-gradient(650px 450px at 50% -160px,rgba(201,165,91,.075),transparent 68%),#080908}
+button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{width:min(100%,590px);margin:auto;padding:0 16px 35px}.header{height:70px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,165,91,.09)}
+.left{display:flex;align-items:center;gap:9px}.back{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#11120f;color:#ddd;font-size:22px}.brand{display:flex;align-items:center;gap:9px;font-weight:950;letter-spacing:1px}.mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#f2e5c3,#c9a55b);color:#111;font-size:11px}.wallet{padding:9px 12px;border:1px solid rgba(66,217,165,.2);border-radius:999px;background:rgba(66,217,165,.055);color:#bdf4df;font-size:.72rem;font-weight:900}
+.hero{padding:27px 2px 17px}.kicker{font-size:9px;color:var(--gold);letter-spacing:2px;font-weight:900}h1{font-size:28px;margin:7px 0 5px}.hero p{color:var(--muted);font-size:11px}.card{padding:21px;border-radius:24px;border:1px solid rgba(201,165,91,.16);background:linear-gradient(145deg,#171813,#0c0d0b);box-shadow:0 25px 80px rgba(0,0,0,.5)}
+.label{font-size:9px;color:#62655e;letter-spacing:1.2px}.balance{font-size:29px;font-weight:950;margin-top:5px}.field-label{display:block;margin:20px 0 8px;font-size:9px;color:#aaa99f;font-weight:900;letter-spacing:.8px}
+.amount-wrap{display:flex;align-items:center;border:1px solid rgba(255,255,255,.09);background:#0b0c0a;border-radius:15px;padding:0 14px}.amount-wrap span{font-size:19px;color:var(--gold);font-weight:900}input{width:100%;height:48px;background:transparent;border:0;outline:0;color:#fff;font-size:12px;font-weight:750;padding:0 10px}
+.amount-wrap input{font-size:20px}.presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}.preset{padding:10px 5px;border:1px solid var(--line);border-radius:11px;background:#10110f;color:#aaa;font-weight:850}.preset.active{border-color:rgba(201,165,91,.55);color:var(--gold2);background:rgba(201,165,91,.07)}
+.method{display:flex;align-items:center;gap:11px;padding:13px;border:1px solid rgba(255,255,255,.07);background:#10110f;border-radius:15px;margin-top:8px}.method.selected{border-color:rgba(201,165,91,.55);background:rgba(201,165,91,.045)}.micon{width:39px;height:39px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#dcefe8,#42b991);color:#13251e;font-weight:1000}.copy{flex:1}.copy b{font-size:11px}.copy small{display:block;color:#666961;font-size:9px;margin-top:3px}.radio{width:17px;height:17px;border:1px solid #555;border-radius:50%;position:relative}.selected .radio{border-color:var(--gold)}.selected .radio:after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--gold)}
+.details{margin-top:18px;padding-top:15px;border-top:1px solid rgba(255,255,255,.055)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.full{grid-column:1/-1}.input-box label{display:block;font-size:8px;color:#73766e;font-weight:900;margin:0 0 6px 2px}.detail-input{width:100%;height:45px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:#0b0c0a;padding:0 12px;font-size:10px}
+.cta{width:100%;margin-top:18px;border:0;border-radius:15px;padding:15px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:12px}.note{margin-top:13px;padding:13px;border-radius:13px;background:rgba(201,165,91,.045);border:1px solid rgba(201,165,91,.1);color:#777a72;font-size:9px;line-height:1.55}.backlink{display:block;text-align:center;margin-top:17px;color:#8b8e86;font-size:10px}
+.modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);z-index:50}.modal.show{display:grid}.modal-card{width:min(100%,420px);background:#11130f;border:1px solid rgba(201,165,91,.2);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000}.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa}.modal-card h2{font-size:18px}.modal-card p{margin-top:8px;color:#777a72;font-size:10px;line-height:1.6}.done{width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950}
+@media(max-width:430px){.presets{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
-<div class="app">
-<header class="header">
- <div class="left"><button class="back" onclick="location.href='account.html'">‹</button><div class="brand"><span class="mark">N+</span>PLAY</div></div>
- <div class="wallet" id="wallet">₹0.00</div>
-</header>
-<section class="hero"><div class="kicker">WALLET</div><h1>Withdraw</h1><p>Manage a withdrawal request from your N+ PLAY wallet.</p></section>
+<body><div class="app">
+<header class="header"><div class="left"><button class="back" onclick="location.href='account.html'">‹</button><div class="brand"><span class="mark">N+</span>PLAY</div></div><div class="wallet" id="wallet">₹0.00</div></header>
+<section class="hero"><div class="kicker">WALLET</div><h1>Withdraw</h1><p>Enter your withdrawal request details.</p></section>
 <section class="card">
- <div class="label">AVAILABLE BALANCE</div><div class="balance" id="balance">₹0.00</div>
- <label class="amount-label">WITHDRAW AMOUNT</label>
- <div class="amount-wrap"><span>₹</span><input id="amount" inputmode="decimal" placeholder="0"></div>
- <div class="method"><div class="icon">↗</div><div><b>Withdrawal Request</b><small>Backend-ready request interface</small></div></div>
- <button class="cta" id="withdrawBtn">CONTINUE WITHDRAWAL</button>
- <div class="note"><b>Platform mode:</b> This is currently a virtual-credit interface. No real-money withdrawal is processed. A compliant backend can handle production requests later.</div>
-</section>
+<div class="label">AVAILABLE BALANCE</div><div class="balance" id="balance">₹0.00</div>
+<label class="field-label">WITHDRAW AMOUNT</label><div class="amount-wrap"><span>₹</span><input id="amount" inputmode="decimal" placeholder="0"></div>
+<div class="presets"><button class="preset" data-a="500">₹500</button><button class="preset" data-a="1000">₹1,000</button><button class="preset" data-a="2000">₹2,000</button><button class="preset" data-a="5000">₹5,000</button></div>
+
+<div class="field-label">WITHDRAWAL METHOD</div>
+<div class="method selected" data-method="Bank Account"><div class="micon">⌂</div><div class="copy"><b>Bank Account</b><small>Banking details</small></div><span class="radio"></span></div>
+<div class="method" data-method="UPI"><div class="micon">U</div><div class="copy"><b>UPI</b><small>UPI ID details</small></div><span class="radio"></span></div>
+
+<div class="details">
+<label class="field-label" style="margin-top:0" id="detailTitle">BANK ACCOUNT DETAILS</label>
+<div class="grid" id="bankFields">
+ <div class="input-box"><label>ACCOUNT HOLDER NAME</label><input class="detail-input" id="holder" autocomplete="off" placeholder="Full name"></div>
+ <div class="input-box"><label>BANK NAME</label><input class="detail-input" id="bank" autocomplete="off" placeholder="Bank name"></div>
+ <div class="input-box"><label>ACCOUNT NUMBER</label><input class="detail-input" id="accountNo" inputmode="numeric" autocomplete="off" placeholder="Account number"></div>
+ <div class="input-box"><label>IFSC CODE</label><input class="detail-input" id="ifsc" autocomplete="off" placeholder="IFSC code"></div>
+ <div class="input-box full"><label>BRANCH NAME</label><input class="detail-input" id="branch" autocomplete="off" placeholder="Branch name"></div>
 </div>
-<div class="modal" id="modal"><div class="modal-card"><button class="close" id="close">×</button><h2>Withdrawal Ready</h2><p id="modalText"></p><button class="done" id="done">DONE</button></div></div>
+<div class="grid" id="upiFields" style="display:none">
+ <div class="input-box"><label>ACCOUNT HOLDER NAME</label><input class="detail-input" id="upiHolder" autocomplete="off" placeholder="Full name"></div>
+ <div class="input-box"><label>BANK NAME</label><input class="detail-input" id="upiBank" autocomplete="off" placeholder="Bank name"></div>
+ <div class="input-box full"><label>UPI ID</label><input class="detail-input" id="upiId" autocomplete="off" placeholder="example@upi"></div>
+</div>
+</div>
+
+<button class="cta" id="submitBtn">SUBMIT WITHDRAWAL REQUEST</button>
+<div class="note"><b>Virtual-credit mode:</b> this creates a demo withdrawal request for testing. No real-money transfer is processed.</div>
+<a class="backlink" href="account.html">← Back to Account</a>
+</section></div>
+
+<div class="modal" id="modal"><div class="modal-card"><button class="close" id="close">×</button><h2>Request Submitted</h2><p id="modalText"></p><button class="done" id="done">DONE</button></div></div>
+
 <script>
 (()=>{
-const STORE="nplusplay_wingo_ultra_final_v2",LEGACY="nplusplay_wallet_v1";
+"use strict";
+const STORE="nplusplay_wingo_ultra_final_v2",REQ="nplusplay_withdraw_requests_demo_v1";
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 function read(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}}
-function balance(){const n=Number(read().balance);if(Number.isFinite(n))return n;const l=Number(localStorage.getItem(LEGACY));return Number.isFinite(l)?l:0}
-function render(){const b=balance();document.querySelector("#wallet").textContent=money(b);document.querySelector("#balance").textContent=money(b)}
-const modal=document.querySelector("#modal");const close=()=>modal.classList.remove("show");
-document.querySelector("#close").onclick=close;document.querySelector("#done").onclick=close;
-document.querySelector("#withdrawBtn").onclick=()=>{
- const amount=Number(document.querySelector("#amount").value);
- if(!Number.isFinite(amount)||amount<=0){alert("Please enter a valid amount.");return}
- if(amount>balance()){alert("Amount exceeds available balance.");return}
- document.querySelector("#modalText").textContent=`Withdrawal amount selected: ${money(amount)}. In the current virtual-credit mode, no real-money withdrawal is processed.`;
+function balance(){const n=Number(read().balance);return Number.isFinite(n)?n:0}
+function render(){wallet.textContent=money(balance());document.getElementById("balance").textContent=money(balance())}
+let selected="Bank Account";
+document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{amount.value=b.dataset.a;document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));b.classList.add("active")});
+document.querySelectorAll(".method").forEach(m=>m.onclick=()=>{
+ selected=m.dataset.method;document.querySelectorAll(".method").forEach(x=>x.classList.remove("selected"));m.classList.add("selected");
+ const bankMode=selected==="Bank Account";bankFields.style.display=bankMode?"grid":"none";upiFields.style.display=bankMode?"none":"grid";detailTitle.textContent=bankMode?"BANK ACCOUNT DETAILS":"UPI DETAILS";
+});
+function addRequest(req){let a=[];try{a=JSON.parse(localStorage.getItem(REQ)||"[]")}catch{};a.unshift(req);localStorage.setItem(REQ,JSON.stringify(a.slice(0,100)))}
+submitBtn.onclick=()=>{
+ const n=Number(amount.value);if(!Number.isFinite(n)||n<=0)return alert("Please enter a valid amount.");
+ if(n>balance())return alert("Amount exceeds available balance.");
+ let details={};
+ if(selected==="Bank Account"){
+  details={holder:holder.value.trim(),bank:bank.value.trim(),accountNo:accountNo.value.trim(),ifsc:ifsc.value.trim(),branch:branch.value.trim()};
+  if(Object.values(details).some(v=>!v))return alert("Please fill all bank details.");
+ }else{
+  details={holder:upiHolder.value.trim(),bank:upiBank.value.trim(),upiId:upiId.value.trim()};
+  if(Object.values(details).some(v=>!v))return alert("Please fill all UPI details.");
+ }
+ const id="WD-"+Date.now().toString(36).toUpperCase();
+ addRequest({id,createdAt:new Date().toISOString(),status:"PENDING",amount:n,method:selected,details});
+ modalText.textContent=`${id} · ${money(n)} · ${selected}. Demo request saved for the local admin request queue.`;
  modal.classList.add("show");
 };
-modal.onclick=e=>{if(e.target===modal)close()};
+const modal=document.getElementById("modal");const close=()=>modal.classList.remove("show");
+document.getElementById("close").onclick=close;document.getElementById("done").onclick=()=>location.href="account.html";modal.onclick=e=>{if(e.target===modal)close()};
 window.addEventListener("storage",render);window.addEventListener("pageshow",render);render();
 })();
 </script>
-</body>
-</html>
+</body></html>
