@@ -1,918 +1,1315 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N+ PLAY - Vortex 3D</title>
-    <!-- Three.js for 3D WebGL Graphics -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        /* ==========================================
-           1. LUXURY 3D DARK GAMING THEME
-           ========================================== */
-        :root {
-            --bg-dark: #0c0f16;
-            --bg-surface: #1a1d24;
-            --card-bg: rgba(26, 29, 36, 0.75);
-            --card-border: rgba(139, 92, 246, 0.25);
-            
-            --gold-neon: #f59e0b;
-            --gold-light: #fbbf24;
-            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fef08a 50%, #d97706 100%);
-            --gold-glow: rgba(245, 158, 11, 0.4);
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=451,
+      initial-scale=1,
+      maximum-scale=1,
+      user-scalable=no">
 
-            --purple-vibrant: #8b5cf6;
-            --purple-glow: rgba(139, 92, 246, 0.4);
-            --cyan-vibrant: #06b6d4;
-            --cyan-glow: rgba(6, 182, 212, 0.4);
-            --red-vibrant: #ef4444;
-            --green-vibrant: #10b981;
+<title>N+ PLAY — VORTEX</title>
 
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: rgba(12, 15, 22, 0.85);
-        }
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+html,
+body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#070a11;
+}
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 60%),
-                radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
-                linear-gradient(180deg, var(--bg-dark) 0%, #05070a 100%);
-            background-attachment: fixed;
-            padding: 10px 10px 80px 10px; /* Space for bottom nav */
-        }
+body{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  font-family:Arial,Helvetica,sans-serif;
+}
 
-        .app-viewport {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-        }
+.game{
+  position:relative;
+  width:451px;
+  height:804px;
+  flex:0 0 451px;
 
-        /* HEADER */
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-        }
+  background:
+    radial-gradient(
+      ellipse at 50% 38%,
+      rgba(72,78,98,.22) 0%,
+      rgba(28,32,43,.18) 34%,
+      transparent 67%
+    ),
+    linear-gradient(
+      180deg,
+      #20232d 0%,
+      #191c25 48%,
+      #12151d 100%
+    );
 
-        .btn-back {
-            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            border: 1px solid var(--card-border);
-            color: var(--gold-light);
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+  overflow:hidden;
+}
 
-        .btn-back:hover {
-            border-color: var(--purple-vibrant);
-            box-shadow: 0 0 12px var(--purple-glow);
-        }
+/* BACKGROUND RAYS */
 
-        .brand-title-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+.game::before{
+  content:"";
+  position:absolute;
+  inset:-40%;
 
-        .brand-title {
-            font-size: 1.1rem;
-            font-weight: 900;
-            background: linear-gradient(90deg, #ffffff, var(--purple-vibrant));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
+  background:
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      rgba(38,47,67,.16) 0deg 11deg,
+      transparent 11deg 22deg
+    );
 
-        .live-badge {
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: var(--purple-vibrant);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+  opacity:.55;
+  pointer-events:none;
+}
 
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--purple-vibrant);
-            border-radius: 50%;
-            animation: pulseDot 1.2s infinite;
-        }
+/* HEADER */
 
-        @keyframes pulseDot {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.3); }
-            100% { opacity: 1; transform: scale(1); }
-        }
+.header{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
 
-        .wallet-chip {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            color: var(--green-vibrant);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 800;
-        }
+  height:62px;
 
-        /* RECENT MULTIPLIER HISTORY STRIP */
-        .history-strip {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding: 4px 2px;
-            white-space: nowrap;
-        }
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 
-        .history-strip::-webkit-scrollbar { display: none; }
+  padding:0 13px;
 
-        .multiplier-tag {
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--card-border);
-            flex-shrink: 0;
-        }
+  z-index:10;
+}
 
-        .multiplier-tag.low { color: var(--cyan-vibrant); border-color: rgba(6, 182, 212, 0.3); }
-        .multiplier-tag.mid { color: var(--purple-vibrant); border-color: rgba(139, 92, 246, 0.3); }
-        .multiplier-tag.high { color: var(--gold-neon); border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 0 8px var(--gold-glow); }
+.balance{
+  display:flex;
+  align-items:center;
+  gap:6px;
 
-        /* 3D GAME ARENA CONTAINER */
-        .arena-card {
-            background: radial-gradient(circle, #1a202c 0%, #05070a 100%);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            height: 250px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+  color:#f0f1f4;
+  font-size:14px;
+  font-weight:700;
+}
 
-        #webglContainer {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+.wallet{
+  width:19px;
+  height:14px;
 
-        /* DYNAMIC FLOATING MULTIPLIER OVERLAY */
-        .arena-overlay-hud {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-        }
+  border:2px solid #e4e6ea;
+  border-radius:2px;
 
-        .multiplier-display {
-            font-size: 3.2rem;
-            font-weight: 900;
-            color: #ffffff;
-            text-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
-            font-family: monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+  position:relative;
+}
 
-        .multiplier-display.crashed {
-            color: var(--red-vibrant);
-            text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-        }
+.wallet::after{
+  content:"";
 
-        .arena-status-sub {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: -6px;
-        }
+  position:absolute;
 
-        /* 3D CHIP DENOMINATION SELECTORS */
-        .chips-panel {
-            display: flex;
-            justify-content: space-between;
-            gap: 6px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 10px;
-        }
+  right:-2px;
+  top:3px;
 
-        .chip-3d {
-            flex: 1;
-            height: 44px;
-            border-radius: 50%;
-            border: 2px dashed rgba(255,255,255,0.4);
-            color: #fff;
-            font-size: 0.8rem;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
+  width:5px;
+  height:5px;
 
-        .chip-10 { background: radial-gradient(circle, #0284c7, #0369a1); }
-        .chip-50 { background: radial-gradient(circle, #7c3aed, #5b21b6); }
-        .chip-100 { background: radial-gradient(circle, #d97706, #b45309); }
-        .chip-500 { background: radial-gradient(circle, #dc2626, #991b1b); }
-        .chip-1k { background: radial-gradient(circle, #10b981, #047857); }
+  border:2px solid #e4e6ea;
+  border-left:0;
 
-        .chip-3d.active {
-            border-style: solid;
-            border-color: #ffffff;
-            transform: scale(1.12);
-            box-shadow: 0 0 16px var(--purple-vibrant);
-        }
+  border-radius:0 2px 2px 0;
+}
 
-        /* BETTING CONTROLS PANEL */
-        .bet-panel {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 14px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+.tools{
+  display:flex;
+  align-items:center;
+  gap:17px;
 
-        .input-box {
-            flex: 1;
-            position: relative;
-            display: flex;
-            align-items: center;
-            background: var(--input-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 0 12px;
-            height: 50px;
-        }
+  color:#f0f1f4;
+}
 
-        .input-box input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--gold-neon);
-            font-size: 1.1rem;
-            font-weight: 900;
-        }
+.help{
+  width:24px;
+  height:24px;
 
-        .btn-main-action {
-            flex: 1.2;
-            height: 50px;
-            border: none;
-            border-radius: 14px;
-            font-size: 1.05rem;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-        }
+  border:2px solid #f1f2f5;
+  border-radius:50%;
 
-        .btn-main-action.bet {
-            background: linear-gradient(135deg, var(--green-vibrant), #047857);
-            color: #ffffff;
-            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
-        }
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-        .btn-main-action.cashout {
-            background: var(--gold-gradient);
-            color: #000000;
-            box-shadow: 0 6px 18px var(--gold-glow);
-            animation: pulseGlow 1s infinite alternate;
-        }
+  font-size:15px;
+  font-weight:700;
+}
 
-        @keyframes pulseGlow {
-            from { box-shadow: 0 0 10px var(--gold-glow); }
-            to { box-shadow: 0 0 25px var(--gold-neon); }
-        }
+.sound{
+  font-size:23px;
+  line-height:1;
+}
 
-        .btn-main-action.waiting {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+.settings{
+  width:24px;
+  height:19px;
 
-        /* LIVE BETS / LEADERBOARD SECTION */
-        .live-leaderboard-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+  position:relative;
+}
 
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            font-weight: 800;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 8px;
-        }
+.settings span{
+  position:absolute;
+  left:0;
+  right:0;
 
-        .live-rows-container {
-            max-height: 160px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+  height:2px;
+  background:#e8e9ed;
+}
 
-        .live-rows-container::-webkit-scrollbar { width: 4px; }
-        .live-rows-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+.settings span:nth-child(1){
+  top:2px;
+}
 
-        .player-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            background: rgba(12, 15, 22, 0.6);
-            border-radius: 10px;
-            font-size: 0.78rem;
-        }
+.settings span:nth-child(2){
+  top:8px;
+}
 
-        .player-row.cashed {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
+.settings span:nth-child(3){
+  top:14px;
+}
 
-        .player-name { font-weight: 700; color: var(--text-main); }
-        .player-mult { font-weight: 800; color: var(--gold-neon); }
-        .player-win { font-weight: 900; color: var(--green-vibrant); }
+.settings span::after{
+  content:"";
 
-        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 100%; max-width: 480px;
-            background: rgba(12, 15, 22, 0.95);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-        }
+  position:absolute;
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
+  width:5px;
+  height:5px;
 
-        .nav-item.active { color: var(--gold-neon); }
-        .nav-icon { font-size: 1.2rem; }
+  border:1.5px solid #e8e9ed;
+  background:#20232d;
 
-        /* TOAST NOTIFICATION */
-        .toast {
-            position: fixed;
-            top: 20px; left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            background: rgba(12, 15, 22, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--purple-vibrant);
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 30px;
-            font-size: 0.85rem; font-weight: 700;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
-            opacity: 0; visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 2000;
-        }
+  border-radius:50%;
 
-        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-    </style>
+  top:-2px;
+}
+
+.settings span:nth-child(1)::after{
+  left:8px;
+}
+
+.settings span:nth-child(2)::after{
+  left:15px;
+}
+
+.settings span:nth-child(3)::after{
+  left:4px;
+}
+
+/* LOGO */
+
+.logo{
+  position:absolute;
+
+  top:66px;
+  left:0;
+  right:0;
+
+  height:100px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  z-index:5;
+}
+
+.logo-main{
+  position:relative;
+
+  color:#f4f4f6;
+
+  font-size:30px;
+  font-weight:900;
+  font-style:italic;
+
+  letter-spacing:-2px;
+
+  text-shadow:
+    2px 3px 0 #050609,
+    0 0 8px rgba(0,0,0,.8);
+}
+
+.logo-main::before{
+  content:"";
+
+  position:absolute;
+
+  width:128px;
+  height:38px;
+
+  left:50%;
+  top:-14px;
+
+  transform:
+    translateX(-50%)
+    rotate(-9deg);
+
+  border-top:7px solid #8c21ff;
+
+  border-radius:50%;
+
+  z-index:-1;
+}
+
+.logo-main::after{
+  content:"";
+
+  position:absolute;
+
+  width:98px;
+  height:27px;
+
+  left:50%;
+  top:4px;
+
+  transform:
+    translateX(-50%)
+    rotate(-15deg);
+
+  border-bottom:6px solid #6814d2;
+
+  border-radius:50%;
+
+  z-index:-1;
+}
+
+.logo-sub{
+  display:block;
+
+  text-align:center;
+
+  margin-top:-4px;
+
+  font-size:9px;
+  font-weight:800;
+
+  letter-spacing:1px;
+
+  font-style:normal;
+
+  color:#d9dbe1;
+
+  text-shadow:none;
+}
+
+/* WHEEL */
+
+.wheel-area{
+  position:absolute;
+
+  top:132px;
+  left:0;
+  right:0;
+
+  height:430px;
+
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+
+  z-index:3;
+}
+
+.wheel{
+  width:386px;
+  height:386px;
+
+  position:relative;
+
+  border-radius:50%;
+
+  border:5px solid #343946;
+
+  background:
+    radial-gradient(
+      circle,
+      #151923 0% 17%,
+      #303542 17.5% 21%,
+      #10131b 21.5% 31%,
+      #303542 31.5% 32.5%,
+      #11141c 33% 42%,
+      #303542 42.5% 43.5%,
+      #10131b 44% 52%,
+      #303542 52.5% 53.5%,
+      #10131b 54% 63%,
+      #303542 63.5% 64.5%,
+      #0c0f16 65% 100%
+    );
+
+  box-shadow:
+    inset 0 0 22px #000,
+    0 9px 25px rgba(0,0,0,.8);
+
+  transition:
+    transform 3.2s
+    cubic-bezier(.12,.7,.12,1);
+}
+
+.wheel::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  border-radius:50%;
+
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      transparent 0deg 11deg,
+      rgba(130,137,151,.23) 11deg 12deg
+    );
+
+  mask:
+    radial-gradient(
+      circle,
+      transparent 0 30%,
+      #000 30.5%
+    );
+
+  -webkit-mask:
+    radial-gradient(
+      circle,
+      transparent 0 30%,
+      #000 30.5%
+    );
+}
+
+.ring{
+  position:absolute;
+
+  inset:35px;
+
+  border:
+    2px solid #363b48;
+
+  border-radius:50%;
+}
+
+.ring.r2{
+  inset:78px;
+}
+
+.ring.r3{
+  inset:119px;
+}
+
+/* TOP POINTER */
+
+.pointer{
+  position:absolute;
+
+  top:7px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  font-size:29px;
+
+  z-index:6;
+
+  filter:
+    drop-shadow(0 2px 3px #000);
+}
+
+/* SYMBOLS */
+
+.symbol{
+  position:absolute;
+
+  left:50%;
+  top:50%;
+
+  transform-origin:0 0;
+
+  color:#777e8e;
+
+  font-size:17px;
+  font-weight:800;
+
+  white-space:nowrap;
+}
+
+.s1{
+  transform:
+    rotate(-90deg)
+    translateY(-142px)
+    rotate(90deg);
+}
+
+.s2{
+  transform:
+    rotate(-60deg)
+    translateY(-142px)
+    rotate(60deg);
+}
+
+.s3{
+  transform:
+    rotate(-30deg)
+    translateY(-142px)
+    rotate(30deg);
+}
+
+.s4{
+  transform:
+    rotate(0deg)
+    translateY(-142px);
+}
+
+.s5{
+  transform:
+    rotate(30deg)
+    translateY(-142px)
+    rotate(-30deg);
+}
+
+.s6{
+  transform:
+    rotate(60deg)
+    translateY(-142px)
+    rotate(-60deg);
+}
+
+.s7{
+  transform:
+    rotate(90deg)
+    translateY(-142px)
+    rotate(-90deg);
+}
+
+.s8{
+  transform:
+    rotate(120deg)
+    translateY(-142px)
+    rotate(-120deg);
+}
+
+.s9{
+  transform:
+    rotate(150deg)
+    translateY(-142px)
+    rotate(-150deg);
+}
+
+.s10{
+  transform:
+    rotate(180deg)
+    translateY(-142px)
+    rotate(-180deg);
+}
+
+.s11{
+  transform:
+    rotate(210deg)
+    translateY(-142px)
+    rotate(-210deg);
+}
+
+.s12{
+  transform:
+    rotate(240deg)
+    translateY(-142px)
+    rotate(-240deg);
+}
+
+.s13{
+  transform:
+    rotate(270deg)
+    translateY(-142px)
+    rotate(-270deg);
+}
+
+.s14{
+  transform:
+    rotate(300deg)
+    translateY(-142px)
+    rotate(-300deg);
+}
+
+.s15{
+  transform:
+    rotate(330deg)
+    translateY(-142px)
+    rotate(-330deg);
+}
+
+/* EMOJIS */
+
+.emoji{
+  position:absolute;
+
+  left:50%;
+  top:50%;
+
+  font-size:26px;
+
+  filter:
+    drop-shadow(0 2px 4px #000);
+}
+
+.e1{
+  transform:
+    translate(-50%,-50%)
+    translateY(-169px);
+}
+
+.e2{
+  transform:
+    translate(-50%,-50%)
+    translateY(-126px);
+}
+
+.e3{
+  transform:
+    translate(-50%,-50%)
+    translateY(-83px);
+}
+
+.e4{
+  transform:
+    translate(-50%,-50%)
+    translateY(83px);
+}
+
+/* CENTER */
+
+.center{
+  position:absolute;
+
+  width:78px;
+  height:78px;
+
+  left:50%;
+  top:50%;
+
+  transform:
+    translate(-50%,-50%);
+
+  border-radius:50%;
+
+  border:3px solid #555b68;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #78808e 0%,
+      #303643 45%,
+      #12151d 75%
+    );
+
+  box-shadow:
+    inset 0 0 15px #000,
+    0 3px 10px #000;
+}
+
+.center::after{
+  content:"◌";
+
+  position:absolute;
+
+  left:17px;
+  top:8px;
+
+  color:#b1b6c0;
+
+  font-size:43px;
+
+  transform:rotate(35deg);
+}
+
+/* CONTROLS */
+
+.controls{
+  position:absolute;
+
+  left:0;
+  right:0;
+
+  bottom:34px;
+
+  z-index:10;
+}
+
+.control-row{
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  gap:13px;
+}
+
+.circle{
+  width:48px;
+  height:48px;
+
+  border-radius:50%;
+
+  border:
+    1px solid #353a47;
+
+  background:
+    linear-gradient(
+      #292d38,
+      #171a22
+    );
+
+  color:#eee;
+
+  font-size:22px;
+
+  box-shadow:
+    0 5px 12px #000;
+
+  cursor:pointer;
+}
+
+.circle:active{
+  transform:scale(.95);
+}
+
+.bet{
+  min-width:120px;
+
+  text-align:center;
+}
+
+.bet-label{
+  color:#a0a5b0;
+
+  font-size:11px;
+  font-weight:700;
+}
+
+.bet-value{
+  margin-top:4px;
+
+  color:#f0f1f4;
+
+  font-size:14px;
+  font-weight:800;
+}
+
+.quick{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+
+  margin-top:8px;
+}
+
+.quick button{
+  border:0;
+
+  background:#2b303b;
+
+  color:#ddd;
+
+  border-radius:16px;
+
+  padding:5px 9px;
+
+  font-size:10px;
+  font-weight:700;
+
+  cursor:pointer;
+}
+
+/* MAIN BUTTONS */
+
+.main-controls{
+  margin-top:8px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  gap:17px;
+}
+
+.side{
+  width:67px;
+  height:48px;
+
+  border:0;
+
+  border-radius:15px;
+
+  background:#2a2e39;
+
+  color:#777d89;
+
+  font-size:12px;
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+.spin{
+  width:92px;
+  height:92px;
+
+  border-radius:50%;
+
+  border:0;
+
+  background:
+    radial-gradient(
+      circle,
+      #fff 0% 18%,
+      #eee 19% 29%,
+      #fff 30% 38%,
+      #7e17ff 40% 66%,
+      #4c0ba0 67% 100%
+    );
+
+  box-shadow:
+    0 0 0 7px rgba(126,23,255,.16),
+    0 0 30px rgba(126,23,255,.95);
+
+  color:#7014dd;
+
+  font-size:38px;
+
+  cursor:pointer;
+}
+
+.spin:active{
+  transform:scale(.96);
+}
+
+.status{
+  height:14px;
+
+  margin-top:4px;
+
+  text-align:center;
+
+  color:#a8adb8;
+
+  font-size:10px;
+  font-weight:700;
+}
+
+/* FOOTER */
+
+.footer{
+  position:absolute;
+
+  left:8px;
+  right:8px;
+  bottom:5px;
+
+  display:flex;
+  justify-content:space-between;
+
+  color:#858b98;
+
+  font-size:10px;
+
+  z-index:10;
+}
+
+/* MOBILE */
+
+@media(max-width:451px){
+
+  body{
+    justify-content:flex-start;
+  }
+
+  .game{
+    transform-origin:
+      top left;
+
+    transform:
+      scale(
+        calc(100vw / 451)
+      );
+  }
+
+}
+
+@media(max-height:760px){
+
+  .logo{
+    top:50px;
+  }
+
+  .wheel-area{
+    top:112px;
+    transform:scale(.86);
+    transform-origin:top center;
+  }
+
+  .controls{
+    bottom:25px;
+  }
+
+  .footer{
+    display:none;
+  }
+}
+</style>
 </head>
+
 <body>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Notification</div>
+<div class="game">
 
-    <!-- MAIN APP CONTAINER -->
-    <div class="app-viewport">
-        <!-- HEADER -->
-        <header class="app-header">
-            <a href="index.html" class="btn-back" title="Back to Home">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <div class="brand-title-box">
-                <span class="brand-title">Vortex 3D</span>
-                <span class="live-badge"><span class="live-dot"></span> ENERGY CORE</span>
-            </div>
-            <div class="wallet-chip" id="walletDisplay">$1,000.00</div>
-        </header>
+  <!-- HEADER -->
 
-        <!-- RECENT MULTIPLIER HISTORY STRIP -->
-        <div class="history-strip" id="historyStrip">
-            <span class="multiplier-tag low">1.62x</span>
-            <span class="multiplier-tag mid">3.15x</span>
-            <span class="multiplier-tag high">22.40x</span>
-            <span class="multiplier-tag low">1.15x</span>
-            <span class="multiplier-tag mid">6.80x</span>
-            <span class="multiplier-tag high">41.10x</span>
-        </div>
+  <header class="header">
 
-        <!-- 3D GAME ARENA -->
-        <div class="arena-card">
-            <div id="webglContainer" style="width:100%; height:100%;"></div>
-
-            <!-- Floating Overlay HUD -->
-            <div class="arena-overlay-hud">
-                <div class="multiplier-display" id="multiplierDisplay">
-                    <span id="multVal">1.00x</span>
-                    <span class="arena-status-sub" id="arenaSub">WAITING FOR NEXT VORTEX</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3D CHIP DENOMINATION SELECTORS -->
-        <div class="chips-panel">
-            <button class="chip-3d chip-10 active" onclick="selectChip(10, this)">$10</button>
-            <button class="chip-3d chip-50" onclick="selectChip(50, this)">$50</button>
-            <button class="chip-3d chip-100" onclick="selectChip(100, this)">$100</button>
-            <button class="chip-3d chip-500" onclick="selectChip(500, this)">$500</button>
-            <button class="chip-3d chip-1k" onclick="selectChip(1000, this)">$1K</button>
-        </div>
-
-        <!-- BETTING CONTROLS PANEL -->
-        <div class="bet-panel">
-            <div class="input-box">
-                <span style="color: var(--text-muted); font-weight: 800; margin-right: 4px;">$</span>
-                <input type="number" id="stakeInput" value="10" min="1" step="1" oninput="updateStake()">
-            </div>
-            <button class="btn-main-action bet" id="actionBtn" onclick="handleActionButton()">
-                <span id="btnTextMain">BET</span>
-                <span id="btnTextSub" style="font-size: 0.72rem; opacity: 0.8; font-weight: 700;">NEXT VORTEX</span>
-            </button>
-        </div>
-
-        <!-- LIVE LEADERBOARD / BETS TABLE -->
-        <div class="live-leaderboard-card">
-            <div class="table-header">
-                <span>Live Players</span>
-                <span style="color: var(--purple-vibrant); font-size: 0.75rem;">🟢 196 Online</span>
-            </div>
-            <div class="live-rows-container" id="liveRowsContainer">
-                <!-- Dynamic Player Rows -->
-            </div>
-        </div>
+    <div class="balance">
+      <span class="wallet"></span>
+      <span id="balance">0.16</span>
+      <span>INR</span>
     </div>
 
-    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="activity.html" class="nav-item">
-            <span class="nav-icon">🔥</span>
-            <span>Activity</span>
-        </a>
-        <a href="promotion.html" class="nav-item">
-            <span class="nav-icon">🎁</span>
-            <span>Promotion</span>
-        </a>
-        <a href="account.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            <span>Account</span>
-        </a>
-    </nav>
+    <div class="tools">
+      <span class="help">?</span>
+      <span class="sound">⌁</span>
 
-    <!-- ==========================================
-       THREE.JS WebGL 3D ARENA & GAME ENGINE
-       ========================================== -->
-    <script>
-        // --- GAME STATE ---
-        let walletBalance = 1000.00;
-        let stakeAmount = 10.00;
-        let currentMultiplier = 1.00;
-        let crashPoint = 2.60;
+      <span class="settings">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </div>
 
-        let gameState = 'WAITING'; // 'WAITING', 'EXPANDING', 'COLLAPSED'
-        let waitingTime = 5.0;
+  </header>
 
-        let hasBetNextRound = false;
-        let hasBetCurrentRound = false;
-        let hasCashedOut = false;
 
-        // Three.js Scene Variables
-        let scene, camera, renderer;
-        let vortexCoreMesh, vortexRingsGroup, particleSystem;
-        let particlesGroup;
+  <!-- LOGO -->
 
-        // Simulated Live Players Data
-        const mockPlayers = [
-            { name: "User ***812", stake: 50, cashout: null, won: false },
-            { name: "User ***304", stake: 100, cashout: null, won: false },
-            { name: "User ***518", stake: 20, cashout: null, won: false },
-            { name: "User ***992", stake: 200, cashout: null, won: false },
-            { name: "User ***601", stake: 10, cashout: null, won: false }
-        ];
+  <div class="logo">
 
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            initThreeJS();
-            startWaitingPhase();
-            renderLivePlayers();
-        };
+    <div class="logo-main">
+      VORTEX
 
-        // --- THREE.JS PROCEDURAL 3D VORTEX ENGINE ---
-        function initThreeJS() {
-            const container = document.getElementById('webglContainer');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+      <span class="logo-sub">
+        OFFICIAL GAME
+      </span>
+    </div>
 
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-            camera.position.set(0, 0, 5.5);
+  </div>
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            container.appendChild(renderer.domElement);
 
-            // Lighting Setup
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
+  <!-- WHEEL -->
 
-            const purpleSpot = new THREE.SpotLight(0x8b5cf6, 3);
-            purpleSpot.position.set(0, 5, 5);
-            scene.add(purpleSpot);
+  <section class="wheel-area">
 
-            const cyanPoint = new THREE.PointLight(0x06b6d4, 2, 10);
-            cyanPoint.position.set(-3, -2, 2);
-            scene.add(cyanPoint);
+    <div
+      class="wheel"
+      id="wheel"
+    >
 
-            // 1. Central 3D Energy Core Orb
-            const coreGeo = new THREE.IcosahedronGeometry(1.0, 2);
-            const coreMat = new THREE.MeshStandardMaterial({
-                color: 0x8b5cf6,
-                wireframe: true,
-                roughness: 0.1,
-                metalness: 0.8
-            });
-            vortexCoreMesh = new THREE.Mesh(coreGeo, coreMat);
-            scene.add(vortexCoreMesh);
+      <div class="ring"></div>
+      <div class="ring r2"></div>
+      <div class="ring r3"></div>
 
-            // Inner Glowing Sphere
-            const innerGeo = new THREE.SphereGeometry(0.7, 32, 32);
-            const innerMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
-            const innerMesh = new THREE.Mesh(innerGeo, innerMat);
-            vortexCoreMesh.add(innerMesh);
+      <div class="pointer">
+        🔥
+      </div>
 
-            // 2. Spiraling Vortex Particle Rings
-            vortexRingsGroup = new THREE.Group();
-            for (let r = 0; r < 5; r++) {
-                const ringGeo = new THREE.TorusGeometry(1.4 + (r * 0.4), 0.02, 16, 64);
-                const ringMat = new THREE.MeshBasicMaterial({
-                    color: (r % 2 === 0) ? 0x8b5cf6 : 0x06b6d4,
-                    transparent: true,
-                    opacity: 0.7
-                });
-                const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-                ringMesh.rotation.x = Math.PI / 3 + (r * 0.1);
-                ringMesh.rotation.y = r * 0.2;
-                vortexRingsGroup.add(ringMesh);
-            }
-            scene.add(vortexRingsGroup);
+      <div class="emoji e1">🔥</div>
+      <div class="emoji e2">☘️</div>
+      <div class="emoji e3">🌊</div>
+      <div class="emoji e4">🌊</div>
 
-            // Particles Group for Collapse Burst
-            particlesGroup = new THREE.Group();
-            scene.add(particlesGroup);
+      <span class="symbol s1">3.9×</span>
+      <span class="symbol s2">2.5×</span>
+      <span class="symbol s3">1.5×</span>
+      <span class="symbol s4">7×</span>
+      <span class="symbol s5">12.5×</span>
+      <span class="symbol s6">28×</span>
+      <span class="symbol s7">52×</span>
+      <span class="symbol s8">85×</span>
+      <span class="symbol s9">21.5×</span>
+      <span class="symbol s10">10×</span>
+      <span class="symbol s11">44×</span>
+      <span class="symbol s12">200×</span>
+      <span class="symbol s13">133×</span>
+      <span class="symbol s14">20.5×</span>
+      <span class="symbol s15">16×</span>
 
-            animateThreeJS();
-        }
+      <div class="center"></div>
 
-        function animateThreeJS() {
-            requestAnimationFrame(animateThreeJS);
+    </div>
 
-            let speed = (gameState === 'EXPANDING') ? 0.05 + (currentMultiplier * 0.01) : 0.01;
+  </section>
 
-            vortexCoreMesh.rotation.y += speed;
-            vortexCoreMesh.rotation.z += speed * 0.5;
 
-            vortexRingsGroup.rotation.z -= speed * 1.5;
-            vortexRingsGroup.rotation.x += speed * 0.3;
+  <!-- CONTROLS -->
 
-            if (gameState === 'EXPANDING') {
-                // Pulse & expand core scale dynamically with multiplier
-                let scale = 1.0 + Math.min(1.5, (currentMultiplier - 1) * 0.1);
-                vortexCoreMesh.scale.set(scale, scale, scale);
-            } else if (gameState === 'COLLAPSED') {
-                // Animate collapse particle explosion
-                particlesGroup.children.forEach(p => {
-                    p.position.add(p.userData.velocity);
-                    p.rotation.x += 0.1;
-                });
-            }
+  <section class="controls">
 
-            renderer.render(scene, camera);
-        }
+    <div class="control-row">
 
-        function triggerCollapseImplosion() {
-            particlesGroup.clear();
-            const colors = [0x8b5cf6, 0x06b6d4, 0xef4444, 0xffffff];
+      <button
+        class="circle"
+        id="minus"
+      >−</button>
 
-            for (let i = 0; i < 40; i++) {
-                const geo = new THREE.SphereGeometry(0.06, 8, 8);
-                const mat = new THREE.MeshBasicMaterial({ color: colors[Math.floor(Math.random() * colors.length)] });
-                const p = new THREE.Mesh(geo, mat);
-                p.position.copy(vortexCoreMesh.position);
-                p.userData.velocity = new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.25,
-                    (Math.random() - 0.5) * 0.25,
-                    (Math.random() - 0.5) * 0.25
-                );
-                particlesGroup.add(p);
-            }
-        }
+      <div class="bet">
 
-        // --- GAME LOOP ENGINE ---
-        function startWaitingPhase() {
-            gameState = 'WAITING';
-            waitingTime = 5.0;
-            currentMultiplier = 1.00;
+        <div class="bet-label">
+          Bet Amount ⓘ
+        </div>
 
-            const multDisplay = document.getElementById('multiplierDisplay');
-            multDisplay.classList.remove('crashed');
-            document.getElementById('multVal').innerText = "1.00x";
-            document.getElementById('arenaSub').innerText = "WAITING FOR NEXT VORTEX";
+        <div
+          class="bet-value"
+          id="bet"
+        >
+          5.00 INR
+        </div>
 
-            vortexCoreMesh.scale.set(1, 1, 1);
-            vortexCoreMesh.visible = true;
-            vortexRingsGroup.visible = true;
-            particlesGroup.clear();
+      </div>
 
-            mockPlayers.forEach(p => { p.cashout = null; p.won = false; });
-            renderLivePlayers();
+      <button
+        class="circle"
+        id="plus"
+      >+</button>
 
-            updateActionButtonState();
+      <button
+        class="circle"
+        id="max"
+      >≋</button>
 
-            const timerInterval = setInterval(() => {
-                waitingTime -= 0.1;
-                if (waitingTime > 0) {
-                    document.getElementById('arenaSub').innerText = `NEXT VORTEX IN ${waitingTime.toFixed(1)}s`;
-                } else {
-                    clearInterval(timerInterval);
-                    startExpandingPhase();
-                }
-            }, 100);
-        }
+    </div>
 
-        function startExpandingPhase() {
-            gameState = 'EXPANDING';
-            document.getElementById('arenaSub').innerText = "VORTEX EXPANDING...";
 
-            if (hasBetNextRound) {
-                hasBetCurrentRound = true;
-                hasBetNextRound = false;
-                hasCashedOut = false;
-            } else {
-                hasBetCurrentRound = false;
-            }
+    <div class="quick">
 
-            updateActionButtonState();
+      <button data-value="1">1</button>
+      <button data-value="5">5</button>
+      <button data-value="10">10</button>
+      <button data-value="25">25</button>
+      <button data-value="50">50</button>
 
-            // Random crash point generator
-            const rand = Math.random();
-            if (rand < 0.1) crashPoint = (1.02 + Math.random() * 0.2).toFixed(2);
-            else if (rand < 0.65) crashPoint = (1.25 + Math.random() * 1.8).toFixed(2);
-            else if (rand < 0.9) crashPoint = (3.00 + Math.random() * 6.0).toFixed(2);
-            else crashPoint = (10.00 + Math.random() * 25.0).toFixed(2);
+    </div>
 
-            const expandInterval = setInterval(() => {
-                if (gameState !== 'EXPANDING') {
-                    clearInterval(expandInterval);
-                    return;
-                }
 
-                currentMultiplier += 0.01 + (currentMultiplier * 0.008);
-                document.getElementById('multVal').innerText = `${currentMultiplier.toFixed(2)}x`;
+    <div class="main-controls">
 
-                // Cash out fake players randomly
-                mockPlayers.forEach(p => {
-                    if (!p.cashout && Math.random() < 0.05 && currentMultiplier > 1.2) {
-                        p.cashout = currentMultiplier.toFixed(2);
-                        p.won = true;
-                        renderLivePlayers();
-                    }
-                });
+      <button
+        class="side"
+        id="cashout"
+      >
+        CASH<br>OUT
+      </button>
 
-                if (hasBetCurrentRound && !hasCashedOut) {
-                    const currentWin = stakeAmount * currentMultiplier;
-                    document.getElementById('btnTextSub').innerText = `CASH OUT $${currentWin.toFixed(2)}`;
-                }
+      <button
+        class="spin"
+        id="spin"
+      >
+        ◉
+      </button>
 
-                // Crash Check
-                if (currentMultiplier >= crashPoint) {
-                    clearInterval(expandInterval);
-                    triggerCollapse();
-                }
-            }, 60);
-        }
+      <button
+        class="side"
+        id="reset"
+      >
+        ↻
+      </button>
 
-        function triggerCollapse() {
-            gameState = 'COLLAPSED';
-            const multDisplay = document.getElementById('multiplierDisplay');
-            multDisplay.classList.add('crashed');
-            document.getElementById('multVal').innerText = `${crashPoint}x`;
-            document.getElementById('arenaSub').innerText = "VORTEX COLLAPSED!";
+    </div>
 
-            triggerCollapseImplosion();
-            vortexCoreMesh.visible = false;
-            vortexRingsGroup.visible = false;
 
-            if (hasBetCurrentRound && !hasCashedOut) {
-                showToast(`❌ Collapsed at ${crashPoint}x! Bet Lost.`);
-            }
+    <div
+      class="status"
+      id="status"
+    >
+      READY • DEMO
+    </div>
 
-            hasBetCurrentRound = false;
-            updateActionButtonState();
+  </section>
 
-            addHistoryTag(crashPoint);
 
-            setTimeout(() => {
-                startWaitingPhase();
-            }, 3000);
-        }
+  <!-- FOOTER -->
 
-        // --- BUTTON ACTION HANDLER ---
-        function handleActionButton() {
-            if (gameState === 'WAITING') {
-                if (!hasBetNextRound) {
-                    if (walletBalance < stakeAmount) {
-                        showToast("Insufficient Balance!");
-                        return;
-                    }
-                    walletBalance -= stakeAmount;
-                    updateWalletDisplay();
-                    hasBetNextRound = true;
-                    showToast(`Bet placed: $${stakeAmount.toFixed(2)}`);
-                    updateActionButtonState();
-                } else {
-                    walletBalance += stakeAmount;
-                    updateWalletDisplay();
-                    hasBetNextRound = false;
-                    showToast("Bet Cancelled!");
-                    updateActionButtonState();
-                }
-            } else if (gameState === 'EXPANDING') {
-                if (hasBetCurrentRound && !hasCashedOut) {
-                    hasCashedOut = true;
-                    const winAmount = stakeAmount * currentMultiplier;
-                    walletBalance += winAmount;
-                    updateWalletDisplay();
-                    showToast(`🎉 Cashed out at ${currentMultiplier.toFixed(2)}x! Won $${winAmount.toFixed(2)}`);
-                    updateActionButtonState();
-                }
-            }
-        }
+  <footer class="footer">
 
-        function updateActionButtonState() {
-            const btn = document.getElementById('actionBtn');
-            const mainText = document.getElementById('btnTextMain');
-            const subText = document.getElementById('btnTextSub');
+    <span>
+      TopBet Games • Vortex
+    </span>
 
-            btn.className = 'btn-main-action';
+    <span id="clock"></span>
 
-            if (gameState === 'WAITING') {
-                if (hasBetNextRound) {
-                    btn.classList.add('waiting');
-                    mainText.innerText = "CANCEL";
-                    subText.innerText = "BET PLACED";
-                } else {
-                    btn.classList.add('bet');
-                    mainText.innerText = "BET";
-                    subText.innerText = "FOR NEXT VORTEX";
-                }
-            } else if (gameState === 'EXPANDING') {
-                if (hasBetCurrentRound && !hasCashedOut) {
-                    btn.classList.add('cashout');
-                    mainText.innerText = "CASH OUT";
-                    const currentWin = stakeAmount * currentMultiplier;
-                    subText.innerText = `$${currentWin.toFixed(2)}`;
-                } else {
-                    btn.classList.add('waiting');
-                    mainText.innerText = "EXPANDING";
-                    subText.innerText = "WAITING NEXT VORTEX";
-                }
-            } else if (gameState === 'COLLAPSED') {
-                btn.classList.add('waiting');
-                mainText.innerText = "COLLAPSED";
-                subText.innerText = "PREPARING...";
-            }
-        }
+  </footer>
 
-        // --- UI HELPERS ---
-        function updateWalletDisplay() {
-            document.getElementById('walletDisplay').innerText = `$${walletBalance.toFixed(2)}`;
-        }
+</div>
 
-        function selectChip(val, btn) {
-            stakeAmount = val;
-            document.getElementById('stakeInput').value = val;
-            document.querySelectorAll('.chip-3d').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
 
-        function updateStake() {
-            const val = parseFloat(document.getElementById('stakeInput').value);
-            stakeAmount = isNaN(val) || val < 1 ? 1 : val;
-        }
+<script>
 
-        function addHistoryTag(mult) {
-            const strip = document.getElementById('historyStrip');
-            const badge = document.createElement('span');
-            badge.className = `multiplier-tag ${mult < 2 ? 'low' : (mult < 10 ? 'mid' : 'high')}`;
-            badge.innerText = `${mult}x`;
-            strip.insertBefore(badge, strip.firstChild);
-        }
+let balance = 0.16;
+let bet = 5;
+let spinning = false;
+let rotation = 0;
 
-        function renderLivePlayers() {
-            const container = document.getElementById('liveRowsContainer');
-            container.innerHTML = mockPlayers.map(p => `
-                <div class="player-row ${p.won ? 'cashed' : ''}">
-                    <span class="player-name">${p.name}</span>
-                    <span class="player-mult">${p.cashout ? p.cashout + 'x' : 'expanding...'}</span>
-                    <span class="player-win">${p.won ? '+$' + (p.stake * p.cashout).toFixed(2) : '$' + p.stake}</span>
-                </div>
-            `).join('');
-        }
+const multipliers = [
+  1.5,
+  2,
+  2.5,
+  2.8,
+  3.9,
+  4.4,
+  7,
+  10,
+  12.5,
+  16,
+  21.5,
+  28,
+  44,
+  52,
+  85,
+  133,
+  200
+];
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.className = 'toast show';
-            setTimeout(() => { toast.className = 'toast'; }, 2800);
-        }
-    </script>
+const $ = id =>
+  document.getElementById(id);
+
+
+/* BALANCE */
+
+function render(){
+
+  $("balance").textContent =
+    balance.toFixed(2);
+
+  $("bet").textContent =
+    bet.toFixed(2) + " INR";
+}
+
+
+/* BET MINUS */
+
+$("minus").onclick = () => {
+
+  if(spinning) return;
+
+  bet = Math.max(
+    1,
+    bet - 1
+  );
+
+  render();
+};
+
+
+/* BET PLUS */
+
+$("plus").onclick = () => {
+
+  if(spinning) return;
+
+  bet = Math.min(
+    500,
+    bet + 1
+  );
+
+  render();
+};
+
+
+/* MAX */
+
+$("max").onclick = () => {
+
+  if(spinning) return;
+
+  bet = Math.min(
+    500,
+    Math.floor(balance)
+  );
+
+  render();
+};
+
+
+/* QUICK BET */
+
+document
+.querySelectorAll(".quick button")
+.forEach(button => {
+
+  button.onclick = () => {
+
+    if(spinning) return;
+
+    bet =
+      Number(
+        button.dataset.value
+      );
+
+    render();
+  };
+
+});
+
+
+/* RESET */
+
+$("reset").onclick = () => {
+
+  if(spinning) return;
+
+  bet = 5;
+
+  render();
+
+  $("status").textContent =
+    "READY • DEMO";
+};
+
+
+/* SPIN */
+
+$("spin").onclick = () => {
+
+  if(spinning)
+    return;
+
+  if(balance < bet){
+
+    $("status").textContent =
+      "INSUFFICIENT BALANCE";
+
+    return;
+  }
+
+
+  spinning = true;
+
+  balance -= bet;
+
+  render();
+
+
+  $("status").textContent =
+    "SPINNING • DEMO";
+
+
+  const index =
+    Math.floor(
+      Math.random() *
+      multipliers.length
+    );
+
+  const multiplier =
+    multipliers[index];
+
+
+  const extra =
+    1440 +
+    Math.random() * 720;
+
+
+  rotation +=
+    extra +
+    index * 8;
+
+
+  $("wheel").style.transform =
+    `rotate(${rotation}deg)`;
+
+
+  setTimeout(() => {
+
+    const payout =
+      bet * multiplier;
+
+    balance += payout;
+
+    render();
+
+
+    $("status").textContent =
+      `RESULT • ${multiplier}× • +${payout.toFixed(2)} INR`;
+
+
+    spinning = false;
+
+  },3200);
+
+};
+
+
+/* CASHOUT DEMO */
+
+$("cashout").onclick = () => {
+
+  if(spinning){
+
+    $("status").textContent =
+      "DEMO CASH OUT";
+
+  }
+
+};
+
+
+/* CLOCK */
+
+function updateClock(){
+
+  const now =
+    new Date();
+
+  const date =
+    now.toLocaleDateString(
+      "en-GB",
+      {
+        day:"2-digit",
+        month:"short",
+        year:"numeric"
+      }
+    );
+
+  const time =
+    now.toLocaleTimeString(
+      "en-GB",
+      {
+        hour12:false
+      }
+    );
+
+  $("clock").textContent =
+    date + " • " + time;
+}
+
+
+setInterval(
+  updateClock,
+  1000
+);
+
+updateClock();
+render();
+
+</script>
+
 </body>
 </html>
