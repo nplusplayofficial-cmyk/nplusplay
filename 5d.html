@@ -336,6 +336,8 @@ const WALLET='nplusplay_wingo_ultra_final_v2';
 
 const DURATIONS=[60,180,300,600];
 
+const pad=(n,len=2)=>String(n).padStart(len,'0');
+
 const state={
   sec:60,
   slot:null,
@@ -367,8 +369,6 @@ function roundInfo(sec=state.sec, now=Date.now()){
 
 function periodForSlot(slot,sec=state.sec){
   const start=new Date(slot*sec*1000);
-  const pad=(n,len=2)=>String(n).padStart(len,'0');
-
   // Stable period ID tied to the exact round slot.
   // Format remains readable and changes by exactly one round per mode.
   const seq=pad(slot%100000,5);
@@ -456,11 +456,13 @@ function load(){
 function renderResultHeader(){
   const root=document.getElementById('resultNums');
   root.innerHTML=state.digits.map(d=>`<span class="resultdot">${d}</span>`).join('');
-  const s=summaryOf(state.digits);
-  document.getElementById('resultSum').textContent=s.sum;
+  const sum=state.digits.reduce((a,b)=>a+b,0);
+  const big=sum>=23;
+  const odd=sum%2===1;
+  document.getElementById('resultSum').textContent=sum;
   document.getElementById('period').textContent=state.period;
   document.getElementById('sumline').innerHTML=
-    `RESULT · <b>${state.digits.join(' · ')}</b> · SUM <b>${s.sum}</b> · <b>${s.big?'BIG':'SMALL'}</b> · <b>${s.odd?'ODD':'EVEN'}</b>`;
+    `RESULT · <b>${state.digits.join(' · ')}</b> · SUM <b>${sum}</b> · <b>${big?'BIG':'SMALL'}</b> · <b>${odd?'ODD':'EVEN'}</b>`;
 }
 
 
