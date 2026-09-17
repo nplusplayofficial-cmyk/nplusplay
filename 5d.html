@@ -17,7 +17,7 @@ button,input{font:inherit}
 button{cursor:pointer}
 body{display:flex;justify-content:center}
 .app{
-  width:min(100%,500px);min-height:100vh;
+  width:min(100%,520px);min-height:100vh;
   background:
     radial-gradient(circle at 50% -12%,rgba(223,198,141,.11),transparent 34%),
     linear-gradient(180deg,#09090b 0%,#050506 100%);
@@ -47,7 +47,7 @@ body{display:flex;justify-content:center}
   padding:8px 12px;border-radius:10px;border:1px solid rgba(223,198,141,.22);
   background:linear-gradient(135deg,#dfc68d,#ab8a52);color:#15120d;font-size:10px;font-weight:950
 }
-.content{padding:8px 10px 18px}
+.content{padding:10px 11px 22px}
 .notice{
   padding:7px 10px;border-radius:10px;background:#0e0f11;border:1px solid var(--line);
   color:#7e7a74;font-size:8px;text-align:center;letter-spacing:.02em;margin-bottom:8px
@@ -70,15 +70,15 @@ body{display:flex;justify-content:center}
 .trlabel{font-size:8px;color:#777;letter-spacing:.11em;text-transform:uppercase}
 .resultnums{display:flex;gap:5px;margin-top:4px}
 .resultdot{
-  width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  width:23px;height:23px;border-radius:50%;display:grid;place-items:center;
   border:1px solid rgba(223,198,141,.18);background:#17181b;color:#eee;font-size:9px;font-weight:950
 }
 .resultsum{
-  min-width:31px;height:28px;border-radius:10px;display:grid;place-items:center;
+  min-width:33px;height:29px;border-radius:10px;display:grid;place-items:center;
   background:var(--red);color:#fff;font-size:11px;font-weight:950
 }
 .periodrow{
-  margin-top:7px;padding:8px 10px;border-radius:14px;background:#0d0e10;border:1px solid var(--line);
+  margin-top:8px;padding:9px 10px;border-radius:14px;background:#0d0e10;border:1px solid var(--line);
   display:flex;justify-content:space-between;align-items:flex-end
 }
 .periodlabel{font-size:7px;color:#777;letter-spacing:.12em;text-transform:uppercase}
@@ -94,7 +94,7 @@ body{display:flex;justify-content:center}
 .progress{height:3px;margin-top:5px;border-radius:10px;overflow:hidden;background:#202124}
 .progress i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .2s linear}
 .stage{
-  margin-top:7px;padding:9px 6px 10px;border-radius:17px;
+  margin-top:8px;padding:10px 7px 11px;border-radius:17px;
   background:
     radial-gradient(circle at 50% 0%,rgba(223,198,141,.06),transparent 35%),#0b0c0e;
   border:1px solid var(--line)
@@ -113,7 +113,7 @@ body{display:flex;justify-content:center}
 }
 
 .reel{
-  position:relative;height:64px;overflow:hidden;border-radius:9px;
+  position:relative;height:67px;overflow:hidden;border-radius:9px;
   background:linear-gradient(90deg,#0c0d0f 0%,#2a2c30 12%,#111216 50%,#292b2f 88%,#0b0c0e 100%);
   border:1px solid rgba(223,198,141,.19);
   box-shadow:inset 4px 0 8px rgba(0,0,0,.48),inset -4px 0 8px rgba(0,0,0,.48),0 7px 14px rgba(0,0,0,.35)
@@ -123,7 +123,7 @@ body{display:flex;justify-content:center}
   background:linear-gradient(90deg,rgba(0,0,0,.30),transparent 20%,transparent 80%,rgba(0,0,0,.34))
 }
 .reel::after{
-  content:"";position:absolute;z-index:7;left:1px;right:1px;top:50%;height:30px;
+  content:"";position:absolute;z-index:7;left:1px;right:1px;top:50%;height:32px;
   transform:translateY(-50%);border-top:1px solid rgba(223,198,141,.22);border-bottom:1px solid rgba(223,198,141,.18);
   box-shadow:inset 0 0 18px rgba(223,198,141,.035);pointer-events:none;border-radius:7px
 }
@@ -133,8 +133,8 @@ body{display:flex;justify-content:center}
   transform:translateY(17px);
 }
 .cell{
-  height:31px;display:flex;align-items:center;justify-content:center;
-  color:#f1ede5;font-size:23px;font-weight:950;line-height:31px;
+  height:32px;display:flex;align-items:center;justify-content:center;
+  color:#f1ede5;font-size:24px;font-weight:950;line-height:32px;
   text-shadow:0 2px 7px #000
 }
 .cell.prev,.cell.next{color:#a7a39c;opacity:.78}
@@ -144,7 +144,7 @@ body{display:flex;justify-content:center}
   0 0 0 1px rgba(223,198,141,.20),0 7px 14px rgba(0,0,0,.35)
 }
 .reellabels{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:4px 5px 0;text-align:center;color:#77736e;font-size:7px;font-weight:900;letter-spacing:.08em}
-.sumline{text-align:center;margin-top:6px;color:#74706a;font-size:7px}
+.sumline{text-align:center;margin-top:8px;color:#858078;font-size:8px}
 .sumline b{color:var(--gold2)}
 .spinstatus{text-align:center;margin-top:4px;color:#4d4a45;font-size:6px;letter-spacing:.13em}
 .categories{
@@ -178,9 +178,9 @@ body{display:flex;justify-content:center}
 .pt{border:1px solid var(--line);background:#141518;color:#858078;border-radius:8px;padding:8px;font-size:7px;font-weight:950}
 .pt.active{background:#201c15;color:var(--gold2);border-color:rgba(223,198,141,.18)}
 .table{margin-top:7px;overflow:hidden;border-radius:9px;border:1px solid var(--line)}
-.th,.tr{display:grid;grid-template-columns:1.55fr 1fr .85fr;gap:3px;align-items:center;padding:6px 5px;font-size:7px}
+.th,.tr{display:grid;grid-template-columns:1.55fr 1fr .85fr;gap:3px;align-items:center;padding:7px 6px;font-size:7px}
 .th{background:#17181b;color:#827e77;font-weight:950}
-.tr{border-top:1px solid var(--line);color:#c7c2ba;min-height:29px}
+.tr{border-top:1px solid var(--line);color:#c7c2ba;min-height:31px}
 .dots{display:flex;gap:2px;align-items:center}
 .hdot{
   width:16px;height:16px;border-radius:50%;display:grid;place-items:center;
@@ -202,7 +202,7 @@ body{display:flex;justify-content:center}
 }
 .sheet.open{display:flex}
 .sheetbox{
-  width:min(100%,500px);padding:13px 13px 18px;border-radius:21px 21px 0 0;
+  width:min(100%,520px);padding:13px 13px 18px;border-radius:21px 21px 0 0;
   background:#111216;border-top:1px solid rgba(223,198,141,.20);box-shadow:0 -20px 70px #000
 }
 .handle{width:38px;height:4px;border-radius:8px;background:#303136;margin:0 auto 11px}
@@ -237,15 +237,19 @@ body{display:flex;justify-content:center}
 </header>
 
 <main class="content">
-<div class="modes" id="modes">
+  <div class="notice">18+ · N+ PLAY VIRTUAL-CREDIT DEMO · NO REAL-MONEY WAGERING</div>
+
+  <div class="modes" id="modes">
     <button class="mode active" data-sec="60">5D 1 Min</button>
     <button class="mode" data-sec="180">5D 3 Min</button>
     <button class="mode" data-sec="300">5D 5 Min</button>
     <button class="mode" data-sec="600">5D 10 Min</button>
   </div>
-<section class="topresult">
+  <div class="clockhint">EXACT WALL-CLOCK ROUNDS · 60s / 180s / 300s / 600s</div>
+
+  <section class="topresult">
     <div>
-      <div class="trlabel">Lottery Results</div>
+      <div class="trlabel">Lottery results</div>
       <div class="resultnums" id="resultNums"></div>
     </div>
     <div class="resultsum" id="resultSum">—</div>
@@ -261,11 +265,14 @@ body{display:flex;justify-content:center}
   </section>
 
   <section class="stage">
-    <div class="stagehead"><strong>5D</strong><span class="live">● LIVE</span></div>
-  <div class="reels" id="reels"></div>
+    <div class="stagehead"><strong>5D RESULT</strong><span class="live">● LIVE DEMO</span></div>
+    <div class="rail"></div>
+    <div class="reels" id="reels"></div>
+    <div class="rail" style="margin-top:3px"></div>
     <div class="reellabels"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span></div>
     <div class="sumline" id="sumline">—</div>
-</section>
+    <div class="spinstatus" id="spinStatus">READY</div>
+  </section>
 
   <section class="categories">
     <div class="tabs" id="catTabs">
@@ -292,7 +299,7 @@ body{display:flex;justify-content:center}
   </section>
 
   <section class="panel">
-<div class="paneltabs">
+    <div class="paneltabs">
       <button class="pt active" data-panel="history">GAME HISTORY</button>
       <button class="pt" data-panel="bets">MY HISTORY</button>
       <button class="pt" data-panel="chart">CHART</button>
@@ -300,7 +307,7 @@ body{display:flex;justify-content:center}
     <div id="panelBody"></div>
   </section>
 
-  <div class="footer">N+ PLAY · 5D DEMO</div>
+  <div class="footer">N+ PLAY · 5D VIRTUAL-CREDIT DEMO</div>
 </main>
 </div>
 
@@ -323,12 +330,10 @@ body{display:flex;justify-content:center}
 </div>
 
 <script>
-const STORE='nplusplay_5d_final_v4';
+
+const STORE='nplusplay_5d_final_v5';
 const WALLET='nplusplay_wingo_ultra_final_v2';
-
 const DURATIONS=[60,180,300,600];
-
-const pad=(n,len=2)=>String(n).padStart(len,'0');
 
 const state={
   sec:60,
@@ -343,33 +348,48 @@ const state={
   betsByMode:{60:[],180:[],300:[],600:[]}
 };
 
-// IMPORTANT:
-// The game clock, period and results are derived from the current Unix time.
-// History is generated from the exact completed slots, rather than copied from
-// a mutable local history array. That keeps refreshes, mode changes and round
-// transitions consistent.
+function pad(n,len=2){return String(n).padStart(len,'0')}
+
+function readWallet(){
+  try{
+    const s=JSON.parse(localStorage.getItem(WALLET)||'null');
+    if(s && typeof s.balance==='number') return s.balance;
+  }catch(e){}
+  return 1000;
+}
+function writeWallet(v){
+  const val=Math.max(0,Number(v)||0);
+  const el=document.getElementById('balance');
+  if(el) el.textContent='₹'+val.toLocaleString('en-IN',{minimumFractionDigits:2});
+  try{
+    const s=JSON.parse(localStorage.getItem(WALLET)||'{}');
+    s.balance=val;
+    localStorage.setItem(WALLET,JSON.stringify(s));
+  }catch(e){}
+}
+
+/* ---------- REAL-TIME ROUND ENGINE ---------- */
 function roundInfo(sec=state.sec, now=Date.now()){
   const durationMs=sec*1000;
   const slot=Math.floor(now/durationMs);
   const startMs=slot*durationMs;
   const endMs=startMs+durationMs;
   return {
-    sec,slot,startMs,endMs,
+    slot,
+    startMs,
+    endMs,
     remainingMs:Math.max(0,endMs-now)
   };
 }
 
 function periodForSlot(slot,sec=state.sec){
-  const start=new Date(slot*sec*1000);
-  // Stable period ID tied to the exact round slot.
-  // Format remains readable and changes by exactly one round per mode.
-  const seq=pad(slot%100000,5);
-  return start.getFullYear()+
-    pad(start.getMonth()+1)+
-    pad(start.getDate())+
-    pad(start.getHours())+
-    pad(start.getMinutes())+
-    seq;
+  const d=new Date(slot*sec*1000);
+  return d.getFullYear()+
+    pad(d.getMonth()+1)+
+    pad(d.getDate())+
+    pad(d.getHours())+
+    pad(d.getMinutes())+
+    pad(slot%100000,5);
 }
 
 function hashString(text){
@@ -382,8 +402,6 @@ function hashString(text){
 }
 
 function digitsForPeriod(period,sec){
-  // The duration is included so the same timestamp text in different modes
-  // can never accidentally share the same result stream.
   let x=hashString(period+'|'+sec);
   const out=[];
   for(let i=0;i<5;i++){
@@ -398,7 +416,9 @@ function resultForSlot(slot,sec=state.sec){
   const digits=digitsForPeriod(period,sec);
   const sum=digits.reduce((a,b)=>a+b,0);
   return {
-    slot,period,digits,sum,
+    period,
+    digits,
+    sum,
     big:sum>=23,
     odd:sum%2===1
   };
@@ -407,12 +427,379 @@ function resultForSlot(slot,sec=state.sec){
 function completedHistory(sec=state.sec,limit=30,now=Date.now()){
   const current=roundInfo(sec,now);
   const rows=[];
-  // Only COMPLETED rounds appear here.
   for(let i=1;i<=limit;i++){
     rows.push(resultForSlot(current.slot-i,sec));
   }
   return rows;
 }
+
+/* ---------- BET STORAGE ONLY ---------- */
+function save(){
+  try{
+    localStorage.setItem(STORE,JSON.stringify({betsByMode:state.betsByMode}));
+  }catch(e){}
+}
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(STORE)||'{}');
+    for(const sec of DURATIONS){
+      state.betsByMode[sec]=Array.isArray(s.betsByMode?.[sec])
+        ? s.betsByMode[sec].slice(0,100)
+        : [];
+    }
+  }catch(e){}
+  writeWallet(readWallet());
+}
+
+/* ---------- RESULT / REEL UI ---------- */
+function renderResultHeader(){
+  const root=document.getElementById('resultNums');
+  if(root){
+    root.innerHTML=state.digits.map(d=>`<span class="resultdot">${d}</span>`).join('');
+  }
+  const s=state.digits.reduce((a,b)=>a+b,0);
+  const sumEl=document.getElementById('resultSum');
+  if(sumEl) sumEl.textContent=s;
+
+  const periodEl=document.getElementById('period');
+  if(periodEl) periodEl.textContent=state.period;
+
+  const line=document.getElementById('sumline');
+  if(line){
+    line.innerHTML=
+      `RESULT · <b>${state.digits.join(' · ')}</b> · SUM <b>${s}</b> · `+
+      `<b>${s>=23?'BIG':'SMALL'}</b> · <b>${s%2?'ODD':'EVEN'}</b>`;
+  }
+}
+
+function buildReels(){
+  const root=document.getElementById('reels');
+  if(!root)return;
+  root.innerHTML='';
+
+  state.digits.forEach(digit=>{
+    const reel=document.createElement('div');
+    reel.className='reel';
+
+    const strip=document.createElement('div');
+    strip.className='strip';
+
+    const prev=(digit+9)%10;
+    const next=(digit+1)%10;
+
+    [prev,digit,next].forEach((n,index)=>{
+      const c=document.createElement('div');
+      c.className='cell '+(index===1?'current':index===0?'prev':'next');
+      c.textContent=String(n);
+      strip.appendChild(c);
+    });
+
+    reel.appendChild(strip);
+    root.appendChild(reel);
+  });
+}
+
+function animateReels(animate=true){
+  const reels=[...document.querySelectorAll('.reel')];
+  const cellH=32;
+
+  reels.forEach((reel,i)=>{
+    const strip=reel.querySelector('.strip');
+    if(!strip)return;
+
+    strip.style.transition='none';
+    strip.style.transform='translateY(-15px)';
+    reel.classList.remove('spinning','locked');
+
+    if(!animate){
+      reel.classList.add('locked');
+      return;
+    }
+
+    const digit=state.digits[i];
+    const rounds=9+i;
+    const values=[];
+    for(let r=0;r<rounds;r++){
+      for(let n=0;n<10;n++) values.push(n);
+    }
+    values.push(digit,(digit+1)%10,(digit+2)%10);
+
+    strip.innerHTML='';
+    values.forEach(n=>{
+      const c=document.createElement('div');
+      c.className='cell';
+      c.textContent=String(n);
+      strip.appendChild(c);
+    });
+
+    strip.style.transform='translateY(0px)';
+    reel.classList.add('spinning');
+
+    const targetIndex=rounds*10;
+    const targetOffset=15-(targetIndex*cellH);
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        strip.style.transition=
+          `transform ${1.0+i*0.12}s cubic-bezier(.10,.76,.15,1)`;
+        strip.style.transform=`translateY(${targetOffset}px)`;
+      });
+    });
+
+    setTimeout(()=>{
+      const prev=(digit+9)%10;
+      const next=(digit+1)%10;
+      strip.style.transition='none';
+      strip.innerHTML='';
+      [prev,digit,next].forEach((n,index)=>{
+        const c=document.createElement('div');
+        c.className='cell '+(index===1?'current':index===0?'prev':'next');
+        c.textContent=String(n);
+        strip.appendChild(c);
+      });
+      strip.style.transform='translateY(-15px)';
+      reel.classList.remove('spinning');
+      reel.classList.add('locked');
+    },1600+i*140);
+  });
+}
+
+/* ---------- ROUND SYNC ---------- */
+function syncRound(force=false){
+  const now=Date.now();
+  const info=roundInfo(state.sec,now);
+  const p=periodForSlot(info.slot,state.sec);
+
+  if(force || state.slot===null || info.slot!==state.slot){
+    const firstLoad=(state.slot===null);
+
+    state.slot=info.slot;
+    state.period=p;
+    state.digits=digitsForPeriod(p,state.sec);
+
+    renderResultHeader();
+    buildReels();
+    animateReels(!firstLoad);
+
+    renderNumbers();
+    renderPanel(state.panel);
+  }
+  return info;
+}
+
+function tick(){
+  const info=syncRound(false);
+
+  // Never display 00:00 for a live round; boundary immediately advances
+  // to the next slot on the same tick.
+  let left=Math.ceil(info.remainingMs/1000);
+  if(left<=0){
+    const nextInfo=syncRound(true);
+    left=Math.max(1,Math.ceil(nextInfo.remainingMs/1000));
+  }
+
+  const mm=Math.floor(left/60);
+  const ss=left%60;
+  const mmEl=document.getElementById('mm');
+  const ssEl=document.getElementById('ss');
+  const pb=document.getElementById('progressBar');
+
+  if(mmEl)mmEl.textContent=pad(mm);
+  if(ssEl)ssEl.textContent=pad(ss);
+  if(pb)pb.style.width=
+    Math.max(0,Math.min(100,(info.remainingMs/(state.sec*1000))*100))+'%';
+}
+
+/* ---------- SELECTION / HISTORY ---------- */
+function selectBet(value,element){
+  state.selected=value;
+  const selected=document.getElementById('selected');
+  const sheet=document.getElementById('sheetSelection');
+  if(selected)selected.textContent=value;
+  if(sheet)sheet.textContent=value;
+  const card=document.getElementById('betcard');
+  if(card)card.classList.add('show');
+  document.querySelectorAll('.num').forEach(x=>x.classList.remove('selected'));
+  if(element)element.classList.add('selected');
+}
+
+function renderNumbers(){
+  const root=document.getElementById('numbers');
+  if(!root)return;
+  root.innerHTML='';
+
+  if(state.cat==='SUM'){
+    for(let n=0;n<=45;n++)addNumberButton(n,'SUM');
+  }else{
+    for(let n=0;n<=9;n++)addNumberButton(n,state.cat);
+  }
+}
+function addNumberButton(n,cat){
+  const b=document.createElement('button');
+  b.className='num';
+  b.innerHTML=`${n}<small>${cat}</small>`;
+  b.onclick=()=>selectBet(`${cat} = ${n}`,b);
+  document.getElementById('numbers').appendChild(b);
+}
+
+function renderPanel(panel='history'){
+  state.panel=panel;
+  document.querySelectorAll('.pt').forEach(b=>{
+    b.classList.toggle('active',b.dataset.panel===panel);
+  });
+
+  const body=document.getElementById('panelBody');
+  if(!body)return;
+
+  if(panel==='history'){
+    // CRITICAL FIX: history is calculated only from completed wall-clock rounds.
+    // It is not persisted, seeded, or affected by mode switching.
+    const list=completedHistory(state.sec,30);
+
+    body.innerHTML=`
+      <div class="table">
+        <div class="th"><span>PERIOD</span><span>RESULT</span><span>SUM</span></div>
+        ${list.map(h=>`
+          <div class="tr">
+            <span>${h.period}</span>
+            <span class="dots">${h.digits.map(d=>`<i class="hdot">${d}</i>`).join('')}</span>
+            <span>
+              <b>${h.sum}</b>
+              <em class="badge ${h.big?'b':'s'}">${h.big?'B':'S'}</em>
+              <em class="badge ${h.odd?'o':'e'}">${h.odd?'O':'E'}</em>
+            </span>
+          </div>
+        `).join('')}
+      </div>`;
+  }else if(panel==='bets'){
+    const list=state.betsByMode[state.sec]||[];
+    body.innerHTML=list.length?`
+      <div class="table">
+        <div class="th"><span>PERIOD</span><span>SELECTION</span><span>STAKE</span></div>
+        ${list.slice(0,18).map(b=>`
+          <div class="tr">
+            <span>${b.period}</span>
+            <span>${b.selection}<br><em class="badge b">DEMO</em></span>
+            <span>₹${Number(b.total).toFixed(2)}</span>
+          </div>
+        `).join('')}
+      </div>`:
+      `<div class="empty">No demo bets in this duration.</div>`;
+  }else{
+    const list=completedHistory(state.sec,100);
+    const counts=Array(10).fill(0);
+    list.forEach(h=>h.digits.forEach(d=>counts[d]++));
+    const max=Math.max(1,...counts);
+    body.innerHTML=`
+      <div style="padding:5px 1px">
+        ${counts.map((c,i)=>`
+          <div style="display:flex;align-items:center;gap:6px;margin:6px 0;font-size:7px">
+            <b style="width:10px">${i}</b>
+            <div style="height:7px;width:${Math.max(4,(c/max)*100)}%;border-radius:7px;background:linear-gradient(90deg,#9d8350,#dfc68d)"></div>
+            <span style="color:#5e5a54">${c}</span>
+          </div>
+        `).join('')}
+        <div style="color:#4f4b46;font-size:6px;margin-top:8px">
+          Historical frequency only; it does not predict future results.
+        </div>
+      </div>`;
+  }
+}
+
+/* ---------- DEMO BET SHEET ---------- */
+function openSheet(){
+  if(!state.selected){alert('Select a 5D option first.');return}
+  document.getElementById('sheet').classList.add('open');
+}
+function closeSheet(){document.getElementById('sheet').classList.remove('open')}
+function changeQty(delta){
+  state.qty=Math.max(1,Math.min(20,state.qty+delta));
+  document.getElementById('qty').textContent=state.qty;
+  updateTotal();
+}
+function updateTotal(){
+  document.getElementById('total').textContent='₹'+(state.amount*state.qty).toFixed(2);
+}
+function confirmBet(){
+  const total=state.amount*state.qty;
+  const balance=readWallet();
+  if(total>balance){alert('Demo wallet balance insufficient.');return}
+
+  state.betsByMode[state.sec].unshift({
+    period:state.period,
+    selection:state.selected,
+    amount:state.amount,
+    qty:state.qty,
+    total,
+    time:Date.now()
+  });
+  state.betsByMode[state.sec]=state.betsByMode[state.sec].slice(0,100);
+
+  writeWallet(balance-total);
+  save();
+  closeSheet();
+  renderPanel('bets');
+}
+
+/* ---------- CONTROLS ---------- */
+document.querySelectorAll('.mode').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const sec=+btn.dataset.sec;
+    if(state.sec===sec)return;
+
+    document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+
+    state.sec=sec;
+    state.slot=null;
+    state.period='';
+    state.selected=null;
+
+    const card=document.getElementById('betcard');
+    if(card)card.classList.remove('show');
+
+    // No old-mode history is written into the new mode.
+    syncRound(true);
+    tick();
+  });
+});
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    state.cat=btn.dataset.cat;
+    state.selected=null;
+    const card=document.getElementById('betcard');
+    if(card)card.classList.remove('show');
+    renderNumbers();
+  });
+});
+
+document.querySelectorAll('.q').forEach(btn=>{
+  btn.addEventListener('click',()=>selectBet(btn.dataset.quick));
+});
+
+document.querySelectorAll('.pt').forEach(btn=>{
+  btn.addEventListener('click',()=>renderPanel(btn.dataset.panel));
+});
+
+document.querySelectorAll('.amt').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.amt').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    state.amount=+btn.dataset.a;
+    updateTotal();
+  });
+});
+
+load();
+renderNumbers();
+syncRound(true);
+tick();
+setInterval(tick,250);
+updateTotal();
+
 function readWallet(){
   try{
     const s=JSON.parse(localStorage.getItem(WALLET)||'null');
@@ -431,30 +818,90 @@ function writeWallet(v){
 }
 
 function save(){
-  localStorage.setItem(STORE,JSON.stringify({betsByMode:state.betsByMode}));
+  localStorage.setItem(STORE,JSON.stringify({
+    historyByMode:state.historyByMode,
+    betsByMode:state.betsByMode
+  }));
 }
-
 function load(){
   try{
     const s=JSON.parse(localStorage.getItem(STORE)||'{}');
     for(const sec of DURATIONS){
-      state.betsByMode[sec]=Array.isArray(s.betsByMode?.[sec])
-        ? s.betsByMode[sec].slice(0,100)
-        : [];
+      state.historyByMode[sec]=Array.isArray(s.historyByMode?.[sec])?s.historyByMode[sec]:[];
+      state.betsByMode[sec]=Array.isArray(s.betsByMode?.[sec])?s.betsByMode[sec]:[];
     }
   }catch(e){}
   writeWallet(readWallet());
 }
+
+function getRoundInfo(now=Date.now()){
+  const slot=Math.floor(now/(state.sec*1000));
+  const startMs=slot*state.sec*1000;
+  const endMs=startMs+state.sec*1000;
+  return {slot,startMs,endMs,remainingMs:Math.max(0,endMs-now)};
+}
+function periodForSlot(slot){
+  const d=new Date(slot*state.sec*1000);
+  return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+
+         pad(d.getHours())+pad(d.getMinutes())+pad(slot%100000,5);
+}
+function hashPeriod(p){
+  let x=2166136261>>>0;
+  for(let i=0;i<p.length;i++){x^=p.charCodeAt(i);x=Math.imul(x,16777619)>>>0}
+  return x>>>0;
+}
+function digitsForPeriod(p){
+  let x=hashPeriod(p), out=[];
+  for(let i=0;i<5;i++){
+    x=(Math.imul(x,1664525)+1013904223)>>>0;
+    out.push(Math.floor(x/4294967296*10));
+  }
+  return out;
+}
+function summaryOf(ds){
+  const sum=ds.reduce((a,b)=>a+b,0);
+  return {sum,big:sum>=23,odd:sum%2===1}
+}
+
+function addCompleted(period, sec){
+  if(!period)return;
+  const list=state.historyByMode[sec];
+  if(list.some(x=>x.period===period))return;
+  const digits=digitsForPeriod(period);
+  const s=summaryOf(digits);
+  list.unshift({period,digits,sum:s.sum,big:s.big,odd:s.odd});
+  state.historyByMode[sec]=list.slice(0,120);
+  save();
+}
+
+function ensureSeedHistory(){
+  // Seed each duration with completed deterministic historical periods so
+  // Game History is immediately usable even on a fresh browser.
+  for(const sec of DURATIONS){
+    if(state.historyByMode[sec].length>=20)continue;
+    const nowSlot=Math.floor(Date.now()/(sec*1000));
+    const arr=[];
+    for(let i=1;i<=30;i++){
+      const slot=nowSlot-i;
+      const p=periodForSlot.call({sec},slot); // replaced below
+      const d=new Date(slot*sec*1000);
+      const period=d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+pad(d.getHours())+pad(d.getMinutes())+pad(slot%100000,5);
+      const digits=digitsForPeriod(period),s=summaryOf(digits);
+      arr.push({period,digits,sum:s.sum,big:s.big,odd:s.odd});
+    }
+    state.historyByMode[sec]=arr;
+  }
+  save();
+}
+
 function renderResultHeader(){
   const root=document.getElementById('resultNums');
   root.innerHTML=state.digits.map(d=>`<span class="resultdot">${d}</span>`).join('');
-  const sum=state.digits.reduce((a,b)=>a+b,0);
-  const big=sum>=23;
-  const odd=sum%2===1;
-  document.getElementById('resultSum').textContent=sum;
+  const s=summaryOf(state.digits);
+  document.getElementById('resultSum').textContent=s.sum;
   document.getElementById('period').textContent=state.period;
   document.getElementById('sumline').innerHTML=
-    `RESULT · <b>${state.digits.join(' · ')}</b> · SUM <b>${sum}</b> · <b>${big?'BIG':'SMALL'}</b> · <b>${odd?'ODD':'EVEN'}</b>`;
+    `RESULT · <b>${state.digits.join(' · ')}</b> · SUM <b>${s.sum}</b> · <b>${s.big?'BIG':'SMALL'}</b> · <b>${s.odd?'ODD':'EVEN'}</b>`;
 }
 
 
@@ -558,19 +1005,16 @@ function animateReels(animate=true){
 
 
 function syncRound(force=false){
-  const info=roundInfo(state.sec);
-  const p=periodForSlot(info.slot,state.sec);
+  const info=getRoundInfo();
+  const p=periodForSlot(info.slot);
 
-  if(
-    force ||
-    state.slot===null ||
-    info.slot!==state.slot
-  ){
-    const firstLoad=(state.slot===null);
+  if(force || state.slot===null || info.slot!==state.slot){
+    const firstLoad = state.slot===null;
+    if(state.period && state.slot!==null) addCompleted(state.period,state.sec);
 
     state.slot=info.slot;
     state.period=p;
-    state.digits=digitsForPeriod(p,state.sec);
+    state.digits=digitsForPeriod(p);
 
     renderResultHeader();
     buildReels();
@@ -578,9 +1022,9 @@ function syncRound(force=false){
     renderNumbers();
     renderPanel(state.panel);
   }
-
   return info;
 }
+
 function tick(){
   const info=syncRound(false);
   const left=Math.max(1,Math.ceil(info.remainingMs/1000));
@@ -618,68 +1062,55 @@ function addNumberButton(n,cat){
 
 function renderPanel(panel='history'){
   state.panel=panel;
-  document.querySelectorAll('.pt').forEach(b=>{
-    b.classList.toggle('active',b.dataset.panel===panel);
-  });
-
+  document.querySelectorAll('.pt').forEach(b=>b.classList.toggle('active',b.dataset.panel===panel));
   const body=document.getElementById('panelBody');
 
   if(panel==='history'){
-    const list=completedHistory(state.sec,30);
-
-    body.innerHTML=`
+    const list=state.historyByMode[state.sec]||[];
+    body.innerHTML=list.length?`
       <div class="table">
         <div class="th"><span>PERIOD</span><span>RESULT</span><span>SUM</span></div>
-        ${list.map(h=>`
-          <div class="tr">
+        ${list.slice(0,18).map(h=>{
+          return `<div class="tr">
             <span>${h.period}</span>
             <span class="dots">${h.digits.map(d=>`<i class="hdot">${d}</i>`).join('')}</span>
-            <span>
-              <b>${h.sum}</b>
+            <span><b>${h.sum}</b>
               <em class="badge ${h.big?'b':'s'}">${h.big?'B':'S'}</em>
               <em class="badge ${h.odd?'o':'e'}">${h.odd?'O':'E'}</em>
             </span>
-          </div>
-        `).join('')}
-      </div>`;
-
+          </div>`
+        }).join('')}
+      </div>`:
+      `<div class="empty">No completed rounds yet.</div>`;
   }else if(panel==='bets'){
     const list=state.betsByMode[state.sec]||[];
-
-    body.innerHTML=list.length ? `
+    body.innerHTML=list.length?`
       <div class="table">
         <div class="th"><span>PERIOD</span><span>SELECTION</span><span>STAKE</span></div>
         ${list.slice(0,18).map(b=>`
           <div class="tr">
             <span>${b.period}</span>
             <span>${b.selection}<br><em class="badge b">DEMO</em></span>
-            <span>₹${Number(b.total).toFixed(2)}</span>
-          </div>
-        `).join('')}
-      </div>` :
+            <span>₹${b.total.toFixed(2)}</span>
+          </div>`).join('')}
+      </div>`:
       `<div class="empty">No demo bets in this duration.</div>`;
-
   }else{
-    const list=completedHistory(state.sec,100);
     const counts=Array(10).fill(0);
-    list.forEach(h=>h.digits.forEach(d=>counts[d]++));
+    (state.historyByMode[state.sec]||[]).forEach(h=>h.digits.forEach(d=>counts[d]++));
     const max=Math.max(1,...counts);
-
-    body.innerHTML=`
-      <div style="padding:5px 1px">
-        ${counts.map((c,i)=>`
-          <div style="display:flex;align-items:center;gap:6px;margin:6px 0;font-size:7px">
-            <b style="width:10px">${i}</b>
-            <div style="height:7px;width:${Math.max(4,(c/max)*100)}%;border-radius:7px;background:linear-gradient(90deg,#9d8350,#dfc68d)"></div>
-            <span style="color:#5e5a54">${c}</span>
-          </div>
-        `).join('')}
-        <div style="color:#4f4b46;font-size:6px;margin-top:8px">
-          Historical frequency only; it does not predict future results.
-        </div>
-      </div>`;
+    body.innerHTML=`<div style="padding:5px 1px">
+      ${counts.map((c,i)=>`
+        <div style="display:flex;align-items:center;gap:6px;margin:6px 0;font-size:7px">
+          <b style="width:10px">${i}</b>
+          <div style="height:7px;width:${Math.max(4,(c/max)*100)}%;border-radius:7px;background:linear-gradient(90deg,#9d8350,#dfc68d)"></div>
+          <span style="color:#5e5a54">${c}</span>
+        </div>`).join('')}
+      <div style="color:#4f4b46;font-size:6px;margin-top:8px">Historical frequency only; it does not predict future results.</div>
+    </div>`;
   }
 }
+
 function openSheet(){
   if(!state.selected){alert('Select a 5D option first.');return}
   document.getElementById('sheet').classList.add('open');
@@ -711,20 +1142,14 @@ function confirmBet(){
 
 document.querySelectorAll('.mode').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    const sec=+btn.dataset.sec;
-    if(state.sec===sec)return;
-
+    if(state.sec===+btn.dataset.sec)return;
     document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active'));
     btn.classList.add('active');
-
-    state.sec=sec;
+    state.sec=+btn.dataset.sec;
     state.slot=null;
     state.period='';
     state.selected=null;
-
     document.getElementById('betcard').classList.remove('show');
-
-    // The new mode immediately snaps to its current real-time wall-clock round.
     syncRound(true);
     tick();
   });
@@ -757,6 +1182,7 @@ document.querySelectorAll('.amt').forEach(btn=>{
 });
 
 load();
+ensureSeedHistory();
 renderNumbers();
 syncRound(true);
 tick();
