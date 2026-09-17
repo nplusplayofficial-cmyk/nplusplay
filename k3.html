@@ -1,971 +1,165 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N+ PLAY - K3 Dice Game 3D</title>
-    <!-- Three.js for 3D WebGL Graphics -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        /* ==========================================
-           1. LUXURY 3D DARK GAMING THEME
-           ========================================== */
-        :root {
-            --bg-dark: #0c0f16;
-            --bg-surface: #1a1d24;
-            --card-bg: rgba(26, 29, 36, 0.75);
-            --card-border: rgba(245, 158, 11, 0.25);
-            
-            --gold-neon: #f59e0b;
-            --gold-light: #fbbf24;
-            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fef08a 50%, #d97706 100%);
-            --gold-glow: rgba(245, 158, 11, 0.4);
-
-            --red-vibrant: #ef4444;
-            --red-glow: rgba(239, 68, 68, 0.4);
-            --green-vibrant: #10b981;
-            --blue-vibrant: #3b82f6;
-            --violet-vibrant: #8b5cf6;
-
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: rgba(12, 15, 22, 0.85);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
-                radial-gradient(circle at 90% 90%, rgba(239, 68, 68, 0.08) 0%, transparent 50%),
-                linear-gradient(180deg, var(--bg-dark) 0%, #05070a 100%);
-            background-attachment: fixed;
-            padding: 10px 10px 80px 10px; /* Space for bottom nav */
-        }
-
-        .app-viewport {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-        }
-
-        /* HEADER */
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-        }
-
-        .btn-back {
-            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            border: 1px solid var(--card-border);
-            color: var(--gold-light);
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-
-        .brand-title-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .brand-title {
-            font-size: 1.1rem;
-            font-weight: 900;
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .wallet-chip {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            color: var(--green-vibrant);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 800;
-        }
-
-        /* MULTI-TIMER SELECTOR TABS */
-        .timer-tabs-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            padding: 6px;
-            border-radius: 16px;
-        }
-
-        .timer-tab {
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--text-muted);
-            padding: 8px 4px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            transition: all 0.25s ease;
-        }
-
-        .timer-tab.active {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(15, 23, 42, 0.9));
-            border-color: var(--gold-neon);
-            color: var(--gold-neon);
-            box-shadow: 0 4px 15px var(--gold-glow);
-        }
-
-        /* 3D GAME ARENA CONTAINER */
-        .arena-card {
-            background: radial-gradient(circle, #1a202c 0%, #05070a 100%);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            height: 240px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #webglContainer {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* LOCK OVERLAY (LAST 5 SECONDS) */
-        .lock-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(12, 15, 22, 0.88);
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.4rem;
-            font-weight: 900;
-            color: var(--red-vibrant);
-            letter-spacing: 2px;
-            z-index: 50;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .lock-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .arena-hud {
-            position: absolute;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(12, 15, 22, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            padding: 8px 14px;
-            border-radius: 14px;
-            z-index: 20;
-        }
-
-        .period-text { font-size: 0.85rem; font-weight: 800; color: var(--text-main); }
-        .clock-val { font-size: 1.1rem; font-weight: 900; color: var(--gold-neon); font-family: monospace; }
-
-        /* 3D CHIP DENOMINATION SELECTORS */
-        .chips-panel {
-            display: flex;
-            justify-content: space-between;
-            gap: 6px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 10px;
-        }
-
-        .chip-3d {
-            flex: 1;
-            height: 42px;
-            border-radius: 50%;
-            border: 2px dashed rgba(255,255,255,0.4);
-            color: #fff;
-            font-size: 0.8rem;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-
-        .chip-10 { background: radial-gradient(circle, #0284c7, #0369a1); }
-        .chip-50 { background: radial-gradient(circle, #7c3aed, #5b21b6); }
-        .chip-100 { background: radial-gradient(circle, #d97706, #b45309); }
-        .chip-500 { background: radial-gradient(circle, #dc2626, #991b1b); }
-        .chip-1k { background: radial-gradient(circle, #10b981, #047857); }
-
-        .chip-3d.active {
-            border-style: solid;
-            border-color: #ffffff;
-            transform: scale(1.12);
-            box-shadow: 0 0 16px var(--gold-neon);
-        }
-
-        /* INTERACTIVE BETTING GRID */
-        .betting-grid-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .grid-row-quick {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
-
-        .btn-quick-bet {
-            height: 42px;
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
-            background: rgba(12, 15, 22, 0.8);
-            color: #fff;
-            font-weight: 900;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .btn-quick-bet.big { background: linear-gradient(135deg, #f59e0b, #b45309); }
-        .btn-quick-bet.small { background: linear-gradient(135deg, #06b6d4, #0369a1); }
-        .btn-quick-bet.odd { background: linear-gradient(135deg, #8b5cf6, #5b21b6); }
-        .btn-quick-bet.even { background: linear-gradient(135deg, #ef4444, #991b1b); }
-
-        .sum-numbers-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-        }
-
-        .btn-sum-cell {
-            background: rgba(12, 15, 22, 0.8);
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 8px 4px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .btn-sum-cell .sum-val { font-size: 0.9rem; font-weight: 900; color: var(--gold-neon); }
-        .btn-sum-cell .sum-mult { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; }
-
-        .chip-placed-badge {
-            position: absolute;
-            top: -4px; right: -4px;
-            background: var(--gold-gradient);
-            color: #000;
-            font-size: 0.58rem;
-            font-weight: 900;
-            padding: 1px 5px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.8);
-            z-index: 5;
-        }
-
-        /* HISTORY & TREND CHART SECTION */
-        .history-section {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .history-tabs-bar {
-            display: flex;
-            background: rgba(12, 15, 22, 0.8);
-            border-radius: 12px;
-            padding: 4px;
-            border: 1px solid var(--card-border);
-        }
-
-        .sub-tab-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 800;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .sub-tab-btn.active {
-            background: var(--card-bg);
-            color: var(--gold-neon);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        .history-table-container {
-            max-height: 360px;
-            overflow-y: auto;
-        }
-
-        .history-table-container::-webkit-scrollbar { width: 4px; }
-        .history-table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 10px 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-
-        th {
-            color: var(--text-muted);
-            font-weight: 700;
-            background: rgba(12, 15, 22, 0.8);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .dice-icon-inline {
-            display: inline-block;
-            width: 18px; height: 18px;
-            background: #fff;
-            color: #000;
-            border-radius: 4px;
-            text-align: center;
-            line-height: 18px;
-            font-weight: 900;
-            font-size: 0.72rem;
-            margin-right: 2px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        /* FIXED 4-COLUMN BOTTOM NAVIGATION BAR */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 100%; max-width: 480px;
-            background: rgba(12, 15, 22, 0.95);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .nav-item.active { color: var(--gold-neon); }
-        .nav-icon { font-size: 1.2rem; }
-
-        /* TOAST NOTIFICATION */
-        .toast {
-            position: fixed;
-            top: 20px; left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            background: rgba(12, 15, 22, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--gold-neon);
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 30px;
-            font-size: 0.85rem; font-weight: 700;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
-            opacity: 0; visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 2000;
-        }
-
-        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080909">
+<title>N+ PLAY — K3</title>
+<style>
+:root{--bg:#070808;--card:#111311;--card2:#161816;--line:rgba(255,255,255,.085);--txt:#f4f1e9;--muted:#858a84;--gold:#d8b66d;--gold2:#f2d594;--red:#ef5a57;--green:#27bd78;--violet:#a86aee;--blue:#639bea}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -15%,#302b1d 0,#111310 30%,#070808 65%);color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{display:flex;justify-content:center}.app{width:100%;max-width:520px;min-height:100vh;background:linear-gradient(180deg,rgba(10,11,10,.98),rgba(6,7,7,.99));box-shadow:0 0 90px #000;overflow:hidden}.ambient{position:fixed;width:520px;height:520px;top:-250px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(216,182,109,.12),transparent 68%);pointer-events:none}
+header{height:64px;position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);background:rgba(8,9,8,.88);backdrop-filter:blur(18px)}.hleft,.hright{display:flex;align-items:center;gap:8px}.brand{display:flex;align-items:center;gap:7px;font-weight:900;letter-spacing:.5px}.mark{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#f4d996,#9c7132);color:#171209;font-size:11px;font-weight:950}.live{font-size:9px;color:#7ee2b0;display:flex;gap:4px;align-items:center}.live i{width:6px;height:6px;border-radius:50%;background:#35cf89;box-shadow:0 0 10px #35cf89}.ib{width:35px;height:35px;border-radius:11px;border:1px solid var(--line);background:#121413;color:#d7d8d2;display:grid;place-items:center}
+main{padding:12px 12px 36px}.wallet{border:1px solid rgba(216,182,109,.2);border-radius:18px;padding:14px;background:linear-gradient(145deg,#29261e,#111310 70%);box-shadow:inset 0 1px rgba(255,255,255,.05),0 15px 35px #0006}.walletrow{display:flex;align-items:center;justify-content:space-between;gap:10px}.label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}.balance{font-size:25px;font-weight:950;margin-top:2px}.wa{display:flex;gap:6px}.wa button{border:0;border-radius:10px;padding:9px 10px;font-size:9px;font-weight:900}.dep{background:var(--gold);color:#161209}.wit{background:#252825;color:#ddd;border:1px solid var(--line)!important}
+.notice{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:10px 0;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:#0f110f;color:#949993;font-size:9px}.notice b{color:#ddd}
+.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}.mode{border:1px solid var(--line);background:#111312;border-radius:13px;padding:9px 2px;color:#818680}.mode strong{display:block;font-size:10px;color:#d8d9d4}.mode small{font-size:8px}.mode.active{border-color:#b8924c;background:linear-gradient(180deg,#2b2417,#141410);box-shadow:0 8px 24px #d8b66d12}.mode.active strong,.mode.active small{color:var(--gold2)}
+.round{border:1px solid var(--line);border-radius:18px;padding:12px;background:linear-gradient(145deg,#181a18,#0d0f0e);overflow:hidden;position:relative}.roundtop{display:flex;justify-content:space-between;position:relative;z-index:1}.how{border:1px solid var(--line);background:#121412;color:#cccfc9;border-radius:9px;padding:7px 9px;font-size:8px;font-weight:800}.timer{text-align:right}.tl{font-size:8px;color:#858983;text-transform:uppercase;letter-spacing:.8px}.time{font-size:27px;line-height:1.1;font-weight:950;letter-spacing:2px;font-variant-numeric:tabular-nums}.period{display:flex;justify-content:space-between;gap:10px;margin-top:9px;align-items:center}.period span{font-size:8px;color:#777b76;text-transform:uppercase}.period code{font:8px ui-monospace,SFMono-Regular,monospace;color:#d7d5ce}.progress{height:3px;border-radius:99px;background:#272a27;overflow:hidden;margin-top:10px}.bar{height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .15s linear}.status{text-align:center;font-size:8px;font-weight:900;letter-spacing:1.1px;color:#72dfaa;margin-top:8px}.closed .status{color:#ff7773}.stage{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px}.stage span{height:3px;border-radius:99px;background:#252825}.stage span.on{background:var(--gold)}
+.title{font-size:9px;color:#777c77;text-transform:uppercase;letter-spacing:1.25px;margin:15px 2px 8px}.recent{display:flex;gap:7px;overflow:auto;padding:2px 1px}.recent::-webkit-scrollbar{display:none}.ball{flex:0 0 31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#171918;border:1px solid var(--line);font-size:10px;font-weight:950}.ball.r{color:#ff7773}.ball.g{color:#6bdfac}.ball.v{color:#c38af5}
+.dicebox{height:125px;margin-top:10px;position:relative;display:flex;align-items:center;justify-content:center;gap:18px;padding:10px;background:radial-gradient(circle at 50% 50%,rgba(216,182,109,.12),transparent 55%),linear-gradient(145deg,#181a18,#090a0a);border:1px solid rgba(216,182,109,.28);border-radius:16px;box-shadow:inset 0 0 35px #000,0 12px 25px #0008}.dicebox:before{content:"";position:absolute;inset:7px;border:1px solid rgba(255,255,255,.035);border-radius:11px;pointer-events:none}.dicebox:after{content:"";position:absolute;width:220px;height:45px;bottom:-22px;left:50%;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(216,182,109,.18),transparent 68%);filter:blur(7px);pointer-events:none}
+.cube-wrap{width:92px;height:92px;perspective:720px;display:grid;place-items:center;filter:drop-shadow(0 14px 10px rgba(0,0,0,.55))}
+.cube{width:70px;height:70px;position:relative;transform-style:preserve-3d;will-change:transform;transition:transform .15s ease}
+.face{position:absolute;width:70px;height:70px;border-radius:12px;
+background:
+radial-gradient(circle at 26% 18%,rgba(255,255,255,.32),transparent 19%),
+linear-gradient(145deg,#ff777b 0%,#e3313a 45%,#a40f18 78%,#68070e 100%);
+border:1px solid rgba(255,184,188,.72);
+box-shadow:
+inset 0 2px 4px rgba(255,255,255,.38),
+inset 0 -10px 17px rgba(70,0,5,.42),
+inset 8px 0 13px rgba(255,255,255,.07),
+0 3px 5px rgba(0,0,0,.55);
+display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:8px;
+backface-visibility:hidden}
+.face:after{content:"";position:absolute;inset:4px;border:1px solid rgba(255,255,255,.12);border-radius:9px;pointer-events:none}
+.face.front{transform:translateZ(35px)}.face.back{transform:rotateY(180deg) translateZ(35px)}
+.face.right{transform:rotateY(90deg) translateZ(35px)}.face.left{transform:rotateY(-90deg) translateZ(35px)}
+.face.top{transform:rotateX(90deg) translateZ(35px)}.face.bottom{transform:rotateX(-90deg) translateZ(35px)}
+.pip{width:11px;height:11px;border-radius:50%;align-self:center;justify-self:center;
+background:radial-gradient(circle at 32% 24%,#fff 0 8%,#fafafa 20%,#d5d5d5 54%,#8e8e8e 100%);
+box-shadow:inset 0 1px 2px rgba(0,0,0,.38),0 1px 1px rgba(255,255,255,.35)}
+.cube.rolling{animation:cubeRoll 1.05s cubic-bezier(.14,.76,.2,1)}
+@keyframes cubeRoll{
+0%{transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1)}
+18%{transform:rotateX(125deg) rotateY(80deg) rotateZ(18deg) scale(1.08)}
+42%{transform:rotateX(285deg) rotateY(210deg) rotateZ(-20deg) scale(.94)}
+68%{transform:rotateX(445deg) rotateY(320deg) rotateZ(13deg) scale(1.06)}
+86%{transform:rotateX(535deg) rotateY(385deg) rotateZ(-5deg) scale(1.01)}
+100%{transform:rotateX(540deg) rotateY(360deg) rotateZ(0deg) scale(1)}} 
+.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:10px;background:#101010;border:1px solid var(--line);border-radius:11px;padding:3px}.filter{border:0;background:#101010;color:#777;border-radius:8px;padding:10px 2px;font-size:8px;font-weight:800}.filter.active{background:linear-gradient(135deg,#c9a066,#8e6837);color:#0b0907}
+.category{margin-top:6px;padding:3px 0}.cat-title{font-size:9px;color:#858a84;padding:8px 4px 5px}.cat-title b{color:#ddd}.cat-row{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:4px}.cat-btn{border:1px solid rgba(216,182,109,.12);background:#151615;color:#e8e4dc;border-radius:9px;padding:9px 2px;font-size:10px;font-weight:900}.cat-btn:hover,.cat-btn:active{border-color:#c8a367;background:#211b12}.cat-wide{grid-column:1/-1;border:1px solid rgba(216,182,109,.15);background:#171411;color:#dfc08a;border-radius:9px;padding:10px;font-size:9px;font-weight:900}
+.numbers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 4px}.num{border:1px solid var(--line);background:radial-gradient(circle at 35% 25%,#292c29,#101211 70%);border-radius:50%;aspect-ratio:1;color:#ddd;font-size:14px;font-weight:950;box-shadow:inset 0 1px #fff1,0 5px 14px #0005}.num small{display:block;font-size:6px;color:#777;font-weight:500;margin-top:2px}
+.bigbuttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}.bigbuttons button{border:1px solid #fff1;color:#fff;border-radius:10px;padding:9px 2px;font-size:9px;font-weight:900}.small{background:#426b94}.big{background:#95602d}.even{background:#3c7655}.odd{background:#8e3e42}
+.selection{margin-top:10px;padding:10px 11px;border:1px solid #d8b66d30;background:linear-gradient(90deg,#d8b66d0b,#111312);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}.selection b{font-size:10px}.selection span{font-size:8px;color:#858a84}.edit{border:1px solid var(--line);background:#171917;color:#d9d8d1;border-radius:8px;padding:6px 8px;font-size:8px}
+.tabs{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:3px;margin-top:15px;border-bottom:1px solid var(--line);padding-bottom:6px}.tab{border:0;background:transparent;color:#777c77;border-radius:8px;padding:8px 2px;font-size:8px;font-weight:900}.tab.active{background:#1a1c1a;color:var(--gold2)}.panel{border:1px solid var(--line);border-radius:15px;background:#0f110f;overflow:hidden;margin-top:8px;min-height:160px}.hh,.hr{display:grid;grid-template-columns:1.45fr .45fr .65fr .7fr;align-items:center}.hh{padding:9px 10px;background:#d8b66d0d;color:#858a84;font-size:7px;text-transform:uppercase}.hr{padding:9px 10px;border-top:1px solid #171917;font-size:8px}.hr.latest{background:#d8b66d08;border-top-color:#d8b66d22}.hr code{font:7px ui-monospace,monospace;color:#80857f}.rn{font-size:15px;font-weight:950}.st.big{color:#e9ad6b}.st.small{color:#83b2ef}.cd{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px}.cd.r{background:var(--red)}.cd.g{background:var(--green)}.cd.v{background:var(--violet)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;padding:9px}.stat{border:1px solid var(--line);background:#141614;border-radius:11px;padding:11px}.stat b{font-size:18px}.stat span{display:block;font-size:7px;color:#777c77;text-transform:uppercase;margin-top:2px}.bars{padding:11px}.br{display:grid;grid-template-columns:18px 1fr 25px;gap:7px;align-items:center;margin:7px 0;font-size:8px}.track{height:6px;background:#242724;border-radius:99px;overflow:hidden}.fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),#f0dcae)}.betitem{display:grid;grid-template-columns:1fr .65fr .6fr;gap:6px;padding:10px;border-bottom:1px solid #181a18;font-size:9px}.betitem small{display:block;color:#777c77;font-size:7px;margin-top:2px}.statusWon{color:#6ee1aa}.statusLost{color:#ff7773}.statusPending{color:#dfc17e}.note{padding:18px;color:#777c77;text-align:center;font-size:8px}.pagination{display:flex;justify-content:center;padding:10px;color:#777;font-size:8px}
+footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display:inline-block;padding:4px 8px;border:1px solid #d8b66d30;border-radius:99px;color:#a99467;margin-bottom:6px}
+.overlay{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;background:#000b;backdrop-filter:blur(8px)}.overlay.show{display:flex}.sheet{width:100%;max-width:520px;border:1px solid #fff1;border-bottom:0;border-radius:23px 23px 0 0;background:linear-gradient(180deg,#1b1d1b,#0c0e0d);padding:15px 15px calc(17px + env(safe-area-inset-bottom));box-shadow:0 -30px 90px #000c}.grab{width:38px;height:4px;background:#484c48;border-radius:99px;margin:0 auto 13px}.sheettop{display:flex;align-items:center;justify-content:space-between}.sheettop h3{font-size:14px;margin:0}.close{width:29px;height:29px;border:0;border-radius:50%;background:#262925;color:#bbb}.selectedBox{margin:11px 0;padding:10px;border-radius:11px;border:1px solid #d8b66d2b;background:#d8b66d09;color:#aaa;font-size:9px}.selectedBox strong{color:var(--gold2)}.field{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#777c77;margin:11px 0 6px}.amount{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#0e100f;color:#fff;text-align:center;outline:none}.amts{display:flex;gap:5px;overflow:auto;margin-top:6px}.amts button{white-space:nowrap;border:1px solid var(--line);background:#111312;color:#999;border-radius:8px;padding:6px 9px;font-size:8px}.step{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:5px;background:#0e100f}.step button{width:30px;height:30px;border:0;border-radius:8px;background:#202320;color:#ddd}.step span{font-weight:900}.multis{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.multi{border:1px solid var(--line);background:#111312;color:#888;border-radius:8px;padding:7px 2px;font-size:8px}.multi.active{background:var(--gold);border-color:var(--gold);color:#151109;font-weight:900}.tot{display:flex;justify-content:space-between;align-items:center;padding:11px 0;font-size:10px}.tot strong{font-size:19px;color:var(--gold2)}.agree{display:flex;align-items:center;gap:7px;color:#858a84;font-size:8px}.acts{display:grid;grid-template-columns:1fr 1.5fr;gap:7px;margin-top:12px}.acts button{padding:12px;border:0;border-radius:11px;font-size:10px;font-weight:900}.can{background:#242724;color:#ddd}.con{background:linear-gradient(135deg,#f1d38f,#b6873c);color:#151108}.con:disabled{opacity:.4}
+.rules{position:fixed;inset:0;z-index:65;display:none;background:#000c;backdrop-filter:blur(9px);padding:20px;overflow:auto}.rules.show{display:block}.rulecard{max-width:520px;margin:20px auto;background:#111311;border:1px solid var(--line);border-radius:20px;padding:17px}.rulehead{display:flex;justify-content:space-between;align-items:center}.rulehead h2{font-size:17px;margin:0}.rule{border-top:1px solid var(--line);padding:11px 0}.rule b{font-size:10px}.rule p{font-size:9px;line-height:1.55;color:#8d928c;margin:5px 0}.ruleclose{width:30px;height:30px;border:0;border-radius:50%;background:#252825;color:#ddd}
+.toast{position:fixed;left:50%;bottom:22px;z-index:100;transform:translate(-50%,20px);padding:10px 14px;background:#202320;border:1px solid var(--line);border-radius:10px;color:#eee;font-size:9px;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
 </head>
 <body>
-
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Notification</div>
-
-    <!-- MAIN APP CONTAINER -->
-    <div class="app-viewport">
-        <!-- HEADER -->
-        <header class="app-header">
-            <a href="index.html" class="btn-back" title="Back to Home">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <div class="brand-title-box">
-                <span class="brand-title">K3 Dice Game 3D</span>
-            </div>
-            <div class="wallet-chip" id="walletDisplay">$1,000.00</div>
-        </header>
-
-        <!-- MULTI-TIMER SELECTOR TABS -->
-        <div class="timer-tabs-grid">
-            <button class="timer-tab active" onclick="switchTimerTab('30s')">
-                <span>⚡ 30s</span>
-                <span id="tabClock-30s">00:30</span>
-            </button>
-            <button class="timer-tab" onclick="switchTimerTab('1m')">
-                <span>⏱️ 1Min</span>
-                <span id="tabClock-1m">01:00</span>
-            </button>
-            <button class="timer-tab" onclick="switchTimerTab('3m')">
-                <span>⏱️ 3Min</span>
-                <span id="tabClock-3m">03:00</span>
-            </button>
-            <button class="timer-tab" onclick="switchTimerTab('5m')">
-                <span>⏱️ 5Min</span>
-                <span id="tabClock-5m">05:00</span>
-            </button>
-        </div>
-
-        <!-- 3D GAME ARENA -->
-        <div class="arena-card">
-            <div class="lock-overlay" id="lockOverlay">🔒 TIME LOCK</div>
-            <div id="webglContainer" style="width:100%; height:100%;"></div>
-
-            <!-- Arena HUD -->
-            <div class="arena-hud">
-                <span class="period-text" id="activePeriodDisplay">Period: 2026080230001</span>
-                <span class="clock-val" id="activeClockDisplay">00:30</span>
-            </div>
-        </div>
-
-        <!-- 3D CHIP DENOMINATION SELECTORS -->
-        <div class="chips-panel">
-            <button class="chip-3d chip-10 active" onclick="selectChip(10, this)">$10</button>
-            <button class="chip-3d chip-50" onclick="selectChip(50, this)">$50</button>
-            <button class="chip-3d chip-100" onclick="selectChip(100, this)">$100</button>
-            <button class="chip-3d chip-500" onclick="selectChip(500, this)">$500</button>
-            <button class="chip-3d chip-1k" onclick="selectChip(1000, this)">$1K</button>
-        </div>
-
-        <!-- INTERACTIVE BETTING GRID -->
-        <div class="betting-grid-card">
-            <!-- Quick Options -->
-            <div class="grid-row-quick">
-                <button class="btn-quick-bet big" onclick="placeBet('Big', 'quick')">
-                    BIG (11-17)
-                    <span class="chip-placed-badge" id="betBadge-Big" style="display:none;">$0</span>
-                </button>
-                <button class="btn-quick-bet small" onclick="placeBet('Small', 'quick')">
-                    SMALL (4-10)
-                    <span class="chip-placed-badge" id="betBadge-Small" style="display:none;">$0</span>
-                </button>
-                <button class="btn-quick-bet odd" onclick="placeBet('Odd', 'quick')">
-                    ODD
-                    <span class="chip-placed-badge" id="betBadge-Odd" style="display:none;">$0</span>
-                </button>
-                <button class="btn-quick-bet even" onclick="placeBet('Even', 'quick')">
-                    EVEN
-                    <span class="chip-placed-badge" id="betBadge-Even" style="display:none;">$0</span>
-                </button>
-            </div>
-
-            <!-- Sum Total Options (3 to 18) -->
-            <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); margin-top: 4px;">Sum Total Bet (3-18)</div>
-            <div class="sum-numbers-grid">
-                <!-- Sums 3-18 populated via JS -->
-            </div>
-        </div>
-
-        <!-- HISTORY & TREND CHART SECTION -->
-        <div class="history-section">
-            <div class="history-tabs-bar">
-                <button class="sub-tab-btn active" onclick="switchSubTab('history')">Game History</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('myBets')">My Bets</button>
-            </div>
-
-            <div class="history-table-container" id="historyView">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>Dice Outcome</th>
-                            <th>Sum</th>
-                            <th>Result</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyTableBody">
-                        <!-- Dynamic Rows -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="history-table-container" id="myBetsView" style="display: none;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>Bet Target</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myBetsTableBody">
-                        <!-- Dynamic Rows -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- FIXED 4-COLUMN BOTTOM NAVIGATION BAR -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="activity.html" class="nav-item">
-            <span class="nav-icon">🔥</span>
-            <span>Activity</span>
-        </a>
-        <a href="promotion.html" class="nav-item">
-            <span class="nav-icon">🎁</span>
-            <span>Promotion</span>
-        </a>
-        <a href="account.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            <span>Account</span>
-        </a>
-    </nav>
-
-    <!-- ==========================================
-       THREE.JS WebGL 3D K3 DICE & GAME ENGINE
-       ========================================== -->
-    <script>
-        // --- GAME STATE ---
-        let walletBalance = 1000.00;
-        let selectedChip = 10;
-        let activeTabKey = '30s';
-        let activeSubTab = 'history';
-        let placedBets = {};
-        let totalStakedRound = 0;
-
-        // 4 Multi-Timer Config
-        const TIMERS_CONFIG = {
-            '30s': { name: 'K3 30s', duration: 30, periodPrefix: '2026080230', periodSeq: 1001, remaining: 30, history: [], myBets: [] },
-            '1m':  { name: 'K3 1Min', duration: 60, periodPrefix: '2026080201', periodSeq: 1001, remaining: 60, history: [], myBets: [] },
-            '3m':  { name: 'K3 3Min', duration: 180, periodPrefix: '2026080203', periodSeq: 1001, remaining: 180, history: [], myBets: [] },
-            '5m':  { name: 'K3 5Min', duration: 300, periodPrefix: '2026080205', periodSeq: 1001, remaining: 300, history: [], myBets: [] }
-        };
-
-        // Three.js Scene Variables
-        let scene, camera, renderer;
-        let shakerCupMesh, diceMeshes = [];
-        let isShaking = false;
-
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            initThreeJS();
-            generateInitialHistory();
-            renderSumGrid();
-            startMasterClock();
-            renderActiveHistory();
-        };
-
-        // --- THREE.JS PROCEDURAL 3D K3 DICE ENGINE ---
-        function initThreeJS() {
-            const container = document.getElementById('webglContainer');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
-            camera.position.set(0, 4.5, 5.5);
-            camera.lookAt(0, 0, 0);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.shadowMap.enabled = true;
-            container.appendChild(renderer.domElement);
-
-            // Lighting Setup
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-
-            const goldSpotLight = new THREE.SpotLight(0xfbbf24, 2.5);
-            goldSpotLight.position.set(2, 8, 4);
-            goldSpotLight.castShadow = true;
-            scene.add(goldSpotLight);
-
-            // Metallic Base Plate
-            const plateGeo = new THREE.CylinderGeometry(2.8, 3.0, 0.2, 32);
-            const plateMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.2, metalness: 0.8 });
-            const plateMesh = new THREE.Mesh(plateGeo, plateMat);
-            plateMesh.position.y = -0.2;
-            scene.add(plateMesh);
-
-            // 3 Cubical Dice
-            const dicePositions = [-0.8, 0, 0.8];
-            for (let i = 0; i < 3; i++) {
-                const dieGeo = new THREE.BoxGeometry(0.7, 0.7, 0.7);
-                const dieMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 });
-                const dieMesh = new THREE.Mesh(dieGeo, dieMat);
-                dieMesh.position.set(dicePositions[i], 0.25, 0);
-                scene.add(dieMesh);
-                diceMeshes.push(dieMesh);
-            }
-
-            // Gold Metallic Shaker Cup
-            const cupGeo = new THREE.CylinderGeometry(1.6, 2.2, 2.2, 32, 1, true);
-            const cupMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.15, side: THREE.DoubleSide });
-            shakerCupMesh = new THREE.Mesh(cupGeo, cupMat);
-            shakerCupMesh.position.set(0, 1.3, 0);
-            scene.add(shakerCupMesh);
-
-            animateThreeJS();
-        }
-
-        function animateThreeJS() {
-            requestAnimationFrame(animateThreeJS);
-
-            if (isShaking) {
-                // Vibrate Cup & Dice
-                shakerCupMesh.position.x = (Math.random() - 0.5) * 0.15;
-                shakerCupMesh.position.z = (Math.random() - 0.5) * 0.15;
-
-                diceMeshes.forEach(d => {
-                    d.rotation.x += 0.2;
-                    d.rotation.y += 0.2;
-                    d.position.y = 0.25 + Math.abs(Math.sin(Date.now() * 0.02) * 0.4);
-                });
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        function triggerDiceRollAnimation(diceResults) {
-            isShaking = true;
-
-            // 1. Lower Shaker Cup
-            const startTime = performance.now();
-            const liftDuration = 2000;
-
-            setTimeout(() => {
-                isShaking = false;
-                shakerCupMesh.position.set(0, 3.5, 0); // Lift cup to reveal dice
-                diceMeshes.forEach(d => d.position.y = 0.25);
-            }, 2000);
-        }
-
-        // --- POPULATE 100+ INITIAL RECORDS FOR ALL TIMERS ---
-        function generateInitialHistory() {
-            Object.keys(TIMERS_CONFIG).forEach(key => {
-                const conf = TIMERS_CONFIG[key];
-                for (let i = 0; i < 110; i++) {
-                    const periodId = `${conf.periodPrefix}${conf.periodSeq - i}`;
-                    const d1 = Math.floor(Math.random() * 6) + 1;
-                    const d2 = Math.floor(Math.random() * 6) + 1;
-                    const d3 = Math.floor(Math.random() * 6) + 1;
-                    const sum = d1 + d2 + d3;
-                    const isTriple = (d1 === d2 && d2 === d3);
-                    const size = isTriple ? 'Triple' : (sum >= 11 ? 'Big' : 'Small');
-                    const parity = sum % 2 === 0 ? 'Even' : 'Odd';
-
-                    conf.history.push({
-                        period: periodId,
-                        dice: [d1, d2, d3],
-                        sum: sum,
-                        size: size,
-                        parity: parity
-                    });
-                }
-            });
-        }
-
-        // --- RENDER SUM GRID ---
-        function renderSumGrid() {
-            const container = document.querySelector('.sum-numbers-grid');
-            const mults = {3:207, 4:69, 5:34.5, 6:20.7, 7:13.8, 8:9.8, 9:7.8, 10:6.9, 11:6.9, 12:7.8, 13:9.8, 14:13.8, 15:20.7, 16:34.5, 17:69, 18:207};
-            let html = '';
-            for (let s = 3; s <= 18; s++) {
-                html += `
-                    <div class="btn-sum-cell" onclick="placeBet('Sum${s}', 'sum')">
-                        <span class="sum-val">${s}</span>
-                        <span class="sum-mult">${mults[s]}x</span>
-                        <span class="chip-placed-badge" id="betBadge-Sum${s}" style="display:none;">$0</span>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        }
-
-        // --- MASTER TIMER LOOP ---
-        function startMasterClock() {
-            setInterval(() => {
-                Object.keys(TIMERS_CONFIG).forEach(key => {
-                    const conf = TIMERS_CONFIG[key];
-                    conf.remaining--;
-
-                    document.getElementById(`tabClock-${key}`).innerText = formatTime(conf.remaining);
-
-                    if (conf.remaining <= 0) {
-                        evaluateRound(key);
-                        conf.remaining = conf.duration;
-                        conf.periodSeq++;
-                    }
-
-                    if (key === activeTabKey) {
-                        document.getElementById('activeClockDisplay').innerText = formatTime(conf.remaining);
-                        document.getElementById('activePeriodDisplay').innerText = `Period: ${conf.periodPrefix}${conf.periodSeq}`;
-
-                        const lockOverlay = document.getElementById('lockOverlay');
-                        if (conf.remaining <= 5) lockOverlay.classList.add('active');
-                        else lockOverlay.classList.remove('active');
-                    }
-                });
-            }, 1000);
-        }
-
-        // --- ROUND EVALUATION ---
-        function evaluateRound(timerKey) {
-            const conf = TIMERS_CONFIG[timerKey];
-            const currentPeriodId = `${conf.periodPrefix}${conf.periodSeq}`;
-
-            const d1 = Math.floor(Math.random() * 6) + 1;
-            const d2 = Math.floor(Math.random() * 6) + 1;
-            const d3 = Math.floor(Math.random() * 6) + 1;
-            const sum = d1 + d2 + d3;
-            const isTriple = (d1 === d2 && d2 === d3);
-            const size = isTriple ? 'Triple' : (sum >= 11 ? 'Big' : 'Small');
-            const parity = sum % 2 === 0 ? 'Even' : 'Odd';
-
-            if (timerKey === activeTabKey) {
-                triggerDiceRollAnimation([d1, d2, d3]);
-            }
-
-            conf.history.unshift({
-                period: currentPeriodId,
-                dice: [d1, d2, d3],
-                sum: sum,
-                size: size,
-                parity: parity
-            });
-
-            // Check User Bets
-            const pendingBet = conf.myBets.find(b => b.period === currentPeriodId && b.status === 'Pending');
-            if (pendingBet) {
-                let isWin = false;
-                let payout = 0;
-
-                if (pendingBet.value === 'Big' && size === 'Big') { isWin = true; payout = pendingBet.amount * 2; }
-                else if (pendingBet.value === 'Small' && size === 'Small') { isWin = true; payout = pendingBet.amount * 2; }
-                else if (pendingBet.value === 'Odd' && parity === 'Odd') { isWin = true; payout = pendingBet.amount * 2; }
-                else if (pendingBet.value === 'Even' && parity === 'Even') { isWin = true; payout = pendingBet.amount * 2; }
-                else if (pendingBet.value === `Sum${sum}`) { isWin = true; payout = pendingBet.amount * 6.9; }
-
-                if (isWin) {
-                    walletBalance += payout;
-                    pendingBet.status = `+ $${payout.toFixed(2)}`;
-                    if (timerKey === activeTabKey) showToast(`🎉 WIN! Dice: ${d1}-${d2}-${d3} (Sum ${sum}). Paid $${payout.toFixed(2)}`);
-                } else {
-                    pendingBet.status = `-$${pendingBet.amount.toFixed(2)}`;
-                    if (timerKey === activeTabKey) showToast(`❌ Result: ${d1}-${d2}-${d3} (Sum ${sum}). Bet Lost.`);
-                }
-                updateWalletDisplay();
-            }
-
-            if (timerKey === activeTabKey) renderActiveHistory();
-        }
-
-        // --- BETTING LOGIC ---
-        function placeBet(targetKey, type) {
-            const conf = TIMERS_CONFIG[activeTabKey];
-            if (conf.remaining <= 5) {
-                showToast("Betting is locked in last 5 seconds!");
-                return;
-            }
-
-            if (walletBalance < selectedChip) {
-                showToast("Insufficient Balance!");
-                return;
-            }
-
-            const currentPeriodId = `${conf.periodPrefix}${conf.periodSeq}`;
-            walletBalance -= selectedChip;
-            placedBets[targetKey] = (placedBets[targetKey] || 0) + selectedChip;
-
-            conf.myBets.unshift({
-                period: currentPeriodId,
-                value: targetKey,
-                amount: selectedChip,
-                status: 'Pending'
-            });
-
-            updateWalletDisplay();
-            updateBetBadges();
-            showToast(`Bet placed on ${targetKey} for $${selectedChip}`);
-        }
-
-        function updateBetBadges() {
-            document.querySelectorAll('.chip-placed-badge').forEach(b => b.style.display = 'none');
-            Object.keys(placedBets).forEach(key => {
-                const badge = document.getElementById(`betBadge-${key}`);
-                if (badge && placedBets[key] > 0) {
-                    badge.innerText = `$${placedBets[key]}`;
-                    badge.style.display = 'block';
-                }
-            });
-        }
-
-        function switchTimerTab(key) {
-            activeTabKey = key;
-            const conf = TIMERS_CONFIG[key];
-
-            document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            document.getElementById('activePeriodDisplay').innerText = `Period: ${conf.periodPrefix}${conf.periodSeq}`;
-            document.getElementById('activeClockDisplay').innerText = formatTime(conf.remaining);
-
-            renderActiveHistory();
-        }
-
-        function switchSubTab(tabName) {
-            activeSubTab = tabName;
-            document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            document.getElementById('historyView').style.display = tabName === 'history' ? 'block' : 'none';
-            document.getElementById('myBetsView').style.display = tabName === 'myBets' ? 'block' : 'none';
-
-            renderActiveHistory();
-        }
-
-        function renderActiveHistory() {
-            const conf = TIMERS_CONFIG[activeTabKey];
-
-            if (activeSubTab === 'history') {
-                const tbody = document.getElementById('historyTableBody');
-                tbody.innerHTML = conf.history.slice(0, 100).map(item => `
-                    <tr>
-                        <td>${item.period}</td>
-                        <td>
-                            <span class="dice-icon-inline">${item.dice[0]}</span>
-                            <span class="dice-icon-inline">${item.dice[1]}</span>
-                            <span class="dice-icon-inline">${item.dice[2]}</span>
-                        </td>
-                        <td style="font-weight:900; color:var(--gold-neon);">${item.sum}</td>
-                        <td><strong>${item.size}</strong> / ${item.parity}</td>
-                    </tr>
-                `).join('');
-            } else if (activeSubTab === 'myBets') {
-                const tbody = document.getElementById('myBetsTableBody');
-                tbody.innerHTML = conf.myBets.slice(0, 50).map(bet => `
-                    <tr>
-                        <td>${bet.period}</td>
-                        <td style="font-weight:800;">${bet.value}</td>
-                        <td>$${bet.amount.toFixed(2)}</td>
-                        <td style="font-weight:900; color:${bet.status.includes('+') ? 'var(--green-vibrant)' : 'var(--red-vibrant)'}">${bet.status}</td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        function selectChip(val, btn) {
-            selectedChip = val;
-            document.querySelectorAll('.chip-3d').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        function updateWalletDisplay() {
-            document.getElementById('walletDisplay').innerText = `$${walletBalance.toFixed(2)}`;
-        }
-
-        function formatTime(totalSec) {
-            const m = Math.floor(totalSec / 60);
-            const s = totalSec % 60;
-            return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.className = 'toast show';
-            setTimeout(() => { toast.className = 'toast'; }, 2800);
-        }
-    </script>
-</body>
-</html>
+<div class="ambient"></div><div class="app">
+<header><div class="hleft"><button class="ib" id="back">‹</button><div class="brand"><div class="mark">N+</div> PLAY</div><span class="live"><i></i>LIVE</span></div><div class="hright"><button class="ib" id="rulesBtn">?</button></div></header>
+<main>
+<section class="wallet"><div class="walletrow"><div><div class="label">Available balance</div><div class="balance" id="balance">₹1,000.00</div></div><div class="wa"><button class="wit" id="withdraw">WITHDRAW</button><button class="dep" id="deposit">DEPOSIT</button></div></div></section>
+<div class="notice"><span>🎲 <b>K3 LIVE</b> · Virtual-credit experience</span><span>DETAIL ›</span></div>
+<div class="modes" id="modes"><button class="mode active" data-sec="60"><strong>K3</strong><small>1 MIN</small></button><button class="mode" data-sec="180"><strong>K3</strong><small>3 MIN</small></button><button class="mode" data-sec="300"><strong>K3</strong><small>5 MIN</small></button><button class="mode" data-sec="600"><strong>K3</strong><small>10 MIN</small></button></div>
+<section class="round" id="round"><div class="roundtop"><button class="how" id="how">HOW TO PLAY</button><div class="timer"><div class="tl">Time remaining</div><div class="time" id="time">01:00</div></div></div><div class="period"><span>Current period</span><code id="period">—</code></div><div class="progress"><div class="bar" id="bar"></div></div><div class="status" id="status">BETTING OPEN</div><div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div></section>
+<div class="title">Recent results</div><div class="recent" id="recent"></div>
+<div class="dicebox" id="dicebox"><div class="cube-wrap"><div class="cube" id="die1"></div></div><div class="cube-wrap"><div class="cube" id="die2"></div></div><div class="cube-wrap"><div class="cube" id="die3"></div></div></div><div id="resultLine" style="text-align:center;margin:8px 0 2px;font-size:9px;letter-spacing:1px;color:#858a84;text-transform:uppercase">RESULT · <b style="color:#e6d6b8">—</b></div>
+<div class="filters"><button class="filter active" data-cat="Total">TOTAL</button><button class="filter" data-cat="2 same">2 SAME</button><button class="filter" data-cat="3 same">3 SAME</button><button class="filter" data-cat="Different">DIFFERENT</button></div>
+<div class="category" id="category"></div>
+<div class="title">Quick K3 bets</div>
+<div class="bigbuttons"><button class="small" data-type="size" data-value="Small">SMALL<small> ≤10 · 2X</small></button><button class="big" data-type="size" data-value="Big">BIG<small> ≥11 · 2X</small></button><button class="even" data-type="parity" data-value="Even">EVEN<small> 2X</small></button><button class="odd" data-type="parity" data-value="Odd">ODD<small> 2X</small></button></div>
+<div class="selection"><div><b>YOUR SELECTION</b><br><span id="selectionText">No selection yet</span></div><button class="edit" id="edit">EDIT</button></div>
+<div class="tabs" id="tabs"><button class="tab active" data-tab="history">HISTORY</button><button class="tab" data-tab="bets">MY BETS</button><button class="tab" data-tab="chart">CHART</button><button class="tab" data-tab="strategy">STRATEGY</button><button class="tab" data-tab="stats">STATS</button></div>
+<section class="panel" id="panel"></section>
+<footer><span class="badge">VIRTUAL CREDIT DEMO</span><br>N+ PLAY · K3</footer>
+</main></div>
+
+<div class="overlay" id="overlay"><div class="sheet"><div class="grab"></div><div class="sheettop"><h3>Place demo selection</h3><button class="close" id="close">×</button></div><div class="selectedBox" id="selectedBox">Select a K3 option.</div><div class="field">Amount</div><input class="amount" id="amount" type="number" min="1" step="1" value="10"><div class="amts" id="amts"></div><div class="field">Quantity</div><div class="step"><button id="minus">−</button><span id="qty">1</span><button id="plus">+</button></div><div class="field">Multiplier</div><div class="multis" id="multis"></div><div class="tot"><span>Total demo credits</span><strong id="total">₹10.00</strong></div><label class="agree"><input id="agree" type="checkbox"> I agree to the game rules</label><div class="acts"><button class="can" id="cancel">CANCEL</button><button class="con" id="confirm" disabled>CONFIRM</button></div></div></div>
+
+<div class="rules" id="rules"><div class="rulecard"><div class="rulehead"><h2>K3 · How to Play</h2><button class="ruleclose" id="ruleClose">×</button></div><div class="rule"><b>1. Durations</b><p>Choose K3 1 Min, 3 Min, 5 Min or 10 Min. Each mode has its own local demo history and period stream.</p></div><div class="rule"><b>2. Dice result</b><p>Three six-sided dice roll and reveal a generated virtual result. Sum, Big/Small and Even/Odd are derived from the three dice.</p></div><div class="rule"><b>3. Categories</b><p>Total shows sums 3–18. 2 Same, 3 Same and Different expose the corresponding K3 selection groups and open the same betting sheet.</p></div><div class="rule"><b>4. Betting</b><p>Select an option, choose amount, quantity and demo multiplier, agree to the rules and confirm while betting is open. The final 5 seconds are locked.</p></div><div class="rule"><b>5. History, My Bets & Chart</b><p>All three are in-page WINGO-style tabs. History shows results, My Bets shows your demo selections, and Chart shows recent sum distribution.</p></div><div class="rule"><b>6. Virtual-credit notice</b><p>This prototype uses virtual credits only. No real-money wagers, payouts, deposits, withdrawals or real-money commission settlement are processed.</p></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{"use strict";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const STORE="nplusplay_k3_wingo_style_v1";
+const modes=[60,180,300,600], pipMap={1:[4],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+const state={sec:60,balance:1000,qty:1,multi:1,selection:null,tab:"history",history:{60:[],180:[],300:[],600:[]},bets:{60:[],180:[],300:[],600:[]},lastStart:null,result:null};
+const money=n=>"₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const sumType=n=>n<=10?"Small":"Big", parity=n=>n%2?"Odd":"Even";
+const periodAt=(start,sec)=>{const d=new Date(start),idx=Math.floor(start/(sec*1000));return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+"K3"+String(sec)+"M"+String(idx%100000).padStart(5,"0")};
+const round=()=>{const now=Date.now(),start=Math.floor(now/(state.sec*1000))*(state.sec*1000),elapsed=Math.floor((now-start)/1000);return{now,start,remaining:state.sec-elapsed,period:periodAt(start,state.sec)}};
+function randResult(){let a=1+Math.floor(Math.random()*6),b=1+Math.floor(Math.random()*6),c=1+Math.floor(Math.random()*6);return{a,b,c,sum:a+b+c,type:sumType(a+b+c),parity:parity(a+b+c)}}
+function resultForPeriod(p){let h=0;for(let i=0;i<p.length;i++)h=(Math.imul(h,31)+p.charCodeAt(i))|0;const a=Math.abs(h)%6+1,b=Math.abs(Math.imul(h,17))%6+1,c=Math.abs(Math.imul(h,29))%6+1;return{a,b,c,sum:a+b+c,type:sumType(a+b+c),parity:parity(a+b+c)}}
+function save(){localStorage.setItem(STORE,JSON.stringify({balance:state.balance,history:state.history,bets:state.bets}))}
+function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||"{}");if(x.balance!=null)state.balance=Number(x.balance);if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets)}catch{}}
+function ensureHistory(){const r=round(),arr=state.history[state.sec],known=new Set(arr.map(x=>x.period));for(let i=0;i<80;i++){const st=r.start-i*state.sec*1000,p=periodAt(st,state.sec);if(!known.has(p)){const x=resultForPeriod(p);arr.push({...x,period:p,ts:st});}}arr.sort((a,b)=>b.ts-a.ts);state.history[state.sec]=arr.slice(0,80);save()}
+function renderBalance(){$("#balance").textContent=money(state.balance)}
+function renderRecent(){$("#recent").innerHTML=state.history[state.sec].slice(0,14).map(x=>`<div class="ball ${x.sum%2?"r":"g"}">${x.sum}</div>`).join("")}
+function renderDice(a,b,c,animate=false){
+  [a,b,c].forEach((n,i)=>{
+    const el=$("#die"+(i+1));
+    const faces={front:"front",back:"back",right:"right",left:"left",top:"top",bottom:"bottom"};
+    el.innerHTML=Object.values(faces).map(cls=>`<div class="face ${cls}">${pipMap[n].map(k=>`<span class="pip" style="grid-area:${Math.ceil(k/3)}/${((k-1)%3)+1}"></span>`).join("")}</div>`).join("");
+    const final={
+      1:"rotateX(0deg) rotateY(0deg)",
+      2:"rotateX(0deg) rotateY(-90deg)",
+      3:"rotateX(-90deg) rotateY(0deg)",
+      4:"rotateX(90deg) rotateY(0deg)",
+      5:"rotateX(0deg) rotateY(90deg)",
+      6:"rotateX(180deg) rotateY(0deg)"
+    }[n];
+    el.classList.remove("rolling");
+    el.style.animationDelay=(i*110)+"ms";
+    if(animate){
+      void el.offsetWidth;
+      el.classList.add("rolling");
+      setTimeout(()=>{el.classList.remove("rolling");el.style.transform=final},1050+i*110);
+    }else{
+      el.style.transform=final;
+    }
+  });
+}function categoryHTML(cat){
+ if(cat==="Total")return `<div class="title">Choose sum</div><div class="numbers">${Array.from({length:16},(_,i)=>{const n=i+3;return `<button class="num" data-type="sum" data-value="${n}">${n}<small>${n===3||n===18?"HIGH":"K3"}</small></button>`}).join("")}</div>`;
+ if(cat==="2 same")return `<div class="cat-title">2 matching numbers · <b>demo category</b></div><div class="cat-row">${[1,2,3,4,5,6].map(n=>`<button class="cat-btn" data-type="pair" data-value="${n}${n}">${n}${n}</button>`).join("")}</div><div class="cat-title">A pair of unique numbers</div><div class="cat-row">${[11,22,33,44,55,66].map(n=>`<button class="cat-btn" data-type="pair" data-value="${n}">${n}</button>`).join("")}</div>`;
+ if(cat==="3 same")return `<div class="cat-title">3 of the same number · <b>demo category</b></div><div class="cat-row">${[1,2,3,4,5,6].map(n=>`<button class="cat-btn" data-type="triple" data-value="${n}${n}${n}">${n}${n}${n}</button>`).join("")}</div><div class="cat-title">Any 3 of the same number</div><div class="cat-row"><button class="cat-wide" data-type="anyTriple" data-value="Any 3 Same">ANY 3 OF THE SAME NUMBER</button></div>`;
+ return `<div class="cat-title">3 different numbers · <b>demo category</b></div><div class="cat-row">${[1,2,3,4,5,6].map(n=>`<button class="cat-btn" data-type="different" data-value="${n}">${n}</button>`).join("")}</div><div class="cat-title">3 continuous numbers</div><div class="cat-row"><button class="cat-wide" data-type="continuous" data-value="3 Continuous">3 CONTINUOUS NUMBERS</button></div><div class="cat-title">2 different numbers</div><div class="cat-row">${[1,2,3,4,5,6].map(n=>`<button class="cat-btn" data-type="different2" data-value="${n}">${n}</button>`).join("")}</div>`;
+}
+function renderCategory(cat="Total"){$("#category").innerHTML=categoryHTML(cat);if(cat==="Total"){$("#category").querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>openBet(b.dataset.type,b.dataset.value))}}
+function renderSelection(){const s=state.selection;$("#selectionText").textContent=s?`${s.type.toUpperCase()} · ${s.value}`:"No selection yet"}
+function renderPanel(){
+ const p=$("#panel"),h=state.history[state.sec],bets=state.bets[state.sec]||[];
+ if(state.tab==="history"){p.innerHTML=`<div class="hh"><span>Period</span><span>Sum</span><span>Type</span><span>Dice</span></div>`+h.slice(0,12).map((x,i)=>`<div class="hr ${i===0?"latest":""}"><code>${x.period}</code><span class="rn">${x.sum}</span><span class="st ${x.type.toLowerCase()}">${x.type} · ${x.parity}</span><span>⚄ ⚂ ⚅</span></div>`).join("")+`<div class="pagination">1 / 50</div>`}
+ else if(state.tab==="bets"){p.innerHTML=bets.length?bets.slice(0,20).map(b=>`<div class="betitem"><div><b>${b.value}</b><small>${b.type} · ${b.period}</small></div><div>${money(b.total)}<small>x${b.multi} · qty ${b.qty}</small></div><div class="${b.status==="WON"?"statusWon":b.status==="LOST"?"statusLost":"statusPending"}">${b.status}</div></div>`).join(""):`<div class="note">No demo selections in this duration.</div>`}
+ else if(state.tab==="chart"){const counts=Array(16).fill(0);h.forEach(x=>counts[x.sum-3]++);const max=Math.max(1,...counts);p.innerHTML=`<div class="bars">${counts.map((v,i)=>`<div class="br"><b>${i+3}</b><div class="track"><div class="fill" style="width:${v/max*100}%"></div></div><span>${v}</span></div>`).join("")}</div><div class="note">Recent K3 sum frequency · demo history only.</div>`}
+ else if(state.tab==="strategy"){const total=h.length,b=h.filter(x=>x.type==="Big").length,e=h.filter(x=>x.parity==="Even").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${total}</b><span>Rounds</span></div><div class="stat"><b>${b}</b><span>Big</span></div><div class="stat"><b>${total-b}</b><span>Small</span></div><div class="stat"><b>${e}</b><span>Even</span></div><div class="stat"><b>${total-e}</b><span>Odd</span></div><div class="stat"><b>${h.filter(x=>x.a===x.b&&x.b===x.c).length}</b><span>3 Same</span></div></div><div class="note">Historical patterns only; they do not predict future results.</div>`}
+ else{const won=bets.filter(x=>x.status==="WON").length,lost=bets.filter(x=>x.status==="LOST").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${bets.length}</b><span>Selections</span></div><div class="stat"><b>${won}</b><span>Demo wins</span></div><div class="stat"><b>${lost}</b><span>Demo losses</span></div><div class="stat"><b>${money(bets.reduce((a,x)=>a+x.total,0))}</b><span>Total stake</span></div></div>`}
+}
+let activeCategory="Total";
+function openBet(type,value){const r=round();if(r.remaining<=5){toast("Betting closed for this round");return}state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${String(type).toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${r.period}</span>`;$("#overlay").classList.add("show");syncSheet()}
+function closeSheet(){$("#overlay").classList.remove("show")}
+function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>state.balance||round().remaining<=5}
+function startMode(sec){state.sec=sec;state.selection=null;$$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));ensureHistory();renderRecent();renderCategory(activeCategory);renderSelection();renderPanel();state.lastStart=null;toast(`K3 ${sec/60} MIN`)}
+function newRound(start){const p=periodAt(start,state.sec),x=resultForPeriod(p);if(!state.history[state.sec].some(a=>a.period===p)){state.history[state.sec].unshift({...x,period:p,ts:start});state.history[state.sec]=state.history[state.sec].slice(0,80)}state.result=x;renderDice(x.a,x.b,x.c,true);$("#resultLine").innerHTML=`RESULT · <b style="color:#e6d6b8">${x.a}+${x.b}+${x.c} = ${x.sum} · ${x.type.toUpperCase()} · ${x.parity.toUpperCase()}</b>`;renderRecent();renderPanel();save()}
+function update(){const r=round(),closed=r.remaining<=5;if(state.lastStart!==null&&state.lastStart!==r.start)newRound(state.lastStart);state.lastStart=r.start;$("#time").textContent=`${String(Math.floor(r.remaining/60)).padStart(2,"0")}:${String(r.remaining%60).padStart(2,"0")}`;$("#period").textContent=r.period;$("#bar").style.width=(r.remaining/state.sec*100)+"%";$("#status").textContent=closed?"BETTING CLOSED":"BETTING OPEN";$("#round").classList.toggle("closed",closed);if(closed)$("#status").style.color="#ff7773";else $("#status").style.color="#72dfaa";const stage=closed?3:r.remaining<=10?2:r.remaining<=20?1:0;$$(".stage span").forEach((x,i)=>x.classList.toggle("on",i<=stage))}
+function toast(t){const x=$("#toast");x.textContent=t;x.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove("show"),1700)}
+load();ensureHistory();const rr=round();state.result=resultForPeriod(rr.period);renderBalance();renderRecent();renderDice(state.result.a,state.result.b,state.result.c,false);$("#resultLine").innerHTML=`RESULT · <b style="color:#e6d6b8">${state.result.a}+${state.result.b}+${state.result.c} = ${state.result.sum} · ${state.result.type.toUpperCase()} · ${state.result.parity.toUpperCase()}</b>`;renderCategory();renderSelection();renderPanel();
+$("#modes").onclick=e=>{const b=e.target.closest(".mode");if(b)startMode(+b.dataset.sec)};
+$$(".filter").forEach(b=>b.onclick=()=>{$$(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");activeCategory=b.dataset.cat;renderCategory(activeCategory)});
+$("#category").addEventListener("click",e=>{const b=e.target.closest("[data-type]");if(b)openBet(b.dataset.type,b.dataset.value)});
+$$(".bigbuttons button").forEach(b=>b.onclick=()=>openBet(b.dataset.type,b.dataset.value));
+$("#edit").onclick=()=>state.selection?openBet(state.selection.type,state.selection.value):toast("Choose a K3 selection first");
+$("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">₹${v}</button>`).join("");$("#multis").innerHTML=[1,5,10,20,50,100].map(v=>`<button class="multi ${v===1?"active":""}" data-m="${v}">X${v}</button>`).join("");
+document.addEventListener("click",e=>{const a=e.target.closest("[data-amt]");if(a){$("#amount").value=a.dataset.amt;syncSheet()}const m=e.target.closest("[data-m]");if(m){state.multi=+m.dataset.m;$$(".multi").forEach(x=>x.classList.toggle("active",x===m));syncSheet()}});
+$("#amount").oninput=syncSheet;$("#minus").onclick=()=>{state.qty=Math.max(1,state.qty-1);$("#qty").textContent=state.qty;syncSheet()};$("#plus").onclick=()=>{state.qty=Math.min(100,state.qty+1);$("#qty").textContent=state.qty;syncSheet()};$("#agree").onchange=syncSheet;
+$("#close").onclick=$("#cancel").onclick=closeSheet;$("#overlay").onclick=e=>{if(e.target===e.currentTarget)closeSheet()};
+$("#confirm").onclick=()=>{const r=round(),total=Number($("#amount").value||0)*state.qty*state.multi;if(r.remaining<=5){toast("Betting closed");return}if(total>state.balance){toast("Insufficient demo credits");return}const b={period:r.period,type:state.selection.type,value:state.selection.value,total,qty:state.qty,multi:state.multi,status:"PENDING",ts:Date.now()};state.balance=Number((state.balance-total).toFixed(2));state.bets[state.sec].unshift(b);save();renderBalance();renderPanel();closeSheet();toast("✓ Demo selection confirmed")};
+$("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;state.tab=b.dataset.tab;$$(".tab").forEach(x=>x.classList.toggle("active",x===b));renderPanel()};
+$("#rulesBtn").onclick=$("#how").onclick=()=>$("#rules").classList.add("show");$("#ruleClose").onclick=()=>$("#rules").classList.remove("show");$("#deposit").onclick=$("#withdraw").onclick=()=>toast("Virtual-credit demo only");$("#back").onclick=()=>history.back();
+setInterval(update,200);update();
+})();
+</script>
+</body></html>
