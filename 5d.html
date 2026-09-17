@@ -17,7 +17,7 @@ button,input{font:inherit}
 button{cursor:pointer}
 body{display:flex;justify-content:center}
 .app{
-  width:min(100%,520px);min-height:100vh;
+  width:min(100%,500px);min-height:100vh;
   background:
     radial-gradient(circle at 50% -12%,rgba(223,198,141,.11),transparent 34%),
     linear-gradient(180deg,#09090b 0%,#050506 100%);
@@ -47,7 +47,7 @@ body{display:flex;justify-content:center}
   padding:8px 12px;border-radius:10px;border:1px solid rgba(223,198,141,.22);
   background:linear-gradient(135deg,#dfc68d,#ab8a52);color:#15120d;font-size:10px;font-weight:950
 }
-.content{padding:10px 11px 22px}
+.content{padding:8px 10px 18px}
 .notice{
   padding:7px 10px;border-radius:10px;background:#0e0f11;border:1px solid var(--line);
   color:#7e7a74;font-size:8px;text-align:center;letter-spacing:.02em;margin-bottom:8px
@@ -70,15 +70,15 @@ body{display:flex;justify-content:center}
 .trlabel{font-size:8px;color:#777;letter-spacing:.11em;text-transform:uppercase}
 .resultnums{display:flex;gap:5px;margin-top:4px}
 .resultdot{
-  width:23px;height:23px;border-radius:50%;display:grid;place-items:center;
+  width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
   border:1px solid rgba(223,198,141,.18);background:#17181b;color:#eee;font-size:9px;font-weight:950
 }
 .resultsum{
-  min-width:33px;height:29px;border-radius:10px;display:grid;place-items:center;
+  min-width:31px;height:28px;border-radius:10px;display:grid;place-items:center;
   background:var(--red);color:#fff;font-size:11px;font-weight:950
 }
 .periodrow{
-  margin-top:8px;padding:9px 10px;border-radius:14px;background:#0d0e10;border:1px solid var(--line);
+  margin-top:7px;padding:8px 10px;border-radius:14px;background:#0d0e10;border:1px solid var(--line);
   display:flex;justify-content:space-between;align-items:flex-end
 }
 .periodlabel{font-size:7px;color:#777;letter-spacing:.12em;text-transform:uppercase}
@@ -94,7 +94,7 @@ body{display:flex;justify-content:center}
 .progress{height:3px;margin-top:5px;border-radius:10px;overflow:hidden;background:#202124}
 .progress i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .2s linear}
 .stage{
-  margin-top:8px;padding:10px 7px 11px;border-radius:17px;
+  margin-top:7px;padding:9px 6px 10px;border-radius:17px;
   background:
     radial-gradient(circle at 50% 0%,rgba(223,198,141,.06),transparent 35%),#0b0c0e;
   border:1px solid var(--line)
@@ -113,7 +113,7 @@ body{display:flex;justify-content:center}
 }
 
 .reel{
-  position:relative;height:67px;overflow:hidden;border-radius:9px;
+  position:relative;height:64px;overflow:hidden;border-radius:9px;
   background:linear-gradient(90deg,#0c0d0f 0%,#2a2c30 12%,#111216 50%,#292b2f 88%,#0b0c0e 100%);
   border:1px solid rgba(223,198,141,.19);
   box-shadow:inset 4px 0 8px rgba(0,0,0,.48),inset -4px 0 8px rgba(0,0,0,.48),0 7px 14px rgba(0,0,0,.35)
@@ -123,7 +123,7 @@ body{display:flex;justify-content:center}
   background:linear-gradient(90deg,rgba(0,0,0,.30),transparent 20%,transparent 80%,rgba(0,0,0,.34))
 }
 .reel::after{
-  content:"";position:absolute;z-index:7;left:1px;right:1px;top:50%;height:32px;
+  content:"";position:absolute;z-index:7;left:1px;right:1px;top:50%;height:30px;
   transform:translateY(-50%);border-top:1px solid rgba(223,198,141,.22);border-bottom:1px solid rgba(223,198,141,.18);
   box-shadow:inset 0 0 18px rgba(223,198,141,.035);pointer-events:none;border-radius:7px
 }
@@ -133,8 +133,8 @@ body{display:flex;justify-content:center}
   transform:translateY(17px);
 }
 .cell{
-  height:32px;display:flex;align-items:center;justify-content:center;
-  color:#f1ede5;font-size:24px;font-weight:950;line-height:32px;
+  height:31px;display:flex;align-items:center;justify-content:center;
+  color:#f1ede5;font-size:23px;font-weight:950;line-height:31px;
   text-shadow:0 2px 7px #000
 }
 .cell.prev,.cell.next{color:#a7a39c;opacity:.78}
@@ -144,7 +144,7 @@ body{display:flex;justify-content:center}
   0 0 0 1px rgba(223,198,141,.20),0 7px 14px rgba(0,0,0,.35)
 }
 .reellabels{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:4px 5px 0;text-align:center;color:#77736e;font-size:7px;font-weight:900;letter-spacing:.08em}
-.sumline{text-align:center;margin-top:8px;color:#858078;font-size:8px}
+.sumline{text-align:center;margin-top:6px;color:#74706a;font-size:7px}
 .sumline b{color:var(--gold2)}
 .spinstatus{text-align:center;margin-top:4px;color:#4d4a45;font-size:6px;letter-spacing:.13em}
 .categories{
@@ -178,9 +178,9 @@ body{display:flex;justify-content:center}
 .pt{border:1px solid var(--line);background:#141518;color:#858078;border-radius:8px;padding:8px;font-size:7px;font-weight:950}
 .pt.active{background:#201c15;color:var(--gold2);border-color:rgba(223,198,141,.18)}
 .table{margin-top:7px;overflow:hidden;border-radius:9px;border:1px solid var(--line)}
-.th,.tr{display:grid;grid-template-columns:1.55fr 1fr .85fr;gap:3px;align-items:center;padding:7px 6px;font-size:7px}
+.th,.tr{display:grid;grid-template-columns:1.55fr 1fr .85fr;gap:3px;align-items:center;padding:6px 5px;font-size:7px}
 .th{background:#17181b;color:#827e77;font-weight:950}
-.tr{border-top:1px solid var(--line);color:#c7c2ba;min-height:31px}
+.tr{border-top:1px solid var(--line);color:#c7c2ba;min-height:29px}
 .dots{display:flex;gap:2px;align-items:center}
 .hdot{
   width:16px;height:16px;border-radius:50%;display:grid;place-items:center;
@@ -202,7 +202,7 @@ body{display:flex;justify-content:center}
 }
 .sheet.open{display:flex}
 .sheetbox{
-  width:min(100%,520px);padding:13px 13px 18px;border-radius:21px 21px 0 0;
+  width:min(100%,500px);padding:13px 13px 18px;border-radius:21px 21px 0 0;
   background:#111216;border-top:1px solid rgba(223,198,141,.20);box-shadow:0 -20px 70px #000
 }
 .handle{width:38px;height:4px;border-radius:8px;background:#303136;margin:0 auto 11px}
@@ -237,19 +237,15 @@ body{display:flex;justify-content:center}
 </header>
 
 <main class="content">
-  <div class="notice">18+ · N+ PLAY VIRTUAL-CREDIT DEMO · NO REAL-MONEY WAGERING</div>
-
-  <div class="modes" id="modes">
+<div class="modes" id="modes">
     <button class="mode active" data-sec="60">5D 1 Min</button>
     <button class="mode" data-sec="180">5D 3 Min</button>
     <button class="mode" data-sec="300">5D 5 Min</button>
     <button class="mode" data-sec="600">5D 10 Min</button>
   </div>
-  <div class="clockhint">EXACT WALL-CLOCK ROUNDS · 60s / 180s / 300s / 600s</div>
-
-  <section class="topresult">
+<section class="topresult">
     <div>
-      <div class="trlabel">Lottery results</div>
+      <div class="trlabel">Lottery Results</div>
       <div class="resultnums" id="resultNums"></div>
     </div>
     <div class="resultsum" id="resultSum">—</div>
@@ -265,14 +261,11 @@ body{display:flex;justify-content:center}
   </section>
 
   <section class="stage">
-    <div class="stagehead"><strong>5D RESULT</strong><span class="live">● LIVE DEMO</span></div>
-    <div class="rail"></div>
-    <div class="reels" id="reels"></div>
-    <div class="rail" style="margin-top:3px"></div>
+    <div class="stagehead"><strong>5D</strong><span class="live">● LIVE</span></div>
+  <div class="reels" id="reels"></div>
     <div class="reellabels"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span></div>
     <div class="sumline" id="sumline">—</div>
-    <div class="spinstatus" id="spinStatus">READY</div>
-  </section>
+</section>
 
   <section class="categories">
     <div class="tabs" id="catTabs">
@@ -299,8 +292,7 @@ body{display:flex;justify-content:center}
   </section>
 
   <section class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;color:#555;font-size:6px;letter-spacing:.11em"><span>CURRENT MODE HISTORY</span><span>COMPLETED ROUNDS ONLY</span></div>
-    <div class="paneltabs">
+<div class="paneltabs">
       <button class="pt active" data-panel="history">GAME HISTORY</button>
       <button class="pt" data-panel="bets">MY HISTORY</button>
       <button class="pt" data-panel="chart">CHART</button>
@@ -308,7 +300,7 @@ body{display:flex;justify-content:center}
     <div id="panelBody"></div>
   </section>
 
-  <div class="footer">N+ PLAY · 5D VIRTUAL-CREDIT DEMO</div>
+  <div class="footer">N+ PLAY · 5D DEMO</div>
 </main>
 </div>
 
