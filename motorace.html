@@ -232,7 +232,13 @@ function tick(){
  $('betState').textContent=open?'LIVE DEMO':'CLOSED';
  if(!open&&sec===60){/* new minute handled by ensureCurrent */}
  if(sec===60){document.querySelectorAll('.bike').forEach(b=>{b.style.transition='none';b.style.left='4%'});$('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';}
- if(sec===0&&!raceStarted)startRace(resultFor(currentPeriod));
+ if(sec===1&&!raceStarted&&!roundHandled){
+  roundHandled=true;
+  startRace(resultFor(currentPeriod));
+}
+if(sec===60){
+  roundHandled=false;
+}
 }
 buildTrack();renderNums();renderBalance();ensureCurrent();renderRecent();renderPanel('history');syncSheet();
 setInterval(tick,100);tick();
