@@ -68,8 +68,47 @@ function newRound(){phase='WAIT';left=6;crash=makeCrash();bets=[null,null];q('#m
 function makeCrash(){let r=Math.random();if(r<.08)return 1+Math.random()*.18;if(r<.55)return 1.15+Math.random()*1.85;if(r<.88)return 3+Math.random()*5;if(r<.98)return 8+Math.random()*12;return 20+Math.random()*80}
 const fx=x=>Number(x).toFixed(2)+'x';
 function start(){phase='FLY';started=performance.now();q('#mult').className='mult';raf=requestAnimationFrame(frame)}
-function current(){let t=(performance.now()-started)/1000;return 1+.34*Math.pow(t,1.45)+.08*t*t}
-function frame(){if(phase!=='FLY')return;let x=current(),p=Math.min(.93,Math.log(x)/Math.log(Math.max(crash,1.01)));q('#mult').textContent=fx(x);q('#plane').style.left=4+p*84+'%';q('#plane').style.top=74-p*60+'%';q('#plane').style.transform='translate(-8px,-25px) rotate('+(-2-p*10)+'deg)';draw(p);qa('.betbtn').forEach((b,i)=>{let z=bets[i];if(z&&!z.cashed){b.classList.add('cash');b.innerHTML='Cash Out<br><span>'+money(z.amount*x)+'</span>'}});if(x>=crash)return end();raf=requestAnimationFrame(frame)}
+function current(){     const t=(performance.now()-started)/1000;      // Smooth, normal demo multiplier progression     // 1x -> 2x -> 3x -> 4x -> 5x gradually     return 1 + (0.18*t) + (0.035*t*t); }
+function frame(){
+    if(phase!=='FLY') return;
+
+    const x=current();
+
+    // Smooth flight movement
+    const p=Math.min(
+        0.93,
+        Math.log(x)/Math.log(Math.max(crash,1.01))
+    );
+
+    q('#mult').textContent=fx(x);
+
+    q('#plane').style.left=(4+p*84)+'%';
+    q('#plane').style.top=(74-p*60)+'%';
+
+    q('#plane').style.transform=
+        'translate(-8px,-25px) rotate('+(-2-p*10)+'deg)';
+
+    draw(p);
+
+    qa('.betbtn').forEach((b,i)=>{
+        const z=bets[i];
+
+        if(z && !z.cashed){
+            b.classList.add('cash');
+
+            b.innerHTML=
+                'Cash Out<br><span>'+
+                money(z.amount*x)+
+                '</span>';
+        }
+    });
+
+    if(x>=crash){
+        return end();
+    }
+
+    raf=requestAnimationFrame(frame);
+}
 function draw(p){let c=q('#graph'),w=q('#wrap').clientWidth,h=q('#wrap').clientHeight,d=devicePixelRatio||1;c.width=w*d;c.height=h*d;let x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,w,h);if(!p)return;x.strokeStyle='#ff174d';x.lineWidth=3;x.shadowColor='#ff174d';x.shadowBlur=10;x.beginPath();for(let i=0;i<=80*p;i++){let a=i/80,X=12+a*w*.84,Y=h-12-Math.pow(a,1.55)*h*.70;i?x.lineTo(X,Y):x.moveTo(X,Y)}x.stroke();x.shadowBlur=0}
 function end(){phase='CRASH';cancelAnimationFrame(raf);q('#mult').className='mult crash';q('#mult').textContent=fx(crash)+' CRASHED';bets.forEach((b,i)=>{if(!b)return;if(!b.cashed){b.status='LOSS';b.result=crash;db.bets.unshift({...b,round:Date.now()});q('#state'+i).textContent='Lost · crash at '+fx(crash)} });db.rounds.unshift({id:Date.now(),result:crash,at:Date.now()});save();render();setTimeout(newRound,2800)}
 function place(i){if(phase!=='WAIT'||bets[i])return;let n=Math.max(1,Number(qa('.betbox')[i].querySelector('input').value)||0);if(n>db.balance){alert('Insufficient demo balance.');return}db.balance-=n;bets[i]={amount:n,cashed:false,status:'ACTIVE'};q('#state'+i).textContent='Bet placed · waiting for flight';balance();render()}
