@@ -6,559 +6,209 @@
 <title>N+ PLAY — Chicken Road</title>
 <style>
 :root{
-  --top:#3a3a3a; --road:#777470; --panel:#3b3b3b; --panel2:#474747;
-  --line:#5a5a5a; --text:#f4f4f4; --muted:#b8b8b8;
-  --green:#3fd061; --gold:#ffd34a; --blue:#3e5f95; --red:#ef555f;
+  --bg:#050505;
+  --panel:#101010;
+  --panel2:#161616;
+  --line:#2a2926;
+  --gold:#d8b76a;
+  --gold2:#f1d991;
+  --text:#f4f1eb;
+  --muted:#89867f;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:#000;color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
-body{min-height:100vh;overflow:hidden}
-button,input{font:inherit}button{cursor:pointer}
-.app{min-height:100vh;background:#2e2e2e}
+html,body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  background:#000;
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+}
+button{font:inherit;cursor:pointer}
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+.app{
+  width:min(100%,620px);
+  min-height:100vh;
+  position:relative;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(216,183,106,.08),transparent 34%),
+    linear-gradient(180deg,#0b0b0b,#050505);
+  border-left:1px solid #111;
+  border-right:1px solid #111;
+  display:flex;
+  flex-direction:column;
+}
 .top{
-  height:58px;background:var(--top);display:flex;align-items:center;gap:12px;
-  padding:0 14px;border-bottom:1px solid #4f4f4f;position:fixed;inset:0 0 auto;z-index:100
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  border-bottom:1px solid var(--line);
+  background:rgba(8,8,8,.9);
+  backdrop-filter:blur(14px);
 }
-.logo{width:205px;height:44px;object-fit:contain;object-position:left center}
-.betid{
-  height:38px;flex:0 1 470px;margin-left:auto;border:1px solid #565656;
-  background:#484848;border-radius:22px;color:#eee;padding:0 20px;font-size:14px;text-align:left
+.icon{
+  width:40px;
+  height:40px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#111;
+  color:#eee;
+  font-size:24px;
 }
-.topRight{display:flex;align-items:center;gap:8px;margin-left:auto}
-.balance{
-  min-width:145px;height:38px;padding:0 15px;border:1px solid #5b5b5b;
-  background:#4b4b4b;border-radius:7px;display:flex;align-items:center;justify-content:center;
-  gap:8px;font-weight:950;font-size:13px
+.brand{
+  font-weight:950;
+  letter-spacing:4px;
+  color:var(--gold2);
 }
-.balance span{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#f1f1f1;color:#555;font-size:11px}
-.iconBtn{width:38px;height:38px;border:1px solid #5b5b5b;background:#4a4a4a;color:#eee;border-radius:8px;font-size:19px}
-.helpBtn{height:38px;border:1px solid #5b5b5b;background:#4a4a4a;color:#fff;border-radius:8px;padding:0 14px;font-size:12px;font-weight:900}
-
-.board{
-  position:fixed;left:0;right:0;top:58px;bottom:0;overflow:hidden;background:var(--road)
+.badge{
+  font-size:9px;
+  letter-spacing:1.5px;
+  color:#8e8a83;
 }
-.viewport{position:absolute;inset:0 0 182px;overflow:hidden;background:var(--road)}
-.world{
-  position:absolute;left:0;top:0;height:100%;width:12000px;will-change:transform;
-  background:#777470
+.main{
+  flex:1;
+  display:grid;
+  place-items:center;
+  padding:28px 18px;
 }
-.roadRepeat{
-  position:absolute;inset:0;
-  background-image:url("./assets/road_tile.png");
-  background-repeat:repeat;
-  background-size:102px 102px;
-  image-rendering:auto
+.card{
+  width:min(100%,470px);
+  padding:34px 24px 28px;
+  border:1px solid #3a352d;
+  border-radius:24px;
+  background:
+    linear-gradient(180deg,rgba(24,24,24,.96),rgba(12,12,12,.98));
+  box-shadow:0 25px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.03);
+  text-align:center;
 }
-.startStrip{
-  position:absolute;left:0;top:0;width:250px;height:100%;
-  background:url("./assets/start_bg.jpg") left center/cover no-repeat
+.logoWrap{
+  width:92px;
+  height:92px;
+  margin:0 auto 18px;
+  border-radius:24px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#1c1c1c,#0e0e0e);
+  border:1px solid #38332b;
+  box-shadow:0 0 35px rgba(216,183,106,.08);
 }
-.finishStrip{
-  position:absolute;right:0;top:0;width:520px;height:100%;
-  background:url("./assets/finish_bg.jpg") center/cover no-repeat
+.logoWrap span{
+  color:var(--gold2);
+  font-weight:950;
+  font-size:24px;
+  letter-spacing:2px;
 }
-.lanes{
-  position:absolute;left:250px;right:520px;top:0;bottom:0;
-  background:repeating-linear-gradient(90deg,transparent 0 8.9%,rgba(255,255,255,.92) 8.9% 9.25%,transparent 9.25% 15.5%);
-  opacity:.9
+.kicker{
+  font-size:9px;
+  color:#8b877f;
+  letter-spacing:2.5px;
+  margin-bottom:12px;
 }
-.worldGlow{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.08),transparent 20%,transparent 80%,rgba(0,0,0,.08));pointer-events:none}
-.checkpoint{
-  position:absolute;width:108px;height:108px;z-index:8;display:grid;place-items:center;
-  transform:translateX(-50%);top:48%;transition:filter .2s,transform .2s
+h1{
+  margin:0;
+  font-size:30px;
+  letter-spacing:.5px;
+  font-weight:950;
 }
-.checkpoint img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 3px rgba(0,0,0,.3))}
-.checkpoint b{position:absolute;color:#f2f1eb;font-size:17px;text-shadow:0 2px 0 #3b3a37,0 0 3px #000;letter-spacing:-.3px}
-.checkpoint.active{transform:translateX(-50%) scale(1.04);filter:brightness(1.18)}
-.checkpoint.done{filter:brightness(1.35)}
-.dash{
-  position:absolute;top:0;bottom:0;width:5px;z-index:3;
-  background:repeating-linear-gradient(180deg,#ece9e4 0 32px,transparent 32px 76px);
-  opacity:.9
+.line{
+  width:64px;
+  height:2px;
+  margin:16px auto;
+  background:linear-gradient(90deg,transparent,var(--gold2),transparent);
 }
-.car,.barrier,.coin{
-  position:absolute;z-index:10;pointer-events:none
+p{
+  margin:0 auto;
+  max-width:360px;
+  color:#9b9891;
+  line-height:1.65;
+  font-size:12px;
 }
-.car img{width:88px}
-.barrier img{width:105px}
-.coin img{width:82px}
-.chicken{
-  position:absolute;z-index:20;width:155px;height:183px;top:calc(50% - 48px);
-  left:115px;will-change:transform;filter:drop-shadow(0 7px 6px rgba(0,0,0,.25))
+.coming{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:22px;
+  padding:11px 16px;
+  border:1px solid #5c5038;
+  border-radius:12px;
+  background:#1a1711;
+  color:var(--gold2);
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:1.6px;
 }
-.chicken img{width:100%;height:100%;object-fit:contain}
-.mulBubble{
-  position:absolute;z-index:25;left:115px;top:calc(50% + 61px);
-  transform:translateX(-3px);padding:10px 19px;background:#2e4e87;color:#fff;border:3px solid #29416d;
-  border-radius:7px;box-shadow:0 5px 0 #213453;font-size:23px;font-weight:1000;min-width:98px;text-align:center
+.dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--gold2);
+  box-shadow:0 0 12px rgba(241,217,145,.7);
 }
-.mulBubble:before{
-  content:"";position:absolute;left:34%;top:-15px;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:15px solid #29416d
+.home{
+  width:100%;
+  margin-top:18px;
+  padding:13px 15px;
+  border:1px solid #3d3a35;
+  border-radius:12px;
+  background:#141414;
+  color:#ddd;
+  font-weight:900;
+  font-size:11px;
 }
-.crashFX{
-  position:absolute;z-index:30;left:0;top:0;bottom:0;width:100%;
-  display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.18)
+.home:hover{
+  border-color:#665b43;
+  color:var(--gold2);
 }
-.crashFX.show{display:flex}
-.crashCard{padding:22px 28px;border:1px solid #59544b;border-radius:18px;background:#202020eF;text-align:center;box-shadow:0 15px 40px #0008}
-.crashCard .tag{font-size:10px;letter-spacing:2px;color:#aaa}
-.crashCard .value{font-size:48px;font-weight:1000;color:#ffd34a;margin:8px 0}
-.crashCard p{margin:0;color:#aaa;font-size:11px}
-
-.controls{
-  position:absolute;left:0;right:0;bottom:0;height:182px;padding:13px 18px;background:#343434;border-top:1px solid #4f4f4f;z-index:50
-}
-.controlGrid{
-  height:100%;display:grid;grid-template-columns:290px 1fr 210px 210px;gap:12px;
-  padding:13px;border:2px solid #5a5a5a;border-radius:19px;background:#3c3c3c
-}
-.amountBox{display:flex;flex-direction:column;gap:8px}
-.amountMain{
-  height:46px;display:grid;grid-template-columns:44px 1fr 44px;border:1px solid #5a5a5a;border-radius:8px;background:#4b4b4b;overflow:hidden
-}
-.amountMain button{border:0;background:transparent;color:#b1b1b1;font-size:23px}
-.amountMain input{border:0;outline:0;background:transparent;text-align:center;color:#f5f5f5;font-size:16px;font-weight:950;width:100%}
-.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.quick button{height:31px;border:1px solid #575757;border-radius:7px;background:#4b4b4b;color:#eee;font-size:11px;font-weight:900}
-.diffBox{display:flex;flex-direction:column;gap:8px;justify-content:center}
-.diffTitle{font-size:14px;color:#eee}.chance{font-size:11px;color:#c2c2c2;text-align:right}
-.diffRow{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;background:#4c4c4c;border-radius:8px;padding:3px}
-.diffRow button{height:41px;border:0;background:transparent;color:#c7c7c7;border-radius:7px;font-size:12px;font-weight:900}
-.diffRow button.active{background:#595959;color:#fff;box-shadow:inset 0 0 0 1px #676767}
-.action{
-  height:100%;border:0;border-radius:17px;font-weight:1000;font-size:22px;
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.22),0 6px 0 rgba(0,0,0,.14)
-}
-.go{background:var(--green);color:#07130a}.cash{background:var(--gold);color:#171717}
-.action small{display:block;font-size:11px;margin-top:4px;opacity:.8}
-.action:disabled{opacity:.38;cursor:not-allowed}
-
-.menuOverlay{position:fixed;inset:0;display:none;background:#0008;z-index:120}
-.menuOverlay.show{display:block}
-.menu{
-  position:absolute;right:12px;top:66px;width:270px;background:#1b1b1b;border:1px solid #484848;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px #000
-}
-.menu h3{margin:0;padding:13px;border-bottom:1px solid #333;font-size:12px;color:#ddd}
-.menu button{width:100%;height:43px;border:0;border-bottom:1px solid #2d2d2d;background:#1b1b1b;color:#ddd;text-align:left;padding:0 14px;font-size:11px}
-.menu button:hover{background:#252525}
-.modalOverlay{position:fixed;inset:0;display:none;place-items:center;background:#0009;z-index:130;padding:18px}
-.modalOverlay.show{display:grid}
-.modal{width:min(92vw,430px);background:#1b1b1b;border:1px solid #525252;border-radius:16px;box-shadow:0 20px 60px #000;padding:18px}
-.modal h2{font-size:14px;margin:0 0 12px}.modal p,.modal li{font-size:11px;line-height:1.6;color:#bbb}
-.modal .close{margin-top:12px;width:100%;height:40px;border:0;border-radius:9px;background:#4e4e4e;color:#fff;font-weight:900}
-
-@media(max-width:900px){
-  .betid{display:none}
-  .controlGrid{grid-template-columns:220px 1fr 160px 160px;gap:8px}
-}
-@media(max-width:720px){
-  .logo{width:155px}
-  .helpBtn{display:none}
-  .balance{min-width:115px;font-size:11px}
-  .controls{height:225px;padding:9px}
-  .viewport{bottom:225px}
-  .controlGrid{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;padding:8px}
-  .diffBox{grid-column:1/-1;grid-row:2}
-  .go,.cash{height:74px}
-}
-@media(max-width:500px){
-  body{overflow:auto}
-  .top{height:54px}
-  .board{top:54px}
-  .logo{width:145px}
-  .balance{min-width:96px}
-  .controls{height:235px}
-  .viewport{bottom:235px}
-  .controlGrid{grid-template-columns:1fr 1fr}
-  .amountBox{grid-column:1;grid-row:1}
-  .go{grid-column:2;grid-row:1}
-  .cash{grid-column:1;grid-row:2}
-  .diffBox{grid-column:2;grid-row:2}
-  .diffRow{grid-template-columns:repeat(2,1fr)}
-  .chance{text-align:left}
+.footer{
+  text-align:center;
+  padding:0 14px 18px;
+  color:#555;
+  font-size:8px;
+  letter-spacing:.5px;
 }
 </style>
 </head>
 <body>
 <main class="app">
   <header class="top">
-    <img class="logo" src="./assets/chicken_logo.png" alt="Chicken Road">
-    <div class="betid">Bet ID: <b id="betId">—</b></div>
-    <div class="topRight">
-      <div class="balance"><b id="balance">1,000.00</b><span>$</span></div>
-      <button class="helpBtn" onclick="showHelp()">ⓘ&nbsp; How to play?</button>
-      <button class="iconBtn" onclick="toggleMenu()">☰</button>
-    </div>
+    <button class="icon" onclick="history.back()">‹</button>
+    <div class="brand">N+ PLAY</div>
+    <div class="badge">DEMO PLATFORM</div>
   </header>
 
-  <section class="board">
-    <div class="viewport" id="viewport">
-      <div class="world" id="world">
-        <div class="roadRepeat"></div>
-        <div class="startStrip"></div>
-        <div class="finishStrip"></div>
-        <div class="lanes"></div>
-        <div class="worldGlow"></div>
-        <div id="markers"></div>
-        <div id="props"></div>
-        <div class="chicken" id="chicken"><img src="./assets/chicken.png" alt=""></div>
-        <div class="mulBubble" id="mulBubble">1.00x</div>
+  <section class="main">
+    <div class="card">
+      <div class="logoWrap"><span>N+ CR</span></div>
+      <div class="kicker">CHICKEN ROAD</div>
+      <h1>Coming Soon</h1>
+      <div class="line"></div>
+      <p>
+        Chicken Road experience is currently under development.
+        We are preparing the next premium N+ PLAY version.
+      </p>
+
+      <div class="coming">
+        <span class="dot"></span>
+        COMING SOON
       </div>
-      <div class="crashFX" id="crashFX">
-        <div class="crashCard">
-          <div class="tag" id="crashTag">ROUND OVER</div>
-          <div class="value" id="crashValue">1.02x</div>
-          <p id="crashText">Chicken stopped</p>
-        </div>
-      </div>
-    </div>
 
-    <div class="controls">
-      <div class="controlGrid">
-        <div class="amountBox">
-          <div class="amountMain">
-            <button onclick="changeAmount(-1)">−</button>
-            <input id="amount" type="number" min="1" step="1" value="1">
-            <button onclick="changeAmount(1)">+</button>
-          </div>
-          <div class="quick">
-            <button onclick="setAmount(1)">1 $</button>
-            <button onclick="setAmount(2)">2 $</button>
-            <button onclick="setAmount(5)">5 $</button>
-            <button onclick="setAmount(10)">10 $</button>
-          </div>
-        </div>
-
-        <div class="diffBox">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="diffTitle">Difficulty</div>
-            <div class="chance" id="chance">Chance of being shot down · 18%</div>
-          </div>
-          <div class="diffRow">
-            <button class="active" data-diff="1">Easy</button>
-            <button data-diff="2">Medium</button>
-            <button data-diff="3">Hard</button>
-            <button data-diff="4">Hardcore</button>
-          </div>
-        </div>
-
-        <button class="action cash" id="cashBtn" disabled onclick="cashOut()">
-          CASH OUT
-          <small id="cashValue">1.00 DEMO</small>
-        </button>
-
-        <button class="action go" id="goBtn" onclick="startRound()">GO</button>
-      </div>
+      <button class="home" onclick="location.href='index.html'">
+        BACK TO N+ PLAY
+      </button>
     </div>
   </section>
+
+  <div class="footer">
+    N+ PLAY · VIRTUAL-CREDIT DEMO EXPERIENCE · 18+
+  </div>
 </main>
-
-<div class="menuOverlay" id="menuOverlay" onclick="closeMenu(event)">
-  <div class="menu">
-    <h3>N+ PLAY · CHICKEN ROAD</h3>
-    <button onclick="showHistory()">Game History</button>
-    <button onclick="showMyHistory()">My Bet History</button>
-    <button onclick="showHelp()">How to Play</button>
-    <button onclick="showRules()">Demo Rules</button>
-    <button onclick="resetDemo()">Reset Demo Wallet</button>
-  </div>
-</div>
-
-<div class="modalOverlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal">
-    <h2 id="modalTitle">Chicken Road</h2>
-    <div id="modalBody"></div>
-    <button class="close" onclick="hideModal()">CLOSE</button>
-  </div>
-</div>
-
-<script>
-(() => {
-'use strict';
-
-const STORE='nplus_chicken_road_nplus_v3';
-const MUL={
-  1:[1.02,1.08,1.14,1.21,1.29,1.37,1.46,1.56,1.67,1.80,1.94,2.09,2.27,2.47,2.69,2.95,3.24,3.58,3.98,4.45,5.01,5.68,6.49,7.49,8.74,10.33,12.39,15.15,18.94,24.35],
-  2:[1.08,1.22,1.38,1.57,1.79,2.06,2.38,2.78,3.27,3.89,4.67,5.67,6.98,8.73,11.11,14.44,19.25,26.48,37.83,56.74,90.79,158.88,317.77,794.43,3177.72],
-  3:[1.19,1.47,1.84,2.32,2.97,3.84,5.05,6.73,9.13,12.65,17.92,26.07,39.11,60.84,98.87,169.49,310.74,621.49,1398.35,3728.95,13051.35,78308.10],
-  4:[1.45,2.22,3.47,5.56,9.13,15.46,27.06,49.21,93.50,187.01,397.39,908.33,2270.83,6358.35,20664.63,82658.55,454622.02,4546220.25]
-};
-const DIFF_NAMES={1:'Easy',2:'Medium',3:'Hard',4:'Hardcore'};
-const CHANCE={1:18,2:28,3:40,4:55};
-const GAP=280;
-const $=id=>document.getElementById(id);
-const money=n=>Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-
-let db;
-try{db=JSON.parse(localStorage.getItem(STORE)||'null')}catch(e){db=null}
-if(!db) db={balance:1000,history:[],bets:[]};
-
-let diff=1;
-let running=false;
-let step=0;
-let currentMul=1;
-let crashStep=0;
-let stake=1;
-let startTs=0;
-let raf=0;
-let autoTimer=null;
-
-function save(){
-  db.history=db.history.slice(0,100);
-  db.bets=db.bets.slice(0,100);
-  localStorage.setItem(STORE,JSON.stringify(db));
-  $('balance').textContent=money(db.balance);
-}
-function setAmount(v){$('amount').value=v}
-function changeAmount(v){
-  let n=Math.max(1,Number($('amount').value)||1);
-  $('amount').value=Math.min(100000,n+v);
-}
-function toggleMenu(){ $('menuOverlay').classList.add('show') }
-function closeMenu(e){ if(e.target.id==='menuOverlay') $('menuOverlay').classList.remove('show') }
-function closeMenuDirect(){ $('menuOverlay').classList.remove('show') }
-function showModal(title,html){
-  closeMenuDirect();
-  $('modalTitle').textContent=title;
-  $('modalBody').innerHTML=html;
-  $('modalOverlay').classList.add('show');
-}
-function closeModal(e){ if(e.target.id==='modalOverlay') hideModal() }
-function hideModal(){ $('modalOverlay').classList.remove('show') }
-
-function showHelp(){
-  showModal('How to Play',`
-    <p>Choose a demo stake and difficulty, then press <b>GO</b>.</p>
-    <p>The chicken advances one road step at a time and the multiplier increases according to the selected difficulty.</p>
-    <p>Press <b>CASH OUT</b> before the round crashes to return virtual demo credits based on the current multiplier.</p>
-    <p>This N+ PLAY page is a <b>virtual-credit demo</b>; no real-money payment or wagering is processed.</p>
-  `);
-}
-function showRules(){
-  showModal('Demo Rules',`
-    <ul>
-      <li>Minimum demo stake: ₹1</li>
-      <li>One active demo round at a time</li>
-      <li>Cash-out amount = demo stake × current multiplier</li>
-      <li>If the round crashes before cash-out, the demo stake is lost</li>
-      <li>Last 100 rounds and demo bets are stored in this browser</li>
-    </ul>
-  `);
-}
-function showHistory(){
-  const rows=db.history.slice(0,30);
-  showModal('Game History',rows.length?`
-    <div style="max-height:55vh;overflow:auto">
-      ${rows.map((r,i)=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid #303030;padding:8px 2px">
-        <span>Round ${i+1}</span><b style="color:#e5c468">${Number(r.mul).toFixed(2)}x</b><span style="color:#888">${r.result}</span>
-      </div>`).join('')}
-    </div>`:'<p>No demo rounds yet.</p>');
-}
-function showMyHistory(){
-  const rows=db.bets.slice(0,30);
-  showModal('My Bet History',rows.length?`
-    <div style="max-height:55vh;overflow:auto">
-      ${rows.map(r=>`<div style="border-bottom:1px solid #303030;padding:9px 2px;font-size:11px">
-        <b>${money(r.stake)} DEMO</b> · ${r.diffName} · ${Number(r.mul).toFixed(2)}x<br>
-        <span style="color:${r.status==='CASHED OUT'?'#55dc80':'#ff6e78'}">${r.status}</span> · ${new Date(r.at).toLocaleTimeString()}
-      </div>`).join('')}
-    </div>`:'<p>No demo bets yet.</p>');
-}
-function resetDemo(){
-  closeMenuDirect();
-  if(!confirm('Reset the N+ PLAY demo wallet and history?')) return;
-  db={balance:1000,history:[],bets:[]};
-  save();
-}
-
-document.querySelectorAll('[data-diff]').forEach(btn=>{
-  btn.onclick=()=>{
-    if(running)return;
-    diff=Number(btn.dataset.diff);
-    document.querySelectorAll('[data-diff]').forEach(x=>x.classList.remove('active'));
-    btn.classList.add('active');
-    $('chance').textContent=`Chance of being shot down · ${CHANCE[diff]}%`;
-    buildWorld();
-    resetView();
-  };
-});
-
-function makeCrashStep(){
-  const arr=MUL[diff];
-  const r=Math.random();
-  // Demo distribution: mostly early/mid rounds, with a smaller tail.
-  if(r<0.20) return 1 + Math.floor(Math.random()*Math.min(3,arr.length));
-  if(r<0.62) return 2 + Math.floor(Math.random()*Math.min(8,Math.max(1,arr.length-1)));
-  if(r<0.90) return Math.max(2, Math.min(arr.length-1, 7 + Math.floor(Math.random()*Math.max(1,Math.min(9,arr.length-7)))));
-  return Math.min(arr.length, Math.max(3, Math.floor(arr.length*(.55+Math.random()*.4))));
-}
-function createEl(tag,cls,parent){
-  const el=document.createElement(tag); if(cls)el.className=cls; parent.appendChild(el); return el;
-}
-function buildWorld(){
-  const world=$('world'), markers=$('markers'), props=$('props');
-  markers.innerHTML=''; props.innerHTML='';
-  const arr=MUL[diff];
-
-  // Difficulty-scaled road.
-  world.style.width=(850 + arr.length*GAP + 600)+'px';
-
-  for(let i=0;i<arr.length;i++){
-    const cp=createEl('div','checkpoint',markers);
-    cp.style.left=(370+i*GAP)+'px';
-    const img=createEl('img','',cp); img.src='./assets/checkpoint.png';
-    const text=createEl('b','',cp); text.textContent=arr[i].toFixed(2)+'x';
-    cp.dataset.step=String(i+1);
-  }
-
-  // Repeated visual props, based on the game's spacing idea.
-  for(let i=0;i<Math.min(arr.length,24);i++){
-    if(i%2===0){
-      const car=createEl('div','car',props);
-      car.style.left=(300+i*GAP+Math.round(30+Math.random()*80))+'px';
-      car.style.top=(14+(i%3)*18)+'%';
-      car.innerHTML='<img src="./assets/car_yellow.png" alt="">';
-      car.dataset.base=car.style.top;
-      car.dataset.phase=Math.random()*Math.PI*2;
-    }else{
-      const barrier=createEl('div','barrier',props);
-      barrier.style.left=(305+i*GAP)+'px';
-      barrier.style.top=(30+(i%2)*30)+'%';
-      barrier.innerHTML='<img src="./assets/barrier.png" alt="">';
-    }
-    if(i%4===1){
-      const coin=createEl('div','coin',props);
-      coin.style.left=(330+i*GAP)+'px';
-      coin.style.top='66%';
-      coin.innerHTML='<img src="./assets/coin.png" alt="">';
-    }
-  }
-}
-function animateCars(ts){
-  document.querySelectorAll('.car').forEach((el,idx)=>{
-    const amp=36, phase=(Number(el.dataset.phase)||0)+(idx*.42);
-    el.style.transform=`translateY(${Math.sin(ts/900+phase)*amp}px)`;
-  });
-  if(running) requestAnimationFrame(animateCars);
-}
-
-function resetView(){
-  $('world').style.transform='translate3d(0,0,0)';
-  $('chicken').style.transform='translate3d(0,0,0)';
-  $('mulBubble').textContent='1.00x';
-  $('mulBubble').style.left='115px';
-  document.querySelectorAll('.checkpoint').forEach(x=>x.classList.remove('active','done'));
-}
-function renderStep(){
-  const arr=MUL[diff];
-  const x=115 + (step>0 ? step*GAP : 0);
-  const viewportW=$('viewport').clientWidth;
-  const targetScroll=Math.max(0, x - Math.min(220, viewportW*.20));
-  $('world').style.transform=`translate3d(${-targetScroll}px,0,0)`;
-  $('chicken').style.left='115px';
-  $('mulBubble').style.left='115px';
-  $('mulBubble').textContent=currentMul.toFixed(2)+'x';
-
-  document.querySelectorAll('.checkpoint').forEach(el=>{
-    const n=Number(el.dataset.step);
-    el.classList.toggle('done',n<step);
-    el.classList.toggle('active',n===step || (step===0 && n===1));
-  });
-
-  $('cashValue').textContent=money(stake*currentMul)+' DEMO';
-}
-function startRound(){
-  if(running)return;
-  stake=Math.max(1,Number($('amount').value)||1);
-  if(stake>db.balance){alert('Insufficient demo balance.');return;}
-  running=true; step=0; currentMul=1; crashStep=makeCrashStep();
-  startTs=performance.now();
-  db.balance-=stake;
-  $('betId').textContent='NPLUS-'+Date.now().toString().slice(-8);
-  save();
-
-  $('goBtn').disabled=true;
-  $('cashBtn').disabled=false;
-  resetView();
-  requestAnimationFrame(animateCars);
-  tick();
-}
-function tick(){
-  if(!running)return;
-  const elapsed=performance.now()-startTs;
-  const nextStep=Math.floor(elapsed/850);
-
-  if(nextStep>step){
-    step=Math.min(nextStep,MUL[diff].length);
-    currentMul=Number((MUL[diff][step-1] || MUL[diff][MUL[diff].length-1]).toFixed(2));
-    renderStep();
-
-    if(step>=crashStep){
-      // Let the chicken finish its jump visually, then resolve.
-      setTimeout(()=>{ if(running) crashRound(); },190);
-      return;
-    }
-  }else{
-    renderStep();
-  }
-  raf=requestAnimationFrame(tick);
-}
-function finishRecord(status,mul,payout){
-  db.history.unshift({
-    mul:Number(mul.toFixed(2)),
-    result:status,
-    diff:DIFF_NAMES[diff],
-    at:Date.now()
-  });
-  db.bets.unshift({
-    stake,
-    mul:Number(mul.toFixed(2)),
-    payout:Number(payout.toFixed(2)),
-    status,
-    diffName:DIFF_NAMES[diff],
-    at:Date.now()
-  });
-  save();
-}
-function cashOut(){
-  if(!running)return;
-  running=false; cancelAnimationFrame(raf);
-  const payout=Number((stake*currentMul).toFixed(2));
-  db.balance+=payout;
-  finishRecord('CASHED OUT',currentMul,payout);
-  showEnd('CASH OUT',currentMul,`Demo return ${money(payout)}`);
-  endControls();
-}
-function crashRound(){
-  if(!running)return;
-  running=false; cancelAnimationFrame(raf);
-  const mul=currentMul;
-  finishRecord('CRASHED',mul,0);
-  showEnd('ROUND CRASHED',mul,'Chicken stopped before cash out.');
-  endControls();
-}
-function showEnd(tag,mul,text){
-  $('crashTag').textContent=tag;
-  $('crashValue').textContent=mul.toFixed(2)+'x';
-  $('crashText').textContent=text;
-  $('crashFX').classList.add('show');
-}
-function endControls(){
-  $('goBtn').disabled=false;
-  $('cashBtn').disabled=true;
-  setTimeout(()=>{
-    $('crashFX').classList.remove('show');
-    $('betId').textContent='—';
-    resetView();
-  },1650);
-}
-window.addEventListener('resize',()=>{if(!running) resetView()});
-
-buildWorld();
-resetView();
-$('chance').textContent=`Chance of being shot down · ${CHANCE[diff]}%`;
-$('balance').textContent=money(db.balance);
-})();
-</script>
 </body>
 </html>
