@@ -30,7 +30,7 @@ letter-spacing:-2px}
 .mult.wait{font-size:25px;letter-spacing:0;color:#8a8f96;text-shadow:none}
 .plane{position:absolute;width:110px;height:70px;z-index:5;left:4%;top:74%;
 transform:translate(-8px,-25px) rotate(-2deg);filter:drop-shadow(0 0 7px rgba(255,25,70,.75)) drop-shadow(0 0 18px rgba(255,20,65,.35));
-transition:transform .08s linear;pointer-events:none}
+transition:none;pointer-events:none}
 .plane img{width:100%;height:100%;display:block;object-fit:contain;user-select:none;-webkit-user-drag:none}
 .plane:after{content:"";position:absolute;left:-20px;top:42px;width:42px;height:3px;border-radius:99px;background:linear-gradient(90deg,transparent,#ff174d);filter:blur(1px);opacity:.8}
 .ground{position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,#6d1730,#ff174d,#6d1730);opacity:.65;z-index:3}
@@ -68,27 +68,34 @@ function newRound(){phase='WAIT';left=6;crash=makeCrash();bets=[null,null];q('#m
 function makeCrash(){let r=Math.random();if(r<.08)return 1+Math.random()*.18;if(r<.55)return 1.15+Math.random()*1.85;if(r<.88)return 3+Math.random()*5;if(r<.98)return 8+Math.random()*12;return 20+Math.random()*80}
 const fx=x=>Number(x).toFixed(2)+'x';
 function start(){phase='FLY';started=performance.now();q('#mult').className='mult';raf=requestAnimationFrame(frame)}
-function current(){     const t=(performance.now()-started)/1000;      // Smooth, normal demo multiplier progression     // 1x -> 2x -> 3x -> 4x -> 5x gradually     return 1 + (0.18*t) + (0.035*t*t); }
+function current(){
+    const t=(performance.now()-started)/1000;
+
+    // Medium, smooth demo flight progression.
+    // Approximate visual checkpoints:
+    // 2x ~ 5s, 3x ~ 7.6s, 4x ~ 9.5s, 5x ~ 11s.
+    return 1 + (0.12*t) + (0.028*t*t);
+}
 function frame(){
     if(phase!=='FLY') return;
 
+    const elapsed=(performance.now()-started)/1000;
     const x=current();
 
-    // Smooth flight movement
-    const p=Math.min(
-        0.93,
-        Math.log(x)/Math.log(Math.max(crash,1.01))
-    );
+    // Keep plane movement consistent and smooth instead of making
+    // its screen position depend directly on the crash target.
+    const p=Math.min(0.93, elapsed/12.5);
+    const eased=1-Math.pow(1-p,1.35);
 
     q('#mult').textContent=fx(x);
 
-    q('#plane').style.left=(4+p*84)+'%';
-    q('#plane').style.top=(74-p*60)+'%';
+    q('#plane').style.left=(4+eased*84)+'%';
+    q('#plane').style.top=(74-eased*60)+'%';
 
     q('#plane').style.transform=
-        'translate(-8px,-25px) rotate('+(-2-p*10)+'deg)';
+        'translate(-8px,-25px) rotate('+(-2-eased*10)+'deg)';
 
-    draw(p);
+    draw(eased);
 
     qa('.betbtn').forEach((b,i)=>{
         const z=bets[i];
