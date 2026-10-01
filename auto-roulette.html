@@ -1,663 +1,238 @@
-from pathlib import Path
-import base64
-
-out = Path("/mnt/data/NPLUS-PLAY-AUTO-ROULETTE")
-out.mkdir(parents=True, exist_ok=True)
-
-skin_path = Path("/mnt/data/a_wide_high_resolution_screenshot_of_an_online_li.png")
-skin_b64 = base64.b64encode(skin_path.read_bytes()).decode("ascii")
-
-html = r'''<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#050608">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>N+ PLAY — Auto Roulette</title>
 <style>
-:root{
-  --gold:#e2c16f;--gold2:#f8df96;--red:#d32931;--green:#15915c;--dark:#050608;
-  --glass:rgba(7,9,14,.88);--line:rgba(255,255,255,.24);--muted:#9aa1af;
-}
 *{box-sizing:border-box}
-html,body{margin:0;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
-body{min-height:100vh}
-button{font:inherit;cursor:pointer}
-.app{min-height:100vh;background:#000}
-.frame{
-  position:relative;width:100%;min-height:100vh;overflow:hidden;background:#050608;
+html,body{
+  margin:0;
+  min-height:100%;
+  background:#000;
+  color:#f6f3ed;
+  font-family:Arial,Helvetica,sans-serif;
 }
-.skin{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  user-select:none;pointer-events:none;
+body{
+  display:flex;
+  justify-content:center;
 }
-
-/* top controls */
-.navLeft{
-  position:absolute;left:10px;top:10px;z-index:30;display:flex;align-items:center;gap:8px
+.app{
+  width:100%;
+  max-width:680px;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% 15%,rgba(196,162,88,.035),transparent 28%),
+    linear-gradient(180deg,#0b0b0b 0%,#080808 35%,#030303 100%);
+  border-left:1px solid #171717;
+  border-right:1px solid #171717;
+  position:relative;
+  overflow:hidden;
 }
-.navBtn{
-  width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.35);
-  background:rgba(8,10,16,.84);color:#fff;backdrop-filter:blur(10px)
+.topbar{
+  height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  border-bottom:1px solid #28241e;
+  background:rgba(9,9,9,.88);
 }
-.brandTag{
-  padding:10px 13px;border:1px solid rgba(215,180,98,.55);
-  border-radius:12px;background:rgba(8,10,16,.78);font-size:12px;font-weight:1000;
-  letter-spacing:2px;color:#f2d78d;backdrop-filter:blur(10px)
+.back{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  border:1px solid #2f2c27;
+  background:#111;
+  color:#eee;
+  font-size:28px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
 }
-.topRight{
-  position:absolute;right:10px;top:10px;z-index:30;display:flex;gap:7px
+.logo{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  color:#f0d986;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:7px;
+  white-space:nowrap;
 }
-.topRight .icon{
-  width:39px;height:39px;border-radius:50%;border:1px solid rgba(255,255,255,.3);
-  background:rgba(8,10,16,.82);color:#fff;backdrop-filter:blur(10px)
+.demo{
+  color:#77736c;
+  font-size:10px;
+  letter-spacing:2px;
+  white-space:nowrap;
 }
-.money{
-  position:absolute;right:12.5%;top:10px;z-index:30;display:flex;gap:7px
+.main{
+  min-height:calc(100vh - 68px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:80px 26px 120px;
 }
-.moneyCard{
-  min-width:122px;padding:8px 12px;border:1px solid rgba(215,180,98,.55);
-  border-radius:10px;background:rgba(7,9,14,.9);text-align:right;backdrop-filter:blur(10px)
+.card{
+  width:min(560px,100%);
+  min-height:470px;
+  border:1px solid #38332b;
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,255,255,.018),transparent 40%),
+    linear-gradient(180deg,#1a1a1a,#121212 62%,#0e0e0e);
+  box-shadow:0 28px 80px rgba(0,0,0,.68);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:42px 28px 34px;
+  text-align:center;
 }
-.moneyCard small{display:block;font-size:8px;color:#aeb4c0;letter-spacing:1px}
-.moneyCard b{display:block;margin-top:2px;color:#ffe08a;font-size:16px}
-
-/* betting state bar */
-.betState{
-  position:absolute;left:0;right:0;top:50.5%;height:4.0%;z-index:24;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(5,225,0,.93);font-weight:1000;font-size:18px;text-shadow:0 1px 3px #000
+.icon{
+  width:104px;
+  height:104px;
+  border-radius:30px;
+  border:1px solid #3d372d;
+  background:linear-gradient(145deg,#191919,#101010);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#f0d986;
+  font-size:30px;
+  font-weight:800;
+  box-shadow:inset 0 0 22px rgba(0,0,0,.5);
+  margin-bottom:24px;
 }
-.timerPill{
-  position:absolute;right:10px;top:4px;z-index:25;padding:4px 8px;border-radius:7px;
-  background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.25);font-size:9px;font-weight:900
+.game-name{
+  color:#9a917f;
+  font-size:10px;
+  letter-spacing:4px;
+  margin-bottom:17px;
 }
-
-/* transparent interactive roulette table map over the realistic skin */
-.tableMap{
-  position:absolute;left:13.0%;right:12.3%;top:54.0%;height:35.0%;z-index:22
+h1{
+  margin:0;
+  font-size:32px;
+  line-height:1.1;
+  font-weight:800;
+  letter-spacing:-.8px;
 }
-.hotspot{
-  position:absolute;border:0;background:transparent;padding:0
+.gold-line{
+  width:72px;
+  height:2px;
+  margin:24px 0 20px;
+  background:linear-gradient(90deg,transparent,#e7cd82,transparent);
+  box-shadow:0 0 12px rgba(231,205,130,.3);
 }
-.hotspot:hover{background:rgba(255,225,130,.08);outline:1px solid rgba(255,225,130,.4)}
-.numberHotspot{
-  width:6.0%;height:32.5%;
+.desc{
+  margin:0;
+  max-width:410px;
+  color:#99958e;
+  font-size:13px;
+  line-height:1.75;
 }
-.numberHotspot.row1{top:0}
-.numberHotspot.row2{top:33.5%}
-.numberHotspot.row3{top:67%}
-
-.zeroHotspot{
-  left:0!important;top:0;width:7%;height:100%
+.status{
+  margin-top:25px;
+  padding:11px 20px;
+  border-radius:12px;
+  border:1px solid #5b4b2e;
+  background:linear-gradient(180deg,#211b11,#15110b);
+  color:#f0d276;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:1.4px;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
-.colHotspot{
-  width:5.6%;height:33.5%;right:-1.3%
+.status-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#efd77e;
+  box-shadow:0 0 10px rgba(239,215,126,.65);
 }
-.col1{top:0}.col2{top:33.5%}.col3{top:67%}
-
-.dozenHotspot{
-  top:50.5%;height:16.5%;width:27.7%
+.back-home{
+  width:100%;
+  max-width:460px;
+  height:48px;
+  margin-top:20px;
+  border-radius:12px;
+  border:1px solid #383838;
+  background:linear-gradient(180deg,#171717,#111);
+  color:#f2f2f2;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
 }
-.dozen1{left:7%}.dozen2{left:34.6%}.dozen3{left:62.3%}
-
-.outHotspot{
-  top:67%;height:16.5%;width:13.9%
+.back-home:hover{
+  border-color:#5a4d38;
 }
-.out1{left:7%}.out2{left:20.9%}.out3{left:34.7%}.out4{left:48.6%}.out5{left:62.4%}.out6{left:76.2%}
-
-.splitV{width:1.1%;height:31%;top:1%;margin-left:-.55%}
-.splitH{width:4.8%;height:1.2%;margin-left:-2.4%}
-.cornerHot{width:1.4%;height:2.5%;margin-left:-.7%;margin-top:-1.25%}
-.streetLeft,.streetRight{
-  width:1.1%;height:29%;top:2%
+.footer{
+  position:absolute;
+  bottom:32px;
+  left:0;
+  width:100%;
+  text-align:center;
+  color:#6a665f;
+  font-size:9px;
+  letter-spacing:.8px;
+  padding:0 20px;
 }
-.streetLeft{left:-1.4%}.streetRight{right:-1.6%}
-.sixLine{
-  width:1.1%;height:1.4%;left:-1.5%
-}
-.sixLine.a{top:31.8%}.sixLine.b{top:65.0%}
-
-/* chips on image */
-.placedChip{
-  position:absolute;z-index:35;width:42px;height:42px;border-radius:50%;
-  border:2px dashed #fff;display:grid;place-items:center;color:#fff;font-size:9px;font-weight:1000;
-  box-shadow:0 4px 12px #000;transform:translate(-50%,-50%)
-}
-.c1{background:#d61e28}.c5{background:#1e6ec2}.c10{background:#0aa326}.c20{background:#985d1b}
-.c50{background:#d9dbe0;color:#222}.c100{background:#ff7c0b}.c200{background:#efc400;color:#111}.c500{background:#7843ef}.c1k{background:#202225}
-.chipRack{
-  position:absolute;left:30.5%;right:29.5%;bottom:4.1%;z-index:35;
-  display:flex;align-items:center;justify-content:center;gap:7px;
-}
-.chipRack button{
-  width:47px;height:47px;border-radius:50%;border:2px dashed #fff;color:#fff;
-  font-size:9px;font-weight:1000;box-shadow:0 3px 12px #000;opacity:.98
-}
-.chipRack button.active{outline:3px solid #ffe08e;outline-offset:2px}
-.actionBar{
-  position:absolute;left:1.2%;bottom:4.5%;z-index:36;display:flex;gap:7px
-}
-.actionBar button,.historyButton{
-  height:42px;padding:0 15px;border-radius:22px;border:1px solid rgba(255,255,255,.32);
-  background:rgba(6,9,15,.9);color:#eef0f4;font-size:10px;font-weight:1000;backdrop-filter:blur(8px)
-}
-.historyButton{position:absolute;right:1.2%;bottom:4.5%;z-index:36;color:#f0d27e;border-color:rgba(215,180,98,.55)}
-
-/* subtle dynamic right-side stats */
-.rightStats{
-  position:absolute;right:.6%;top:8%;width:23.5%;height:49%;z-index:25;
-  pointer-events:none;color:#fff
-}
-.recentOverlay{
-  position:absolute;left:3%;right:4%;top:4.8%;height:12%;
-  display:flex;align-items:center;justify-content:center;gap:9px;font-size:11px;font-weight:900
-}
-.hotOverlay{
-  position:absolute;left:4%;right:4%;bottom:1%;height:42%;
-  display:grid;grid-template-columns:1fr 1fr;gap:8px
-}
-.hotCard{
-  padding:8px;border:1px solid rgba(255,255,255,.16);border-radius:8px;
-  background:rgba(6,9,16,.62);backdrop-filter:blur(5px);font-size:9px
-}
-.hotCard h4{margin:0 0 5px;font-size:10px;color:#f1dd9a}
-.hotRow{display:flex;justify-content:space-between;padding:2px 0}
-
-/* left live chat overlay */
-.chatOverlay{
-  position:absolute;left:.7%;top:9.5%;width:23.5%;height:52%;z-index:28;
-  overflow:auto;padding:8px 10px 8px 10px;color:#fff
-}
-.chatOverlay .m{
-  background:rgba(7,10,19,.68);border:1px solid rgba(255,255,255,.08);border-radius:7px;
-  padding:6px 7px;margin-bottom:6px;font-size:9px;line-height:1.3;backdrop-filter:blur(5px)
-}
-.chatOverlay .m small{display:block;color:#9ea5b7;font-size:7px;margin-bottom:2px}
-.chatInputFake{
-  position:absolute;left:.9%;bottom:27.4%;width:23.2%;height:3.6%;z-index:29;
-  display:flex;align-items:center;padding:0 10px;border:1px solid rgba(255,255,255,.26);
-  border-radius:16px;background:rgba(7,10,18,.75);color:#89909f;font-size:8px
-}
-
-/* result */
-.resultPopup{
-  position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);z-index:50;
-  display:none;width:240px;padding:18px;text-align:center;border:1px solid #9a7734;
-  border-radius:14px;background:rgba(7,9,15,.96);box-shadow:0 25px 80px #000
-}
-.resultPopup.show{display:block}
-.resultPopup .big{font-size:60px;color:#f4d982;font-weight:1000}
-.resultPopup .sub{font-size:11px;color:#d3d7df}
-
-/* modal */
-.modal{
-  position:fixed;inset:0;background:#000d;display:none;place-items:center;z-index:100
-}
-.modal.show{display:grid}
-.modalBox{
-  width:min(850px,94vw);max-height:88vh;overflow:auto;background:#11172f;
-  border:1px solid #6f5e3e;border-radius:14px;padding:18px
-}
-.modalBox h2{margin:0 0 10px;color:#f3d98e}
-.modalBox table{width:100%;border-collapse:collapse;font-size:9px}
-.modalBox th,.modalBox td{border-bottom:1px solid #293047;padding:7px 4px;text-align:left}
-.modalBox button{width:100%;height:38px;margin-top:10px;border:0;border-radius:8px;background:#dfc172;color:#111;font-weight:1000}
-.toast{
-  position:fixed;left:50%;bottom:15px;transform:translateX(-50%);
-  z-index:120;display:none;padding:9px 13px;border-radius:9px;
-  background:#12172e;border:1px solid #5d6780;color:#fff;font-size:10px
-}
-.toast.show{display:block}
-@media(max-width:900px){
-  .money{transform:scale(.82);transform-origin:top right}
-  .chipRack button{width:38px;height:38px;font-size:8px}
-  .actionBar button,.historyButton{height:34px;padding:0 10px;font-size:8px}
+@media(max-width:600px){
+  .topbar{height:62px;padding:0 12px}
+  .back{width:40px;height:40px;font-size:24px}
+  .logo{font-size:16px;letter-spacing:5px}
+  .demo{font-size:8px}
+  .main{padding:55px 16px 100px}
+  .card{
+    min-height:455px;
+    border-radius:22px;
+    padding:34px 20px 28px;
+  }
+  .icon{width:88px;height:88px;border-radius:25px;font-size:26px}
+  h1{font-size:29px}
+  .desc{font-size:12px;max-width:330px}
+  .footer{bottom:22px;font-size:8px}
 }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="frame">
-    <img class="skin" alt="N+ PLAY photoreal roulette skin" src="data:image/png;base64,''' + b64 + r'''">
+  <div class="app">
+    <header class="topbar">
+      <button class="back" onclick="history.back()" aria-label="Back">‹</button>
+      <div class="logo">N + PLAY</div>
+      <div class="demo">DEMO PLATFORM</div>
+    </header>
 
-    <div class="navLeft">
-      <button class="navBtn" onclick="location.href='index.html'">‹</button>
-      <div class="brandTag">N+ PLAY · AUTO ROULETTE</div>
-    </div>
+    <main class="main">
+      <section class="card">
+        <div class="icon">N+</div>
+        <div class="game-name">AUTO ROULETTE</div>
+        <h1>Coming Soon</h1>
+        <div class="gold-line"></div>
 
-    <div class="topRight">
-      <button class="icon">♪</button>
-      <button class="icon">⚙</button>
-      <button class="icon">↶</button>
-      <button class="icon" onclick="openHistory()">◒</button>
-      <button class="icon">?</button>
-      <button class="icon">⛶</button>
-    </div>
+        <p class="desc">
+          Auto Roulette experience is currently under development.
+          We are preparing the next premium N+ PLAY version.
+        </p>
 
-    <div class="money">
-      <div class="moneyCard"><small>BALANCE</small><b id="balance">₹10,000</b></div>
-      <div class="moneyCard"><small>TOTAL BET</small><b id="totalBet">₹0</b></div>
-    </div>
-
-    <div class="betState" id="betState">
-      PLACE YOUR BETS
-      <span class="timerPill" id="timer">20s</span>
-    </div>
-
-    <!-- live-style player chat -->
-    <div class="chatOverlay" id="chatOverlay">
-      <div class="m"><small>Auto</small><b>Hello! Welcome to Auto-Roulette!</b></div>
-      <div class="m"><small>Rahul_07</small>Good luck all</div>
-      <div class="m"><small>vicky1998</small>red pls</div>
-      <div class="m"><small>sandyking</small>last 3 black 😭</div>
-      <div class="m"><small>meena_12</small>someone big win? 💸</div>
-      <div class="m"><small>kingmaker</small>0 coming soon</div>
-      <div class="m"><small>rocky_bet</small>27 please</div>
-      <div class="m"><small>ajaytrader</small>nice hit bro</div>
-      <div class="m"><small>nivash_07</small>blackkk</div>
-      <div class="m"><small>devil_king</small>ah ah red again</div>
-    </div>
-    <div class="chatInputFake">Type a message...</div>
-
-    <!-- dynamic recent/hot/cold information -->
-    <div class="rightStats">
-      <div class="recentOverlay" id="recent"></div>
-      <div class="hotOverlay">
-        <div class="hotCard">
-          <h4>HOT NUMBERS</h4>
-          <div class="hotRow"><span id="h1">7</span><b id="h1c">7x</b></div>
-          <div class="hotRow"><span id="h2">23</span><b id="h2c">6x</b></div>
-          <div class="hotRow"><span id="h3">16</span><b id="h3c">5x</b></div>
+        <div class="status">
+          <span class="status-dot"></span>
+          COMING SOON
         </div>
-        <div class="hotCard">
-          <h4>COLD NUMBERS</h4>
-          <div class="hotRow"><span id="c1">4</span><b id="c1c">1x</b></div>
-          <div class="hotRow"><span id="c2">13</span><b id="c2c">1x</b></div>
-          <div class="hotRow"><span id="c3">36</span><b id="c3c">1x</b></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- precise interactive layer mapped to the realistic table -->
-    <div class="tableHot" id="tableHot"></div>
+        <button class="back-home" onclick="window.location.href='index.html'">
+          BACK TO N+ PLAY
+        </button>
+      </section>
+    </main>
 
-    <div class="chipRack">
-      <button class="c1 active" data-chip="1">1</button>
-      <button class="c5" data-chip="5">5</button>
-      <button class="c10" data-chip="10">10</button>
-      <button class="c20" data-chip="20">20</button>
-      <button class="c50" data-chip="50">50</button>
-      <button class="c100" data-chip="100">100</button>
-      <button class="c200" data-chip="200">200</button>
-      <button class="c500" data-chip="500">500</button>
-      <button class="c1k" data-chip="1000">1K</button>
-    </div>
-
-    <div class="actionBar">
-      <button onclick="undo()">↶ UNDO</button>
-      <button onclick="clearBets()">♲ CLEAR</button>
-      <button onclick="doubleBets()">×2 DOUBLE</button>
-    </div>
-
-    <button class="historyButton" onclick="openHistory()">GAME HISTORY · LAST 500</button>
-
-    <div class="resultPopup" id="resultPopup">
-      <div class="big" id="resultNumber">0</div>
-      <div class="sub" id="resultText">GREEN</div>
+    <div class="footer">
+      N+ PLAY · VIRTUAL-CREDIT DEMO EXPERIENCE · 18+
     </div>
   </div>
-</div>
-
-<div class="modal" id="historyModal">
-  <div class="modalBox">
-    <h2>LAST 500 ROUNDS</h2>
-    <table>
-      <thead><tr><th>#</th><th>NUMBER</th><th>COLOR</th><th>SIZE</th><th>PARITY</th></tr></thead>
-      <tbody id="historyBody"></tbody>
-    </table>
-    <button onclick="closeHistory()">CLOSE</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-(() => {
-  const REDS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
-  const ORDER = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
-  const STORE='nplus_roulette_realistic_v1';
-  let db;
-  try{db=JSON.parse(localStorage.getItem(STORE)||'null')}catch(e){db=null}
-  if(!db)db={balance:10000,history:[]};
-
-  let chip=1;
-  let bets=[];
-  let locked=false;
-  let seconds=20;
-  let wheelRotation=0;
-
-  const $=id=>document.getElementById(id);
-  const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
-  const color=n=>n===0?'GREEN':REDS.has(n)?'RED':'BLACK';
-  const chipClass=v=>v===1?'c1':v===5?'c5':v===10?'c10':v===20?'c20':v===50?'c50':v===100?'c100':v===200?'c200':v===500?'c500':'c1k';
-
-  function save(){
-    db.history=db.history.slice(0,500);
-    localStorage.setItem(STORE,JSON.stringify(db));
-  }
-  function totalBet(){return bets.reduce((s,b)=>s+b.amount,0)}
-  function toast(msg){
-    $('toast').textContent=msg;
-    $('toast').classList.add('show');
-    setTimeout(()=>$('toast').classList.remove('show'),1200);
-  }
-
-  function buildTableMap(){
-    const root=$('tableHot');
-
-    const rows=[
-      [3,6,9,12,15,18,21,24,27,30,33,36],
-      [2,5,8,11,14,17,20,23,26,29,32,35],
-      [1,4,7,10,13,16,19,22,25,28,31,34]
-    ];
-
-    // Number cells
-    rows.forEach((row,r)=>{
-      row.forEach((n,c)=>{
-        const b=document.createElement('button');
-        b.className='hotspot numberHotspot row'+(r+1);
-        b.style.left=(7 + c*(73/12))+'%';
-        b.style.top=(r*33.4)+'%';
-        b.dataset.num=n;
-        b.onclick=()=>place(String(n),'number',[n],35);
-        root.appendChild(b);
-      });
-    });
-
-    // 0
-    const z=document.createElement('button');
-    z.className='hotspot zeroHotspot'; z.dataset.num=0;
-    z.onclick=()=>place('0','number',[0],35); root.appendChild(z);
-
-    // 2-to-1 columns
-    ['COL3','COL2','COL1'].forEach((name,i)=>{
-      const b=document.createElement('button');
-      b.className='hotspot colHotspot col'+(i+1); b.dataset.out=name;
-      b.onclick=()=>outside(name); root.appendChild(b);
-    });
-
-    // Dozens
-    ['1ST 12','2ND 12','3RD 12'].forEach((name,i)=>{
-      const b=document.createElement('button');
-      b.className='hotspot dozenHotspot dozen'+(i+1);b.dataset.out=name;
-      b.onclick=()=>outside(name);root.appendChild(b);
-    });
-
-    // Even chances
-    ['1-18','EVEN','RED','BLACK','ODD','19-36'].forEach((name,i)=>{
-      const b=document.createElement('button');
-      b.className='hotspot outHotspot out'+(i+1);b.dataset.out=name;
-      b.onclick=()=>outside(name);root.appendChild(b);
-    });
-
-    // Split points: horizontal between adjacent numbered columns.
-    for(let r=0;r<3;r++){
-      for(let c=0;c<11;c++){
-        const a=rows[r][c],b=rows[r][c+1];
-        const h=document.createElement('button');
-        h.className='hotspot splitV';
-        h.style.left=(7 + (c+1)*(73/12) - .55)+'%';
-        h.style.top=(r*33.4 + 4)+'%';
-        h.dataset.a=a;h.dataset.b=b;
-        h.onmouseenter=()=>h.style.background='rgba(248,223,150,.15)';
-        h.onmouseleave=()=>h.style.background='transparent';
-        h.onclick=()=>place('Split '+a+'/'+b,'split',[a,b],17);
-        root.appendChild(h);
-      }
-    }
-
-    // Split points vertically between rows.
-    for(let r=0;r<2;r++){
-      for(let c=0;c<12;c++){
-        const a=rows[r][c],b=rows[r+1][c];
-        const h=document.createElement('button');
-        h.className='hotspot splitH';
-        h.style.left=(7 + c*(73/12) + 0.8)+'%';
-        h.style.top=((r+1)*33.4 - .65)+'%';
-        h.dataset.a=a;h.dataset.b=b;
-        h.onclick=()=>place('Split '+a+'/'+b,'split',[a,b],17);
-        root.appendChild(h);
-      }
-    }
-
-    // Corner points
-    for(let r=0;r<2;r++){
-      for(let c=0;c<11;c++){
-        const nums=[rows[r][c],rows[r][c+1],rows[r+1][c],rows[r+1][c+1]];
-        const h=document.createElement('button');
-        h.className='hotspot cornerHot';
-        h.style.left=(7 + (c+1)*(73/12) - .7)+'%';
-        h.style.top=((r+1)*33.4 - 1.3)+'%';
-        h.onclick=()=>place('Corner '+nums.join('/'),'corner',nums,8);
-        root.appendChild(h);
-      }
-    }
-
-    // Street edges (row edges). One edge per row.
-    [0,1,2].forEach(r=>{
-      const start=rows[r][0],nums=rows[r].slice(0,3);
-      const h=document.createElement('button');
-      h.className='hotspot streetRight';h.style.top=(r*33.4+2)+'%';h.dataset.row=r;
-      h.onclick=()=>place('Street '+start+'-'+(start+6), 'street', nums, 11);
-      root.appendChild(h);
-    });
-
-    // Six-line dividers between row 1-2 and 2-3.
-    [0,1].forEach(r=>{
-      const nums=[...rows[r],...rows[r+1]].slice(0,6);
-      const h=document.createElement('button');
-      h.className='hotspot sixLine '+(r===0?'a':'b');
-      h.onclick=()=>place('Six Line '+nums[0]+'-'+nums[nums.length-1],'sixline',nums,5);
-      root.appendChild(h);
-    });
-  }
-
-  function place(name,kind,nums,payout){
-    if(locked)return;
-    if(db.balance<chip)return toast('Insufficient demo balance');
-    db.balance-=chip;
-    bets.push({name,kind,nums,payout,amount:chip});
-    render();
-  }
-
-  function outside(name){
-    if(name==='UNDO')return undo();
-    if(name==='CLEAR')return clearBets();
-    if(name==='DOUBLE')return doubleBets();
-    const payout=(name.includes('12')||name.startsWith('COL'))?2:1;
-    place(name,'outside',[],payout);
-  }
-
-  function isWin(b,n){
-    if(b.kind==='number')return n===b.nums[0];
-    if(['split','corner','street','sixline'].includes(b.kind))return b.nums.includes(n);
-    if(b.kind==='outside'){
-      if(n===0)return false;
-      if(b.name==='RED')return color(n)==='RED';
-      if(b.name==='BLACK')return color(n)==='BLACK';
-      if(b.name==='ODD')return n%2===1;
-      if(b.name==='EVEN')return n%2===0;
-      if(b.name==='1-18')return n>=1&&n<=18;
-      if(b.name==='19-36')return n>=19&&n<=36;
-      if(b.name==='1ST 12')return n>=1&&n<=12;
-      if(b.name==='2ND 12')return n>=13&&n<=24;
-      if(b.name==='3RD 12')return n>=25&&n<=36;
-      if(b.name==='COL1')return [1,4,7,10,13,16,19,22,25,28,31,34].includes(n);
-      if(b.name==='COL2')return [2,5,8,11,14,17,20,23,26,29,32,35].includes(n);
-      if(b.name==='COL3')return [3,6,9,12,15,18,21,24,27,30,33,36].includes(n);
-    }
-    return false;
-  }
-
-  function addVisualChip(xPct,yPct,amount){
-    const ch=document.createElement('span');
-    ch.className='placedChip '+chipClass(amount);
-    ch.textContent=amount>=1000?'1K':amount;
-    ch.style.left=xPct+'%';ch.style.top=yPct+'%';
-    $('tableHot').appendChild(ch);
-  }
-
-  function renderBets(){
-    document.querySelectorAll('.placedChip').forEach(x=>x.remove());
-
-    const numberTotals=new Map();
-    bets.forEach(b=>{
-      if(b.kind==='number')numberTotals.set(b.nums[0],(numberTotals.get(b.nums[0])||0)+b.amount);
-      else if(['split','corner','street','sixline'].includes(b.kind)){
-        b.nums.forEach(n=>numberTotals.set(n,(numberTotals.get(n)||0)+b.amount));
-      }
-    });
-
-    const rows=[
-      [3,6,9,12,15,18,21,24,27,30,33,36],
-      [2,5,8,11,14,17,20,23,26,29,32,35],
-      [1,4,7,10,13,16,19,22,25,28,31,34]
-    ];
-    numberTotals.forEach((amt,n)=>{
-      for(let r=0;r<3;r++){
-        const c=rows[r].indexOf(n);
-        if(c>=0){
-          const x=7+c*(73/12)+(73/12)/2;
-          const y=r*33.4+16.5;
-          addVisualChip(x,y,amt);
-        }
-      }
-    });
-
-    $('balance').textContent=money(db.balance);
-    $('totalBet').textContent=money(totalBet());
-  }
-
-  function renderHistory(){
-    $('historyBody').innerHTML=db.history.slice(0,500).map((n,i)=>{
-      const c=color(n);
-      return `<tr><td>${i+1}</td><td>${n}</td><td>${c}</td><td>${n===0?'—':n<=18?'SMALL':'BIG'}</td><td>${n===0?'—':n%2?'ODD':'EVEN'}</td></tr>`
-    }).join('');
-  }
-
-  function renderRecent(){
-    const h=db.history.slice(0,11);
-    $('recent').innerHTML=h.length?h.map(n=>`<span style="color:${n===0?'#56dfa3':REDS.has(n)?'#ef6666':'#fff'}">${n}</span>`).join(' '):'<span style="color:#747b8c">No rounds</span>';
-    const f=Array.from({length:37},(_,n)=>({n,count:db.history.filter(x=>x===n).length}));
-    const hot=[...f].sort((a,b)=>b.count-a.count||a.n-b.n).slice(0,3);
-    const cold=[...f].sort((a,b)=>a.count-b.count||a.n-b.n).slice(0,3);
-    [['h1','h1c'],['h2','h2c'],['h3','h3c']].forEach((p,i)=>{$(p[0]).textContent=hot[i].n;$(p[1]).textContent=hot[i].count+'x'});
-    [['c1','c1c'],['c2','c2c'],['c3','c3c']].forEach((p,i)=>{$(p[0]).textContent=cold[i].n;$(p[1]).textContent=cold[i].count+'x'});
-  }
-
-  function render(){
-    renderBets();renderHistory();renderRecent();
-  }
-
-  function undo(){
-    const b=bets.pop();
-    if(!b)return toast('Nothing to undo');
-    db.balance+=b.amount;render();
-  }
-  function clearBets(){
-    db.balance+=totalBet();bets=[];render();
-  }
-  function doubleBets(){
-    const extra=totalBet();
-    if(!extra||db.balance<extra)return toast('Cannot double');
-    db.balance-=extra;bets.forEach(b=>b.amount*=2);render();
-  }
-  window.undo=undo;window.clearBets=clearBets;window.doubleBets=doubleBets;
-
-  function spin(){
-    if(locked)return;
-    locked=true;
-    $('betState').textContent='NO MORE BETS';
-    $('betState').style.background='rgba(185,28,35,.93)';
-
-    const result=ORDER[Math.floor(Math.random()*ORDER.length)];
-    const start=performance.now(),duration=4600;
-
-    function frame(now){
-      const t=Math.min(1,(now-start)/duration);
-      const e=1-Math.pow(1-t,5);
-      $('wheelImg').style.transform=`scale(1) rotate(${1440*e}deg)`;
-      const ballAngle=(t*1750)%360;
-      const radius=228-15*Math.sin(t*Math.PI);
-      $('ball').style.transform=`rotate(${ballAngle}deg) translateY(-${radius}px)`;
-
-      if(t<1)requestAnimationFrame(frame);else finish(result);
-    }
-
-    requestAnimationFrame(frame);
-  }
-
-  function finish(result){
-    const win=bets.reduce((s,b)=>s+(isWin(b,result)?b.amount*b.payout:0),0);
-    db.balance+=win;
-    db.history.unshift(result);
-    save();
-    bets=[];
-
-    $('resultNumber').textContent=result;
-    $('resultText').textContent=color(result)+(win?' · YOU WON '+money(win):' · NO WIN');
-    $('resultPopup').classList.add('show');
-
-    $('betState').textContent=win?`YOU WON ${money(win)}`:'ROUND COMPLETE';
-    $('betState').style.background=win?'rgba(21,145,92,.94)':'rgba(32,56,88,.94)';
-
-    render();
-
-    setTimeout(()=>{
-      $('resultPopup').classList.remove('show');
-      locked=false;seconds=20;
-      $('betState').style.background='rgba(5,225,0,.93)';
-      $('betState').textContent='PLACE YOUR BETS';
-      $('timer').textContent='20s';
-    },1700);
-  }
-
-  document.querySelectorAll('[data-chip]').forEach(b=>b.addEventListener('click',()=>{
-    chip=Number(b.dataset.chip);
-    document.querySelectorAll('[data-chip]').forEach(x=>x.classList.toggle('active',x===b));
-  }));
-
-  function openHistory(){$('historyModal').classList.add('show');renderHistory()}
-  function closeHistory(){$('historyModal').classList.remove('show')}
-  window.openHistory=openHistory;window.closeHistory=closeHistory;
-
-  buildTableMap();
-  render();
-
-  const chatMessages=[
-    ['Player_531','red 17'],['LuckyTiger','good luck 🔥'],['Ravi_21','split 3 / 6'],['Player_719','1st 12'],['CasinoFan','0 coming soon'],['Auto','place your bets']
-  ];
-  let ci=0;
-  setInterval(()=>{
-    const chat=$('chatOverlay');
-    if(!chat)return;
-    const [n,t]=chatMessages[ci++%chatMessages.length];
-    const d=document.createElement('div');d.className='m';d.innerHTML=`<small>${n}</small>${t}`;
-    chat.appendChild(d);while(chat.children.length>12)chat.removeChild(chat.firstChild);chat.scrollTop=chat.scrollHeight
-  },3000);
-
-  setInterval(()=>{
-    if(locked)return;
-    seconds--;
-    $('timer').textContent=seconds+'s';
-    if(seconds<=0)spin();
-  },1000);
-})();
-</script>
 </body>
-</html>'''
-
-path = out / "auto-roulette.html"
-path.write_text(html, encoding="utf-8")
-print(path)
+</html>
