@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
@@ -79,7 +80,8 @@
       color:#111;
       font-size:17px;
       font-weight:950;
-      box-shadow:0 15px 45px rgba(201,165,91,.16);
+      box-shadow:
+        0 15px 45px rgba(201,165,91,.16);
     }
 
     .brand h1{
@@ -105,7 +107,8 @@
           rgba(255,255,255,.045),
           rgba(255,255,255,.018)
         );
-      box-shadow:0 28px 90px rgba(0,0,0,.62);
+      box-shadow:
+        0 28px 90px rgba(0,0,0,.62);
     }
 
     .tabs{
@@ -170,6 +173,10 @@
 
     .password{
       position:relative;
+    }
+
+    .password input{
+      padding-right:65px;
     }
 
     .toggle{
@@ -248,7 +255,15 @@
     }
 
     .hidden{
-      display:none!important;
+      display:none !important;
+    }
+
+    .helper{
+      margin-top:9px;
+      color:#5f625b;
+      font-size:.48rem;
+      line-height:1.5;
+      text-align:center;
     }
 
     .footer{
@@ -263,15 +278,8 @@
       color:#7d6a3d;
     }
 
-    .helper{
-      margin-top:9px;
-      color:#5f625b;
-      font-size:.48rem;
-      line-height:1.5;
-      text-align:center;
-    }
-
     @media (max-width:420px){
+
       body{
         padding:14px;
       }
@@ -283,6 +291,7 @@
       .brand h1{
         font-size:1.5rem;
       }
+
     }
   </style>
 </head>
@@ -293,11 +302,19 @@
 
     <!-- BRAND -->
     <div class="brand">
-      <div class="mark">N+</div>
 
-      <h1>N+ PLAY</h1>
+      <div class="mark">
+        N+
+      </div>
 
-      <p>SECURE MEMBER ACCESS</p>
+      <h1>
+        N+ PLAY
+      </h1>
+
+      <p>
+        SECURE MEMBER ACCESS
+      </p>
+
     </div>
 
 
@@ -326,12 +343,16 @@
       </div>
 
 
-      <!-- AUTH FORM -->
-      <form id="authForm">
+      <!-- FORM -->
+      <form
+        id="authForm"
+        novalidate
+      >
 
-        <!-- =========================
+        <!-- ==========================
              LOGIN
-        ========================== -->
+        =========================== -->
+
         <div id="loginFields">
 
           <div class="field">
@@ -343,7 +364,6 @@
             <input
               id="loginEmail"
               type="email"
-              required
               placeholder="you@example.com"
               autocomplete="username"
               maxlength="254"
@@ -361,7 +381,6 @@
             <input
               id="loginMobile"
               type="tel"
-              required
               placeholder="+91 9876543210"
               autocomplete="tel"
               inputmode="tel"
@@ -382,7 +401,6 @@
               <input
                 id="loginPassword"
                 type="password"
-                required
                 placeholder="Your password"
                 autocomplete="current-password"
                 minlength="6"
@@ -403,9 +421,10 @@
         </div>
 
 
-        <!-- =========================
+        <!-- ==========================
              SIGN UP
-        ========================== -->
+        =========================== -->
+
         <div
           id="signupFields"
           class="hidden"
@@ -421,7 +440,6 @@
               id="name"
               type="text"
               maxlength="40"
-              required
               placeholder="Your name"
               autocomplete="name"
             >
@@ -438,7 +456,6 @@
             <input
               id="signupEmail"
               type="email"
-              required
               placeholder="you@example.com"
               autocomplete="email"
               maxlength="254"
@@ -456,7 +473,6 @@
             <input
               id="signupMobile"
               type="tel"
-              required
               placeholder="+91 9876543210"
               autocomplete="tel"
               inputmode="tel"
@@ -478,7 +494,6 @@
                 id="signupPassword"
                 type="password"
                 minlength="6"
-                required
                 placeholder="Minimum 6 characters"
                 autocomplete="new-password"
               >
@@ -508,7 +523,6 @@
                 id="confirm"
                 type="password"
                 minlength="6"
-                required
                 placeholder="Repeat password"
                 autocomplete="new-password"
               >
@@ -528,7 +542,7 @@
         </div>
 
 
-        <!-- SUBMIT -->
+        <!-- SUBMIT BUTTON -->
         <button
           class="action"
           id="submitBtn"
@@ -544,12 +558,8 @@
       <div class="notice">
 
         <b>Free demo:</b>
-
-        New accounts start with
-        ₹108 virtual credits.
-
+        New accounts start with ₹108 virtual credits.
         No email OTP or SMS OTP is required.
-
         Login requires email + mobile number + password.
 
       </div>
@@ -563,8 +573,8 @@
 
 
       <div class="helper">
-        Your email and mobile number can only be registered
-        once on this N+ PLAY account system.
+        Each email address and mobile number can only be
+        registered once on N+ PLAY.
       </div>
 
     </section>
@@ -589,11 +599,14 @@
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   ></script>
 
+
   <!-- N+ PLAY CONFIG -->
   <script src="core/nplus-config.js"></script>
 
+
   <!-- N+ PLAY AUTH -->
-  <script src="core/nplus-auth.js"></script>
+  <!-- Cache-busting version -->
+  <script src="core/nplus-auth.js?v=20261003"></script>
 
 
   <!-- PAGE LOGIC -->
@@ -611,9 +624,9 @@
       let mode = "login";
 
 
-      // -----------------------------------
+      // =====================================
       // STATUS
-      // -----------------------------------
+      // =====================================
 
       function setStatus(
         text,
@@ -646,9 +659,9 @@
       }
 
 
-      // -----------------------------------
+      // =====================================
       // MODE
-      // -----------------------------------
+      // =====================================
 
       function setMode(next){
 
@@ -692,21 +705,46 @@
           );
 
 
+        // IMPORTANT:
+        // Only visible fields are required.
+
+        $("loginEmail").required =
+          !signup;
+
+        $("loginMobile").required =
+          !signup;
+
+        $("loginPassword").required =
+          !signup;
+
+
+        $("name").required =
+          signup;
+
+        $("signupEmail").required =
+          signup;
+
+        $("signupMobile").required =
+          signup;
+
+        $("signupPassword").required =
+          signup;
+
+        $("confirm").required =
+          signup;
+
+
         $("submitBtn").textContent =
           signup
             ? "CREATE N+ PLAY ACCOUNT"
             : "LOGIN TO N+ PLAY";
 
-
-        // Reset signup fields when switching
-        // from login to signup is intentionally
-        // not done so the user doesn't lose input.
       }
 
 
-      // -----------------------------------
+      // =====================================
       // PASSWORD SHOW / HIDE
-      // -----------------------------------
+      // =====================================
 
       function togglePassword(
         inputId,
@@ -716,18 +754,21 @@
         const input =
           $(inputId);
 
+
         if(
           input.type === "password"
         ){
 
-          input.type = "text";
+          input.type =
+            "text";
 
           button.textContent =
             "HIDE";
 
         }else{
 
-          input.type = "password";
+          input.type =
+            "password";
 
           button.textContent =
             "SHOW";
@@ -737,9 +778,9 @@
       }
 
 
-      // -----------------------------------
-      // REDIRECT
-      // -----------------------------------
+      // =====================================
+      // NEXT URL
+      // =====================================
 
       function nextUrl(){
 
@@ -749,7 +790,6 @@
           ).get("next");
 
 
-        // Prevent javascript: URLs
         if(
           next &&
           !next
@@ -767,49 +807,66 @@
       }
 
 
-      // -----------------------------------
+      // =====================================
       // TAB EVENTS
-      // -----------------------------------
+      // =====================================
 
       $("loginTab").onclick =
-        () => setMode("login");
+        () => {
+
+          setMode("login");
+
+        };
 
 
       $("signupTab").onclick =
-        () => setMode("signup");
+        () => {
+
+          setMode("signup");
+
+        };
 
 
-      // -----------------------------------
+      // =====================================
       // PASSWORD BUTTONS
-      // -----------------------------------
+      // =====================================
 
       $("loginShow").onclick =
-        () =>
+        () => {
+
           togglePassword(
             "loginPassword",
             $("loginShow")
           );
 
+        };
+
 
       $("signupShow").onclick =
-        () =>
+        () => {
+
           togglePassword(
             "signupPassword",
             $("signupShow")
           );
 
+        };
+
 
       $("confirmShow").onclick =
-        () =>
+        () => {
+
           togglePassword(
             "confirm",
             $("confirmShow")
           );
 
+        };
 
-      // -----------------------------------
+
+      // =====================================
       // FORM SUBMIT
-      // -----------------------------------
+      // =====================================
 
       $("authForm").onsubmit =
         async event => {
@@ -829,6 +886,7 @@
 
           try{
 
+
             // =================================
             // LOGIN
             // =================================
@@ -840,22 +898,58 @@
                   .value
                   .trim();
 
+
               const mobile =
                 $("loginMobile")
                   .value
                   .trim();
+
 
               const password =
                 $("loginPassword")
                   .value;
 
 
+              if(!email){
+
+                throw new Error(
+                  "Email address is required."
+                );
+
+              }
+
+
+              if(!mobile){
+
+                throw new Error(
+                  "Mobile number is required."
+                );
+
+              }
+
+
+              if(!password){
+
+                throw new Error(
+                  "Password is required."
+                );
+
+              }
+
+
+              if(password.length < 6){
+
+                throw new Error(
+                  "Password must be at least 6 characters."
+                );
+
+              }
+
+
               await NPlusAuth.signIn({
 
                 email,
-
                 mobile,
-
                 password
 
               });
@@ -868,10 +962,13 @@
 
 
               setTimeout(
-                () =>
+                () => {
+
                   location.replace(
                     nextUrl()
-                  ),
+                  );
+
+                },
                 500
               );
 
@@ -882,7 +979,7 @@
 
 
             // =================================
-            // SIGN UP
+            // SIGNUP
             // =================================
 
             const name =
@@ -890,26 +987,29 @@
                 .value
                 .trim();
 
+
             const email =
               $("signupEmail")
                 .value
                 .trim();
+
 
             const mobile =
               $("signupMobile")
                 .value
                 .trim();
 
+
             const password =
               $("signupPassword")
                 .value;
+
 
             const confirm =
               $("confirm")
                 .value;
 
 
-            // NAME
             if(!name){
 
               throw new Error(
@@ -919,7 +1019,33 @@
             }
 
 
-            // PASSWORD
+            if(!email){
+
+              throw new Error(
+                "Email address is required."
+              );
+
+            }
+
+
+            if(!mobile){
+
+              throw new Error(
+                "Mobile number is required."
+              );
+
+            }
+
+
+            if(!password){
+
+              throw new Error(
+                "Password is required."
+              );
+
+            }
+
+
             if(password.length < 6){
 
               throw new Error(
@@ -929,7 +1055,6 @@
             }
 
 
-            // CONFIRM PASSWORD
             if(password !== confirm){
 
               throw new Error(
@@ -939,18 +1064,28 @@
             }
 
 
+            // =================================
             // CREATE ACCOUNT
-            await NPlusAuth.signUp({
+            // =================================
 
-              name,
+            const result =
+              await NPlusAuth.signUp({
 
-              email,
+                name,
+                email,
+                mobile,
+                password
 
-              mobile,
+              });
 
-              password
 
-            });
+            if(!result || !result.user){
+
+              throw new Error(
+                "Account could not be created."
+              );
+
+            }
 
 
             setStatus(
@@ -960,10 +1095,13 @@
 
 
             setTimeout(
-              () =>
+              () => {
+
                 location.replace(
                   nextUrl()
-                ),
+                );
+
+              },
               700
             );
 
@@ -993,9 +1131,9 @@
         };
 
 
-      // -----------------------------------
-      // INITIAL STATE
-      // -----------------------------------
+      // =====================================
+      // INITIAL MODE
+      // =====================================
 
       setMode("login");
 
@@ -1006,4 +1144,3 @@
 
 </body>
 </html>
-```
