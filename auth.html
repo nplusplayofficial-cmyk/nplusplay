@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080908">
+<title>N+ PLAY — Login</title>
+<style>
+:root{--bg:#080908;--line:rgba(255,255,255,.08);--text:#f4f1e8;--muted:#81837b;--gold:#c9a55b;--gold2:#f0dfb5;--green:#42d9a5;--red:#ff6d77}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}
+body{min-height:100vh;color:var(--text);display:grid;place-items:center;padding:18px;background:radial-gradient(600px 400px at 50% -120px,rgba(201,165,91,.1),transparent 68%),radial-gradient(500px 400px at 100% 55%,rgba(255,255,255,.025),transparent 72%),#080908}
+button,input{font:inherit}button{cursor:pointer}.app{width:min(100%,470px)}
+.brand{text-align:center;margin-bottom:20px}.mark{width:62px;height:62px;margin:auto;border-radius:19px;display:grid;place-items:center;background:linear-gradient(145deg,#f2e5c3,#c9a55b 52%,#70582b);color:#11100c;font-weight:950;font-size:17px;box-shadow:0 15px 45px rgba(201,165,91,.16)}
+.brand h1{margin-top:11px;font-size:1.65rem;letter-spacing:1.4px}.brand p{margin-top:5px;color:#6f716a;font-size:.58rem;letter-spacing:1.4px}
+.card{padding:22px;border:1px solid rgba(201,165,91,.16);border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));box-shadow:0 28px 90px rgba(0,0,0,.62)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)}
+.tab{padding:11px;border:0;border-radius:10px;background:transparent;color:#757870;font-size:.61rem;font-weight:900}.tab.active{background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d}
+.form{margin-top:18px}.field{margin-top:13px}.field:first-child{margin-top:0}label{display:block;margin:0 0 7px;color:#a4a69e;font-size:.55rem;font-weight:800;letter-spacing:.6px}
+.input-wrap{position:relative}input{width:100%;padding:13px 14px;border:1px solid var(--line);outline:0;border-radius:13px;background:#0c0d0b;color:#eee9dc;font-size:.65rem}input:focus{border-color:rgba(201,165,91,.45);box-shadow:0 0 0 3px rgba(201,165,91,.07)}
+.toggle{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#777a72;font-size:.52rem;font-weight:800}
+.action{width:100%;margin-top:17px;padding:13px;border:0;border-radius:13px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;font-size:.61rem}.action:disabled{opacity:.55;cursor:not-allowed}
+.note{margin-top:12px;color:#666960;font-size:.52rem;line-height:1.55;text-align:center}.status{display:none;margin-top:12px;padding:11px;border-radius:12px;font-size:.55rem;line-height:1.45;border:1px solid var(--line)}.status.show{display:block}.status.ok{color:#9ce9c9;background:rgba(66,217,165,.06);border-color:rgba(66,217,165,.18)}.status.err{color:#ffafb5;background:rgba(255,109,119,.05);border-color:rgba(255,109,119,.18)}
+.promo{margin-top:12px;padding:12px;border:1px solid rgba(201,165,91,.12);border-radius:13px;background:rgba(201,165,91,.035);color:#787a73;font-size:.52rem;line-height:1.5}.promo b{color:#d8c28c}.footer{margin-top:16px;text-align:center;color:#555850;font-size:.47rem;line-height:1.6}.footer b{color:#7d6a3d}.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="brand"><div class="mark">N+</div><h1>N+ PLAY</h1><p>SECURE MEMBER ACCESS</p></div>
+<section class="card">
+<div class="tabs"><button class="tab active" id="loginTab" type="button">LOGIN</button><button class="tab" id="signupTab" type="button">CREATE ACCOUNT</button></div>
+<form class="form" id="authForm">
+<div class="field hidden" id="nameField"><label for="name">DISPLAY NAME</label><input id="name" type="text" maxlength="40" placeholder="Your name" autocomplete="name"></div>
+<div class="field"><label for="email">EMAIL ADDRESS</label><input id="email" type="email" required placeholder="you@example.com" autocomplete="email"></div>
+<div class="field"><label for="password">PASSWORD</label><div class="input-wrap"><input id="password" type="password" required minlength="6" placeholder="Minimum 6 characters" autocomplete="current-password"><button class="toggle" id="togglePassword" type="button">SHOW</button></div></div>
+<div class="field hidden" id="confirmField"><label for="confirmPassword">CONFIRM PASSWORD</label><div class="input-wrap"><input id="confirmPassword" type="password" minlength="6" placeholder="Repeat password" autocomplete="new-password"><button class="toggle" id="toggleConfirm" type="button">SHOW</button></div></div>
+<button class="action" id="submitBtn" type="submit">LOGIN TO N+ PLAY</button>
+</form>
+<div class="promo"><b>Demo platform:</b> New accounts receive ₹108 virtual credits for platform use. No real-money payment or cash withdrawal is processed here.</div>
+<div class="status" id="status"></div><div class="note" id="switchNote">New here? Create your N+ PLAY account above.</div>
+</section>
+<div class="footer"><b>N+ PLAY</b><br>18+ · Virtual-credit platform mode · Play responsibly</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js"></script>
+<script src="core/nplus-auth.js"></script>
+<script>
+(()=>{"use strict";
+const loginTab=document.getElementById("loginTab"),signupTab=document.getElementById("signupTab"),authForm=document.getElementById("authForm"),nameField=document.getElementById("nameField"),confirmField=document.getElementById("confirmField"),nameInput=document.getElementById("name"),emailInput=document.getElementById("email"),passwordInput=document.getElementById("password"),confirmInput=document.getElementById("confirmPassword"),submitBtn=document.getElementById("submitBtn"),status=document.getElementById("status"),switchNote=document.getElementById("switchNote"),togglePassword=document.getElementById("togglePassword"),toggleConfirm=document.getElementById("toggleConfirm");
+let mode="login";
+function setStatus(message,type="err"){status.textContent=message;status.className="status show "+type}
+function setMode(next){mode=next;const signup=mode==="signup";loginTab.classList.toggle("active",!signup);signupTab.classList.toggle("active",signup);nameField.classList.toggle("hidden",!signup);confirmField.classList.toggle("hidden",!signup);nameInput.required=signup;confirmInput.required=signup;submitBtn.textContent=signup?"CREATE N+ PLAY ACCOUNT":"LOGIN TO N+ PLAY";switchNote.textContent=signup?"Already registered? Switch to Login above.":"New here? Create your N+ PLAY account above.";status.className="status";status.textContent=""}
+function showHide(input,button){const visible=input.type==="text";input.type=visible?"password":"text";button.textContent=visible?"SHOW":"HIDE"}
+function nextUrl(){const params=new URLSearchParams(location.search),next=params.get("next");if(!next)return "account.html";if(next.startsWith("javascript:"))return "account.html";return next}
+loginTab.addEventListener("click",()=>setMode("login"));signupTab.addEventListener("click",()=>setMode("signup"));togglePassword.addEventListener("click",()=>showHide(passwordInput,togglePassword));toggleConfirm.addEventListener("click",()=>showHide(confirmInput,toggleConfirm));
+authForm.addEventListener("submit",async e=>{e.preventDefault();status.className="status";submitBtn.disabled=true;try{const email=emailInput.value.trim().toLowerCase(),password=passwordInput.value;if(mode==="signup"){if(password.length<6)throw new Error("Password must be at least 6 characters.");if(password!==confirmInput.value)throw new Error("Passwords do not match.");const user=await window.NPlusAuth.signUp({email,password,name:nameInput.value.trim()});if(user&&user.aud){setStatus("Account created successfully. Opening your account…","ok");setTimeout(()=>location.href=nextUrl(),500)}else{setStatus("Account created. Please verify your email if confirmation is enabled, then log in.","ok");setMode("login")}}else{await window.NPlusAuth.signIn({email,password});setStatus("Login successful. Opening your account…","ok");setTimeout(()=>location.href=nextUrl(),350)}}catch(err){setStatus(err?.message||"Something went wrong. Please try again.","err")}finally{submitBtn.disabled=false}});
+(async()=>{try{const user=await window.NPlusAuth.current();if(user){setStatus("You are already signed in. Opening your account…","ok");setTimeout(()=>location.href=nextUrl(),350)}}catch{}})();
+})();
+</script>
+</body>
+</html>
