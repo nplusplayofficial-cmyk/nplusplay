@@ -4,33 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#080908">
-<title>N+ PLAY — Login</title>
+<title>N+ PLAY — Secure Access</title>
 <style>
-:root{--bg:#080908;--line:rgba(255,255,255,.08);--text:#f4f1e8;--muted:#7f827a;--gold:#c9a55b;--gold2:#f0dfb5;--green:#42d9a5;--red:#ff6d77}
+:root{--line:rgba(255,255,255,.08);--text:#f4f1e8;--muted:#7f827a;--gold:#c9a55b;--gold2:#f0dfb5;--green:#42d9a5;--red:#ff6d77}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}
 body{min-height:100vh;color:var(--text);display:grid;place-items:center;padding:18px;background:radial-gradient(600px 420px at 50% -130px,rgba(201,165,91,.1),transparent 68%),#080908}
-button,input{font:inherit}button{cursor:pointer}.app{width:min(100%,470px)}
+button,input{font:inherit}button{cursor:pointer}.app{width:min(100%,480px)}
 .brand{text-align:center;margin-bottom:20px}.mark{width:62px;height:62px;margin:auto;border-radius:19px;display:grid;place-items:center;background:linear-gradient(145deg,#f2e5c3,#c9a55b 52%,#70582b);color:#111;font-size:17px;font-weight:950;box-shadow:0 15px 45px rgba(201,165,91,.16)}.brand h1{margin-top:11px;font-size:1.65rem;letter-spacing:1.4px}.brand p{margin-top:5px;color:#6f716a;font-size:.56rem;letter-spacing:1.4px}
 .card{padding:22px;border:1px solid rgba(201,165,91,.16);border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));box-shadow:0 28px 90px rgba(0,0,0,.62)}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)}
 .tab{padding:11px;border:0;border-radius:10px;background:transparent;color:#757870;font-size:.61rem;font-weight:900}.tab.active{background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d}
-.form{margin-top:18px}.field{margin-top:13px}.field:first-child{margin-top:0}label{display:block;margin-bottom:7px;color:#a4a69e;font-size:.55rem;font-weight:800;letter-spacing:.6px}
+.field{margin-top:13px}label{display:block;margin-bottom:7px;color:#a4a69e;font-size:.55rem;font-weight:800;letter-spacing:.6px}
 input{width:100%;padding:13px 14px;border:1px solid var(--line);outline:0;border-radius:13px;background:#0c0d0b;color:#eee9dc;font-size:.65rem}input:focus{border-color:rgba(201,165,91,.45);box-shadow:0 0 0 3px rgba(201,165,91,.07)}
 .password{position:relative}.toggle{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#777a72;font-size:.52rem;font-weight:800}
 .action{width:100%;margin-top:17px;padding:13px;border:0;border-radius:13px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;font-size:.61rem}.action:disabled{opacity:.55}
-.note{margin-top:12px;color:#666960;font-size:.52rem;line-height:1.55;text-align:center}.notice{margin-top:12px;padding:12px;border:1px solid rgba(201,165,91,.12);border-radius:13px;background:rgba(201,165,91,.035);color:#787a73;font-size:.51rem;line-height:1.5}.notice b{color:#d8c28c}
+.secondary{width:100%;margin-top:10px;padding:11px;border:1px solid var(--line);background:transparent;color:#aaa;font-weight:850;font-size:.56rem;border-radius:12px}
+.notice{margin-top:12px;padding:12px;border:1px solid rgba(201,165,91,.12);border-radius:13px;background:rgba(201,165,91,.035);color:#787a73;font-size:.51rem;line-height:1.5}.notice b{color:#d8c28c}
 .status{display:none;margin-top:12px;padding:11px;border-radius:12px;font-size:.55rem;line-height:1.45;border:1px solid var(--line)}.status.show{display:block}.status.ok{color:#9ce9c9;background:rgba(66,217,165,.06);border-color:rgba(66,217,165,.18)}.status.err{color:#ffafb5;background:rgba(255,109,119,.05);border-color:rgba(255,109,119,.18)}
-.otp{text-align:center;letter-spacing:9px;font-weight:950;font-size:1.25rem}.hidden{display:none!important}.back{margin-top:11px;width:100%;padding:11px;border:1px solid var(--line);background:transparent;color:#85877f;border-radius:12px;font-size:.56rem;font-weight:800}
-.footer{margin-top:16px;text-align:center;color:#555850;font-size:.47rem;line-height:1.6}.footer b{color:#7d6a3d}
+.hidden{display:none!important}.footer{margin-top:16px;text-align:center;color:#555850;font-size:.47rem;line-height:1.6}.footer b{color:#7d6a3d}.otp{text-align:center;letter-spacing:8px;font-size:1.15rem;font-weight:900}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="brand">
-    <div class="mark">N+</div>
-    <h1>N+ PLAY</h1>
-    <p>SECURE MEMBER ACCESS</p>
-  </div>
+  <div class="brand"><div class="mark">N+</div><h1>N+ PLAY</h1><p>SECURE MEMBER ACCESS</p></div>
 
   <section class="card">
     <div class="tabs">
@@ -38,54 +34,31 @@ input{width:100%;padding:13px 14px;border:1px solid var(--line);outline:0;border
       <button class="tab" id="signupTab" type="button">CREATE ACCOUNT</button>
     </div>
 
-    <form class="form" id="authForm">
-      <div id="signupFields" class="hidden">
-        <div class="field">
-          <label>DISPLAY NAME</label>
-          <input id="name" type="text" maxlength="40" placeholder="Your name" autocomplete="name">
-        </div>
-        <div class="field">
-          <label>EMAIL ADDRESS</label>
-          <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
-        </div>
-        <div class="field">
-          <label>MOBILE NUMBER</label>
-          <input id="phone" type="tel" placeholder="+91 9876543210" autocomplete="tel">
-        </div>
-        <div class="field">
-          <label>PASSWORD</label>
-          <div class="password"><input id="password" type="password" minlength="6" placeholder="Minimum 6 characters" autocomplete="new-password"><button class="toggle" id="togglePassword" type="button">SHOW</button></div>
-        </div>
-        <div class="field">
-          <label>CONFIRM PASSWORD</label>
-          <div class="password"><input id="confirm" type="password" minlength="6" placeholder="Repeat password" autocomplete="new-password"><button class="toggle" id="toggleConfirm" type="button">SHOW</button></div>
-        </div>
+    <form id="authForm">
+      <div id="loginFields">
+        <div class="field"><label>EMAIL ADDRESS</label><input id="loginEmail" type="email" required placeholder="you@example.com" autocomplete="username"></div>
+        <div class="field"><label>MOBILE NUMBER</label><input id="loginMobile" type="tel" required placeholder="+91 9876543210" autocomplete="tel"></div>
+        <div class="field"><label>PASSWORD</label><div class="password"><input id="loginPassword" type="password" required placeholder="Your password" autocomplete="current-password"><button class="toggle" id="loginShow" type="button">SHOW</button></div></div>
       </div>
 
-      <div id="loginFields">
-        <div class="field">
-          <label>EMAIL OR MOBILE NUMBER</label>
-          <input id="identifier" type="text" placeholder="Email or +91 mobile" autocomplete="username">
-        </div>
-        <div class="field">
-          <label>PASSWORD</label>
-          <div class="password"><input id="loginPassword" type="password" placeholder="Your password" autocomplete="current-password"><button class="toggle" id="toggleLoginPassword" type="button">SHOW</button></div>
-        </div>
+      <div id="signupFields" class="hidden">
+        <div class="field"><label>DISPLAY NAME</label><input id="name" type="text" maxlength="40" placeholder="Your name" autocomplete="name"></div>
+        <div class="field"><label>EMAIL ADDRESS</label><input id="signupEmail" type="email" required placeholder="you@example.com" autocomplete="email"></div>
+        <div class="field"><label>MOBILE NUMBER</label><input id="signupMobile" type="tel" required placeholder="+91 9876543210" autocomplete="tel"></div>
+        <div class="field"><label>PASSWORD</label><div class="password"><input id="signupPassword" type="password" minlength="6" required placeholder="Minimum 6 characters" autocomplete="new-password"><button class="toggle" id="signupShow" type="button">SHOW</button></div></div>
+        <div class="field"><label>CONFIRM PASSWORD</label><div class="password"><input id="confirm" type="password" minlength="6" required placeholder="Repeat password" autocomplete="new-password"><button class="toggle" id="confirmShow" type="button">SHOW</button></div></div>
       </div>
 
       <div id="otpFields" class="hidden">
-        <div class="field">
-          <label>SMS VERIFICATION CODE</label>
-          <input id="otp" class="otp" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code">
-        </div>
-        <div class="note" id="otpHint">Enter the 6-digit code sent to your mobile number.</div>
-        <button class="back" id="backToSignup" type="button">BACK</button>
+        <div class="field"><label>EMAIL OTP</label><input id="otp" class="otp" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code"></div>
+        <div class="notice">A 6-digit verification code has been sent to your email. Enter it to activate your N+ PLAY account.</div>
+        <button class="secondary" id="backBtn" type="button">BACK TO SIGNUP</button>
       </div>
 
       <button class="action" id="submitBtn" type="submit">LOGIN TO N+ PLAY</button>
     </form>
 
-    <div class="notice"><b>Demo platform:</b> New accounts start with ₹108 virtual credits. No real-money payment or cash withdrawal is processed here.</div>
+    <div class="notice"><b>Free demo:</b> New verified accounts start with ₹108 virtual credits. Email OTP is used only during signup. Login requires email + mobile number + password.</div>
     <div class="status" id="status"></div>
   </section>
 
@@ -95,105 +68,88 @@ input{width:100%;padding:13px 14px;border:1px solid var(--line);outline:0;border
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/nplus-config.js"></script>
 <script src="core/nplus-auth.js"></script>
-
 <script>
 (() => {
   "use strict";
-  const $ = id => document.getElementById(id);
-  const loginTab=$("loginTab"),signupTab=$("signupTab"),form=$("authForm");
-  const signupFields=$("signupFields"),loginFields=$("loginFields"),otpFields=$("otpFields");
-  const submit=$("submitBtn"),status=$("status");
-
+  const $=id=>document.getElementById(id);
   let mode="login", stage="credentials", pending={};
 
-  function msg(text,type="err"){status.textContent=text;status.className="status show "+type}
-  function clearMsg(){status.className="status";status.textContent=""}
-  function togglePassword(input,btn){input.type=input.type==="password"?"text":"password";btn.textContent=input.type==="password"?"SHOW":"HIDE"}
-
+  function setStatus(text,type="err"){const s=$("status");s.textContent=text;s.className="status show "+type}
+  function clearStatus(){$("status").className="status";$("status").textContent=""}
   function setMode(next){
-    mode=next;stage="credentials";clearMsg();
+    mode=next;stage="credentials";pending={};clearStatus();
     const signup=next==="signup";
-    loginTab.classList.toggle("active",!signup);
-    signupTab.classList.toggle("active",signup);
-    signupFields.classList.toggle("hidden",!signup);
-    loginFields.classList.toggle("hidden",signup);
-    otpFields.classList.add("hidden");
-    submit.classList.remove("hidden");
-    submit.textContent=signup?"SEND OTP":"LOGIN TO N+ PLAY";
+    $("loginTab").classList.toggle("active",!signup);$("signupTab").classList.toggle("active",signup);
+    $("loginFields").classList.toggle("hidden",signup);$("signupFields").classList.toggle("hidden",!signup);
+    $("otpFields").classList.add("hidden");
+    $("submitBtn").textContent=signup?"SEND EMAIL OTP":"LOGIN TO N+ PLAY";
   }
+  function togglePassword(input,btn){const i=$(input);i.type=i.type==="password"?"text":"password";btn.textContent=i.type==="password"?"SHOW":"HIDE"}
+  function nextUrl(){const n=new URLSearchParams(location.search).get("next");return n&&!n.startsWith("javascript:")?n:"account.html"}
 
-  loginTab.onclick=()=>setMode("login");
-  signupTab.onclick=()=>setMode("signup");
-  $("togglePassword").onclick=()=>togglePassword($("password"),$("togglePassword"));
-  $("toggleConfirm").onclick=()=>togglePassword($("confirm"),$("toggleConfirm"));
-  $("toggleLoginPassword").onclick=()=>togglePassword($("loginPassword"),$("toggleLoginPassword"));
+  $("loginTab").onclick=()=>setMode("login");
+  $("signupTab").onclick=()=>setMode("signup");
+  $("loginShow").onclick=()=>togglePassword("loginPassword",$("loginShow"));
+  $("signupShow").onclick=()=>togglePassword("signupPassword",$("signupShow"));
+  $("confirmShow").onclick=()=>togglePassword("confirm",$("confirmShow"));
+  $("backBtn").onclick=()=>{stage="credentials";$("otpFields").classList.add("hidden");$("signupFields").classList.remove("hidden");$("submitBtn").classList.remove("hidden");$("submitBtn").textContent="SEND EMAIL OTP";clearStatus()};
 
-  $("backToSignup").onclick=()=>{stage="credentials";otpFields.classList.add("hidden");signupFields.classList.remove("hidden");submit.classList.remove("hidden");clearMsg()};
+  $("authForm").onsubmit=async e=>{
+    e.preventDefault(); $("submitBtn").disabled=true; clearStatus();
 
-  function nextUrl(){
-    const n=new URLSearchParams(location.search).get("next");
-    return n && !n.startsWith("javascript:") ? n : "account.html";
-  }
-
-  form.onsubmit=async e=>{
-    e.preventDefault();
-    submit.disabled=true;clearMsg();
     try{
       if(mode==="login"){
-        const user=await NPlusAuth.signIn({
-          identifier:$("identifier").value.trim(),
+        await NPlusAuth.signIn({
+          email:$("loginEmail").value.trim(),
+          mobile:$("loginMobile").value.trim(),
           password:$("loginPassword").value
         });
-        if(!user) throw new Error("Login failed.");
-        msg("Login successful. Opening N+ PLAY…","ok");
-        setTimeout(()=>location.replace(nextUrl()),400);
+        setStatus("Login successful. Opening N+ PLAY…","ok");
+        setTimeout(()=>location.replace(nextUrl()),500);
         return;
       }
 
       if(stage==="credentials"){
-        const email=$("email").value.trim().toLowerCase();
-        const phone=NPlusAuth.normalizePhone($("phone").value);
-        const password=$("password").value;
-        const confirm=$("confirm").value;
-        if(!email) throw new Error("Email is required.");
-        if(!phone) throw new Error("Mobile number is required.");
+        const password=$("signupPassword").value;
         if(password.length<6) throw new Error("Password must be at least 6 characters.");
-        if(password!==confirm) throw new Error("Passwords do not match.");
+        if(password!==$("confirm").value) throw new Error("Passwords do not match.");
 
-        pending={email,phone,name:$("name").value.trim(),password};
-        await NPlusAuth.signUp(pending);
+        pending={
+          name:$("name").value.trim(),
+          email:$("signupEmail").value.trim(),
+          mobile:$("signupMobile").value.trim(),
+          password
+        };
+
+        await NPlusAuth.sendSignupOtp(pending);
 
         stage="otp";
-        signupFields.classList.add("hidden");
-        loginFields.classList.add("hidden");
-        otpFields.classList.remove("hidden");
-        submit.textContent="VERIFY OTP";
-        msg("OTP sent to your mobile number. Enter the 6-digit code.","ok");
-        submit.disabled=false;
+        $("signupFields").classList.add("hidden");
+        $("loginFields").classList.add("hidden");
+        $("otpFields").classList.remove("hidden");
+        $("submitBtn").textContent="VERIFY EMAIL OTP";
+        setStatus("Email OTP sent. Check your inbox and enter the 6-digit code.","ok");
+        $("submitBtn").disabled=false;
         return;
       }
 
       const token=$("otp").value.trim();
-      if(!/^\d{6}$/.test(token)) throw new Error("Enter the 6-digit OTP.");
-      await NPlusAuth.verifySignupOtp({...pending,token});
-      msg("Verified successfully. Opening your account…","ok");
+      const user=await NPlusAuth.verifySignupEmailOtp({
+        email:pending.email,
+        token,
+        mobile:pending.mobile,
+        name:pending.name
+      });
+
+      if(!user) throw new Error("Verification failed.");
+      setStatus("Email verified. Account created successfully.","ok");
       setTimeout(()=>location.replace(nextUrl()),500);
     }catch(err){
-      msg(err?.message || "Something went wrong. Please try again.");
+      setStatus(err?.message || "Unable to continue.");
     }finally{
-      submit.disabled=false;
+      $("submitBtn").disabled=false;
     }
   };
-
-  (async()=>{
-    try{
-      const user=await NPlusAuth.current();
-      if(user){
-        msg("You are already signed in. Opening your account…","ok");
-        setTimeout(()=>location.replace(nextUrl()),350);
-      }
-    }catch{}
-  })();
 })();
 </script>
 </body>
