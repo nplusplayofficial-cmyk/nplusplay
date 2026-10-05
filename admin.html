@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>N+ PLAY — Admin</title>
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#070707;
+  --panel:#101010;
+  --panel2:#151515;
+  --gold:#c9a55b;
+  --gold2:#f1e5c3;
+  --text:#f5f2e9;
+  --muted:#8e8e8e;
+  --green:#23d39a;
+  --red:#ff5260;
+  --line:rgba(201,165,91,.16);
+}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top right,rgba(201,165,91,.08),transparent 30%),
+    radial-gradient(circle at bottom left,rgba(201,165,91,.04),transparent 35%),
+    var(--bg);
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
+  min-height:100vh;
+}
+button{
+  font:inherit;
+  cursor:pointer;
+}
+.app{
+  width:min(1180px,94%);
+  margin:auto;
+  padding:28px 0 50px;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  padding:20px 22px;
+  border:1px solid var(--line);
+  background:rgba(16,16,16,.92);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.mark{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  background:linear-gradient(145deg,#f1e5c3,#c9a55b);
+  color:#080808;
+  font-weight:1000;
+  font-size:20px;
+}
+.brand h1{
+  margin:0;
+  font-size:19px;
+  letter-spacing:3px;
+}
+.brand p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:2px;
+}
+.logout{
+  border:1px solid rgba(255,82,96,.3);
+  color:#ff8b94;
+  background:rgba(255,82,96,.06);
+  border-radius:12px;
+  padding:11px 16px;
+  font-weight:800;
+}
+.hero{
+  margin-top:22px;
+  padding:26px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(201,165,91,.08),rgba(16,16,16,.96));
+}
+.hero .eyebrow{
+  color:var(--gold);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+.hero h2{
+  margin:9px 0 5px;
+  font-size:30px;
+}
+.hero p{
+  color:var(--muted);
+  margin:0;
+}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  margin-top:20px;
+}
+.stat{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:20px;
+}
+.stat span{
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1.5px;
+}
+.stat strong{
+  display:block;
+  margin-top:8px;
+  font-size:27px;
+}
+.pending{
+  color:var(--gold2);
+}
+.requests{
+  margin-top:22px;
+}
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+.section-head h3{
+  margin:0;
+  font-size:18px;
+}
+.refresh{
+  background:#151515;
+  border:1px solid var(--line);
+  color:var(--gold2);
+  padding:9px 13px;
+  border-radius:10px;
+  font-weight:800;
+}
+.card{
+  background:rgba(16,16,16,.94);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:14px;
+}
+.row{
+  display:grid;
+  grid-template-columns:1.3fr .8fr .8fr .8fr;
+  gap:18px;
+  align-items:center;
+}
+.label{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1.2px;
+  margin-bottom:5px;
+}
+.value{
+  font-weight:800;
+}
+.uid{
+  color:var(--gold2);
+  font-size:12px;
+  word-break:break-all;
+}
+.amount{
+  font-size:22px;
+  color:var(--gold2);
+}
+.time{
+  color:#aaa;
+  font-size:12px;
+}
+.actions{
+  display:flex;
+  gap:9px;
+  margin-top:17px;
+  padding-top:15px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.accept,.reject{
+  border:0;
+  border-radius:11px;
+  padding:11px 18px;
+  font-weight:900;
+}
+.accept{
+  background:rgba(35,211,154,.12);
+  color:var(--green);
+  border:1px solid rgba(35,211,154,.3);
+}
+.reject{
+  background:rgba(255,82,96,.08);
+  color:#ff7c86;
+  border:1px solid rgba(255,82,96,.28);
+}
+.empty{
+  text-align:center;
+  padding:45px 20px;
+  border:1px dashed rgba(201,165,91,.2);
+  border-radius:18px;
+  color:var(--muted);
+}
+.status{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  transform:translateX(-50%) translateY(20px);
+  opacity:0;
+  pointer-events:none;
+  background:#171717;
+  border:1px solid var(--line);
+  padding:13px 18px;
+  border-radius:12px;
+  transition:.25s;
+  z-index:20;
+}
+.status.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.status.ok{border-color:rgba(35,211,154,.3)}
+.status.err{border-color:rgba(255,82,96,.3)}
+.loading{
+  color:var(--muted);
+  text-align:center;
+  padding:30px;
+}
+@media(max-width:800px){
+  .stats{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  .app{width:92%;padding-top:15px}
+  .topbar{padding:15px}
+  .hero{padding:20px}
+  .hero h2{font-size:24px}
+  .row{grid-template-columns:1fr}
+  .actions button{flex:1}
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">N+</div>
+      <div>
+        <h1>N+ PLAY</h1>
+        <p>SECURE ADMIN PANEL</p>
+      </div>
+    </div>
+
+    <button class="logout" id="logoutBtn">LOGOUT</button>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">ADMIN CONTROL CENTER</div>
+    <h2>Virtual Wallet Requests</h2>
+    <p>
+      Manage demo-credit deposit requests securely.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <span>PENDING REQUESTS</span>
+        <strong class="pending" id="pendingCount">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>PENDING VIRTUAL CREDITS</span>
+        <strong id="pendingAmount">₹0.00</strong>
+      </div>
+
+      <div class="stat">
+        <span>ADMIN STATUS</span>
+        <strong style="color:#23d39a;font-size:18px">AUTHORIZED</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="requests">
+
+    <div class="section-head">
+      <h3>Pending Requests</h3>
+      <button class="refresh" id="refreshBtn">↻ REFRESH</button>
+    </div>
+
+    <div id="requestList">
+      <div class="loading">Loading requests...</div>
+    </div>
+
+  </section>
+
+</div>
+
+<div class="status" id="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js"></script>
+
+<script>
+(() => {
+  "use strict";
+
+  const cfg = window.NPlusConfig;
+
+  if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+    document.getElementById("requestList").innerHTML =
+      '<div class="empty">N+ PLAY configuration not found.</div>';
+    return;
+  }
+
+  const supabase = window.supabase.createClient(
+    cfg.supabaseUrl,
+    cfg.supabaseAnonKey
+  );
+
+  const $ = id => document.getElementById(id);
+
+  let currentUser = null;
+
+  function money(value) {
+    return "₹" + Number(value || 0).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function showStatus(message, type="ok") {
+    const el = $("status");
+    el.textContent = message;
+    el.className = "status show " + type;
+
+    setTimeout(() => {
+      el.className = "status";
+    }, 2800);
+  }
+
+  async function requireAdmin() {
+
+    const { data, error } =
+      await supabase.auth.getSession();
+
+    if (error || !data.session) {
+      location.replace(
+        "auth.html?next=" +
+        encodeURIComponent("admin.html")
+      );
+      return false;
+    }
+
+    currentUser = data.session.user;
+
+    const { data: profile, error: profileError } =
+      await supabase
+        .from("profiles")
+        .select("id,email,display_name,role")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
+    if (
+      profileError ||
+      !profile ||
+      profile.role !== "admin"
+    ) {
+      await supabase.auth.signOut();
+
+      document.body.innerHTML = `
+        <div style="
+          min-height:100vh;
+          display:grid;
+          place-items:center;
+          background:#070707;
+          color:#fff;
+          font-family:Arial;
+          padding:30px;
+          text-align:center;
+        ">
+          <div>
+            <div style="font-size:50px">🔒</div>
+            <h2>Access Denied</h2>
+            <p style="color:#999">
+              This area is restricted to authorized administrators.
+            </p>
+            <button
+              onclick="location.href='auth.html'"
+              style="
+                padding:12px 20px;
+                border-radius:10px;
+                border:0;
+                background:#c9a55b;
+                font-weight:900;
+                cursor:pointer;
+              "
+            >
+              BACK TO LOGIN
+            </button>
+          </div>
+        </div>
+      `;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  async function loadRequests() {
+
+    $("requestList").innerHTML =
+      '<div class="loading">Loading requests...</div>';
+
+    const { data, error } =
+      await supabase
+        .from("deposit_requests")
+        .select("id,user_id,amount,status,created_at")
+        .eq("status","pending")
+        .order("created_at",{ascending:false});
+
+    if (error) {
+      console.error(error);
+
+      $("requestList").innerHTML = `
+        <div class="empty">
+          Unable to load requests.<br><br>
+          <small>${escapeHTML(error.message)}</small>
+        </div>
+      `;
+
+      return;
+    }
+
+    const requests = data || [];
+
+    $("pendingCount").textContent =
+      requests.length;
+
+    const total =
+      requests.reduce(
+        (sum,item) => sum + Number(item.amount || 0),
+        0
+      );
+
+    $("pendingAmount").textContent =
+      money(total);
+
+    if (!requests.length) {
+      $("requestList").innerHTML = `
+        <div class="empty">
+          <div style="font-size:30px">✓</div>
+          <div style="margin-top:8px">
+            No pending requests
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    /*
+      Load profile/wallet information for each request.
+      If current RLS does not allow admin profile reads,
+      the request still remains visible with the user UUID.
+    */
+
+    const cards = [];
+
+    for (const request of requests) {
+
+      let profile = null;
+      let wallet = null;
+
+      const profileResult =
+        await supabase
+          .from("profiles")
+          .select("display_name,uid,email")
+          .eq("id",request.user_id)
+          .maybeSingle();
+
+      if (!profileResult.error) {
+        profile = profileResult.data;
+      }
+
+      const walletResult =
+        await supabase
+          .from("demo_wallets")
+          .select("balance")
+          .eq("user_id",request.user_id)
+          .maybeSingle();
+
+      if (!walletResult.error) {
+        wallet = walletResult.data;
+      }
+
+      const name =
+        profile?.display_name ||
+        "N+ PLAY User";
+
+      const uid =
+        profile?.uid ||
+        request.user_id;
+
+      const walletBalance =
+        wallet?.balance ?? "—";
+
+      const created =
+        new Date(request.created_at)
+          .toLocaleString("en-IN",{
+            dateStyle:"medium",
+            timeStyle:"short"
+          });
+
+      cards.push(`
+        <article class="card">
+
+          <div class="row">
+
+            <div>
+              <div class="label">USER</div>
+              <div class="value">
+                ${escapeHTML(name)}
+              </div>
+              <div class="uid">
+                ${escapeHTML(uid)}
+              </div>
+            </div>
+
+            <div>
+              <div class="label">REQUEST</div>
+              <div class="amount">
+                ${money(request.amount)}
+              </div>
+            </div>
+
+            <div>
+              <div class="label">CURRENT WALLET</div>
+              <div class="value">
+                ${money(walletBalance)}
+              </div>
+            </div>
+
+            <div>
+              <div class="label">TIME</div>
+              <div class="time">
+                ${escapeHTML(created)}
+              </div>
+            </div>
+
+          </div>
+
+          <div class="actions">
+
+            <button
+              class="accept"
+              data-action="approve"
+              data-id="${request.id}"
+            >
+              ✓ ACCEPT
+            </button>
+
+            <button
+              class="reject"
+              data-action="reject"
+              data-id="${request.id}"
+            >
+              ✕ REJECT
+            </button>
+
+          </div>
+
+        </article>
+      `);
+    }
+
+    $("requestList").innerHTML =
+      cards.join("");
+
+    document
+      .querySelectorAll("[data-action]")
+      .forEach(button => {
+
+        button.addEventListener("click", async () => {
+
+          const action =
+            button.dataset.action;
+
+          const requestId =
+            button.dataset.id;
+
+          button.disabled = true;
+
+          if (action === "approve") {
+            await approve(requestId);
+          } else {
+            await reject(requestId);
+          }
+
+          button.disabled = false;
+        });
+
+      });
+  }
+
+  async function approve(requestId) {
+
+    const confirmed =
+      confirm(
+        "Accept this virtual-credit deposit request?"
+      );
+
+    if (!confirmed) return;
+
+    const { data, error } =
+      await supabase.rpc(
+        "nplus_approve_deposit",
+        {
+          p_request_id: requestId
+        }
+      );
+
+    if (error) {
+      console.error(error);
+      showStatus(
+        error.message || "Approval failed.",
+        "err"
+      );
+      return;
+    }
+
+    showStatus(
+      "Request approved successfully.",
+      "ok"
+    );
+
+    console.log("Approval result:",data);
+
+    await loadRequests();
+  }
+
+  async function reject(requestId) {
+
+    const confirmed =
+      confirm(
+        "Reject this virtual-credit deposit request?"
+      );
+
+    if (!confirmed) return;
+
+    const { data, error } =
+      await supabase.rpc(
+        "nplus_reject_deposit",
+        {
+          p_request_id: requestId
+        }
+      );
+
+    if (error) {
+      console.error(error);
+      showStatus(
+        error.message || "Rejection failed.",
+        "err"
+      );
+      return;
+    }
+
+    showStatus(
+      "Request rejected.",
+      "ok"
+    );
+
+    console.log("Rejection result:",data);
+
+    await loadRequests();
+  }
+
+  $("refreshBtn").addEventListener(
+    "click",
+    loadRequests
+  );
+
+  $("logoutBtn").addEventListener(
+    "click",
+    async () => {
+      await supabase.auth.signOut();
+      location.replace("auth.html");
+    }
+  );
+
+  (async () => {
+
+    const allowed =
+      await requireAdmin();
+
+    if (!allowed) return;
+
+    await loadRequests();
+
+  })();
+
+})();
+</script>
+
+</body>
+</html>
