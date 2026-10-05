@@ -1,11 +1,6 @@
 (() => {
   "use strict";
 
-  const CFG = window.NPlusConfig || {};
-  const PREFIX = "nplus_userstore_v3__";
-  const WALLET_KEY = "__wallet_balance__";
-  const TX_KEY = "__wallet_transactions__";
-
   const GAME_STORES = [
     "nplusplay_wingo_ultra_final_v2",
     "nplusplay_k3_wingo_style_v1",
@@ -15,88 +10,134 @@
     "nplus_5d_final_v5"
   ];
 
-  async function uid() {
-    const user = await window.NPlusAuth?.current?.();
-    return user?.uid || user?.id || null;
-  }
+  async function getUser() {
+    if (!window.NPlusAuth?.current) {
+      throw new Error("Authentication system unavailable.");
+    }
 
-  function key(uidValue, keyName) {
-    return PREFIX + uidValue + "__" + keyName;
+    const user = await window.NPlusAuth.current();
+
+    if (!user?.id) {
+      throw new Error("Authentication required.");
+    }
+
+    return user;
   }
 
   async function getBalance() {
-    const id = await uid();
-    if (!id) return 0;
+    const user = await getUser();
 
-    const k = key(id, WALLET_KEY);
-    const raw = localStorage.getItem(k);
+    const { data, error } = await window.supabase
+      .from("demo_wallets")
+      .select("balance")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-    if (raw !== null && Number.isFinite(Number(raw))) return Number(raw);
+    if (error) {
+      console.error("Wallet read error:", error);
+      throw new Error("Unable to load wallet.");
+    }
 
-    const initial = Number(CFG.initialDemoBalance ?? 1000);
-    localStorage.setItem(k, String(initial));
-    return initial;
+    if (!data) {
+      throw new Error("Wallet not found.");
+    }
+
+    return Number(data.balance);
   }
 
-  async function setBalance(amount, meta = {}) {
-    const id = await uid();
-    if (!id) throw new Error("Authentication required.");
+  async function changeBalance(delta, meta = {}) {
+    await getUser();
 
-    const next = Number(amount);
-    if (!Number.isFinite(next) || next < 0) throw new Error("Invalid balance.");
+    const amount = Number(delta);
 
-    const old = await getBalance();
-    localStorage.setItem(key(id, WALLET_KEY), String(next));
+    if (!Number.isFinite(amount) || amount === 0) {
+      throw new Error("Invalid wallet amount.");
+    }
+
+    const { data, error } = await window.supabase.rpc(
+      "nplus_wallet_change",
+      {
+        p_delta: amount,
+        p_type: meta.type || "GAME",
+        p_source: meta.source || "SYSTEM",
+        p_note: meta.note || ""
+      }
+    );
+
+    if (error) {
+      console.error("Wallet change error:", error);
+      throw new Error(error.message || "Unable to update wallet.");
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+
+    if (!result) {
+      throw new Error("Wallet update returned no result.");
+    }
 
     const tx = {
       id: crypto.randomUUID(),
-      uid: id,
-      before: old,
-      after: next,
-      delta: next - old,
-      type: meta.type || "ADJUSTMENT",
+      uid: result.user_id,
+      before: Number(result.before),
+      after: Number(result.after),
+      delta: Number(result.delta),
+      type: meta.type || "GAME",
       source: meta.source || "SYSTEM",
       note: meta.note || "",
       created_at: Date.now()
     };
 
-    const txKey = key(id, TX_KEY);
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem(txKey) || "[]"); } catch {}
-    list.unshift(tx);
-    localStorage.setItem(txKey, JSON.stringify(list.slice(0, 500)));
+    window.dispatchEvent(
+      new CustomEvent("nplus:wallet-change", {
+        detail: tx
+      })
+    );
 
-    window.dispatchEvent(new CustomEvent("nplus:wallet-change", { detail: tx }));
-    return next;
+    return Number(result.after);
   }
 
-  async function changeBalance(delta, meta = {}) {
+  async function setBalance(amount, meta = {}) {
     const current = await getBalance();
-    const amount = Number(delta);
-    if (!Number.isFinite(amount)) throw new Error("Invalid amount.");
-    if (current + amount < 0) throw new Error("Insufficient virtual balance.");
-    return setBalance(current + amount, meta);
+    const next = Number(amount);
+
+    if (!Number.isFinite(next) || next < 0) {
+      throw new Error("Invalid balance.");
+    }
+
+    const delta = next - current;
+
+    if (delta === 0) {
+      return current;
+    }
+
+    return changeBalance(delta, meta);
   }
 
   async function transactions() {
-    const id = await uid();
-    if (!id) return [];
-    try { return JSON.parse(localStorage.getItem(key(id, TX_KEY)) || "[]"); }
-    catch { return []; }
+    const user = await getUser();
+
+    const { data, error } = await window.supabase
+      .from("demo_wallet_transactions")
+      .select(
+        "id,user_id,delta,balance_before,balance_after,type,source,note,created_at"
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(500);
+
+    if (error) {
+      console.error("Transaction read error:", error);
+      throw new Error("Unable to load wallet transactions.");
+    }
+
+    return data || [];
   }
 
-  function installGameBridge() {
-    // This bridge provides user-scoped storage helpers for future game adapters.
-    // Existing game logic should be integrated one game at a time after the core is tested.
-    window.NPlusWallet = {
-      getBalance,
-      setBalance,
-      changeBalance,
-      transactions,
-      gameStores: [...GAME_STORES],
-      walletKey: WALLET_KEY
-    };
-  }
-
-  installGameBridge();
+  window.NPlusWallet = {
+    getBalance,
+    setBalance,
+    changeBalance,
+    transactions,
+    gameStores: [...GAME_STORES]
+  };
 })();
