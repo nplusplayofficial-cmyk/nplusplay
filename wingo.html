@@ -1,11 +1,16 @@
 <!doctype html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080909">
 <title>N+ PLAY — WINGO ULTRA FINAL V2</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261005"></script>
+<script src="core/nplus-auth.js?v=20261005"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261005"></script>
+
 <style>
 :root{--bg:#070808;--card:#111311;--card2:#161816;--line:rgba(255,255,255,.085);--txt:#f4f1e9;--muted:#858a84;--gold:#d8b66d;--gold2:#f2d594;--red:#ef5a57;--green:#27bd78;--violet:#a86aee;--blue:#639bea;--danger:#ff706c}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -15%,#302b1d 0,#111310 30%,#070808 65%);color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{display:flex;justify-content:center}.app{width:100%;max-width:520px;min-height:100vh;background:linear-gradient(180deg,rgba(10,11,10,.98),rgba(6,7,7,.99));box-shadow:0 0 90px #000;overflow:hidden}.ambient{position:fixed;width:520px;height:520px;top:-250px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(216,182,109,.12),transparent 68%);pointer-events:none}
@@ -28,57 +33,175 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 .resultInfo{max-height:150px;overflow:auto}.meta{flex-wrap:wrap}.meta .pill.r{color:#ff817d;border-color:#ef5a5755}.meta .pill.g{color:#67dda7;border-color:#27bd7855}.meta .pill.v{color:#c18af5;border-color:#a86aee55}
 </style>
 </head>
+
 <body>
 <div class="ambient"></div>
+
 <div class="app">
 <header>
-  <div class="hleft"><button class="ib" id="back">‹</button><div class="brand"><div class="mark">N+</div> PLAY</div><span class="live"><i></i>LIVE</span></div>
-  <div class="hright"><button class="ib" id="sound">⌁</button><button class="ib" id="rulesBtn">?</button></div>
+<div class="hleft">
+<button class="ib" id="back">‹</button>
+<div class="brand"><div class="mark">N+</div> PLAY</div>
+<span class="live"><i></i>LIVE</span>
+</div>
+<div class="hright">
+<button class="ib" id="sound">⌁</button>
+<button class="ib" id="rulesBtn">?</button>
+</div>
 </header>
+
 <main>
-<section class="wallet"><div class="walletrow"><div><div class="label">Available balance</div><div class="balance" id="balance">₹1,000.00</div></div><div class="wa"><button class="wit" id="withdraw">WITHDRAW</button><button class="dep" id="deposit">DEPOSIT</button></div></div></section>
-<div class="notice"><span>🔊 <b>WINGO LIVE</b> · Virtual-credit experience</span><span>DETAIL ›</span></div>
+<section class="wallet">
+<div class="walletrow">
+<div>
+<div class="label">Available balance</div>
+<div class="balance" id="balance">₹0.00</div>
+</div>
+<div class="wa">
+<button class="wit" id="withdraw">WITHDRAW</button>
+<button class="dep" id="deposit">DEPOSIT</button>
+</div>
+</div>
+</section>
+
+<div class="notice">
+<span>🔊 <b>WINGO LIVE</b> · Virtual-credit experience</span>
+<span>DETAIL ›</span>
+</div>
+
 <div class="modes" id="modes">
 <button class="mode active" data-sec="30"><strong>WINGO</strong><small>30 SEC</small></button>
 <button class="mode" data-sec="60"><strong>WINGO</strong><small>1 MIN</small></button>
 <button class="mode" data-sec="180"><strong>WINGO</strong><small>3 MIN</small></button>
 <button class="mode" data-sec="300"><strong>WINGO</strong><small>5 MIN</small></button>
 </div>
+
 <section class="round" id="round">
-<div class="roundtop"><button class="how" id="how">HOW TO PLAY</button><div class="timer"><div class="tl">Time remaining</div><div class="time" id="time">00:30</div></div></div>
-<div class="period"><span>Current period</span><code id="period">—</code></div><div class="progress"><div class="bar" id="bar"></div></div><div class="status" id="status">BETTING OPEN</div>
+<div class="roundtop">
+<button class="how" id="how">HOW TO PLAY</button>
+<div class="timer">
+<div class="tl">Time remaining</div>
+<div class="time" id="time">00:30</div>
+</div>
+</div>
+<div class="period"><span>Current period</span><code id="period">—</code></div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div class="status" id="status">BETTING OPEN</div>
 <div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div>
 </section>
-<div class="title">Recent results</div><div class="recent" id="recent"></div>
+
+<div class="title">Recent results</div>
+<div class="recent" id="recent"></div>
+
 <div class="title">Choose colour</div>
 <div class="choice3">
 <button class="choice green" data-type="color" data-value="Green">GREEN<small>Demo category</small></button>
 <button class="choice violet" data-type="color" data-value="Violet">VIOLET<small>Demo category</small></button>
 <button class="choice red" data-type="color" data-value="Red">RED<small>Demo category</small></button>
 </div>
-<div class="title">Choose number</div><div class="numbers" id="numbers"></div>
-<div class="quick"><button id="random">RANDOM</button><button class="active" data-multi="1">X1</button><button data-multi="5">X5</button><button data-multi="10">X10</button><button data-multi="20">X20</button><button data-multi="50">X50</button><button data-multi="100">X100</button></div>
-<div class="title">Choose size</div><div class="size"><button class="big" data-type="size" data-value="Big">BIG<small>5–9</small></button><button class="small" data-type="size" data-value="Small">SMALL<small>0–4</small></button></div>
-<div class="selection" id="selection"><div><b>YOUR SELECTION</b><br><span id="selectionText">No selection yet</span></div><button class="edit" id="edit">EDIT</button></div>
-<div class="tabs" id="tabs"><button class="tab active" data-tab="history">HISTORY</button><button class="tab" data-tab="bets">MY BETS</button><button class="tab" data-tab="chart">CHART</button><button class="tab" data-tab="strategy">STRATEGY</button><button class="tab" data-tab="stats">STATS</button></div>
+
+<div class="title">Choose number</div>
+<div class="numbers" id="numbers"></div>
+
+<div class="quick">
+<button id="random">RANDOM</button>
+<button class="active" data-multi="1">X1</button>
+<button data-multi="5">X5</button>
+<button data-multi="10">X10</button>
+<button data-multi="20">X20</button>
+<button data-multi="50">X50</button>
+<button data-multi="100">X100</button>
+</div>
+
+<div class="title">Choose size</div>
+<div class="size">
+<button class="big" data-type="size" data-value="Big">BIG<small>5–9</small></button>
+<button class="small" data-type="size" data-value="Small">SMALL<small>0–4</small></button>
+</div>
+
+<div class="selection" id="selection">
+<div><b>YOUR SELECTION</b><br><span id="selectionText">No selection yet</span></div>
+<button class="edit" id="edit">EDIT</button>
+</div>
+
+<div class="tabs" id="tabs">
+<button class="tab active" data-tab="history">HISTORY</button>
+<button class="tab" data-tab="bets">MY BETS</button>
+<button class="tab" data-tab="chart">CHART</button>
+<button class="tab" data-tab="strategy">STRATEGY</button>
+<button class="tab" data-tab="stats">STATS</button>
+</div>
+
 <section class="panel" id="panel"></section>
-<footer><span class="badge">VIRTUAL CREDIT DEMO</span><br>N+ PLAY · WINGO ULTRA FINAL</footer>
-</main></div>
 
-<div class="overlay" id="overlay"><div class="sheet"><div class="grab"></div><div class="sheettop"><h3>Place demo selection</h3><button class="close" id="close">×</button></div>
+<footer>
+<span class="badge">VIRTUAL CREDIT DEMO</span><br>
+N+ PLAY · WINGO ULTRA FINAL
+</footer>
+</main>
+</div>
+
+<div class="overlay" id="overlay">
+<div class="sheet">
+<div class="grab"></div>
+<div class="sheettop">
+<h3>Place demo selection</h3>
+<button class="close" id="close">×</button>
+</div>
+
 <div class="selectedBox" id="selectedBox">Select a number, colour or size.</div>
-<div class="field">Amount</div><input class="amount" id="amount" type="number" min="1" step="1" value="10">
+
+<div class="field">Amount</div>
+<input class="amount" id="amount" type="number" min="1" step="1" value="10">
+
 <div class="amts" id="amts"></div>
-<div class="field">Quantity</div><div class="step"><button id="minus">−</button><span id="qty">1</span><button id="plus">+</button></div>
-<div class="field">Multiplier</div><div class="multis" id="multis"></div>
-<div class="tot"><span>Total demo credits</span><strong id="total">₹10.00</strong></div>
-<label class="agree"><input id="agree" type="checkbox"> I agree to the game rules</label>
-<div class="acts"><button class="can" id="cancel">CANCEL</button><button class="con" id="confirm" disabled>CONFIRM</button></div>
-</div></div>
 
-<div class="result" id="result"><div class="rcard"><div class="rlabel">Round result</div><div class="outcome" id="outcome">YOU WON</div><div class="resultNum" id="resultNum">5</div><div class="meta" id="meta"></div><div class="resultInfo" id="resultInfo"></div><div class="ring" id="ring"></div><button class="continue" id="continue">CONTINUE</button></div></div>
+<div class="field">Quantity</div>
+<div class="step">
+<button id="minus">−</button>
+<span id="qty">1</span>
+<button id="plus">+</button>
+</div>
 
-<div class="rules" id="rules"><div class="rulecard"><div class="rulehead"><h2>WINGO · How to Play</h2><button class="ruleclose" id="ruleClose">×</button></div>
+<div class="field">Multiplier</div>
+<div class="multis" id="multis"></div>
+
+<div class="tot">
+<span>Total demo credits</span>
+<strong id="total">₹10.00</strong>
+</div>
+
+<label class="agree">
+<input id="agree" type="checkbox">
+I agree to the game rules
+</label>
+
+<div class="acts">
+<button class="can" id="cancel">CANCEL</button>
+<button class="con" id="confirm" disabled>CONFIRM</button>
+</div>
+</div>
+</div>
+
+<div class="result" id="result">
+<div class="rcard">
+<div class="rlabel">Round result</div>
+<div class="outcome" id="outcome">YOU WON</div>
+<div class="resultNum" id="resultNum">5</div>
+<div class="meta" id="meta"></div>
+<div class="resultInfo" id="resultInfo"></div>
+<div class="ring" id="ring"></div>
+<button class="continue" id="continue">CONTINUE</button>
+</div>
+</div>
+
+<div class="rules" id="rules">
+<div class="rulecard">
+<div class="rulehead">
+<h2>WINGO · How to Play</h2>
+<button class="ruleclose" id="ruleClose">×</button>
+</div>
+
 <div class="rule"><b>1. Game overview</b><p>WINGO is a round-based virtual-credit game experience. Each round has a fixed duration and one generated result.</p></div>
 <div class="rule"><b>2. Durations & periods</b><p>Choose 30 SEC, 1 MIN, 3 MIN or 5 MIN. Each duration has its own period sequence and history context.</p></div>
 <div class="rule"><b>3. Timer & betting cutoff</b><p>Selections can be confirmed while the round is open. New confirmations are locked during the final 5 seconds. When the timer reaches zero, the round closes and the result is revealed.</p></div>
@@ -92,74 +215,1358 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <div class="rule"><b>11. Charts & statistics</b><p>Charts show historical demo results only. Previous patterns do not guarantee or predict future results.</p></div>
 <div class="rule"><b>12. Sync & reconnect</b><p>The interface uses clock-based round boundaries and restores stored prototype state after reload. A production deployment should use a server-authoritative game engine.</p></div>
 <div class="rule"><b>13. Virtual-credit notice</b><p>This prototype uses virtual credits only. It does not process real-money wagers, payouts, deposits, withdrawals or real-money commission settlement.</p></div>
-</div></div>
+</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-(()=>{"use strict";
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+(()=>{
+"use strict";
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+
 const STORE="nplusplay_wingo_ultra_final_v2";
 const DEMO_RETURN_RATE=0.98;
 const modes=[30,60,180,300];
-const state={sec:30,balance:1000,qty:1,multi:1,selection:null,history:{30:[],60:[],180:[],300:[]},bets:{30:[],60:[],180:[],300:[]},tab:"history",shownResult:null,lastRoundStart:null};
+
+const state={
+  sec:30,
+  balance:0,
+  qty:1,
+  multi:1,
+  selection:null,
+  history:{30:[],60:[],180:[],300:[]},
+  bets:{30:[],60:[],180:[],300:[]},
+  tab:"history",
+  shownResult:null,
+  lastRoundStart:null
+};
+
+let updateBusy=false;
+let settlementBusy=false;
+
 const color=n=>n===0||n===5?"v":[1,3,7,9].includes(n)?"g":"r";
-const colorsFor=n=>{const out=[];if([1,3,7,9].includes(n))out.push("Green");if(n===5)out.push("Green","Violet");if([2,4,6,8].includes(n))out.push("Red");if(n===0)out.push("Red","Violet");return [...new Set(out)];};
+
+const colorsFor=n=>{
+  const out=[];
+  if([1,3,7,9].includes(n))out.push("Green");
+  if(n===5)out.push("Green","Violet");
+  if([2,4,6,8].includes(n))out.push("Red");
+  if(n===0)out.push("Red","Violet");
+  return [...new Set(out)];
+};
+
 const cname=c=>({r:"Red",g:"Green",v:"Violet"})[c];
+
 const size=n=>n>=5?"Big":"Small";
-const payoutFor=(b,n)=>{if(b.type==="number")return Number(b.value)===n?9:0;if(b.type==="size")return String(b.value)===size(n)?2:0;if(b.type==="color"){if(b.value==="Violet")return (n===0||n===5)?4.5:0;if(b.value==="Green")return [1,3,7,9].includes(n)?2:n===5?1.5:0;if(b.value==="Red")return [2,4,6,8].includes(n)?2:n===0?1.5:0;}return 0;};
-const money=n=>"₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
-function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||"{}");if(x.balance!=null)state.balance=Number(x.balance);if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets)}catch{}normalizeState()}
-function save(){localStorage.setItem(STORE,JSON.stringify({balance:state.balance,history:state.history,bets:state.bets}))}
-function walletDeltaForWin(b){return Number((b.total*DEMO_RETURN_RATE).toFixed(2))}
-function normalizeState(){state.balance=Number.isFinite(Number(state.balance))?Number(Number(state.balance).toFixed(2)):1000;for(const sec of modes){state.history[sec]=Array.isArray(state.history[sec])?state.history[sec]:[];state.bets[sec]=Array.isArray(state.bets[sec])?state.bets[sec]:[];state.history[sec].sort((a,b)=>(b.ts||0)-(a.ts||0));state.history[sec]=state.history[sec].slice(0,500);}}
-function periodAt(start,sec){const d=new Date(start),idx=Math.floor(start/(sec*1000)),code={30:"1000",60:"2000",180:"3000",300:"4000"}[sec];const date=d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");return date+code+String(idx%100000).padStart(5,"0")}
-function round(){const now=Date.now(),start=Math.floor(now/(state.sec*1000))*(state.sec*1000),elapsed=Math.floor((now-start)/1000),remaining=state.sec-elapsed;return{now,start,remaining,period:periodAt(start,state.sec)}}
-function resultFor(p){const n=hash(p)%10,c=color(n);return{period:p,number:n,color:c,colorName:cname(c),colors:colorsFor(n),size:size(n)}}
-function ensureHistory(){const r=round(),arr=state.history[state.sec];const known=new Set(arr.map(x=>x.period));for(let i=1;i<=500;i++){const st=r.start-i*state.sec*1000,p=periodAt(st,state.sec);if(!known.has(p)){arr.push({...resultFor(p),ts:st});known.add(p)}}arr.sort((a,b)=>(b.ts||0)-(a.ts||0));state.history[state.sec]=arr.slice(0,500);save()}
-function settlePastRounds(showPopup=false){const now=Date.now(),arr=state.bets[state.sec]||[];let changed=false,lastSettled=null,wonCredit=0,lostStake=0;for(const b of arr){if(b.status!=="PENDING")continue;const st=periodStartFromPeriod(b.period,state.sec);if(st==null||st+state.sec*1000>now)continue;const x=resultFor(b.period),mult=payoutFor(b,x.number),won=mult>0;b.status=won?"WON":"LOST";b.settledAt=Date.now();b.payoutMultiplier=mult;b.feeRate=0.02;b.contractAmount=Number((b.total*DEMO_RETURN_RATE).toFixed(2));if(won){const credit=Number((b.contractAmount*mult).toFixed(2));b.returnAmount=credit;b.netAmount=Number((credit-b.total).toFixed(2));state.balance+=credit;wonCredit+=credit}else{b.returnAmount=0;b.netAmount=Number((-b.total).toFixed(2));lostStake+=b.total}changed=true;lastSettled={period:b.period,result:x}}if(changed){state.balance=Number(state.balance.toFixed(2));save();renderBalance();renderRecent();renderPanel();if(showPopup&&lastSettled)showResult(lastSettled.period,lastSettled.result,wonCredit,lostStake)}}
-function periodStartFromPeriod(p,sec){const str=String(p||"");if(str.length<13)return null;const y=Number(str.slice(0,4)),m=Number(str.slice(4,6))-1,d=Number(str.slice(6,8));if(!Number.isFinite(y)||!Number.isFinite(m)||!Number.isFinite(d))return null;const dayStart=new Date(y,m,d).getTime(),code={30:"1000",60:"2000",180:"3000",300:"4000"}[sec];if(str.slice(8,12)!==code)return null;const serial=Number(str.slice(12));if(!Number.isFinite(serial))return null;const roundsPerDay=Math.floor(86400000/(sec*1000));const daySerial=Math.floor(dayStart/(sec*1000))%100000;let offset=(serial-daySerial)%roundsPerDay;if(offset<0)offset+=roundsPerDay;return dayStart+offset*sec*1000}
-function renderBalance(){const el=$("#balance");el.textContent=money(state.balance);el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");clearTimeout(window.__balanceTimer);window.__balanceTimer=setTimeout(()=>el.classList.remove("bump"),320)}
-function renderNumbers(){$("#numbers").innerHTML=Array.from({length:10},(_,n)=>`<button class="num ${color(n)} ${state.selection?.type==="number"&&Number(state.selection.value)===n?"active":""}" data-type="number" data-value="${n}">${n}</button>`).join("")}
-function renderRecent(){$("#recent").innerHTML=state.history[state.sec].slice(0,14).map(x=>`<div class="ball ${x.color}" title="${(x.colors||[x.colorName]).join(" + ")}">${x.number}</div>`).join("")}
-function renderSelection(){const s=state.selection;$("#selectionText").textContent=s?`${s.type.toUpperCase()} · ${s.value}`:"No selection yet";$$(".choice").forEach(b=>b.classList.toggle("active",s?.type==="color"&&s.value===b.dataset.value));$$(".size button").forEach(b=>b.classList.toggle("active",s?.type==="size"&&s.value===b.dataset.value));renderNumbers()}
-function renderPanel(){const p=$("#panel"),h=state.history[state.sec],bets=state.bets[state.sec]||[];if(state.tab==="history"){p.innerHTML=`<div class="hh"><span>Period</span><span>Number</span><span>Big/Small</span><span>Color</span></div>`+h.slice(0,12).map((x,i)=>`<div class="hr ${i===0?"latest":""}"><code>${x.period}</code><span class="rn ${x.color}">${x.number}</span><span class="st ${x.size.toLowerCase()}">${x.size}</span><span>${(x.colors||[x.colorName]).map(c=>`<i class="cd ${c.toLowerCase()[0]==="r"?"r":c.toLowerCase()[0]==="g"?"g":"v"}"></i>`).join("")}</span></div>`).join("")+`<div class="pagination"><button class="pg">‹</button><span>1 / 50</span><button class="pg">›</button></div>`}
-else if(state.tab==="bets"){p.innerHTML=bets.length?`<div class="betsummary">${bets.slice(0,20).map(b=>`<div class="betitem"><div><b>${b.value}</b><small>${b.type} · ${b.period}</small></div><div>${money(b.total)}<small>x${b.multi} · qty ${b.qty}</small></div><div class="${b.status==="WON"?"statusWon":b.status==="LOST"?"statusLost":"statusPending"}">${b.status}</div></div>`).join("")}</div>`:`<div class="note">No demo selections in this duration.</div>`}
-else if(state.tab==="chart"){const counts=Array(10).fill(0);h.forEach(x=>counts[x.number]++);const max=Math.max(1,...counts);p.innerHTML=`<div class="bars">${counts.map((v,i)=>`<div class="br"><b>${i}</b><div class="track"><div class="fill" style="width:${v/max*100}%"></div></div><span>${v}</span></div>`).join("")}</div><div class="note">Historical demo frequency · not predictive.</div>`}
-else if(state.tab==="strategy"){const total=h.length,b=h.filter(x=>x.size==="Big").length,s=total-b,r=h.filter(x=>x.color==="r").length,g=h.filter(x=>x.color==="g").length,v=h.filter(x=>x.color==="v").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${total}</b><span>Rounds</span></div><div class="stat"><b>${b}</b><span>Big</span></div><div class="stat"><b>${s}</b><span>Small</span></div><div class="stat"><b>${r}</b><span>Red</span></div><div class="stat"><b>${g}</b><span>Green</span></div><div class="stat"><b>${v}</b><span>Violet</span></div></div><div class="note">Patterns are historical statistics only and do not predict future results.</div>`}
-else{const total=h.length,b=h.filter(x=>x.size==="Big").length,won=(bets||[]).filter(x=>x.status==="WON").length,lost=(bets||[]).filter(x=>x.status==="LOST").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${total}</b><span>Total rounds</span></div><div class="stat"><b>${b}</b><span>Big</span></div><div class="stat"><b>${total-b}</b><span>Small</span></div><div class="stat"><b>${won}</b><span>Demo wins</span></div><div class="stat"><b>${lost}</b><span>Demo losses</span></div><div class="stat"><b>${bets.length}</b><span>Selections</span></div></div>`}}
-function setMode(sec){state.sec=sec;state.selection=null;$$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));ensureHistory();renderRecent();renderSelection();renderPanel();state.lastRoundStart=null;toast(`WINGO ${sec===30?"30 SEC":sec===60?"1 MIN":sec===180?"3 MIN":"5 MIN"}`)}
-function update(){const r=round(),closed=r.remaining<=5;const roundChanged=state.lastRoundStart!==null&&state.lastRoundStart!==r.start;if(roundChanged)completeRound(state.lastRoundStart);settlePastRounds(roundChanged);$("#time").textContent=`00:${String(r.remaining).padStart(2,"0")}`;$("#period").textContent=r.period;$("#bar").style.width=(r.remaining/state.sec*100)+"%";$("#status").textContent=closed?"BETTING CLOSED":"BETTING OPEN";$("#round").classList.toggle("closed",closed);const stage=closed?3:r.remaining<=10?2:r.remaining<=20?1:0;$$("#stage span").forEach((x,i)=>x.classList.toggle("on",i<=stage));state.lastRoundStart=r.start}
-function completeRound(start){const p=periodAt(start,state.sec),x=resultFor(p),arr=state.history[state.sec];if(!arr.some(a=>a.period===p)){arr.unshift({...x,ts:start});state.history[state.sec]=arr.slice(0,500)}let changed=false,roundWon=0,roundLost=0;for(const b of state.bets[state.sec]){if(b.period!==p||b.status!=="PENDING")continue;const mult=payoutFor(b,x.number),won=mult>0;b.status=won?"WON":"LOST";b.settledAt=Date.now();b.payoutMultiplier=mult;b.feeRate=0.02;b.contractAmount=Number((b.total*DEMO_RETURN_RATE).toFixed(2));if(won){const credit=Number((b.contractAmount*mult).toFixed(2));b.returnAmount=credit;b.netAmount=Number((credit-b.total).toFixed(2));state.balance+=credit;roundWon+=credit}else{b.returnAmount=0;b.netAmount=Number((-b.total).toFixed(2));roundLost+=b.total}changed=true}state.balance=Number(state.balance.toFixed(2));save();renderRecent();renderPanel();if(changed)showResult(p,x,roundWon,roundLost)}
-function openBet(type,value){const r=round();if(r.remaining<=5){toast("Betting closed for this round");return}state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${type.toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${r.period}</span>`;$("#overlay").classList.add("show");syncSheet()}
-function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>state.balance||round().remaining<=5}
-function closeSheet(){ $("#overlay").classList.remove("show") }
-function showResult(p,x,wonCredit=0,lostStake=0){
-  const bets=state.bets[state.sec].filter(b=>b.period===p),wins=bets.filter(b=>b.status==="WON"),loss=bets.filter(b=>b.status==="LOST");
-  const wonCount=wins.length,lossCount=loss.length;
-  $("#outcome").textContent=wonCount&&!lossCount?"YOU WON":lossCount&&!wonCount?"YOU LOST":wonCount&&lossCount?"MIXED RESULT":"ROUND RESULT";
-  $("#outcome").className="outcome "+(wonCount&&!lossCount?"win":lossCount&&!wonCount?"loss":"mix");
-  $("#resultNum").textContent=x.number;
-  $("#meta").innerHTML=`${(x.colors||[x.colorName]).map(c=>`<span class="pill ${c.toLowerCase()[0]==="r"?"r":c.toLowerCase()[0]==="g"?"g":"v"}">${c.toUpperCase()}</span>`).join("")}<span class="pill ${x.size==="Big"?"b":"s"}">${x.size.toUpperCase()}</span>`;
-  const details=wins.map(b=>`${String(b.type).toUpperCase()} ${b.value} · x${b.payoutMultiplier} · ${money(b.returnAmount)}`).join("<br>");
-  const net=Number((wonCredit-lostStake).toFixed(2));
-  const walletLine=net>0?`Wallet credited <strong>${money(wonCredit)}</strong>`:net<0?`Wallet reduced by <strong>${money(Math.abs(net))}</strong>`:"Wallet unchanged";
-  $("#resultInfo").innerHTML=`Period <strong>${p}</strong><br>${bets.length?`${wonCount} won · ${lossCount} lost · ${bets.length} selection${bets.length>1?"s":""}${details?`<br>${details}`:""}<br>${walletLine}<br>Balance <strong>${money(state.balance)}</strong>`:"No demo selection this round"}`;
-  $("#result").classList.add("show");clearTimeout(window.__resultTimer);window.__resultTimer=setTimeout(()=>$("#result").classList.remove("show"),3000);
+
+const payoutFor=(b,n)=>{
+  if(b.type==="number")return Number(b.value)===n?9:0;
+  if(b.type==="size")return String(b.value)===size(n)?2:0;
+
+  if(b.type==="color"){
+    if(b.value==="Violet")return (n===0||n===5)?4.5:0;
+    if(b.value==="Green")return [1,3,7,9].includes(n)?2:n===5?1.5:0;
+    if(b.value==="Red")return [2,4,6,8].includes(n)?2:n===0?1.5:0;
+  }
+
+  return 0;
+};
+
+const money=n=>"₹"+Number(n).toLocaleString("en-IN",{
+  minimumFractionDigits:2,
+  maximumFractionDigits:2
+});
+
+function hash(s){
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){
+    h^=s.charCodeAt(i);
+    h=Math.imul(h,16777619);
+  }
+  return h>>>0;
 }
-function toast(t){const x=$("#toast");x.textContent=t;x.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove("show"),1700)}
-load();ensureHistory();settlePastRounds(false);$("#balance").textContent=money(state.balance);renderRecent();renderNumbers();renderSelection();renderPanel();$("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">₹${v}</button>`).join("");$("#multis").innerHTML=[1,5,10,20,50,100].map(v=>`<button class="multi ${v===1?"active":""}" data-m="${v}">X${v}</button>`).join("");
-$("#modes").onclick=e=>{const b=e.target.closest(".mode");if(b)setMode(+b.dataset.sec)};
-document.addEventListener("click",e=>{const b=e.target.closest("[data-type]");if(b)openBet(b.dataset.type,b.dataset.value);const m=e.target.closest("[data-m]");if(m){state.multi=+m.dataset.m;$$(".multi").forEach(x=>x.classList.toggle("active",x===m));syncSheet()}const a=e.target.closest("[data-amt]");if(a){$("#amount").value=a.dataset.amt;syncSheet()}});
-$("#random").onclick=()=>openBet("number",Math.floor(Math.random()*10));$("#edit").onclick=()=>state.selection?openBet(state.selection.type,state.selection.value):toast("Choose a selection first");
-$("#minus").onclick=()=>{state.qty=Math.max(1,state.qty-1);$("#qty").textContent=state.qty;syncSheet()};$("#plus").onclick=()=>{state.qty=Math.min(100,state.qty+1);$("#qty").textContent=state.qty;syncSheet()};
-$("#amount").oninput=syncSheet;$("#agree").onchange=syncSheet;$("#close").onclick=closeSheet;$("#cancel").onclick=closeSheet;$("#overlay").onclick=e=>{if(e.target.id==="overlay")closeSheet()};
-$("#confirm").onclick=()=>{const r=round(),total=Number($("#amount").value||0)*state.qty*state.multi;if(r.remaining<=5){toast("Betting is closed");return}if(total>state.balance){toast("Insufficient demo credits");return}const p=r.period;if(state.bets[state.sec].some(b=>b.period===p&&b.type===state.selection.type&&String(b.value)===String(state.selection.value)&&b.total===total)){toast("Duplicate selection blocked");return}state.balance-=total;state.bets[state.sec].unshift({period:p,type:state.selection.type,value:state.selection.value,total,qty:state.qty,multi:state.multi,status:"PENDING",ts:Date.now()});save();renderBalance();renderPanel();closeSheet();toast("✓ Demo selection confirmed")};
-$("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;state.tab=b.dataset.tab;$$(".tab").forEach(x=>x.classList.toggle("active",x===b));renderPanel()};
-$("#rulesBtn").onclick=$("#how").onclick=()=>$("#rules").classList.add("show");$("#ruleClose").onclick=()=>$("#rules").classList.remove("show");$("#deposit").onclick=$("#withdraw").onclick=()=>toast("Virtual-credit demo only");$("#sound").onclick=()=>toast("Sound control ready");$("#back").onclick=()=>history.back();$("#continue").onclick=()=>$("#result").classList.remove("show");
-window.addEventListener("storage",e=>{if(e.key!==STORE||!e.newValue)return;try{const x=JSON.parse(e.newValue);if(x.balance!=null)state.balance=Number(x.balance);if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets);normalizeState();ensureHistory();renderRecent();renderPanel();renderBalance()}catch{}});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden){ensureHistory();settlePastRounds(false);update();renderRecent();renderPanel()}});
-setInterval(update,150);update();
+
+function load(){
+  try{
+    const x=JSON.parse(localStorage.getItem(STORE)||"{}");
+
+    if(x.history){
+      state.history=Object.assign(state.history,x.history);
+    }
+
+    if(x.bets){
+      state.bets=Object.assign(state.bets,x.bets);
+    }
+  }catch{}
+
+  normalizeState();
+}
+
+function save(){
+  localStorage.setItem(STORE,JSON.stringify({
+    history:state.history,
+    bets:state.bets
+  }));
+}
+
+async function syncWallet(){
+  try{
+    state.balance=Number(
+      await window.NPlusWallet.getBalance()
+    );
+
+    renderBalance();
+    syncSheet();
+
+    return state.balance;
+  }catch(err){
+    console.error("Wallet sync error:",err);
+    throw err;
+  }
+}
+
+function walletDeltaForWin(b){
+  return Number(
+    (b.total*DEMO_RETURN_RATE).toFixed(2)
+  );
+}
+
+function normalizeState(){
+  state.balance=Number.isFinite(Number(state.balance))
+    ?Number(Number(state.balance).toFixed(2))
+    :0;
+
+  for(const sec of modes){
+    state.history[sec]=Array.isArray(state.history[sec])
+      ?state.history[sec]
+      :[];
+
+    state.bets[sec]=Array.isArray(state.bets[sec])
+      ?state.bets[sec]
+      :[];
+
+    state.history[sec].sort(
+      (a,b)=>(b.ts||0)-(a.ts||0)
+    );
+
+    state.history[sec]=state.history[sec].slice(0,500);
+  }
+}
+
+function periodAt(start,sec){
+  const d=new Date(start);
+  const idx=Math.floor(start/(sec*1000));
+  const code={
+    30:"1000",
+    60:"2000",
+    180:"3000",
+    300:"4000"
+  }[sec];
+
+  const date=
+    d.getFullYear()+
+    String(d.getMonth()+1).padStart(2,"0")+
+    String(d.getDate()).padStart(2,"0");
+
+  return date+
+    code+
+    String(idx%100000).padStart(5,"0");
+}
+
+function round(){
+  const now=Date.now();
+  const start=
+    Math.floor(now/(state.sec*1000))*
+    (state.sec*1000);
+
+  const elapsed=
+    Math.floor((now-start)/1000);
+
+  const remaining=
+    state.sec-elapsed;
+
+  return{
+    now,
+    start,
+    remaining,
+    period:periodAt(start,state.sec)
+  };
+}
+
+function resultFor(p){
+  const n=hash(p)%10;
+  const c=color(n);
+
+  return{
+    period:p,
+    number:n,
+    color:c,
+    colorName:cname(c),
+    colors:colorsFor(n),
+    size:size(n)
+  };
+}
+
+function ensureHistory(){
+  const r=round();
+  const arr=state.history[state.sec];
+  const known=new Set(arr.map(x=>x.period));
+
+  for(let i=1;i<=500;i++){
+    const st=
+      r.start-i*state.sec*1000;
+
+    const p=periodAt(st,state.sec);
+
+    if(!known.has(p)){
+      arr.push({
+        ...resultFor(p),
+        ts:st
+      });
+
+      known.add(p);
+    }
+  }
+
+  arr.sort(
+    (a,b)=>(b.ts||0)-(a.ts||0)
+  );
+
+  state.history[state.sec]=arr.slice(0,500);
+  save();
+}
+
+function periodStartFromPeriod(p,sec){
+  const str=String(p||"");
+
+  if(str.length<13)return null;
+
+  const y=Number(str.slice(0,4));
+  const m=Number(str.slice(4,6))-1;
+  const d=Number(str.slice(6,8));
+
+  if(
+    !Number.isFinite(y)||
+    !Number.isFinite(m)||
+    !Number.isFinite(d)
+  ){
+    return null;
+  }
+
+  const dayStart=
+    new Date(y,m,d).getTime();
+
+  const code={
+    30:"1000",
+    60:"2000",
+    180:"3000",
+    300:"4000"
+  }[sec];
+
+  if(str.slice(8,12)!==code)return null;
+
+  const serial=Number(str.slice(12));
+
+  if(!Number.isFinite(serial))return null;
+
+  const roundsPerDay=
+    Math.floor(86400000/(sec*1000));
+
+  const daySerial=
+    Math.floor(dayStart/(sec*1000))%100000;
+
+  let offset=
+    (serial-daySerial)%roundsPerDay;
+
+  if(offset<0)offset+=roundsPerDay;
+
+  return dayStart+
+    offset*sec*1000;
+}
+
+async function settlePastRounds(showPopup=false){
+  if(settlementBusy)return;
+
+  settlementBusy=true;
+
+  try{
+    const now=Date.now();
+    const arr=state.bets[state.sec]||[];
+
+    let changed=false;
+    let lastSettled=null;
+    let wonCredit=0;
+    let lostStake=0;
+
+    for(const b of arr){
+
+      if(b.status!=="PENDING")continue;
+
+      const st=
+        periodStartFromPeriod(
+          b.period,
+          state.sec
+        );
+
+      if(
+        st==null||
+        st+state.sec*1000>now
+      ){
+        continue;
+      }
+
+      const x=resultFor(b.period);
+      const mult=payoutFor(b,x.number);
+      const won=mult>0;
+
+      b.status=won?"WON":"LOST";
+      b.settledAt=Date.now();
+      b.payoutMultiplier=mult;
+      b.feeRate=0.02;
+      b.contractAmount=
+        Number(
+          (b.total*DEMO_RETURN_RATE).toFixed(2)
+        );
+
+      if(won){
+        const credit=
+          Number(
+            (b.contractAmount*mult).toFixed(2)
+          );
+
+        try{
+          const after=
+            await window.NPlusWallet.changeBalance(
+              credit,
+              {
+                type:"GAME_WIN",
+                source:"WINGO",
+                note:`WINGO WIN ${b.period} ${b.betId||b.ts}`
+              }
+            );
+
+          state.balance=Number(after);
+
+          b.returnAmount=credit;
+          b.netAmount=
+            Number(
+              (credit-b.total).toFixed(2)
+            );
+
+          wonCredit+=credit;
+        }catch(err){
+          console.error(err);
+
+          b.status="PENDING";
+          b.settledAt=null;
+
+          toast(
+            err.message||
+            "Wallet settlement failed"
+          );
+
+          break;
+        }
+      }else{
+        b.returnAmount=0;
+
+        b.netAmount=
+          Number(
+            (-b.total).toFixed(2)
+          );
+
+        lostStake+=b.total;
+      }
+
+      changed=true;
+      lastSettled={
+        period:b.period,
+        result:x
+      };
+    }
+
+    if(changed){
+      save();
+      await syncWallet();
+
+      renderRecent();
+      renderPanel();
+
+      if(showPopup&&lastSettled){
+        showResult(
+          lastSettled.period,
+          lastSettled.result,
+          wonCredit,
+          lostStake
+        );
+      }
+    }
+  }finally{
+    settlementBusy=false;
+  }
+}
+
+function renderBalance(){
+  const el=$("#balance");
+
+  el.textContent=money(state.balance);
+
+  el.classList.remove("bump");
+  void el.offsetWidth;
+  el.classList.add("bump");
+
+  clearTimeout(window.__balanceTimer);
+
+  window.__balanceTimer=
+    setTimeout(
+      ()=>el.classList.remove("bump"),
+      320
+    );
+}
+
+function renderNumbers(){
+  $("#numbers").innerHTML=
+    Array.from({length:10},(_,n)=>
+      `<button class="num ${color(n)} ${
+        state.selection?.type==="number"&&
+        Number(state.selection.value)===n
+        ?"active":""
+      }" data-type="number" data-value="${n}">${n}</button>`
+    ).join("");
+}
+
+function renderRecent(){
+  $("#recent").innerHTML=
+    state.history[state.sec]
+      .slice(0,14)
+      .map(x=>
+        `<div class="ball ${x.color}" title="${
+          (x.colors||[x.colorName]).join(" + ")
+        }">${x.number}</div>`
+      )
+      .join("");
+}
+
+function renderSelection(){
+  const s=state.selection;
+
+  $("#selectionText").textContent=
+    s
+      ?`${s.type.toUpperCase()} · ${s.value}`
+      :"No selection yet";
+
+  $$(".choice").forEach(b=>
+    b.classList.toggle(
+      "active",
+      s?.type==="color"&&
+      s.value===b.dataset.value
+    )
+  );
+
+  $$(".size button").forEach(b=>
+    b.classList.toggle(
+      "active",
+      s?.type==="size"&&
+      s.value===b.dataset.value
+    )
+  );
+
+  renderNumbers();
+}
+
+function renderPanel(){
+  const p=$("#panel");
+  const h=state.history[state.sec];
+  const bets=state.bets[state.sec]||[];
+
+  if(state.tab==="history"){
+    p.innerHTML=
+      `<div class="hh">
+        <span>Period</span>
+        <span>Number</span>
+        <span>Big/Small</span>
+        <span>Color</span>
+      </div>`+
+      h.slice(0,12).map((x,i)=>
+        `<div class="hr ${i===0?"latest":""}">
+          <code>${x.period}</code>
+          <span class="rn ${x.color}">${x.number}</span>
+          <span class="st ${x.size.toLowerCase()}">${x.size}</span>
+          <span>
+            ${(x.colors||[x.colorName]).map(c=>
+              `<i class="cd ${
+                c.toLowerCase()[0]==="r"
+                  ?"r"
+                  :c.toLowerCase()[0]==="g"
+                  ?"g"
+                  :"v"
+              }"></i>`
+            ).join("")}
+          </span>
+        </div>`
+      ).join("")+
+      `<div class="pagination">
+        <button class="pg">‹</button>
+        <span>1 / 50</span>
+        <button class="pg">›</button>
+      </div>`;
+  }
+
+  else if(state.tab==="bets"){
+    p.innerHTML=
+      bets.length
+      ?`<div class="betsummary">${
+        bets.slice(0,20).map(b=>
+          `<div class="betitem">
+            <div>
+              <b>${b.value}</b>
+              <small>${b.type} · ${b.period}</small>
+            </div>
+            <div>
+              ${money(b.total)}
+              <small>x${b.multi} · qty ${b.qty}</small>
+            </div>
+            <div class="${
+              b.status==="WON"
+                ?"statusWon"
+                :b.status==="LOST"
+                ?"statusLost"
+                :"statusPending"
+            }">${b.status}</div>
+          </div>`
+        ).join("")
+      }</div>`
+      :`<div class="note">
+        No demo selections in this duration.
+      </div>`;
+  }
+
+  else if(state.tab==="chart"){
+    const counts=Array(10).fill(0);
+
+    h.forEach(x=>counts[x.number]++);
+
+    const max=Math.max(1,...counts);
+
+    p.innerHTML=
+      `<div class="bars">${
+        counts.map((v,i)=>
+          `<div class="br">
+            <b>${i}</b>
+            <div class="track">
+              <div class="fill" style="width:${v/max*100}%"></div>
+            </div>
+            <span>${v}</span>
+          </div>`
+        ).join("")
+      }</div>
+      <div class="note">
+        Historical demo frequency · not predictive.
+      </div>`;
+  }
+
+  else if(state.tab==="strategy"){
+    const total=h.length;
+    const b=h.filter(x=>x.size==="Big").length;
+    const s=total-b;
+    const r=h.filter(x=>x.color==="r").length;
+    const g=h.filter(x=>x.color==="g").length;
+    const v=h.filter(x=>x.color==="v").length;
+
+    p.innerHTML=
+      `<div class="stats">
+        <div class="stat"><b>${total}</b><span>Rounds</span></div>
+        <div class="stat"><b>${b}</b><span>Big</span></div>
+        <div class="stat"><b>${s}</b><span>Small</span></div>
+        <div class="stat"><b>${r}</b><span>Red</span></div>
+        <div class="stat"><b>${g}</b><span>Green</span></div>
+        <div class="stat"><b>${v}</b><span>Violet</span></div>
+      </div>
+      <div class="note">
+        Patterns are historical statistics only and do not predict future results.
+      </div>`;
+  }
+
+  else{
+    const total=h.length;
+    const b=h.filter(x=>x.size==="Big").length;
+    const won=(bets||[]).filter(x=>x.status==="WON").length;
+    const lost=(bets||[]).filter(x=>x.status==="LOST").length;
+
+    p.innerHTML=
+      `<div class="stats">
+        <div class="stat"><b>${total}</b><span>Total rounds</span></div>
+        <div class="stat"><b>${b}</b><span>Big</span></div>
+        <div class="stat"><b>${total-b}</b><span>Small</span></div>
+        <div class="stat"><b>${won}</b><span>Demo wins</span></div>
+        <div class="stat"><b>${lost}</b><span>Demo losses</span></div>
+        <div class="stat"><b>${bets.length}</b><span>Selections</span></div>
+      </div>`;
+  }
+}
+
+function setMode(sec){
+  state.sec=sec;
+  state.selection=null;
+
+  $$(".mode").forEach(x=>
+    x.classList.toggle(
+      "active",
+      +x.dataset.sec===sec
+    )
+  );
+
+  ensureHistory();
+  renderRecent();
+  renderSelection();
+  renderPanel();
+
+  state.lastRoundStart=null;
+
+  toast(
+    `WINGO ${
+      sec===30
+        ?"30 SEC"
+        :sec===60
+        ?"1 MIN"
+        :sec===180
+        ?"3 MIN"
+        :"5 MIN"
+    }`
+  );
+}
+
+async function completeRound(start){
+  const p=periodAt(start,state.sec);
+  const x=resultFor(p);
+  const arr=state.history[state.sec];
+
+  if(!arr.some(a=>a.period===p)){
+    arr.unshift({
+      ...x,
+      ts:start
+    });
+
+    state.history[state.sec]=
+      arr.slice(0,500);
+  }
+
+  let roundWon=0;
+  let roundLost=0;
+
+  await settleSpecificPeriod(
+    p,
+    x,
+    roundWon,
+    roundLost
+  );
+
+  renderRecent();
+  renderPanel();
+}
+
+async function settleSpecificPeriod(
+  p,
+  x,
+  roundWon,
+  roundLost
+){
+  const bets=
+    state.bets[state.sec]
+      .filter(
+        b=>
+          b.period===p&&
+          b.status==="PENDING"
+      );
+
+  let wonCredit=0;
+  let lostStake=0;
+  let changed=false;
+
+  for(const b of bets){
+    const mult=payoutFor(b,x.number);
+    const won=mult>0;
+
+    b.payoutMultiplier=mult;
+    b.feeRate=0.02;
+    b.contractAmount=
+      Number(
+        (b.total*DEMO_RETURN_RATE).toFixed(2)
+      );
+
+    if(won){
+      const credit=
+        Number(
+          (b.contractAmount*mult).toFixed(2)
+        );
+
+      try{
+        const after=
+          await window.NPlusWallet.changeBalance(
+            credit,
+            {
+              type:"GAME_WIN",
+              source:"WINGO",
+              note:`WINGO WIN ${b.period} ${b.betId||b.ts}`
+            }
+          );
+
+        state.balance=Number(after);
+
+        b.status="WON";
+        b.settledAt=Date.now();
+        b.returnAmount=credit;
+        b.netAmount=
+          Number(
+            (credit-b.total).toFixed(2)
+          );
+
+        wonCredit+=credit;
+      }catch(err){
+        console.error(err);
+
+        toast(
+          err.message||
+          "Wallet settlement failed"
+        );
+
+        continue;
+      }
+    }else{
+      b.status="LOST";
+      b.settledAt=Date.now();
+      b.returnAmount=0;
+      b.netAmount=
+        Number(
+          (-b.total).toFixed(2)
+        );
+
+      lostStake+=b.total;
+    }
+
+    changed=true;
+  }
+
+  if(changed){
+    save();
+    await syncWallet();
+
+    if(wonCredit||lostStake){
+      showResult(
+        p,
+        x,
+        wonCredit,
+        lostStake
+      );
+    }
+  }
+}
+
+function update(){
+  if(updateBusy)return;
+
+  updateBusy=true;
+
+  Promise.resolve()
+    .then(async()=>{
+      const r=round();
+      const closed=r.remaining<=5;
+
+      const roundChanged=
+        state.lastRoundStart!==null&&
+        state.lastRoundStart!==r.start;
+
+      if(roundChanged){
+        await completeRound(
+          state.lastRoundStart
+        );
+      }
+
+      await settlePastRounds(roundChanged);
+
+      $("#time").textContent=
+        `00:${String(r.remaining).padStart(2,"0")}`;
+
+      $("#period").textContent=r.period;
+
+      $("#bar").style.width=
+        (r.remaining/state.sec*100)+"%";
+
+      $("#status").textContent=
+        closed
+          ?"BETTING CLOSED"
+          :"BETTING OPEN";
+
+      $("#round").classList.toggle(
+        "closed",
+        closed
+      );
+
+      const stage=
+        closed
+          ?3
+          :r.remaining<=10
+          ?2
+          :r.remaining<=20
+          ?1
+          :0;
+
+      $$("#stage span").forEach(
+        (x,i)=>
+          x.classList.toggle(
+            "on",
+            i<=stage
+          )
+      );
+
+      state.lastRoundStart=r.start;
+    })
+    .catch(err=>{
+      console.error("WINGO update error:",err);
+    })
+    .finally(()=>{
+      updateBusy=false;
+    });
+}
+
+function openBet(type,value){
+  const r=round();
+
+  if(r.remaining<=5){
+    toast("Betting closed for this round");
+    return;
+  }
+
+  state.selection={
+    type,
+    value
+  };
+
+  renderSelection();
+
+  $("#selectedBox").innerHTML=
+    `<strong>${type.toUpperCase()}</strong> · <strong>${value}</strong>
+     <br>
+     <span style="display:block;margin-top:4px;color:#777">
+       Period ${r.period}
+     </span>`;
+
+  $("#overlay").classList.add("show");
+
+  syncSheet();
+}
+
+function syncSheet(){
+  const total=
+    Number($("#amount").value||0)*
+    state.qty*
+    state.multi;
+
+  $("#total").textContent=
+    money(total);
+
+  $("#confirm").disabled=
+    !state.selection||
+    !$("#agree").checked||
+    total<1||
+    total>state.balance||
+    round().remaining<=5;
+}
+
+function closeSheet(){
+  $("#overlay").classList.remove("show");
+}
+
+function showResult(
+  p,
+  x,
+  wonCredit=0,
+  lostStake=0
+){
+  const bets=
+    state.bets[state.sec]
+      .filter(b=>b.period===p);
+
+  const wins=
+    bets.filter(b=>b.status==="WON");
+
+  const loss=
+    bets.filter(b=>b.status==="LOST");
+
+  const wonCount=wins.length;
+  const lossCount=loss.length;
+
+  $("#outcome").textContent=
+    wonCount&&!lossCount
+      ?"YOU WON"
+      :lossCount&&!wonCount
+      ?"YOU LOST"
+      :wonCount&&lossCount
+      ?"MIXED RESULT"
+      :"ROUND RESULT";
+
+  $("#outcome").className=
+    "outcome "+
+    (
+      wonCount&&!lossCount
+        ?"win"
+        :lossCount&&!wonCount
+        ?"loss"
+        :"mix"
+    );
+
+  $("#resultNum").textContent=
+    x.number;
+
+  $("#meta").innerHTML=
+    `${(x.colors||[x.colorName]).map(c=>
+      `<span class="pill ${
+        c.toLowerCase()[0]==="r"
+          ?"r"
+          :c.toLowerCase()[0]==="g"
+          ?"g"
+          :"v"
+      }">${c.toUpperCase()}</span>`
+    ).join("")}
+    <span class="pill ${
+      x.size==="Big"?"b":"s"
+    }">${x.size.toUpperCase()}</span>`;
+
+  const details=
+    wins.map(b=>
+      `${String(b.type).toUpperCase()} ${b.value} · x${b.payoutMultiplier} · ${money(b.returnAmount)}`
+    ).join("<br>");
+
+  const net=
+    Number(
+      (wonCredit-lostStake).toFixed(2)
+    );
+
+  const walletLine=
+    net>0
+      ?`Wallet credited <strong>${money(wonCredit)}</strong>`
+      :net<0
+      ?`Wallet reduced by <strong>${money(Math.abs(net))}</strong>`
+      :"Wallet unchanged";
+
+  $("#resultInfo").innerHTML=
+    `Period <strong>${p}</strong><br>
+    ${
+      bets.length
+        ?`${wonCount} won · ${lossCount} lost · ${bets.length} selection${bets.length>1?"s":""}
+          ${details?`<br>${details}`:""}
+          <br>${walletLine}
+          <br>Balance <strong>${money(state.balance)}</strong>`
+        :"No demo selection this round"
+    }`;
+
+  $("#result").classList.add("show");
+
+  clearTimeout(window.__resultTimer);
+
+  window.__resultTimer=
+    setTimeout(
+      ()=>$("#result").classList.remove("show"),
+      3000
+    );
+}
+
+function toast(t){
+  const x=$("#toast");
+
+  x.textContent=t;
+  x.classList.add("show");
+
+  clearTimeout(window.__toast);
+
+  window.__toast=
+    setTimeout(
+      ()=>x.classList.remove("show"),
+      1700
+    );
+}
+
+/* -----------------------------
+   INITIALIZATION
+----------------------------- */
+
+(async()=>{
+  try{
+    const user=
+      await window.NPlusAuth.requireAuth();
+
+    if(!user)return;
+
+    load();
+
+    ensureHistory();
+
+    await syncWallet();
+
+    await settlePastRounds(false);
+
+    await syncWallet();
+
+    renderRecent();
+    renderNumbers();
+    renderSelection();
+    renderPanel();
+
+    $("#amts").innerHTML=
+      [10,50,100,500,1000]
+        .map(v=>
+          `<button data-amt="${v}">₹${v}</button>`
+        )
+        .join("");
+
+    $("#multis").innerHTML=
+      [1,5,10,20,50,100]
+        .map(v=>
+          `<button class="multi ${
+            v===1?"active":""
+          }" data-m="${v}">X${v}</button>`
+        )
+        .join("");
+
+    update();
+
+  }catch(err){
+    console.error(err);
+
+    toast(
+      err.message||
+      "Unable to load WINGO"
+    );
+  }
+})();
+
+/* -----------------------------
+   EVENTS
+----------------------------- */
+
+$("#modes").onclick=e=>{
+  const b=e.target.closest(".mode");
+  if(b)setMode(+b.dataset.sec);
+};
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-type]");
+
+  if(b){
+    openBet(
+      b.dataset.type,
+      b.dataset.value
+    );
+  }
+
+  const m=e.target.closest("[data-m]");
+
+  if(m){
+    state.multi=+m.dataset.m;
+
+    $$(".multi").forEach(
+      x=>
+        x.classList.toggle(
+          "active",
+          x===m
+        )
+    );
+
+    syncSheet();
+  }
+
+  const a=e.target.closest("[data-amt]");
+
+  if(a){
+    $("#amount").value=
+      a.dataset.amt;
+
+    syncSheet();
+  }
+});
+
+$("#random").onclick=
+  ()=>openBet(
+    "number",
+    Math.floor(Math.random()*10)
+  );
+
+$("#edit").onclick=
+  ()=>state.selection
+    ?openBet(
+      state.selection.type,
+      state.selection.value
+    )
+    :toast(
+      "Choose a selection first"
+    );
+
+$("#minus").onclick=()=>{
+  state.qty=
+    Math.max(
+      1,
+      state.qty-1
+    );
+
+  $("#qty").textContent=
+    state.qty;
+
+  syncSheet();
+};
+
+$("#plus").onclick=()=>{
+  state.qty=
+    Math.min(
+      100,
+      state.qty+1
+    );
+
+  $("#qty").textContent=
+    state.qty;
+
+  syncSheet();
+};
+
+$("#amount").oninput=
+  syncSheet;
+
+$("#agree").onchange=
+  syncSheet;
+
+$("#close").onclick=
+  closeSheet;
+
+$("#cancel").onclick=
+  closeSheet;
+
+$("#overlay").onclick=e=>{
+  if(e.target.id==="overlay"){
+    closeSheet();
+  }
+};
+
+/* -----------------------------
+   SUPABASE WALLET BET
+----------------------------- */
+
+$("#confirm").onclick=async()=>{
+  const r=round();
+
+  const total=
+    Number($("#amount").value||0)*
+    state.qty*
+    state.multi;
+
+  if(r.remaining<=5){
+    toast("Betting is closed");
+    return;
+  }
+
+  if(!state.selection){
+    toast("Choose a selection");
+    return;
+  }
+
+  if(total<1){
+    toast("Invalid amount");
+    return;
+  }
+
+  if(total>state.balance){
+    toast("Insufficient demo credits");
+    return;
+  }
+
+  const p=r.period;
+
+  if(
+    state.bets[state.sec].some(
+      b=>
+        b.period===p&&
+        b.type===state.selection.type&&
+        String(b.value)===
+          String(state.selection.value)&&
+        b.total===total
+    )
+  ){
+    toast("Duplicate selection blocked");
+    return;
+  }
+
+  const confirmBtn=
+    $("#confirm");
+
+  confirmBtn.disabled=true;
+
+  try{
+    const betId=
+      crypto.randomUUID();
+
+    const after=
+      await window.NPlusWallet.changeBalance(
+        -total,
+        {
+          type:"GAME_BET",
+          source:"WINGO",
+          note:
+            `WINGO BET ${p} ${betId}`
+        }
+      );
+
+    state.balance=
+      Number(after);
+
+    state.bets[state.sec].unshift({
+      betId,
+      period:p,
+      type:state.selection.type,
+      value:state.selection.value,
+      total,
+      qty:state.qty,
+      multi:state.multi,
+      status:"PENDING",
+      ts:Date.now()
+    });
+
+    save();
+
+    renderBalance();
+    renderPanel();
+
+    closeSheet();
+
+    toast(
+      "✓ Demo selection confirmed"
+    );
+
+  }catch(err){
+    console.error(err);
+
+    toast(
+      err.message||
+      "Unable to place selection"
+    );
+
+  }finally{
+    confirmBtn.disabled=false;
+    syncSheet();
+  }
+};
+
+$("#tabs").onclick=e=>{
+  const b=e.target.closest(".tab");
+
+  if(!b)return;
+
+  state.tab=
+    b.dataset.tab;
+
+  $$(".tab").forEach(
+    x=>
+      x.classList.toggle(
+        "active",
+        x===b
+      )
+  );
+
+  renderPanel();
+};
+
+$("#rulesBtn").onclick=
+  $("#how").onclick=
+    ()=>$("#rules").classList.add("show");
+
+$("#ruleClose").onclick=
+  ()=>$("#rules").classList.remove("show");
+
+$("#deposit").onclick=
+  $("#withdraw").onclick=
+    ()=>toast(
+      "Virtual-credit demo only"
+    );
+
+$("#sound").onclick=
+  ()=>toast(
+    "Sound control ready"
+  );
+
+$("#back").onclick=
+  ()=>history.back();
+
+$("#continue").onclick=
+  ()=>$("#result").classList.remove("show");
+
+window.addEventListener(
+  "storage",
+  e=>{
+    if(
+      e.key!==STORE||
+      !e.newValue
+    )return;
+
+    try{
+      const x=
+        JSON.parse(e.newValue);
+
+      if(x.history){
+        state.history=
+          Object.assign(
+            state.history,
+            x.history
+          );
+      }
+
+      if(x.bets){
+        state.bets=
+          Object.assign(
+            state.bets,
+            x.bets
+          );
+      }
+
+      normalizeState();
+      ensureHistory();
+      renderRecent();
+      renderPanel();
+
+      syncWallet().catch(
+        console.error
+      );
+
+    }catch{}
+  }
+);
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+    if(!document.hidden){
+      ensureHistory();
+
+      syncWallet()
+        .then(
+          ()=>settlePastRounds(false)
+        )
+        .then(
+          ()=>update()
+        )
+        .then(()=>{
+          renderRecent();
+          renderPanel();
+        })
+        .catch(console.error);
+    }
+  }
+);
+
+setInterval(
+  update,
+  150
+);
+
 })();
 </script>
 
