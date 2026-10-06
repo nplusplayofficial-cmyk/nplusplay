@@ -33,6 +33,10 @@ button{
   font:inherit;
   cursor:pointer;
 }
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
 .app{
   width:min(1180px,94%);
   margin:auto;
@@ -131,7 +135,6 @@ button{
   color:var(--gold2);
 }
 
-
 .game-controls{
   margin-top:22px;
 }
@@ -152,8 +155,10 @@ button{
   transform:translateY(-1px);
 }
 .game-icon{
-  width:42px;height:42px;
-  display:grid;place-items:center;
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
   border-radius:12px;
   background:rgba(201,165,91,.10);
   border:1px solid var(--line);
@@ -260,9 +265,6 @@ button{
   background:rgba(201,165,91,.12);
   color:var(--gold2);
 }
-@media(max-width:520px){
-  .wingo-duration-grid{grid-template-columns:repeat(2,1fr)}
-}
 
 .mode-grid{
   display:grid;
@@ -349,18 +351,10 @@ button{
   font-size:10px;
   line-height:1.5;
 }
-@media(max-width:950px){
-  .game-grid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:520px){
-  .game-grid{grid-template-columns:1fr}
-  .mode-grid{grid-template-columns:1fr}
-  .detail-head{align-items:flex-start}
-}
-
 
 .live-monitor{
   margin-top:15px;
+  display:none!important;
 }
 .live-grid{
   display:grid;
@@ -384,32 +378,35 @@ button{
   margin-top:7px;
   font-size:18px;
 }
-.live-table{
+.live-table,
+.wa-table,
+.game-table,
+.deposit-table{
   width:100%;
   border-collapse:collapse;
 }
-.live-table th,.live-table td{
-  padding:11px 9px;
+.live-table th,.live-table td,
+.wa-table th,.wa-table td,
+.game-table th,.game-table td,
+.deposit-table th,.deposit-table td{
+  padding:10px 8px;
   border-bottom:1px solid rgba(255,255,255,.06);
   text-align:left;
   white-space:nowrap;
 }
-.live-table th{
+.live-table th,.wa-table th,.game-table th,.deposit-table th{
   color:var(--muted);
   font-size:9px;
   letter-spacing:1px;
 }
-.live-table td{
-  font-size:12px;
+.live-table td,.wa-table td,.game-table td,.deposit-table td{
+  font-size:11px;
 }
 .live-note{
   color:var(--muted);
   font-size:10px;
   line-height:1.5;
   margin-top:10px;
-}
-@media(max-width:850px){
-  .live-grid{grid-template-columns:1fr}
 }
 
 .commission{
@@ -439,161 +436,11 @@ button{
 .commission-card.highlight{
   background:linear-gradient(145deg,rgba(201,165,91,.12),rgba(16,16,16,.98));
 }
-.game-table{
-  width:100%;
-  border-collapse:collapse;
-}
-.game-table th,.game-table td{
-  text-align:left;
-  padding:13px 10px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-.game-table th{
-  color:var(--muted);
-  font-size:10px;
-  letter-spacing:1.2px;
-}
-.game-table td{
-  font-size:13px;
-}
 .commission-note{
   color:var(--muted);
   font-size:11px;
   margin-top:10px;
 }
-@media(max-width:1000px){
-  .commission-grid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:520px){
-  .commission-grid{grid-template-columns:1fr}
-  .game-table{font-size:12px}
-  .game-table th,.game-table td{padding:10px 6px}
-}
-
-.requests{
-  margin-top:22px;
-}
-.section-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-}
-.section-head h3{
-  margin:0;
-  font-size:18px;
-}
-.refresh{
-  background:#151515;
-  border:1px solid var(--line);
-  color:var(--gold2);
-  padding:9px 13px;
-  border-radius:10px;
-  font-weight:800;
-}
-.card{
-  background:rgba(16,16,16,.94);
-  border:1px solid var(--line);
-  border-radius:18px;
-  padding:20px;
-  margin-bottom:14px;
-}
-.row{
-  display:grid;
-  grid-template-columns:1.3fr .8fr .8fr .8fr;
-  gap:18px;
-  align-items:center;
-}
-.label{
-  color:var(--muted);
-  font-size:10px;
-  letter-spacing:1.2px;
-  margin-bottom:5px;
-}
-.value{
-  font-weight:800;
-}
-.uid{
-  color:var(--gold2);
-  font-size:12px;
-  word-break:break-all;
-}
-.amount{
-  font-size:22px;
-  color:var(--gold2);
-}
-.time{
-  color:#aaa;
-  font-size:12px;
-}
-.actions{
-  display:flex;
-  gap:9px;
-  margin-top:17px;
-  padding-top:15px;
-  border-top:1px solid rgba(255,255,255,.06);
-}
-.accept,.reject{
-  border:0;
-  border-radius:11px;
-  padding:11px 18px;
-  font-weight:900;
-}
-.accept{
-  background:rgba(35,211,154,.12);
-  color:var(--green);
-  border:1px solid rgba(35,211,154,.3);
-}
-.reject{
-  background:rgba(255,82,96,.08);
-  color:#ff7c86;
-  border:1px solid rgba(255,82,96,.28);
-}
-.empty{
-  text-align:center;
-  padding:45px 20px;
-  border:1px dashed rgba(201,165,91,.2);
-  border-radius:18px;
-  color:var(--muted);
-}
-.status{
-  position:fixed;
-  left:50%;
-  bottom:24px;
-  transform:translateX(-50%) translateY(20px);
-  opacity:0;
-  pointer-events:none;
-  background:#171717;
-  border:1px solid var(--line);
-  padding:13px 18px;
-  border-radius:12px;
-  transition:.25s;
-  z-index:20;
-}
-.status.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
-.status.ok{border-color:rgba(35,211,154,.3)}
-.status.err{border-color:rgba(255,82,96,.3)}
-.loading{
-  color:var(--muted);
-  text-align:center;
-  padding:30px;
-}
-@media(max-width:800px){
-  .stats{grid-template-columns:1fr}
-  .row{grid-template-columns:1fr 1fr}
-}
-@media(max-width:520px){
-  .app{width:92%;padding-top:15px}
-  .topbar{padding:15px}
-  .hero{padding:20px}
-  .hero h2{font-size:24px}
-  .row{grid-template-columns:1fr}
-  .actions button{flex:1}
-}
-.live-monitor{display:none!important}
 
 .wa-grid{
   display:grid;
@@ -651,29 +498,6 @@ button{
   margin-top:5px;
   font-size:17px;
 }
-.wa-table{
-  width:100%;
-  border-collapse:collapse;
-}
-.wa-table th,.wa-table td{
-  padding:10px 8px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  text-align:left;
-  white-space:nowrap;
-}
-.wa-table th{
-  color:var(--muted);
-  font-size:9px;
-  letter-spacing:1px;
-}
-.wa-table td{font-size:11px}
-@media(max-width:800px){
-  .wa-grid,.wa-breakdown{grid-template-columns:1fr 1fr}
-}
-@media(max-width:520px){
-  .wa-grid,.wa-breakdown{grid-template-columns:1fr}
-}
-
 
 .auto-insight{
   margin-top:14px;
@@ -743,12 +567,192 @@ button{
   font-size:9px;
   line-height:1.45;
 }
+
+.requests,
+.deposit-report{
+  margin-top:22px;
+}
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:12px;
+}
+.section-head h3{
+  margin:0;
+  font-size:18px;
+}
+.refresh{
+  background:#151515;
+  border:1px solid var(--line);
+  color:var(--gold2);
+  padding:9px 13px;
+  border-radius:10px;
+  font-weight:800;
+}
+.card{
+  background:rgba(16,16,16,.94);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:14px;
+}
+
+.deposit-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+.deposit-stat{
+  background:linear-gradient(145deg,rgba(201,165,91,.09),rgba(16,16,16,.98));
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:20px;
+}
+.deposit-stat span{
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1.3px;
+}
+.deposit-stat strong{
+  display:block;
+  margin-top:8px;
+  font-size:25px;
+}
+.deposit-table-wrap{
+  overflow-x:auto;
+}
+.deposit-status{
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.6px;
+}
+.deposit-status.approved{
+  color:var(--green);
+  background:rgba(35,211,154,.09);
+  border:1px solid rgba(35,211,154,.22);
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1.3fr .8fr .8fr .8fr;
+  gap:18px;
+  align-items:center;
+}
+.label{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1.2px;
+  margin-bottom:5px;
+}
+.value{
+  font-weight:800;
+}
+.uid{
+  color:var(--gold2);
+  font-size:12px;
+  word-break:break-all;
+}
+.amount{
+  font-size:22px;
+  color:var(--gold2);
+}
+.time{
+  color:#aaa;
+  font-size:12px;
+}
+.actions{
+  display:flex;
+  gap:9px;
+  margin-top:17px;
+  padding-top:15px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.accept,.reject{
+  border-radius:11px;
+  padding:11px 18px;
+  font-weight:900;
+}
+.accept{
+  background:rgba(35,211,154,.12);
+  color:var(--green);
+  border:1px solid rgba(35,211,154,.3);
+}
+.reject{
+  background:rgba(255,82,96,.08);
+  color:#ff7c86;
+  border:1px solid rgba(255,82,96,.28);
+}
+.empty{
+  text-align:center;
+  padding:45px 20px;
+  border:1px dashed rgba(201,165,91,.2);
+  border-radius:18px;
+  color:var(--muted);
+}
+.status{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  transform:translateX(-50%) translateY(20px);
+  opacity:0;
+  pointer-events:none;
+  background:#171717;
+  border:1px solid var(--line);
+  padding:13px 18px;
+  border-radius:12px;
+  transition:.25s;
+  z-index:20;
+}
+.status.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.status.ok{border-color:rgba(35,211,154,.3)}
+.status.err{border-color:rgba(255,82,96,.3)}
+.loading{
+  color:var(--muted);
+  text-align:center;
+  padding:30px;
+}
+
+@media(max-width:1000px){
+  .commission-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:950px){
+  .game-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:850px){
+  .live-grid{grid-template-columns:1fr}
+}
+@media(max-width:800px){
+  .stats{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr 1fr}
+  .deposit-grid{grid-template-columns:1fr 1fr}
+  .wa-grid,.wa-breakdown{grid-template-columns:1fr 1fr}
+}
 @media(max-width:700px){
   .auto-insight-grid{grid-template-columns:1fr}
 }
-
-
-
+@media(max-width:520px){
+  .app{width:92%;padding-top:15px}
+  .topbar{padding:15px}
+  .hero{padding:20px}
+  .hero h2{font-size:24px}
+  .row{grid-template-columns:1fr}
+  .actions button{flex:1}
+  .game-grid{grid-template-columns:1fr}
+  .mode-grid{grid-template-columns:1fr}
+  .detail-head{align-items:flex-start}
+  .wingo-duration-grid{grid-template-columns:repeat(2,1fr)}
+  .commission-grid{grid-template-columns:1fr}
+  .deposit-grid{grid-template-columns:1fr}
+  .wa-grid,.wa-breakdown{grid-template-columns:1fr}
+}
 </style>
 </head>
 
@@ -771,9 +775,7 @@ button{
   <section class="hero">
     <div class="eyebrow">ADMIN CONTROL CENTER</div>
     <h2>Virtual Wallet Requests</h2>
-    <p>
-      Manage demo-credit deposit requests securely.
-    </p>
+    <p>Manage demo-credit deposit requests securely.</p>
 
     <div class="stats">
       <div class="stat">
@@ -792,8 +794,6 @@ button{
       </div>
     </div>
   </section>
-
-
 
   <section class="game-controls">
     <div class="section-head">
@@ -816,6 +816,7 @@ button{
 
       <div class="card">
         <div class="label">DEMO RESULT MODE</div>
+
         <div class="mode-grid">
           <button class="mode-btn active" data-mode="auto">⚙ AUTO</button>
           <button class="mode-btn" data-mode="manual">✦ MANUAL DEMO</button>
@@ -861,11 +862,14 @@ button{
             <button class="choice" data-size="BIG">BIG <small>5–9</small></button>
             <button class="choice" data-size="SMALL">SMALL <small>0–4</small></button>
           </div>
-          <div class="commission-note" style="margin-top:8px">MANUAL mode uses exactly the Color + Number + Size you select.</div>
+
+          <div class="commission-note" style="margin-top:8px">
+            MANUAL mode uses exactly the Color + Number + Size you select.
+          </div>
         </div>
 
         <div class="demo-result">
-          <div class="label">NEXT DEMO RESULT</div>
+          <div class="label">CURRENT DEMO RESULT</div>
           <div class="result-big" id="demoResultText">AUTO</div>
         </div>
 
@@ -918,8 +922,6 @@ button{
             <span>CURRENT ROUND</span>
             <strong id="waNextSummary">AUTO RESULT — CURRENT PERIOD</strong>
           </div>
-
-
 
           <div class="auto-insight" id="autoDemoInsight">
             <div class="auto-insight-head">
@@ -1094,17 +1096,75 @@ button{
     </div>
   </section>
 
-  <section class="requests">
-
+  <!-- APPROVED DEPOSIT REPORT -->
+  <section class="deposit-report">
     <div class="section-head">
-      <h3>Pending Requests</h3>
+      <div>
+        <h3>Deposit Report</h3>
+        <div class="commission-note">
+          Approved virtual-credit deposits and deposit history.
+        </div>
+      </div>
+      <button class="refresh" id="depositReportRefreshBtn">↻ REFRESH</button>
+    </div>
+
+    <div class="deposit-grid">
+      <div class="deposit-stat">
+        <span>TOTAL APPROVED DEPOSITED</span>
+        <strong id="approvedDepositTotal">₹0.00</strong>
+      </div>
+
+      <div class="deposit-stat">
+        <span>TODAY APPROVED DEPOSITED</span>
+        <strong id="todayDepositTotal">₹0.00</strong>
+      </div>
+
+      <div class="deposit-stat">
+        <span>APPROVED DEPOSIT COUNT</span>
+        <strong id="approvedDepositCount">0</strong>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:15px">
+      <div class="section-head">
+        <h3>Approved Deposit History</h3>
+      </div>
+
+      <div class="deposit-table-wrap">
+        <table class="deposit-table">
+          <thead>
+            <tr>
+              <th>USER</th>
+              <th>NPLUS UID</th>
+              <th>DEPOSITED</th>
+              <th>STATUS</th>
+              <th>TIME</th>
+            </tr>
+          </thead>
+          <tbody id="depositHistoryBody">
+            <tr>
+              <td colspan="5" class="loading">Loading deposit history...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="requests">
+    <div class="section-head">
+      <div>
+        <h3>Pending Requests</h3>
+        <div class="commission-note">
+          Requests remain here until accepted or rejected.
+        </div>
+      </div>
       <button class="refresh" id="refreshBtn">↻ REFRESH</button>
     </div>
 
     <div id="requestList">
       <div class="loading">Loading requests...</div>
     </div>
-
   </section>
 
 </div>
@@ -1112,7 +1172,7 @@ button{
 <div class="status" id="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/nplus-config.js"></script>
+<script src="core/nplus-config.js?v=20261006"></script>
 
 <script>
 (() => {
@@ -1121,8 +1181,22 @@ button{
   const cfg = window.NPlusConfig;
 
   if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
-    document.getElementById("requestList").innerHTML =
-      '<div class="empty">N+ PLAY configuration not found.</div>';
+    document.body.innerHTML = `
+      <div style="
+        min-height:100vh;
+        display:grid;
+        place-items:center;
+        background:#070707;
+        color:#fff;
+        font-family:Arial;
+        padding:30px;
+        text-align:center;
+      ">
+        <div>
+          <h2>N+ PLAY configuration not found.</h2>
+        </div>
+      </div>
+    `;
     return;
   }
 
@@ -1134,11 +1208,26 @@ button{
   const $ = id => document.getElementById(id);
 
   let currentUser = null;
+  let selectedGame = null;
+  let selectedMode = "auto";
+  let selectedColor = null;
+  let selectedNumber = null;
+  let selectedSize = null;
+  let selectedDuration = 30;
+
+  const DEMO_GAMES = [
+    { name:"WINGO", key:"WINGO", icon:"🎯" },
+    { name:"K3 WINGO", key:"K3", icon:"🎲" },
+    { name:"5D", key:"5D", icon:"🔢" },
+    { name:"TRX WINGO", key:"TRX", icon:"⚡" },
+    { name:"AVIATOR", key:"AVIATOR", icon:"✈️" },
+    { name:"MOTO RACE", key:"MOTO", icon:"🏁" }
+  ];
 
   function money(value) {
     return "₹" + Number(value || 0).toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
     });
   }
 
@@ -1156,15 +1245,14 @@ button{
     el.textContent = message;
     el.className = "status show " + type;
 
-    setTimeout(() => {
+    window.clearTimeout(showStatus._timer);
+    showStatus._timer = window.setTimeout(() => {
       el.className = "status";
     }, 2800);
   }
 
   async function requireAdmin() {
-
-    const { data, error } =
-      await supabase.auth.getSession();
+    const { data, error } = await supabase.auth.getSession();
 
     if (error || !data.session) {
       location.replace("admin-login.html");
@@ -1173,17 +1261,19 @@ button{
 
     currentUser = data.session.user;
 
-    const { data: profile, error: profileError } =
-      await supabase
-        .from("profiles")
-        .select("id,email,display_name,role")
-        .eq("id", currentUser.id)
-        .maybeSingle();
+    const {
+      data: profile,
+      error: profileError
+    } = await supabase
+      .from("profiles")
+      .select("id,email,display_name,role")
+      .eq("id", currentUser.id)
+      .maybeSingle();
 
     if (
       profileError ||
       !profile ||
-      profile.role !== "admin"
+      String(profile.role || "").toLowerCase() !== "admin"
     ) {
       await supabase.auth.signOut();
 
@@ -1227,27 +1317,11 @@ button{
     return true;
   }
 
-
-
-  const DEMO_GAMES = [
-    { name:"WINGO", key:"WINGO", icon:"🎯" },
-    { name:"K3 WINGO", key:"K3", icon:"🎲" },
-    { name:"5D", key:"5D", icon:"🔢" },
-    { name:"TRX WINGO", key:"TRX", icon:"⚡" },
-    { name:"AVIATOR", key:"AVIATOR", icon:"✈️" },
-    { name:"MOTO RACE", key:"MOTO", icon:"🏁" }
-  ];
-
-  let selectedGame = null;
-  let selectedMode = "auto";
-  let selectedColor = null;
-  let selectedNumber = null;
-  let selectedSize = null;
-  let selectedDuration = 30;
-
   function getDemoState() {
     try {
-      return JSON.parse(localStorage.getItem("nplus_admin_demo_controls") || "{}");
+      return JSON.parse(
+        localStorage.getItem("nplus_admin_demo_controls") || "{}"
+      );
     } catch {
       return {};
     }
@@ -1270,13 +1344,14 @@ button{
         game.key === "WINGO"
           ? (item.durations?.[30] || {})
           : item;
+
       const mode = durationState.mode || "AUTO";
       const result = durationState.result || "—";
 
       return `
         <article class="game-box">
           <div class="game-icon">${game.icon}</div>
-          <h4>${game.name}</h4>
+          <h4>${escapeHTML(game.name)}</h4>
           <div class="game-status">● DEMO ACTIVE</div>
 
           <div class="game-mini">
@@ -1284,13 +1359,14 @@ button{
               <span>MODE</span>
               <strong>${escapeHTML(mode)}</strong>
             </div>
+
             <div>
               <span>LAST RESULT</span>
               <strong>${escapeHTML(result)}</strong>
             </div>
           </div>
 
-          <button class="open-game" data-game="${game.key}">
+          <button class="open-game" data-game="${escapeHTML(game.key)}">
             OPEN GAME CONTROL →
           </button>
         </article>
@@ -1298,99 +1374,79 @@ button{
     }).join("");
 
     document.querySelectorAll("[data-game]").forEach(btn => {
-      btn.addEventListener("click", () => openGame(btn.dataset.game));
+      btn.addEventListener("click", () => {
+        openGame(btn.dataset.game);
+      });
     });
   }
 
-  function openGame(key) {
-    selectedGame = DEMO_GAMES.find(g => g.key === key);
-    if (!selectedGame) return;
+  function wingoDurationLabel(sec) {
+    return sec === 30
+      ? "30 SEC"
+      : sec === 60
+      ? "1 MIN"
+      : sec === 180
+      ? "3 MIN"
+      : "5 MIN";
+  }
 
-    const rootState = getDemoState();
-    const state = rootState[key] || {};
+  function wingoPeriodInfo(sec, now = Date.now()) {
+    const start =
+      Math.floor(now / (sec * 1000)) *
+      sec *
+      1000;
 
-    selectedDuration =
-      key === "WINGO"
-        ? Number(state.durations?.[30]?.duration || 30)
-        : 30;
+    const next = start + sec * 1000;
 
-    selectedMode = String(
-      key === "WINGO"
-        ? (state.durations?.[selectedDuration]?.mode || "AUTO")
-        : (state.mode || "AUTO")
-    ).toLowerCase();
+    function periodAt(ts) {
+      const d = new Date(ts);
+      const idx = Math.floor(ts / (sec * 1000));
 
-    const selectedState =
-      key === "WINGO"
-        ? (state.durations?.[selectedDuration] || {})
-        : state;
+      const code = {
+        30:"1000",
+        60:"2000",
+        180:"3000",
+        300:"4000"
+      }[sec];
 
-    selectedColor = selectedState.color || null;
-    selectedNumber =
-      selectedState.number === undefined || selectedState.number === null ? null : String(selectedState.number);
-    selectedSize = selectedState.size || null;
+      const date =
+        d.getFullYear() +
+        String(d.getMonth() + 1).padStart(2,"0") +
+        String(d.getDate()).padStart(2,"0");
 
-    $("detailGameName").textContent =
-      selectedGame.name + " — DEMO CONTROL";
+      return (
+        date +
+        code +
+        String(idx % 100000).padStart(5,"0")
+      );
+    }
 
-    $("detailPeriod").textContent =
-      "Demo period " + new Date().toLocaleString("en-IN");
-
-    $("gameDetail").classList.add("show");
-
-    syncDemoControls();
-    $("wingoAnalytics").style.display =
-      selectedGame.key === "WINGO" ? "block" : "none";
-    if (selectedGame.key === "WINGO") loadWingoAnalytics();
-
-    $("gameDetail").scrollIntoView({
-      behavior:"smooth",
-      block:"start"
-    });
+    return {
+      current: periodAt(start),
+      next: periodAt(next),
+      remaining: Math.max(
+        0,
+        Math.ceil((next - now) / 1000)
+      )
+    };
   }
 
   function syncDemoControls() {
     const durationBox = $("wingoDuration");
 
-    if (durationBox) {
-      durationBox.classList.toggle(
-        "show",
-        selectedGame?.key === "WINGO"
-      );
-
-      document.querySelectorAll(".duration-btn").forEach(btn => {
-        btn.classList.toggle(
-          "active",
-          Number(btn.dataset.duration) === selectedDuration
-        );
-      });
-    }
+    durationBox.classList.toggle(
+      "show",
+      selectedGame?.key === "WINGO"
+    );
 
     document.querySelectorAll(".duration-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (selectedGame?.key !== "WINGO") return;
-
-      selectedDuration = Number(btn.dataset.duration);
-
-      const saved =
-        getDemoState().WINGO?.durations?.[selectedDuration] || {};
-
-      selectedMode = String(saved.mode || "AUTO").toLowerCase();
-      selectedColor = saved.color || null;
-      selectedNumber =
-        saved.number === undefined || saved.number === null ? null : String(saved.number);
-      selectedSize = saved.size || null;
-
-      syncDemoControls();
-      if (selectedGame?.key === "WINGO") loadWingoAnalytics();
-      showStatus(
-        `${selectedDuration === 30 ? "30 SEC" : selectedDuration === 60 ? "1 MIN" : selectedDuration === 180 ? "3 MIN" : "5 MIN"} selected.`,
-        "ok"
+      btn.classList.toggle(
+        "active",
+        Number(btn.dataset.duration) === selectedDuration
       );
     });
-  });
 
-  document.querySelectorAll(".mode-btn").forEach(btn => {
+    document.querySelectorAll(".mode-btn").forEach(btn => {
       btn.classList.toggle(
         "active",
         btn.dataset.mode === selectedMode
@@ -1398,7 +1454,9 @@ button{
     });
 
     $("manualPanel").style.display =
-      selectedMode === "manual" ? "block" : "none";
+      selectedMode === "manual"
+        ? "block"
+        : "none";
 
     document.querySelectorAll("[data-color]").forEach(btn => {
       btn.classList.toggle(
@@ -1415,11 +1473,15 @@ button{
     });
 
     document.querySelectorAll("[data-size]").forEach(btn => {
-      btn.classList.toggle("selected", btn.dataset.size === selectedSize);
+      btn.classList.toggle(
+        "selected",
+        btn.dataset.size === selectedSize
+      );
     });
 
     const rootState = getDemoState();
     const gameState = rootState[selectedGame?.key] || {};
+
     const result =
       selectedGame?.key === "WINGO"
         ? gameState.durations?.[selectedDuration]?.result
@@ -1440,6 +1502,82 @@ button{
     }
   }
 
+  function openGame(key) {
+    selectedGame = DEMO_GAMES.find(
+      game => game.key === key
+    );
+
+    if (!selectedGame) return;
+
+    const rootState = getDemoState();
+    const state = rootState[key] || {};
+
+    selectedDuration =
+      key === "WINGO"
+        ? Number(
+            state.durations?.[30]?.duration || 30
+          )
+        : 30;
+
+    selectedMode =
+      String(
+        key === "WINGO"
+          ? (
+              state.durations?.[
+                selectedDuration
+              ]?.mode || "AUTO"
+            )
+          : (state.mode || "AUTO")
+      ).toLowerCase();
+
+    const selectedState =
+      key === "WINGO"
+        ? (
+            state.durations?.[
+              selectedDuration
+            ] || {}
+          )
+        : state;
+
+    selectedColor =
+      selectedState.color || null;
+
+    selectedNumber =
+      selectedState.number === undefined ||
+      selectedState.number === null
+        ? null
+        : String(selectedState.number);
+
+    selectedSize =
+      selectedState.size || null;
+
+    $("detailGameName").textContent =
+      selectedGame.name +
+      " — DEMO CONTROL";
+
+    $("detailPeriod").textContent =
+      "Demo period " +
+      new Date().toLocaleString("en-IN");
+
+    $("gameDetail").classList.add("show");
+
+    syncDemoControls();
+
+    $("wingoAnalytics").style.display =
+      selectedGame.key === "WINGO"
+        ? "block"
+        : "none";
+
+    if (selectedGame.key === "WINGO") {
+      loadWingoAnalytics();
+    }
+
+    $("gameDetail").scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+  }
+
   function generateDemoResult() {
     if (!selectedGame) return;
 
@@ -1451,6 +1589,12 @@ button{
       ) {
         $("demoResultText").textContent =
           "SELECT COLOR / NUMBER / SIZE";
+
+        showStatus(
+          "Select Color + Number + Size first.",
+          "err"
+        );
+
         return;
       }
 
@@ -1461,15 +1605,33 @@ button{
         "Demo result generated successfully.",
         "ok"
       );
+
       return;
     }
 
-    const number = Math.floor(Math.random() * 10);
-    const colors = ["GREEN","VIOLET","RED"];
-    const color = colors[Math.floor(Math.random() * colors.length)];
+    const number =
+      Math.floor(Math.random() * 10);
+
+    const colors = [
+      "GREEN",
+      "VIOLET",
+      "RED"
+    ];
+
+    const color =
+      colors[
+        Math.floor(
+          Math.random() * colors.length
+        )
+      ];
+
+    const size =
+      number >= 5
+        ? "BIG"
+        : "SMALL";
 
     $("demoResultText").textContent =
-      `${color} ${number}`;
+      `${color} ${number} · ${size}`;
 
     showStatus(
       "Demo result generated successfully.",
@@ -1482,587 +1644,995 @@ button{
 
     const state = getDemoState();
 
-    let result = $("demoResultText").textContent;
+    let result =
+      $("demoResultText").textContent;
 
     if (selectedMode === "manual") {
-      if (selectedNumber === null) {
-        showStatus("Please select a number first.", "err");
+      if (
+        !selectedColor ||
+        selectedNumber === null ||
+        !selectedSize
+      ) {
+        showStatus(
+          "Select Color + Number + Size first.",
+          "err"
+        );
         return;
       }
 
-      result = `${selectedColor || "—"} ${selectedNumber} · ${selectedSize || "—"}`;
+      result =
+        `${selectedColor} ${selectedNumber} · ${selectedSize}`;
     }
 
     if (selectedGame.key === "WINGO") {
       try {
-        const info = wingoPeriodInfo(selectedDuration);
-        const targetPeriod = info.current;
+        const info =
+          wingoPeriodInfo(
+            selectedDuration
+          );
+
+        const targetPeriod =
+          info.current;
 
         if (selectedMode === "manual") {
-          if (
-            !selectedColor ||
-            selectedNumber === null ||
-            !selectedSize
-          ) {
-            showStatus(
-              "Select Color + Number + Size first.",
-              "err"
-            );
-            return;
-          }
-
-          const { data, error } = await supabase.rpc(
+          const {
+            data,
+            error
+          } = await supabase.rpc(
             "nplus_admin_save_wingo_manual",
             {
-              p_duration: selectedDuration,
-              p_period: targetPeriod,
-              p_color: selectedColor,
-              p_number: Number(selectedNumber),
-              p_size: selectedSize
+              p_duration:
+                selectedDuration,
+              p_period:
+                targetPeriod,
+              p_color:
+                selectedColor,
+              p_number:
+                Number(selectedNumber),
+              p_size:
+                selectedSize
             }
           );
 
           if (error) {
-            console.error("WINGO manual save error:", error);
+            console.error(
+              "WINGO manual save error:",
+              error
+            );
+
             showStatus(
-              error.message || "Unable to save manual WINGO result.",
+              error.message ||
+              "Unable to save manual WINGO result.",
               "err"
             );
+
             return;
           }
 
-          const gameState = state.WINGO || {};
-          gameState.durations = gameState.durations || {};
-          gameState.durations[selectedDuration] = {
-            duration: selectedDuration,
-            mode: "MANUAL",
-            color: data?.color || selectedColor,
-            number: data?.number ?? Number(selectedNumber),
-            size: data?.size || selectedSize,
+          const gameState =
+            state.WINGO || {};
+
+          gameState.durations =
+            gameState.durations || {};
+
+          gameState.durations[
+            selectedDuration
+          ] = {
+            duration:
+              selectedDuration,
+            mode:"MANUAL",
+            color:
+              data?.color ||
+              selectedColor,
+            number:
+              data?.number ??
+              Number(selectedNumber),
+            size:
+              data?.size ||
+              selectedSize,
             result:
-              `${data?.color || selectedColor} ${data?.number ?? Number(selectedNumber)} · ${data?.size || selectedSize}`,
-            period: targetPeriod,
-            updated_at: new Date().toISOString()
+              `${data?.color || selectedColor} ${
+                data?.number ??
+                Number(selectedNumber)
+              } · ${
+                data?.size ||
+                selectedSize
+              }`,
+            period:
+              targetPeriod,
+            updated_at:
+              new Date().toISOString()
           };
 
-          state.WINGO = gameState;
+          state.WINGO =
+            gameState;
+
           saveDemoState(state);
           renderGameCards();
 
           showStatus(
-            `MANUAL active for ${targetPeriod}: ${data?.color || selectedColor} ${data?.number ?? Number(selectedNumber)} · ${data?.size || selectedSize}`,
+            `MANUAL active for ${targetPeriod}: ${
+              data?.color ||
+              selectedColor
+            } ${
+              data?.number ??
+              Number(selectedNumber)
+            } · ${
+              data?.size ||
+              selectedSize
+            }`,
             "ok"
           );
 
-          loadWingoAnalytics();
+          await loadWingoAnalytics();
           return;
         }
 
-        // AUTO / RANDOM: remove the MANUAL result for the current round
-        // so an old manual setting cannot override the new mode.
-        const currentInfo = wingoPeriodInfo(selectedDuration);
-        const { error: clearError } = await supabase.rpc(
+        const {
+          error: clearError
+        } = await supabase.rpc(
           "nplus_admin_clear_wingo_manual",
           {
-            p_duration: selectedDuration,
-            p_period: currentInfo.current
+            p_duration:
+              selectedDuration,
+            p_period:
+              targetPeriod
           }
         );
 
-        if (clearError) {
-          console.error("WINGO manual clear error:", clearError);
+        if (
+          clearError &&
+          !/not exist|does not exist/i.test(
+            clearError.message || ""
+          )
+        ) {
+          console.error(
+            "WINGO manual clear error:",
+            clearError
+          );
+
           showStatus(
-            clearError.message || "Unable to clear manual WINGO result.",
+            clearError.message ||
+            "Unable to clear manual WINGO result.",
             "err"
           );
+
           return;
         }
 
-        // AUTO / RANDOM continue to use the duration-level demo mode.
-        const { data, error } = await supabase.rpc(
+        const {
+          data,
+          error
+        } = await supabase.rpc(
           "nplus_admin_set_wingo_demo",
           {
-            p_duration: selectedDuration,
-            p_mode: selectedMode.toUpperCase(),
-            p_color: selectedColor,
+            p_duration:
+              selectedDuration,
+            p_mode:
+              selectedMode.toUpperCase(),
+            p_color:
+              selectedColor,
             p_number:
               selectedNumber === null
                 ? null
                 : Number(selectedNumber),
-            p_size: selectedSize
+            p_size:
+              selectedSize
           }
         );
 
         if (error) {
-          console.error("WINGO save error:", error);
+          console.error(
+            "WINGO save error:",
+            error
+          );
+
           showStatus(
-            error.message || "Unable to save WINGO setting.",
+            error.message ||
+            "Unable to save WINGO setting.",
             "err"
           );
+
           return;
         }
 
-        const gameState = state.WINGO || {};
-        gameState.durations = gameState.durations || {};
-        gameState.durations[selectedDuration] = {
-          duration: selectedDuration,
-          mode: selectedMode.toUpperCase(),
-          color: data?.color || selectedColor,
-          number: data?.number ?? selectedNumber,
-          size: data?.size || selectedSize,
-          result: data?.result || result,
-          updated_at: new Date().toISOString()
+        const gameState =
+          state.WINGO || {};
+
+        gameState.durations =
+          gameState.durations || {};
+
+        gameState.durations[
+          selectedDuration
+        ] = {
+          duration:
+            selectedDuration,
+          mode:
+            selectedMode.toUpperCase(),
+          color:
+            data?.color ||
+            selectedColor,
+          number:
+            data?.number ??
+            selectedNumber,
+          size:
+            data?.size ||
+            selectedSize,
+          result:
+            data?.result ||
+            result,
+          updated_at:
+            new Date().toISOString()
         };
 
-        state.WINGO = gameState;
+        state.WINGO =
+          gameState;
+
         saveDemoState(state);
         renderGameCards();
 
         showStatus(
-          `WINGO ${selectedDuration === 30 ? "30 SEC" : selectedDuration === 60 ? "1 MIN" : selectedDuration === 180 ? "3 MIN" : "5 MIN"} saved successfully.`,
+          `WINGO ${
+            wingoDurationLabel(
+              selectedDuration
+            )
+          } saved successfully.`,
           "ok"
         );
 
-        loadWingoAnalytics();
+        await loadWingoAnalytics();
       } catch (err) {
         console.error(err);
+
         showStatus(
-          err.message || "Unable to save WINGO setting.",
+          err.message ||
+          "Unable to save WINGO setting.",
           "err"
         );
       }
+
       return;
     }
 
     state[selectedGame.key] = {
-      mode: selectedMode.toUpperCase(),
-      color: selectedColor,
-      number: selectedNumber,
-      result,
-      updated_at: new Date().toISOString()
+      mode:
+        selectedMode.toUpperCase(),
+      color:
+        selectedColor,
+      number:
+        selectedNumber,
+      result:
+        result,
+      updated_at:
+        new Date().toISOString()
     };
 
     saveDemoState(state);
     renderGameCards();
-    showStatus(selectedGame.name + " demo setting saved successfully.", "ok");
+
+    showStatus(
+      selectedGame.name +
+      " demo setting saved successfully.",
+      "ok"
+    );
   }
 
-  document.querySelectorAll(".mode-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      selectedMode = btn.dataset.mode;
-      syncDemoControls();
+  document.querySelectorAll(".mode-btn")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          selectedMode =
+            btn.dataset.mode;
+
+          syncDemoControls();
+        }
+      );
     });
-  });
 
-  document.querySelectorAll("[data-color]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      selectedColor = btn.dataset.color;
-      syncDemoControls();
+  document.querySelectorAll(".duration-btn")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          if (
+            selectedGame?.key !== "WINGO"
+          ) {
+            return;
+          }
+
+          selectedDuration =
+            Number(
+              btn.dataset.duration
+            );
+
+          const saved =
+            getDemoState()
+              .WINGO
+              ?.durations
+              ?.[
+                selectedDuration
+              ] || {};
+
+          selectedMode =
+            String(
+              saved.mode ||
+              "AUTO"
+            ).toLowerCase();
+
+          selectedColor =
+            saved.color || null;
+
+          selectedNumber =
+            saved.number === undefined ||
+            saved.number === null
+              ? null
+              : String(
+                  saved.number
+                );
+
+          selectedSize =
+            saved.size || null;
+
+          syncDemoControls();
+
+          loadWingoAnalytics();
+
+          showStatus(
+            `${wingoDurationLabel(
+              selectedDuration
+            )} selected.`,
+            "ok"
+          );
+        }
+      );
     });
-  });
 
-  document.querySelectorAll("[data-number]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      selectedNumber = btn.dataset.number;
-      syncDemoControls();
+  document.querySelectorAll("[data-color]")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          selectedColor =
+            btn.dataset.color;
+
+          syncDemoControls();
+        }
+      );
     });
-  });
 
-  document.querySelectorAll("[data-size]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      selectedSize = btn.dataset.size;
-      syncDemoControls();
+  document.querySelectorAll("[data-number]")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          selectedNumber =
+            btn.dataset.number;
+
+          syncDemoControls();
+        }
+      );
     });
-  });
 
-  $("generateDemoBtn").addEventListener(
-    "click",
-    generateDemoResult
-  );
+  document.querySelectorAll("[data-size]")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          selectedSize =
+            btn.dataset.size;
 
-  $("saveDemoBtn").addEventListener(
-    "click",
-    saveDemoSetting
-  );
+          syncDemoControls();
+        }
+      );
+    });
 
-  $("closeGameBtn").addEventListener("click", () => {
-    $("gameDetail").classList.remove("show");
-    $("wingoAnalytics").style.display = "none";
-    selectedGame = null;
-  });
-
-  renderGameCards();
-
-
-  function wingoPeriodInfo(sec = 30, now = Date.now()) {
-    const start = Math.floor(now / (sec * 1000)) * sec * 1000;
-    const next = start + sec * 1000;
-
-    function periodAt(ts) {
-      const d = new Date(ts);
-      const idx = Math.floor(ts / (sec * 1000));
-      const code = {
-        30:"1000",
-        60:"2000",
-        180:"3000",
-        300:"4000"
-      }[sec];
-
-      const date =
-        d.getFullYear() +
-        String(d.getMonth()+1).padStart(2,"0") +
-        String(d.getDate()).padStart(2,"0");
-
-      return date + code +
-        String(idx % 100000).padStart(5,"0");
-    }
-
-    return {
-      current: periodAt(start),
-      next: periodAt(next),
-      remaining: Math.max(0, Math.ceil((next - now) / 1000))
-    };
-  }
-
-  function parseWingoBetNote(note) {
-    const text = String(note || "");
-    const match = text.match(
-      /^WINGO BET\\s+(\\S+)\\s+(\\S+)\\s+type=([^\\s]+)\\s+value=([^\\s]+)\\s+qty=(\\d+)\\s+multi=(\\d+)$/i
+  $("generateDemoBtn")
+    .addEventListener(
+      "click",
+      generateDemoResult
     );
 
-    if (!match) {
-      return {
-        period: text.split(/\s+/)[2] || "—",
-        selection: "Legacy bet"
-      };
-    }
+  $("saveDemoBtn")
+    .addEventListener(
+      "click",
+      saveDemoSetting
+    );
 
-    return {
-      period: match[1],
-      selection: `${match[3]} ${match[4]}`
-    };
+  $("closeGameBtn")
+    .addEventListener(
+      "click",
+      () => {
+        $("gameDetail")
+          .classList
+          .remove("show");
+
+        $("wingoAnalytics")
+          .style
+          .display = "none";
+
+        selectedGame = null;
+      }
+    );
+
+  $("wingoAnalyticsRefresh")
+    ?.addEventListener(
+      "click",
+      loadWingoAnalytics
+    );
+
+  function renderWingoBreakdown(
+    containerId,
+    rows,
+    labels
+  ) {
+    const el =
+      $(containerId);
+
+    el.innerHTML =
+      labels.map(label => {
+        const x =
+          rows[label] ||
+          {
+            count:0,
+            amount:0
+          };
+
+        return `
+          <div class="wa-line">
+            <span>${escapeHTML(label)}</span>
+            <b>
+              ${Number(x.count || 0)}
+              ·
+              ${money(x.amount)}
+            </b>
+          </div>
+        `;
+      }).join("");
   }
 
-
-  function wingoPeriodInfo(sec, now = Date.now()) {
-    const start = Math.floor(now / (sec * 1000)) * sec * 1000;
-    const next = start + sec * 1000;
-    const d = new Date(start);
-    const idx = Math.floor(start / (sec * 1000));
-    const code = ({30:"1000",60:"2000",180:"3000",300:"4000"})[sec];
-    const date =
-      d.getFullYear() +
-      String(d.getMonth()+1).padStart(2,"0") +
-      String(d.getDate()).padStart(2,"0");
-
-    const periodAt = ts => {
-      const dd = new Date(ts);
-      const ii = Math.floor(ts / (sec * 1000));
-      const dt =
-        dd.getFullYear() +
-        String(dd.getMonth()+1).padStart(2,"0") +
-        String(dd.getDate()).padStart(2,"0");
-      return dt + code + String(ii % 100000).padStart(5,"0");
-    };
-
-    return {
-      current: periodAt(start),
-      next: periodAt(next),
-      remaining: Math.max(0, Math.ceil((next-now)/1000))
-    };
-  }
-
-  function renderWingoBreakdown(containerId, rows, labels) {
-    const el = $(containerId);
-    el.innerHTML = labels.map(label => {
-      const x = rows[label] || {count:0, amount:0};
-      return `<div class="wa-line">
-        <span>${escapeHTML(label)}</span>
-        <b>${x.count} · ${money(x.amount)}</b>
-      </div>`;
-    }).join("");
-  }
-
-  async function getSavedManualWingoResult(period, sec) {
+  async function getSavedManualWingoResult(
+    period,
+    sec
+  ) {
     try {
-      const { data, error } = await supabase
+      const {
+        data,
+        error
+      } = await supabase
         .from("wingo_manual_results")
-        .select("period,color,number,size,mode")
-        .eq("duration_seconds", sec)
-        .eq("period", period)
-        .eq("mode", "MANUAL")
+        .select(
+          "period,color,number,size,mode"
+        )
+        .eq(
+          "duration_seconds",
+          sec
+        )
+        .eq(
+          "period",
+          period
+        )
+        .eq(
+          "mode",
+          "MANUAL"
+        )
         .maybeSingle();
 
-      if (error || !data) return null;
+      if (
+        error ||
+        !data
+      ) {
+        return null;
+      }
 
       return {
-        period: data.period,
-        color: String(data.color || "").toUpperCase(),
-        number: Number(data.number),
-        size: String(data.size || "").toUpperCase()
+        period:data.period,
+        color:String(
+          data.color || ""
+        ).toUpperCase(),
+        number:Number(
+          data.number
+        ),
+        size:String(
+          data.size || ""
+        ).toUpperCase()
       };
     } catch {
       return null;
     }
   }
 
+  function pickLowestStake(
+    rows,
+    labels
+  ) {
+    const values =
+      labels.map(label => {
+        const x =
+          rows?.[label] ||
+          {
+            count:0,
+            amount:0
+          };
 
-
-  function pickLowestStake(rows, labels) {
-    const values = labels.map(label => {
-      const x = rows?.[label] || {count:0, amount:0};
-      return {
-        label,
-        count: Number(x.count || 0),
-        amount: Number(x.amount || 0)
-      };
-    });
+        return {
+          label,
+          count:Number(
+            x.count || 0
+          ),
+          amount:Number(
+            x.amount || 0
+          )
+        };
+      });
 
     values.sort((a,b) => {
-      if (a.amount !== b.amount) return a.amount - b.amount;
-      if (a.count !== b.count) return a.count - b.count;
-      return labels.indexOf(a.label) - labels.indexOf(b.label);
+      if (
+        a.amount !==
+        b.amount
+      ) {
+        return (
+          a.amount -
+          b.amount
+        );
+      }
+
+      if (
+        a.count !==
+        b.count
+      ) {
+        return (
+          a.count -
+          b.count
+        );
+      }
+
+      return (
+        labels.indexOf(a.label) -
+        labels.indexOf(b.label)
+      );
     });
 
-    return values[0] || {label:"—",count:0,amount:0};
+    return (
+      values[0] ||
+      {
+        label:"—",
+        count:0,
+        amount:0
+      }
+    );
   }
 
   function autoDemoHash(text) {
     let h = 2166136261;
-    for (let i = 0; i < String(text).length; i++) {
-      h ^= String(text).charCodeAt(i);
-      h = Math.imul(h, 16777619);
+
+    const str =
+      String(text);
+
+    for (
+      let i = 0;
+      i < str.length;
+      i++
+    ) {
+      h ^=
+        str.charCodeAt(i);
+
+      h =
+        Math.imul(
+          h,
+          16777619
+        );
     }
-    return (h >>> 0);
+
+    return (
+      h >>> 0
+    );
   }
 
-  function independentAutoDemoResult(period) {
-    const h = autoDemoHash(period);
-    const number = h % 10;
+  function independentAutoDemoResult(
+    period
+  ) {
+    const h =
+      autoDemoHash(
+        period
+      );
+
+    const number =
+      h % 10;
 
     let color = "GREEN";
-    if (number === 0 || number === 5) {
-      color = (h % 2 === 0) ? "VIOLET" : "GREEN";
-    } else if ([2,4,6,8].includes(number)) {
+
+    if (
+      number === 0 ||
+      number === 5
+    ) {
+      color =
+        h % 2 === 0
+          ? "VIOLET"
+          : "GREEN";
+    } else if (
+      [2,4,6,8]
+      .includes(number)
+    ) {
       color = "RED";
     } else {
       color = "GREEN";
     }
 
-    const size = number >= 5 ? "BIG" : "SMALL";
+    const size =
+      number >= 5
+        ? "BIG"
+        : "SMALL";
 
-    return { color, number, size };
+    return {
+      color,
+      number,
+      size
+    };
   }
 
-  function renderAutoDemoInsight(summary, period) {
-    const color = pickLowestStake(
-      summary.colors || {},
-      ["Green","Violet","Red"]
-    );
-    const number = pickLowestStake(
-      summary.numbers || {},
-      ["0","1","2","3","4","5","6","7","8","9"]
-    );
-    const size = pickLowestStake(
-      summary.sizes || {},
-      ["Big","Small"]
-    );
+  function renderAutoDemoInsight(
+    summary,
+    period
+  ) {
+    const color =
+      pickLowestStake(
+        summary.colors || {},
+        [
+          "Green",
+          "Violet",
+          "Red"
+        ]
+      );
 
-    $("autoInsightPeriod").textContent = `LIVE · ${period}`;
-    $("autoLowestColor").textContent = `${color.label} · ${money(color.amount)}`;
-    $("autoLowestNumber").textContent = `${number.label} · ${money(number.amount)}`;
-    $("autoLowestSize").textContent = `${size.label} · ${money(size.amount)}`;
+    const number =
+      pickLowestStake(
+        summary.numbers || {},
+        [
+          "0","1","2","3","4",
+          "5","6","7","8","9"
+        ]
+      );
 
-    const result = independentAutoDemoResult(period);
-    $("autoInsightResult").textContent =
+    const size =
+      pickLowestStake(
+        summary.sizes || {},
+        [
+          "Big",
+          "Small"
+        ]
+      );
+
+    $("autoInsightPeriod")
+      .textContent =
+      `LIVE · ${period}`;
+
+    $("autoLowestColor")
+      .textContent =
+      `${color.label} · ${money(color.amount)}`;
+
+    $("autoLowestNumber")
+      .textContent =
+      `${number.label} · ${money(number.amount)}`;
+
+    $("autoLowestSize")
+      .textContent =
+      `${size.label} · ${money(size.amount)}`;
+
+    const result =
+      independentAutoDemoResult(
+        period
+      );
+
+    $("autoInsightResult")
+      .textContent =
       `${result.color} ${result.number} · ${result.size}`;
   }
 
   async function loadWingoAnalytics() {
-    if (selectedGame?.key !== "WINGO") return;
-
-    const sec = selectedDuration || 30;
-    const info = wingoPeriodInfo(sec);
-
-    $("wingoAnalytics").style.display = "block";
-    $("waDuration").textContent =
-      sec === 30 ? "30 SEC" :
-      sec === 60 ? "1 MIN" :
-      sec === 180 ? "3 MIN" : "5 MIN";
-
-    $("waCurrentPeriod").textContent = info.current;
-    $("waNextPeriod").textContent = info.next;
-    $("waTimeLeft").textContent = `${info.remaining}s`;
-    const savedManualCurrent = await getSavedManualWingoResult(info.current, sec);
-    if (savedManualCurrent) {
-      $("waNextSummary").textContent =
-        `MANUAL RESULT — ${info.current} · ${savedManualCurrent.color} ${savedManualCurrent.number} · ${savedManualCurrent.size}`;
-    } else {
-      $("waNextSummary").textContent = `AUTO RESULT — ${info.current}`;
-    }
-
-    const { data, error } = await supabase.rpc(
-      "nplus_admin_wingo_round_summary",
-      { p_period: info.current }
-    );
-
-    if (error) {
-      console.error("WINGO analytics error:", error);
-      $("waBets").innerHTML =
-        `<tr><td colspan="8" class="empty">${escapeHTML(error.message)}</td></tr>`;
+    if (
+      selectedGame?.key !== "WINGO"
+    ) {
       return;
     }
 
-    const summary = data || {};
-    const bets = Array.isArray(summary.bets) ? summary.bets : [];
+    const sec =
+      selectedDuration || 30;
 
-    $("waBetCount").textContent = Number(summary.bet_count || 0).toLocaleString("en-IN");
-    $("waStake").textContent = money(summary.total_stake || 0);
+    const info =
+      wingoPeriodInfo(sec);
 
-    renderAutoDemoInsight(summary, info.current);
+    $("wingoAnalytics")
+      .style
+      .display = "block";
+
+    $("waDuration")
+      .textContent =
+      wingoDurationLabel(sec);
+
+    $("waCurrentPeriod")
+      .textContent =
+      info.current;
+
+    $("waNextPeriod")
+      .textContent =
+      info.next;
+
+    $("waTimeLeft")
+      .textContent =
+      `${info.remaining}s`;
+
+    const savedManualCurrent =
+      await getSavedManualWingoResult(
+        info.current,
+        sec
+      );
+
+    if (savedManualCurrent) {
+      $("waNextSummary")
+        .textContent =
+        `MANUAL RESULT — ${info.current} · ${
+          savedManualCurrent.color
+        } ${
+          savedManualCurrent.number
+        } · ${
+          savedManualCurrent.size
+        }`;
+    } else {
+      $("waNextSummary")
+        .textContent =
+        `AUTO RESULT — ${info.current}`;
+    }
+
+    const {
+      data,
+      error
+    } = await supabase.rpc(
+      "nplus_admin_wingo_round_summary",
+      {
+        p_period:
+          info.current
+      }
+    );
+
+    if (error) {
+      console.error(
+        "WINGO analytics error:",
+        error
+      );
+
+      $("waBets")
+        .innerHTML =
+        `<tr>
+          <td colspan="8" class="empty">
+            ${escapeHTML(
+              error.message
+            )}
+          </td>
+        </tr>`;
+
+      renderAutoDemoInsight(
+        {
+          colors:{},
+          numbers:{},
+          sizes:{}
+        },
+        info.current
+      );
+
+      return;
+    }
+
+    const summary =
+      data || {};
+
+    const bets =
+      Array.isArray(
+        summary.bets
+      )
+        ? summary.bets
+        : [];
+
+    $("waBetCount")
+      .textContent =
+      Number(
+        summary.bet_count || 0
+      ).toLocaleString(
+        "en-IN"
+      );
+
+    $("waStake")
+      .textContent =
+      money(
+        summary.total_stake
+      );
+
+    renderAutoDemoInsight(
+      summary,
+      info.current
+    );
 
     renderWingoBreakdown(
       "waColors",
       summary.colors || {},
-      ["Green","Violet","Red"]
+      [
+        "Green",
+        "Violet",
+        "Red"
+      ]
     );
 
     renderWingoBreakdown(
       "waNumbers",
       summary.numbers || {},
-      ["0","1","2","3","4","5","6","7","8","9"]
+      [
+        "0","1","2","3","4",
+        "5","6","7","8","9"
+      ]
     );
 
     renderWingoBreakdown(
       "waSizes",
       summary.sizes || {},
-      ["Big","Small"]
+      [
+        "Big",
+        "Small"
+      ]
     );
 
     if (!bets.length) {
-      $("waBets").innerHTML =
-        `<tr><td colspan="8" class="empty">No confirmed bets for ${escapeHTML(info.current)}.</td></tr>`;
+      $("waBets")
+        .innerHTML =
+        `<tr>
+          <td colspan="8" class="empty">
+            No confirmed bets for ${
+              escapeHTML(
+                info.current
+              )
+            }.
+          </td>
+        </tr>`;
+
       return;
     }
 
-    $("waBets").innerHTML = bets.map(row => `
-      <tr>
-        <td>${escapeHTML(row.display_name || "User")}</td>
-        <td>${escapeHTML(row.uid || "—")}</td>
-        <td>${escapeHTML(row.period || info.current)}</td>
-        <td>${escapeHTML(String(row.type || "").toUpperCase())} ${escapeHTML(row.value || "")}</td>
-        <td>${escapeHTML(row.qty || "1")}</td>
-        <td>X${escapeHTML(row.multi || "1")}</td>
-        <td>${money(row.stake || 0)}</td>
-        <td>${escapeHTML(new Date(row.created_at).toLocaleTimeString("en-IN"))}</td>
-      </tr>
-    `).join("");
+    $("waBets")
+      .innerHTML =
+      bets.map(row => `
+        <tr>
+          <td>${escapeHTML(
+            row.display_name ||
+            "User"
+          )}</td>
+          <td>${escapeHTML(
+            row.uid || "—"
+          )}</td>
+          <td>${escapeHTML(
+            row.period ||
+            info.current
+          )}</td>
+          <td>${escapeHTML(
+            String(
+              row.type || ""
+            ).toUpperCase()
+          )} ${escapeHTML(
+            row.value || ""
+          )}</td>
+          <td>${escapeHTML(
+            row.qty || "1"
+          )}</td>
+          <td>X${escapeHTML(
+            row.multi || "1"
+          )}</td>
+          <td>${money(
+            row.stake || 0
+          )}</td>
+          <td>${escapeHTML(
+            new Date(
+              row.created_at
+            ).toLocaleTimeString(
+              "en-IN"
+            )
+          )}</td>
+        </tr>
+      `).join("");
   }
-
-  setInterval(() => {
-    if (selectedGame?.key === "WINGO") loadWingoAnalytics();
-  }, 2000);
-
-  async function loadWingoLiveMonitor() {
-    const info = wingoPeriodInfo(30);
-
-    $("liveDuration").textContent = "30 SEC";
-    $("liveCurrentPeriod").textContent = info.current;
-    $("liveNextPeriod").textContent = info.next;
-    $("liveTimeLeft").textContent = `${info.remaining}s`;
-
-    const { data, error } = await supabase.rpc(
-      "nplus_admin_wingo_live_bets",
-      { p_period: info.current }
-    );
-
-    if (error) {
-      console.error("WINGO monitor error:", error);
-      $("wingoLiveBets").innerHTML =
-        `<tr><td colspan="6" class="empty">${escapeHTML(error.message)}</td></tr>`;
-      $("liveBetCount").textContent = "0";
-      $("liveBetAmount").textContent = money(0);
-      return;
-    }
-
-    const rows = Array.isArray(data) ? data : [];
-
-    $("liveBetCount").textContent =
-      rows.length.toLocaleString("en-IN");
-
-    $("liveBetAmount").textContent =
-      money(rows.reduce((sum, row) => sum + Number(row.stake || 0), 0));
-
-    if (!rows.length) {
-      $("wingoLiveBets").innerHTML =
-        `<tr><td colspan="6" class="empty">No confirmed bets for the current round.</td></tr>`;
-      return;
-    }
-
-    $("wingoLiveBets").innerHTML = rows.map(row => `
-      <tr>
-        <td>${escapeHTML(row.display_name || "User")}</td>
-        <td>${escapeHTML(row.uid || "—")}</td>
-        <td>${escapeHTML(row.period || info.current)}</td>
-        <td>${escapeHTML(row.selection || "—")}</td>
-        <td>${money(row.stake)}</td>
-        <td>${escapeHTML(new Date(row.created_at).toLocaleTimeString("en-IN"))}</td>
-      </tr>
-    `).join("");
-  }
-
-  setInterval(loadWingoLiveMonitor, 1000);
-  $("wingoMonitorRefresh")?.addEventListener(
-    "click",
-    loadWingoLiveMonitor
-  );
 
   async function loadCommission() {
-    const list = $("gameCommissionList");
-    list.innerHTML = '<div class="loading">Loading commission...</div>';
+    const list =
+      $("gameCommissionList");
 
-    const { data, error } = await supabase.rpc(
+    list.innerHTML =
+      '<div class="loading">Loading commission...</div>';
+
+    const {
+      data,
+      error
+    } = await supabase.rpc(
       "nplus_admin_commission_summary"
     );
 
     if (error) {
-      console.error("Commission error:", error);
+      console.error(
+        "Commission error:",
+        error
+      );
+
       list.innerHTML = `
         <div class="empty">
           Unable to load commission report.<br><br>
-          <small>${escapeHTML(error.message)}</small>
+          <small>${escapeHTML(
+            error.message
+          )}</small>
         </div>
       `;
+
       return;
     }
 
-    const report = data || {};
+    const report =
+      data || {};
 
-    $("totalBets").textContent =
-      Number(report.total_bets || 0).toLocaleString("en-IN");
+    $("totalBets")
+      .textContent =
+      Number(
+        report.total_bets || 0
+      ).toLocaleString(
+        "en-IN"
+      );
 
-    $("totalBetAmount").textContent =
-      money(report.total_bet_amount);
+    $("totalBetAmount")
+      .textContent =
+      money(
+        report.total_bet_amount
+      );
 
-    $("totalWins").textContent =
-      Number(report.total_wins || 0).toLocaleString("en-IN");
+    $("totalWins")
+      .textContent =
+      Number(
+        report.total_wins || 0
+      ).toLocaleString(
+        "en-IN"
+      );
 
-    $("totalWinningAmount").textContent =
-      money(report.total_winning_amount);
+    $("totalWinningAmount")
+      .textContent =
+      money(
+        report.total_winning_amount
+      );
 
-    $("todayCommission").textContent =
-      money(report.today_commission);
+    $("todayCommission")
+      .textContent =
+      money(
+        report.today_commission
+      );
 
-    $("allTimeCommission").textContent =
-      money(report.all_time_commission);
+    $("allTimeCommission")
+      .textContent =
+      money(
+        report.all_time_commission
+      );
 
-    $("todayBetAmount").textContent =
-      money(report.today_bet_amount);
+    $("todayBetAmount")
+      .textContent =
+      money(
+        report.today_bet_amount
+      );
 
-    $("commissionRate").textContent =
-      (Number(report.commission_rate || 0) * 100).toFixed(0) + "%";
+    $("commissionRate")
+      .textContent =
+      (
+        Number(
+          report.commission_rate || 0
+        ) * 100
+      ).toFixed(0) + "%";
 
-    const games = Array.isArray(report.games) ? report.games : [];
+    const games =
+      Array.isArray(
+        report.games
+      )
+        ? report.games
+        : [];
 
     if (!games.length) {
       list.innerHTML = `
@@ -2087,11 +2657,22 @@ button{
           <tbody>
             ${games.map(game => `
               <tr>
-                <td>${escapeHTML(game.game || "UNKNOWN")}</td>
-                <td>${Number(game.bets || 0).toLocaleString("en-IN")}</td>
-                <td>${money(game.bet_amount)}</td>
+                <td>${escapeHTML(
+                  game.game ||
+                  "UNKNOWN"
+                )}</td>
+                <td>${Number(
+                  game.bets || 0
+                ).toLocaleString(
+                  "en-IN"
+                )}</td>
+                <td>${money(
+                  game.bet_amount
+                )}</td>
                 <td style="color:var(--gold2);font-weight:900">
-                  ${money(game.commission)}
+                  ${money(
+                    game.commission
+                  )}
                 </td>
               </tr>
             `).join("")}
@@ -2102,89 +2683,120 @@ button{
   }
 
   async function loadRequests() {
-
-    $("requestList").innerHTML =
+    $("requestList")
+      .innerHTML =
       '<div class="loading">Loading requests...</div>';
 
-    const { data, error } =
-      await supabase
-        .from("deposit_requests")
-        .select("id,user_id,amount,status,created_at")
-        .eq("status","pending")
-        .order("created_at",{ascending:false});
+    const {
+      data,
+      error
+    } = await supabase
+      .from("deposit_requests")
+      .select(
+        "id,user_id,amount,status,created_at"
+      )
+      .eq(
+        "status",
+        "pending"
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      );
 
     if (error) {
       console.error(error);
 
-      $("requestList").innerHTML = `
-        <div class="empty">
-          Unable to load requests.<br><br>
-          <small>${escapeHTML(error.message)}</small>
-        </div>
-      `;
+      $("requestList")
+        .innerHTML = `
+          <div class="empty">
+            Unable to load requests.<br><br>
+            <small>${escapeHTML(
+              error.message
+            )}</small>
+          </div>
+        `;
 
       return;
     }
 
-    const requests = data || [];
+    const requests =
+      data || [];
 
-    $("pendingCount").textContent =
+    $("pendingCount")
+      .textContent =
       requests.length;
 
     const total =
       requests.reduce(
-        (sum,item) => sum + Number(item.amount || 0),
+        (sum,item) =>
+          sum +
+          Number(
+            item.amount || 0
+          ),
         0
       );
 
-    $("pendingAmount").textContent =
+    $("pendingAmount")
+      .textContent =
       money(total);
 
     if (!requests.length) {
-      $("requestList").innerHTML = `
-        <div class="empty">
-          <div style="font-size:30px">✓</div>
-          <div style="margin-top:8px">
-            No pending requests
+      $("requestList")
+        .innerHTML = `
+          <div class="empty">
+            <div style="font-size:30px">✓</div>
+            <div style="margin-top:8px">
+              No pending requests
+            </div>
           </div>
-        </div>
-      `;
+        `;
+
       return;
     }
 
-    /*
-      Load profile/wallet information for each request.
-      If current RLS does not allow admin profile reads,
-      the request still remains visible with the user UUID.
-    */
-
     const cards = [];
 
-    for (const request of requests) {
-
+    for (
+      const request of requests
+    ) {
       let profile = null;
       let wallet = null;
 
-      const profileResult =
-        await supabase
-          .from("profiles")
-          .select("display_name,uid,email")
-          .eq("id",request.user_id)
-          .maybeSingle();
+      const {
+        data:profileData,
+        error:profileError
+      } = await supabase
+        .from("profiles")
+        .select(
+          "display_name,uid,email"
+        )
+        .eq(
+          "id",
+          request.user_id
+        )
+        .maybeSingle();
 
-      if (!profileResult.error) {
-        profile = profileResult.data;
+      if (!profileError) {
+        profile =
+          profileData;
       }
 
-      const walletResult =
-        await supabase
-          .from("demo_wallets")
-          .select("balance")
-          .eq("user_id",request.user_id)
-          .maybeSingle();
+      const {
+        data:walletData,
+        error:walletError
+      } = await supabase
+        .from("demo_wallets")
+        .select("balance")
+        .eq(
+          "user_id",
+          request.user_id
+        )
+        .maybeSingle();
 
-      if (!walletResult.error) {
-        wallet = walletResult.data;
+      if (!walletError) {
+        wallet =
+          walletData;
       }
 
       const name =
@@ -2196,18 +2808,22 @@ button{
         request.user_id;
 
       const walletBalance =
-        wallet?.balance ?? "—";
+        wallet?.balance ??
+        "—";
 
       const created =
-        new Date(request.created_at)
-          .toLocaleString("en-IN",{
+        new Date(
+          request.created_at
+        ).toLocaleString(
+          "en-IN",
+          {
             dateStyle:"medium",
             timeStyle:"short"
-          });
+          }
+        );
 
       cards.push(`
         <article class="card">
-
           <div class="row">
 
             <div>
@@ -2223,32 +2839,39 @@ button{
             <div>
               <div class="label">REQUEST</div>
               <div class="amount">
-                ${money(request.amount)}
+                ${money(
+                  request.amount
+                )}
               </div>
             </div>
 
             <div>
               <div class="label">CURRENT WALLET</div>
               <div class="value">
-                ${money(walletBalance)}
+                ${money(
+                  walletBalance
+                )}
               </div>
             </div>
 
             <div>
               <div class="label">TIME</div>
               <div class="time">
-                ${escapeHTML(created)}
+                ${escapeHTML(
+                  created
+                )}
               </div>
             </div>
 
           </div>
 
           <div class="actions">
-
             <button
               class="accept"
               data-action="approve"
-              data-id="${request.id}"
+              data-id="${escapeHTML(
+                request.id
+              )}"
             >
               ✓ ACCEPT
             </button>
@@ -2256,69 +2879,92 @@ button{
             <button
               class="reject"
               data-action="reject"
-              data-id="${request.id}"
+              data-id="${escapeHTML(
+                request.id
+              )}"
             >
               ✕ REJECT
             </button>
-
           </div>
-
         </article>
       `);
     }
 
-    $("requestList").innerHTML =
+    $("requestList")
+      .innerHTML =
       cards.join("");
 
     document
-      .querySelectorAll("[data-action]")
+      .querySelectorAll(
+        "[data-action]"
+      )
       .forEach(button => {
+        button.addEventListener(
+          "click",
+          async () => {
+            const action =
+              button.dataset.action;
 
-        button.addEventListener("click", async () => {
+            const requestId =
+              button.dataset.id;
 
-          const action =
-            button.dataset.action;
+            button.disabled = true;
 
-          const requestId =
-            button.dataset.id;
-
-          button.disabled = true;
-
-          if (action === "approve") {
-            await approve(requestId);
-          } else {
-            await reject(requestId);
+            try {
+              if (
+                action === "approve"
+              ) {
+                await approve(
+                  requestId
+                );
+              } else {
+                await reject(
+                  requestId
+                );
+              }
+            } finally {
+              button.disabled =
+                false;
+            }
           }
-
-          button.disabled = false;
-        });
-
+        );
       });
   }
 
-  async function approve(requestId) {
-
+  async function approve(
+    requestId
+  ) {
     const confirmed =
       confirm(
         "Accept this virtual-credit deposit request?"
       );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
-    const { data, error } =
-      await supabase.rpc(
-        "nplus_approve_deposit",
-        {
-          p_request_id: requestId
-        }
-      );
+    const {
+      data,
+      error
+    } = await supabase.rpc(
+      "nplus_approve_deposit",
+      {
+        p_request_id:
+          requestId
+      }
+    );
 
     if (error) {
-      console.error(error);
+      console.error(
+        error
+      );
+
       showStatus(
-        error.message || "Approval failed.",
+        error.message ||
+        "Approval failed.",
         "err"
       );
+
       return;
     }
 
@@ -2327,34 +2973,52 @@ button{
       "ok"
     );
 
-    console.log("Approval result:",data);
+    console.log(
+      "Approval result:",
+      data
+    );
 
-    await loadRequests();
+    await Promise.all([
+      loadRequests(),
+      loadDepositReport(),
+      loadCommission()
+    ]);
   }
 
-  async function reject(requestId) {
-
+  async function reject(
+    requestId
+  ) {
     const confirmed =
       confirm(
         "Reject this virtual-credit deposit request?"
       );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
-    const { data, error } =
-      await supabase.rpc(
-        "nplus_reject_deposit",
-        {
-          p_request_id: requestId
-        }
-      );
+    const {
+      data,
+      error
+    } = await supabase.rpc(
+      "nplus_reject_deposit",
+      {
+        p_request_id:
+          requestId
+      }
+    );
 
     if (error) {
-      console.error(error);
+      console.error(
+        error
+      );
+
       showStatus(
-        error.message || "Rejection failed.",
+        error.message ||
+        "Rejection failed.",
         "err"
       );
+
       return;
     }
 
@@ -2363,50 +3027,312 @@ button{
       "ok"
     );
 
-    console.log("Rejection result:",data);
+    console.log(
+      "Rejection result:",
+      data
+    );
 
     await loadRequests();
   }
 
-  $("refreshBtn").addEventListener(
-    "click",
-    async () => {
-      await Promise.all([
-        loadRequests(),
-        loadCommission()
-      ]);
-    }
-  );
+  async function loadDepositReport() {
+    $("depositHistoryBody")
+      .innerHTML =
+      `<tr>
+        <td colspan="5" class="loading">
+          Loading deposit history...
+        </td>
+      </tr>`;
 
-  $("commissionRefreshBtn").addEventListener(
-    "click",
-    async () => {
-      await loadCommission();
-      await loadRequests();
-    }
-  );
+    const {
+      data,
+      error
+    } = await supabase
+      .from("deposit_requests")
+      .select(
+        "id,user_id,amount,status,created_at"
+      )
+      .eq(
+        "status",
+        "approved"
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      )
+      .limit(500);
 
-  $("logoutBtn").addEventListener(
-    "click",
-    async () => {
-      await supabase.auth.signOut();
-      location.replace("auth.html");
+    if (error) {
+      console.error(
+        "Deposit report error:",
+        error
+      );
+
+      $("approvedDepositTotal")
+        .textContent =
+        "₹0.00";
+
+      $("todayDepositTotal")
+        .textContent =
+        "₹0.00";
+
+      $("approvedDepositCount")
+        .textContent =
+        "0";
+
+      $("depositHistoryBody")
+        .innerHTML =
+        `<tr>
+          <td colspan="5" class="empty">
+            Unable to load deposit history.<br><br>
+            <small>${escapeHTML(
+              error.message
+            )}</small>
+          </td>
+        </tr>`;
+
+      return;
     }
-  );
+
+    const deposits =
+      data || [];
+
+    const total =
+      deposits.reduce(
+        (sum,item) =>
+          sum +
+          Number(
+            item.amount || 0
+          ),
+        0
+      );
+
+    const startOfToday =
+      new Date();
+
+    startOfToday.setHours(
+      0,0,0,0
+    );
+
+    const todayTotal =
+      deposits.reduce(
+        (sum,item) => {
+          const created =
+            new Date(
+              item.created_at
+            );
+
+          return created >= startOfToday
+            ? sum +
+              Number(
+                item.amount || 0
+              )
+            : sum;
+        },
+        0
+      );
+
+    $("approvedDepositTotal")
+      .textContent =
+      money(total);
+
+    $("todayDepositTotal")
+      .textContent =
+      money(todayTotal);
+
+    $("approvedDepositCount")
+      .textContent =
+      deposits.length.toLocaleString(
+        "en-IN"
+      );
+
+    if (!deposits.length) {
+      $("depositHistoryBody")
+        .innerHTML =
+        `<tr>
+          <td colspan="5" class="empty">
+            No approved deposits yet.
+          </td>
+        </tr>`;
+
+      return;
+    }
+
+    const rows = [];
+
+    for (
+      const deposit of deposits
+    ) {
+      let profile = null;
+
+      const {
+        data:profileData,
+        error:profileError
+      } = await supabase
+        .from("profiles")
+        .select(
+          "display_name,uid"
+        )
+        .eq(
+          "id",
+          deposit.user_id
+        )
+        .maybeSingle();
+
+      if (!profileError) {
+        profile =
+          profileData;
+      }
+
+      const name =
+        profile?.display_name ||
+        "N+ PLAY User";
+
+      const uid =
+        profile?.uid ||
+        deposit.user_id;
+
+      const created =
+        new Date(
+          deposit.created_at
+        ).toLocaleString(
+          "en-IN",
+          {
+            dateStyle:"medium",
+            timeStyle:"short"
+          }
+        );
+
+      rows.push(`
+        <tr>
+          <td>
+            ${escapeHTML(name)}
+          </td>
+
+          <td>
+            ${escapeHTML(uid)}
+          </td>
+
+          <td style="color:var(--gold2);font-weight:900">
+            ${money(
+              deposit.amount
+            )}
+          </td>
+
+          <td>
+            <span class="deposit-status approved">
+              APPROVED
+            </span>
+          </td>
+
+          <td>
+            ${escapeHTML(created)}
+          </td>
+        </tr>
+      `);
+    }
+
+    $("depositHistoryBody")
+      .innerHTML =
+      rows.join("");
+  }
+
+  $("refreshBtn")
+    .addEventListener(
+      "click",
+      async () => {
+        await Promise.all([
+          loadRequests(),
+          loadCommission(),
+          loadDepositReport()
+        ]);
+      }
+    );
+
+  $("commissionRefreshBtn")
+    .addEventListener(
+      "click",
+      async () => {
+        await Promise.all([
+          loadCommission(),
+          loadRequests(),
+          loadDepositReport()
+        ]);
+      }
+    );
+
+  $("depositReportRefreshBtn")
+    .addEventListener(
+      "click",
+      loadDepositReport
+    );
+
+  $("logoutBtn")
+    .addEventListener(
+      "click",
+      async () => {
+        await supabase.auth.signOut();
+        location.replace(
+          "admin-login.html"
+        );
+      }
+    );
+
+  renderGameCards();
 
   (async () => {
-
     const allowed =
       await requireAdmin();
 
-    if (!allowed) return;
+    if (!allowed) {
+      return;
+    }
 
     await Promise.all([
       loadRequests(),
-      loadCommission()
+      loadCommission(),
+      loadDepositReport()
     ]);
-
   })();
+
+  /*
+    Keep the deposit report and pending request list fresh
+    without requiring the admin to manually refresh.
+  */
+  window.setInterval(
+    async () => {
+      const sessionResult =
+        await supabase.auth.getSession();
+
+      if (
+        sessionResult.error ||
+        !sessionResult.data.session
+      ) {
+        return;
+      }
+
+      await Promise.all([
+        loadRequests(),
+        loadCommission(),
+        loadDepositReport()
+      ]);
+    },
+    15000
+  );
+
+  /*
+    Keep WINGO analytics live only when the detail panel is open.
+  */
+  window.setInterval(
+    () => {
+      if (
+        selectedGame?.key === "WINGO"
+      ) {
+        loadWingoAnalytics();
+      }
+    },
+    2000
+  );
 
 })();
 </script>
