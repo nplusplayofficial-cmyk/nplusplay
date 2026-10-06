@@ -358,6 +358,60 @@ button{
   .detail-head{align-items:flex-start}
 }
 
+
+.live-monitor{
+  margin-top:15px;
+}
+.live-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.live-card{
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;
+  padding:16px;
+}
+.live-card span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1.1px;
+}
+.live-card strong{
+  display:block;
+  margin-top:7px;
+  font-size:18px;
+}
+.live-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.live-table th,.live-table td{
+  padding:11px 9px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  text-align:left;
+  white-space:nowrap;
+}
+.live-table th{
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1px;
+}
+.live-table td{
+  font-size:12px;
+}
+.live-note{
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+  margin-top:10px;
+}
+@media(max-width:850px){
+  .live-grid{grid-template-columns:1fr}
+}
+
 .commission{
   margin-top:22px;
 }
@@ -715,6 +769,64 @@ button{
       </div>
       <div id="gameCommissionList">
         <div class="loading">Loading commission...</div>
+      </div>
+    </div>
+
+    <div class="card live-monitor">
+      <div class="section-head">
+        <div>
+          <h3>WINGO Live Round Monitor</h3>
+          <div class="live-note">
+            Read-only demo monitoring. Shows the current/next period and confirmed
+            virtual-credit selections. It does not choose or alter outcomes.
+          </div>
+        </div>
+        <button class="refresh" id="wingoMonitorRefresh">↻ REFRESH</button>
+      </div>
+
+      <div class="live-grid">
+        <div class="live-card">
+          <span>DURATION</span>
+          <strong id="liveDuration">30 SEC</strong>
+        </div>
+        <div class="live-card">
+          <span>CURRENT PERIOD</span>
+          <strong id="liveCurrentPeriod">—</strong>
+        </div>
+        <div class="live-card">
+          <span>NEXT PERIOD</span>
+          <strong id="liveNextPeriod">—</strong>
+        </div>
+        <div class="live-card">
+          <span>TIME LEFT</span>
+          <strong id="liveTimeLeft">—</strong>
+        </div>
+        <div class="live-card">
+          <span>CURRENT ROUND BETS</span>
+          <strong id="liveBetCount">0</strong>
+        </div>
+        <div class="live-card">
+          <span>CURRENT ROUND STAKE</span>
+          <strong id="liveBetAmount">₹0.00</strong>
+        </div>
+      </div>
+
+      <div style="margin-top:15px;overflow-x:auto">
+        <table class="live-table">
+          <thead>
+            <tr>
+              <th>USER</th>
+              <th>NPLUS UID</th>
+              <th>PERIOD</th>
+              <th>SELECTION</th>
+              <th>STAKE</th>
+              <th>TIME</th>
+            </tr>
+          </thead>
+          <tbody id="wingoLiveBets">
+            <tr><td colspan="6" class="loading">Loading...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -1173,6 +1285,110 @@ button{
   });
 
   renderGameCards();
+
+
+  function wingoPeriodInfo(sec = 30, now = Date.now()) {
+    const start = Math.floor(now / (sec * 1000)) * sec * 1000;
+    const next = start + sec * 1000;
+
+    function periodAt(ts) {
+      const d = new Date(ts);
+      const idx = Math.floor(ts / (sec * 1000));
+      const code = {
+        30:"1000",
+        60:"2000",
+        180:"3000",
+        300:"4000"
+      }[sec];
+
+      const date =
+        d.getFullYear() +
+        String(d.getMonth()+1).padStart(2,"0") +
+        String(d.getDate()).padStart(2,"0");
+
+      return date + code +
+        String(idx % 100000).padStart(5,"0");
+    }
+
+    return {
+      current: periodAt(start),
+      next: periodAt(next),
+      remaining: Math.max(0, Math.ceil((next - now) / 1000))
+    };
+  }
+
+  function parseWingoBetNote(note) {
+    const text = String(note || "");
+    const match = text.match(
+      /^WINGO BET\\s+(\\S+)\\s+(\\S+)\\s+type=([^\\s]+)\\s+value=([^\\s]+)\\s+qty=(\\d+)\\s+multi=(\\d+)$/i
+    );
+
+    if (!match) {
+      return {
+        period: text.split(/\s+/)[2] || "—",
+        selection: "Legacy bet"
+      };
+    }
+
+    return {
+      period: match[1],
+      selection: `${match[3]} ${match[4]}`
+    };
+  }
+
+  async function loadWingoLiveMonitor() {
+    const info = wingoPeriodInfo(30);
+
+    $("liveDuration").textContent = "30 SEC";
+    $("liveCurrentPeriod").textContent = info.current;
+    $("liveNextPeriod").textContent = info.next;
+    $("liveTimeLeft").textContent = `${info.remaining}s`;
+
+    const { data, error } = await supabase.rpc(
+      "nplus_admin_wingo_live_bets",
+      { p_period: info.current }
+    );
+
+    if (error) {
+      console.error("WINGO monitor error:", error);
+      $("wingoLiveBets").innerHTML =
+        `<tr><td colspan="6" class="empty">${escapeHTML(error.message)}</td></tr>`;
+      $("liveBetCount").textContent = "0";
+      $("liveBetAmount").textContent = money(0);
+      return;
+    }
+
+    const rows = Array.isArray(data) ? data : [];
+
+    $("liveBetCount").textContent =
+      rows.length.toLocaleString("en-IN");
+
+    $("liveBetAmount").textContent =
+      money(rows.reduce((sum, row) => sum + Number(row.stake || 0), 0));
+
+    if (!rows.length) {
+      $("wingoLiveBets").innerHTML =
+        `<tr><td colspan="6" class="empty">No confirmed bets for the current round.</td></tr>`;
+      return;
+    }
+
+    $("wingoLiveBets").innerHTML = rows.map(row => `
+      <tr>
+        <td>${escapeHTML(row.display_name || "User")}</td>
+        <td>${escapeHTML(row.uid || "—")}</td>
+        <td>${escapeHTML(row.period || info.current)}</td>
+        <td>${escapeHTML(row.selection || "—")}</td>
+        <td>${money(row.stake)}</td>
+        <td>${escapeHTML(new Date(row.created_at).toLocaleTimeString("en-IN"))}</td>
+      </tr>
+    `).join("");
+  }
+
+  setInterval(loadWingoLiveMonitor, 1000);
+  $("wingoMonitorRefresh")?.addEventListener(
+    "click",
+    loadWingoLiveMonitor
+  );
 
   async function loadCommission() {
     const list = $("gameCommissionList");
