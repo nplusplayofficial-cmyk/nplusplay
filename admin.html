@@ -164,21 +164,6 @@ button{
   margin:0;
   font-size:17px;
 }
-.game-activation{
-  margin-top:12px;
-  width:100%;
-  padding:9px 11px;
-  border-radius:10px;
-  font-weight:900;
-  border:1px solid rgba(35,211,154,.28);
-  background:rgba(35,211,154,.08);
-  color:var(--green);
-}
-.game-activation.off{
-  border-color:rgba(255,82,96,.28);
-  background:rgba(255,82,96,.06);
-  color:#ff7c86;
-}
 .game-status{
   margin-top:5px;
   color:var(--green);
@@ -241,6 +226,44 @@ button{
   padding:9px 13px;
   font-weight:800;
 }
+.wingo-duration{
+  display:none;
+  margin-top:15px;
+  padding:14px;
+  border-radius:14px;
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+}
+.wingo-duration.show{display:block}
+.wingo-duration-title{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1.2px;
+  margin-bottom:9px;
+}
+.wingo-duration-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.duration-btn{
+  border:1px solid var(--line);
+  background:#151515;
+  color:var(--text);
+  border-radius:10px;
+  padding:10px 7px;
+  font-weight:900;
+  font-size:11px;
+}
+.duration-btn.active{
+  border-color:rgba(201,165,91,.7);
+  background:rgba(201,165,91,.12);
+  color:var(--gold2);
+}
+@media(max-width:520px){
+  .wingo-duration-grid{grid-template-columns:repeat(2,1fr)}
+}
+
 .mode-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -589,6 +612,16 @@ button{
           <button class="mode-btn" data-mode="random">↯ RANDOM DEMO</button>
         </div>
 
+        <div class="wingo-duration" id="wingoDuration">
+          <div class="wingo-duration-title">WINGO ROUND DURATION</div>
+          <div class="wingo-duration-grid">
+            <button class="duration-btn active" data-duration="30">30 SEC</button>
+            <button class="duration-btn" data-duration="60">1 MIN</button>
+            <button class="duration-btn" data-duration="180">3 MIN</button>
+            <button class="duration-btn" data-duration="300">5 MIN</button>
+          </div>
+        </div>
+
         <div class="control-panel" id="manualPanel" style="display:none">
           <h4>Manual Demo Result</h4>
 
@@ -834,6 +867,7 @@ button{
   let selectedMode = "auto";
   let selectedColor = null;
   let selectedNumber = null;
+  let selectedDuration = 30;
 
   function getDemoState() {
     try {
@@ -856,7 +890,12 @@ button{
 
     grid.innerHTML = DEMO_GAMES.map(game => {
       const item = state[game.key] || {};
-      const mode = item.mode || "AUTO";
+      const durationState =
+        game.key === "WINGO"
+          ? (item.durations?.[30] || {})
+          : item;
+      const mode = durationState.mode || "AUTO";
+      const result = durationState.result || "—";
 
       return `
         <article class="game-box">
@@ -871,7 +910,7 @@ button{
             </div>
             <div>
               <span>LAST RESULT</span>
-              <strong>${escapeHTML(item.result || "—")}</strong>
+              <strong>${escapeHTML(result)}</strong>
             </div>
           </div>
 
@@ -891,14 +930,30 @@ button{
     selectedGame = DEMO_GAMES.find(g => g.key === key);
     if (!selectedGame) return;
 
-    const state = getDemoState()[key] || {};
+    const rootState = getDemoState();
+    const state = rootState[key] || {};
 
-    selectedMode = String(state.mode || "AUTO").toLowerCase();
-    selectedColor = state.color || null;
+    selectedDuration =
+      key === "WINGO"
+        ? Number(state.durations?.[30]?.duration || 30)
+        : 30;
+
+    selectedMode = String(
+      key === "WINGO"
+        ? (state.durations?.[selectedDuration]?.mode || "AUTO")
+        : (state.mode || "AUTO")
+    ).toLowerCase();
+
+    const selectedState =
+      key === "WINGO"
+        ? (state.durations?.[selectedDuration] || {})
+        : state;
+
+    selectedColor = selectedState.color || null;
     selectedNumber =
-      state.number === undefined || state.number === null
+      selectedState.number === undefined || selectedState.number === null
         ? null
-        : String(state.number);
+        : String(selectedState.number);
 
     $("detailGameName").textContent =
       selectedGame.name + " — DEMO CONTROL";
@@ -916,6 +971,22 @@ button{
   }
 
   function syncDemoControls() {
+    const durationBox = $("wingoDuration");
+
+    if (durationBox) {
+      durationBox.classList.toggle(
+        "show",
+        selectedGame?.key === "WINGO"
+      );
+
+      document.querySelectorAll(".duration-btn").forEach(btn => {
+        btn.classList.toggle(
+          "active",
+          Number(btn.dataset.duration) === selectedDuration
+        );
+      });
+    }
+
     document.querySelectorAll(".mode-btn").forEach(btn => {
       btn.classList.toggle(
         "active",
@@ -940,8 +1011,12 @@ button{
       );
     });
 
-    const state = getDemoState();
-    const result = state[selectedGame?.key]?.result;
+    const rootState = getDemoState();
+    const gameState = rootState[selectedGame?.key] || {};
+    const result =
+      selectedGame?.key === "WINGO"
+        ? gameState.durations?.[selectedDuration]?.result
+        : gameState.result;
 
     if (selectedMode === "manual") {
       $("demoResultText").textContent =
@@ -990,13 +1065,29 @@ button{
         `${selectedColor || "—"} ${selectedNumber ?? "—"}`;
     }
 
-    state[selectedGame.key] = {
-      mode:selectedMode.toUpperCase(),
-      color:selectedColor,
-      number:selectedNumber,
-      result,
-      updated_at:new Date().toISOString()
-    };
+    if (selectedGame.key === "WINGO") {
+      const gameState = state.WINGO || {};
+      gameState.durations = gameState.durations || {};
+
+      gameState.durations[selectedDuration] = {
+        duration:selectedDuration,
+        mode:selectedMode.toUpperCase(),
+        color:selectedColor,
+        number:selectedNumber,
+        result,
+        updated_at:new Date().toISOString()
+      };
+
+      state.WINGO = gameState;
+    } else {
+      state[selectedGame.key] = {
+        mode:selectedMode.toUpperCase(),
+        color:selectedColor,
+        number:selectedNumber,
+        result,
+        updated_at:new Date().toISOString()
+      };
+    }
 
     saveDemoState(state);
     renderGameCards();
@@ -1043,72 +1134,6 @@ button{
   });
 
   renderGameCards();
-
-
-  async function loadGameActivation() {
-    const { data, error } = await supabase
-      .from("game_settings")
-      .select("game_key,game_name,enabled");
-
-    if (error) {
-      console.error("Game status error:", error);
-      return;
-    }
-
-    const rows = data || [];
-
-    document.querySelectorAll("[data-toggle-game]").forEach(button => {
-      const key = button.dataset.toggleGame;
-      const row = rows.find(x => x.game_key === key);
-      const enabled = row ? row.enabled === true : true;
-
-      button.textContent = enabled ? "● ACTIVE" : "○ PAUSED";
-      button.classList.toggle("off", !enabled);
-      button.dataset.enabled = String(enabled);
-    });
-  }
-
-  async function toggleGameActivation(gameKey, button) {
-    const current = button.dataset.enabled !== "false";
-    const next = !current;
-
-    button.disabled = true;
-    button.textContent = "UPDATING...";
-
-    const { error } = await supabase.rpc(
-      "nplus_set_game_status",
-      {
-        p_game_key: gameKey,
-        p_enabled: next
-      }
-    );
-
-    if (error) {
-      console.error(error);
-      showStatus(error.message || "Unable to update game status.", "err");
-      await loadGameActivation();
-      button.disabled = false;
-      return;
-    }
-
-    showStatus(
-      gameKey + (next ? " activated." : " paused."),
-      "ok"
-    );
-
-    await loadGameActivation();
-    button.disabled = false;
-  }
-
-  document.addEventListener("click", event => {
-    const button = event.target.closest("[data-toggle-game]");
-    if (!button) return;
-
-    toggleGameActivation(
-      button.dataset.toggleGame,
-      button
-    );
-  });
 
   async function loadCommission() {
     const list = $("gameCommissionList");
@@ -1466,8 +1491,7 @@ button{
     async () => {
       await Promise.all([
         loadRequests(),
-        loadCommission(),
-        loadGameActivation()
+        loadCommission()
       ]);
     }
   );
@@ -1497,8 +1521,7 @@ button{
 
     await Promise.all([
       loadRequests(),
-      loadCommission(),
-      loadGameActivation()
+      loadCommission()
     ]);
 
   })();
