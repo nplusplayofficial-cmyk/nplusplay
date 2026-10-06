@@ -1291,12 +1291,6 @@ button{
     $("manualPanel").style.display =
       selectedMode === "manual" ? "block" : "none";
 
-    if (selectedNumber !== null) {
-      const n = Number(selectedNumber);
-      selectedColor = [1,3,7,9].includes(n) ? "GREEN" : [2,4,6,8].includes(n) ? "RED" : n === 0 ? "RED" : "GREEN";
-      selectedSize = n >= 5 ? "BIG" : "SMALL";
-    }
-
     document.querySelectorAll("[data-color]").forEach(btn => {
       btn.classList.toggle(
         "selected",
@@ -1380,7 +1374,7 @@ button{
         return;
       }
 
-      result = `${selectedColor || "—"} ${selectedNumber}`;
+      result = `${selectedColor || "—"} ${selectedNumber} · ${selectedSize || "—"}`;
     }
 
     if (selectedGame.key === "WINGO") {
