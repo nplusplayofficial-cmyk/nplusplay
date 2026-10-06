@@ -1,117 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080909">
+
+<title>N+ PLAY — Admin Login</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      #302b1d 0,
+      #111310 35%,
+      #070808 70%
+    );
+  color:#f4f1e9;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+}
+
+/* BRAND */
+
+.brand{
+  text-align:center;
+  margin-bottom:24px;
+}
+
+.mark{
+  width:52px;
+  height:52px;
+  margin:0 auto 12px;
+
+  border-radius:15px;
+
+  display:grid;
+  place-items:center;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f4d996,
+      #9c7132
+    );
+
+  color:#171209;
+
+  font-size:18px;
+  font-weight:950;
+
+  box-shadow:
+    0 10px 30px rgba(216,182,109,.12);
+}
+
+.brand h1{
+  margin:0;
+
+  font-size:25px;
+  font-weight:900;
+
+  letter-spacing:.5px;
+}
+
+.brand p{
+  margin:7px 0 0;
+
+  color:#858a84;
+
+  font-size:10px;
+  font-weight:600;
+
+  letter-spacing:2px;
+}
+
+/* CARD */
+
+.card{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17,19,17,.98),
+      rgba(13,15,13,.98)
+    );
+
+  border:1px solid rgba(216,182,109,.20);
+
+  border-radius:22px;
+
+  padding:22px;
+
+  box-shadow:
+    0 20px 70px rgba(0,0,0,.55);
+}
+
+.kicker{
+  color:#d8b66d;
+
+  font-size:10px;
+  font-weight:900;
+
+  letter-spacing:1.5px;
+
+  margin-bottom:7px;
+}
+
+h2{
+  margin:0 0 20px;
+
+  font-size:20px;
+  font-weight:850;
+}
+
+/* FORM */
+
+.field{
+  margin-bottom:15px;
+}
+
+label{
+  display:block;
+
+  margin-bottom:7px;
+
+  color:#858a84;
+
+  font-size:9px;
+  font-weight:800;
+
+  letter-spacing:1px;
+}
+
+.input-wrap{
+  position:relative;
+}
+
+input{
+  width:100%;
+
+  padding:14px;
+
+  border-radius:11px;
+
+  border:1px solid rgba(255,255,255,.09);
+
+  background:#0b0c0b;
+
+  color:#fff;
+
+  outline:none;
+
+  font-size:14px;
+
+  transition:.2s;
+}
+
+input::placeholder{
+  color:#555a55;
+}
+
+input:focus{
+  border-color:#d8b66d;
+
+  box-shadow:
+    0 0 0 3px rgba(216,182,109,.07);
+}
+
+/* PASSWORD SHOW */
+
+.password-row{
+  position:relative;
+}
+
+.password-row input{
+  padding-right:70px;
+}
+
+.show-btn{
+  position:absolute;
+
+  right:8px;
+  top:50%;
+
+  transform:translateY(-50%);
+
+  border:0;
+
+  background:transparent;
+
+  color:#858a84;
+
+  font-size:9px;
+  font-weight:900;
+
+  cursor:pointer;
+}
+
+.show-btn:hover{
+  color:#d8b66d;
+}
+
+/* ACTION */
+
+.action{
+  width:100%;
+
+  border:0;
+
+  border-radius:12px;
+
+  padding:14px;
+
+  margin-top:4px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f1d38f,
+      #b6873c
+    );
+
+  color:#151108;
+
+  font-size:13px;
+  font-weight:950;
+
+  cursor:pointer;
+
+  transition:.2s;
+
+  box-shadow:
+    0 8px 22px rgba(182,135,60,.15);
+}
+
+.action:hover{
+  filter:brightness(1.06);
+}
+
+.action:active{
+  transform:translateY(1px);
+}
+
+.action:disabled{
+  opacity:.5;
+
+  cursor:not-allowed;
+
+  transform:none;
+}
+
+/* STATUS */
+
+.status{
+  display:none;
+
+  margin-top:14px;
+
+  padding:11px;
+
+  border-radius:10px;
+
+  font-size:12px;
+
+  line-height:1.45;
+}
+
+.status.show{
+  display:block;
+}
+
+.status.err{
+  background:#321817;
+
+  color:#ffaaa6;
+
+  border:1px solid #69302d;
+}
+
+.status.ok{
+  background:#14291f;
+
+  color:#86dfb0;
+
+  border:1px solid #28543d;
+}
+
+/* SECURITY NOTE */
+
+.security{
+  margin-top:16px;
+
+  padding:11px 12px;
+
+  border-radius:10px;
+
+  background:#0b0c0b;
+
+  border:1px solid rgba(255,255,255,.05);
+
+  color:#666b66;
+
+  font-size:9px;
+
+  line-height:1.5;
+
+  text-align:center;
+}
+
+.security strong{
+  color:#9c8a62;
+}
+
+/* BACK */
+
+.back{
+  display:block;
+
+  text-align:center;
+
+  margin-top:18px;
+
+  color:#858a84;
+
+  font-size:11px;
+
+  text-decoration:none;
+
+  transition:.2s;
+}
+
+.back:hover{
+  color:#d8b66d;
+}
+
+/* FOOTER */
+
+.footer{
+  text-align:center;
+
+  margin-top:20px;
+
+  color:#555a55;
+
+  font-size:9px;
+}
+
+/* MOBILE */
+
+@media(max-width:480px){
+
+  body{
+    padding:16px;
+  }
+
+  .card{
+    padding:19px;
+  }
+
+  .brand h1{
+    font-size:23px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- BRAND -->
+
+  <div class="brand">
+
+    <div class="mark">
+      N+
+    </div>
+
+    <h1>
+      N+ PLAY
+    </h1>
+
+    <p>
+      ADMIN CONTROL CENTER
+    </p>
+
+  </div>
+
+
+  <!-- LOGIN CARD -->
+
+  <section class="card">
+
+    <div class="kicker">
+      AUTHORIZED ACCESS
+    </div>
+
+    <h2>
+      Admin Login
+    </h2>
+
+
+    <form id="adminForm">
+
+      <!-- EMAIL -->
+
+      <div class="field">
+
+        <label for="email">
+          ADMIN EMAIL
+        </label>
+
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          autocomplete="username"
+          placeholder="admin@example.com"
+        >
+
+      </div>
+
+
+      <!-- PASSWORD -->
+
+      <div class="field">
+
+        <label for="password">
+          PASSWORD
+        </label>
+
+        <div class="password-row">
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            minlength="6"
+            autocomplete="current-password"
+            placeholder="Admin password"
+          >
+
+          <button
+            class="show-btn"
+            id="showPassword"
+            type="button"
+          >
+            SHOW
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- LOGIN -->
+
+      <button
+        class="action"
+        id="loginBtn"
+        type="submit"
+      >
+        ENTER ADMIN PANEL
+      </button>
+
+    </form>
+
+
+    <!-- STATUS -->
+
+    <div
+      id="status"
+      class="status"
+    ></div>
+
+
+    <!-- SECURITY -->
+
+    <div class="security">
+      <strong>ADMIN ONLY</strong><br>
+      This area is restricted to authorized N+ PLAY administrators.
+      Virtual-credit platform management only.
+    </div>
+
+
+    <!-- BACK -->
+
+    <a
+      class="back"
+      href="auth.html"
+    >
+      ← Back to N+ PLAY Login
+    </a>
+
+  </section>
+
+
+  <!-- FOOTER -->
+
+  <div class="footer">
+    N+ PLAY · Virtual-credit platform · Authorized personnel only
+  </div>
+
+</div>
+
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="core/nplus-config.js"></script>
+
+<script src="core/nplus-auth.js"></script>
+
+
 <script>
 (() => {
+
   "use strict";
 
-  const form = document.getElementById("adminForm");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const loginBtn = document.getElementById("loginBtn");
-  const status = document.getElementById("status");
 
-  function showStatus(message, type = "err") {
+  /* --------------------------------
+     ELEMENTS
+  -------------------------------- */
+
+  const form =
+    document.getElementById("adminForm");
+
+  const emailInput =
+    document.getElementById("email");
+
+  const passwordInput =
+    document.getElementById("password");
+
+  const showPassword =
+    document.getElementById("showPassword");
+
+  const loginBtn =
+    document.getElementById("loginBtn");
+
+  const status =
+    document.getElementById("status");
+
+
+  /* --------------------------------
+     STATUS
+  -------------------------------- */
+
+  function showStatus(
+    message,
+    type = "err"
+  ){
+
     status.textContent = message;
-    status.className = "status show " + type;
+
+    status.className =
+      "status show " + type;
+
   }
 
-  async function getAdminRole(userId) {
 
-    const client = window.NPlusAuth?.client;
+  function clearStatus(){
 
-    if (!client) {
-      throw new Error("Authentication system unavailable.");
-    }
-
-    const { data, error } = await client
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Role check error:", error);
-      throw new Error("Unable to verify admin access.");
-    }
-
-    return String(data?.role || "").toLowerCase();
-  }
-
-  form.addEventListener("submit", async (e) => {
-
-    e.preventDefault();
-
-    status.className = "status";
     status.textContent = "";
 
-    loginBtn.disabled = true;
+    status.className =
+      "status";
 
-    try {
+  }
 
-      const email = emailInput.value.trim().toLowerCase();
-      const password = passwordInput.value;
 
-      if (!email || !password) {
-        throw new Error("Enter admin email and password.");
-      }
+  /* --------------------------------
+     PASSWORD SHOW / HIDE
+  -------------------------------- */
 
-      const client = window.NPlusAuth?.client;
+  showPassword.addEventListener(
+    "click",
+    () => {
 
-      if (!client) {
-        throw new Error("Supabase authentication unavailable.");
-      }
+      const hidden =
+        passwordInput.type === "password";
 
-      // ADMIN LOGIN = EMAIL + PASSWORD ONLY
-      const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password
-      });
+      passwordInput.type =
+        hidden ? "text" : "password";
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      showPassword.textContent =
+        hidden ? "HIDE" : "SHOW";
 
-      const user = data?.user;
+    }
+  );
 
-      if (!user?.id) {
-        throw new Error("Authentication failed.");
-      }
 
-      // Verify role from Supabase profile
-      const role = await getAdminRole(user.id);
+  /* --------------------------------
+     ADMIN ROLE CHECK
+  -------------------------------- */
 
-      if (role !== "admin") {
+  async function getAdminRole(userId){
 
-        await client.auth.signOut();
+    const client =
+      window.NPlusAuth?.client;
 
-        throw new Error(
-          "This account is not authorized for the Admin Panel."
-        );
-      }
+    if(!client){
 
-      showStatus(
-        "Admin authentication successful. Opening dashboard…",
-        "ok"
+      throw new Error(
+        "Authentication system unavailable."
       );
-
-      setTimeout(() => {
-        location.replace("admin.html");
-      }, 500);
-
-    } catch (err) {
-
-      console.error("Admin login error:", err);
-
-      showStatus(
-        err?.message ||
-        "Admin login failed. Please check your credentials."
-      );
-
-    } finally {
-
-      loginBtn.disabled = false;
 
     }
 
-  });
+
+    const {
+      data,
+      error
+    } = await client
+
+      .from("profiles")
+
+      .select("role")
+
+      .eq("id", userId)
+
+      .maybeSingle();
+
+
+    if(error){
+
+      console.error(
+        "Admin role check error:",
+        error
+      );
+
+      throw new Error(
+        "Unable to verify admin access."
+      );
+
+    }
+
+
+    return String(
+      data?.role || ""
+    ).trim().toLowerCase();
+
+  }
+
+
+  /* --------------------------------
+     ADMIN LOGIN
+  -------------------------------- */
+
+  form.addEventListener(
+    "submit",
+    async (event) => {
+
+      event.preventDefault();
+
+      clearStatus();
+
+      loginBtn.disabled = true;
+
+      loginBtn.textContent =
+        "AUTHENTICATING…";
+
+
+      try{
+
+        const email =
+          emailInput.value
+            .trim()
+            .toLowerCase();
+
+        const password =
+          passwordInput.value;
+
+
+        /* BASIC VALIDATION */
+
+        if(!email){
+
+          throw new Error(
+            "Enter admin email."
+          );
+
+        }
+
+        if(!password){
+
+          throw new Error(
+            "Enter admin password."
+          );
+
+        }
+
+
+        /* GET SUPABASE CLIENT */
+
+        const client =
+          window.NPlusAuth?.client;
+
+        if(!client){
+
+          throw new Error(
+            "Supabase authentication unavailable."
+          );
+
+        }
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Admin login uses
+         * EMAIL + PASSWORD ONLY.
+         *
+         * No mobile validation.
+         * No OTP.
+         */
+
+        const {
+          data,
+          error
+        } = await client.auth.signInWithPassword({
+
+          email: email,
+
+          password: password
+
+        });
+
+
+        if(error){
+
+          console.error(
+            "Supabase admin login:",
+            error
+          );
+
+          throw new Error(
+            error.message ||
+            "Invalid admin credentials."
+          );
+
+        }
+
+
+        const user =
+          data?.user;
+
+
+        if(!user?.id){
+
+          throw new Error(
+            "Authentication failed."
+          );
+
+        }
+
+
+        /* VERIFY ADMIN ROLE */
+
+        const role =
+          await getAdminRole(user.id);
+
+
+        /*
+         * ONLY role=admin
+         * can continue.
+         */
+
+        if(role !== "admin"){
+
+          await client.auth.signOut();
+
+          throw new Error(
+            "This account is not authorized for the Admin Panel."
+          );
+
+        }
+
+
+        /* SUCCESS */
+
+        showStatus(
+          "Admin authentication successful. Opening dashboard…",
+          "ok"
+        );
+
+
+        loginBtn.textContent =
+          "ACCESS GRANTED";
+
+
+        setTimeout(
+          () => {
+
+            location.replace(
+              "admin.html"
+            );
+
+          },
+          500
+        );
+
+
+      }catch(error){
+
+        console.error(
+          "Admin login error:",
+          error
+        );
+
+
+        showStatus(
+          error?.message ||
+          "Admin login failed. Please check your credentials.",
+          "err"
+        );
+
+
+        loginBtn.textContent =
+          "ENTER ADMIN PANEL";
+
+
+      }finally{
+
+        loginBtn.disabled = false;
+
+      }
+
+    }
+  );
+
+
+  /* --------------------------------
+     ALREADY LOGGED-IN CHECK
+  -------------------------------- */
+
+  (async () => {
+
+    try{
+
+      const client =
+        window.NPlusAuth?.client;
+
+      if(!client) return;
+
+
+      const {
+        data
+      } = await client.auth.getUser();
+
+
+      const user =
+        data?.user;
+
+
+      if(!user?.id) return;
+
+
+      const role =
+        await getAdminRole(user.id);
+
+
+      /*
+       * If already authenticated
+       * as admin, directly open
+       * admin dashboard.
+       */
+
+      if(role === "admin"){
+
+        showStatus(
+          "Admin session detected. Opening dashboard…",
+          "ok"
+        );
+
+        setTimeout(
+          () => {
+
+            location.replace(
+              "admin.html"
+            );
+
+          },
+          400
+        );
+
+      }
+
+    }catch(error){
+
+      console.log(
+        "Existing admin session check:",
+        error
+      );
+
+    }
+
+  })();
+
 
 })();
 </script>
+
+</body>
+</html>
