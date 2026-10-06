@@ -842,6 +842,7 @@ button:disabled{
 
         <div class="mode-grid">
           <button class="mode-btn active" data-mode="auto">⚙ AUTO</button>
+          <button class="mode-btn" data-mode="lowest">⬇ AUTO · LOWEST STAKE</button>
           <button class="mode-btn" data-mode="manual">✦ MANUAL DEMO</button>
           <button class="mode-btn" data-mode="random">↯ RANDOM DEMO</button>
         </div>
@@ -911,7 +912,7 @@ button:disabled{
             <div>
               <h3>WINGO Round Analytics</h3>
               <div class="commission-note">
-                Read-only virtual-credit analytics. Results are independent of betting distribution.
+                Read-only virtual-credit analytics. AUTO · LOWEST STAKE is a demo strategy locked in the final 5 seconds.
               </div>
             </div>
             <button class="refresh" id="wingoAnalyticsRefresh">↻ REFRESH</button>
@@ -968,13 +969,13 @@ button:disabled{
             </div>
 
             <div class="auto-insight-result">
-              <span>AUTO DEMO RESULT · INDEPENDENT</span>
+              <span>AUTO DEMO RESULT · <b>LOWEST STAKE (5 SEC)</b></span>
               <strong id="autoInsightResult">—</strong>
             </div>
 
             <div class="auto-insight-note">
-              The lowest-stake values are shown as a demo analytics insight only.
-              They do not control or select the round result. AUTO result remains independent.
+              In LOWEST STAKE demo mode, the lowest current-period stake is used at the final 5-second lock.
+              The selected Color + Number + Size are stored against the exact current period.
             </div>
           </div>
 
@@ -999,8 +1000,8 @@ button:disabled{
           </div>
 
           <div class="commission-note" style="margin-top:12px">
-            AUTO mode uses an independent demo result generator. The system does not select
-            an outcome from the lowest/highest betting side.
+            AUTO mode is independent. LOWEST STAKE mode is a separate virtual/demo strategy that
+            locks the lowest current-period stake selection during the final 5 seconds.
           </div>
         </div>
       </div>
@@ -1518,6 +1519,9 @@ button:disabled{
         selectedSize
           ? `${selectedColor} ${selectedNumber} · ${selectedSize}`
           : "SELECT COLOR / NUMBER / SIZE";
+    } else if (selectedMode === "lowest") {
+      $("demoResultText").textContent =
+        "AUTO · LOWEST STAKE (LAST 5 SEC)";
     } else {
       $("demoResultText").textContent =
         selectedMode === "random"
@@ -1633,6 +1637,18 @@ button:disabled{
       return;
     }
 
+    if (selectedMode === "lowest") {
+      $("demoResultText").textContent =
+        "AUTO · LOWEST STAKE (LAST 5 SEC)";
+
+      showStatus(
+        "Lowest-stake AUTO is active. The result is chosen at the 5-second lock using current-period stake analytics.",
+        "ok"
+      );
+      loadWingoAnalytics();
+      return;
+    }
+
     const number =
       Math.floor(Math.random() * 10);
 
@@ -1697,6 +1713,38 @@ button:disabled{
 
         const targetPeriod =
           info.current;
+
+        if (selectedMode === "lowest") {
+          const gameState = state.WINGO || {};
+          gameState.durations = gameState.durations || {};
+          gameState.durations[selectedDuration] = {
+            ...(gameState.durations[selectedDuration] || {}),
+            duration: selectedDuration,
+            mode: "LOWEST",
+            strategy: "LOWEST_STAKE_LAST_5_SEC",
+            result: "AUTO · LOWEST STAKE (LAST 5 SEC)",
+            updated_at: new Date().toISOString()
+          };
+          state.WINGO = gameState;
+          saveDemoState(state);
+          renderGameCards();
+
+          const live = wingoPeriodInfo(selectedDuration);
+          if (live.remaining <= 5) {
+            await loadWingoAnalytics();
+            showStatus(
+              "LOWEST STAKE AUTO locked/processed for the current 5-second window.",
+              "ok"
+            );
+          } else {
+            showStatus(
+              `LOWEST STAKE AUTO enabled. It will lock during the final 5 seconds of ${live.current}.`,
+              "ok"
+            );
+          }
+
+          return;
+        }
 
         if (selectedMode === "manual") {
           const {
@@ -2456,6 +2504,73 @@ button:disabled{
       )
         ? summary.bets
         : [];
+
+    // AUTO · LOWEST STAKE is locked once the final 5 seconds begin.
+    // We save one exact result for the current period so the user game
+    // can settle that same period deterministically.
+    if (selectedMode === "lowest" && info.remaining <= 5 && Number(summary.total_stake || 0) > 0) {
+      const rootState = getDemoState();
+      const savedState = rootState.WINGO?.durations?.[sec] || {};
+      const alreadySaved =
+        savedState.strategy === "LOWEST_STAKE_LAST_5_SEC" &&
+        savedState.period === info.current;
+
+      if (!alreadySaved) {
+        const c = pickLowestStake(summary.colors || {}, ["Green","Violet","Red"]);
+        const n = pickLowestStake(summary.numbers || {}, ["0","1","2","3","4","5","6","7","8","9"]);
+        const z = pickLowestStake(summary.sizes || {}, ["Big","Small"]);
+        const number = Number(n.label);
+
+        if (Number.isInteger(number) && number >= 0 && number <= 9) {
+          try {
+            const { data: saved, error: saveError } = await supabase.rpc(
+              "nplus_admin_save_wingo_manual",
+              {
+                p_duration: sec,
+                p_period: info.current,
+                p_color: String(c.label).toUpperCase(),
+                p_number: number,
+                p_size: String(z.label).toUpperCase()
+              }
+            );
+
+            if (!saveError) {
+              const nextState = getDemoState();
+              nextState.WINGO = nextState.WINGO || {};
+              nextState.WINGO.durations = nextState.WINGO.durations || {};
+              nextState.WINGO.durations[sec] = {
+                ...nextState.WINGO.durations[sec],
+                duration: sec,
+                mode: "LOWEST",
+                color: String(c.label).toUpperCase(),
+                number: number,
+                size: String(z.label).toUpperCase(),
+                result: `${String(c.label).toUpperCase()} ${number} · ${String(z.label).toUpperCase()}`,
+                period: info.current,
+                strategy: "LOWEST_STAKE_LAST_5_SEC",
+                colorStake: c.amount,
+                numberStake: n.amount,
+                sizeStake: z.amount,
+                updated_at: new Date().toISOString()
+              };
+              saveDemoState(nextState);
+
+              $("demoResultText").textContent =
+                `${String(c.label).toUpperCase()} ${number} · ${String(z.label).toUpperCase()}`;
+
+              showStatus(
+                `LOWEST STAKE locked for ${info.current}: ${String(c.label).toUpperCase()} ${number} · ${String(z.label).toUpperCase()}`,
+                "ok"
+              );
+            } else {
+              console.error("Lowest stake auto save error:", saveError);
+            }
+          } catch (err) {
+            console.error("Lowest stake auto save error:", err);
+          }
+        }
+      }
+    }
 
     $("waBetCount")
       .textContent =
