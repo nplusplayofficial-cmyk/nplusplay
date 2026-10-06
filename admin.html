@@ -786,7 +786,7 @@ button{
             <button class="choice" data-size="BIG">BIG <small>5–9</small></button>
             <button class="choice" data-size="SMALL">SMALL <small>0–4</small></button>
           </div>
-          <div class="commission-note" style="margin-top:8px">NUMBER controls the valid COLOR and SIZE.</div>
+          <div class="commission-note" style="margin-top:8px">MANUAL mode uses exactly the Color + Number + Size you select.</div>
         </div>
 
         <div class="demo-result">
@@ -1219,7 +1219,7 @@ button{
     selectedColor = selectedState.color || null;
     selectedNumber =
       selectedState.number === undefined || selectedState.number === null ? null : String(selectedState.number);
-    selectedSize = selectedState.size || (selectedNumber !== null ? (Number(selectedNumber) >= 5 ? "BIG" : "SMALL") : null);
+    selectedSize = selectedState.size || null;
 
     $("detailGameName").textContent =
       selectedGame.name + " — DEMO CONTROL";
@@ -1270,7 +1270,7 @@ button{
       selectedColor = saved.color || null;
       selectedNumber =
         saved.number === undefined || saved.number === null ? null : String(saved.number);
-      selectedSize = saved.size || (selectedNumber !== null ? (Number(selectedNumber) >= 5 ? "BIG" : "SMALL") : null);
+      selectedSize = saved.size || null;
 
       syncDemoControls();
       if (selectedGame?.key === "WINGO") loadWingoAnalytics();
@@ -1318,9 +1318,11 @@ button{
 
     if (selectedMode === "manual") {
       $("demoResultText").textContent =
-        selectedColor || selectedNumber !== null
-          ? `${selectedColor || "—"} ${selectedNumber ?? "—"} · ${selectedSize || "—"}`
-          : "SELECT COLOR / NUMBER";
+        selectedColor &&
+        selectedNumber !== null &&
+        selectedSize
+          ? `${selectedColor} ${selectedNumber} · ${selectedSize}`
+          : "SELECT COLOR / NUMBER / SIZE";
     } else {
       $("demoResultText").textContent =
         selectedMode === "random"
@@ -1333,13 +1335,18 @@ button{
     if (!selectedGame) return;
 
     if (selectedMode === "manual") {
-      if (!selectedColor && selectedNumber === null) {
-        $("demoResultText").textContent = "SELECT RESULT FIRST";
+      if (
+        !selectedColor ||
+        selectedNumber === null ||
+        !selectedSize
+      ) {
+        $("demoResultText").textContent =
+          "SELECT COLOR / NUMBER / SIZE";
         return;
       }
 
       $("demoResultText").textContent =
-        `${selectedColor || "—"} ${selectedNumber ?? "—"} · ${selectedSize || "—"}`;
+        `${selectedColor} ${selectedNumber} · ${selectedSize}`;
 
       showStatus(
         "Demo result generated successfully.",
@@ -1379,20 +1386,110 @@ button{
 
     if (selectedGame.key === "WINGO") {
       try {
+        const info = wingoPeriodInfo(selectedDuration);
+        const targetPeriod = info.next;
+
+        if (selectedMode === "manual") {
+          if (
+            !selectedColor ||
+            selectedNumber === null ||
+            !selectedSize
+          ) {
+            showStatus(
+              "Select Color + Number + Size first.",
+              "err"
+            );
+            return;
+          }
+
+          const { data, error } = await supabase.rpc(
+            "nplus_admin_save_wingo_manual",
+            {
+              p_duration: selectedDuration,
+              p_period: targetPeriod,
+              p_color: selectedColor,
+              p_number: Number(selectedNumber),
+              p_size: selectedSize
+            }
+          );
+
+          if (error) {
+            console.error("WINGO manual save error:", error);
+            showStatus(
+              error.message || "Unable to save manual WINGO result.",
+              "err"
+            );
+            return;
+          }
+
+          const gameState = state.WINGO || {};
+          gameState.durations = gameState.durations || {};
+          gameState.durations[selectedDuration] = {
+            duration: selectedDuration,
+            mode: "MANUAL",
+            color: data?.color || selectedColor,
+            number: data?.number ?? Number(selectedNumber),
+            size: data?.size || selectedSize,
+            result:
+              `${data?.color || selectedColor} ${data?.number ?? Number(selectedNumber)} · ${data?.size || selectedSize}`,
+            period: targetPeriod,
+            updated_at: new Date().toISOString()
+          };
+
+          state.WINGO = gameState;
+          saveDemoState(state);
+          renderGameCards();
+
+          showStatus(
+            `MANUAL saved for ${targetPeriod}: ${data?.color || selectedColor} ${data?.number ?? Number(selectedNumber)} · ${data?.size || selectedSize}`,
+            "ok"
+          );
+
+          loadWingoAnalytics();
+          return;
+        }
+
+        // AUTO / RANDOM: remove the scheduled MANUAL result for the next round
+        // so an old manual setting cannot override the new mode.
+        const nextInfo = wingoPeriodInfo(selectedDuration);
+        const { error: clearError } = await supabase.rpc(
+          "nplus_admin_clear_wingo_manual",
+          {
+            p_duration: selectedDuration,
+            p_period: nextInfo.next
+          }
+        );
+
+        if (clearError) {
+          console.error("WINGO manual clear error:", clearError);
+          showStatus(
+            clearError.message || "Unable to clear manual WINGO result.",
+            "err"
+          );
+          return;
+        }
+
+        // AUTO / RANDOM continue to use the duration-level demo mode.
         const { data, error } = await supabase.rpc(
           "nplus_admin_set_wingo_demo",
           {
             p_duration: selectedDuration,
             p_mode: selectedMode.toUpperCase(),
             p_color: selectedColor,
-            p_number: selectedNumber === null ? null : Number(selectedNumber),
+            p_number:
+              selectedNumber === null
+                ? null
+                : Number(selectedNumber),
             p_size: selectedSize
           }
         );
 
         if (error) {
           console.error("WINGO save error:", error);
-          showStatus(error.message || "Unable to save WINGO setting.", "err");
+          showStatus(
+            error.message || "Unable to save WINGO setting.",
+            "err"
+          );
           return;
         }
 
@@ -1407,6 +1504,7 @@ button{
           result: data?.result || result,
           updated_at: new Date().toISOString()
         };
+
         state.WINGO = gameState;
         saveDemoState(state);
         renderGameCards();
@@ -1419,7 +1517,10 @@ button{
         loadWingoAnalytics();
       } catch (err) {
         console.error(err);
-        showStatus(err.message || "Unable to save WINGO setting.", "err");
+        showStatus(
+          err.message || "Unable to save WINGO setting.",
+          "err"
+        );
       }
       return;
     }
@@ -1460,10 +1561,6 @@ button{
 
   document.querySelectorAll("[data-size]").forEach(btn => {
     btn.addEventListener("click", () => {
-      if (selectedNumber === null) {
-        showStatus("Select a number first. Size is synced to the number.", "err");
-        return;
-      }
       selectedSize = btn.dataset.size;
       syncDemoControls();
     });
@@ -1577,6 +1674,29 @@ button{
     }).join("");
   }
 
+  async function getSavedManualWingoResult(period, sec) {
+    try {
+      const { data, error } = await supabase
+        .from("wingo_manual_results")
+        .select("period,color,number,size,mode")
+        .eq("duration_seconds", sec)
+        .eq("period", period)
+        .eq("mode", "MANUAL")
+        .maybeSingle();
+
+      if (error || !data) return null;
+
+      return {
+        period: data.period,
+        color: String(data.color || "").toUpperCase(),
+        number: Number(data.number),
+        size: String(data.size || "").toUpperCase()
+      };
+    } catch {
+      return null;
+    }
+  }
+
   async function loadWingoAnalytics() {
     if (selectedGame?.key !== "WINGO") return;
 
@@ -1592,7 +1712,13 @@ button{
     $("waCurrentPeriod").textContent = info.current;
     $("waNextPeriod").textContent = info.next;
     $("waTimeLeft").textContent = `${info.remaining}s`;
-    $("waNextSummary").textContent = `AUTO RESULT — ${info.next}`;
+    const savedManual = await getSavedManualWingoResult(info.next, sec);
+    if (savedManual) {
+      $("waNextSummary").textContent =
+        `MANUAL RESULT — ${savedManual.color} ${savedManual.number} · ${savedManual.size}`;
+    } else {
+      $("waNextSummary").textContent = `AUTO RESULT — ${info.next}`;
+    }
 
     const { data, error } = await supabase.rpc(
       "nplus_admin_wingo_round_summary",
