@@ -10,6 +10,16 @@
     "nplus_5d_final_v5"
   ];
 
+  function getClient() {
+    const client = window.NPlusAuth?.client;
+
+    if (!client) {
+      throw new Error("Supabase client unavailable.");
+    }
+
+    return client;
+  }
+
   async function getUser() {
     if (!window.NPlusAuth?.current) {
       throw new Error("Authentication system unavailable.");
@@ -26,8 +36,9 @@
 
   async function getBalance() {
     const user = await getUser();
+    const client = getClient();
 
-    const { data, error } = await window.supabase
+    const { data, error } = await client
       .from("demo_wallets")
       .select("balance")
       .eq("user_id", user.id)
@@ -48,13 +59,14 @@
   async function changeBalance(delta, meta = {}) {
     await getUser();
 
+    const client = getClient();
     const amount = Number(delta);
 
     if (!Number.isFinite(amount) || amount === 0) {
       throw new Error("Invalid wallet amount.");
     }
 
-    const { data, error } = await window.supabase.rpc(
+    const { data, error } = await client.rpc(
       "nplus_wallet_change",
       {
         p_delta: amount,
@@ -66,13 +78,19 @@
 
     if (error) {
       console.error("Wallet change error:", error);
-      throw new Error(error.message || "Unable to update wallet.");
+      throw new Error(
+        error.message || "Unable to update wallet."
+      );
     }
 
-    const result = Array.isArray(data) ? data[0] : data;
+    const result = Array.isArray(data)
+      ? data[0]
+      : data;
 
     if (!result) {
-      throw new Error("Wallet update returned no result.");
+      throw new Error(
+        "Wallet update returned no result."
+      );
     }
 
     const tx = {
@@ -88,9 +106,12 @@
     };
 
     window.dispatchEvent(
-      new CustomEvent("nplus:wallet-change", {
-        detail: tx
-      })
+      new CustomEvent(
+        "nplus:wallet-change",
+        {
+          detail: tx
+        }
+      )
     );
 
     return Number(result.after);
@@ -115,19 +136,28 @@
 
   async function transactions() {
     const user = await getUser();
+    const client = getClient();
 
-    const { data, error } = await window.supabase
+    const { data, error } = await client
       .from("demo_wallet_transactions")
       .select(
         "id,user_id,delta,balance_before,balance_after,type,source,note,created_at"
       )
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
+      .order("created_at", {
+        ascending: false
+      })
       .limit(500);
 
     if (error) {
-      console.error("Transaction read error:", error);
-      throw new Error("Unable to load wallet transactions.");
+      console.error(
+        "Transaction read error:",
+        error
+      );
+
+      throw new Error(
+        "Unable to load wallet transactions."
+      );
     }
 
     return data || [];
