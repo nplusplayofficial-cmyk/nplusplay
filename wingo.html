@@ -410,6 +410,47 @@ function resultFor(p){
   };
 }
 
+async function getAdminWingoResult(period, sec){
+  try {
+    const client = window.NPlusAuth?.client;
+    if (!client) return null;
+
+    const { data, error } = await client
+      .from("demo_game_controls")
+      .select("game_key,duration_seconds,mode,color,number,result,updated_at")
+      .eq("game_key", "WINGO")
+      .eq("duration_seconds", sec)
+      .maybeSingle();
+
+    if (error) {
+      console.error("WINGO admin result read error:", error);
+      return null;
+    }
+
+    if (!data || String(data.mode).toUpperCase() !== "MANUAL") {
+      return null;
+    }
+
+    const n = Number(data.number);
+    if (!Number.isInteger(n) || n < 0 || n > 9) return null;
+
+    const c = color(n);
+
+    return {
+      period,
+      number: n,
+      color: c,
+      colorName: cname(c),
+      colors: colorsFor(n),
+      size: size(n),
+      adminControlled: true
+    };
+  } catch (err) {
+    console.error("WINGO admin result error:", err);
+    return null;
+  }
+}
+
 function ensureHistory(){
   const r=round();
   const arr=state.history[state.sec];
@@ -841,7 +882,13 @@ function setMode(sec){
 
 async function completeRound(start){
   const p=periodAt(start,state.sec);
-  const x=resultFor(p);
+
+  const adminResult = await getAdminWingoResult(
+    p,
+    state.sec
+  );
+
+  const x = adminResult || resultFor(p);
   const arr=state.history[state.sec];
 
   if(!arr.some(a=>a.period===p)){
