@@ -1,0 +1,3213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>N+ PLAY — Admin</title>
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#070707;
+  --panel:#101010;
+  --panel2:#151515;
+  --gold:#c9a55b;
+  --gold2:#f1e5c3;
+  --text:#f5f2e9;
+  --muted:#8e8e8e;
+  --green:#23d39a;
+  --red:#ff5260;
+  --line:rgba(201,165,91,.16);
+}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top right,rgba(201,165,91,.08),transparent 30%),
+    radial-gradient(circle at bottom left,rgba(201,165,91,.04),transparent 35%),
+    var(--bg);
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
+  min-height:100vh;
+}
+button{
+  font:inherit;
+  cursor:pointer;
+}
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+.app{
+  width:min(1180px,94%);
+  margin:auto;
+  padding:28px 0 50px;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  padding:20px 22px;
+  border:1px solid var(--line);
+  background:rgba(16,16,16,.92);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.mark{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  background:linear-gradient(145deg,#f1e5c3,#c9a55b);
+  color:#080808;
+  font-weight:1000;
+  font-size:20px;
+}
+.brand h1{
+  margin:0;
+  font-size:19px;
+  letter-spacing:3px;
+}
+.brand p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:2px;
+}
+.logout{
+  border:1px solid rgba(255,82,96,.3);
+  color:#ff8b94;
+  background:rgba(255,82,96,.06);
+  border-radius:12px;
+  padding:11px 16px;
+  font-weight:800;
+}
+.hero{
+  margin-top:22px;
+  padding:26px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(201,165,91,.08),rgba(16,16,16,.96));
+}
+.hero .eyebrow{
+  color:var(--gold);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+.hero h2{
+  margin:9px 0 5px;
+  font-size:30px;
+}
+.hero p{
+  color:var(--muted);
+  margin:0;
+}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  margin-top:20px;
+}
+.stat{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:20px;
+}
+.stat span{
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1.5px;
+}
+.stat strong{
+  display:block;
+  margin-top:8px;
+  font-size:27px;
+}
+.pending{
+  color:var(--gold2);
+}
+
+.game-controls{
+  margin-top:22px;
+}
+.game-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+.game-box{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px;
+  transition:.2s;
+}
+.game-box:hover{
+  border-color:rgba(201,165,91,.38);
+  transform:translateY(-1px);
+}
+.game-icon{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:rgba(201,165,91,.10);
+  border:1px solid var(--line);
+  font-size:19px;
+  margin-bottom:13px;
+}
+.game-box h4{
+  margin:0;
+  font-size:17px;
+}
+.game-status{
+  margin-top:5px;
+  color:var(--green);
+  font-size:10px;
+  letter-spacing:1.3px;
+  font-weight:900;
+}
+.game-mini{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:16px;
+}
+.game-mini div{
+  padding:10px;
+  border-radius:10px;
+  background:#151515;
+}
+.game-mini span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1px;
+}
+.game-mini strong{
+  display:block;
+  margin-top:4px;
+  font-size:13px;
+}
+.open-game{
+  width:100%;
+  margin-top:13px;
+  padding:11px;
+  border-radius:11px;
+  border:1px solid var(--line);
+  background:#151515;
+  color:var(--gold2);
+  font-weight:900;
+}
+.game-detail{
+  display:none;
+  margin-top:22px;
+}
+.game-detail.show{
+  display:block;
+}
+.detail-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:14px;
+}
+.detail-head h3{margin:0}
+.close-game{
+  background:#151515;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:9px 13px;
+  font-weight:800;
+}
+.wingo-duration{
+  display:none;
+  margin-top:15px;
+  padding:14px;
+  border-radius:14px;
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+}
+.wingo-duration.show{display:block}
+.wingo-duration-title{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1.2px;
+  margin-bottom:9px;
+}
+.wingo-duration-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.duration-btn{
+  border:1px solid var(--line);
+  background:#151515;
+  color:var(--text);
+  border-radius:10px;
+  padding:10px 7px;
+  font-weight:900;
+  font-size:11px;
+}
+.duration-btn.active{
+  border-color:rgba(201,165,91,.7);
+  background:rgba(201,165,91,.12);
+  color:var(--gold2);
+}
+
+.mode-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.mode-btn{
+  border:1px solid var(--line);
+  background:#151515;
+  color:var(--text);
+  border-radius:12px;
+  padding:13px 10px;
+  font-weight:900;
+}
+.mode-btn.active{
+  border-color:rgba(201,165,91,.7);
+  background:rgba(201,165,91,.12);
+  color:var(--gold2);
+}
+.control-panel{
+  margin-top:15px;
+  padding:18px;
+  border-radius:15px;
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+}
+.control-panel h4{
+  margin:0 0 13px;
+}
+.choice-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+}
+.choice{
+  border:1px solid rgba(255,255,255,.10);
+  background:#171717;
+  color:#fff;
+  border-radius:10px;
+  padding:10px 13px;
+  font-weight:800;
+}
+.choice.selected{
+  border-color:var(--gold);
+  color:var(--gold2);
+  background:rgba(201,165,91,.12);
+}
+.demo-result{
+  margin-top:15px;
+  padding:17px;
+  border-radius:14px;
+  background:linear-gradient(145deg,rgba(201,165,91,.09),rgba(16,16,16,.95));
+  border:1px solid var(--line);
+}
+.demo-result .result-big{
+  font-size:28px;
+  font-weight:1000;
+  color:var(--gold2);
+}
+.demo-actions{
+  display:flex;
+  gap:9px;
+  margin-top:14px;
+}
+.demo-actions button{
+  flex:1;
+  border-radius:11px;
+  padding:12px;
+  font-weight:900;
+}
+.generate-demo{
+  background:linear-gradient(145deg,#f1e5c3,#c9a55b);
+  color:#080808;
+  border:0;
+}
+.save-demo{
+  background:#151515;
+  color:var(--gold2);
+  border:1px solid var(--line);
+}
+.demo-warning{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+
+.live-monitor{
+  margin-top:15px;
+  display:none!important;
+}
+.live-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.live-card{
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;
+  padding:16px;
+}
+.live-card span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1.1px;
+}
+.live-card strong{
+  display:block;
+  margin-top:7px;
+  font-size:18px;
+}
+.live-table,
+.wa-table,
+.game-table,
+.deposit-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.live-table th,.live-table td,
+.wa-table th,.wa-table td,
+.game-table th,.game-table td,
+.deposit-table th,.deposit-table td{
+  padding:10px 8px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  text-align:left;
+  white-space:nowrap;
+}
+.live-table th,.wa-table th,.game-table th,.deposit-table th{
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1px;
+}
+.live-table td,.wa-table td,.game-table td,.deposit-table td{
+  font-size:11px;
+}
+.live-note{
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+  margin-top:10px;
+}
+
+.commission{
+  margin-top:22px;
+}
+.commission-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+}
+.commission-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:20px;
+}
+.commission-card span{
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1.4px;
+}
+.commission-card strong{
+  display:block;
+  margin-top:8px;
+  font-size:25px;
+}
+.commission-card.highlight{
+  background:linear-gradient(145deg,rgba(201,165,91,.12),rgba(16,16,16,.98));
+}
+.commission-note{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:10px;
+}
+
+.wa-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:14px;
+}
+.wa-card{
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  padding:13px;
+}
+.wa-card span,.wa-breakdown h4,.wa-next span{
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1px;
+}
+.wa-card strong{
+  display:block;
+  margin-top:6px;
+  font-size:16px;
+}
+.wa-breakdown{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:14px;
+}
+.wa-breakdown>div{
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  padding:14px;
+}
+.wa-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:11px;
+}
+.wa-line:last-child{border-bottom:0}
+.wa-line b{font-size:12px}
+.wa-next{
+  margin-top:14px;
+  padding:14px;
+  border-radius:12px;
+  background:rgba(201,165,91,.08);
+  border:1px solid rgba(201,165,91,.18);
+}
+.wa-next strong{
+  display:block;
+  margin-top:5px;
+  font-size:17px;
+}
+
+.auto-insight{
+  margin-top:14px;
+  padding:15px;
+  border-radius:14px;
+  background:linear-gradient(145deg,rgba(201,165,91,.08),rgba(16,16,16,.96));
+  border:1px solid rgba(201,165,91,.16);
+}
+.auto-insight-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+.auto-insight-head b{
+  font-size:12px;
+  letter-spacing:1.2px;
+}
+.auto-insight-head span{
+  color:var(--muted);
+  font-size:9px;
+}
+.auto-insight-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+}
+.auto-insight-card{
+  padding:11px;
+  border-radius:10px;
+  background:#141414;
+  border:1px solid rgba(255,255,255,.06);
+}
+.auto-insight-card span{
+  display:block;
+  color:var(--muted);
+  font-size:8px;
+  letter-spacing:1px;
+}
+.auto-insight-card strong{
+  display:block;
+  margin-top:5px;
+  font-size:14px;
+}
+.auto-insight-result{
+  margin-top:10px;
+  padding:12px;
+  border-radius:10px;
+  background:rgba(35,211,154,.06);
+  border:1px solid rgba(35,211,154,.16);
+}
+.auto-insight-result span{
+  color:var(--muted);
+  font-size:8px;
+  letter-spacing:1px;
+}
+.auto-insight-result strong{
+  display:block;
+  margin-top:6px;
+  color:#9ff0cc;
+  font-size:18px;
+}
+.auto-insight-note{
+  margin-top:9px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.45;
+}
+
+.requests,
+.deposit-report{
+  margin-top:22px;
+}
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:12px;
+}
+.section-head h3{
+  margin:0;
+  font-size:18px;
+}
+.refresh{
+  background:#151515;
+  border:1px solid var(--line);
+  color:var(--gold2);
+  padding:9px 13px;
+  border-radius:10px;
+  font-weight:800;
+}
+.card{
+  background:rgba(16,16,16,.94);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:14px;
+}
+
+.deposit-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+.deposit-stat{
+  background:linear-gradient(145deg,rgba(201,165,91,.09),rgba(16,16,16,.98));
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:20px;
+}
+.deposit-stat span{
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1.3px;
+}
+.deposit-stat strong{
+  display:block;
+  margin-top:8px;
+  font-size:25px;
+}
+.deposit-table-wrap{
+  overflow-x:auto;
+}
+.deposit-status{
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.6px;
+}
+.deposit-status.approved{
+  color:var(--green);
+  background:rgba(35,211,154,.09);
+  border:1px solid rgba(35,211,154,.22);
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1.3fr .8fr .8fr .8fr;
+  gap:18px;
+  align-items:center;
+}
+.label{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1.2px;
+  margin-bottom:5px;
+}
+.value{
+  font-weight:800;
+}
+.uid{
+  color:var(--gold2);
+  font-size:12px;
+  word-break:break-all;
+}
+.amount{
+  font-size:22px;
+  color:var(--gold2);
+}
+.time{
+  color:#aaa;
+  font-size:12px;
+}
+.actions{
+  display:flex;
+  gap:9px;
+  margin-top:17px;
+  padding-top:15px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.accept,.reject{
+  border-radius:11px;
+  padding:11px 18px;
+  font-weight:900;
+}
+.accept{
+  background:rgba(35,211,154,.12);
+  color:var(--green);
+  border:1px solid rgba(35,211,154,.3);
+}
+.reject{
+  background:rgba(255,82,96,.08);
+  color:#ff7c86;
+  border:1px solid rgba(255,82,96,.28);
+}
+.empty{
+  text-align:center;
+  padding:45px 20px;
+  border:1px dashed rgba(201,165,91,.2);
+  border-radius:18px;
+  color:var(--muted);
+}
+.status{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  transform:translateX(-50%) translateY(20px);
+  opacity:0;
+  pointer-events:none;
+  background:#171717;
+  border:1px solid var(--line);
+  padding:13px 18px;
+  border-radius:12px;
+  transition:.25s;
+  z-index:20;
+}
+.status.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.status.ok{border-color:rgba(35,211,154,.3)}
+.status.err{border-color:rgba(255,82,96,.3)}
+.loading{
+  color:var(--muted);
+  text-align:center;
+  padding:30px;
+}
+
+@media(max-width:1000px){
+  .commission-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:950px){
+  .game-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:850px){
+  .live-grid{grid-template-columns:1fr}
+}
+@media(max-width:800px){
+  .stats{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr 1fr}
+  .deposit-grid{grid-template-columns:1fr 1fr}
+  .wa-grid,.wa-breakdown{grid-template-columns:1fr 1fr}
+}
+@media(max-width:700px){
+  .auto-insight-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .app{width:92%;padding-top:15px}
+  .topbar{padding:15px}
+  .hero{padding:20px}
+  .hero h2{font-size:24px}
+  .row{grid-template-columns:1fr}
+  .actions button{flex:1}
+  .game-grid{grid-template-columns:1fr}
+  .mode-grid{grid-template-columns:1fr}
+  .detail-head{align-items:flex-start}
+  .wingo-duration-grid{grid-template-columns:repeat(2,1fr)}
+  .commission-grid{grid-template-columns:1fr}
+  .deposit-grid{grid-template-columns:1fr}
+  .wa-grid,.wa-breakdown{grid-template-columns:1fr}
+}
+
+.adminnav{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px;padding:8px;border:1px solid var(--line);border-radius:14px;background:#101010}
+.adminnav a{flex:1;min-width:150px;text-align:center;text-decoration:none;border:1px solid rgba(255,255,255,.08);background:#151515;color:var(--muted);border-radius:10px;padding:11px 10px;font-size:11px;font-weight:900;letter-spacing:.5px}
+.adminnav a.active{background:rgba(201,165,91,.12);border-color:rgba(201,165,91,.55);color:var(--gold2)}
+.dashboard{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.dashboard-card{display:block;text-decoration:none;background:linear-gradient(145deg,rgba(201,165,91,.09),rgba(16,16,16,.98));border:1px solid var(--line);border-radius:18px;padding:22px;color:var(--text);transition:.2s}
+.dashboard-card:hover{transform:translateY(-2px);border-color:rgba(201,165,91,.4)}
+.dashboard-card .icon{font-size:28px;margin-bottom:12px}
+.dashboard-card h3{margin:0 0 6px;font-size:18px}
+.dashboard-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.dashboard-card .go{margin-top:15px;color:var(--gold2);font-weight:900;font-size:11px}
+.page-deposits .game-controls,.page-deposits .commission{display:none!important}
+.page-games .hero,.page-games .commission,.page-games .deposit-report,.page-games .requests{display:none!important}
+.page-reports .hero,.page-reports .game-controls,.page-reports .deposit-report,.page-reports .requests{display:none!important}
+.page-dashboard .hero,.page-dashboard .game-controls,.page-dashboard .commission,.page-dashboard .deposit-report,.page-dashboard .requests{display:none!important}
+@media(max-width:850px){.dashboard{grid-template-columns:1fr}.adminnav a{min-width:100%;}}
+
+</style>
+</head>
+
+<body class="page-deposits">
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">N+</div>
+      <div>
+        <h1>N+ PLAY</h1>
+        <p>SECURE ADMIN PANEL</p>
+      </div>
+    </div>
+
+    <button class="logout" id="logoutBtn">LOGOUT</button>
+  </header>
+  <nav class="adminnav">
+    <a href="admin.html" data-nav="dashboard">DASHBOARD</a>
+    <a href="admin-deposits.html" data-nav="deposits">DEPOSITS &amp; WALLET</a>
+    <a href="admin-games.html" data-nav="games">GAME CONTROL</a>
+    <a href="admin-reports.html" data-nav="reports">COMMISSION &amp; REPORTS</a>
+  </nav>
+
+  <section class="hero">
+    <div class="eyebrow">ADMIN CONTROL CENTER</div>
+    <h2>Virtual Wallet Requests</h2>
+    <p>Manage demo-credit deposit requests securely.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <span>PENDING REQUESTS</span>
+        <strong class="pending" id="pendingCount">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>PENDING VIRTUAL CREDITS</span>
+        <strong id="pendingAmount">₹0.00</strong>
+      </div>
+
+      <div class="stat">
+        <span>ADMIN STATUS</span>
+        <strong style="color:#23d39a;font-size:18px">AUTHORIZED</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="game-controls">
+    <div class="section-head">
+      <div>
+        <h3>Demo Game Control Center</h3>
+        <div class="commission-note">Virtual/demo controls only • no real-money settlement</div>
+      </div>
+    </div>
+
+    <div class="game-grid" id="gameGrid"></div>
+
+    <div class="game-detail" id="gameDetail">
+      <div class="detail-head">
+        <div>
+          <h3 id="detailGameName">Game Control</h3>
+          <div class="commission-note" id="detailPeriod">Demo period —</div>
+        </div>
+        <button class="close-game" id="closeGameBtn">✕ CLOSE</button>
+      </div>
+
+      <div class="card">
+        <div class="label">DEMO RESULT MODE</div>
+
+        <div class="mode-grid">
+          <button class="mode-btn active" data-mode="auto">⚙ AUTO</button>
+          <button class="mode-btn" data-mode="manual">✦ MANUAL DEMO</button>
+          <button class="mode-btn" data-mode="random">↯ RANDOM DEMO</button>
+        </div>
+
+        <div class="wingo-duration" id="wingoDuration">
+          <div class="wingo-duration-title">WINGO ROUND DURATION</div>
+          <div class="wingo-duration-grid">
+            <button class="duration-btn active" data-duration="30">30 SEC</button>
+            <button class="duration-btn" data-duration="60">1 MIN</button>
+            <button class="duration-btn" data-duration="180">3 MIN</button>
+            <button class="duration-btn" data-duration="300">5 MIN</button>
+          </div>
+        </div>
+
+        <div class="control-panel" id="manualPanel" style="display:none">
+          <h4>Manual Demo Result</h4>
+
+          <div class="label">COLOR</div>
+          <div class="choice-row" id="colorChoices">
+            <button class="choice" data-color="GREEN">GREEN</button>
+            <button class="choice" data-color="VIOLET">VIOLET</button>
+            <button class="choice" data-color="RED">RED</button>
+          </div>
+
+          <div class="label" style="margin-top:16px">NUMBER</div>
+          <div class="choice-row" id="numberChoices">
+            <button class="choice" data-number="0">0</button>
+            <button class="choice" data-number="1">1</button>
+            <button class="choice" data-number="2">2</button>
+            <button class="choice" data-number="3">3</button>
+            <button class="choice" data-number="4">4</button>
+            <button class="choice" data-number="5">5</button>
+            <button class="choice" data-number="6">6</button>
+            <button class="choice" data-number="7">7</button>
+            <button class="choice" data-number="8">8</button>
+            <button class="choice" data-number="9">9</button>
+          </div>
+
+          <div class="label" style="margin-top:16px">SIZE</div>
+          <div class="choice-row" id="sizeChoices">
+            <button class="choice" data-size="BIG">BIG <small>5–9</small></button>
+            <button class="choice" data-size="SMALL">SMALL <small>0–4</small></button>
+          </div>
+
+          <div class="commission-note" style="margin-top:8px">
+            MANUAL mode uses exactly the Color + Number + Size you select.
+          </div>
+        </div>
+
+        <div class="demo-result">
+          <div class="label">CURRENT DEMO RESULT</div>
+          <div class="result-big" id="demoResultText">AUTO</div>
+        </div>
+
+        <div class="demo-actions">
+          <button class="generate-demo" id="generateDemoBtn">GENERATE DEMO RESULT</button>
+          <button class="save-demo" id="saveDemoBtn">SAVE DEMO SETTING</button>
+        </div>
+
+        <div class="demo-warning">
+          These controls are for the N+ PLAY virtual/demo presentation only.
+          They do not alter user balances, payments, withdrawals, or real-money outcomes.
+        </div>
+
+        <div class="card wingo-analytics" id="wingoAnalytics" style="display:none">
+          <div class="section-head">
+            <div>
+              <h3>WINGO Round Analytics</h3>
+              <div class="commission-note">
+                Read-only virtual-credit analytics. Results are independent of betting distribution.
+              </div>
+            </div>
+            <button class="refresh" id="wingoAnalyticsRefresh">↻ REFRESH</button>
+          </div>
+
+          <div class="wa-grid">
+            <div class="wa-card"><span>DURATION</span><strong id="waDuration">30 SEC</strong></div>
+            <div class="wa-card"><span>CURRENT PERIOD</span><strong id="waCurrentPeriod">—</strong></div>
+            <div class="wa-card"><span>NEXT PERIOD</span><strong id="waNextPeriod">—</strong></div>
+            <div class="wa-card"><span>TIME LEFT</span><strong id="waTimeLeft">—</strong></div>
+            <div class="wa-card"><span>BET COUNT</span><strong id="waBetCount">0</strong></div>
+            <div class="wa-card"><span>TOTAL STAKE</span><strong id="waStake">₹0.00</strong></div>
+          </div>
+
+          <div class="wa-breakdown">
+            <div>
+              <h4>COLOR BETS</h4>
+              <div id="waColors"></div>
+            </div>
+            <div>
+              <h4>NUMBER BETS</h4>
+              <div id="waNumbers"></div>
+            </div>
+            <div>
+              <h4>BIG / SMALL</h4>
+              <div id="waSizes"></div>
+            </div>
+          </div>
+
+          <div class="wa-next">
+            <span>CURRENT ROUND</span>
+            <strong id="waNextSummary">AUTO RESULT — CURRENT PERIOD</strong>
+          </div>
+
+          <div class="auto-insight" id="autoDemoInsight">
+            <div class="auto-insight-head">
+              <b>AUTO DEMO INSIGHT</b>
+              <span id="autoInsightPeriod">LIVE CURRENT PERIOD</span>
+            </div>
+
+            <div class="auto-insight-grid">
+              <div class="auto-insight-card">
+                <span>LOWEST COLOR STAKE</span>
+                <strong id="autoLowestColor">—</strong>
+              </div>
+              <div class="auto-insight-card">
+                <span>LOWEST NUMBER STAKE</span>
+                <strong id="autoLowestNumber">—</strong>
+              </div>
+              <div class="auto-insight-card">
+                <span>LOWEST SIZE STAKE</span>
+                <strong id="autoLowestSize">—</strong>
+              </div>
+            </div>
+
+            <div class="auto-insight-result">
+              <span>AUTO DEMO RESULT · INDEPENDENT</span>
+              <strong id="autoInsightResult">—</strong>
+            </div>
+
+            <div class="auto-insight-note">
+              The lowest-stake values are shown as a demo analytics insight only.
+              They do not control or select the round result. AUTO result remains independent.
+            </div>
+          </div>
+
+          <div style="margin-top:15px;overflow-x:auto">
+            <table class="wa-table">
+              <thead>
+                <tr>
+                  <th>USER</th>
+                  <th>NPLUS UID</th>
+                  <th>PERIOD</th>
+                  <th>SELECTION</th>
+                  <th>QTY</th>
+                  <th>MULTI</th>
+                  <th>STAKE</th>
+                  <th>TIME</th>
+                </tr>
+              </thead>
+              <tbody id="waBets">
+                <tr><td colspan="8" class="loading">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="commission-note" style="margin-top:12px">
+            AUTO mode uses an independent demo result generator. The system does not select
+            an outcome from the lowest/highest betting side.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="commission">
+    <div class="section-head">
+      <div>
+        <h3>Commission & Game Report</h3>
+        <div class="commission-note">Virtual/demo platform fee report • current rate: 2%</div>
+      </div>
+      <button class="refresh" id="commissionRefreshBtn">↻ REFRESH</button>
+    </div>
+
+    <div class="commission-grid">
+      <div class="commission-card">
+        <span>TOTAL BETS</span>
+        <strong id="totalBets">0</strong>
+      </div>
+      <div class="commission-card">
+        <span>TOTAL BET AMOUNT</span>
+        <strong id="totalBetAmount">₹0.00</strong>
+      </div>
+      <div class="commission-card">
+        <span>TOTAL WINS</span>
+        <strong id="totalWins">0</strong>
+      </div>
+      <div class="commission-card">
+        <span>TOTAL WINNING AMOUNT</span>
+        <strong id="totalWinningAmount">₹0.00</strong>
+      </div>
+      <div class="commission-card highlight">
+        <span>TODAY COMMISSION</span>
+        <strong id="todayCommission">₹0.00</strong>
+      </div>
+      <div class="commission-card highlight">
+        <span>ALL-TIME COMMISSION</span>
+        <strong id="allTimeCommission">₹0.00</strong>
+      </div>
+      <div class="commission-card">
+        <span>TODAY BET AMOUNT</span>
+        <strong id="todayBetAmount">₹0.00</strong>
+      </div>
+      <div class="commission-card">
+        <span>COMMISSION RATE</span>
+        <strong id="commissionRate">2%</strong>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:15px">
+      <div class="section-head">
+        <h3>Game-wise Commission</h3>
+      </div>
+      <div id="gameCommissionList">
+        <div class="loading">Loading commission...</div>
+      </div>
+    </div>
+
+    <div class="card live-monitor">
+      <div class="section-head">
+        <div>
+          <h3>WINGO Live Round Monitor</h3>
+          <div class="live-note">
+            Read-only demo monitoring. Shows the current/next period and confirmed
+            virtual-credit selections. It does not choose or alter outcomes.
+          </div>
+        </div>
+        <button class="refresh" id="wingoMonitorRefresh">↻ REFRESH</button>
+      </div>
+
+      <div class="live-grid">
+        <div class="live-card">
+          <span>DURATION</span>
+          <strong id="liveDuration">30 SEC</strong>
+        </div>
+        <div class="live-card">
+          <span>CURRENT PERIOD</span>
+          <strong id="liveCurrentPeriod">—</strong>
+        </div>
+        <div class="live-card">
+          <span>NEXT PERIOD</span>
+          <strong id="liveNextPeriod">—</strong>
+        </div>
+        <div class="live-card">
+          <span>TIME LEFT</span>
+          <strong id="liveTimeLeft">—</strong>
+        </div>
+        <div class="live-card">
+          <span>CURRENT ROUND BETS</span>
+          <strong id="liveBetCount">0</strong>
+        </div>
+        <div class="live-card">
+          <span>CURRENT ROUND STAKE</span>
+          <strong id="liveBetAmount">₹0.00</strong>
+        </div>
+      </div>
+
+      <div style="margin-top:15px;overflow-x:auto">
+        <table class="live-table">
+          <thead>
+            <tr>
+              <th>USER</th>
+              <th>NPLUS UID</th>
+              <th>PERIOD</th>
+              <th>SELECTION</th>
+              <th>STAKE</th>
+              <th>TIME</th>
+            </tr>
+          </thead>
+          <tbody id="wingoLiveBets">
+            <tr><td colspan="6" class="loading">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPROVED DEPOSIT REPORT -->
+  <section class="deposit-report">
+    <div class="section-head">
+      <div>
+        <h3>Deposit Report</h3>
+        <div class="commission-note">
+          Approved virtual-credit deposits and deposit history.
+        </div>
+      </div>
+      <button class="refresh" id="depositReportRefreshBtn">↻ REFRESH</button>
+    </div>
+
+    <div class="deposit-grid">
+      <div class="deposit-stat">
+        <span>TOTAL APPROVED DEPOSITED</span>
+        <strong id="approvedDepositTotal">₹0.00</strong>
+      </div>
+
+      <div class="deposit-stat">
+        <span>TODAY APPROVED DEPOSITED</span>
+        <strong id="todayDepositTotal">₹0.00</strong>
+      </div>
+
+      <div class="deposit-stat">
+        <span>APPROVED DEPOSIT COUNT</span>
+        <strong id="approvedDepositCount">0</strong>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:15px">
+      <div class="section-head">
+        <h3>Approved Deposit History</h3>
+      </div>
+
+      <div class="deposit-table-wrap">
+        <table class="deposit-table">
+          <thead>
+            <tr>
+              <th>USER</th>
+              <th>NPLUS UID</th>
+              <th>DEPOSITED</th>
+              <th>STATUS</th>
+              <th>TIME</th>
+            </tr>
+          </thead>
+          <tbody id="depositHistoryBody">
+            <tr>
+              <td colspan="5" class="loading">Loading deposit history...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="requests">
+    <div class="section-head">
+      <div>
+        <h3>Pending Requests</h3>
+        <div class="commission-note">
+          Requests remain here until accepted or rejected.
+        </div>
+      </div>
+      <button class="refresh" id="refreshBtn">↻ REFRESH</button>
+    </div>
+
+    <div id="requestList">
+      <div class="loading">Loading requests...</div>
+    </div>
+  </section>
+
+</div>
+
+<div class="status" id="status"></div>
+
+<script>document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.adminnav a').forEach(a=>a.classList.toggle('active',a.dataset.nav==='deposits'));});</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261006"></script>
+
+<script>
+(() => {
+  "use strict";
+
+  const cfg = window.NPlusConfig;
+
+  if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+    document.body.innerHTML = `
+      <div style="
+        min-height:100vh;
+        display:grid;
+        place-items:center;
+        background:#070707;
+        color:#fff;
+        font-family:Arial;
+        padding:30px;
+        text-align:center;
+      ">
+        <div>
+          <h2>N+ PLAY configuration not found.</h2>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const supabase = window.supabase.createClient(
+    cfg.supabaseUrl,
+    cfg.supabaseAnonKey
+  );
+
+  const $ = id => document.getElementById(id);
+
+  let currentUser = null;
+  let selectedGame = null;
+  let selectedMode = "auto";
+  let selectedColor = null;
+  let selectedNumber = null;
+  let selectedSize = null;
+  let selectedDuration = 30;
+
+  const DEMO_GAMES = [
+    { name:"WINGO", key:"WINGO", icon:"🎯" },
+    { name:"K3 WINGO", key:"K3", icon:"🎲" },
+    { name:"5D", key:"5D", icon:"🔢" },
+    { name:"TRX WINGO", key:"TRX", icon:"⚡" },
+    { name:"AVIATOR", key:"AVIATOR", icon:"✈️" },
+    { name:"MOTO RACE", key:"MOTO", icon:"🏁" }
+  ];
+
+  function money(value) {
+    return "₹" + Number(value || 0).toLocaleString("en-IN", {
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    });
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function showStatus(message, type="ok") {
+    const el = $("status");
+    el.textContent = message;
+    el.className = "status show " + type;
+
+    window.clearTimeout(showStatus._timer);
+    showStatus._timer = window.setTimeout(() => {
+      el.className = "status";
+    }, 2800);
+  }
+
+  async function requireAdmin() {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error || !data.session) {
+      location.replace("admin-login.html");
+      return false;
+    }
+
+    currentUser = data.session.user;
+
+    const {
+      data: profile,
+      error: profileError
+    } = await supabase
+      .from("profiles")
+      .select("id,email,display_name,role")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+    if (
+      profileError ||
+      !profile ||
+      String(profile.role || "").toLowerCase() !== "admin"
+    ) {
+      await supabase.auth.signOut();
+
+      document.body.innerHTML = `
+        <div style="
+          min-height:100vh;
+          display:grid;
+          place-items:center;
+          background:#070707;
+          color:#fff;
+          font-family:Arial;
+          padding:30px;
+          text-align:center;
+        ">
+          <div>
+            <div style="font-size:50px">🔒</div>
+            <h2>Access Denied</h2>
+            <p style="color:#999">
+              This area is restricted to authorized administrators.
+            </p>
+            <button
+              onclick="location.href='admin-login.html'"
+              style="
+                padding:12px 20px;
+                border-radius:10px;
+                border:0;
+                background:#c9a55b;
+                font-weight:900;
+                cursor:pointer;
+              "
+            >
+              BACK TO LOGIN
+            </button>
+          </div>
+        </div>
+      `;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  function getDemoState() {
+    try {
+      return JSON.parse(
+        localStorage.getItem("nplus_admin_demo_controls") || "{}"
+      );
+    } catch {
+      return {};
+    }
+  }
+
+  function saveDemoState(state) {
+    localStorage.setItem(
+      "nplus_admin_demo_controls",
+      JSON.stringify(state)
+    );
+  }
+
+  function renderGameCards() {
+    const state = getDemoState();
+    const grid = $("gameGrid");
+
+    grid.innerHTML = DEMO_GAMES.map(game => {
+      const item = state[game.key] || {};
+      const durationState =
+        game.key === "WINGO"
+          ? (item.durations?.[30] || {})
+          : item;
+
+      const mode = durationState.mode || "AUTO";
+      const result = durationState.result || "—";
+
+      return `
+        <article class="game-box">
+          <div class="game-icon">${game.icon}</div>
+          <h4>${escapeHTML(game.name)}</h4>
+          <div class="game-status">● DEMO ACTIVE</div>
+
+          <div class="game-mini">
+            <div>
+              <span>MODE</span>
+              <strong>${escapeHTML(mode)}</strong>
+            </div>
+
+            <div>
+              <span>LAST RESULT</span>
+              <strong>${escapeHTML(result)}</strong>
+            </div>
+          </div>
+
+          <button class="open-game" data-game="${escapeHTML(game.key)}">
+            OPEN GAME CONTROL →
+          </button>
+        </article>
+      `;
+    }).join("");
+
+    document.querySelectorAll("[data-game]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        openGame(btn.dataset.game);
+      });
+    });
+  }
+
+  function wingoDurationLabel(sec) {
+    return sec === 30
+      ? "30 SEC"
+      : sec === 60
+      ? "1 MIN"
+      : sec === 180
+      ? "3 MIN"
+      : "5 MIN";
+  }
+
+  function wingoPeriodInfo(sec, now = Date.now()) {
+    const start =
+      Math.floor(now / (sec * 1000)) *
+      sec *
+      1000;
+
+    const next = start + sec * 1000;
+
+    function periodAt(ts) {
+      const d = new Date(ts);
+      const idx = Math.floor(ts / (sec * 1000));
+
+      const code = {
+        30:"1000",
+        60:"2000",
+        180:"3000",
+        300:"4000"
+      }[sec];
+
+      const date =
+        d.getFullYear() +
+        String(d.getMonth() + 1).padStart(2,"0") +
+        String(d.getDate()).padStart(2,"0");
+
+      return (
+        date +
+        code +
+        String(idx % 100000).padStart(5,"0")
+      );
+    }
+
+    return {
+      current: periodAt(start),
+      next: periodAt(next),
+      remaining: Math.max(
+        0,
+        Math.ceil((next - now) / 1000)
+      )
+    };
+  }
+
+  function syncDemoControls() {
+    const durationBox = $("wingoDuration");
+
+    durationBox.classList.toggle(
+      "show",
+      selectedGame?.key === "WINGO"
+    );
+
+    document.querySelectorAll(".duration-btn").forEach(btn => {
+      btn.classList.toggle(
+        "active",
+        Number(btn.dataset.duration) === selectedDuration
+      );
+    });
+
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+      btn.classList.toggle(
+        "active",
+        btn.dataset.mode === selectedMode
+      );
+    });
+
+    $("manualPanel").style.display =
+      selectedMode === "manual"
+        ? "block"
+        : "none";
+
+    document.querySelectorAll("[data-color]").forEach(btn => {
+      btn.classList.toggle(
+        "selected",
+        btn.dataset.color === selectedColor
+      );
+    });
+
+    document.querySelectorAll("[data-number]").forEach(btn => {
+      btn.classList.toggle(
+        "selected",
+        btn.dataset.number === selectedNumber
+      );
+    });
+
+    document.querySelectorAll("[data-size]").forEach(btn => {
+      btn.classList.toggle(
+        "selected",
+        btn.dataset.size === selectedSize
+      );
+    });
+
+    const rootState = getDemoState();
+    const gameState = rootState[selectedGame?.key] || {};
+
+    const result =
+      selectedGame?.key === "WINGO"
+        ? gameState.durations?.[selectedDuration]?.result
+        : gameState.result;
+
+    if (selectedMode === "manual") {
+      $("demoResultText").textContent =
+        selectedColor &&
+        selectedNumber !== null &&
+        selectedSize
+          ? `${selectedColor} ${selectedNumber} · ${selectedSize}`
+          : "SELECT COLOR / NUMBER / SIZE";
+    } else {
+      $("demoResultText").textContent =
+        selectedMode === "random"
+          ? "RANDOM DEMO"
+          : (result || "AUTO");
+    }
+  }
+
+  function openGame(key) {
+    selectedGame = DEMO_GAMES.find(
+      game => game.key === key
+    );
+
+    if (!selectedGame) return;
+
+    const rootState = getDemoState();
+    const state = rootState[key] || {};
+
+    selectedDuration =
+      key === "WINGO"
+        ? Number(
+            state.durations?.[30]?.duration || 30
+          )
+        : 30;
+
+    selectedMode =
+      String(
+        key === "WINGO"
+          ? (
+              state.durations?.[
+                selectedDuration
+              ]?.mode || "AUTO"
+            )
+          : (state.mode || "AUTO")
+      ).toLowerCase();
+
+    const selectedState =
+      key === "WINGO"
+        ? (
+            state.durations?.[
+              selectedDuration
+            ] || {}
+          )
+        : state;
+
+    selectedColor =
+      selectedState.color || null;
+
+    selectedNumber =
+      selectedState.number === undefined ||
+      selectedState.number === null
+        ? null
+        : String(selectedState.number);
+
+    selectedSize =
+      selectedState.size || null;
+
+    $("detailGameName").textContent =
+      selectedGame.name +
+      " — DEMO CONTROL";
+
+    $("detailPeriod").textContent =
+      "Demo period " +
+      new Date().toLocaleString("en-IN");
+
+    $("gameDetail").classList.add("show");
+
+    syncDemoControls();
+
+    $("wingoAnalytics").style.display =
+      selectedGame.key === "WINGO"
+        ? "block"
+        : "none";
+
+    if (selectedGame.key === "WINGO") {
+      loadWingoAnalytics();
+    }
+
+    $("gameDetail").scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+  }
+
+  function generateDemoResult() {
+    if (!selectedGame) return;
+
+    if (selectedMode === "manual") {
+      if (
+        !selectedColor ||
+        selectedNumber === null ||
+        !selectedSize
+      ) {
+        $("demoResultText").textContent =
+          "SELECT COLOR / NUMBER / SIZE";
+
+        showStatus(
+          "Select Color + Number + Size first.",
+          "err"
+        );
+
+        return;
+      }
+
+      $("demoResultText").textContent =
+        `${selectedColor} ${selectedNumber} · ${selectedSize}`;
+
+      showStatus(
+        "Demo result generated successfully.",
+        "ok"
+      );
+
+      return;
+    }
+
+    const number =
+      Math.floor(Math.random() * 10);
+
+    const colors = [
+      "GREEN",
+      "VIOLET",
+      "RED"
+    ];
+
+    const color =
+      colors[
+        Math.floor(
+          Math.random() * colors.length
+        )
+      ];
+
+    const size =
+      number >= 5
+        ? "BIG"
+        : "SMALL";
+
+    $("demoResultText").textContent =
+      `${color} ${number} · ${size}`;
+
+    showStatus(
+      "Demo result generated successfully.",
+      "ok"
+    );
+  }
+
+  async function saveDemoSetting() {
+    if (!selectedGame) return;
+
+    const state = getDemoState();
+
+    let result =
+      $("demoResultText").textContent;
+
+    if (selectedMode === "manual") {
+      if (
+        !selectedColor ||
+        selectedNumber === null ||
+        !selectedSize
+      ) {
+        showStatus(
+          "Select Color + Number + Size first.",
+          "err"
+        );
+        return;
+      }
+
+      result =
+        `${selectedColor} ${selectedNumber} · ${selectedSize}`;
+    }
+
+    if (selectedGame.key === "WINGO") {
+      try {
+        const info =
+          wingoPeriodInfo(
+            selectedDuration
+          );
+
+        const targetPeriod =
+          info.current;
+
+        if (selectedMode === "manual") {
+          const {
+            data,
+            error
+          } = await supabase.rpc(
+            "nplus_admin_save_wingo_manual",
+            {
+              p_duration:
+                selectedDuration,
+              p_period:
+                targetPeriod,
+              p_color:
+                selectedColor,
+              p_number:
+                Number(selectedNumber),
+              p_size:
+                selectedSize
+            }
+          );
+
+          if (error) {
+            console.error(
+              "WINGO manual save error:",
+              error
+            );
+
+            showStatus(
+              error.message ||
+              "Unable to save manual WINGO result.",
+              "err"
+            );
+
+            return;
+          }
+
+          const gameState =
+            state.WINGO || {};
+
+          gameState.durations =
+            gameState.durations || {};
+
+          gameState.durations[
+            selectedDuration
+          ] = {
+            duration:
+              selectedDuration,
+            mode:"MANUAL",
+            color:
+              data?.color ||
+              selectedColor,
+            number:
+              data?.number ??
+              Number(selectedNumber),
+            size:
+              data?.size ||
+              selectedSize,
+            result:
+              `${data?.color || selectedColor} ${
+                data?.number ??
+                Number(selectedNumber)
+              } · ${
+                data?.size ||
+                selectedSize
+              }`,
+            period:
+              targetPeriod,
+            updated_at:
+              new Date().toISOString()
+          };
+
+          state.WINGO =
+            gameState;
+
+          saveDemoState(state);
+          renderGameCards();
+
+          showStatus(
+            `MANUAL active for ${targetPeriod}: ${
+              data?.color ||
+              selectedColor
+            } ${
+              data?.number ??
+              Number(selectedNumber)
+            } · ${
+              data?.size ||
+              selectedSize
+            }`,
+            "ok"
+          );
+
+          await loadWingoAnalytics();
+          return;
+        }
+
+        const {
+          error: clearError
+        } = await supabase.rpc(
+          "nplus_admin_clear_wingo_manual",
+          {
+            p_duration:
+              selectedDuration,
+            p_period:
+              targetPeriod
+          }
+        );
+
+        if (
+          clearError &&
+          !/not exist|does not exist/i.test(
+            clearError.message || ""
+          )
+        ) {
+          console.error(
+            "WINGO manual clear error:",
+            clearError
+          );
+
+          showStatus(
+            clearError.message ||
+            "Unable to clear manual WINGO result.",
+            "err"
+          );
+
+          return;
+        }
+
+        const {
+          data,
+          error
+        } = await supabase.rpc(
+          "nplus_admin_set_wingo_demo",
+          {
+            p_duration:
+              selectedDuration,
+            p_mode:
+              selectedMode.toUpperCase(),
+            p_color:
+              selectedColor,
+            p_number:
+              selectedNumber === null
+                ? null
+                : Number(selectedNumber),
+            p_size:
+              selectedSize
+          }
+        );
+
+        if (error) {
+          console.error(
+            "WINGO save error:",
+            error
+          );
+
+          showStatus(
+            error.message ||
+            "Unable to save WINGO setting.",
+            "err"
+          );
+
+          return;
+        }
+
+        const gameState =
+          state.WINGO || {};
+
+        gameState.durations =
+          gameState.durations || {};
+
+        gameState.durations[
+          selectedDuration
+        ] = {
+          duration:
+            selectedDuration,
+          mode:
+            selectedMode.toUpperCase(),
+          color:
+            data?.color ||
+            selectedColor,
+          number:
+            data?.number ??
+            selectedNumber,
+          size:
+            data?.size ||
+            selectedSize,
+          result:
+            data?.result ||
+            result,
+          updated_at:
+            new Date().toISOString()
+        };
+
+        state.WINGO =
+          gameState;
+
+        saveDemoState(state);
+        renderGameCards();
+
+        showStatus(
+          `WINGO ${
+            wingoDurationLabel(
+              selectedDuration
+            )
+          } saved successfully.`,
+          "ok"
+        );
+
+        await loadWingoAnalytics();
+      } catch (err) {
+        console.error(err);
+
+        showStatus(
+          err.message ||
+          "Unable to save WINGO setting.",
+          "err"
+        );
+      }
+
+      return;
+    }
+
+    state[selectedGame.key] = {
+      mode:
+        selectedMode.toUpperCase(),
+      color:
+        selectedColor,
+      number:
+        selectedNumber,
+      result:
+        result,
+      updated_at:
+        new Date().toISOString()
+    };
+
+    saveDemoState(state);
+    renderGameCards();
+
+    showStatus(
+      selectedGame.name +
+      " demo setting saved successfully.",
+      "ok"
+    );
+  }
+
+  document.querySelectorAll(".mode-btn")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          selectedMode =
+            btn.dataset.mode;
+
+          syncDemoControls();
+        }
+      );
+    });
+
+  document.querySelectorAll(".duration-btn")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          if (
+            selectedGame?.key !== "WINGO"
+          ) {
+            return;
+          }
+
+          selectedDuration =
+            Number(
+              btn.dataset.duration
+            );
+
+          const saved =
+            getDemoState()
+              .WINGO
+              ?.durations
+              ?.[
+                selectedDuration
+              ] || {};
+
+          selectedMode =
+            String(
+              saved.mode ||
+              "AUTO"
+            ).toLowerCase();
+
+          selectedColor =
+            saved.color || null;
+
+          selectedNumber =
+            saved.number === undefined ||
+            saved.number === null
+              ? null
+              : String(
+                  saved.number
+                );
+
+          selectedSize =
+            saved.size || null;
+
+          syncDemoControls();
+
+          loadWingoAnalytics();
+
+          showStatus(
+            `${wingoDurationLabel(
+              selectedDuration
+            )} selected.`,
+            "ok"
+          );
+        }
+      );
+    });
+
+  document.querySelectorAll("[data-color]")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          selectedColor =
+            btn.dataset.color;
+
+          syncDemoControls();
+        }
+      );
+    });
+
+  document.querySelectorAll("[data-number]")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          selectedNumber =
+            btn.dataset.number;
+
+          syncDemoControls();
+        }
+      );
+    });
+
+  document.querySelectorAll("[data-size]")
+    .forEach(btn => {
+      btn.addEventListener(
+        "click",
+        () => {
+          selectedSize =
+            btn.dataset.size;
+
+          syncDemoControls();
+        }
+      );
+    });
+
+  $("generateDemoBtn")
+    .addEventListener(
+      "click",
+      generateDemoResult
+    );
+
+  $("saveDemoBtn")
+    .addEventListener(
+      "click",
+      saveDemoSetting
+    );
+
+  $("closeGameBtn")
+    .addEventListener(
+      "click",
+      () => {
+        $("gameDetail")
+          .classList
+          .remove("show");
+
+        $("wingoAnalytics")
+          .style
+          .display = "none";
+
+        selectedGame = null;
+      }
+    );
+
+  $("wingoAnalyticsRefresh")
+    ?.addEventListener(
+      "click",
+      loadWingoAnalytics
+    );
+
+  function renderWingoBreakdown(
+    containerId,
+    rows,
+    labels
+  ) {
+    const el =
+      $(containerId);
+
+    el.innerHTML =
+      labels.map(label => {
+        const x =
+          rows[label] ||
+          {
+            count:0,
+            amount:0
+          };
+
+        return `
+          <div class="wa-line">
+            <span>${escapeHTML(label)}</span>
+            <b>
+              ${Number(x.count || 0)}
+              ·
+              ${money(x.amount)}
+            </b>
+          </div>
+        `;
+      }).join("");
+  }
+
+  async function getSavedManualWingoResult(
+    period,
+    sec
+  ) {
+    try {
+      const {
+        data,
+        error
+      } = await supabase
+        .from("wingo_manual_results")
+        .select(
+          "period,color,number,size,mode"
+        )
+        .eq(
+          "duration_seconds",
+          sec
+        )
+        .eq(
+          "period",
+          period
+        )
+        .eq(
+          "mode",
+          "MANUAL"
+        )
+        .maybeSingle();
+
+      if (
+        error ||
+        !data
+      ) {
+        return null;
+      }
+
+      return {
+        period:data.period,
+        color:String(
+          data.color || ""
+        ).toUpperCase(),
+        number:Number(
+          data.number
+        ),
+        size:String(
+          data.size || ""
+        ).toUpperCase()
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function pickLowestStake(
+    rows,
+    labels
+  ) {
+    const values =
+      labels.map(label => {
+        const x =
+          rows?.[label] ||
+          {
+            count:0,
+            amount:0
+          };
+
+        return {
+          label,
+          count:Number(
+            x.count || 0
+          ),
+          amount:Number(
+            x.amount || 0
+          )
+        };
+      });
+
+    values.sort((a,b) => {
+      if (
+        a.amount !==
+        b.amount
+      ) {
+        return (
+          a.amount -
+          b.amount
+        );
+      }
+
+      if (
+        a.count !==
+        b.count
+      ) {
+        return (
+          a.count -
+          b.count
+        );
+      }
+
+      return (
+        labels.indexOf(a.label) -
+        labels.indexOf(b.label)
+      );
+    });
+
+    return (
+      values[0] ||
+      {
+        label:"—",
+        count:0,
+        amount:0
+      }
+    );
+  }
+
+  function autoDemoHash(text) {
+    let h = 2166136261;
+
+    const str =
+      String(text);
+
+    for (
+      let i = 0;
+      i < str.length;
+      i++
+    ) {
+      h ^=
+        str.charCodeAt(i);
+
+      h =
+        Math.imul(
+          h,
+          16777619
+        );
+    }
+
+    return (
+      h >>> 0
+    );
+  }
+
+  function independentAutoDemoResult(
+    period
+  ) {
+    const h =
+      autoDemoHash(
+        period
+      );
+
+    const number =
+      h % 10;
+
+    let color = "GREEN";
+
+    if (
+      number === 0 ||
+      number === 5
+    ) {
+      color =
+        h % 2 === 0
+          ? "VIOLET"
+          : "GREEN";
+    } else if (
+      [2,4,6,8]
+      .includes(number)
+    ) {
+      color = "RED";
+    } else {
+      color = "GREEN";
+    }
+
+    const size =
+      number >= 5
+        ? "BIG"
+        : "SMALL";
+
+    return {
+      color,
+      number,
+      size
+    };
+  }
+
+  function renderAutoDemoInsight(
+    summary,
+    period
+  ) {
+    const color =
+      pickLowestStake(
+        summary.colors || {},
+        [
+          "Green",
+          "Violet",
+          "Red"
+        ]
+      );
+
+    const number =
+      pickLowestStake(
+        summary.numbers || {},
+        [
+          "0","1","2","3","4",
+          "5","6","7","8","9"
+        ]
+      );
+
+    const size =
+      pickLowestStake(
+        summary.sizes || {},
+        [
+          "Big",
+          "Small"
+        ]
+      );
+
+    $("autoInsightPeriod")
+      .textContent =
+      `LIVE · ${period}`;
+
+    $("autoLowestColor")
+      .textContent =
+      `${color.label} · ${money(color.amount)}`;
+
+    $("autoLowestNumber")
+      .textContent =
+      `${number.label} · ${money(number.amount)}`;
+
+    $("autoLowestSize")
+      .textContent =
+      `${size.label} · ${money(size.amount)}`;
+
+    const result =
+      independentAutoDemoResult(
+        period
+      );
+
+    $("autoInsightResult")
+      .textContent =
+      `${result.color} ${result.number} · ${result.size}`;
+  }
+
+  async function loadWingoAnalytics() {
+    if (
+      selectedGame?.key !== "WINGO"
+    ) {
+      return;
+    }
+
+    const sec =
+      selectedDuration || 30;
+
+    const info =
+      wingoPeriodInfo(sec);
+
+    $("wingoAnalytics")
+      .style
+      .display = "block";
+
+    $("waDuration")
+      .textContent =
+      wingoDurationLabel(sec);
+
+    $("waCurrentPeriod")
+      .textContent =
+      info.current;
+
+    $("waNextPeriod")
+      .textContent =
+      info.next;
+
+    $("waTimeLeft")
+      .textContent =
+      `${info.remaining}s`;
+
+    const savedManualCurrent =
+      await getSavedManualWingoResult(
+        info.current,
+        sec
+      );
+
+    if (savedManualCurrent) {
+      $("waNextSummary")
+        .textContent =
+        `MANUAL RESULT — ${info.current} · ${
+          savedManualCurrent.color
+        } ${
+          savedManualCurrent.number
+        } · ${
+          savedManualCurrent.size
+        }`;
+    } else {
+      $("waNextSummary")
+        .textContent =
+        `AUTO RESULT — ${info.current}`;
+    }
+
+    const {
+      data,
+      error
+    } = await supabase.rpc(
+      "nplus_admin_wingo_round_summary",
+      {
+        p_period:
+          info.current
+      }
+    );
+
+    if (error) {
+      console.error(
+        "WINGO analytics error:",
+        error
+      );
+
+      $("waBets")
+        .innerHTML =
+        `<tr>
+          <td colspan="8" class="empty">
+            ${escapeHTML(
+              error.message
+            )}
+          </td>
+        </tr>`;
+
+      renderAutoDemoInsight(
+        {
+          colors:{},
+          numbers:{},
+          sizes:{}
+        },
+        info.current
+      );
+
+      return;
+    }
+
+    const summary =
+      data || {};
+
+    const bets =
+      Array.isArray(
+        summary.bets
+      )
+        ? summary.bets
+        : [];
+
+    $("waBetCount")
+      .textContent =
+      Number(
+        summary.bet_count || 0
+      ).toLocaleString(
+        "en-IN"
+      );
+
+    $("waStake")
+      .textContent =
+      money(
+        summary.total_stake
+      );
+
+    renderAutoDemoInsight(
+      summary,
+      info.current
+    );
+
+    renderWingoBreakdown(
+      "waColors",
+      summary.colors || {},
+      [
+        "Green",
+        "Violet",
+        "Red"
+      ]
+    );
+
+    renderWingoBreakdown(
+      "waNumbers",
+      summary.numbers || {},
+      [
+        "0","1","2","3","4",
+        "5","6","7","8","9"
+      ]
+    );
+
+    renderWingoBreakdown(
+      "waSizes",
+      summary.sizes || {},
+      [
+        "Big",
+        "Small"
+      ]
+    );
+
+    if (!bets.length) {
+      $("waBets")
+        .innerHTML =
+        `<tr>
+          <td colspan="8" class="empty">
+            No confirmed bets for ${
+              escapeHTML(
+                info.current
+              )
+            }.
+          </td>
+        </tr>`;
+
+      return;
+    }
+
+    $("waBets")
+      .innerHTML =
+      bets.map(row => `
+        <tr>
+          <td>${escapeHTML(
+            row.display_name ||
+            "User"
+          )}</td>
+          <td>${escapeHTML(
+            row.uid || "—"
+          )}</td>
+          <td>${escapeHTML(
+            row.period ||
+            info.current
+          )}</td>
+          <td>${escapeHTML(
+            String(
+              row.type || ""
+            ).toUpperCase()
+          )} ${escapeHTML(
+            row.value || ""
+          )}</td>
+          <td>${escapeHTML(
+            row.qty || "1"
+          )}</td>
+          <td>X${escapeHTML(
+            row.multi || "1"
+          )}</td>
+          <td>${money(
+            row.stake || 0
+          )}</td>
+          <td>${escapeHTML(
+            new Date(
+              row.created_at
+            ).toLocaleTimeString(
+              "en-IN"
+            )
+          )}</td>
+        </tr>
+      `).join("");
+  }
+
+  async function loadCommission() {
+    const list =
+      $("gameCommissionList");
+
+    list.innerHTML =
+      '<div class="loading">Loading commission...</div>';
+
+    const {
+      data,
+      error
+    } = await supabase.rpc(
+      "nplus_admin_commission_summary"
+    );
+
+    if (error) {
+      console.error(
+        "Commission error:",
+        error
+      );
+
+      list.innerHTML = `
+        <div class="empty">
+          Unable to load commission report.<br><br>
+          <small>${escapeHTML(
+            error.message
+          )}</small>
+        </div>
+      `;
+
+      return;
+    }
+
+    const report =
+      data || {};
+
+    $("totalBets")
+      .textContent =
+      Number(
+        report.total_bets || 0
+      ).toLocaleString(
+        "en-IN"
+      );
+
+    $("totalBetAmount")
+      .textContent =
+      money(
+        report.total_bet_amount
+      );
+
+    $("totalWins")
+      .textContent =
+      Number(
+        report.total_wins || 0
+      ).toLocaleString(
+        "en-IN"
+      );
+
+    $("totalWinningAmount")
+      .textContent =
+      money(
+        report.total_winning_amount
+      );
+
+    $("todayCommission")
+      .textContent =
+      money(
+        report.today_commission
+      );
+
+    $("allTimeCommission")
+      .textContent =
+      money(
+        report.all_time_commission
+      );
+
+    $("todayBetAmount")
+      .textContent =
+      money(
+        report.today_bet_amount
+      );
+
+    $("commissionRate")
+      .textContent =
+      (
+        Number(
+          report.commission_rate || 0
+        ) * 100
+      ).toFixed(0) + "%";
+
+    const games =
+      Array.isArray(
+        report.games
+      )
+        ? report.games
+        : [];
+
+    if (!games.length) {
+      list.innerHTML = `
+        <div class="empty">
+          No game transactions yet.
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = `
+      <div style="overflow-x:auto">
+        <table class="game-table">
+          <thead>
+            <tr>
+              <th>GAME</th>
+              <th>BETS</th>
+              <th>BET AMOUNT</th>
+              <th>COMMISSION</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${games.map(game => `
+              <tr>
+                <td>${escapeHTML(
+                  game.game ||
+                  "UNKNOWN"
+                )}</td>
+                <td>${Number(
+                  game.bets || 0
+                ).toLocaleString(
+                  "en-IN"
+                )}</td>
+                <td>${money(
+                  game.bet_amount
+                )}</td>
+                <td style="color:var(--gold2);font-weight:900">
+                  ${money(
+                    game.commission
+                  )}
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  async function loadRequests() {
+    $("requestList")
+      .innerHTML =
+      '<div class="loading">Loading requests...</div>';
+
+    const {
+      data,
+      error
+    } = await supabase
+      .from("deposit_requests")
+      .select(
+        "id,user_id,amount,status,created_at"
+      )
+      .eq(
+        "status",
+        "pending"
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      );
+
+    if (error) {
+      console.error(error);
+
+      $("requestList")
+        .innerHTML = `
+          <div class="empty">
+            Unable to load requests.<br><br>
+            <small>${escapeHTML(
+              error.message
+            )}</small>
+          </div>
+        `;
+
+      return;
+    }
+
+    const requests =
+      data || [];
+
+    $("pendingCount")
+      .textContent =
+      requests.length;
+
+    const total =
+      requests.reduce(
+        (sum,item) =>
+          sum +
+          Number(
+            item.amount || 0
+          ),
+        0
+      );
+
+    $("pendingAmount")
+      .textContent =
+      money(total);
+
+    if (!requests.length) {
+      $("requestList")
+        .innerHTML = `
+          <div class="empty">
+            <div style="font-size:30px">✓</div>
+            <div style="margin-top:8px">
+              No pending requests
+            </div>
+          </div>
+        `;
+
+      return;
+    }
+
+    const cards = [];
+
+    for (
+      const request of requests
+    ) {
+      let profile = null;
+      let wallet = null;
+
+      const {
+        data:profileData,
+        error:profileError
+      } = await supabase
+        .from("profiles")
+        .select(
+          "display_name,uid,email"
+        )
+        .eq(
+          "id",
+          request.user_id
+        )
+        .maybeSingle();
+
+      if (!profileError) {
+        profile =
+          profileData;
+      }
+
+      const {
+        data:walletData,
+        error:walletError
+      } = await supabase
+        .from("demo_wallets")
+        .select("balance")
+        .eq(
+          "user_id",
+          request.user_id
+        )
+        .maybeSingle();
+
+      if (!walletError) {
+        wallet =
+          walletData;
+      }
+
+      const name =
+        profile?.display_name ||
+        "N+ PLAY User";
+
+      const uid =
+        profile?.uid ||
+        request.user_id;
+
+      const walletBalance =
+        wallet?.balance ??
+        "—";
+
+      const created =
+        new Date(
+          request.created_at
+        ).toLocaleString(
+          "en-IN",
+          {
+            dateStyle:"medium",
+            timeStyle:"short"
+          }
+        );
+
+      cards.push(`
+        <article class="card">
+          <div class="row">
+
+            <div>
+              <div class="label">USER</div>
+              <div class="value">
+                ${escapeHTML(name)}
+              </div>
+              <div class="uid">
+                ${escapeHTML(uid)}
+              </div>
+            </div>
+
+            <div>
+              <div class="label">REQUEST</div>
+              <div class="amount">
+                ${money(
+                  request.amount
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div class="label">CURRENT WALLET</div>
+              <div class="value">
+                ${money(
+                  walletBalance
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div class="label">TIME</div>
+              <div class="time">
+                ${escapeHTML(
+                  created
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          <div class="actions">
+            <button
+              class="accept"
+              data-action="approve"
+              data-id="${escapeHTML(
+                request.id
+              )}"
+            >
+              ✓ ACCEPT
+            </button>
+
+            <button
+              class="reject"
+              data-action="reject"
+              data-id="${escapeHTML(
+                request.id
+              )}"
+            >
+              ✕ REJECT
+            </button>
+          </div>
+        </article>
+      `);
+    }
+
+    $("requestList")
+      .innerHTML =
+      cards.join("");
+
+    document
+      .querySelectorAll(
+        "[data-action]"
+      )
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          async () => {
+            const action =
+              button.dataset.action;
+
+            const requestId =
+              button.dataset.id;
+
+            button.disabled = true;
+
+            try {
+              if (
+                action === "approve"
+              ) {
+                await approve(
+                  requestId
+                );
+              } else {
+                await reject(
+                  requestId
+                );
+              }
+            } finally {
+              button.disabled =
+                false;
+            }
+          }
+        );
+      });
+  }
+
+  async function approve(
+    requestId
+  ) {
+    const confirmed =
+      confirm(
+        "Accept this virtual-credit deposit request?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const {
+      data,
+      error
+    } = await supabase.rpc(
+      "nplus_approve_deposit",
+      {
+        p_request_id:
+          requestId
+      }
+    );
+
+    if (error) {
+      console.error(
+        error
+      );
+
+      showStatus(
+        error.message ||
+        "Approval failed.",
+        "err"
+      );
+
+      return;
+    }
+
+    showStatus(
+      "Request approved successfully.",
+      "ok"
+    );
+
+    console.log(
+      "Approval result:",
+      data
+    );
+
+    await Promise.all([
+      loadRequests(),
+      loadDepositReport(),
+      loadCommission()
+    ]);
+  }
+
+  async function reject(
+    requestId
+  ) {
+    const confirmed =
+      confirm(
+        "Reject this virtual-credit deposit request?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const {
+      data,
+      error
+    } = await supabase.rpc(
+      "nplus_reject_deposit",
+      {
+        p_request_id:
+          requestId
+      }
+    );
+
+    if (error) {
+      console.error(
+        error
+      );
+
+      showStatus(
+        error.message ||
+        "Rejection failed.",
+        "err"
+      );
+
+      return;
+    }
+
+    showStatus(
+      "Request rejected.",
+      "ok"
+    );
+
+    console.log(
+      "Rejection result:",
+      data
+    );
+
+    await loadRequests();
+  }
+
+  async function loadDepositReport() {
+    $("depositHistoryBody").innerHTML =
+      `<tr><td colspan="5" class="loading">Loading deposit history...</td></tr>`;
+
+    const { data, error } = await supabase.rpc(
+      "nplus_admin_deposit_summary"
+    );
+
+    if (error) {
+      console.error("Deposit report error:", error);
+      $("approvedDepositTotal").textContent = "₹0.00";
+      $("todayDepositTotal").textContent = "₹0.00";
+      $("approvedDepositCount").textContent = "0";
+      $("depositHistoryBody").innerHTML =
+        `<tr><td colspan="5" class="empty">
+          Unable to load deposit history.<br><br>
+          <small>${escapeHTML(error.message)}</small>
+        </td></tr>`;
+      return;
+    }
+
+    const report = data || {};
+    const rows = Array.isArray(report.rows) ? report.rows : [];
+
+    $("approvedDepositTotal").textContent =
+      money(report.approved_total || 0);
+
+    $("todayDepositTotal").textContent =
+      money(report.today_approved_total || 0);
+
+    $("approvedDepositCount").textContent =
+      Number(report.approved_count || 0).toLocaleString("en-IN");
+
+    if (!rows.length) {
+      $("depositHistoryBody").innerHTML =
+        `<tr><td colspan="5" class="empty">No approved deposits yet.</td></tr>`;
+      return;
+    }
+
+    $("depositHistoryBody").innerHTML = rows.map(row => `
+      <tr>
+        <td>${escapeHTML(row.display_name || "N+ PLAY User")}</td>
+        <td>${escapeHTML(row.uid || row.user_id || "—")}</td>
+        <td style="color:var(--gold2);font-weight:900">${money(row.amount || 0)}</td>
+        <td><span class="deposit-status approved">APPROVED</span></td>
+        <td>${escapeHTML(new Date(row.created_at).toLocaleString("en-IN", {dateStyle:"medium",timeStyle:"short"}))}</td>
+      </tr>
+    `).join("");
+  }
+
+  $("refreshBtn")
+    .addEventListener(
+      "click",
+      async () => {
+        await Promise.all([
+          loadRequests(),
+          loadCommission(),
+          loadDepositReport()
+        ]);
+      }
+    );
+
+  $("commissionRefreshBtn")
+    .addEventListener(
+      "click",
+      async () => {
+        await Promise.all([
+          loadCommission(),
+          loadRequests(),
+          loadDepositReport()
+        ]);
+      }
+    );
+
+  $("depositReportRefreshBtn")
+    .addEventListener(
+      "click",
+      loadDepositReport
+    );
+
+  $("logoutBtn")
+    .addEventListener(
+      "click",
+      async () => {
+        await supabase.auth.signOut();
+        location.replace(
+          "admin-login.html"
+        );
+      }
+    );
+
+  renderGameCards();
+
+  (async () => {
+    const allowed =
+      await requireAdmin();
+
+    if (!allowed) {
+      return;
+    }
+
+    await Promise.all([
+      loadRequests(),
+      loadCommission(),
+      loadDepositReport()
+    ]);
+  })();
+
+  /*
+    Keep the deposit report and pending request list fresh
+    without requiring the admin to manually refresh.
+  */
+  window.setInterval(
+    async () => {
+      const sessionResult =
+        await supabase.auth.getSession();
+
+      if (
+        sessionResult.error ||
+        !sessionResult.data.session
+      ) {
+        return;
+      }
+
+      await Promise.all([
+        loadRequests(),
+        loadCommission(),
+        loadDepositReport()
+      ]);
+    },
+    15000
+  );
+
+  /*
+    Keep WINGO analytics live only when the detail panel is open.
+  */
+  window.setInterval(
+    () => {
+      if (
+        selectedGame?.key === "WINGO"
+      ) {
+        loadWingoAnalytics();
+      }
+    },
+    2000
+  );
+
+})();
+</script>
+
+</body>
+</html>
