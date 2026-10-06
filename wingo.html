@@ -262,14 +262,18 @@ const cname=c=>({r:"Red",g:"Green",v:"Violet"})[c];
 
 const size=n=>n>=5?"Big":"Small";
 
-const payoutFor=(b,n)=>{
+const payoutFor=(b,result)=>{
+  const n=Number(result?.number);
+  const resultSize=String(result?.size||size(n));
+  const resultColor=String(result?.colorName||cname(result?.color)||"");
+
   if(b.type==="number")return Number(b.value)===n?9:0;
-  if(b.type==="size")return String(b.value)===size(n)?2:0;
+  if(b.type==="size")return String(b.value).toUpperCase()===resultSize.toUpperCase()?2:0;
 
   if(b.type==="color"){
-    if(b.value==="Violet")return (n===0||n===5)?4.5:0;
-    if(b.value==="Green")return [1,3,7,9].includes(n)?2:n===5?1.5:0;
-    if(b.value==="Red")return [2,4,6,8].includes(n)?2:n===0?1.5:0;
+    if(b.value==="Violet")return resultColor==="VIOLET"?4.5:0;
+    if(b.value==="Green")return resultColor==="GREEN"?2:0;
+    if(b.value==="Red")return resultColor==="RED"?2:0;
   }
 
   return 0;
@@ -434,16 +438,21 @@ async function getAdminWingoResult(period, sec){
     const n = Number(data.number);
     if (!Number.isInteger(n) || n < 0 || n > 9) return null;
 
-    const c = color(n);
+    const storedColor = String(data.color || "").toUpperCase();
     const storedSize = String(data.size || "").toUpperCase();
+    const colorMap = { GREEN:"g", RED:"r", VIOLET:"v" };
+    const c = colorMap[storedColor] || color(n);
+    const finalSize = storedSize === "BIG" || storedSize === "SMALL"
+      ? (storedSize === "BIG" ? "Big" : "Small")
+      : size(n);
 
     return {
       period,
       number: n,
       color: c,
-      colorName: cname(c),
-      colors: colorsFor(n),
-      size: storedSize === "BIG" || storedSize === "SMALL" ? (storedSize === "BIG" ? "Big" : "Small") : size(n),
+      colorName: storedColor || cname(c),
+      colors: storedColor ? [storedColor] : colorsFor(n),
+      size: finalSize,
       adminControlled: true
     };
   } catch (err) {
@@ -560,8 +569,9 @@ async function settlePastRounds(showPopup=false){
         continue;
       }
 
-      const x=resultFor(b.period);
-      const mult=payoutFor(b,x.number);
+      const adminResult = await getAdminWingoResult(b.period, state.sec);
+      const x = adminResult || resultFor(b.period);
+      const mult=payoutFor(b,x);
       const won=mult>0;
 
       b.status=won?"WON":"LOST";
@@ -935,7 +945,7 @@ async function settleSpecificPeriod(
   let changed=false;
 
   for(const b of bets){
-    const mult=payoutFor(b,x.number);
+    const mult=payoutFor(b,x);
     const won=mult>0;
 
     b.payoutMultiplier=mult;
