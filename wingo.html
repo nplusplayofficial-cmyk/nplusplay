@@ -419,44 +419,49 @@ async function getAdminWingoResult(period, sec){
     const client = window.NPlusAuth?.client;
     if (!client) return null;
 
+    // MANUAL results are bound to the exact WINGO period.
+    // No number -> color/size conversion is performed here.
     const { data, error } = await client
-      .from("demo_game_controls")
-      .select("game_key,duration_seconds,mode,color,number,result,updated_at")
-      .eq("game_key", "WINGO")
+      .from("wingo_manual_results")
+      .select("duration_seconds,period,mode,color,number,size,created_at")
       .eq("duration_seconds", sec)
+      .eq("period", period)
+      .eq("mode", "MANUAL")
       .maybeSingle();
 
     if (error) {
-      console.error("WINGO admin result read error:", error);
+      console.error("WINGO manual result read error:", error);
       return null;
     }
 
-    if (!data || String(data.mode).toUpperCase() !== "MANUAL") {
-      return null;
-    }
+    if (!data) return null;
 
     const n = Number(data.number);
     if (!Number.isInteger(n) || n < 0 || n > 9) return null;
 
     const storedColor = String(data.color || "").toUpperCase();
     const storedSize = String(data.size || "").toUpperCase();
-    const colorMap = { GREEN:"g", RED:"r", VIOLET:"v" };
-    const c = colorMap[storedColor] || color(n);
-    const finalSize = storedSize === "BIG" || storedSize === "SMALL"
-      ? (storedSize === "BIG" ? "Big" : "Small")
-      : size(n);
+
+    const colorMap = {
+      GREEN:"g",
+      RED:"r",
+      VIOLET:"v"
+    };
+
+    if (!colorMap[storedColor]) return null;
+    if (storedSize !== "BIG" && storedSize !== "SMALL") return null;
 
     return {
       period,
       number: n,
-      color: c,
-      colorName: storedColor || cname(c),
-      colors: storedColor ? [storedColor] : colorsFor(n),
-      size: finalSize,
+      color: colorMap[storedColor],
+      colorName: storedColor,
+      colors: [storedColor],
+      size: storedSize === "BIG" ? "Big" : "Small",
       adminControlled: true
     };
   } catch (err) {
-    console.error("WINGO admin result error:", err);
+    console.error("WINGO manual result error:", err);
     return null;
   }
 }
