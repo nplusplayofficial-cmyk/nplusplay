@@ -987,7 +987,31 @@ button{
       });
     }
 
-    document.querySelectorAll(".mode-btn").forEach(btn => {
+    document.querySelectorAll(".duration-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (selectedGame?.key !== "WINGO") return;
+
+      selectedDuration = Number(btn.dataset.duration);
+
+      const saved =
+        getDemoState().WINGO?.durations?.[selectedDuration] || {};
+
+      selectedMode = String(saved.mode || "AUTO").toLowerCase();
+      selectedColor = saved.color || null;
+      selectedNumber =
+        saved.number === undefined || saved.number === null
+          ? null
+          : String(saved.number);
+
+      syncDemoControls();
+      showStatus(
+        `${selectedDuration === 30 ? "30 SEC" : selectedDuration === 60 ? "1 MIN" : selectedDuration === 180 ? "3 MIN" : "5 MIN"} selected.`,
+        "ok"
+      );
+    });
+  });
+
+  document.querySelectorAll(".mode-btn").forEach(btn => {
       btn.classList.toggle(
         "active",
         btn.dataset.mode === selectedMode
@@ -1042,6 +1066,11 @@ button{
 
       $("demoResultText").textContent =
         `${selectedColor || "—"} ${selectedNumber ?? "—"}`;
+
+      showStatus(
+        "Demo result generated successfully.",
+        "ok"
+      );
       return;
     }
 
@@ -1051,6 +1080,11 @@ button{
 
     $("demoResultText").textContent =
       `${color} ${number}`;
+
+    showStatus(
+      "Demo result generated successfully.",
+      "ok"
+    );
   }
 
   function saveDemoSetting() {
@@ -1092,7 +1126,12 @@ button{
     saveDemoState(state);
     renderGameCards();
     showStatus(
-      selectedGame.name + " demo setting saved.",
+      selectedGame.name +
+        " • " +
+        (selectedDuration === 30 ? "30 SEC" :
+         selectedDuration === 60 ? "1 MIN" :
+         selectedDuration === 180 ? "3 MIN" : "5 MIN") +
+        " demo setting saved successfully.",
       "ok"
     );
   }
