@@ -593,6 +593,87 @@ button{
   .row{grid-template-columns:1fr}
   .actions button{flex:1}
 }
+.live-monitor{display:none!important}
+
+.wa-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:14px;
+}
+.wa-card{
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  padding:13px;
+}
+.wa-card span,.wa-breakdown h4,.wa-next span{
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1px;
+}
+.wa-card strong{
+  display:block;
+  margin-top:6px;
+  font-size:16px;
+}
+.wa-breakdown{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:14px;
+}
+.wa-breakdown>div{
+  background:#111;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  padding:14px;
+}
+.wa-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:11px;
+}
+.wa-line:last-child{border-bottom:0}
+.wa-line b{font-size:12px}
+.wa-next{
+  margin-top:14px;
+  padding:14px;
+  border-radius:12px;
+  background:rgba(201,165,91,.08);
+  border:1px solid rgba(201,165,91,.18);
+}
+.wa-next strong{
+  display:block;
+  margin-top:5px;
+  font-size:17px;
+}
+.wa-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.wa-table th,.wa-table td{
+  padding:10px 8px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  text-align:left;
+  white-space:nowrap;
+}
+.wa-table th{
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1px;
+}
+.wa-table td{font-size:11px}
+@media(max-width:800px){
+  .wa-grid,.wa-breakdown{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  .wa-grid,.wa-breakdown{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 
@@ -714,6 +795,72 @@ button{
         <div class="demo-warning">
           These controls are for the N+ PLAY virtual/demo presentation only.
           They do not alter user balances, payments, withdrawals, or real-money outcomes.
+        </div>
+
+        <div class="card wingo-analytics" id="wingoAnalytics" style="display:none">
+          <div class="section-head">
+            <div>
+              <h3>WINGO Round Analytics</h3>
+              <div class="commission-note">
+                Read-only virtual-credit analytics. Results are independent of betting distribution.
+              </div>
+            </div>
+            <button class="refresh" id="wingoAnalyticsRefresh">↻ REFRESH</button>
+          </div>
+
+          <div class="wa-grid">
+            <div class="wa-card"><span>DURATION</span><strong id="waDuration">30 SEC</strong></div>
+            <div class="wa-card"><span>CURRENT PERIOD</span><strong id="waCurrentPeriod">—</strong></div>
+            <div class="wa-card"><span>NEXT PERIOD</span><strong id="waNextPeriod">—</strong></div>
+            <div class="wa-card"><span>TIME LEFT</span><strong id="waTimeLeft">—</strong></div>
+            <div class="wa-card"><span>BET COUNT</span><strong id="waBetCount">0</strong></div>
+            <div class="wa-card"><span>TOTAL STAKE</span><strong id="waStake">₹0.00</strong></div>
+          </div>
+
+          <div class="wa-breakdown">
+            <div>
+              <h4>COLOR BETS</h4>
+              <div id="waColors"></div>
+            </div>
+            <div>
+              <h4>NUMBER BETS</h4>
+              <div id="waNumbers"></div>
+            </div>
+            <div>
+              <h4>BIG / SMALL</h4>
+              <div id="waSizes"></div>
+            </div>
+          </div>
+
+          <div class="wa-next">
+            <span>NEXT ROUND</span>
+            <strong id="waNextSummary">AUTO RESULT — NEXT PERIOD</strong>
+          </div>
+
+          <div style="margin-top:15px;overflow-x:auto">
+            <table class="wa-table">
+              <thead>
+                <tr>
+                  <th>USER</th>
+                  <th>NPLUS UID</th>
+                  <th>PERIOD</th>
+                  <th>SELECTION</th>
+                  <th>QTY</th>
+                  <th>MULTI</th>
+                  <th>STAKE</th>
+                  <th>TIME</th>
+                </tr>
+              </thead>
+              <tbody id="waBets">
+                <tr><td colspan="8" class="loading">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="commission-note" style="margin-top:12px">
+            AUTO mode uses an independent demo result generator. The system does not select
+            an outcome from the lowest/highest betting side.
+          </div>
         </div>
       </div>
     </div>
@@ -1076,6 +1223,10 @@ button{
     $("gameDetail").classList.add("show");
 
     syncDemoControls();
+    $("wingoAnalytics").style.display =
+      selectedGame.key === "WINGO" ? "block" : "none";
+    if (selectedGame.key === "WINGO") loadWingoAnalytics();
+
     $("gameDetail").scrollIntoView({
       behavior:"smooth",
       block:"start"
@@ -1116,6 +1267,7 @@ button{
           : String(saved.number);
 
       syncDemoControls();
+      if (selectedGame?.key === "WINGO") loadWingoAnalytics();
       showStatus(
         `${selectedDuration === 30 ? "30 SEC" : selectedDuration === 60 ? "1 MIN" : selectedDuration === 180 ? "3 MIN" : "5 MIN"} selected.`,
         "ok"
@@ -1281,6 +1433,7 @@ button{
 
   $("closeGameBtn").addEventListener("click", () => {
     $("gameDetail").classList.remove("show");
+    $("wingoAnalytics").style.display = "none";
     selectedGame = null;
   });
 
@@ -1335,6 +1488,123 @@ button{
       selection: `${match[3]} ${match[4]}`
     };
   }
+
+
+  function wingoPeriodInfo(sec, now = Date.now()) {
+    const start = Math.floor(now / (sec * 1000)) * sec * 1000;
+    const next = start + sec * 1000;
+    const d = new Date(start);
+    const idx = Math.floor(start / (sec * 1000));
+    const code = ({30:"1000",60:"2000",180:"3000",300:"4000"})[sec];
+    const date =
+      d.getFullYear() +
+      String(d.getMonth()+1).padStart(2,"0") +
+      String(d.getDate()).padStart(2,"0");
+
+    const periodAt = ts => {
+      const dd = new Date(ts);
+      const ii = Math.floor(ts / (sec * 1000));
+      const dt =
+        dd.getFullYear() +
+        String(dd.getMonth()+1).padStart(2,"0") +
+        String(dd.getDate()).padStart(2,"0");
+      return dt + code + String(ii % 100000).padStart(5,"0");
+    };
+
+    return {
+      current: periodAt(start),
+      next: periodAt(next),
+      remaining: Math.max(0, Math.ceil((next-now)/1000))
+    };
+  }
+
+  function renderWingoBreakdown(containerId, rows, labels) {
+    const el = $(containerId);
+    el.innerHTML = labels.map(label => {
+      const x = rows[label] || {count:0, amount:0};
+      return `<div class="wa-line">
+        <span>${escapeHTML(label)}</span>
+        <b>${x.count} · ${money(x.amount)}</b>
+      </div>`;
+    }).join("");
+  }
+
+  async function loadWingoAnalytics() {
+    if (selectedGame?.key !== "WINGO") return;
+
+    const sec = selectedDuration || 30;
+    const info = wingoPeriodInfo(sec);
+
+    $("wingoAnalytics").style.display = "block";
+    $("waDuration").textContent =
+      sec === 30 ? "30 SEC" :
+      sec === 60 ? "1 MIN" :
+      sec === 180 ? "3 MIN" : "5 MIN";
+
+    $("waCurrentPeriod").textContent = info.current;
+    $("waNextPeriod").textContent = info.next;
+    $("waTimeLeft").textContent = `${info.remaining}s`;
+    $("waNextSummary").textContent = `AUTO RESULT — ${info.next}`;
+
+    const { data, error } = await supabase.rpc(
+      "nplus_admin_wingo_round_summary",
+      { p_period: info.current }
+    );
+
+    if (error) {
+      console.error("WINGO analytics error:", error);
+      $("waBets").innerHTML =
+        `<tr><td colspan="8" class="empty">${escapeHTML(error.message)}</td></tr>`;
+      return;
+    }
+
+    const summary = data || {};
+    const bets = Array.isArray(summary.bets) ? summary.bets : [];
+
+    $("waBetCount").textContent = Number(summary.bet_count || 0).toLocaleString("en-IN");
+    $("waStake").textContent = money(summary.total_stake || 0);
+
+    renderWingoBreakdown(
+      "waColors",
+      summary.colors || {},
+      ["Green","Violet","Red"]
+    );
+
+    renderWingoBreakdown(
+      "waNumbers",
+      summary.numbers || {},
+      ["0","1","2","3","4","5","6","7","8","9"]
+    );
+
+    renderWingoBreakdown(
+      "waSizes",
+      summary.sizes || {},
+      ["Big","Small"]
+    );
+
+    if (!bets.length) {
+      $("waBets").innerHTML =
+        `<tr><td colspan="8" class="empty">No confirmed bets for ${escapeHTML(info.current)}.</td></tr>`;
+      return;
+    }
+
+    $("waBets").innerHTML = bets.map(row => `
+      <tr>
+        <td>${escapeHTML(row.display_name || "User")}</td>
+        <td>${escapeHTML(row.uid || "—")}</td>
+        <td>${escapeHTML(row.period || info.current)}</td>
+        <td>${escapeHTML(String(row.type || "").toUpperCase())} ${escapeHTML(row.value || "")}</td>
+        <td>${escapeHTML(row.qty || "1")}</td>
+        <td>X${escapeHTML(row.multi || "1")}</td>
+        <td>${money(row.stake || 0)}</td>
+        <td>${escapeHTML(new Date(row.created_at).toLocaleTimeString("en-IN"))}</td>
+      </tr>
+    `).join("");
+  }
+
+  setInterval(() => {
+    if (selectedGame?.key === "WINGO") loadWingoAnalytics();
+  }, 2000);
 
   async function loadWingoLiveMonitor() {
     const info = wingoPeriodInfo(30);
