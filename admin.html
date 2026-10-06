@@ -674,6 +674,81 @@ button{
   .wa-grid,.wa-breakdown{grid-template-columns:1fr}
 }
 
+
+.auto-insight{
+  margin-top:14px;
+  padding:15px;
+  border-radius:14px;
+  background:linear-gradient(145deg,rgba(201,165,91,.08),rgba(16,16,16,.96));
+  border:1px solid rgba(201,165,91,.16);
+}
+.auto-insight-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+.auto-insight-head b{
+  font-size:12px;
+  letter-spacing:1.2px;
+}
+.auto-insight-head span{
+  color:var(--muted);
+  font-size:9px;
+}
+.auto-insight-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+}
+.auto-insight-card{
+  padding:11px;
+  border-radius:10px;
+  background:#141414;
+  border:1px solid rgba(255,255,255,.06);
+}
+.auto-insight-card span{
+  display:block;
+  color:var(--muted);
+  font-size:8px;
+  letter-spacing:1px;
+}
+.auto-insight-card strong{
+  display:block;
+  margin-top:5px;
+  font-size:14px;
+}
+.auto-insight-result{
+  margin-top:10px;
+  padding:12px;
+  border-radius:10px;
+  background:rgba(35,211,154,.06);
+  border:1px solid rgba(35,211,154,.16);
+}
+.auto-insight-result span{
+  color:var(--muted);
+  font-size:8px;
+  letter-spacing:1px;
+}
+.auto-insight-result strong{
+  display:block;
+  margin-top:6px;
+  color:#9ff0cc;
+  font-size:18px;
+}
+.auto-insight-note{
+  margin-top:9px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.45;
+}
+@media(max-width:700px){
+  .auto-insight-grid{grid-template-columns:1fr}
+}
+
+
+
 </style>
 </head>
 
@@ -840,8 +915,42 @@ button{
           </div>
 
           <div class="wa-next">
-            <span>NEXT ROUND</span>
-            <strong id="waNextSummary">AUTO RESULT — NEXT PERIOD</strong>
+            <span>CURRENT ROUND</span>
+            <strong id="waNextSummary">AUTO RESULT — CURRENT PERIOD</strong>
+          </div>
+
+
+
+          <div class="auto-insight" id="autoDemoInsight">
+            <div class="auto-insight-head">
+              <b>AUTO DEMO INSIGHT</b>
+              <span id="autoInsightPeriod">LIVE CURRENT PERIOD</span>
+            </div>
+
+            <div class="auto-insight-grid">
+              <div class="auto-insight-card">
+                <span>LOWEST COLOR STAKE</span>
+                <strong id="autoLowestColor">—</strong>
+              </div>
+              <div class="auto-insight-card">
+                <span>LOWEST NUMBER STAKE</span>
+                <strong id="autoLowestNumber">—</strong>
+              </div>
+              <div class="auto-insight-card">
+                <span>LOWEST SIZE STAKE</span>
+                <strong id="autoLowestSize">—</strong>
+              </div>
+            </div>
+
+            <div class="auto-insight-result">
+              <span>AUTO DEMO RESULT · INDEPENDENT</span>
+              <strong id="autoInsightResult">—</strong>
+            </div>
+
+            <div class="auto-insight-note">
+              The lowest-stake values are shown as a demo analytics insight only.
+              They do not control or select the round result. AUTO result remains independent.
+            </div>
           </div>
 
           <div style="margin-top:15px;overflow-x:auto">
@@ -1441,7 +1550,7 @@ button{
           renderGameCards();
 
           showStatus(
-            `MANUAL saved for ${targetPeriod}: ${data?.color || selectedColor} ${data?.number ?? Number(selectedNumber)} · ${data?.size || selectedSize}`,
+            `MANUAL active for ${targetPeriod}: ${data?.color || selectedColor} ${data?.number ?? Number(selectedNumber)} · ${data?.size || selectedSize}`,
             "ok"
           );
 
@@ -1449,14 +1558,14 @@ button{
           return;
         }
 
-        // AUTO / RANDOM: remove the scheduled MANUAL result for the next round
+        // AUTO / RANDOM: remove the MANUAL result for the current round
         // so an old manual setting cannot override the new mode.
-        const nextInfo = wingoPeriodInfo(selectedDuration);
+        const currentInfo = wingoPeriodInfo(selectedDuration);
         const { error: clearError } = await supabase.rpc(
           "nplus_admin_clear_wingo_manual",
           {
             p_duration: selectedDuration,
-            p_period: nextInfo.next
+            p_period: currentInfo.current
           }
         );
 
@@ -1697,6 +1806,78 @@ button{
     }
   }
 
+
+
+  function pickLowestStake(rows, labels) {
+    const values = labels.map(label => {
+      const x = rows?.[label] || {count:0, amount:0};
+      return {
+        label,
+        count: Number(x.count || 0),
+        amount: Number(x.amount || 0)
+      };
+    });
+
+    values.sort((a,b) => {
+      if (a.amount !== b.amount) return a.amount - b.amount;
+      if (a.count !== b.count) return a.count - b.count;
+      return labels.indexOf(a.label) - labels.indexOf(b.label);
+    });
+
+    return values[0] || {label:"—",count:0,amount:0};
+  }
+
+  function autoDemoHash(text) {
+    let h = 2166136261;
+    for (let i = 0; i < String(text).length; i++) {
+      h ^= String(text).charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0);
+  }
+
+  function independentAutoDemoResult(period) {
+    const h = autoDemoHash(period);
+    const number = h % 10;
+
+    let color = "GREEN";
+    if (number === 0 || number === 5) {
+      color = (h % 2 === 0) ? "VIOLET" : "GREEN";
+    } else if ([2,4,6,8].includes(number)) {
+      color = "RED";
+    } else {
+      color = "GREEN";
+    }
+
+    const size = number >= 5 ? "BIG" : "SMALL";
+
+    return { color, number, size };
+  }
+
+  function renderAutoDemoInsight(summary, period) {
+    const color = pickLowestStake(
+      summary.colors || {},
+      ["Green","Violet","Red"]
+    );
+    const number = pickLowestStake(
+      summary.numbers || {},
+      ["0","1","2","3","4","5","6","7","8","9"]
+    );
+    const size = pickLowestStake(
+      summary.sizes || {},
+      ["Big","Small"]
+    );
+
+    $("autoInsightPeriod").textContent = `LIVE · ${period}`;
+    $("autoLowestColor").textContent = `${color.label} · ${money(color.amount)}`;
+    $("autoLowestNumber").textContent = `${number.label} · ${money(number.amount)}`;
+    $("autoLowestSize").textContent = `${size.label} · ${money(size.amount)}`;
+
+    const result = independentAutoDemoResult(period);
+    $("autoInsightResult").textContent =
+      `${result.color} ${result.number} · ${result.size}`;
+  }
+
   async function loadWingoAnalytics() {
     if (selectedGame?.key !== "WINGO") return;
 
@@ -1712,12 +1893,12 @@ button{
     $("waCurrentPeriod").textContent = info.current;
     $("waNextPeriod").textContent = info.next;
     $("waTimeLeft").textContent = `${info.remaining}s`;
-    const savedManual = await getSavedManualWingoResult(info.next, sec);
-    if (savedManual) {
+    const savedManualCurrent = await getSavedManualWingoResult(info.current, sec);
+    if (savedManualCurrent) {
       $("waNextSummary").textContent =
-        `MANUAL RESULT — ${savedManual.color} ${savedManual.number} · ${savedManual.size}`;
+        `MANUAL RESULT — ${info.current} · ${savedManualCurrent.color} ${savedManualCurrent.number} · ${savedManualCurrent.size}`;
     } else {
-      $("waNextSummary").textContent = `AUTO RESULT — ${info.next}`;
+      $("waNextSummary").textContent = `AUTO RESULT — ${info.current}`;
     }
 
     const { data, error } = await supabase.rpc(
@@ -1737,6 +1918,8 @@ button{
 
     $("waBetCount").textContent = Number(summary.bet_count || 0).toLocaleString("en-IN");
     $("waStake").textContent = money(summary.total_stake || 0);
+
+    renderAutoDemoInsight(summary, info.current);
 
     renderWingoBreakdown(
       "waColors",
