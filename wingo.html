@@ -7,9 +7,9 @@
 <title>N+ PLAY — WINGO ULTRA FINAL V2</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/nplus-config.js?v=20261005"></script>
-<script src="core/nplus-auth.js?v=20261005"></script>
-<script src="core/nplus-wallet-bridge.js?v=20261005"></script>
+<script src="core/nplus-config.js?v=20261006"></script>
+<script src="core/nplus-auth.js?v=20261006"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261006"></script>
 
 <style>
 :root{--bg:#070808;--card:#111311;--card2:#161816;--line:rgba(255,255,255,.085);--txt:#f4f1e9;--muted:#858a84;--gold:#d8b66d;--gold2:#f2d594;--red:#ef5a57;--green:#27bd78;--violet:#a86aee;--blue:#639bea;--danger:#ff706c}
@@ -419,7 +419,7 @@ async function getAdminWingoResult(period, sec){
     const client = window.NPlusAuth?.client;
     if (!client) return null;
 
-    // MANUAL results are bound to the exact WINGO period.
+    // MANUAL results are bound to the exact WINGO period that is ending.
     // No number -> color/size conversion is performed here.
     const { data, error } = await client
       .from("wingo_manual_results")
@@ -1545,14 +1545,12 @@ $("#rulesBtn").onclick=
 $("#ruleClose").onclick=
   ()=>$("#rules").classList.remove("show");
 
-$("#deposit").onclick = () => {
-  location.href = "deposit.html";
-};
+$("#deposit").onclick=
+  $("#withdraw").onclick=
+    ()=>toast(
+      "Virtual-credit demo only"
+    );
 
-$("#withdraw").onclick = () => {
-  location.href = "withdraw.html";
-};
-  
 $("#sound").onclick=
   ()=>toast(
     "Sound control ready"
