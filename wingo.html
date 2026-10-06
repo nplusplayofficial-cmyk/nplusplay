@@ -435,6 +435,7 @@ async function getAdminWingoResult(period, sec){
     if (!Number.isInteger(n) || n < 0 || n > 9) return null;
 
     const c = color(n);
+    const storedSize = String(data.size || "").toUpperCase();
 
     return {
       period,
@@ -442,7 +443,7 @@ async function getAdminWingoResult(period, sec){
       color: c,
       colorName: cname(c),
       colors: colorsFor(n),
-      size: size(n),
+      size: storedSize === "BIG" || storedSize === "SMALL" ? (storedSize === "BIG" ? "Big" : "Small") : size(n),
       adminControlled: true
     };
   } catch (err) {
