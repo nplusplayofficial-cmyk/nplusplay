@@ -10,6 +10,7 @@
 <script src="core/nplus-config.js?v=20261005"></script>
 <script src="core/nplus-auth.js?v=20261005"></script>
 <script src="core/nplus-wallet-bridge.js?v=20261005"></script>
+<script src="core/nplus-game-status.js?v=20261006"></script>
 
 <style>
 :root{--bg:#070808;--card:#111311;--card2:#161816;--line:rgba(255,255,255,.085);--txt:#f4f1e9;--muted:#858a84;--gold:#d8b66d;--gold2:#f2d594;--red:#ef5a57;--green:#27bd78;--violet:#a86aee;--blue:#639bea;--danger:#ff706c}
@@ -31,10 +32,67 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 @media(min-width:700px){body{padding:18px}.app{border:1px solid #fff1;border-radius:24px;min-height:calc(100vh - 36px)}header{border-radius:24px 24px 0 0}}
 .resultInfo strong{color:var(--gold2)}
 .resultInfo{max-height:150px;overflow:auto}.meta{flex-wrap:wrap}.meta .pill.r{color:#ff817d;border-color:#ef5a5755}.meta .pill.g{color:#67dda7;border-color:#27bd7855}.meta .pill.v{color:#c18af5;border-color:#a86aee55}
+
+.game-lock{
+  position:fixed;
+  inset:0;
+  z-index:999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(0,0,0,.88);
+  backdrop-filter:blur(10px);
+}
+.game-lock.show{display:flex}
+.game-lock-card{
+  width:min(420px,100%);
+  padding:28px 22px;
+  text-align:center;
+  border:1px solid rgba(216,182,109,.25);
+  border-radius:20px;
+  background:#111311;
+  box-shadow:0 30px 100px #000;
+}
+.game-lock-mark{
+  width:54px;height:54px;
+  margin:0 auto 14px;
+  display:grid;place-items:center;
+  border-radius:15px;
+  background:linear-gradient(145deg,#f1d38f,#b6873c);
+  color:#151108;
+  font-weight:950;
+  font-size:20px;
+}
+.game-lock-card h2{margin:0 0 8px;font-size:20px}
+.game-lock-card p{margin:0;color:#858a84;font-size:11px;line-height:1.5}
+.game-lock-back{
+  margin-top:18px;
+  border:0;
+  border-radius:10px;
+  padding:11px 18px;
+  background:#252825;
+  color:#ddd;
+  font-weight:900;
+}
+
 </style>
 </head>
 
 <body>
+
+<div class="game-lock" id="gameLock" aria-hidden="true">
+  <div class="game-lock-card">
+    <div class="game-lock-mark">N+</div>
+    <h2>WINGO Temporarily Unavailable</h2>
+    <p>
+      This demo game is currently paused by the administrator.
+      Please try again later.
+    </p>
+    <button class="game-lock-back" id="gameLockBack">BACK</button>
+  </div>
+</div>
+
 <div class="ambient"></div>
 
 <div class="app">
@@ -1189,6 +1247,41 @@ function toast(t){
     );
 }
 
+
+async function checkWingoActivation(){
+  try{
+    if(!window.NPlusGameStatus?.isGameEnabled){
+      console.warn("Game status bridge unavailable; keeping existing WINGO behavior.");
+      return true;
+    }
+
+    const enabled =
+      await window.NPlusGameStatus.isGameEnabled("WINGO");
+
+    if(enabled) return true;
+
+    document
+      .getElementById("gameLock")
+      ?.classList.add("show");
+
+    document
+      .getElementById("gameLock")
+      ?.setAttribute("aria-hidden","false");
+
+    return false;
+  }catch(err){
+    console.error("WINGO activation check failed:",err);
+    toast("Unable to check game status");
+    return true;
+  }
+}
+
+document.getElementById("gameLockBack")?.addEventListener(
+  "click",
+  ()=>history.back()
+);
+
+
 /* -----------------------------
    INITIALIZATION
 ----------------------------- */
@@ -1199,6 +1292,11 @@ function toast(t){
       await window.NPlusAuth.requireAuth();
 
     if(!user)return;
+
+    const gameEnabled =
+      await checkWingoActivation();
+
+    if(!gameEnabled)return;
 
     load();
 
@@ -1542,8 +1640,13 @@ window.addEventListener(
 
 document.addEventListener(
   "visibilitychange",
-  ()=>{
+  async ()=>{
     if(!document.hidden){
+      const gameEnabled =
+        await checkWingoActivation();
+
+      if(!gameEnabled)return;
+
       ensureHistory();
 
       syncWallet()
