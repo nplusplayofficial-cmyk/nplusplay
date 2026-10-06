@@ -1387,7 +1387,7 @@ button{
     if (selectedGame.key === "WINGO") {
       try {
         const info = wingoPeriodInfo(selectedDuration);
-        const targetPeriod = info.next;
+        const targetPeriod = info.current;
 
         if (selectedMode === "manual") {
           if (
