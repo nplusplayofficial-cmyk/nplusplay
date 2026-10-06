@@ -1351,7 +1351,7 @@ button{
     );
   }
 
-  function saveDemoSetting() {
+  async function saveDemoSetting() {
     if (!selectedGame) return;
 
     const state = getDemoState();
@@ -1359,45 +1359,70 @@ button{
     let result = $("demoResultText").textContent;
 
     if (selectedMode === "manual") {
-      result =
-        `${selectedColor || "—"} ${selectedNumber ?? "—"}`;
+      if (selectedNumber === null) {
+        showStatus("Please select a number first.", "err");
+        return;
+      }
+
+      result = `${selectedColor || "—"} ${selectedNumber}`;
     }
 
     if (selectedGame.key === "WINGO") {
-      const gameState = state.WINGO || {};
-      gameState.durations = gameState.durations || {};
+      try {
+        const { data, error } = await supabase.rpc(
+          "nplus_admin_set_wingo_demo",
+          {
+            p_duration: selectedDuration,
+            p_mode: selectedMode.toUpperCase(),
+            p_color: selectedColor,
+            p_number: selectedNumber === null ? null : Number(selectedNumber)
+          }
+        );
 
-      gameState.durations[selectedDuration] = {
-        duration:selectedDuration,
-        mode:selectedMode.toUpperCase(),
-        color:selectedColor,
-        number:selectedNumber,
-        result,
-        updated_at:new Date().toISOString()
-      };
+        if (error) {
+          console.error("WINGO save error:", error);
+          showStatus(error.message || "Unable to save WINGO setting.", "err");
+          return;
+        }
 
-      state.WINGO = gameState;
-    } else {
-      state[selectedGame.key] = {
-        mode:selectedMode.toUpperCase(),
-        color:selectedColor,
-        number:selectedNumber,
-        result,
-        updated_at:new Date().toISOString()
-      };
+        const gameState = state.WINGO || {};
+        gameState.durations = gameState.durations || {};
+        gameState.durations[selectedDuration] = {
+          duration: selectedDuration,
+          mode: selectedMode.toUpperCase(),
+          color: data?.color || selectedColor,
+          number: data?.number ?? selectedNumber,
+          result: data?.result || result,
+          updated_at: new Date().toISOString()
+        };
+        state.WINGO = gameState;
+        saveDemoState(state);
+        renderGameCards();
+
+        showStatus(
+          `WINGO ${selectedDuration === 30 ? "30 SEC" : selectedDuration === 60 ? "1 MIN" : selectedDuration === 180 ? "3 MIN" : "5 MIN"} saved successfully.`,
+          "ok"
+        );
+
+        loadWingoAnalytics();
+      } catch (err) {
+        console.error(err);
+        showStatus(err.message || "Unable to save WINGO setting.", "err");
+      }
+      return;
     }
+
+    state[selectedGame.key] = {
+      mode: selectedMode.toUpperCase(),
+      color: selectedColor,
+      number: selectedNumber,
+      result,
+      updated_at: new Date().toISOString()
+    };
 
     saveDemoState(state);
     renderGameCards();
-    showStatus(
-      selectedGame.name +
-        " • " +
-        (selectedDuration === 30 ? "30 SEC" :
-         selectedDuration === 60 ? "1 MIN" :
-         selectedDuration === 180 ? "3 MIN" : "5 MIN") +
-        " demo setting saved successfully.",
-      "ok"
-    );
+    showStatus(selectedGame.name + " demo setting saved successfully.", "ok");
   }
 
   document.querySelectorAll(".mode-btn").forEach(btn => {
