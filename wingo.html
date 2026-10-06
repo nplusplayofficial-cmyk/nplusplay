@@ -396,60 +396,8 @@ function round(){
   };
 }
 
-
-function getAdminWingoControl(sec){
-  try{
-    const root =
-      JSON.parse(
-        localStorage.getItem("nplus_admin_demo_controls") || "{}"
-      );
-
-    const item =
-      root?.WINGO?.durations?.[String(sec)] ||
-      root?.WINGO?.durations?.[sec] ||
-      null;
-
-    if(!item)return null;
-
-    return {
-      mode:String(item.mode || "AUTO").toUpperCase(),
-      number:
-        item.number === undefined || item.number === null
-          ? null
-          : Number(item.number),
-      color:
-        item.color
-          ? String(item.color).toUpperCase()
-          : null
-    };
-  }catch{
-    return null;
-  }
-}
-
-function manualNumberFor(sec,p){
-  const control=getAdminWingoControl(sec);
-
-  if(
-    !control ||
-    control.mode!=="MANUAL" ||
-    !Number.isInteger(control.number) ||
-    control.number<0 ||
-    control.number>9
-  ){
-    return null;
-  }
-
-  return control.number;
-}
-
 function resultFor(p){
-  const forced = manualNumberFor(state.sec,p);
-  const n =
-    forced === null
-      ? hash(p)%10
-      : forced;
-
+  const n=hash(p)%10;
   const c=color(n);
 
   return{
@@ -1464,7 +1412,7 @@ $("#confirm").onclick=async()=>{
           type:"GAME_BET",
           source:"WINGO",
           note:
-            `WINGO BET ${p} ${betId}`
+            `WINGO BET ${p} ${betId} type=${state.selection.type} value=${state.selection.value} qty=${state.qty} multi=${state.multi}`
         }
       );
 
@@ -1554,13 +1502,6 @@ $("#continue").onclick=
 window.addEventListener(
   "storage",
   e=>{
-    if(e.key === "nplus_admin_demo_controls"){
-      ensureHistory();
-      renderRecent();
-      renderPanel();
-      update();
-      return;
-    }
     if(
       e.key!==STORE||
       !e.newValue
