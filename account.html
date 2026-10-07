@@ -152,38 +152,157 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 <div class="modal" id="rulesModal"><div class="modal-card"><button class="close">×</button><h2>Game Rules</h2><p>Game-specific rules are available from each supported game page. Always review the rules before using a game.</p><button class="done">DONE</button></div></div>
 <div class="modal" id="termsModal"><div class="modal-card"><button class="close">×</button><h2>Terms & Privacy</h2><p>Platform terms and privacy controls can be connected here when the full account backend is introduced.</p><button class="done">DONE</button></div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261007"></script>
+<script src="core/nplus-auth.js?v=20261007"></script>
 <script>
 (()=>{
-"use strict";
-const STORE="nplusplay_wingo_ultra_final_v2", LEGACY="nplusplay_wallet_v1";
-const modes=[30,60,180,300];
-const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-function read(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}}
-function bets(){
- const x=read(),out=[];
- for(const sec of modes) if(Array.isArray(x.bets?.[sec])) out.push(...x.bets[sec].map(b=>({...b,sec:Number(b.sec||sec)})));
- return out.sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0));
-}
-function balance(){
- const n=Number(read().balance);if(Number.isFinite(n))return n;
- const l=Number(localStorage.getItem(LEGACY));return Number.isFinite(l)?l:1000;
-}
-let last=null;
-function render(){
- const b=balance();document.querySelector("#wallet").textContent=money(b);document.querySelector("#balance").textContent=money(b);
- if(last!==null&&last!==b){document.querySelector("#syncText").textContent="UPDATED";setTimeout(()=>document.querySelector("#syncText").textContent="SYNCED",900)} last=b;
- const a=bets(),settled=a.filter(x=>["WON","LOST"].includes(String(x.status).toUpperCase()));
- document.querySelector("#totalGames").textContent=new Set(a.map(x=>x.gameName||x.game||"N+ PLAY GAME")).size;
- document.querySelector("#wins").textContent=settled.filter(x=>String(x.status).toUpperCase()==="WON").length;
- document.querySelector("#losses").textContent=settled.filter(x=>String(x.status).toUpperCase()==="LOST").length;
-}
-document.querySelectorAll("[data-modal]").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.modal).classList.add("show"));
-document.querySelectorAll(".modal").forEach(m=>{m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")});m.querySelector(".close").onclick=()=>m.classList.remove("show");m.querySelector(".done").onclick=()=>m.classList.remove("show")});
-document.querySelector("#editProfile").onclick=()=>document.getElementById("profileModal").classList.add("show");
-window.addEventListener("storage",e=>{if(e.key===STORE||e.key===LEGACY)render()});
-window.addEventListener("pageshow",render);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});
-setInterval(render,1500);render();
+ "use strict";
+
+ const STORE="nplusplay_wingo_ultra_final_v2";
+ const LEGACY="nplusplay_wallet_v1";
+ const modes=[30,60,180,300];
+ const walletEl=document.querySelector("#wallet");
+ const balanceEl=document.querySelector("#balance");
+ const syncEl=document.querySelector("#syncText");
+ const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+ function readLegacy(){
+   try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}
+ }
+ function legacyBets(){
+   const x=readLegacy(),out=[];
+   for(const sec of modes){
+     if(Array.isArray(x.bets?.[sec])) out.push(...x.bets[sec].map(b=>({...b,sec:Number(b.sec||sec)})));
+   }
+   return out.sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0));
+ }
+
+ function paintWallet(value, status="SYNCED"){
+   const n=Number(value);
+   if(!Number.isFinite(n)) return;
+   walletEl.textContent=money(n);
+   balanceEl.textContent=money(n);
+   syncEl.textContent=status;
+ }
+
+ async function supabaseBalance(){
+   const client=window.NPlusAuth?.client;
+   if(!client) return null;
+
+   try{
+     const {data:userData,error:userError}=await client.auth.getUser();
+     if(userError || !userData?.user?.id) return null;
+
+     const {data,error}=await client
+       .from("demo_wallets")
+       .select("balance")
+       .eq("user_id",userData.user.id)
+       .maybeSingle();
+
+     if(error || !data) return null;
+
+     const value=Number(data.balance);
+     return Number.isFinite(value)?value:null;
+   }catch(err){
+     console.error("N+ PLAY account wallet sync error:",err);
+     return null;
+   }
+ }
+
+ let lastBalance=null;
+ let refreshBusy=false;
+
+ async function renderWallet(){
+   if(refreshBusy) return;
+   refreshBusy=true;
+
+   try{
+     const remote=await supabaseBalance();
+
+     if(remote!==null){
+       const changed=lastBalance!==null && remote!==lastBalance;
+       paintWallet(remote,changed?"UPDATED":"SYNCED");
+       lastBalance=remote;
+
+       if(changed){
+         clearTimeout(window.__accountSyncTimer);
+         window.__accountSyncTimer=setTimeout(()=>syncEl.textContent="SYNCED",900);
+       }
+       return;
+     }
+
+     // Legacy fallback only when Supabase is unavailable/not authenticated.
+     const legacy=Number(readLegacy().balance);
+     if(Number.isFinite(legacy)){
+       paintWallet(legacy,"LOCAL FALLBACK");
+       lastBalance=legacy;
+       return;
+     }
+
+     const old=Number(localStorage.getItem(LEGACY));
+     if(Number.isFinite(old)){
+       paintWallet(old,"LOCAL FALLBACK");
+       lastBalance=old;
+     }
+   } finally {
+     refreshBusy=false;
+   }
+ }
+
+ function renderStats(){
+   const a=legacyBets();
+   const settled=a.filter(x=>["WON","LOST"].includes(String(x.status).toUpperCase()));
+
+   document.querySelector("#totalGames").textContent=
+     new Set(a.map(x=>x.gameName||x.game||"N+ PLAY GAME")).size;
+
+   document.querySelector("#wins").textContent=
+     settled.filter(x=>String(x.status).toUpperCase()==="WON").length;
+
+   document.querySelector("#losses").textContent=
+     settled.filter(x=>String(x.status).toUpperCase()==="LOST").length;
+ }
+
+ async function render(){
+   renderStats();
+   await renderWallet();
+ }
+
+ document.querySelectorAll("[data-modal]").forEach(b=>{
+   b.onclick=()=>document.getElementById(b.dataset.modal).classList.add("show");
+ });
+
+ document.querySelectorAll(".modal").forEach(m=>{
+   m.addEventListener("click",e=>{
+     if(e.target===m)m.classList.remove("show");
+   });
+   m.querySelector(".close").onclick=()=>m.classList.remove("show");
+   m.querySelector(".done").onclick=()=>m.classList.remove("show");
+ });
+
+ document.querySelector("#editProfile").onclick=()=>{
+   document.getElementById("profileModal").classList.add("show");
+ };
+
+ window.addEventListener("nplus:wallet-change",()=>{
+   renderWallet();
+ });
+
+ window.addEventListener("storage",e=>{
+   if(e.key===STORE||e.key===LEGACY) render();
+ });
+
+ window.addEventListener("focus",()=>renderWallet());
+ window.addEventListener("pageshow",()=>render());
+ document.addEventListener("visibilitychange",()=>{
+   if(!document.hidden) render();
+ });
+
+ setInterval(renderWallet,2000);
+ setInterval(renderStats,1500);
+
+ render();
 })();
 </script>
 <!-- N+ PLAY CORE v1 -->
