@@ -838,13 +838,11 @@ button:disabled{
       </div>
 
       <div class="card">
-        <div class="label">DEMO RESULT MODE</div>
+        <div class="label">GAME CONTROL MODE</div>
 
         <div class="mode-grid">
           <button class="mode-btn active" data-mode="auto">⚙ AUTO</button>
-          <button class="mode-btn" data-mode="lowest">⬇ AUTO · LOWEST STAKE</button>
           <button class="mode-btn" data-mode="manual">✦ MANUAL DEMO</button>
-          <button class="mode-btn" data-mode="random">↯ RANDOM DEMO</button>
         </div>
 
         <div class="wingo-duration" id="wingoDuration">
@@ -898,7 +896,7 @@ button:disabled{
         </div>
 
         <div class="demo-actions">
-          <button class="generate-demo" id="generateDemoBtn">GENERATE DEMO RESULT</button>
+          <button class="generate-demo" id="generateDemoBtn">PREVIEW CURRENT STATE</button>
           <button class="save-demo" id="saveDemoBtn">SAVE DEMO SETTING</button>
         </div>
 
@@ -912,7 +910,7 @@ button:disabled{
             <div>
               <h3>WINGO Round Analytics</h3>
               <div class="commission-note">
-                Read-only virtual-credit analytics. AUTO · LOWEST STAKE is a demo strategy locked in the final 5 seconds.
+                Read-only virtual-credit analytics. Analytics never choose or alter game outcomes.
               </div>
             </div>
             <button class="refresh" id="wingoAnalyticsRefresh">↻ REFRESH</button>
@@ -947,38 +945,6 @@ button:disabled{
             <strong id="waNextSummary">AUTO RESULT — CURRENT PERIOD</strong>
           </div>
 
-          <div class="auto-insight" id="autoDemoInsight">
-            <div class="auto-insight-head">
-              <b>AUTO DEMO INSIGHT</b>
-              <span id="autoInsightPeriod">LIVE CURRENT PERIOD</span>
-            </div>
-
-            <div class="auto-insight-grid">
-              <div class="auto-insight-card">
-                <span>LOWEST COLOR STAKE</span>
-                <strong id="autoLowestColor">—</strong>
-              </div>
-              <div class="auto-insight-card">
-                <span>LOWEST NUMBER STAKE</span>
-                <strong id="autoLowestNumber">—</strong>
-              </div>
-              <div class="auto-insight-card">
-                <span>LOWEST SIZE STAKE</span>
-                <strong id="autoLowestSize">—</strong>
-              </div>
-            </div>
-
-            <div class="auto-insight-result">
-              <span>AUTO DEMO RESULT · <b>LOWEST STAKE (5 SEC)</b></span>
-              <strong id="autoInsightResult">—</strong>
-            </div>
-
-            <div class="auto-insight-note">
-              In LOWEST STAKE demo mode, the lowest current-period stake is used at the final 5-second lock.
-              The selected Color + Number + Size are stored against the exact current period.
-            </div>
-          </div>
-
           <div style="margin-top:15px;overflow-x:auto">
             <table class="wa-table">
               <thead>
@@ -1000,8 +966,7 @@ button:disabled{
           </div>
 
           <div class="commission-note" style="margin-top:12px">
-            AUTO mode is independent. LOWEST STAKE mode is a separate virtual/demo strategy that
-            locks the lowest current-period stake selection during the final 5 seconds.
+            AUTO mode is independent. The analytics shown here are read-only and never alter the outcome engine.
           </div>
         </div>
       </div>
@@ -1472,6 +1437,8 @@ button:disabled{
     });
 
     document.querySelectorAll(".mode-btn").forEach(btn => {
+      const isManual = btn.dataset.mode === "manual";
+      btn.disabled = isManual && selectedGame?.key !== "WINGO";
       btn.classList.toggle(
         "active",
         btn.dataset.mode === selectedMode
@@ -1519,14 +1486,8 @@ button:disabled{
         selectedSize
           ? `${selectedColor} ${selectedNumber} · ${selectedSize}`
           : "SELECT COLOR / NUMBER / SIZE";
-    } else if (selectedMode === "lowest") {
-      $("demoResultText").textContent =
-        "AUTO · LOWEST STAKE (LAST 5 SEC)";
     } else {
-      $("demoResultText").textContent =
-        selectedMode === "random"
-          ? "RANDOM DEMO"
-          : (result || "AUTO");
+      $("demoResultText").textContent = result || "AUTO";
     }
   }
 
@@ -1548,15 +1509,15 @@ button:disabled{
         : 30;
 
     selectedMode =
-      String(
-        key === "WINGO"
-          ? (
-              state.durations?.[
-                selectedDuration
-              ]?.mode || "AUTO"
-            )
-          : (state.mode || "AUTO")
-      ).toLowerCase();
+      key === "WINGO"
+        ? String(
+            state.durations?.[selectedDuration]?.mode || "AUTO"
+          ).toLowerCase()
+        : "auto";
+
+    if (!["auto", "manual"].includes(selectedMode)) {
+      selectedMode = "auto";
+    }
 
     const selectedState =
       key === "WINGO"
@@ -1584,8 +1545,9 @@ button:disabled{
       " — DEMO CONTROL";
 
     $("detailPeriod").textContent =
-      "Demo period " +
-      new Date().toLocaleString("en-IN");
+      selectedGame.key === "WINGO"
+        ? `CURRENT PERIOD ${wingoPeriodInfo(selectedDuration).current}`
+        : "AUTO ENGINE · GAME CONTROL READ-ONLY";
 
     $("gameDetail").classList.add("show");
 
@@ -1637,44 +1599,13 @@ button:disabled{
       return;
     }
 
-    if (selectedMode === "lowest") {
-      $("demoResultText").textContent =
-        "AUTO · LOWEST STAKE (LAST 5 SEC)";
-
-      showStatus(
-        "Lowest-stake AUTO is active. The result is chosen at the 5-second lock using current-period stake analytics.",
-        "ok"
-      );
-      loadWingoAnalytics();
-      return;
-    }
-
-    const number =
-      Math.floor(Math.random() * 10);
-
-    const colors = [
-      "GREEN",
-      "VIOLET",
-      "RED"
-    ];
-
-    const color =
-      colors[
-        Math.floor(
-          Math.random() * colors.length
-        )
-      ];
-
-    const size =
-      number >= 5
-        ? "BIG"
-        : "SMALL";
-
     $("demoResultText").textContent =
-      `${color} ${number} · ${size}`;
+      selectedGame.key === "WINGO"
+        ? "AUTO"
+        : `${selectedGame.name} · AUTO ENGINE`;
 
     showStatus(
-      "Demo result generated successfully.",
+      `${selectedGame.name} is running on its game-owned AUTO engine.`,
       "ok"
     );
   }
@@ -1713,38 +1644,6 @@ button:disabled{
 
         const targetPeriod =
           info.current;
-
-        if (selectedMode === "lowest") {
-          const gameState = state.WINGO || {};
-          gameState.durations = gameState.durations || {};
-          gameState.durations[selectedDuration] = {
-            ...(gameState.durations[selectedDuration] || {}),
-            duration: selectedDuration,
-            mode: "LOWEST",
-            strategy: "LOWEST_STAKE_LAST_5_SEC",
-            result: "AUTO · LOWEST STAKE (LAST 5 SEC)",
-            updated_at: new Date().toISOString()
-          };
-          state.WINGO = gameState;
-          saveDemoState(state);
-          renderGameCards();
-
-          const live = wingoPeriodInfo(selectedDuration);
-          if (live.remaining <= 5) {
-            await loadWingoAnalytics();
-            showStatus(
-              "LOWEST STAKE AUTO locked/processed for the current 5-second window.",
-              "ok"
-            );
-          } else {
-            showStatus(
-              `LOWEST STAKE AUTO enabled. It will lock during the final 5 seconds of ${live.current}.`,
-              "ok"
-            );
-          }
-
-          return;
-        }
 
         if (selectedMode === "manual") {
           const {
@@ -1966,17 +1865,18 @@ button:disabled{
       return;
     }
 
+    if (selectedGame.key !== "WINGO") {
+      showStatus(
+        `${selectedGame.name} uses its own AUTO demo engine. Only WINGO manual result control is connected to live game settlement.`,
+        "ok"
+      );
+      return;
+    }
+
     state[selectedGame.key] = {
-      mode:
-        selectedMode.toUpperCase(),
-      color:
-        selectedColor,
-      number:
-        selectedNumber,
-      result:
-        result,
-      updated_at:
-        new Date().toISOString()
+      mode: "AUTO",
+      result: "AUTO",
+      updated_at: new Date().toISOString()
     };
 
     saveDemoState(state);
@@ -1984,7 +1884,7 @@ button:disabled{
 
     showStatus(
       selectedGame.name +
-      " demo setting saved successfully.",
+      " AUTO mode saved.",
       "ok"
     );
   }
@@ -1994,9 +1894,8 @@ button:disabled{
       btn.addEventListener(
         "click",
         () => {
-          selectedMode =
-            btn.dataset.mode;
-
+          if (btn.disabled) return;
+          selectedMode = btn.dataset.mode;
           syncDemoControls();
         }
       );
@@ -2214,193 +2113,6 @@ button:disabled{
     }
   }
 
-  function pickLowestStake(
-    rows,
-    labels
-  ) {
-    const values =
-      labels.map(label => {
-        const x =
-          rows?.[label] ||
-          {
-            count:0,
-            amount:0
-          };
-
-        return {
-          label,
-          count:Number(
-            x.count || 0
-          ),
-          amount:Number(
-            x.amount || 0
-          )
-        };
-      });
-
-    values.sort((a,b) => {
-      if (
-        a.amount !==
-        b.amount
-      ) {
-        return (
-          a.amount -
-          b.amount
-        );
-      }
-
-      if (
-        a.count !==
-        b.count
-      ) {
-        return (
-          a.count -
-          b.count
-        );
-      }
-
-      return (
-        labels.indexOf(a.label) -
-        labels.indexOf(b.label)
-      );
-    });
-
-    return (
-      values[0] ||
-      {
-        label:"—",
-        count:0,
-        amount:0
-      }
-    );
-  }
-
-  function autoDemoHash(text) {
-    let h = 2166136261;
-
-    const str =
-      String(text);
-
-    for (
-      let i = 0;
-      i < str.length;
-      i++
-    ) {
-      h ^=
-        str.charCodeAt(i);
-
-      h =
-        Math.imul(
-          h,
-          16777619
-        );
-    }
-
-    return (
-      h >>> 0
-    );
-  }
-
-  function independentAutoDemoResult(
-    period
-  ) {
-    const h =
-      autoDemoHash(
-        period
-      );
-
-    const number =
-      h % 10;
-
-    let color = "GREEN";
-
-    if (
-      number === 0 ||
-      number === 5
-    ) {
-      color =
-        h % 2 === 0
-          ? "VIOLET"
-          : "GREEN";
-    } else if (
-      [2,4,6,8]
-      .includes(number)
-    ) {
-      color = "RED";
-    } else {
-      color = "GREEN";
-    }
-
-    const size =
-      number >= 5
-        ? "BIG"
-        : "SMALL";
-
-    return {
-      color,
-      number,
-      size
-    };
-  }
-
-  function renderAutoDemoInsight(
-    summary,
-    period
-  ) {
-    const color =
-      pickLowestStake(
-        summary.colors || {},
-        [
-          "Green",
-          "Violet",
-          "Red"
-        ]
-      );
-
-    const number =
-      pickLowestStake(
-        summary.numbers || {},
-        [
-          "0","1","2","3","4",
-          "5","6","7","8","9"
-        ]
-      );
-
-    const size =
-      pickLowestStake(
-        summary.sizes || {},
-        [
-          "Big",
-          "Small"
-        ]
-      );
-
-    $("autoInsightPeriod")
-      .textContent =
-      `LIVE · ${period}`;
-
-    $("autoLowestColor")
-      .textContent =
-      `${color.label} · ${money(color.amount)}`;
-
-    $("autoLowestNumber")
-      .textContent =
-      `${number.label} · ${money(number.amount)}`;
-
-    $("autoLowestSize")
-      .textContent =
-      `${size.label} · ${money(size.amount)}`;
-
-    const result =
-      independentAutoDemoResult(
-        period
-      );
-
-    $("autoInsightResult")
-      .textContent =
-      `${result.color} ${result.number} · ${result.size}`;
-  }
-
   async function loadWingoAnalytics() {
     if (
       selectedGame?.key !== "WINGO"
@@ -2483,15 +2195,6 @@ button:disabled{
           </td>
         </tr>`;
 
-      renderAutoDemoInsight(
-        {
-          colors:{},
-          numbers:{},
-          sizes:{}
-        },
-        info.current
-      );
-
       return;
     }
 
@@ -2504,73 +2207,6 @@ button:disabled{
       )
         ? summary.bets
         : [];
-
-    // AUTO · LOWEST STAKE is locked once the final 5 seconds begin.
-    // We save one exact result for the current period so the user game
-    // can settle that same period deterministically.
-    if (selectedMode === "lowest" && info.remaining <= 5 && Number(summary.total_stake || 0) > 0) {
-      const rootState = getDemoState();
-      const savedState = rootState.WINGO?.durations?.[sec] || {};
-      const alreadySaved =
-        savedState.strategy === "LOWEST_STAKE_LAST_5_SEC" &&
-        savedState.period === info.current;
-
-      if (!alreadySaved) {
-        const c = pickLowestStake(summary.colors || {}, ["Green","Violet","Red"]);
-        const n = pickLowestStake(summary.numbers || {}, ["0","1","2","3","4","5","6","7","8","9"]);
-        const z = pickLowestStake(summary.sizes || {}, ["Big","Small"]);
-        const number = Number(n.label);
-
-        if (Number.isInteger(number) && number >= 0 && number <= 9) {
-          try {
-            const { data: saved, error: saveError } = await supabase.rpc(
-              "nplus_admin_save_wingo_manual",
-              {
-                p_duration: sec,
-                p_period: info.current,
-                p_color: String(c.label).toUpperCase(),
-                p_number: number,
-                p_size: String(z.label).toUpperCase()
-              }
-            );
-
-            if (!saveError) {
-              const nextState = getDemoState();
-              nextState.WINGO = nextState.WINGO || {};
-              nextState.WINGO.durations = nextState.WINGO.durations || {};
-              nextState.WINGO.durations[sec] = {
-                ...nextState.WINGO.durations[sec],
-                duration: sec,
-                mode: "LOWEST",
-                color: String(c.label).toUpperCase(),
-                number: number,
-                size: String(z.label).toUpperCase(),
-                result: `${String(c.label).toUpperCase()} ${number} · ${String(z.label).toUpperCase()}`,
-                period: info.current,
-                strategy: "LOWEST_STAKE_LAST_5_SEC",
-                colorStake: c.amount,
-                numberStake: n.amount,
-                sizeStake: z.amount,
-                updated_at: new Date().toISOString()
-              };
-              saveDemoState(nextState);
-
-              $("demoResultText").textContent =
-                `${String(c.label).toUpperCase()} ${number} · ${String(z.label).toUpperCase()}`;
-
-              showStatus(
-                `LOWEST STAKE locked for ${info.current}: ${String(c.label).toUpperCase()} ${number} · ${String(z.label).toUpperCase()}`,
-                "ok"
-              );
-            } else {
-              console.error("Lowest stake auto save error:", saveError);
-            }
-          } catch (err) {
-            console.error("Lowest stake auto save error:", err);
-          }
-        }
-      }
-    }
 
     $("waBetCount")
       .textContent =
@@ -2585,11 +2221,6 @@ button:disabled{
       money(
         summary.total_stake
       );
-
-    renderAutoDemoInsight(
-      summary,
-      info.current
-    );
 
     renderWingoBreakdown(
       "waColors",
@@ -3478,4 +3109,3 @@ button:disabled{
 
 </body>
 </html>
-
