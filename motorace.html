@@ -61,6 +61,11 @@ body{min-height:100vh}
 .result{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;place-items:center;z-index:40;padding:18px}.result.show{display:grid}.rcard{width:min(92%,370px);padding:25px 20px 20px;border:1px solid #4a4030;border-radius:18px;background:linear-gradient(180deg,#171717,#0d0d0d);text-align:center;box-shadow:0 18px 60px #000,0 0 35px #0008;animation:classicIn .18s ease-out}.rcard.win{border-color:#5b8f65}.rcard.loss{border-color:#704348}.rlabel{font-size:9px;color:#8e8a82;letter-spacing:2.5px}.outcome{font-size:22px;font-weight:950;letter-spacing:1px;margin:10px 0 4px}.outcome.win{color:#65e39a}.outcome.loss{color:#ff6c75}.resultNum{font-size:52px;font-weight:950;line-height:1;color:var(--gold2);margin:5px}.rmeta{font-size:10px;color:#aaa;line-height:1.8;margin-top:7px}.resultLine{height:1px;background:#2c2a26;margin:14px 0}.continue{width:100%;margin-top:15px;padding:11px;border:1px solid #4a4030;border-radius:10px;background:#171717;color:#ddd;font-weight:900}.autoClose{font-size:8px;color:#666;margin-top:9px}@keyframes classicIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 @media(max-width:430px){.track{height:285px}.bike{width:51px}.num{padding:9px 2px}}
 </style>
+<!-- N+ PLAY SHARED ACCOUNT + SUPABASE DEMO WALLET -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js"></script>
+<script src="core/nplus-auth.js"></script>
+<script src="core/nplus-wallet-bridge.js"></script>
 </head>
 <body>
 <main class="app">
@@ -144,15 +149,37 @@ const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:
 
 let db;
 try{db=JSON.parse(localStorage.getItem(STORE)||'null')}catch(e){db=null}
-if(!db) db={balance:1000,rounds:[],bets:[],lastSettledPeriod:null};
+if(!db) db={rounds:[],bets:[],lastSettledPeriod:null};
+if(!Array.isArray(db.rounds)) db.rounds=[];
+if(!Array.isArray(db.bets)) db.bets=[];
 
+let walletBalance=null;
+let walletBusy=false;
 let pos=1, selected=null, qty=1, multiplier=1;
 let activePeriod='';
 let raceStartedFor=null;
 let lastDisplayedSecond=-1;
 let resultCloseTimer=null;
 
-function save(){db.rounds=db.rounds.slice(0,100);db.bets=db.bets.slice(0,100);localStorage.setItem(STORE,JSON.stringify(db))}
+function save(){
+ db.rounds=db.rounds.slice(0,100);
+ db.bets=db.bets.slice(0,100);
+ localStorage.setItem(STORE,JSON.stringify(db));
+}
+async function refreshWallet(){
+ if(walletBusy||!window.NPlusWallet)return;
+ walletBusy=true;
+ try{
+   const value=await window.NPlusWallet.getBalance();
+   walletBalance=Number(value);
+   renderBalance();
+   syncSheet();
+ }catch(e){
+   console.error('N+ PLAY Moto Race wallet sync error:',e);
+ }finally{
+   walletBusy=false;
+ }
+}
 function periodFor(date=new Date()){
  return date.getFullYear()+String(date.getMonth()+1).padStart(2,'0')+String(date.getDate()).padStart(2,'0')+String(date.getHours()).padStart(2,'0')+String(date.getMinutes()).padStart(2,'0');
 }
@@ -240,35 +267,55 @@ function openSheet(){
 $('betBtn').onclick=openSheet;
 function syncSheet(){
  const stake=Math.max(0,Number($('amount').value)||0)*qty*multiplier;
- $('qty').textContent=qty;$('total').textContent=money(stake*(1+FEE));
+ const total=stake*(1+FEE);
+ $('qty').textContent=qty;
+ $('total').textContent=money(total);
  document.querySelectorAll('[data-multi]').forEach(x=>x.classList.toggle('active',+x.dataset.multi===multiplier));
+ $('confirm').disabled=!$('agree').checked||walletBalance===null||total<1||total>walletBalance||!selected||!isBettingOpen();
 }
 document.querySelectorAll('[data-amt]').forEach(b=>b.onclick=()=>{$('amount').value=b.dataset.amt;syncSheet()});
 document.querySelectorAll('[data-multi]').forEach(b=>b.onclick=()=>{multiplier=+b.dataset.multi;syncSheet()});
 $('amount').oninput=syncSheet;
 $('minus').onclick=()=>{qty=Math.max(1,qty-1);syncSheet()};
 $('plus').onclick=()=>{qty=Math.min(100,qty+1);syncSheet()};
-$('agree').onchange=e=>$('confirm').disabled=!e.target.checked;
+$('agree').onchange=syncSheet;
 $('cancel').onclick=()=>{$('overlay').classList.remove('show')};
 
-$('confirm').onclick=()=>{
+$('confirm').onclick=async()=>{
  if(!isBettingOpen()){$('overlay').classList.remove('show');alert('Betting closed for this round.');return}
+ if(walletBalance===null)await refreshWallet();
  const unit=Math.max(0,Number($('amount').value)||0);
  const stake=unit*qty*multiplier;
  if(stake<1){alert('Minimum demo stake is ₹1.');return}
  const fee=stake*FEE,total=stake+fee;
- if(total>db.balance){alert('Insufficient demo balance.');return}
- db.balance-=total;
- db.bets.unshift({
-   id:'BET-'+Date.now(),
-   period:activePeriod,
-   position:pos,
-   selection:{...selected},
-   stake,fee,total,
-   status:'PENDING',
-   placedAt:Date.now()
- });
- save();renderBalance();renderPanel('my');$('overlay').classList.remove('show');
+ if(walletBalance===null){alert('Wallet is still syncing. Please try again.');return}
+ if(total>walletBalance){alert('Insufficient demo balance.');return}
+ const betId='BET-'+Date.now();
+ try{
+   const after=await window.NPlusWallet.changeBalance(-total,{
+     type:'GAME_BET',
+     source:'MOTORACE',
+     note:`MOTORACE BET ${activePeriod} ${betId} selection=${selected.kind}:${selected.value} position=${pos} stake=${stake.toFixed(2)} fee=${fee.toFixed(2)} qty=${qty} multi=${multiplier}`
+   });
+   walletBalance=Number(after);
+   db.bets.unshift({
+     id:betId,
+     period:activePeriod,
+     position:pos,
+     selection:{...selected},
+     stake,fee,total,
+     status:'PENDING',
+     placedAt:Date.now()
+   });
+   save();
+   renderBalance();
+   renderPanel('my');
+   $('overlay').classList.remove('show');
+   toast('✓ Demo bet confirmed');
+ }catch(e){
+   console.error(e);
+   alert(e?.message||'Unable to place demo bet.');
+ }
 };
 
 function matches(bet,result){
@@ -278,21 +325,44 @@ function matches(bet,result){
  if(bet.selection.kind==='bs')return bet.selection.value==='BIG' ? n>=6 : n<=5;
  return false;
 }
-function settlePeriod(period,result){
- let changed=false;
- for(const bet of db.bets){
-   if(bet.period!==period||bet.status!=='PENDING')continue;
+async function settlePeriod(period,result){
+ const pending=db.bets.filter(b=>b.period===period&&b.status==='PENDING');
+ if(!pending.length)return true;
+
+ const winners=pending.filter(b=>matches(b,result));
+ const payoutTotal=winners.reduce((a,b)=>a+(b.stake*PAYOUT),0);
+
+ if(payoutTotal>0){
+   try{
+     const after=await window.NPlusWallet.changeBalance(payoutTotal,{
+       type:'GAME_WIN',
+       source:'MOTORACE',
+       note:`MOTORACE WIN ${period} bets=${winners.map(b=>b.id).join(',')} payout=${payoutTotal.toFixed(2)}`
+     });
+     walletBalance=Number(after);
+   }catch(e){
+     console.error('Moto Race settlement wallet error:',e);
+     return false;
+   }
+ }
+
+ for(const bet of pending){
    bet.result=result[bet.position-1];
    if(matches(bet,result)){
      bet.status='WIN';
      bet.payout=bet.stake*PAYOUT;
-     db.balance+=bet.payout;
-   }else bet.status='LOSS';
-   changed=true;
+   }else{
+     bet.status='LOSS';
+     bet.payout=0;
+   }
  }
- if(changed){db.lastSettledPeriod=period;save();renderBalance();renderPanel(currentPanel)}
+ db.lastSettledPeriod=period;
+ save();
+ renderBalance();
+ renderPanel(currentPanel);
+ return true;
 }
-function renderBalance(){$('balance').textContent=money(db.balance)}
+function renderBalance(){$('balance').textContent=walletBalance===null?'SYNCING…':money(walletBalance)}
 function renderRecent(){
  const rounds=db.rounds.slice(0,10);
  $('recent').innerHTML=rounds.map(r=>r.result.slice(0,3).map(n=>'<span style="background:'+COLORS[n-1]+'">'+n+'</span>').join('')).join('');
@@ -342,14 +412,18 @@ function startRace(){
  }
  requestAnimationFrame(frame);
 }
-function finishRace(result){
+async function finishRace(result){
  $('raceState').textContent='1ST BIKE '+result[0]+' · 2ND BIKE '+result[1]+' · 3RD BIKE '+result[2];
 
  const myBets=db.bets.filter(b=>b.period===activePeriod);
  const hadBet=myBets.length>0;
 
  // Settle this round first.
- settlePeriod(activePeriod,result);
+ const settled=await settlePeriod(activePeriod,result);
+ if(!settled){
+   $('raceState').textContent='RESULT READY · WALLET SYNC RETRY NEEDED';
+   return;
+ }
 
  // Only show the result popup if the user actually bet in this round.
  if(!hadBet){
@@ -401,6 +475,12 @@ function updateClock(){
 }
 
 buildTrack();renderNumbers();renderBalance();ensureRound();renderRecent();renderPanel('history');syncSheet();
+refreshWallet();
+window.addEventListener('nplus:wallet-change',()=>refreshWallet());
+window.addEventListener('focus',()=>refreshWallet());
+window.addEventListener('pageshow',()=>refreshWallet());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshWallet()});
+setInterval(refreshWallet,2000);
 setInterval(updateClock,100);
 updateClock();
 
