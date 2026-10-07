@@ -1,1 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#070707">
+<meta name="description" content="N+ PLAY — Premium gaming lobby">
+<title>N+ PLAY — Premium Gaming</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --bg:#070707;
+    --bg-2:#0c0c0c;
+    --surface:rgba(255,255,255,.045);
+    --surface-2:rgba(255,255,255,.07);
+    --line:rgba(255,255,255,.09);
+    --line-gold:rgba(201,165,91,.22);
+    --gold:#c9a55b;
+    --gold-2:#e8d7ae;
+    --gold-dark:#70582b;
+    --white:#fff;
+    --muted:#989898;
+    --muted-2:#626262;
+    --green:#23d39a;
+    --red:#ff5260;
+    --radius:18px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+    min-height:100vh;
+    overflow-x:hidden;
+    color:var(--white);
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(650px 350px at 50% -80px,rgba(201,165,91,.11),transparent 70%),
+      radial-gradient(500px 400px at -15% 45%,rgba(201,165,91,.045),transparent 70%),
+      linear-gradient(180deg,#090909 0%,#050505 100%);
+    padding-bottom:92px;
+}
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.22;
+    background-image:radial-gradient(rgba(255,255,255,.12) .5px,transparent .5px);
+    background-size:5px 5px;
+    mask-image:linear-gradient(to bottom,black,transparent 75%);
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.page{width:min(100%,560px);margin:auto;padding:0 14px}
+@media(min-width:900px){.page{max-width:1180px}}
+
+.accent-text{
+    background:linear-gradient(110deg,#70582b 0%,#f2e7c8 26%,#c9a55b 52%,#f2e7c8 72%,#70582b 100%);
+    background-size:220% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:accentSweep 6s linear infinite;
+}
+@keyframes accentSweep{to{background-position:220% center}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,165,91,.0)}50%{box-shadow:0 0 0 7px rgba(201,165,91,.07)}}
+
+.header{
+    position:sticky;top:0;z-index:100;
+    margin:0 -14px;
+    padding:13px 14px 11px;
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(7,7,7,.76);
+    backdrop-filter:blur(22px) saturate(140%);
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-mark{
+    width:34px;height:34px;border-radius:11px;
+    display:grid;place-items:center;
+    font-size:11px;font-weight:900;letter-spacing:-.5px;
+    color:#090909;
+    background:linear-gradient(145deg,#fff1a0,#c9a55b 48%,#8f6500);
+    box-shadow:0 5px 24px rgba(201,165,91,.18);
+}
+.brand-name{font-size:1.18rem;font-weight:900;letter-spacing:.9px}
+.header-right{display:flex;align-items:center;gap:8px}
+.wallet{
+    display:flex;align-items:center;gap:7px;
+    padding:7px 11px;border:1px solid rgba(35,211,154,.2);
+    border-radius:999px;background:rgba(35,211,154,.07);
+}
+.wallet-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.wallet-value{font-size:.76rem;font-weight:800;color:#bff8e5}
+.age{font-size:.62rem;font-weight:900;color:#ff8b94;padding:6px 8px;border:1px solid rgba(255,82,96,.2);border-radius:999px;background:rgba(255,82,96,.06)}
+
+.categories{
+    display:flex;gap:7px;overflow:auto;scrollbar-width:none;
+    padding:12px 1px 8px;
+}
+.categories::-webkit-scrollbar{display:none}
+.cat{
+    flex:0 0 auto;padding:8px 14px;border-radius:999px;
+    border:1px solid transparent;color:var(--muted);
+    font-size:.72rem;font-weight:700;cursor:pointer;
+    transition:.28s var(--ease);
+}
+.cat:hover{color:#fff;border-color:var(--line)}
+.cat.active{
+    color:#080808;background:linear-gradient(135deg,#f2e7c8,var(--gold));
+    border-color:var(--gold);
+    box-shadow:0 5px 22px rgba(201,165,91,.17);
+}
+
+.hero{
+    position:relative;overflow:hidden;
+    min-height:260px;margin:10px 0 15px;
+    border:1px solid var(--line-gold);
+    border-radius:24px;
+    background:
+      radial-gradient(circle at 78% 25%,rgba(201,165,91,.22),transparent 25%),
+      radial-gradient(circle at 90% 100%,rgba(120,72,0,.2),transparent 42%),
+      linear-gradient(135deg,#16130b,#0b0b0b 58%,#090909);
+    box-shadow:var(--shadow);
+    isolation:isolate;
+}
+.hero:before{
+    content:"N+";
+    position:absolute;right:-25px;bottom:-55px;
+    font-size:220px;line-height:1;font-weight:900;
+    color:rgba(201,165,91,.035);
+    transform:rotate(-8deg);
+}
+.hero:after{
+    content:"";
+    position:absolute;inset:-1px;
+    background:linear-gradient(115deg,transparent 35%,rgba(255,240,160,.08) 50%,transparent 65%);
+    transform:translateX(-120%);
+    animation:heroShine 7s var(--ease) infinite;
+}
+@keyframes heroShine{55%,100%{transform:translateX(120%)}}
+.hero-content{position:relative;z-index:2;padding:25px 22px}
+.eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    color:var(--gold-2);font-size:.61rem;font-weight:900;letter-spacing:1.6px;
+    text-transform:uppercase;
+}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+.hero h1{max-width:330px;margin:10px 0 7px;font-size:2.05rem;line-height:1.04;letter-spacing:-1.6px}
+.hero p{max-width:300px;color:#aaa;font-size:.76rem;line-height:1.6}
+.hero-actions{display:flex;gap:9px;margin-top:18px}
+.primary,.secondary{
+    border-radius:12px;padding:10px 16px;font-size:.74rem;font-weight:900;
+    transition:.28s var(--ease);display:inline-flex;align-items:center;gap:7px;
+}
+.primary{color:#080808;background:linear-gradient(135deg,#f2e7c8,var(--gold));box-shadow:0 8px 26px rgba(201,165,91,.2)}
+.secondary{border:1px solid var(--line-gold);background:rgba(255,255,255,.035);color:#eee}
+.primary:hover,.secondary:hover{transform:translateY(-2px)}
+
+.live{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;margin-bottom:20px;
+    border:1px solid var(--line);border-radius:14px;
+    background:rgba(255,255,255,.025);overflow:hidden;
+}
+.live-label{display:flex;align-items:center;gap:6px;flex:0 0 auto;color:#ff7781;font-size:.62rem;font-weight:900}
+.live-label span{width:6px;height:6px;border-radius:50%;background:#ff5260;box-shadow:0 0 12px #ff5260}
+.live-track{overflow:hidden;white-space:nowrap;color:#999;font-size:.67rem}
+.live-track b{color:var(--gold-2)}
+
+.section{margin:0 0 23px}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px}
+.section-title{display:flex;align-items:center;gap:9px;font-size:.94rem;font-weight:900;letter-spacing:-.3px}
+.section-title:before{content:"";width:3px;height:16px;border-radius:5px;background:linear-gradient(var(--gold-2),var(--gold-dark));box-shadow:0 0 12px rgba(201,165,91,.35)}
+.section-sub{margin-top:4px;margin-left:12px;color:var(--muted-2);font-size:.6rem}
+.view{color:#888;font-size:.65rem;font-weight:700}
+.view:hover{color:var(--gold)}
+
+.recommendations{
+    display:grid;grid-auto-flow:column;grid-auto-columns:112px;
+    gap:10px;overflow-x:auto;scrollbar-width:none;padding:2px 1px 5px;
+}
+.recommendations::-webkit-scrollbar{display:none}
+.rec{
+    position:relative;aspect-ratio:1;border-radius:17px;overflow:hidden;
+    border:1px solid var(--line);background:#0b0b0b;
+    transition:.3s var(--ease);
+}
+.rec:after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(0,0,0,.5),transparent 45%);
+    pointer-events:none;
+}
+.rec:hover{transform:translateY(-4px);border-color:var(--line-gold);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.rec img{width:100%;height:100%;display:block;object-fit:cover}
+.rec .rec-name{position:absolute;z-index:2;left:9px;bottom:8px;font-size:.62rem;font-weight:900;text-shadow:0 2px 7px #000}
+
+.game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.game{
+    position:relative;min-width:0;aspect-ratio:1.08;
+    overflow:hidden;border-radius:17px;background:#0b0b0b;
+    border:1px solid var(--line);
+    transition:.32s var(--ease);
+}
+.game:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(0,0,0,.72),transparent 55%)}
+.game img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s var(--ease)}
+.game:hover{transform:translateY(-3px);border-color:var(--line-gold);box-shadow:0 14px 32px rgba(0,0,0,.48)}
+.game:hover img{transform:scale(1.045)}
+.game-info{position:absolute;z-index:2;left:11px;right:11px;bottom:10px}
+.game-name{font-size:.72rem;font-weight:900}
+.game-meta{margin-top:3px;color:#aaa;font-size:.56rem}
+.badge{
+    position:absolute;z-index:3;top:9px;left:9px;
+    padding:4px 7px;border-radius:7px;
+    font-size:.5rem;font-weight:900;letter-spacing:.5px;
+    color:#080808;background:linear-gradient(135deg,#f2e7c8,var(--gold));
+}
+.badge.new{background:linear-gradient(135deg,#bff8e5,#23d39a)}
+.badge.hot{color:#fff;background:linear-gradient(135deg,#ff7b83,#c92536)}
+
+.champions{
+    border:1px solid var(--line);border-radius:19px;overflow:hidden;
+    background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+    box-shadow:var(--shadow);
+}
+.champion{
+    display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;
+    padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.045);
+}
+.champion:last-child{border-bottom:0}
+.rank{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.66rem;font-weight:900;background:rgba(255,255,255,.06);color:#999}
+.rank.top{color:#080808;background:linear-gradient(145deg,#f2e7c8,var(--gold))}
+.rank.second{color:#111;background:linear-gradient(145deg,#eee,#888)}
+.rank.third{color:#fff;background:linear-gradient(145deg,#d99555,#74421f)}
+.player{font-size:.68rem;font-weight:800}.player small{display:block;margin-top:2px;color:#666;font-size:.5rem;font-weight:500}
+.amount{font-size:.68rem;font-weight:900;color:var(--gold-2)}
+
+.footer{padding:8px 0 18px;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:15px}
+.footer-links a{color:#777;font-size:.61rem}.footer-links a:hover{color:var(--gold)}
+.disclaimer{padding-top:14px;border-top:1px solid rgba(255,255,255,.06);color:#505050;font-size:.53rem;line-height:1.65}
+.disclaimer strong{color:#8a6e12}
+
+.bottom-nav{
+    position:fixed;z-index:200;bottom:0;left:50%;transform:translateX(-50%);
+    width:min(100%,560px);padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:repeat(5,1fr);gap:3px;
+    background:rgba(8,8,8,.84);backdrop-filter:blur(24px) saturate(140%);
+    border:1px solid rgba(255,255,255,.08);border-bottom:0;
+    border-radius:20px 20px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.45);
+}
+.nav-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;color:#666;font-size:.52rem;font-weight:700;transition:.25s var(--ease)}
+.nav-icon{font-size:1rem;line-height:1}
+.nav-item.active{color:var(--gold)}
+.nav-item.active:before{content:"";position:absolute;top:-9px;width:25px;height:2px;border-radius:2px;background:var(--gold);box-shadow:0 0 14px rgba(201,165,91,.7)}
+.nav-badge{position:absolute;top:1px;margin-left:25px;padding:2px 5px;border-radius:999px;background:var(--red);color:#fff;font-size:.42rem;font-weight:900}
+
+@media(min-width:700px){
+    .header{margin:0;padding-left:0;padding-right:0}
+    .game-grid{grid-template-columns:repeat(4,1fr)}
+    .hero{min-height:310px}.hero-content{padding:40px}
+    .hero h1{font-size:2.7rem}
+    .recommendations{grid-auto-columns:145px}
+    .game{aspect-ratio:1.15}
+}
+@media(prefers-reduced-motion:reduce){
+    *,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}
+}
+</style>
+<style>
+
+/* ========================= N+ PLAY V3 — LUXURY UI LAYER ========================= */
+:root{
+    --bg:#030303;
+    --bg-2:#070707;
+    --gold:#c9a55b;
+    --gold-hi:#f2e7c8;
+    --gold-deep:#5f4a24;
+    --glass:rgba(255,255,255,.045);
+    --glass-hi:rgba(255,255,255,.075);
+    --stroke:rgba(255,255,255,.075);
+    --gold-stroke:rgba(201,165,91,.24);
+    --lux-shadow:0 24px 90px rgba(0,0,0,.72);
+    --lux-ease:cubic-bezier(.16,1,.3,1);
+}
+body{
+    background:
+      radial-gradient(900px 430px at 50% -100px,rgba(201,165,91,.12),transparent 67%),
+      radial-gradient(700px 520px at 110% 30%,rgba(201,165,91,.055),transparent 68%),
+      radial-gradient(620px 500px at -10% 70%,rgba(140,105,48,.035),transparent 70%),
+      #030303;
+}
+body:after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+    background:
+      linear-gradient(90deg,transparent 0 49.8%,rgba(255,255,255,.012) 50%,transparent 50.2%),
+      radial-gradient(circle at 50% 0,rgba(255,255,255,.035),transparent 36%);
+}
+.page{max-width:590px}
+@media(min-width:900px){.page{max-width:1220px}}
+
+.header{
+    background:linear-gradient(180deg,rgba(4,4,4,.94),rgba(4,4,4,.72));
+    border-bottom:1px solid rgba(201,165,91,.10);
+    box-shadow:0 12px 35px rgba(0,0,0,.25);
+}
+.brand-mark{
+    position:relative;
+    width:38px;height:38px;border-radius:12px;
+    background:linear-gradient(145deg,#f2e7c8 0%,#c9a55b 45%,#70582b 100%);
+    box-shadow:0 0 0 1px rgba(242,231,200,.18),0 8px 32px rgba(201,165,91,.22);
+}
+.brand-mark:after{
+    content:"";position:absolute;inset:-5px;border-radius:15px;
+    border:1px solid rgba(201,165,91,.10);
+}
+.brand-name{
+    font-size:1.28rem;letter-spacing:1.2px;
+    text-shadow:0 0 25px rgba(201,165,91,.12);
+}
+.wallet{
+    border-color:rgba(35,211,154,.24);
+    box-shadow:inset 0 0 20px rgba(35,211,154,.025);
+}
+
+.categories{
+    padding-top:14px;padding-bottom:10px;
+    mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+}
+.cat{padding:9px 15px}
+.cat.active{
+    box-shadow:0 0 0 1px rgba(242,231,200,.18),0 7px 28px rgba(201,165,91,.19),inset 0 1px rgba(255,255,255,.55);
+}
+
+.hero{
+    min-height:300px;
+    border-color:rgba(201,165,91,.25);
+    border-radius:28px;
+    background:
+      radial-gradient(500px 270px at 78% 20%,rgba(255,225,103,.19),transparent 55%),
+      radial-gradient(340px 340px at 95% 100%,rgba(95,74,36,.22),transparent 62%),
+      linear-gradient(125deg,#18130a 0%,#0b0b0a 45%,#050505 100%);
+    box-shadow:0 28px 100px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.10);
+}
+.hero:before{
+    font-size:260px;
+    color:rgba(201,165,91,.045);
+    text-shadow:0 0 100px rgba(201,165,91,.08);
+}
+.hero:after{
+    background:linear-gradient(110deg,transparent 30%,rgba(242,231,200,.13) 48%,rgba(255,255,255,.035) 51%,transparent 70%);
+    animation-duration:8s;
+}
+.hero-content{
+    padding:32px 25px;
+}
+.hero h1{
+    font-size:2.35rem;
+    text-shadow:0 12px 45px rgba(201,165,91,.10);
+}
+.hero p{color:#b5b5b5}
+.primary{
+    box-shadow:0 10px 35px rgba(201,165,91,.22),inset 0 1px rgba(255,255,255,.6);
+}
+.secondary{
+    box-shadow:inset 0 1px rgba(255,255,255,.06);
+}
+
+.live{
+    border-color:rgba(201,165,91,.10);
+    background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.015));
+    box-shadow:inset 0 1px rgba(255,255,255,.05);
+}
+
+.section{margin-bottom:30px}
+.section-title{
+    font-size:1rem;
+    letter-spacing:-.4px;
+}
+.section-title:before{
+    width:4px;height:19px;
+    box-shadow:0 0 18px rgba(201,165,91,.45);
+}
+.section-sub{font-size:.61rem;color:#686868}
+
+.recommendations{
+    grid-auto-columns:120px;
+    gap:12px;
+}
+.rec{
+    border-radius:19px;
+    border-color:rgba(255,255,255,.095);
+    box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.08);
+}
+.rec:before{
+    content:"";position:absolute;z-index:2;inset:0;
+    background:linear-gradient(125deg,rgba(255,255,255,.13),transparent 23%,transparent 72%,rgba(201,165,91,.05));
+    pointer-events:none;
+}
+.rec:hover{
+    border-color:rgba(201,165,91,.32);
+    box-shadow:0 20px 45px rgba(0,0,0,.55),0 0 25px rgba(201,165,91,.07);
+}
+.rec img{filter:saturate(1.04) contrast(1.03)}
+
+.game{
+    border-radius:19px;
+    border-color:rgba(255,255,255,.085);
+    box-shadow:0 15px 35px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.075);
+}
+.game:after{
+    content:"";position:absolute;inset:0;z-index:2;
+    pointer-events:none;
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
+}
+.game:hover{
+    border-color:rgba(201,165,91,.30);
+    box-shadow:0 22px 50px rgba(0,0,0,.60),0 0 30px rgba(201,165,91,.06);
+}
+.game-info{bottom:12px}
+.game-name{text-shadow:0 2px 12px #000;font-size:.75rem}
+.badge{
+    box-shadow:0 4px 16px rgba(0,0,0,.28);
+}
+
+.champions{
+    border-radius:21px;
+    border-color:rgba(201,165,91,.12);
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+    box-shadow:0 25px 65px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.07);
+}
+.champion{padding:13px 15px}
+.amount{text-shadow:0 0 18px rgba(201,165,91,.14)}
+
+.bottom-nav{
+    border-color:rgba(201,165,91,.13);
+    background:linear-gradient(180deg,rgba(12,12,12,.84),rgba(4,4,4,.94));
+    box-shadow:0 -20px 55px rgba(0,0,0,.65),inset 0 1px rgba(255,255,255,.055);
+}
+.nav-item.active{color:var(--gold-hi)}
+.nav-item.active:before{
+    width:32px;height:3px;
+    box-shadow:0 0 18px rgba(201,165,91,.75);
+}
+
+.footer{padding-top:4px}
+.footer-links a{transition:.25s var(--lux-ease)}
+.footer-links a:hover{transform:translateY(-1px)}
+
+@media(min-width:700px){
+    .hero{min-height:360px}
+    .hero-content{padding:48px}
+    .hero h1{font-size:3.35rem;max-width:500px}
+    .hero p{font-size:.82rem;max-width:420px}
+    .recommendations{grid-auto-columns:165px}
+    .game{aspect-ratio:1.22}
+}
+
+</style>
+<style>
+
+/* ====================== N+ PLAY V4 — SIGNATURE MOTION SYSTEM ====================== */
+.signature-hero{
+    min-height:390px;
+    isolation:isolate;
+    overflow:hidden;
+    transform:translateZ(0);
+}
+.signature-hero .hero-content{
+    position:relative;
+    z-index:5;
+    max-width:720px;
+}
+.hero-kicker{
+    margin-top:14px;
+    color:rgba(255,255,255,.43);
+    font-size:.56rem;
+    font-weight:800;
+    letter-spacing:3px;
+}
+.signature-hero h1{
+    margin:9px 0 12px;
+    font-size:clamp(3rem,13vw,5.6rem);
+    line-height:.84;
+    letter-spacing:-5px;
+    font-weight:900;
+}
+.hero-line{
+    display:block;
+}
+.signature-hero .hero-line:first-child{
+    color:#f4f0e7;
+    text-shadow:0 20px 60px rgba(255,255,255,.08);
+}
+.signature-hero .accent-text{
+    text-shadow:0 18px 65px rgba(201,165,91,.15);
+}
+.signature-hero p{
+    max-width:490px;
+    font-size:.78rem;
+    color:#a8a8a8;
+}
+.hero-grid{
+    position:absolute;
+    z-index:1;
+    inset:0;
+    opacity:.22;
+    background-image:
+      linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(circle at 72% 42%,black,transparent 67%);
+    transform:perspective(700px) rotateX(62deg) scale(1.6) translateY(85px);
+    transform-origin:center bottom;
+}
+.hero-glow{
+    position:absolute;
+    z-index:2;
+    width:390px;height:390px;
+    right:-80px;top:-100px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(201,165,91,.22),rgba(201,165,91,.055) 30%,transparent 68%);
+    filter:blur(5px);
+    animation:heroBreath 6s ease-in-out infinite;
+}
+@keyframes heroBreath{
+    0%,100%{transform:scale(.94);opacity:.72}
+    50%{transform:scale(1.08);opacity:1}
+}
+.hero-orbit{
+    position:absolute;
+    z-index:3;
+    border:1px solid rgba(201,165,91,.16);
+    border-radius:50%;
+    pointer-events:none;
+}
+.orbit-one{
+    width:430px;height:170px;
+    right:-120px;top:50px;
+    transform:rotate(-24deg);
+    box-shadow:0 0 50px rgba(201,165,91,.035);
+    animation:orbitFloat 9s ease-in-out infinite;
+}
+.orbit-two{
+    width:330px;height:120px;
+    right:-65px;top:120px;
+    transform:rotate(-24deg);
+    border-color:rgba(255,255,255,.07);
+    animation:orbitFloat 11s ease-in-out infinite reverse;
+}
+@keyframes orbitFloat{
+    0%,100%{translate:0 0}
+    50%{translate:-12px 9px}
+}
+.hero-metrics{
+    display:flex;
+    gap:22px;
+    margin-top:25px;
+}
+.hero-metrics div{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+.hero-metrics strong{
+    font-size:.86rem;
+    font-weight:900;
+    color:#f4f0e7;
+}
+.hero-metrics span{
+    color:#5f5f5f;
+    font-size:.45rem;
+    font-weight:800;
+    letter-spacing:1.2px;
+}
+.hero-corner{
+    position:absolute;
+    z-index:6;
+    color:rgba(255,255,255,.27);
+    font-size:.43rem;
+    font-weight:800;
+    letter-spacing:1.5px;
+}
+.hero-corner-tl{top:17px;left:20px}
+.hero-corner-br{right:20px;bottom:18px}
+
+.primary,.secondary{
+    position:relative;
+    overflow:hidden;
+}
+.primary:before,.secondary:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.24) 48%,transparent 70%);
+    transform:translateX(-120%);
+    transition:transform .7s var(--lux-ease);
+}
+.primary:hover:before,.secondary:hover:before{
+    transform:translateX(120%);
+}
+.primary span,.secondary span{
+    transition:transform .35s var(--lux-ease);
+}
+.primary:hover span,.secondary:hover span{transform:translate(2px,-2px)}
+
+.rec,.game{
+    will-change:transform;
+    transform:translateZ(0);
+}
+.rec:after,.game:after{
+    transition:opacity .35s ease;
+}
+.rec:before{
+    opacity:.7;
+    transition:opacity .35s ease,transform .55s var(--lux-ease);
+}
+.rec:hover:before{
+    opacity:1;
+    transform:translate3d(8px,-5px,0);
+}
+.game:after{
+    opacity:.75;
+}
+.game:hover:after{
+    opacity:1;
+}
+.game:before{
+    transition:opacity .4s ease;
+}
+.game:hover:before{opacity:.9}
+
+/* A restrained moving highlight that gives cards a luxury glass finish. */
+.rec,.game,.champions,.live{
+    background-clip:padding-box;
+}
+.rec:hover,.game:hover{
+    animation:cardLift .45s var(--lux-ease) both;
+}
+@keyframes cardLift{
+    from{filter:brightness(1)}
+    50%{filter:brightness(1.08)}
+    to{filter:brightness(1.02)}
+}
+
+/* Staggered entrance: content feels staged instead of appearing all at once. */
+.hero,.live,.section{
+    animation:sectionReveal .7s var(--lux-ease) both;
+}
+.live{animation-delay:.06s}
+.section:nth-of-type(3){animation-delay:.10s}
+.section:nth-of-type(4){animation-delay:.15s}
+.section:nth-of-type(5){animation-delay:.20s}
+@keyframes sectionReveal{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:none}
+}
+
+@media(min-width:700px){
+    .signature-hero{min-height:450px}
+    .signature-hero .hero-content{padding:58px}
+    .hero-metrics{margin-top:32px;gap:34px}
+}
+@media(max-width:430px){
+    .signature-hero{min-height:385px}
+    .signature-hero h1{letter-spacing:-3.4px}
+    .hero-metrics{gap:16px}
+    .hero-metrics strong{font-size:.78rem}
+}
+@media(prefers-reduced-motion:reduce){
+    .signature-hero *, .hero, .live, .section, .rec, .game{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+
+</style>
+
+<style>
+/* =========================================================
+   N+ PLAY FINAL — LUXURY CINEMATIC LOBBY
+   Existing game links, sections and navigation preserved.
+   ========================================================= */
+
+:root{
+    --n-gold:#c9a55b;
+    --n-gold-hi:#f2e7c8;
+    --n-gold-deep:#5f4a24;
+    --n-black:#020202;
+    --n-panel:rgba(255,255,255,.035);
+    --n-line:rgba(255,255,255,.075);
+    --n-ease:cubic-bezier(.16,1,.3,1);
+}
+
+body{
+    background:
+        radial-gradient(900px 520px at 50% -160px,rgba(201,165,91,.14),transparent 65%),
+        radial-gradient(700px 520px at 105% 35%,rgba(201,165,91,.055),transparent 70%),
+        radial-gradient(650px 520px at -10% 70%,rgba(201,165,91,.035),transparent 70%),
+        #020202;
+}
+
+body:after{
+    background:
+        linear-gradient(90deg,transparent 0 49.9%,rgba(255,255,255,.009) 50%,transparent 50.1%),
+        radial-gradient(circle at 50% 0,rgba(255,255,255,.03),transparent 42%);
+}
+
+.page{max-width:590px}
+@media(min-width:900px){.page{max-width:1220px}}
+
+.header{
+    background:linear-gradient(180deg,rgba(3,3,3,.96),rgba(3,3,3,.78));
+    border-bottom-color:rgba(201,165,91,.12);
+    box-shadow:0 16px 45px rgba(0,0,0,.35);
+}
+
+.brand-mark{
+    width:40px;height:40px;border-radius:13px;
+    background:linear-gradient(145deg,#f2e7c8 0%,#c9a55b 45%,#5f4a24 100%);
+    box-shadow:0 0 0 1px rgba(242,231,200,.2),
+               0 9px 34px rgba(201,165,91,.24);
+}
+
+.brand-name{
+    font-size:1.3rem;
+    letter-spacing:1.3px;
+}
+
+.wallet{
+    border-color:rgba(35,211,154,.27);
+    box-shadow:inset 0 0 25px rgba(35,211,154,.035),0 5px 25px rgba(0,0,0,.2);
+}
+
+/* Category rail */
+.categories{
+    padding:15px 1px 11px;
+    gap:8px;
+}
+
+.cat{
+    position:relative;
+    padding:9px 15px;
+    border-color:transparent;
+    transition:all .35s var(--n-ease);
+}
+
+.cat.active{
+    box-shadow:
+        0 0 0 1px rgba(242,231,200,.22),
+        0 8px 28px rgba(201,165,91,.2),
+        inset 0 1px rgba(255,255,255,.6);
+}
+
+/* ================= FINAL HERO ================= */
+.final-hero{
+    min-height:535px;
+    margin:9px 0 17px;
+    border-radius:30px;
+    border:1px solid rgba(201,165,91,.27);
+    background:
+        radial-gradient(620px 440px at 78% 26%,rgba(201,165,91,.14),transparent 55%),
+        radial-gradient(420px 420px at 94% 92%,rgba(95,74,36,.2),transparent 62%),
+        linear-gradient(135deg,#141109 0%,#080807 50%,#030303 100%);
+    box-shadow:
+        0 38px 120px rgba(0,0,0,.82),
+        inset 0 1px rgba(255,255,255,.11);
+    isolation:isolate;
+}
+
+.final-hero:before{
+    content:"N+";
+    right:-40px;
+    bottom:-85px;
+    font-size:290px;
+    color:rgba(201,165,91,.035);
+    text-shadow:0 0 100px rgba(201,165,91,.08);
+}
+
+.hero-art-wrap{
+    position:absolute;
+    z-index:0;
+    inset:-3% -7% -5% 37%;
+    display:grid;
+    place-items:center;
+    pointer-events:none;
+}
+
+.hero-art-glow{
+    position:absolute;
+    width:92%;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(201,165,91,.26),rgba(201,165,91,.055) 32%,transparent 69%);
+    filter:blur(13px);
+    animation:finalHeroBreath 6s ease-in-out infinite;
+}
+
+.hero-game-art{
+    width:min(510px,94%);
+    height:min(510px,94%);
+    object-fit:contain;
+    filter:
+        saturate(1.08)
+        contrast(1.06)
+        drop-shadow(0 38px 60px rgba(0,0,0,.9));
+    opacity:.94;
+    transform:translate3d(18px,0,0) rotate(2deg) scale(1.03);
+    animation:finalHeroFloat 7s ease-in-out infinite;
+}
+
+@keyframes finalHeroFloat{
+    0%,100%{transform:translate3d(18px,5px,0) rotate(2deg) scale(1.03)}
+    50%{transform:translate3d(8px,-10px,0) rotate(-1deg) scale(1.065)}
+}
+
+@keyframes finalHeroBreath{
+    0%,100%{transform:scale(.94);opacity:.7}
+    50%{transform:scale(1.08);opacity:1}
+}
+
+.hero-vignette{
+    position:absolute;
+    z-index:1;
+    inset:0;
+    background:
+        linear-gradient(90deg,#030303 0%,rgba(3,3,3,.96) 21%,rgba(3,3,3,.78) 43%,rgba(3,3,3,.3) 72%,rgba(3,3,3,.62) 100%),
+        linear-gradient(0deg,rgba(0,0,0,.85),transparent 40%,rgba(0,0,0,.22));
+    pointer-events:none;
+}
+
+.hero-grid-final{
+    position:absolute;
+    z-index:2;
+    inset:0;
+    opacity:.2;
+    background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+    background-size:45px 45px;
+    mask-image:radial-gradient(circle at 78% 48%,black,transparent 65%);
+    transform:perspective(700px) rotateX(62deg) scale(1.55) translateY(105px);
+    transform-origin:center bottom;
+    pointer-events:none;
+}
+
+.hero-orbit{
+    z-index:3;
+    border-color:rgba(201,165,91,.17);
+}
+
+.orbit-one{
+    width:500px;height:205px;
+    right:-155px;top:82px;
+    transform:rotate(-25deg);
+    box-shadow:0 0 65px rgba(201,165,91,.04);
+}
+
+.orbit-two{
+    width:380px;height:145px;
+    right:-92px;top:154px;
+    transform:rotate(-25deg);
+    border-color:rgba(255,255,255,.065);
+}
+
+.hero-light-sweep{
+    position:absolute;
+    z-index:4;
+    top:-30%;
+    left:-45%;
+    width:22%;
+    height:170%;
+    background:linear-gradient(90deg,transparent,rgba(255,245,190,.12),transparent);
+    transform:rotate(18deg);
+    animation:finalLightSweep 9s ease-in-out infinite;
+    pointer-events:none;
+}
+
+@keyframes finalLightSweep{
+    0%,56%{left:-45%;opacity:0}
+    64%{opacity:1}
+    90%,100%{left:130%;opacity:0}
+}
+
+.final-hero .hero-content{
+    position:relative;
+    z-index:6;
+    max-width:650px;
+    padding:60px 42px 40px;
+}
+
+.final-hero .eyebrow{
+    color:var(--n-gold-hi);
+    letter-spacing:2px;
+}
+
+.final-hero .hero-kicker{
+    margin-top:15px;
+    color:rgba(201,165,91,.72);
+    font-size:.58rem;
+    font-weight:900;
+    letter-spacing:2.7px;
+}
+
+.final-hero h1{
+    margin:13px 0 14px;
+    max-width:510px;
+    font-size:clamp(4rem,11vw,6.5rem);
+    line-height:.82;
+    letter-spacing:-5px;
+    font-weight:900;
+}
+
+.final-hero .hero-line:first-child{
+    color:#f4f0e7;
+    text-shadow:0 20px 65px rgba(255,255,255,.08);
+}
+
+.final-hero .accent-text{
+    text-shadow:0 18px 75px rgba(201,165,91,.2);
+}
+
+.final-hero p{
+    max-width:455px;
+    color:#aaa;
+    font-size:.8rem;
+    line-height:1.7;
+}
+
+.final-hero .hero-actions{
+    margin-top:23px;
+}
+
+.final-hero .primary,
+.final-hero .secondary{
+    min-height:43px;
+    padding:11px 17px;
+    border-radius:13px;
+}
+
+.final-hero .primary{
+    box-shadow:
+        0 12px 38px rgba(201,165,91,.25),
+        inset 0 1px rgba(255,255,255,.7);
+}
+
+.hero-metrics{
+    margin-top:32px;
+    gap:30px;
+}
+
+.hero-metrics strong{
+    font-size:.9rem;
+}
+
+.hero-metrics span{
+    font-size:.46rem;
+    letter-spacing:1.4px;
+}
+
+.hero-dots{
+    position:absolute;
+    z-index:8;
+    right:24px;
+    bottom:25px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.hero-dot{
+    width:7px;height:7px;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:rgba(255,255,255,.22);
+    cursor:pointer;
+    transition:all .35s var(--n-ease);
+}
+
+.hero-dot.active{
+    width:27px;
+    border-radius:99px;
+    background:linear-gradient(90deg,#70582b,#f2e7c8,#c9a55b);
+    box-shadow:0 0 18px rgba(201,165,91,.55);
+}
+
+.final-hero.is-changing .hero-game-art{
+    animation:finalHeroSwap .55s var(--n-ease) both;
+}
+
+@keyframes finalHeroSwap{
+    0%{opacity:.15;transform:translate3d(55px,0,0) scale(.94) rotate(5deg)}
+    100%{opacity:.94;transform:translate3d(18px,0,0) scale(1.03) rotate(2deg)}
+}
+
+/* ================= GAME CARDS ================= */
+.recommendations{
+    grid-auto-columns:124px;
+    gap:13px;
+    padding:3px 2px 8px;
+}
+
+.rec{
+    border-radius:20px;
+    border-color:rgba(255,255,255,.095);
+    box-shadow:
+        0 14px 34px rgba(0,0,0,.48),
+        inset 0 1px rgba(255,255,255,.09);
+    transition:transform .42s var(--n-ease),border-color .35s ease,box-shadow .42s var(--n-ease);
+}
+
+.rec:before{
+    background:
+        linear-gradient(125deg,rgba(255,255,255,.16),transparent 22%,transparent 70%,rgba(201,165,91,.08)),
+        linear-gradient(180deg,transparent 45%,rgba(0,0,0,.08));
+}
+
+.rec:after{
+    background:linear-gradient(0deg,rgba(0,0,0,.72),transparent 58%);
+}
+
+.rec img{
+    object-fit:cover;
+    transform:scale(1.001);
+    transition:transform .55s var(--n-ease),filter .45s ease;
+}
+
+.rec:hover{
+    transform:translateY(-7px) scale(1.015);
+    border-color:rgba(201,165,91,.38);
+    box-shadow:
+        0 25px 55px rgba(0,0,0,.62),
+        0 0 32px rgba(201,165,91,.08);
+}
+
+.rec:hover img{
+    transform:scale(1.07);
+    filter:saturate(1.12) contrast(1.05);
+}
+
+.rec .rec-name{
+    left:10px;
+    bottom:9px;
+    font-size:.61rem;
+    letter-spacing:.2px;
+}
+
+/* Lottery/Casino/Rummy cards */
+.game{
+    aspect-ratio:1.08;
+    border-radius:20px;
+    border-color:rgba(255,255,255,.09);
+    box-shadow:
+        0 16px 38px rgba(0,0,0,.48),
+        inset 0 1px rgba(255,255,255,.08);
+    transition:transform .42s var(--n-ease),border-color .35s ease,box-shadow .42s var(--n-ease);
+}
+
+.game:after{
+    border-radius:inherit;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.035);
+}
+
+.game img{
+    transition:transform .55s var(--n-ease),filter .45s ease;
+}
+
+.game:hover{
+    transform:translateY(-6px) scale(1.012);
+    border-color:rgba(201,165,91,.34);
+    box-shadow:
+        0 25px 55px rgba(0,0,0,.62),
+        0 0 28px rgba(201,165,91,.07);
+}
+
+.game:hover img{
+    transform:scale(1.065);
+    filter:saturate(1.1) contrast(1.04);
+}
+
+.badge{
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 5px 18px rgba(0,0,0,.35);
+}
+
+/* Section hierarchy */
+.section{margin-bottom:34px}
+
+.section-head{
+    margin-bottom:13px;
+}
+
+.section-title{
+    font-size:1rem;
+    letter-spacing:-.35px;
+}
+
+.section-title:before{
+    width:4px;
+    height:20px;
+    box-shadow:0 0 20px rgba(201,165,91,.48);
+}
+
+.section-sub{
+    margin-top:5px;
+    color:#696969;
+}
+
+.view{
+    letter-spacing:.4px;
+}
+
+/* Empty future sections */
+.champions{
+    border-radius:21px;
+    border-color:rgba(201,165,91,.12);
+    box-shadow:0 24px 70px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.065);
+}
+
+/* Leaderboard */
+.champion{
+    padding:14px 15px;
+    transition:background .25s ease;
+}
+
+.champion:hover{
+    background:rgba(201,165,91,.025);
+}
+
+.amount{
+    text-shadow:0 0 20px rgba(201,165,91,.18);
+}
+
+/* Bottom nav */
+.bottom-nav{
+    width:min(100%,590px);
+    border-color:rgba(201,165,91,.14);
+    background:linear-gradient(180deg,rgba(12,12,12,.87),rgba(3,3,3,.96));
+    box-shadow:
+        0 -22px 65px rgba(0,0,0,.72),
+        inset 0 1px rgba(255,255,255,.055);
+}
+
+.nav-item.active{
+    color:var(--n-gold-hi);
+}
+
+.nav-item.active:before{
+    width:34px;
+    height:3px;
+    box-shadow:0 0 20px rgba(201,165,91,.8);
+}
+
+/* Entrance */
+.header,.categories,.final-hero,.live,.section{
+    animation:finalReveal .7s var(--n-ease) both;
+}
+
+.categories{animation-delay:.03s}
+.final-hero{animation-delay:.06s}
+.live{animation-delay:.11s}
+.section:nth-of-type(3){animation-delay:.15s}
+.section:nth-of-type(4){animation-delay:.19s}
+.section:nth-of-type(5){animation-delay:.23s}
+
+@keyframes finalReveal{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:none}
+}
+
+@media(min-width:700px){
+    .final-hero{min-height:575px}
+    .final-hero .hero-content{padding:72px 60px}
+    .hero-art-wrap{inset:-7% -2% -9% 39%}
+    .hero-game-art{width:550px;height:550px}
+    .recommendations{grid-auto-columns:170px}
+    .game{aspect-ratio:1.16}
+}
+
+@media(max-width:520px){
+    .final-hero{
+        min-height:500px;
+        border-radius:27px;
+    }
+
+    .hero-art-wrap{
+        inset:4% -24% 24% 38%;
+        opacity:.54;
+    }
+
+    .hero-game-art{
+        width:350px;
+        height:350px;
+    }
+
+    .hero-vignette{
+        background:
+            linear-gradient(90deg,#030303 0%,rgba(3,3,3,.95) 40%,rgba(3,3,3,.58) 100%),
+            linear-gradient(0deg,rgba(0,0,0,.86),transparent 45%);
+    }
+
+    .final-hero .hero-content{
+        padding:40px 22px 32px;
+    }
+
+    .final-hero h1{
+        font-size:clamp(3.45rem,16vw,5.2rem);
+        letter-spacing:-3.7px;
+    }
+
+    .final-hero p{
+        max-width:330px;
+        font-size:.75rem;
+    }
+
+    .hero-metrics{
+        gap:17px;
+    }
+
+    .hero-dots{
+        right:19px;
+        bottom:20px;
+    }
+
+    .recommendations{
+        grid-auto-columns:116px;
+    }
+}
+
+@media(max-width:380px){
+    .final-hero{min-height:480px}
+    .final-hero .hero-content{padding:37px 18px 28px}
+    .hero-actions{flex-wrap:wrap}
+    .hero-metrics{gap:13px}
+}
+
+@media(prefers-reduced-motion:reduce){
+    .final-hero *,
+    .header,.categories,.final-hero,.live,.section,.rec,.game{
+        animation:none!important;
+        transition:none!important;
+    }
+}
+</style>
+
+
+<style>
+/* N+ PLAY HOME FINAL — responsive polish + shared wallet */
+#homeWallet{
+    cursor:default;
+    transition:transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease;
+}
+#homeWallet.is-updated{
+    animation:walletSync .55s cubic-bezier(.16,1,.3,1);
+}
+@keyframes walletSync{
+    0%{transform:scale(1)}
+    45%{transform:scale(1.055);box-shadow:0 0 0 5px rgba(35,211,154,.08),0 8px 30px rgba(35,211,154,.12)}
+    100%{transform:scale(1)}
+}
+
+/* Desktop: keep the luxury lobby spacious instead of looking like a stretched mobile page. */
+@media (min-width: 900px){
+    .page{
+        width:min(100% - 48px,1180px);
+        max-width:1180px;
+    }
+    .header{
+        margin:0;
+        padding-left:2px;
+        padding-right:2px;
+    }
+    .categories{
+        justify-content:center;
+        overflow:visible;
+        mask-image:none;
+    }
+    .final-hero{
+        min-height:520px;
+    }
+    .recommendations{
+        grid-auto-columns:155px;
+    }
+    .game-grid{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+    .bottom-nav{
+        width:min(100% - 48px,590px);
+    }
+}
+
+/* Medium screens: prevent the hero artwork from overpowering the copy. */
+@media (min-width: 521px) and (max-width: 899px){
+    .page{width:min(100% - 24px,760px)}
+    .final-hero{min-height:500px}
+}
+</style>
+
+
+<style>
+/* N+ PLAY — PRO GRAPHITE HOME
+   Match the WINGO visual language: near-black, graphite, white, restrained gold. */
+:root{
+  --gold:#d9b64a;
+  --gold-hi:#f3df9a;
+  --gold-deep:#8d7228;
+}
+body{
+  background:
+    radial-gradient(900px 500px at 50% -170px,rgba(255,255,255,.055),transparent 68%),
+    radial-gradient(650px 520px at 105% 35%,rgba(255,255,255,.025),transparent 70%),
+    linear-gradient(180deg,#0a0b0b 0%,#050606 55%,#020303 100%);
+}
+body:after{opacity:.55;background:radial-gradient(circle at 50% 0,rgba(255,255,255,.028),transparent 42%)}
+.header{background:linear-gradient(180deg,rgba(8,9,9,.97),rgba(8,9,9,.88));border-bottom-color:rgba(255,255,255,.08)}
+.brand-mark{background:linear-gradient(145deg,#f4f1e7 0%,#d9b64a 48%,#80651e 100%);box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 28px rgba(0,0,0,.45)}
+.brand-name{color:#f3f3ef;text-shadow:none}
+.accent-text{background:linear-gradient(110deg,#a68939,#f3df9a,#d9b64a,#f3df9a,#a68939);background-size:220% auto}
+.wallet{border-color:rgba(255,255,255,.11);background:rgba(255,255,255,.045);box-shadow:inset 0 0 20px rgba(255,255,255,.015)}
+.wallet-value{color:#e8e8e3}
+.wallet-dot{background:#34d399;box-shadow:0 0 9px #34d399}
+.cat{color:#858585}
+.cat.active{color:#111;background:linear-gradient(135deg,#eee8d0,#d9b64a);border-color:#d9b64a;box-shadow:0 6px 22px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.65)}
+.final-hero{
+  border-color:rgba(255,255,255,.10);
+  background:
+    radial-gradient(560px 380px at 80% 22%,rgba(255,255,255,.075),transparent 58%),
+    radial-gradient(420px 420px at 94% 92%,rgba(217,182,74,.075),transparent 65%),
+    linear-gradient(135deg,#171918 0%,#0d0f0f 48%,#070808 100%);
+  box-shadow:0 38px 120px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.10);
+}
+.final-hero:before{color:rgba(255,255,255,.022);text-shadow:none}
+.hero-art-glow{background:radial-gradient(circle,rgba(255,255,255,.12),rgba(217,182,74,.045) 34%,transparent 70%)}
+.hero-vignette{background:linear-gradient(90deg,#070808 0%,rgba(7,8,8,.96) 22%,rgba(7,8,8,.72) 46%,rgba(7,8,8,.25) 74%,rgba(7,8,8,.58) 100%),linear-gradient(0deg,rgba(0,0,0,.82),transparent 42%,rgba(0,0,0,.18))}
+.hero-grid-final{opacity:.12;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px)}
+.hero-orbit{border-color:rgba(255,255,255,.08);box-shadow:none}
+.orbit-two{border-color:rgba(217,182,74,.08)}
+.hero-light-sweep{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+.final-hero .eyebrow{color:#e7e7e2}
+.final-hero .hero-kicker{color:#bda75f}
+.final-hero .hero-line:first-child{color:#f1f1ed;text-shadow:0 20px 65px rgba(0,0,0,.45)}
+.final-hero .accent-text{text-shadow:0 18px 65px rgba(217,182,74,.08)}
+.final-hero p{color:#9c9f9d}
+.primary{color:#111;background:linear-gradient(135deg,#f0ead5,#d9b64a);box-shadow:0 12px 34px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.72)}
+.secondary{border-color:rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#e6e6e2}
+.live{border-color:rgba(255,255,255,.09);background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.018));box-shadow:inset 0 1px rgba(255,255,255,.05)}
+.live-label{color:#f07878}
+.live-track b{color:#d8d8d3}
+.section-title:before{background:linear-gradient(#f0df9a,#8d7228);box-shadow:0 0 15px rgba(217,182,74,.25)}
+.view:hover{color:#e1c875}
+.rec,.game,.champions{border-color:rgba(255,255,255,.085);background:#0b0d0d;box-shadow:0 16px 38px rgba(0,0,0,.50),inset 0 1px rgba(255,255,255,.065)}
+.rec:hover,.game:hover{border-color:rgba(217,182,74,.22);box-shadow:0 24px 52px rgba(0,0,0,.62),0 0 25px rgba(217,182,74,.035)}
+.badge{background:linear-gradient(135deg,#eee8d0,#d9b64a);border-color:rgba(255,255,255,.16)}
+.badge.new{background:linear-gradient(135deg,#d8f8eb,#34d399)}
+.bottom-nav{border-color:rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(12,14,14,.90),rgba(4,5,5,.97));box-shadow:0 -22px 65px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.055)}
+.nav-item.active{color:#e1c875}
+.nav-item.active:before{background:#d9b64a;box-shadow:0 0 15px rgba(217,182,74,.45)}
+.hero-metrics strong{color:#e5e5df}
+.hero-metrics span{color:#626563}
+.disclaimer strong{color:#9f8640}
+</style>
+
+<style>
+/* N+ PLAY — MIDNIGHT SIGNATURE PALETTE */
+:root{
+  --n-gold:#c9a55b;
+  --n-gold-hi:#f2e7c8;
+  --n-gold-deep:#70582b;
+  --gold:#c9a55b;
+  --gold-2:#f2e7c8;
+  --gold-dark:#70582b;
+}
+body{
+  background:
+    radial-gradient(850px 500px at 50% -160px,rgba(70,120,210,.13),transparent 65%),
+    radial-gradient(650px 500px at 105% 32%,rgba(95,74,36,.08),transparent 70%),
+    radial-gradient(620px 500px at -10% 70%,rgba(95,74,36,.06),transparent 70%),
+    #05070b;
+}
+.gold-text,.accent-text{
+  background:linear-gradient(110deg,#70582b 0%,#f2e7c8 30%,#c9a55b 53%,#f4f0e7 73%,#70582b 100%);
+  background-size:220% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.header{
+  border-bottom-color:rgba(201,165,91,.12);
+}
+.brand-mark{
+  background:linear-gradient(145deg,#f2e7c8 0%,#c9a55b 48%,#70582b 100%);
+  box-shadow:0 0 0 1px rgba(242,231,200,.20),0 9px 34px rgba(201,165,91,.22);
+}
+.wallet{
+  border-color:rgba(35,211,154,.27);
+}
+.cat.active,.primary{
+  color:#07101d;
+  background:linear-gradient(135deg,#f2e7c8,#c9a55b);
+  border-color:#c9a55b;
+  box-shadow:0 8px 28px rgba(201,165,91,.20),inset 0 1px rgba(255,255,255,.7);
+}
+.hero,.final-hero{
+  border-color:rgba(201,165,91,.22);
+  background:
+    radial-gradient(600px 430px at 78% 25%,rgba(201,165,91,.14),transparent 56%),
+    radial-gradient(420px 420px at 94% 92%,rgba(95,74,36,.18),transparent 62%),
+    linear-gradient(135deg,#0d1420 0%,#080b10 52%,#040507 100%);
+}
+.hero:before,.final-hero:before{
+  color:rgba(201,165,91,.035);
+  text-shadow:0 0 100px rgba(201,165,91,.08);
+}
+.hero-art-glow{
+  background:radial-gradient(circle,rgba(201,165,91,.22),rgba(201,165,91,.045) 34%,transparent 69%);
+}
+.hero-orbit{border-color:rgba(201,165,91,.15)}
+.orbit-two{border-color:rgba(242,231,200,.07)}
+.hero-light-sweep{
+  background:linear-gradient(90deg,transparent,rgba(242,231,200,.10),transparent);
+}
+.hero-dot.active{
+  background:linear-gradient(90deg,#70582b,#f2e7c8,#c9a55b);
+  box-shadow:0 0 18px rgba(201,165,91,.45);
+}
+.secondary{
+  border-color:rgba(201,165,91,.18);
+}
+.section-title:before{
+  background:linear-gradient(#f2e7c8,#70582b);
+  box-shadow:0 0 18px rgba(201,165,91,.35);
+}
+.rec:hover,.game:hover{
+  border-color:rgba(201,165,91,.30);
+  box-shadow:0 24px 55px rgba(0,0,0,.62),0 0 30px rgba(201,165,91,.07);
+}
+.champions{
+  border-color:rgba(201,165,91,.10);
+}
+.rank.top{
+  background:linear-gradient(145deg,#f2e7c8,#c9a55b);
+}
+.amount{
+  color:#f2e7c8;
+  text-shadow:0 0 20px rgba(201,165,91,.16);
+}
+.bottom-nav{
+  border-color:rgba(201,165,91,.12);
+}
+.nav-item.active{
+  color:#f2e7c8;
+}
+.nav-item.active:before{
+  background:#c9a55b;
+  box-shadow:0 0 18px rgba(201,165,91,.65);
+}
+</style>
+
+
+<style>
+/* N+ PLAY HOME — WINGO VISUAL LANGUAGE */
+:root{
+  --n-gold:#c9a55b;
+  --n-gold-hi:#f2e7c8;
+  --n-gold-deep:#70582b;
+  --gold:#c9a55b;
+  --gold-2:#f2e7c8;
+  --gold-dark:#70582b;
+}
+body{
+  background:
+    radial-gradient(850px 500px at 50% -150px,rgba(201,165,91,.07),transparent 66%),
+    radial-gradient(600px 500px at 105% 35%,rgba(120,88,35,.035),transparent 70%),
+    #090a09;
+}
+.header{
+  background:linear-gradient(180deg,rgba(9,10,9,.96),rgba(9,10,9,.86));
+  border-bottom-color:rgba(201,165,91,.10);
+}
+.brand-mark{
+  background:linear-gradient(145deg,#f3e6c1 0%,#c9a55b 48%,#765a27 100%);
+  box-shadow:0 0 0 1px rgba(242,231,200,.16),0 8px 28px rgba(201,165,91,.14);
+}
+.gold-text,.accent-text{
+  background:linear-gradient(110deg,#70582b 0%,#f2e7c8 30%,#c9a55b 53%,#f4e8c6 73%,#70582b 100%);
+  background-size:220% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.cat.active,.primary{
+  color:#11110f;
+  background:linear-gradient(135deg,#f1e5c3,#c9a55b);
+  border-color:rgba(201,165,91,.75);
+  box-shadow:0 7px 25px rgba(201,165,91,.14),inset 0 1px rgba(255,255,255,.62);
+}
+.secondary{
+  border-color:rgba(201,165,91,.18);
+  background:rgba(255,255,255,.025);
+}
+.final-hero,.hero{
+  border-color:rgba(201,165,91,.18);
+  background:
+    radial-gradient(560px 400px at 78% 25%,rgba(201,165,91,.075),transparent 58%),
+    radial-gradient(420px 420px at 94% 92%,rgba(95,74,36,.10),transparent 62%),
+    linear-gradient(135deg,#171713 0%,#0d0e0d 50%,#080908 100%);
+}
+.hero:before,.final-hero:before{
+  color:rgba(201,165,91,.025);
+  text-shadow:0 0 90px rgba(201,165,91,.05);
+}
+.hero-art-glow{
+  background:radial-gradient(circle,rgba(201,165,91,.13),rgba(201,165,91,.025) 34%,transparent 69%);
+}
+.hero-orbit{border-color:rgba(201,165,91,.12)}
+.orbit-two{border-color:rgba(242,231,200,.055)}
+.hero-dot.active{
+  background:linear-gradient(90deg,#70582b,#f2e7c8,#c9a55b);
+  box-shadow:0 0 16px rgba(201,165,91,.35);
+}
+.section-title:before{
+  background:linear-gradient(#f2e7c8,#70582b);
+  box-shadow:0 0 16px rgba(201,165,91,.25);
+}
+.rec:hover,.game:hover{
+  border-color:rgba(201,165,91,.24);
+  box-shadow:0 24px 55px rgba(0,0,0,.62),0 0 24px rgba(201,165,91,.045);
+}
+.champions{
+  border-color:rgba(201,165,91,.08);
+}
+.rank.top{
+  background:linear-gradient(145deg,#f1e5c3,#c9a55b);
+}
+.amount{
+  color:#f2e7c8;
+  text-shadow:0 0 18px rgba(201,165,91,.11);
+}
+.bottom-nav{
+  border-color:rgba(201,165,91,.10);
+}
+.nav-item.active{color:#f2e7c8}
+.nav-item.active:before{
+  background:#c9a55b;
+  box-shadow:0 0 16px rgba(201,165,91,.55);
+}
+
+/* Keep status colors independent from the gold accent. */
+.wallet-dot{background:#23d39a;box-shadow:0 0 10px #23d39a}
+.wallet{border-color:rgba(35,211,154,.22)}
+.live-label span{background:#ff5260;box-shadow:0 0 12px #ff5260}
+</style>
+
+<!-- N+ PLAY CORE v1 -->
+<script src="core/config.js"></script>
+<script src="core/storage.js"></script>
+<script src="core/user.js"></script>
+<script src="core/wallet.js"></script>
+<script src="core/activity.js"></script>
+<script src="core/games.js"></script>
+
+</head>
+
+<body>
+<main class="page">
+
+<header class="header">
+    <a href="index.html" class="brand" aria-label="N+ PLAY home">
+        <span class="brand-mark">N+</span>
+        <span class="brand-name accent-text">PLAY</span>
+    </a>
+    <div class="header-right">
+        <div class="wallet" id="homeWallet" aria-label="Current  wallet balance"><span class="wallet-dot"></span><span class="wallet-value" id="homeWalletValue">₹1,000</span></div>
+        <span class="age">18+</span>
+    </div>
+</header>
+
+<nav class="categories" aria-label="Game categories">
+    <a class="cat active" href="#popular">Popular</a>
+    <a class="cat" href="#lottery">Lottery</a>
+    <a class="cat" href="#casino">Casino</a>
+    <a class="cat" href="#rummy">Rummy</a>
+</nav>
+
+<section class="hero signature-hero final-hero" id="popular">
+    <div class="hero-art-wrap">
+        <div class="hero-art-glow"></div>
+        <img id="heroGameArt" class="hero-game-art" src="aviator.png" alt="Aviator">
+    </div>
+    <div class="hero-vignette"></div>
+    <div class="hero-grid-final"></div>
+    <div class="hero-orbit orbit-one"></div>
+    <div class="hero-orbit orbit-two"></div>
+    <div class="hero-light-sweep"></div>
+
+    <div class="hero-content">
+        <div class="eyebrow"><i></i> N+ PLAY • FEATURED EXPERIENCE</div>
+        <div class="hero-kicker" id="heroKicker">AVIATOR / SIGNATURE PICK</div>
+
+        <h1>
+            <span class="hero-line">PLAY</span>
+            <span class="accent-text hero-line" id="heroTitle">BEYOND</span>
+        </h1>
+
+        <p id="heroDescription">
+            A cinematic gaming experience designed to feel fast, focused and unmistakably N+.
+        </p>
+
+        <div class="hero-actions">
+            <a href="aviator.html" class="primary" id="heroPrimary">Enter Aviator <span>↗</span></a>
+            <a href="#recommendations" class="secondary">Discover Games <span>↓</span></a>
+        </div>
+
+        <div class="hero-metrics">
+            <div><strong id="heroIndex">01</strong><span>FEATURED</span></div>
+            <div><strong>24/7</strong><span>LOBBY ACCESS</span></div>
+            <div><strong>N+</strong><span>ORIGINAL UI</span></div>
+        </div>
+    </div>
+
+    <div class="hero-dots" aria-label="Featured game selector">
+        <button class="hero-dot active" data-index="0" aria-label="Aviator"></button>
+        <button class="hero-dot" data-index="1" aria-label="WINGO"></button>
+        <button class="hero-dot" data-index="2" aria-label="Vortex"></button>
+    </div>
+
+    <div class="hero-corner hero-corner-tl">N+ / 05</div>
+    <div class="hero-corner hero-corner-br">SIGNATURE LOBBY</div>
+</section>
+
+<div class="live" aria-label=" activity">
+    <div class="live-label"><span></span> LIVE</div>
+    <div class="live-track">
+        <span> activity • </span>
+        <b>Aviator</b> <span>• </span><b>WINGO</b> <span>• </span><b>K3</b> <span>• </span><b>5D</b>
+    </div>
+</div>
+
+<section class="section" id="recommendations">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Platform Recommendation</h2>
+            <p class="section-sub">Curated experiences for you</p>
+        </div>
+        <a href="#lottery" class="view">VIEW ALL →</a>
+    </div>
+
+    <div class="recommendations">
+        <a class="rec" href="aviator.html"><img src="aviator.png" alt="Aviator" loading="eager"><span class="rec-name">AVIATOR</span></a>
+        <a class="rec" href="wingo.html"><img src="wingo.png" alt="WINGO" loading="eager"><span class="rec-name">WINGO</span></a>
+        <a class="rec" href="k3.html"><img src="k3.png" alt="K3" loading="lazy"><span class="rec-name">K3</span></a>
+        <a class="rec" href="trx-wingo.html"><img src="trx-win-go.png" alt="TRX Win Go" loading="lazy"><span class="rec-name">TRX WIN GO</span></a>
+    </div>
+</section>
+
+<section class="section" id="lottery">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Lottery Games</h2>
+            <p class="section-sub">Fast, focused experiences</p>
+        </div>
+        <span class="view">5 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="wingo.html"><span class="badge hot">HOT</span><img src="wingo.png" alt="Win Go" loading="lazy"><div class="game-info"><div class="game-name">Win Go</div><div class="game-meta">30s • </div></div></a>
+        <a class="game" href="motorace.html"><span class="badge">FEATURED</span><img src="motorace.png" alt="MotoRace" loading="lazy"><div class="game-info"><div class="game-name">MotoRace</div><div class="game-meta">Quick Play • </div></div></a>
+        <a class="game" href="k3.html"><img src="k3.png" alt="K3" loading="lazy"><div class="game-info"><div class="game-name">K3</div><div class="game-meta">Dice • </div></div></a>
+        <a class="game" href="5d.html"><span class="badge new">NEW</span><img src="5d.png" alt="5D" loading="lazy"><div class="game-info"><div class="game-name">5D</div><div class="game-meta">Lottery • </div></div></a>
+        <a class="game" href="trx-wingo.html"><img src="trx-win-go.png" alt="TRX Win Go" loading="lazy"><div class="game-info"><div class="game-name">TRX Win Go</div><div class="game-meta">Fast Play • </div></div></a>
+    </div>
+</section>
+
+<section class="section" id="casino">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Casino Games</h2>
+            <p class="section-sub">Classic table experiences</p>
+        </div>
+        <span class="view">4 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="crazy-time.html"><span class="badge hot">HOT</span><img src="crazy-time.png" alt="Crazy Time" loading="lazy"><div class="game-info"><div class="game-name">Crazy Time</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="auto-roulette.html"><img src="auto-roulette.png" alt="Auto Roulette" loading="lazy"><div class="game-info"><div class="game-name">Auto Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="american-roulette.html"><img src="american-roulette.png" alt="American Roulette" loading="lazy"><div class="game-info"><div class="game-name">Am. Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="roulette.html"><img src="roulette.png" alt="Roulette" loading="lazy"><div class="game-info"><div class="game-name">Roulette</div><div class="game-meta">Coming Soon</div></div></a>
+    </div>
+</section>
+
+<section class="section" id="rummy">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Rummy Cards</h2>
+            <p class="section-sub">Cards, tables & strategy</p>
+        </div>
+        <span class="view">3 GAMES</span>
+    </div>
+
+    <div class="game-grid">
+        <a class="game" href="365-rummy.html"><img src="365-rummy.png" alt="365 Rummy" loading="lazy"><div class="game-info"><div class="game-name">365 Rummy</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="v8-poker-rummy.html"><img src="v8-poker.png" alt="V8 Poker" loading="lazy"><div class="game-info"><div class="game-name">V8 Poker</div><div class="game-meta">Coming Soon</div></div></a>
+        <a class="game" href="koolbet-rummy.html"><img src="koolbet.png" alt="Koolbet" loading="lazy"><div class="game-info"><div class="game-name">Koolbet</div><div class="game-meta">Coming Soon</div></div></a>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <div>
+            <h2 class="section-title">Today's Champions</h2>
+            <p class="section-sub"> leaderboard</p>
+        </div>
+    </div>
+    <div class="champions">
+        <div class="champion"><div class="rank top">1</div><div class="player">Mem***JVN<small>Top  score</small></div><div class="amount">₹14,850</div></div>
+        <div class="champion"><div class="rank second">2</div><div class="player">Su***aj<small> player</small></div><div class="amount">₹11,200</div></div>
+        <div class="champion"><div class="rank third">3</div><div class="player">Kap***oor<small> player</small></div><div class="amount">₹9,450</div></div>
+        <div class="champion"><div class="rank">4</div><div class="player">Mem***H3M<small> player</small></div><div class="amount">₹7,800</div></div>
+        <div class="champion"><div class="rank">5</div><div class="player">Me***er<small> player</small></div><div class="amount">₹6,150</div></div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="#">Language</a>
+        <a href="#">Support</a>
+        <a href="#">Beginner Guide</a>
+        <a href="#">About N+ PLAY</a>
+    </div>
+    <div class="disclaimer">
+        <p><strong>18+ |  EXPERIENCE</strong></p>
+        <p>N+ PLAY is a premium gaming interface prototype. Play responsibly.</p>
+        <p>© 2026 N+ PLAY. All rights reserved.</p>
+    </div>
+</footer>
+</main>
+
+<nav class="bottom-nav" aria-label="Primary navigation">
+    <a href="index.html" class="nav-item active"><span class="nav-icon">⌂</span><span>Home</span></a>
+    <a href="activity.html" class="nav-item"><span class="nav-icon">◷</span><span>Activity</span></a>
+    <a href="bonus.html" class="nav-item"><span class="nav-icon">✦</span><span>Bonus</span><span class="nav-badge">NEW</span></a>
+    <a href="promotion.html" class="nav-item"><span class="nav-icon">◇</span><span>Promotion</span></a>
+    <a href="account.html" class="nav-item"><span class="nav-icon">◯</span><span>Account</span></a>
+</nav>
+
+<script>
+document.querySelectorAll('.cat').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+        document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
+        tab.classList.add('active');
+    });
+});
+</script>
+
+<script>
+(() => {
+    const slides = [
+        {
+            art:"aviator.png",
+            href:"aviator.html",
+            name:"Aviator",
+            kicker:"AVIATOR / SIGNATURE PICK",
+            title:"BEYOND",
+            desc:"A cinematic gaming experience designed to feel fast, focused and unmistakably N+.",
+            index:"01"
+        },
+        {
+            art:"wingo.png",
+            href:"wingo.html",
+            name:"WINGO",
+            kicker:"WINGO / LIVE PICK",
+            title:"PREDICT",
+            desc:"A sharp, colorful prediction experience presented through the N+ PLAY luxury interface.",
+            index:"02"
+        },
+        {
+            art:"vortex.png",
+            href:"vortex.html",
+            name:"Vortex",
+            kicker:"VORTEX / FEATURED",
+            title:"SPIN",
+            desc:"A high-energy experience wrapped in layered motion, depth and the signature N+ atmosphere.",
+            index:"03"
+        }
+    ];
+
+    const hero = document.querySelector(".final-hero");
+    const art = document.getElementById("heroGameArt");
+    const primary = document.getElementById("heroPrimary");
+    const kicker = document.getElementById("heroKicker");
+    const title = document.getElementById("heroTitle");
+    const desc = document.getElementById("heroDescription");
+    const index = document.getElementById("heroIndex");
+    const dots = [...document.querySelectorAll(".hero-dot")];
+
+    if(!hero || !art || !primary || !kicker || !title || !desc || !index) return;
+
+    let current = 0;
+    let timer = null;
+
+    function render(i){
+        current = i;
+        const s = slides[i];
+
+        hero.classList.remove("is-changing");
+        void hero.offsetWidth;
+
+        art.src = s.art;
+        art.alt = s.name;
+        primary.href = s.href;
+        primary.innerHTML = "Enter " + s.name + ' <span>↗</span>';
+        kicker.textContent = s.kicker;
+        title.textContent = s.title;
+        desc.textContent = s.desc;
+        index.textContent = s.index;
+
+        dots.forEach((dot,n) => dot.classList.toggle("active",n === i));
+        hero.classList.add("is-changing");
+    }
+
+    function restart(){
+        clearInterval(timer);
+        timer = setInterval(() => {
+            render((current + 1) % slides.length);
+        },6500);
+    }
+
+    dots.forEach((dot,i) => {
+        dot.addEventListener("click",() => {
+            render(i);
+            restart();
+        });
+    });
+
+    restart();
+})();
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261007"></script>
+<script src="core/nplus-auth.js?v=20261007"></script>
+
+<script>
+/* =========================================================
+   N+ PLAY HOME — SUPABASE WALLET SYNC
+   Same source of truth as the authenticated virtual wallet.
+   ========================================================= */
+(() => {
+    "use strict";
+
+    const LEGACY_STORE = "nplusplay_wingo_ultra_final_v2";
+    const walletEl = document.getElementById("homeWalletValue");
+    const walletBox = document.getElementById("homeWallet");
+    if (!walletEl) return;
+
+    const money = (value) => {
+        const n = Number(value);
+        const safe = Number.isFinite(n) ? n : 0;
+        return "₹" + safe.toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    };
+
+    let lastValue = null;
+    let refreshBusy = false;
+
+    function readLegacyWallet() {
+        try {
+            const raw = localStorage.getItem(LEGACY_STORE);
+            if (!raw) return null;
+            const data = JSON.parse(raw);
+            const value = Number(data?.balance);
+            return Number.isFinite(value) ? value : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function paint(value, animate = false) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return;
+
+        walletEl.textContent = money(n);
+
+        if (animate && walletBox && n !== lastValue) {
+            walletBox.classList.remove("is-updated");
+            void walletBox.offsetWidth;
+            walletBox.classList.add("is-updated");
+
+            clearTimeout(window.__homeWalletTimer);
+            window.__homeWalletTimer = setTimeout(() => {
+                walletBox.classList.remove("is-updated");
+            }, 650);
+        }
+
+        lastValue = n;
+    }
+
+    async function readSupabaseBalance() {
+        const client = window.NPlusAuth?.client;
+        if (!client) return null;
+
+        try {
+            const { data: userData, error: userError } = await client.auth.getUser();
+            if (userError || !userData?.user?.id) return null;
+
+            const { data, error } = await client
+                .from("demo_wallets")
+                .select("balance")
+                .eq("user_id", userData.user.id)
+                .maybeSingle();
+
+            if (error || !data) return null;
+
+            const value = Number(data.balance);
+            return Number.isFinite(value) ? value : null;
+        } catch (err) {
+            console.error("N+ PLAY home wallet sync error:", err);
+            return null;
+        }
+    }
+
+    async function syncWallet(animate = false) {
+        if (refreshBusy) return;
+        refreshBusy = true;
+
+        try {
+            const remote = await readSupabaseBalance();
+
+            if (remote !== null) {
+                paint(remote, animate);
+                return;
+            }
+
+            // Temporary fallback only when auth/Supabase is unavailable.
+            const legacy = readLegacyWallet();
+            if (legacy !== null) paint(legacy, animate);
+        } finally {
+            refreshBusy = false;
+        }
+    }
+
+    // Initial load.
+    syncWallet(false);
+
+    // Same-tab wallet bridge event used by game pages.
+    window.addEventListener("nplus:wallet-change", () => {
+        syncWallet(true);
+    });
+
+    // Browser/tab changes.
+    window.addEventListener("storage", (event) => {
+        if (event.key === LEGACY_STORE) {
+            syncWallet(true);
+        }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) syncWallet(true);
+    });
+
+    window.addEventListener("focus", () => {
+        syncWallet(true);
+    });
+
+    window.addEventListener("pageshow", () => {
+        syncWallet(true);
+    });
+
+    // Keep the lobby balance current while the page remains open.
+    setInterval(() => {
+        syncWallet(false);
+    }, 2000);
+})();
+</script>
+
+</body>
+</html>
