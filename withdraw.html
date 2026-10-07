@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#080908"><title>N+ PLAY — Withdraw</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261007"></script>
+<script src="core/nplus-auth.js?v=20261007"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261007"></script>
 <style>
 :root{--bg:#080908;--panel:#11130f;--line:rgba(255,255,255,.075);--gold:#c9a55b;--gold2:#f0dfb5;--text:#f4f1e8;--muted:#777a72;--green:#42d9a5}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}body{min-height:100vh;color:var(--text);background:radial-gradient(650px 450px at 50% -160px,rgba(201,165,91,.075),transparent 68%),#080908}
@@ -57,37 +61,170 @@ button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{wid
 <script>
 (()=>{
 "use strict";
-const STORE="nplusplay_wingo_ultra_final_v2",REQ="nplusplay_withdraw_requests_demo_v1";
+
+const REQ="nplusplay_withdraw_requests_demo_v1";
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-function read(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}}
-function balance(){const n=Number(read().balance);return Number.isFinite(n)?n:0}
-function render(){wallet.textContent=money(balance());document.getElementById("balance").textContent=money(balance())}
+
 let selected="Bank Account";
-document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{amount.value=b.dataset.a;document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));b.classList.add("active")});
-document.querySelectorAll(".method").forEach(m=>m.onclick=()=>{
- selected=m.dataset.method;document.querySelectorAll(".method").forEach(x=>x.classList.remove("selected"));m.classList.add("selected");
- const bankMode=selected==="Bank Account";bankFields.style.display=bankMode?"grid":"none";upiFields.style.display=bankMode?"none":"grid";detailTitle.textContent=bankMode?"BANK ACCOUNT DETAILS":"UPI DETAILS";
+let currentBalance=0;
+let refreshBusy=false;
+
+function setBalanceUI(value){
+  currentBalance=Number.isFinite(Number(value))?Number(value):0;
+  const formatted=money(currentBalance);
+  const walletEl=document.getElementById("wallet");
+  const balanceEl=document.getElementById("balance");
+  if(walletEl) walletEl.textContent=formatted;
+  if(balanceEl) balanceEl.textContent=formatted;
+}
+
+async function syncBalance(){
+  if(refreshBusy)return currentBalance;
+  refreshBusy=true;
+  try{
+    if(!window.NPlusAuth?.current || !window.NPlusWallet?.getBalance){
+      throw new Error("Wallet sync system unavailable.");
+    }
+
+    const user=await window.NPlusAuth.current();
+    if(!user?.id){
+      window.location.href="auth.html";
+      return currentBalance;
+    }
+
+    const value=await window.NPlusWallet.getBalance();
+    setBalanceUI(value);
+    return currentBalance;
+  }catch(err){
+    console.error("Withdraw wallet sync error:",err);
+    return currentBalance;
+  }finally{
+    refreshBusy=false;
+  }
+}
+
+async function getFreshBalance(){
+  await syncBalance();
+  return currentBalance;
+}
+
+function addRequest(req){
+  let a=[];
+  try{a=JSON.parse(localStorage.getItem(REQ)||"[]")}catch{}
+  a.unshift(req);
+  localStorage.setItem(REQ,JSON.stringify(a.slice(0,100)));
+}
+
+document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
+  amount.value=b.dataset.a;
+  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
 });
-function addRequest(req){let a=[];try{a=JSON.parse(localStorage.getItem(REQ)||"[]")}catch{};a.unshift(req);localStorage.setItem(REQ,JSON.stringify(a.slice(0,100)))}
-submitBtn.onclick=()=>{
- const n=Number(amount.value);if(!Number.isFinite(n)||n<=0)return alert("Please enter a valid amount.");
- if(n>balance())return alert("Amount exceeds available balance.");
- let details={};
- if(selected==="Bank Account"){
-  details={holder:holder.value.trim(),bank:bank.value.trim(),accountNo:accountNo.value.trim(),ifsc:ifsc.value.trim(),branch:branch.value.trim()};
-  if(Object.values(details).some(v=>!v))return alert("Please fill all bank details.");
- }else{
-  details={holder:upiHolder.value.trim(),bank:upiBank.value.trim(),upiId:upiId.value.trim()};
-  if(Object.values(details).some(v=>!v))return alert("Please fill all UPI details.");
- }
- const id="WD-"+Date.now().toString(36).toUpperCase();
- addRequest({id,createdAt:new Date().toISOString(),status:"PENDING",amount:n,method:selected,details});
- modalText.textContent=`${id} · ${money(n)} · ${selected}. Demo request saved for the local admin request queue.`;
- modal.classList.add("show");
+
+document.querySelectorAll(".method").forEach(m=>m.onclick=()=>{
+  selected=m.dataset.method;
+  document.querySelectorAll(".method").forEach(x=>x.classList.remove("selected"));
+  m.classList.add("selected");
+
+  const bankMode=selected==="Bank Account";
+  bankFields.style.display=bankMode?"grid":"none";
+  upiFields.style.display=bankMode?"none":"grid";
+  detailTitle.textContent=bankMode?"BANK ACCOUNT DETAILS":"UPI DETAILS";
+});
+
+submitBtn.onclick=async()=>{
+  const n=Number(amount.value);
+
+  if(!Number.isFinite(n)||n<=0){
+    alert("Please enter a valid amount.");
+    return;
+  }
+
+  const bal=await getFreshBalance();
+
+  if(n>bal){
+    alert("Amount exceeds available balance.");
+    return;
+  }
+
+  let details={};
+
+  if(selected==="Bank Account"){
+    details={
+      holder:holder.value.trim(),
+      bank:bank.value.trim(),
+      accountNo:accountNo.value.trim(),
+      ifsc:ifsc.value.trim(),
+      branch:branch.value.trim()
+    };
+
+    if(Object.values(details).some(v=>!v)){
+      alert("Please fill all bank details.");
+      return;
+    }
+  }else{
+    details={
+      holder:upiHolder.value.trim(),
+      bank:upiBank.value.trim(),
+      upiId:upiId.value.trim()
+    };
+
+    if(Object.values(details).some(v=>!v)){
+      alert("Please fill all UPI details.");
+      return;
+    }
+  }
+
+  const id="WD-"+Date.now().toString(36).toUpperCase();
+
+  addRequest({
+    id,
+    createdAt:new Date().toISOString(),
+    status:"PENDING",
+    amount:n,
+    method:selected,
+    details
+  });
+
+  modalText.textContent=
+    `${id} · ${money(n)} · ${selected}. Demo request saved for the local admin request queue.`;
+
+  modal.classList.add("show");
 };
-const modal=document.getElementById("modal");const close=()=>modal.classList.remove("show");
-document.getElementById("close").onclick=close;document.getElementById("done").onclick=()=>location.href="account.html";modal.onclick=e=>{if(e.target===modal)close()};
-window.addEventListener("storage",render);window.addEventListener("pageshow",render);render();
+
+const modal=document.getElementById("modal");
+const close=()=>modal.classList.remove("show");
+
+document.getElementById("close").onclick=close;
+document.getElementById("done").onclick=()=>location.href="account.html";
+modal.onclick=e=>{if(e.target===modal)close()};
+
+/* Keep the displayed balance synced when the user changes it elsewhere. */
+window.addEventListener("nplus:wallet-change",e=>{
+  const after=e?.detail?.after;
+  if(Number.isFinite(Number(after))) setBalanceUI(Number(after));
+  else syncBalance();
+});
+
+window.addEventListener("storage",()=>syncBalance());
+window.addEventListener("pageshow",()=>syncBalance());
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden) syncBalance();
+});
+
+/* Cross-page refresh protection: re-read Supabase wallet periodically. */
+setInterval(()=>syncBalance(),2000);
+
+(async()=>{
+  try{
+    const user=await window.NPlusAuth.requireAuth();
+    if(!user)return;
+    await syncBalance();
+  }catch(err){
+    console.error("Withdraw init error:",err);
+    alert(err.message||"Unable to load wallet.");
+  }
+})();
 })();
 </script>
 </body></html>
