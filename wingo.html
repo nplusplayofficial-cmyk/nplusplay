@@ -1545,11 +1545,13 @@ $("#rulesBtn").onclick=
 $("#ruleClose").onclick=
   ()=>$("#rules").classList.remove("show");
 
-$("#deposit").onclick=
-  $("#withdraw").onclick=
-    ()=>toast(
-      "Virtual-credit demo only"
-    );
+$("#deposit").onclick=()=>{
+  window.location.href="deposit.html";
+};
+
+$("#withdraw").onclick=()=>{
+  window.location.href="withdraw.html";
+};
 
 $("#sound").onclick=
   ()=>toast(
