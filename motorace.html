@@ -158,6 +158,7 @@ let walletBusy=false;
 let pos=1, selected=null, qty=1, multiplier=1;
 let activePeriod='';
 let raceStartedFor=null;
+let settlementBusy=false;
 let lastDisplayedSecond=-1;
 let resultCloseTimer=null;
 
@@ -180,12 +181,23 @@ async function refreshWallet(){
    walletBusy=false;
  }
 }
+const ROUND_MS=60*1000;
 function periodFor(date=new Date()){
- return date.getFullYear()+String(date.getMonth()+1).padStart(2,'0')+String(date.getDate()).padStart(2,'0')+String(date.getHours()).padStart(2,'0')+String(date.getMinutes()).padStart(2,'0');
+ // Absolute one-minute period stream: every client sees the same round boundary.
+ // Display is kept in IST for N+ PLAY's India-facing UI.
+ const istMs=date.getTime()+5.5*60*60*1000;
+ const d=new Date(istMs);
+ return d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,'0')+
+   String(d.getUTCDate()).padStart(2,'0')+String(d.getUTCHours()).padStart(2,'0')+
+   String(d.getUTCMinutes()).padStart(2,'0');
 }
 function secondsRemaining(){
- const now=new Date();
- return 60-now.getSeconds();
+ const msIntoRound=Date.now()%ROUND_MS;
+ return Math.max(1,60-Math.floor(msIntoRound/1000));
+}
+function msUntilNextRound(){
+ const r=ROUND_MS-(Date.now()%ROUND_MS);
+ return r===ROUND_MS?0:r;
 }
 function resultFor(period){
  let x=2166136261;
@@ -198,20 +210,36 @@ function resultFor(period){
  }
  return arr;
 }
+async function settlePendingOlderRounds(currentPeriod){
+ if(settlementBusy) return;
+ settlementBusy=true;
+ try{
+   const periods=[...new Set(db.bets.filter(b=>b.status==='PENDING'&&b.period!==currentPeriod).map(b=>b.period))];
+   for(const period of periods){
+     await settlePeriod(period,resultFor(period));
+   }
+ }finally{
+   settlementBusy=false;
+ }
+}
 function ensureRound(){
  const p=periodFor();
  if(p!==activePeriod){
+   const previousPeriod=activePeriod;
    activePeriod=p;
    $('period').textContent=p;
    raceStartedFor=null;
    clearTimeout(resultCloseTimer);
    $('result').classList.remove('show');
-   db.rounds.unshift({period:p,result:resultFor(p),createdAt:Date.now()});
-   db.rounds=db.rounds.slice(0,100);
-   save();
+   if(!db.rounds.some(r=>r.period===p)){
+     db.rounds.unshift({period:p,result:resultFor(p),createdAt:Date.now()});
+     db.rounds=db.rounds.slice(0,100);
+     save();
+   }
    resetBikes();
    renderRecent();
    $('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
+   if(previousPeriod) void settlePendingOlderRounds(p);
  }
 }
 function resetBikes(){
@@ -391,14 +419,17 @@ document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>{
 });
 
 function startRace(){
- if(raceStartedFor===activePeriod)return;
- raceStartedFor=activePeriod;
+ const racePeriod=activePeriod;
+ if(raceStartedFor===racePeriod)return;
+ raceStartedFor=racePeriod;
  $('status').textContent='BETTING CLOSED · RACE LIVE';
  $('status').style.color='var(--red)';
  $('betState').textContent='BETTING CLOSED';
  $('raceState').textContent='10 BIKES RACING…';
- const result=resultFor(activePeriod);
- const start=performance.now(),duration=4800;
+ const result=resultFor(racePeriod);
+ const start=performance.now();
+ // Finish before the absolute minute boundary, even when a user opens the page late.
+ const duration=Math.max(450,Math.min(4800,Math.max(450,msUntilNextRound()-100)));
  function frame(now){
    const t=Math.min(1,(now-start)/duration);
    result.forEach((bike,rank)=>{
@@ -408,18 +439,18 @@ function startRace(){
      if(el)el.style.left=(4+eased*84)+'%';
    });
    if(t<1)requestAnimationFrame(frame);
-   else finishRace(result);
+   else finishRace(racePeriod,result);
  }
  requestAnimationFrame(frame);
 }
-async function finishRace(result){
+async function finishRace(racePeriod,result){
  $('raceState').textContent='1ST BIKE '+result[0]+' · 2ND BIKE '+result[1]+' · 3RD BIKE '+result[2];
 
- const myBets=db.bets.filter(b=>b.period===activePeriod);
+ const myBets=db.bets.filter(b=>b.period===racePeriod);
  const hadBet=myBets.length>0;
 
- // Settle this round first.
- const settled=await settlePeriod(activePeriod,result);
+ // Settle this exact completed round first.
+ const settled=await settlePeriod(racePeriod,result);
  if(!settled){
    $('raceState').textContent='RESULT READY · WALLET SYNC RETRY NEEDED';
    return;
@@ -475,6 +506,7 @@ function updateClock(){
 }
 
 buildTrack();renderNumbers();renderBalance();ensureRound();renderRecent();renderPanel('history');syncSheet();
+void settlePendingOlderRounds(activePeriod);
 refreshWallet();
 window.addEventListener('nplus:wallet-change',()=>refreshWallet());
 window.addEventListener('focus',()=>refreshWallet());
