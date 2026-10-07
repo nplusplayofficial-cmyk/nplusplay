@@ -1850,20 +1850,26 @@ document.querySelectorAll('.cat').forEach(tab=>{
 </script>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261007"></script>
+<script src="core/nplus-auth.js?v=20261007"></script>
+
 <script>
 /* =========================================================
-   N+ PLAY HOME — SHARED  WALLET SYNC
-   Uses the same wallet store as WINGO V3.
+   N+ PLAY HOME — SUPABASE WALLET SYNC
+   Same source of truth as the authenticated virtual wallet.
    ========================================================= */
 (() => {
-    const WALLET_STORE = "nplusplay_wingo_ultra_final_v2";
+    "use strict";
+
+    const LEGACY_STORE = "nplusplay_wingo_ultra_final_v2";
     const walletEl = document.getElementById("homeWalletValue");
     const walletBox = document.getElementById("homeWallet");
     if (!walletEl) return;
 
     const money = (value) => {
         const n = Number(value);
-        const safe = Number.isFinite(n) ? n : 1000;
+        const safe = Number.isFinite(n) ? n : 0;
         return "₹" + safe.toLocaleString("en-IN", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
@@ -1871,56 +1877,115 @@ document.querySelectorAll('.cat').forEach(tab=>{
     };
 
     let lastValue = null;
+    let refreshBusy = false;
 
-    function readWallet() {
+    function readLegacyWallet() {
         try {
-            const raw = localStorage.getItem(WALLET_STORE);
-            if (!raw) return 1000;
+            const raw = localStorage.getItem(LEGACY_STORE);
+            if (!raw) return null;
             const data = JSON.parse(raw);
-            const value = Number(data && data.balance);
-            return Number.isFinite(value) ? value : 1000;
+            const value = Number(data?.balance);
+            return Number.isFinite(value) ? value : null;
         } catch {
-            return 1000;
+            return null;
         }
     }
 
-    function renderWallet(animate = false) {
-        const value = readWallet();
-        walletEl.textContent = money(value);
+    function paint(value, animate = false) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return;
 
-        if (animate && value !== lastValue && walletBox) {
+        walletEl.textContent = money(n);
+
+        if (animate && walletBox && n !== lastValue) {
             walletBox.classList.remove("is-updated");
             void walletBox.offsetWidth;
             walletBox.classList.add("is-updated");
+
             clearTimeout(window.__homeWalletTimer);
-            window.__homeWalletTimer = setTimeout(
-                () => walletBox.classList.remove("is-updated"),
-                650
-            );
+            window.__homeWalletTimer = setTimeout(() => {
+                walletBox.classList.remove("is-updated");
+            }, 650);
         }
-        lastValue = value;
+
+        lastValue = n;
     }
 
-    renderWallet(false);
+    async function readSupabaseBalance() {
+        const client = window.NPlusAuth?.client;
+        if (!client) return null;
 
-    // Fires when WINGO changes the wallet in another tab/window.
+        try {
+            const { data: userData, error: userError } = await client.auth.getUser();
+            if (userError || !userData?.user?.id) return null;
+
+            const { data, error } = await client
+                .from("demo_wallets")
+                .select("balance")
+                .eq("user_id", userData.user.id)
+                .maybeSingle();
+
+            if (error || !data) return null;
+
+            const value = Number(data.balance);
+            return Number.isFinite(value) ? value : null;
+        } catch (err) {
+            console.error("N+ PLAY home wallet sync error:", err);
+            return null;
+        }
+    }
+
+    async function syncWallet(animate = false) {
+        if (refreshBusy) return;
+        refreshBusy = true;
+
+        try {
+            const remote = await readSupabaseBalance();
+
+            if (remote !== null) {
+                paint(remote, animate);
+                return;
+            }
+
+            // Temporary fallback only when auth/Supabase is unavailable.
+            const legacy = readLegacyWallet();
+            if (legacy !== null) paint(legacy, animate);
+        } finally {
+            refreshBusy = false;
+        }
+    }
+
+    // Initial load.
+    syncWallet(false);
+
+    // Same-tab wallet bridge event used by game pages.
+    window.addEventListener("nplus:wallet-change", () => {
+        syncWallet(true);
+    });
+
+    // Browser/tab changes.
     window.addEventListener("storage", (event) => {
-        if (event.key === WALLET_STORE) renderWallet(true);
+        if (event.key === LEGACY_STORE) {
+            syncWallet(true);
+        }
     });
 
-    // Also refresh when the user comes back to this tab.
     document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) renderWallet(true);
+        if (!document.hidden) syncWallet(true);
     });
 
-    window.addEventListener("focus", () => renderWallet(true));
+    window.addEventListener("focus", () => {
+        syncWallet(true);
+    });
 
-    // Lightweight same-tab refresh for cases where the user returns from WINGO
-    // without a separate tab storage event.
+    window.addEventListener("pageshow", () => {
+        syncWallet(true);
+    });
+
+    // Keep the lobby balance current while the page remains open.
     setInterval(() => {
-        const current = readWallet();
-        if (current !== lastValue) renderWallet(true);
-    }, 1000);
+        syncWallet(false);
+    }, 2000);
 })();
 </script>
 
