@@ -40,6 +40,11 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
 .empty{padding:18px;text-align:center;color:#5d5953;font-size:7px}.footer{text-align:center;padding:7px 0 15px;color:#4d4943;font-size:6px}
 .sheet{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.7)}.sheet.open{display:flex}.sheetbox{width:min(100%,500px);padding:13px 13px 18px;border-radius:20px 20px 0 0;background:#111216;border-top:1px solid rgba(223,198,141,.2);box-shadow:0 -20px 70px #000}.handle{width:38px;height:4px;background:#303136;border-radius:8px;margin:0 auto 10px}.sheethead{display:flex;justify-content:space-between;align-items:center}.sheethead strong{font-size:10px}.close{width:28px;height:28px;border:0;border-radius:8px;background:#1a1b1f;color:#aaa}.selection{margin-top:7px;color:#777;font-size:7px}.selection b{color:var(--gold2)}.amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px}.amt{border:1px solid var(--line);border-radius:8px;background:#191a1e;color:#b7b2aa;padding:8px;font-size:8px;font-weight:950}.amt.active{background:#261f14;color:var(--gold2);border-color:rgba(223,198,141,.35)}.qty{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding:8px 9px;background:#191a1e;border-radius:9px;font-size:8px}.step{display:flex;align-items:center;gap:6px}.step button{width:25px;height:25px;border:0;border-radius:7px;background:#25262b;color:#ddd}.total{display:flex;justify-content:space-between;margin-top:9px;color:#77736d;font-size:8px}.total b{color:#fff;font-size:11px}.rules{margin-top:8px;color:#5c5852;font-size:7px;line-height:1.4}.confirm{width:100%;margin-top:9px;padding:11px;border:0;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#111;font-size:9px;font-weight:950}
 </style>
+<!-- N+ PLAY SHARED AUTH + SUPABASE WALLET -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261007"></script>
+<script src="core/nplus-auth.js?v=20261007"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261007"></script>
 </head>
 <body>
 <div class="app">
@@ -136,13 +141,41 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
 
 <script>
 const STORE='nplusplay_trxwingo_demo_v2';
-const WALLET='nplusplay_wingo_ultra_final_v2';
 const state={sec:60,slot:null,period:'',digits:[0,0,0,0,0],selected:null,amount:10,qty:1,mult:1,panel:'history',bets:[]};
 
 function pad(n,l=2){return String(n).padStart(l,'0')}
-function readWallet(){try{const s=JSON.parse(localStorage.getItem(WALLET)||'null');if(s&&typeof s.balance==='number')return s.balance}catch(e){}return 1000}
-function setWallet(v){v=Math.max(0,Number(v)||0);document.getElementById('balance').textContent='₹'+v.toLocaleString('en-IN',{minimumFractionDigits:2});try{const s=JSON.parse(localStorage.getItem(WALLET)||'{}');s.balance=v;localStorage.setItem(WALLET,JSON.stringify(s))}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem(STORE)||'{}');state.bets=Array.isArray(s.bets)?s.bets.slice(0,100):[]}catch(e){}setWallet(readWallet())}
+let walletBusy=false;
+
+function paintWallet(v){
+ const n=Number(v);
+ if(!Number.isFinite(n))return;
+ document.getElementById('balance').textContent='₹'+n.toLocaleString('en-IN',{minimumFractionDigits:2});
+}
+
+async function readWallet(){
+ try{
+  if(window.NPlusWallet?.getBalance){
+   const v=await window.NPlusWallet.getBalance();
+   paintWallet(v);
+   return Number(v);
+  }
+ }catch(e){console.error('TRX WINGO wallet read failed:',e)}
+ return null;
+}
+
+async function syncWallet(){
+ if(walletBusy)return;
+ await readWallet();
+}
+
+async function loadWalletAndBets(){
+ try{
+  const s=JSON.parse(localStorage.getItem(STORE)||'{}');
+  state.bets=Array.isArray(s.bets)?s.bets.slice(0,100):[];
+ }catch(e){state.bets=[]}
+ await readWallet();
+}
+
 function save(){localStorage.setItem(STORE,JSON.stringify({bets:state.bets}))}
 
 function roundInfo(now=Date.now()){const ms=state.sec*1000,slot=Math.floor(now/ms),end=(slot+1)*ms;return{slot,end,remaining:Math.max(0,end-now)}}
@@ -231,11 +264,33 @@ function closeSheet(){document.getElementById('sheet').classList.remove('open')}
 function changeQty(d){state.qty=Math.max(1,Math.min(20,state.qty+d));document.getElementById('q').textContent=state.qty;updateTotal()}
 function updateTotal(){document.getElementById('tot').textContent='₹'+(state.amount*state.qty*state.mult).toFixed(2)}
 document.querySelectorAll('.amt').forEach(b=>b.onclick=()=>{document.querySelectorAll('.amt').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.amount=+b.dataset.a;updateTotal()})
-function confirmBet(){
- const total=state.amount*state.qty*state.mult,bal=readWallet();
+async function confirmBet(){
+ if(walletBusy)return;
+ const total=Number(state.amount)*Number(state.qty)*Number(state.mult);
+ if(!Number.isFinite(total)||total<1){alert('Invalid demo stake.');return}
+ if(!bettingOpen()){updateBetStatus();return}
+
+ const bal=await readWallet();
+ if(bal===null){alert('Unable to load the shared demo wallet.');return}
  if(total>bal){alert('Demo wallet balance insufficient.');return}
- state.bets.unshift({period:state.period,selection:state.selected,stake:total,time:Date.now()});state.bets=state.bets.slice(0,100);
- setWallet(bal-total);save();closeSheet();renderPanel('my')
+
+ walletBusy=true;
+ try{
+  await window.NPlusWallet.changeBalance(-total,{
+   type:'GAME_BET',
+   source:'TRX_WINGO',
+   note:`TRX WINGO BET ${state.period} selection=${state.selected} amount=${state.amount} qty=${state.qty} mult=${state.mult}`
+  });
+  state.bets.unshift({period:state.period,selection:state.selected,stake:total,time:Date.now()});
+  state.bets=state.bets.slice(0,100);
+  save();closeSheet();renderPanel('my');
+ }catch(e){
+  console.error(e);
+  alert(e?.message||'Unable to place demo bet.');
+ }finally{
+  walletBusy=false;
+  await readWallet();
+ }
 }
 
 function renderPanel(panel='history'){
@@ -259,7 +314,19 @@ function closeInfo(id){document.getElementById(id).classList.remove('open')}
 document.getElementById('howBtn').onclick=()=>openInfo('howModal');
 document.getElementById('hashBtn').onclick=()=>openInfo('hashModal');
 
-load();renderNumbers();tick();updateTotal();setInterval(tick,250)
+loadWalletAndBets().then(()=>{
+ renderNumbers();
+ tick();
+ updateTotal();
+ syncWallet();
+});
+setInterval(tick,250);
+window.addEventListener('nplus:wallet-change',()=>syncWallet());
+window.addEventListener('storage',()=>syncWallet());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncWallet()});
+window.addEventListener('focus',()=>syncWallet());
+window.addEventListener('pageshow',()=>syncWallet());
+setInterval(()=>syncWallet(),2000);
 </script>
 </body>
 </html>
