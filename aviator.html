@@ -141,6 +141,10 @@ th{color:#70757c;font-size:9px}
   .layout .left{order:2} .layout .right{order:1}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261007"></script>
+<script src="core/nplus-auth.js?v=20261007"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261007"></script>
 </head>
 <body>
 <main class="app">
@@ -360,15 +364,11 @@ const money=n=> '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits
 const fx=x=>Number(x).toFixed(2)+'x';
 
 let db={balance:1000,rounds:[],bets:[],lastRound:null};
-let sharedWallet=false;
 
 function loadDb(){
-  try{ const x=JSON.parse(localStorage.getItem(STORE)||'null'); if(x && typeof x==='object') db={...db,...x}; }catch(e){}
   try{
-    const w=JSON.parse(localStorage.getItem(WALLET_STORE)||'null');
-    if(w && Number.isFinite(Number(w.balance))){
-      db.balance=Number(w.balance); sharedWallet=true;
-    }
+    const x=JSON.parse(localStorage.getItem(STORE)||'null');
+    if(x && typeof x==='object') db={...db,...x};
   }catch(e){}
   db.rounds=Array.isArray(db.rounds)?db.rounds:[];
   db.bets=Array.isArray(db.bets)?db.bets:[];
@@ -378,22 +378,35 @@ loadDb();
 function saveDb(){
   db.rounds=db.rounds.slice(0,100);
   db.bets=db.bets.slice(0,100);
-  localStorage.setItem(STORE,JSON.stringify(db));
-  if(sharedWallet){
-    try{
-      const w=JSON.parse(localStorage.getItem(WALLET_STORE)||'{}');
-      w.balance=db.balance;
-      localStorage.setItem(WALLET_STORE,JSON.stringify(w));
-    }catch(e){}
-  }
+  localStorage.setItem(STORE,JSON.stringify({rounds:db.rounds,bets:db.bets,lastRound:db.lastRound}));
   broadcast();
+}
+
+function walletClient(){ return window.NPlusWallet || null; }
+async function syncWallet(){
+  try{
+    const wallet=walletClient();
+    if(wallet){
+      const value=await wallet.getBalance();
+      if(Number.isFinite(Number(value))){
+        db.balance=Number(value);
+        renderBalance();
+        renderBetBox(0);
+        renderBetBox(1);
+        return true;
+      }
+    }
+  }catch(e){
+    console.warn('Aviator Supabase wallet sync:',e);
+  }
+  return false;
 }
 function broadcast(){
   try{ localStorage.setItem('nplus_aviator_ping',String(Date.now())); }catch(e){}
 }
 
 window.addEventListener('storage',e=>{
-  if(e.key===STORE || e.key===WALLET_STORE){
+  if(e.key===STORE){
     loadDb(); renderAll();
   }
 });
@@ -621,44 +634,84 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 
-function placeDemoBet(i,auto=false){
+const walletBusy=[false,false];
+
+async function placeDemoBet(i,auto=false){
+  if(walletBusy[i]) return false;
+  walletBusy[i]=true;
   const box=$$('.betbox')[i], input=box.querySelector('.amountInput');
   const stake=Math.max(MIN_BET,Number(input.value)||0);
-  if(stake>db.balance){
-    box.querySelector('.state').textContent='Insufficient demo balance';
+  try{
+    const wallet=walletClient();
+    const current=wallet ? Number(await wallet.getBalance()) : Number(db.balance);
+    if(!Number.isFinite(current) || stake>current){
+      box.querySelector('.state').textContent='Insufficient demo balance';
+      return false;
+    }
+    if(wallet){
+      const next=await wallet.changeBalance(-stake,{
+        type:'GAME_BET',
+        source:'AVIATOR',
+        note:`AVIATOR BET ${activeRoundId} slot=${i+1}${auto?' auto':''}`
+      });
+      db.balance=Number(next);
+    }else{
+      db.balance=current-stake;
+    }
+    const bet={
+      id:'BET-'+Date.now()+'-'+i,
+      roundId:activeRoundId,
+      slot:i,
+      label:'YOU · BET '+(i+1),
+      stake,
+      status:'PENDING',
+      payout:0,
+      placedAt:Date.now(),
+      auto
+    };
+    db.bets.unshift(bet);
+    userSlots[i]=bet;
+    saveDb();
+    renderAll();
+    return true;
+  }catch(e){
+    box.querySelector('.state').textContent=e?.message||'Unable to place demo bet';
     return false;
+  }finally{
+    walletBusy[i]=false;
   }
-  db.balance-=stake;
-  const bet={
-    id:'BET-'+Date.now()+'-'+i,
-    roundId:activeRoundId,
-    slot:i,
-    label:'YOU · BET '+(i+1),
-    stake,
-    status:'PENDING',
-    payout:0,
-    placedAt:Date.now(),
-    auto
-  };
-  db.bets.unshift(bet);
-  userSlots[i]=bet;
-  saveDb();
-  renderAll();
-  return true;
 }
 
-function cashDemo(i,auto=false){
+async function cashDemo(i,auto=false){
+  if(walletBusy[i]) return;
   const b=userSlots[i];
   if(!b || b.status!=='PENDING' || phase!=='FLY') return;
-  const x=currentMultiplier();
-  const payout=Number((b.stake*x).toFixed(2));
-  b.status='WIN';
-  b.result=x;
-  b.payout=payout;
-  b.roundStatus='SETTLED';
-  db.balance+=payout;
-  saveDb();
-  renderAll();
+  walletBusy[i]=true;
+  try{
+    const x=currentMultiplier();
+    const payout=Number((b.stake*x).toFixed(2));
+    const wallet=walletClient();
+    if(wallet){
+      const next=await wallet.changeBalance(payout,{
+        type:'GAME_WIN',
+        source:'AVIATOR',
+        note:`AVIATOR WIN ${activeRoundId} slot=${i+1}${auto?' auto':''} multiplier=${x.toFixed(2)}x`
+      });
+      db.balance=Number(next);
+    }else{
+      db.balance+=payout;
+    }
+    b.status='WIN';
+    b.result=x;
+    b.payout=payout;
+    b.roundStatus='SETTLED';
+    saveDb();
+    renderAll();
+  }catch(e){
+    console.warn('Aviator cashout failed:',e);
+  }finally{
+    walletBusy[i]=false;
+  }
 }
 
 function finishRound(){
@@ -793,7 +846,7 @@ $$('[data-action]').forEach(row=>row.onclick=()=>{
   }
   if(a==='reset'){
     localStorage.removeItem(STORE);
-    db={balance:1000,rounds:[],bets:[]};
+    db={balance:Number(db.balance)||0,rounds:[],bets:[],lastRound:null};
     userSlots=[null,null];
     closeDrawer();renderAll();
     return;
@@ -815,6 +868,13 @@ resize();
 beginRound();
 setInterval(loop,50);
 renderAll();
+
+syncWallet();
+window.addEventListener('nplus:wallet-change',()=>syncWallet());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncWallet();});
+window.addEventListener('focus',()=>syncWallet());
+window.addEventListener('pageshow',()=>syncWallet());
+setInterval(syncWallet,2000);
 
 })();
 </script>
