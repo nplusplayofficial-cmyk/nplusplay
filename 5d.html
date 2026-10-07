@@ -330,9 +330,14 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- N+ PLAY SHARED WALLET -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261007"></script>
+<script src="core/nplus-auth.js?v=20261007"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261007"></script>
+
 <script>
 const STORE='nplusplay_5d_final_v4';
-const WALLET='nplusplay_wingo_ultra_final_v2';
 
 const DURATIONS=[60,180,300,600];
 
@@ -421,21 +426,25 @@ function completedHistory(sec=state.sec,limit=30,now=Date.now()){
   }
   return rows;
 }
-function readWallet(){
-  try{
-    const s=JSON.parse(localStorage.getItem(WALLET)||'null');
-    if(s && typeof s.balance==='number') return s.balance;
-  }catch(e){}
-  return 1000;
+function renderWallet(value){
+  const val=Number(value);
+  if(!Number.isFinite(val)) return;
+  document.getElementById('balance').textContent='₹'+val.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
-function writeWallet(v){
-  const val=Math.max(0,Number(v)||0);
-  document.getElementById('balance').textContent='₹'+val.toLocaleString('en-IN',{minimumFractionDigits:2});
+
+let walletSyncBusy=false;
+
+async function syncWallet(){
+  if(walletSyncBusy) return;
+  walletSyncBusy=true;
   try{
-    const s=JSON.parse(localStorage.getItem(WALLET)||'{}');
-    s.balance=val;
-    localStorage.setItem(WALLET,JSON.stringify(s));
-  }catch(e){}
+    const balance=await window.NPlusWallet.getBalance();
+    renderWallet(balance);
+  }catch(e){
+    console.error('5D wallet sync error:',e);
+  }finally{
+    walletSyncBusy=false;
+  }
 }
 
 function save(){
@@ -451,7 +460,6 @@ function load(){
         : [];
     }
   }catch(e){}
-  writeWallet(readWallet());
 }
 function renderResultHeader(){
   const root=document.getElementById('resultNums');
@@ -701,20 +709,47 @@ function changeQty(delta){
 function updateTotal(){
   document.getElementById('total').textContent='₹'+(state.amount*state.qty).toFixed(2);
 }
-function confirmBet(){
+let betBusy=false;
+
+async function confirmBet(){
+  if(betBusy) return;
+
   const total=state.amount*state.qty;
-  const balance=readWallet();
-  if(total>balance){alert('Demo wallet balance insufficient.');return}
-  const bet={
-    period:state.period,selection:state.selected,amount:state.amount,qty:state.qty,
-    total,time:Date.now()
-  };
-  state.betsByMode[state.sec].unshift(bet);
-  state.betsByMode[state.sec]=state.betsByMode[state.sec].slice(0,100);
-  writeWallet(balance-total);
-  save();
-  closeSheet();
-  renderPanel('bets');
+  if(!state.selected){alert('Select a 5D option first.');return}
+  if(!Number.isFinite(total)||total<1){alert('Invalid demo stake.');return}
+
+  betBusy=true;
+  try{
+    const after=await window.NPlusWallet.changeBalance(
+      -total,
+      {
+        type:'GAME_BET',
+        source:'5D',
+        note:`5D BET period=${state.period} selection=${state.selected} amount=${state.amount} qty=${state.qty}`
+      }
+    );
+
+    const bet={
+      period:state.period,
+      selection:state.selected,
+      amount:state.amount,
+      qty:state.qty,
+      total,
+      time:Date.now()
+    };
+
+    state.betsByMode[state.sec].unshift(bet);
+    state.betsByMode[state.sec]=state.betsByMode[state.sec].slice(0,100);
+    save();
+    renderWallet(after);
+    closeSheet();
+    renderPanel('bets');
+  }catch(e){
+    alert(e?.message||'Unable to place demo bet.');
+    syncWallet();
+  }finally{
+    betBusy=false;
+  }
 }
 
 document.querySelectorAll('.mode').forEach(btn=>{
@@ -768,6 +803,14 @@ load();
 renderNumbers();
 syncRound(true);
 tick();
+syncWallet();
+
+window.addEventListener('nplus:wallet-change',()=>syncWallet());
+window.addEventListener('focus',()=>syncWallet());
+window.addEventListener('pageshow',()=>syncWallet());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncWallet()});
+setInterval(syncWallet,2000);
+
 setInterval(tick,250);
 updateTotal();
 </script>
