@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="manifest" href="./manifest.webmanifest">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>N+ PLAY — Admin</title>
@@ -792,6 +793,7 @@ button:disabled{
     <a href="admin.html" data-nav="dashboard">DASHBOARD</a>
     <a href="admin-deposits.html" data-nav="deposits">DEPOSITS &amp; WALLET</a>
     <a href="admin-games.html" data-nav="games">GAME CONTROL</a>
+    <a href="admin-users.html" data-nav="users">USERS</a>
     <a href="admin-reports.html" data-nav="reports">COMMISSION &amp; REPORTS</a>
   </nav>
 
@@ -1324,6 +1326,89 @@ button:disabled{
     );
   }
 
+  async function getDbWingoManual(period, sec) {
+    const { data, error } = await supabase
+      .from("wingo_manual_results")
+      .select("duration_seconds,period,color,number,size,mode,created_at")
+      .eq("duration_seconds", sec)
+      .eq("period", period)
+      .eq("mode", "MANUAL")
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    return {
+      duration: Number(data.duration_seconds),
+      period: String(data.period),
+      mode: "MANUAL",
+      color: String(data.color || "").toUpperCase(),
+      number: Number(data.number),
+      size: String(data.size || "").toUpperCase(),
+      result: `${String(data.color || "").toUpperCase()} ${Number(data.number)} · ${String(data.size || "").toUpperCase()}`,
+      updated_at: data.created_at || new Date().toISOString()
+    };
+  }
+
+  async function hydrateWingoFromDatabase(options = {}) {
+    try {
+      const { data, error } = await supabase
+        .from("wingo_manual_results")
+        .select("duration_seconds,period,color,number,size,mode,created_at")
+        .eq("mode", "MANUAL")
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+      if (error) throw error;
+
+      const state = getDemoState();
+      state.WINGO = state.WINGO || {};
+      state.WINGO.durations = state.WINGO.durations || {};
+
+      for (const row of (data || [])) {
+        const sec = Number(row.duration_seconds);
+        if (!sec) continue;
+        state.WINGO.durations[sec] = {
+          duration: sec,
+          mode: "MANUAL",
+          color: String(row.color || "").toUpperCase(),
+          number: Number(row.number),
+          size: String(row.size || "").toUpperCase(),
+          result: `${String(row.color || "").toUpperCase()} ${Number(row.number)} · ${String(row.size || "").toUpperCase()}`,
+          period: String(row.period),
+          updated_at: row.created_at || new Date().toISOString()
+        };
+      }
+
+      saveDemoState(state);
+      renderGameCards();
+
+      if (selectedGame?.key === "WINGO") {
+        const info = wingoPeriodInfo(selectedDuration);
+        const row = (data || []).find(x =>
+          Number(x.duration_seconds) === Number(selectedDuration) &&
+          String(x.period) === String(info.current)
+        );
+
+        if (row) {
+          selectedMode = "manual";
+          selectedColor = String(row.color || "").toUpperCase();
+          selectedNumber = row.number === null || row.number === undefined ? null : String(row.number);
+          selectedSize = String(row.size || "").toUpperCase() || null;
+        } else if (!options.preserveSelection) {
+          selectedMode = "auto";
+          selectedColor = null;
+          selectedNumber = null;
+          selectedSize = null;
+        }
+
+        syncDemoControls();
+        await loadWingoAnalytics();
+      }
+    } catch (err) {
+      console.error("WINGO Supabase hydrate error:", err);
+    }
+  }
+
   function renderGameCards() {
     const state = getDemoState();
     const grid = $("gameGrid");
@@ -1771,86 +1856,30 @@ button:disabled{
           return;
         }
 
-        const {
-          data,
-          error
-        } = await supabase.rpc(
-          "nplus_admin_set_wingo_demo",
-          {
-            p_duration:
-              selectedDuration,
-            p_mode:
-              selectedMode.toUpperCase(),
-            p_color:
-              selectedColor,
-            p_number:
-              selectedNumber === null
-                ? null
-                : Number(selectedNumber),
-            p_size:
-              selectedSize
-          }
-        );
-
-        if (error) {
-          console.error(
-            "WINGO save error:",
-            error
-          );
-
-          showStatus(
-            error.message ||
-            "Unable to save WINGO setting.",
-            "err"
-          );
-
-          return;
-        }
-
-        const gameState =
-          state.WINGO || {};
-
-        gameState.durations =
-          gameState.durations || {};
-
-        gameState.durations[
-          selectedDuration
-        ] = {
-          duration:
-            selectedDuration,
-          mode:
-            selectedMode.toUpperCase(),
-          color:
-            data?.color ||
-            selectedColor,
-          number:
-            data?.number ??
-            selectedNumber,
-          size:
-            data?.size ||
-            selectedSize,
-          result:
-            data?.result ||
-            result,
-          updated_at:
-            new Date().toISOString()
+        const gameState = state.WINGO || {};
+        gameState.durations = gameState.durations || {};
+        gameState.durations[selectedDuration] = {
+          duration: selectedDuration,
+          mode: "AUTO",
+          color: null,
+          number: null,
+          size: null,
+          result: "AUTO",
+          period: targetPeriod,
+          updated_at: new Date().toISOString()
         };
-
-        state.WINGO =
-          gameState;
-
+        state.WINGO = gameState;
         saveDemoState(state);
         renderGameCards();
-
+        selectedMode = "auto";
+        selectedColor = null;
+        selectedNumber = null;
+        selectedSize = null;
+        syncDemoControls();
         showStatus(
-          `WINGO ${
-            wingoDurationLabel(
-              selectedDuration
-            )
-          } saved successfully.`,
+          `WINGO ${wingoDurationLabel(selectedDuration)} AUTO restored for ${targetPeriod}.`,
           "ok"
         );
-
         await loadWingoAnalytics();
       } catch (err) {
         console.error(err);
@@ -1905,7 +1934,7 @@ button:disabled{
     .forEach(btn => {
       btn.addEventListener(
         "click",
-        () => {
+        async () => {
           if (
             selectedGame?.key !== "WINGO"
           ) {
@@ -1917,42 +1946,26 @@ button:disabled{
               btn.dataset.duration
             );
 
-          const saved =
-            getDemoState()
-              .WINGO
-              ?.durations
-              ?.[
-                selectedDuration
-              ] || {};
+          const info = wingoPeriodInfo(selectedDuration);
+          const saved = await getDbWingoManual(info.current, selectedDuration);
 
-          selectedMode =
-            String(
-              saved.mode ||
-              "AUTO"
-            ).toLowerCase();
-
-          selectedColor =
-            saved.color || null;
-
-          selectedNumber =
-            saved.number === undefined ||
-            saved.number === null
-              ? null
-              : String(
-                  saved.number
-                );
-
-          selectedSize =
-            saved.size || null;
+          if (saved) {
+            selectedMode = "manual";
+            selectedColor = saved.color;
+            selectedNumber = String(saved.number);
+            selectedSize = saved.size;
+          } else {
+            selectedMode = "auto";
+            selectedColor = null;
+            selectedNumber = null;
+            selectedSize = null;
+          }
 
           syncDemoControls();
-
-          loadWingoAnalytics();
+          await loadWingoAnalytics();
 
           showStatus(
-            `${wingoDurationLabel(
-              selectedDuration
-            )} selected.`,
+            `${wingoDurationLabel(selectedDuration)} · ${info.current} loaded from Supabase.`,
             "ok"
           );
         }
@@ -3051,17 +3064,14 @@ button:disabled{
   renderGameCards();
 
   (async () => {
-    const allowed =
-      await requireAdmin();
-
-    if (!allowed) {
-      return;
-    }
+    const allowed = await requireAdmin();
+    if (!allowed) return;
 
     await Promise.all([
       loadRequests(),
       loadCommission(),
-      loadDepositReport()
+      loadDepositReport(),
+      hydrateWingoFromDatabase()
     ]);
   })();
 
@@ -3094,11 +3104,11 @@ button:disabled{
     Keep WINGO analytics live only when the detail panel is open.
   */
   window.setInterval(
-    () => {
-      if (
-        selectedGame?.key === "WINGO"
-      ) {
-        loadWingoAnalytics();
+    async () => {
+      if (selectedGame?.key === "WINGO") {
+        await hydrateWingoFromDatabase({ preserveSelection: true });
+      } else {
+        await hydrateWingoFromDatabase();
       }
     },
     2000
@@ -3107,5 +3117,7 @@ button:disabled{
 })();
 </script>
 
+
+<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 </body>
 </html>
