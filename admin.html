@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="manifest" href="./manifest.webmanifest">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>N+ PLAY — Admin</title>
@@ -757,7 +758,7 @@ button:disabled{
 .adminnav{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px;padding:8px;border:1px solid var(--line);border-radius:14px;background:#101010}
 .adminnav a{flex:1;min-width:150px;text-align:center;text-decoration:none;border:1px solid rgba(255,255,255,.08);background:#151515;color:var(--muted);border-radius:10px;padding:11px 10px;font-size:11px;font-weight:900;letter-spacing:.5px}
 .adminnav a.active{background:rgba(201,165,91,.12);border-color:rgba(201,165,91,.55);color:var(--gold2)}
-.dashboard{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.dashboard{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:15px}
 .dashboard-card{display:block;text-decoration:none;background:linear-gradient(145deg,rgba(201,165,91,.09),rgba(16,16,16,.98));border:1px solid var(--line);border-radius:18px;padding:22px;color:var(--text);transition:.2s}
 .dashboard-card:hover{transform:translateY(-2px);border-color:rgba(201,165,91,.4)}
 .dashboard-card .icon{font-size:28px;margin-bottom:12px}
@@ -786,6 +787,7 @@ button:disabled{
     <a href="admin.html" class="active">DASHBOARD</a>
     <a href="admin-deposits.html">DEPOSITS &amp; WALLET</a>
     <a href="admin-games.html">GAME CONTROL</a>
+    <a href="admin-users.html">USERS</a>
     <a href="admin-reports.html">COMMISSION &amp; REPORTS</a>
   </nav>
 
@@ -808,6 +810,13 @@ button:disabled{
       <p>Manage WINGO demo modes, durations, exact manual results and read-only round analytics.</p>
       <div class="go">OPEN GAME CONTROL →</div>
     </a>
+    <a class="dashboard-card" href="admin-users.html">
+      <div class="icon">👥</div>
+      <h3>User Management</h3>
+      <p>Search N+ UIDs, view demo wallet balances and inspect a user’s virtual-credit transaction ledger.</p>
+      <div class="go">OPEN USER MANAGEMENT →</div>
+    </a>
+
     <a class="dashboard-card" href="admin-reports.html">
       <div class="icon">📊</div>
       <h3>Commission &amp; Reports</h3>
@@ -837,5 +846,7 @@ button:disabled{
   guard();
 })();
 </script>
+
+<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 </body>
 </html>
