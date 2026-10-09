@@ -1,0 +1,23 @@
+{
+  "name": "N+ PLAY \u2014 Virtual Credit Demo",
+  "short_name": "N+ PLAY",
+  "description": "Premium virtual-credit gaming demo platform.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080908",
+  "theme_color": "#080908",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "./assets/nplus-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
