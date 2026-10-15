@@ -2,36 +2,41 @@
 
 This branch is a review candidate, not a claim that N+ PLAY is production-secure. It keeps the current plain HTML/CSS/JavaScript + Supabase architecture and does not migrate to Next.js.
 
-## Changes in this branch
-- Adds the missing, correctly named admin-users.html user-management page.
+## Repository/code changes in this branch
+- Adds the missing, correctly named admin-users.html user-management page and removes the typo duplicate.
 - Adds assets/nplus-icon.svg, matching the icon path used by manifest.webmanifest and sw.js.
-- Adds deposit-demo.html so the demo deposit request route exists. It creates a pending row in public.deposit_requests; it must not change a wallet balance until an admin-approved server RPC runs.
-- Updates deposit.html to route only to the virtual-credit request flow and reject the disabled payment-gateway placeholder.
+- Adds deposit-demo.html so the demo request route exists; it submits a pending virtual-credit request and does not immediately change the balance.
+- Updates deposit.html to use virtual-credit requests only and block the unimplemented gateway route.
 - Sets legacy core/config.js to REAL_MONEY: false.
-- Bumps the service-worker cache version and fixes forgot-password links to use the existing auth.html.
-- Restores email OTP verification for account creation while retaining email + mobile + password login.
-- Adds static QA checks and SQL migration drafts for admin user tools and profile/deposit safeguards.
+- Bumps the service-worker cache version and fixes forgot-password links to use auth.html.
+- Restores email-OTP signup while retaining email + mobile + password login.
+- Adds static QA checks, GitHub Actions CI, a live-hardening migration record and release checklist.
 
-## Before any database change
-1. Take and verify a database backup first. Do not use an unreviewed schema reset on the live project.
-2. Review the live schema, RLS policies, triggers, and definitions for nplus_wallet_change, nplus_approve_deposit, nplus_reject_deposit, and nplus_phone_is_registered.
-3. Review sql/NPLUS_PLAY_PREMIUM_FOUNDATION.sql and sql/NPLUS_PLAY_PROFILE_DEPOSIT_GUARDS.sql against that live schema. Do not run either script just because it exists in this branch.
-4. Test on a staging project or backed-up database where possible. Apply approved SQL separately and verify its result before testing the website.
+## Verified local database backup
+A custom-format backup archive was created on the operator's computer:
+`C:\Users\Natarajan K\NPLUS-PLAY-DB-BACKUP\nplus-play-full-2026-10-15.dump`
+The archive listing was read successfully with `pg_restore --list` (661 TOC entries). It has not been restored into a separate test database; keep the dump file private and never upload it to GitHub.
 
-The foundation migration resets policies on demo_wallets and demo_wallet_transactions, grants users own-row access, preserves admin read access for admin screens via the existing nplus_is_admin() helper, and revokes direct browser table writes. That affects existing behavior, so it requires a verified backup and a review of how admin pages read those tables.
+## Confirmed live database hardening (applied 2026-10-15)
+- Added a trigger to prevent non-admin role changes on profiles. A rollback-only test confirmed a non-admin promotion attempt is blocked.
+- Removed anonymous EXECUTE from the generic wallet RPC and administrative SECURITY DEFINER RPCs, while preserving authenticated access and each function's internal authorization checks.
+- Revoked direct anon/authenticated write access to wallet and transaction tables; authenticated own-row reads remain.
+- Consolidated redundant deposit policies and optimized RLS expressions; added profile owner/admin reads and missing FK/ledger indexes.
+- The exact migration is recorded in `sql/NPLUS_PLAY_LIVE_HARDENING_2026-10-15.sql`. Do not rerun manually on this production project; the change is already applied.
 
-## Email OTP requirement
-Signup now calls Supabase signUp, then verifies the six-digit code with verifyOtp(type=email). Login remains password-based and checks the entered mobile number against the profile.
+## Remaining database/auth checks
+- Supabase leaked-password protection is still disabled and must be enabled in Auth settings.
+- `nplus_phone_is_registered(text)` remains anon-executable for signup compatibility and exposes whether a mobile number is registered. Replace with a rate-limited/less-enumerable design before wider public launch.
+- For signup OTP, the Confirm signup email template must use `{{ .Token }}`; test actual email delivery and verification in the live project. Current code expects a six-digit code.
+- Verify a test signup creates a profile and ₹108 wallet, and that normal login works. Do not modify existing balances.
+- Do not use the old `supabase-schema.sql` basic template over the production database; it has an obsolete ₹1,000 default.
 
-For six-digit signup codes, the Supabase Confirm signup email template must use {{ .Token }} rather than {{ .ConfirmationURL }}. If the current template still sends a clickable confirmation link, the user will not receive a code that matches the UI. Email-delivery restrictions/custom SMTP also need verification before opening signup to the public. See the current Supabase template guide: https://supabase.com/docs/guides/auth/auth-email-templates
+## Critical game-security blocker
+The browser game pages can call `nplus_wallet_change` with positive `GAME_WIN` deltas. That RPC prevents negative balances but does not itself verify that a positive win was earned. Client-generated outcomes can be forged.
 
-## Security release blocker
-The browser game pages can call nplus_wallet_change with positive GAME_WIN deltas. The currently available function definition checks authentication and prevents negative balances, but does not itself prove a win was earned. Because each game currently calculates rounds/payouts in the browser, a player may be able to forge a positive credit unless the live RPC has additional checks not captured in the available definition.
-
-Do not merge this branch as a fully secured game release until game bets, round outcomes and payouts are validated atomically on the server (RPC/Edge Functions), arbitrary client-supplied positive credits are blocked, and duplicate/replayed settlement attempts are tested. Removing positive credits prematurely would break winning settlements, so do not patch the legacy RPC without replacing the game settlement flow.
+Do not merge this branch as a fully secured release until every game uses server-authoritative bets/rounds/results/payouts with replay/idempotency protection. Removing positive credits immediately would break current winning settlements; the server settlement replacement has to land before tightening those credits.
 
 ## Verification
-- Static QA now checks inline JavaScript syntax, required files, the manifest/service-worker assets, and static local links.
-- Run node qa/verify-project.js from the repository root.
-- Current CI passed for the earlier staged code; check the latest PR check after any further push. Live Supabase RPC behavior, OTP email delivery, game settlement, and browser runtime still need hands-on testing.
-- Current live main was not changed by this branch. Review the Pull Request before merging.
+- Static QA workflow completed successfully on the latest branch commit: 36 HTML pages checked, 0 warnings and 0 static errors. This is static validation only.
+- It does not test live Supabase auth, RLS, RPC or browser/game settlement behaviour.
+- Production SQL hardening was applied via Supabase, but app code remains isolated on this branch. The Pull Request is draft and not merged into main.
