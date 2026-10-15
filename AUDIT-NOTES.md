@@ -25,7 +25,7 @@ These changes did not change existing wallet balances or execute any game result
 
 ## Authentication / release checks
 - Signup uses Supabase signUp and verifyOtp({ email, token, type: "email" }); Confirm signup email template must use `{{ .Token }}` for a six-digit code, rather than only `{{ .ConfirmationURL }}`.
-- The signup code calls `nplus_phone_is_registered`; it remains anon-executable for compatibility and leaks whether a phone is already registered. Replace this with a rate-limited/less-enumerable design before a wider public launch.
+- The live `main` signup code still calls `nplus_phone_is_registered`, so that function remains anon-executable until the PR is merged and deployed. The branch removes the lookup and relies on `profiles_phone_digits_unique_idx`, which is a database-enforced unique index. After deployment and signup testing, revoke anon EXECUTE on the old RPC.
 - Verify that Auth email OTP delivers successfully and that the auth.users trigger stores email/mobile and creates exactly ₹108 for new users. Do not modify existing balances.
 - The checked-in `supabase-schema.sql` is an old/basic template with a ₹1,000 default; do not run it over production.
 - Leaked password protection still needs to be enabled in Supabase Auth settings.
