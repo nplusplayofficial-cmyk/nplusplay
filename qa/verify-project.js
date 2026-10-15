@@ -114,6 +114,16 @@ try {
 
 // Release guard: migrated games must use server settlement, never client-authored wins.
 try {
+  for (const [page, label] of [['k3.html','K3'], ['5d.html','5D'], ['trx-wingo.html','TRX WINGO']]) {
+    const source = fs.readFileSync(path.join(root, page), 'utf8');
+    if (/NPlusWallet\.changeBalance\s*\(/.test(source) || /type\s*:\s*['"]GAME_WIN['"]/.test(source)) {
+      fail(page + ' must not write wallet entries client-side while payout rules are pending');
+    }
+    if (!source.includes('BETTING PAUSED')) {
+      fail(page + ' must visibly pause bets until server payout rules are approved');
+    }
+  }
+
   const withdraw = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
   if (/function\s+addRequest\s*\(/.test(withdraw) || /addRequest\s*\(\s*\{/.test(withdraw)) {
     fail('Withdraw page must not store withdrawal requests in localStorage');
