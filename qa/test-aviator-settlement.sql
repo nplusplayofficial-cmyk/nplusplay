@@ -70,6 +70,11 @@ begin
  history:=public.nplus_aviator_demo_history(100);
  if jsonb_typeof(history)<>'array' then raise exception 'Aviator history RPC did not return an array.'; end if;
 
+ -- End the forced test round so the RPC creates a fresh waiting round.
+ update public.nplus_aviator_demo_rounds
+ set crashes_at=clock_timestamp()-interval '3 seconds',status='flying'
+ where id=round_id;
+
  -- Place a fresh test bet, expire its round and verify it loses without a credit.
  r:=public.nplus_aviator_demo_current_round();
  lost_round_id:=(r->>'round_id')::uuid;
