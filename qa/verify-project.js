@@ -71,9 +71,12 @@ for (const required of [
   'sql/NPLUS_PLAY_MOTORACE_RPC.sql',
   'sql/NPLUS_PLAY_AVIATOR_SCHEMA.sql',
   'sql/NPLUS_PLAY_AVIATOR_RPC.sql',
+  'sql/POST_ROLLOUT_REVOKE_PHONE_ENUMERATION.sql',
+  'sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql',
   'qa/test-wingo-settlement.sql',
   'qa/test-motorace-settlement.sql',
-  'qa/test-aviator-settlement.sql'
+  'qa/test-aviator-settlement.sql',
+  'qa/test-generic-wallet-credit-guard.sql'
 ]) {
   if (!exists(required)) fail('required file missing: ' + required);
 }
