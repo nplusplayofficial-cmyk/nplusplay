@@ -22,11 +22,14 @@ button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{wid
 .cta{width:100%;margin-top:18px;border:0;border-radius:15px;padding:15px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:12px}.note{margin-top:13px;padding:13px;border-radius:13px;background:rgba(201,165,91,.045);border:1px solid rgba(201,165,91,.1);color:#777a72;font-size:9px;line-height:1.55}.backlink{display:block;text-align:center;margin-top:17px;color:#8b8e86;font-size:10px}
 .modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);z-index:50}.modal.show{display:grid}.modal-card{width:min(100%,420px);background:#11130f;border:1px solid rgba(201,165,91,.2);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000}.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa}.modal-card h2{font-size:18px}.modal-card p{margin-top:8px;color:#777a72;font-size:10px;line-height:1.6}.done{width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950}
 @media(max-width:430px){.presets{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+/* Virtual-credit-only mode: do not collect or save payment/withdrawal details. */
+.amount-wrap,.presets,.field-label,.method,.details{display:none !important}
+#submitBtn{opacity:.55;cursor:not-allowed;background:#292a26!important;color:#9a9b94!important;border:1px solid var(--line)}
 </style>
 </head>
 <body><div class="app">
 <header class="header"><div class="left"><button class="back" onclick="location.href='account.html'">‹</button><div class="brand"><span class="mark">N+</span>PLAY</div></div><div class="wallet" id="wallet">₹0.00</div></header>
-<section class="hero"><div class="kicker">WALLET</div><h1>Withdraw</h1><p>Enter your withdrawal request details.</p></section>
+<section class="hero"><div class="kicker">WALLET</div><h1>Withdrawals unavailable</h1><p>N+ PLAY is in virtual-credit demo mode. Demo credits cannot be withdrawn as cash.</p></section>
 <section class="card">
 <div class="label">AVAILABLE BALANCE</div><div class="balance" id="balance">₹0.00</div>
 <label class="field-label">WITHDRAW AMOUNT</label><div class="amount-wrap"><span>₹</span><input id="amount" inputmode="decimal" placeholder="0"></div>
@@ -53,11 +56,11 @@ button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{wid
 </div>
 
 <button class="cta" id="submitBtn">SUBMIT WITHDRAWAL REQUEST</button>
-<div class="note"><b>Virtual-credit mode:</b> this creates a demo withdrawal request for testing. No real-money transfer is processed.</div>
+<div class="note"><b>Demo mode:</b> withdrawals are disabled. No bank, UPI or withdrawal details are collected or saved.</div>
 <a class="backlink" href="account.html">← Back to Account</a>
 </section></div>
 
-<div class="modal" id="modal"><div class="modal-card"><button class="close" id="close">×</button><h2>Request Submitted</h2><p id="modalText"></p><button class="done" id="done">DONE</button></div></div>
+<div class="modal" id="modal"><div class="modal-card"><button class="close" id="close">×</button><h2>Withdrawals unavailable</h2><p id="modalText">N+ PLAY uses virtual demo credits only. Cash withdrawals are not available.</p><button class="done" id="done">DONE</button></div></div>
 
 <script>
 (()=>{
@@ -109,13 +112,6 @@ async function getFreshBalance(){
   return currentBalance;
 }
 
-function addRequest(req){
-  let a=[];
-  try{a=JSON.parse(localStorage.getItem(REQ)||"[]")}catch{}
-  a.unshift(req);
-  localStorage.setItem(REQ,JSON.stringify(a.slice(0,100)));
-}
-
 document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
   amount.value=b.dataset.a;
   document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));
@@ -133,64 +129,12 @@ document.querySelectorAll(".method").forEach(m=>m.onclick=()=>{
   detailTitle.textContent=bankMode?"BANK ACCOUNT DETAILS":"UPI DETAILS";
 });
 
-submitBtn.onclick=async()=>{
-  const n=Number(amount.value);
-
-  if(!Number.isFinite(n)||n<=0){
-    alert("Please enter a valid amount.");
-    return;
-  }
-
-  const bal=await getFreshBalance();
-
-  if(n>bal){
-    alert("Amount exceeds available balance.");
-    return;
-  }
-
-  let details={};
-
-  if(selected==="Bank Account"){
-    details={
-      holder:holder.value.trim(),
-      bank:bank.value.trim(),
-      accountNo:accountNo.value.trim(),
-      ifsc:ifsc.value.trim(),
-      branch:branch.value.trim()
-    };
-
-    if(Object.values(details).some(v=>!v)){
-      alert("Please fill all bank details.");
-      return;
-    }
-  }else{
-    details={
-      holder:upiHolder.value.trim(),
-      bank:upiBank.value.trim(),
-      upiId:upiId.value.trim()
-    };
-
-    if(Object.values(details).some(v=>!v)){
-      alert("Please fill all UPI details.");
-      return;
-    }
-  }
-
-  const id="WD-"+Date.now().toString(36).toUpperCase();
-
-  addRequest({
-    id,
-    createdAt:new Date().toISOString(),
-    status:"PENDING",
-    amount:n,
-    method:selected,
-    details
-  });
-
-  modalText.textContent=
-    `${id} · ${money(n)} · ${selected}. Demo request saved for the local admin request queue.`;
-
-  modal.classList.add("show");
+const submitButton=document.getElementById("submitBtn");
+submitButton.textContent="WITHDRAWALS DISABLED";
+submitButton.disabled=true;
+submitButton.setAttribute("aria-disabled","true");
+submitButton.onclick=()=>{
+  alert("Withdrawals are disabled. N+ PLAY virtual demo credits have no cash value.");
 };
 
 const modal=document.getElementById("modal");
