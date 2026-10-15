@@ -385,23 +385,18 @@ function saveDb(){
 
 function walletClient(){ return window.NPlusWallet || null; }
 async function syncWallet(){
-  try{
-    const wallet=walletClient();
-    if(wallet){
-      const value=await wallet.getBalance();
-      if(Number.isFinite(Number(value))){
-        db.balance=Number(value);
-        renderBalance();
-        renderBetBox(0);
-        renderBetBox(1);
-        return true;
-      }
-    }
-  }catch(e){
-    console.warn('Aviator Supabase wallet sync:',e);
-  }
-  return false;
+ try{
+  const wallet=walletClient();
+  if(!wallet)throw new Error('Authenticated wallet unavailable.');
+  const value=await wallet.getBalance();
+  if(!Number.isFinite(Number(value)))throw new Error('Wallet balance unavailable.');
+  db.balance=Number(value);aviatorWalletReady=true;renderBalance();renderBetBox(0);renderBetBox(1);return true;
+ }catch(e){
+  console.warn('Aviator Supabase wallet sync:',e);
+  aviatorWalletReady=false;renderBalance();return false;
+ }
 }
+
 function broadcast(){
   try{ localStorage.setItem('nplus_aviator_ping',String(Date.now())); }catch(e){}
 }
@@ -422,6 +417,13 @@ function broadcast(){
   try{localStorage.setItem('nplus_aviator_ping',String(Date.now()));}catch(e){}
   try{bc?.postMessage({type:'sync',at:Date.now()});}catch(e){}
 }
+let serverRound=null;
+let serverOffsetMs=0;
+let serverRoundSyncBusy=false;
+let lastAviatorBetsSyncAt=0;
+let aviatorWalletReady=false;
+let crashHandledRoundId=null;
+
 
 let phase='WAIT', waitLeft=ROUND_WAIT, crashPoint=1, startedAt=0, raf=0;
 let activeRoundId='';
@@ -433,24 +435,109 @@ let roundsSeen=0;
 
 const multiplier=$('mult'), statusEl=$('status'), plane=$('plane'), canvas=$('graph'), ctx=canvas.getContext('2d');
 
-function periodId(){
-  const d=new Date();
-  return d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0');
+function serverNowMs(){return Date.now()+serverOffsetMs;}
+function aviatorClient(){const client=window.NPlusAuth?.client;if(!client)throw new Error('Authentication client unavailable.');return client;}
+function normalizeAviatorStatus(status){const s=String(status||'open').toLowerCase();return s==='cashed_out'?'WIN':s==='lost'?'LOSS':'PENDING';}
+function syncActiveSlots(){
+ userSlots=[null,null];
+ for(const b of db.bets||[]){
+  if(String(b.roundId)!==String(activeRoundId)||b.roundStatus!=='OPEN')continue;
+  const slot=Number(b.slot);
+  if(slot===0||slot===1)userSlots[slot]=b;
+ }
 }
-
-function crashForRound(id){
-  let x=2166136261;
-  for(const c of id){ x^=c.charCodeAt(0); x=Math.imul(x,16777619); }
-  x>>>0;
-  x ^= x<<13; x ^= x>>>17; x ^= x<<5;
-  const r=(x>>>0)/4294967295;
-  if(r<.48) return Number((1.15+r*1.45).toFixed(2));
-  if(r<.78) return Number((2.0+(r-.48)*3.5).toFixed(2));
-  if(r<.95) return Number((3.05+(r-.78)*13).toFixed(2));
-  return Number((7+(r-.95)*90).toFixed(2));
+async function syncAviatorBets(){
+ const {data,error}=await aviatorClient().rpc('nplus_aviator_demo_my_bets',{p_limit:200});
+ if(error)throw error;
+ const rows=Array.isArray(data)?data:[];
+ const localOnly=(db.bets||[]).filter(b=>!b.serverBetId).map(b=>b.status==='PENDING'?{...b,status:'UNVERIFIED',roundStatus:'UNVERIFIED'}:b);
+ const remote=rows.filter(b=>b?.bet_id&&b?.round_id).map(b=>({
+  id:String(b.bet_id),serverBetId:String(b.bet_id),requestId:b.request_id||null,
+  roundId:String(b.round_id),roundIndex:Number(b.round_index),slot:Number(b.slot),
+  label:'YOU · BET '+(Number(b.slot)+1),stake:Number(b.stake||0),
+  status:normalizeAviatorStatus(b.status),roundStatus:String(b.status).toLowerCase()==='open'?'OPEN':'SETTLED',
+  payout:Number(b.payout||0),result:b.cashout_multiplier===null?null:Number(b.cashout_multiplier),
+  placedAt:Date.parse(b.created_at)||Date.now(),settledAt:b.settled_at?Date.parse(b.settled_at):null,
+  serverAuthoritative:true,auto:b.auto_cashout!==null&&b.auto_cashout!==undefined,
+  autoTarget:b.auto_cashout===null?null:Number(b.auto_cashout)
+ }));
+ db.bets=[...remote,...localOnly].sort((a,b)=>(b.placedAt||0)-(a.placedAt||0)).slice(0,500);
+ lastAviatorBetsSyncAt=Date.now();
+ syncActiveSlots();
+ saveDb();
+ return db.bets;
 }
-
-function renderBalance(){ $('balance').textContent=money(db.balance); }
+async function syncAviatorHistory(){
+ const {data,error}=await aviatorClient().rpc('nplus_aviator_demo_history',{p_limit:100});
+ if(error)throw error;
+ const rows=Array.isArray(data)?data:[];
+ db.rounds=rows.filter(r=>r?.round_id&&Number.isFinite(Number(r.crash_point))).map(r=>({
+  roundId:String(r.round_id),result:Number(r.crash_point),at:Date.parse(r.crashed_at)||Date.now(),serverAuthoritative:true
+ })).slice(0,100);
+ saveDb();
+ renderHistoryTop();
+ renderTable();
+ return db.rounds;
+}
+async function finishRound(serverState){
+ if(!serverState||String(serverState.phase)!=='CRASH')return;
+ if(crashHandledRoundId===String(serverState.round_id))return;
+ crashHandledRoundId=String(serverState.round_id);
+ phase='CRASH';
+ activeRoundId=String(serverState.round_id);
+ crashPoint=Number(serverState.crash_point);
+ if(!Number.isFinite(crashPoint)||crashPoint<1.01){crashHandledRoundId=null;return;}
+ multiplier.className='mult crash';
+ multiplier.textContent=fx(crashPoint);
+ statusEl.textContent='CRASHED AT '+fx(crashPoint);
+ statusEl.className='status closed';
+ try{await syncAviatorBets();await syncAviatorHistory();}catch(e){console.warn('Aviator server history refresh:',e);}
+ renderAll();
+ setTimeout(()=>{void syncAviatorRound(true).catch(e=>console.warn('Aviator next-round sync:',e));},2300);
+}
+async function syncAviatorRound(force=false){
+ if(serverRoundSyncBusy)return;
+ serverRoundSyncBusy=true;
+ try{
+  const {data,error}=await aviatorClient().rpc('nplus_aviator_demo_current_round');
+  if(error)throw error;
+  const row=Array.isArray(data)?data[0]:data;
+  if(!row?.round_id||!row?.server_time||!row?.flight_starts_at)throw new Error('Server round response incomplete.');
+  serverOffsetMs=Date.parse(row.server_time)-Date.now();
+  const nextId=String(row.round_id);
+  const changed=String(activeRoundId)!==nextId;
+  serverRound=row;
+  if(changed){
+   activeRoundId=nextId;
+   crashHandledRoundId=null;
+   userSlots=[null,null];
+   await Promise.all([syncAviatorBets(),syncAviatorHistory()]);
+  }else if(force||Date.now()-lastAviatorBetsSyncAt>=1200){
+   await syncAviatorBets();
+  }
+  if(row.phase==='WAIT'){
+   phase='WAIT';
+   crashPoint=0;
+   waitLeft=Math.max(0,(Date.parse(row.flight_starts_at)-serverNowMs())/1000);
+   multiplier.className='mult wait';
+   multiplier.textContent='NEXT ROUND '+waitLeft.toFixed(1)+'s';
+   statusEl.textContent='BETTING OPEN';
+   statusEl.className='status live';
+   placePlane(0);drawGraph(0);
+  }else if(row.phase==='FLY'){
+   crashPoint=0;
+   if(phase!=='FLY'||changed)startFlight();
+   else {statusEl.textContent='FLIGHT LIVE';statusEl.className='status live';}
+  }else if(row.phase==='CRASH'){
+   await finishRound(row);
+  }else{
+   throw new Error('Unknown Aviator server phase.');
+  }
+  renderAll();
+  return row;
+ }finally{serverRoundSyncBusy=false;}
+}
+function renderBalance(){ $('balance').textContent=aviatorWalletReady?money(db.balance):'SYNCING…'; }
 
 function resize(){
   canvas.width=$('wrap').clientWidth*devicePixelRatio;
@@ -577,165 +664,86 @@ function renderBetBox(i){
 
 function renderAll(){renderBalance();renderHistoryTop();renderBetList();renderTable();renderBetBox(0);renderBetBox(1);}
 
-function beginRound(){
-  activeRoundId=periodId();
-  crashPoint=crashForRound(activeRoundId);
-  phase='WAIT';
-  waitLeft=ROUND_WAIT;
-  userSlots=[null,null];
-  multiplier.className='mult wait';
-  multiplier.textContent='NEXT ROUND '+waitLeft.toFixed(1)+'s';
-  statusEl.textContent='BETTING OPEN';
-  statusEl.className='status live';
-  placePlane(0);
-  drawGraph(0);
-  renderAll();
+async function beginRound(){
+ try{await syncAviatorRound(true);}
+ catch(e){console.error('Aviator server round sync failed:',e);statusEl.textContent='SERVER SYNC REQUIRED';statusEl.className='status closed';}
 }
-
 function startFlight(){
-  phase='FLY';
-  startedAt=performance.now();
-  multiplier.className='mult';
-  statusEl.textContent='FLIGHT LIVE';
-  statusEl.className='status live';
-
-  // Auto-demo bets for armed panels.
-  $$('.betbox').forEach((box,i)=>{
-    if(box.dataset.mode==='auto' && box.dataset.autoEnabled==='true' && !userSlots[i]){
-      placeDemoBet(i,true);
-    }
-  });
-  requestAnimationFrame(frame);
+ if(!serverRound)return;
+ phase='FLY';
+ const elapsed=Math.max(0,(serverNowMs()-Date.parse(serverRound.flight_starts_at))/1000);
+ startedAt=performance.now()-elapsed*1000;
+ multiplier.className='mult';
+ statusEl.textContent='FLIGHT LIVE';
+ statusEl.className='status live';
+ requestAnimationFrame(frame);
 }
-
 function currentMultiplier(){
-  const t=(performance.now()-startedAt)/1000;
-  // smooth demo progression; not tied to user action
-  return Math.max(1,1+0.12*t+0.019*t*t);
+ if(!serverRound)return 1;
+ const t=Math.max(0,(serverNowMs()-Date.parse(serverRound.flight_starts_at))/1000);
+ return Math.max(1,1+0.12*t+0.019*t*t);
 }
-
-function frame(now){
-  if(phase!=='FLY') return;
-  const x=currentMultiplier();
-  const p=Math.min(.93,Math.log(x)/Math.log(Math.max(crashPoint,1.01)));
-  multiplier.textContent=fx(x);
-  placePlane(p);
-  drawGraph(p);
-
-  $$('.betbox').forEach((box,i)=>{
-    const b=userSlots[i];
-    if(b?.status==='PENDING' && box.dataset.mode==='auto'){
-      const target=Math.max(1.01,Number(box.querySelector('.autoTarget').value)||2);
-      if(x>=target){cashDemo(i,true);return;}
-    }
-  });
-
-  if(x>=crashPoint){ finishRound(); return; }
-  renderBetBox(0);renderBetBox(1);
-  requestAnimationFrame(frame);
+function frame(){
+ if(phase!=='FLY'||!serverRound)return;
+ const x=currentMultiplier();
+ const elapsed=Math.max(0,(serverNowMs()-Date.parse(serverRound.flight_starts_at))/1000);
+ // Smooth visual progress does not reveal the server-owned crash deadline.
+ const p=Math.min(.93,1-Math.exp(-elapsed*0.095));
+ multiplier.textContent=fx(x);
+ placePlane(p);
+ drawGraph(p);
+ renderBetBox(0);renderBetBox(1);
+ requestAnimationFrame(frame);
 }
-
-const walletBusy=[false,false];
-
 async function placeDemoBet(i,auto=false){
-  if(walletBusy[i]) return false;
-  walletBusy[i]=true;
-  const box=$$('.betbox')[i], input=box.querySelector('.amountInput');
-  const stake=Math.max(MIN_BET,Number(input.value)||0);
-  try{
-    const wallet=walletClient();
-    const current=wallet ? Number(await wallet.getBalance()) : Number(db.balance);
-    if(!Number.isFinite(current) || stake>current){
-      box.querySelector('.state').textContent='Insufficient demo balance';
-      return false;
-    }
-    if(wallet){
-      const next=await wallet.changeBalance(-stake,{
-        type:'GAME_BET',
-        source:'AVIATOR',
-        note:`AVIATOR BET ${activeRoundId} slot=${i+1}${auto?' auto':''}`
-      });
-      db.balance=Number(next);
-    }else{
-      db.balance=current-stake;
-    }
-    const bet={
-      id:'BET-'+Date.now()+'-'+i,
-      roundId:activeRoundId,
-      slot:i,
-      label:'YOU · BET '+(i+1),
-      stake,
-      status:'PENDING',
-      payout:0,
-      placedAt:Date.now(),
-      auto
-    };
-    db.bets.unshift(bet);
-    userSlots[i]=bet;
-    saveDb();
-    renderAll();
-    return true;
-  }catch(e){
-    box.querySelector('.state').textContent=e?.message||'Unable to place demo bet';
-    return false;
-  }finally{
-    walletBusy[i]=false;
-  }
-}
-
-async function cashDemo(i,auto=false){
-  if(walletBusy[i]) return;
-  const b=userSlots[i];
-  if(!b || b.status!=='PENDING' || phase!=='FLY') return;
-  walletBusy[i]=true;
-  try{
-    const x=currentMultiplier();
-    const payout=Number((b.stake*x).toFixed(2));
-    const wallet=walletClient();
-    if(wallet){
-      const next=await wallet.changeBalance(payout,{
-        type:'GAME_WIN',
-        source:'AVIATOR',
-        note:`AVIATOR WIN ${activeRoundId} slot=${i+1}${auto?' auto':''} multiplier=${x.toFixed(2)}x`
-      });
-      db.balance=Number(next);
-    }else{
-      db.balance+=payout;
-    }
-    b.status='WIN';
-    b.result=x;
-    b.payout=payout;
-    b.roundStatus='SETTLED';
-    saveDb();
-    renderAll();
-  }catch(e){
-    console.warn('Aviator cashout failed:',e);
-  }finally{
-    walletBusy[i]=false;
-  }
-}
-
-function finishRound(){
-  phase='CRASH';
-  const result=Number(crashPoint.toFixed(2));
-  multiplier.className='mult crash';
-  multiplier.textContent=fx(result);
-  statusEl.textContent='CRASHED AT '+fx(result);
-  statusEl.className='status closed';
-
-  db.bets.filter(b=>b.roundId===activeRoundId && b.status==='PENDING').forEach(b=>{
-    b.status='LOSS';
-    b.result=result;
-    b.roundStatus='SETTLED';
+ if(walletBusy[i])return false;
+ if(phase!=='WAIT'||!serverRound||!aviatorWalletReady)return false;
+ walletBusy[i]=true;
+ const box=$$('.betbox')[i];
+ const input=box.querySelector('.amountInput');
+ const stake=Number((Math.max(MIN_BET,Number(input.value)||0)).toFixed(2));
+ const autoTarget=auto?Math.max(1.01,Number(box.querySelector('.autoTarget').value)||2):null;
+ try{
+  const requestId=crypto.randomUUID();
+  const {data,error}=await aviatorClient().rpc('nplus_aviator_demo_place_bet',{
+   p_round_id:activeRoundId,p_slot:i,p_stake:stake,p_request_id:requestId,p_auto_cashout:autoTarget
   });
-
-  db.rounds.unshift({roundId:activeRoundId,result,at:Date.now()});
-  saveDb();
-  renderAll();
-
-  setTimeout(()=>beginRound(),2200);
+  if(error)throw error;
+  const row=Array.isArray(data)?data[0]:data;
+  if(!row?.bet_id)throw new Error('Server did not confirm this Aviator bet.');
+  db.balance=Number(row.balance);aviatorWalletReady=true;
+  const bet={
+   id:String(row.bet_id),serverBetId:String(row.bet_id),requestId,
+   roundId:String(row.round_id),slot:i,label:'YOU · BET '+(i+1),stake:Number(row.stake),
+   status:normalizeAviatorStatus(row.status),roundStatus:String(row.status).toLowerCase()==='open'?'OPEN':'SETTLED',
+   payout:Number(row.payout||0),placedAt:Date.now(),auto:autoTarget!==null,autoTarget
+  };
+  const existing=(db.bets||[]).findIndex(x=>String(x.serverBetId||'')===bet.serverBetId);
+  if(existing>=0)db.bets[existing]=bet;else db.bets.unshift(bet);
+  userSlots[i]=bet;saveDb();renderAll();await syncWallet();return true;
+ }catch(e){
+  console.error('Aviator server bet failed:',e);
+  box.querySelector('.state').textContent=e?.message||'Unable to place demo bet';
+  return false;
+ }finally{walletBusy[i]=false;}
 }
-
+async function cashDemo(i,auto=false){
+ if(walletBusy[i])return;
+ const b=userSlots[i];
+ if(!b||!b.serverBetId||b.status!=='PENDING'||phase!=='FLY')return;
+ walletBusy[i]=true;
+ try{
+  const {data,error}=await aviatorClient().rpc('nplus_aviator_demo_cashout',{p_bet_id:b.serverBetId});
+  if(error)throw error;
+  const row=Array.isArray(data)?data[0]:data;
+  if(!row?.status)throw new Error('Server did not return a cash-out status.');
+  await syncAviatorBets();await syncWallet();renderAll();
+  if(row.status==='lost'&&row.crash_point)await syncAviatorRound(true);
+ }catch(e){
+  console.warn('Aviator server cash-out failed:',e);
+  $$('.betbox')[i].querySelector('.state').textContent=e?.message||'Cash-out rejected by server';
+ }finally{walletBusy[i]=false;}
+}
 function setupBetBox(box,i){
   const input=box.querySelector('.amountInput');
   const btn=box.querySelector('.betbtn');
@@ -768,12 +776,17 @@ function setupBetBox(box,i){
   btn.onclick=()=>{
     if(box.dataset.mode==='auto'){
       if(phase==='WAIT'){
+        if(userSlots[i]?.serverBetId&&userSlots[i]?.status==='PENDING'){
+          box.querySelector('.state').textContent='Auto bet already placed for this round';
+          return;
+        }
         box.dataset.autoEnabled='true';
         box.querySelector('.autoToggle').checked=true;
-        box.querySelector('.state').textContent='Auto bet armed for next flight';
+        box.querySelector('.state').textContent='Submitting server-validated auto bet…';
         renderBetBox(i);
+        void placeDemoBet(i,true);
       }else{
-        alert('Auto mode will enter the next demo round.');
+        alert('Auto mode is available for the next waiting round.');
       }
       return;
     }
@@ -856,26 +869,32 @@ $$('[data-action]').forEach(row=>row.onclick=()=>{
 
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeModal();}});
 
+let lastAviatorRoundPoll=0;
 function loop(){
-  if(phase==='WAIT'){
-    waitLeft-=.05;
-    if(waitLeft<=0) startFlight();
-    else multiplier.textContent='NEXT ROUND '+waitLeft.toFixed(1)+'s';
-  }
-  renderBetList();
+ if(phase==='WAIT'&&serverRound){
+  waitLeft=Math.max(0,(Date.parse(serverRound.flight_starts_at)-serverNowMs())/1000);
+  if(waitLeft>0)multiplier.textContent='NEXT ROUND '+waitLeft.toFixed(1)+'s';
+ }
+ if(Date.now()-lastAviatorRoundPoll>=500){
+  lastAviatorRoundPoll=Date.now();
+  void syncAviatorRound(false).catch(e=>console.warn('Aviator round sync:',e));
+ }
+ renderBetList();
 }
 
 resize();
-beginRound();
-setInterval(loop,50);
+db.balance=0;
+aviatorWalletReady=false;
 renderAll();
-
-syncWallet();
+void syncWallet();
+void beginRound();
+setInterval(loop,50);
 window.addEventListener('nplus:wallet-change',()=>syncWallet());
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncWallet();});
-window.addEventListener('focus',()=>syncWallet());
-window.addEventListener('pageshow',()=>syncWallet());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){void syncWallet();void syncAviatorRound(true).catch(console.error);}});
+window.addEventListener('focus',()=>{void syncWallet();void syncAviatorRound(true).catch(console.error);});
+window.addEventListener('pageshow',()=>{void syncWallet();void syncAviatorRound(true).catch(console.error);});
 setInterval(syncWallet,2000);
+
 
 })();
 </script>
