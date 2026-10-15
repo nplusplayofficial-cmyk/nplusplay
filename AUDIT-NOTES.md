@@ -7,6 +7,7 @@ The following database hardening was then applied and read-only verified:
 - Added `profiles.role` trigger protection; a rollback-only test confirmed a non-admin promotion attempt is blocked.
 - Removed anonymous EXECUTE on the generic wallet RPC and the admin SECURITY DEFINER RPC set; authenticated calls remain granted and the RPCs retain their own authorization checks.
 - Removed direct anon/authenticated write privileges from wallet and transaction tables; authenticated users retain own-row SELECT.
+- Added a unique expression index on digit-normalized profile phone values after confirming 5 existing profiles had no duplicate phone groups.
 - Consolidated duplicate deposit SELECT/INSERT policies and optimized RLS expressions using `(SELECT auth.uid())`.
 - Added profile owner/admin SELECT policy, kept own-row profile update policy, and added reviewed_by/updated_by/transaction indexes.
 - Removed public EXECUTE on the auth profile trigger function.
