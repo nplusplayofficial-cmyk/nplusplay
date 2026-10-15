@@ -53,3 +53,7 @@ jobs:
         env:
           PGPASSWORD: nplus_test
         run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-aviator-settlement.sql
+      - name: Test generic wallet positive-credit guard in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-generic-wallet-credit-guard.sql
