@@ -69,8 +69,11 @@ for (const required of [
   'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql',
   'sql/NPLUS_PLAY_MOTORACE_SCHEMA.sql',
   'sql/NPLUS_PLAY_MOTORACE_RPC.sql',
+  'sql/NPLUS_PLAY_AVIATOR_SCHEMA.sql',
+  'sql/NPLUS_PLAY_AVIATOR_RPC.sql',
   'qa/test-wingo-settlement.sql',
-  'qa/test-motorace-settlement.sql'
+  'qa/test-motorace-settlement.sql',
+  'qa/test-aviator-settlement.sql'
 ]) {
   if (!exists(required)) fail('required file missing: ' + required);
 }
