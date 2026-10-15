@@ -94,6 +94,11 @@ begin
   -- Avoid the five-second cutoff window, then place one real test bet.
   v_end := (v_round->>'ends_at')::timestamptz;
   if extract(epoch from (v_end - clock_timestamp())) <= 12 then
+    -- Remove the unused boundary row so it cannot collide with the test's
+    -- deliberate reindexing of the placed round to a completed period.
+    delete from public.nplus_wingo_demo_rounds r
+    where r.id = v_round_id
+      and not exists (select 1 from public.nplus_wingo_demo_bets b where b.round_id = r.id);
     perform pg_sleep(greatest(0.5, extract(epoch from (v_end - clock_timestamp())) + 0.5));
     v_round := public.nplus_wingo_demo_current_round(30);
     v_round_index := (v_round->>'round_index')::bigint;
