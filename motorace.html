@@ -158,8 +158,12 @@ let walletBalance=null;
 let walletBusy=false;
 let pos=1, selected=null, qty=1, multiplier=1;
 let activePeriod='';
+let serverRoundIndex=null;
+let serverRoundCache=null;
+let serverRoundSyncBusy=false;
 let raceStartedFor=null;
 let settlementBusy=false;
+const serverSettlementPromises=new Map();
 let lastDisplayedSecond=-1;
 let resultCloseTimer=null;
 
@@ -200,47 +204,138 @@ function msUntilNextRound(){
  const r=ROUND_MS-(Date.now()%ROUND_MS);
  return r===ROUND_MS?0:r;
 }
-function resultFor(period){
- let x=2166136261;
- for(const c of period){x^=c.charCodeAt(0);x=Math.imul(x,16777619)}
- const arr=[];
- while(arr.length<10){
-   x^=x<<13;x^=x>>>17;x^=x<<5;
-   const n=Math.abs(x)%10+1;
-   if(!arr.includes(n))arr.push(n);
- }
- return arr;
+function validateMotoOutcome(outcome){
+ if(!Array.isArray(outcome)||outcome.length!==10)throw new Error('Server returned an invalid MotoRace result.');
+ const numbers=outcome.map(Number);
+ if(numbers.some(n=>!Number.isInteger(n)||n<1||n>10)||new Set(numbers).size!==10)throw new Error('Server returned an invalid MotoRace result.');
+ return numbers;
+}
+function statusForUI(status){
+ const s=String(status||'pending').toLowerCase();
+ return s==='won'?'WIN':s==='lost'?'LOSS':'PENDING';
+}
+function getMotoClient(){
+ const client=window.NPlusAuth?.client;
+ if(!client)throw new Error('Authentication client unavailable.');
+ return client;
+}
+async function syncServerMotoRound(force=false){
+ const localIndex=Math.floor(Date.now()/60000);
+ if(!force&&serverRoundCache&&Number(serverRoundCache.round_index)===localIndex)return serverRoundCache;
+ if(serverRoundSyncBusy)return serverRoundCache;
+ serverRoundSyncBusy=true;
+ try{
+  const {data,error}=await getMotoClient().rpc('nplus_moto_demo_current_round');
+  if(error)throw error;
+  const row=Array.isArray(data)?data[0]:data;
+  if(!row||row.round_index===undefined)throw new Error('Server round unavailable.');
+  serverRoundCache=row;
+  serverRoundIndex=Number(row.round_index);
+  return row;
+ }finally{serverRoundSyncBusy=false;}
+}
+async function syncMotoHistory(){
+ const {data,error}=await getMotoClient().rpc('nplus_moto_demo_history',{p_limit:100});
+ if(error)throw error;
+ const rows=Array.isArray(data)?data:[];
+ db.rounds=rows.filter(r=>r?.status==='settled'&&r?.period&&r?.outcome).map(r=>({
+  period:String(r.period),
+  roundIndex:Number(r.round_index),
+  result:validateMotoOutcome(r.outcome),
+  createdAt:Date.parse(r.settled_at)||Date.parse(r.starts_at)||Date.now(),
+  serverAuthoritative:true
+ })).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,100);
+ save();
+ renderRecent();
+ return db.rounds;
+}
+async function syncMotoBets(){
+ const {data,error}=await getMotoClient().rpc('nplus_moto_demo_my_bets',{p_limit:200});
+ if(error)throw error;
+ const rows=Array.isArray(data)?data:[];
+ const legacy=(db.bets||[]).filter(b=>!b.serverBetId).map(b=>b.status==='PENDING'?{...b,status:'UNVERIFIED'}:b);
+ const remote=rows.filter(b=>b?.bet_id&&b?.period).map(b=>{
+  const sel=b.selection||{};
+  return {
+   id:String(b.bet_id),serverBetId:String(b.bet_id),requestId:b.request_id||null,
+   period:String(b.period),serverRoundIndex:Number(b.round_index),
+   position:Number(sel.position)||1,
+   selection:{kind:String(sel.kind||''),value:sel.value??''},
+   stake:Number(b.stake||0),fee:Number(b.fee||0),total:Number(b.total||0),
+   qty:Math.max(1,Number(sel.qty)||1),multiplier:Math.max(1,Number(sel.multi)||1),
+   status:statusForUI(b.status),payout:Number(b.payout||0),
+   result:null,placedAt:Date.parse(b.created_at)||Date.now(),
+   settledAt:b.settled_at?Date.parse(b.settled_at):null,serverAuthoritative:true
+  };
+ });
+ db.bets=[...remote,...legacy].sort((a,b)=>(b.placedAt||0)-(a.placedAt||0)).slice(0,500);
+ save();
+ renderPanel(currentPanel||'history');
+ return db.bets;
+}
+async function settleMotoRound(roundIndex){
+ const idx=Number(roundIndex);
+ if(!Number.isFinite(idx))throw new Error('Invalid MotoRace round index.');
+ const key=String(idx);
+ if(serverSettlementPromises.has(key))return serverSettlementPromises.get(key);
+ const promise=(async()=>{
+  const {data,error}=await getMotoClient().rpc('nplus_moto_demo_settle_round',{p_round_index:idx});
+  if(error)throw error;
+  const row=Array.isArray(data)?data[0]:data;
+  if(!row?.outcome||!Array.isArray(row.bets))throw new Error('Server settlement response was incomplete.');
+  const result=validateMotoOutcome(row.outcome);
+  const period=String(row.period||periodFor(new Date(idx*60000)));
+  for(const b of db.bets||[]){
+   if(Number(b.serverRoundIndex)!==idx||!b.serverBetId)continue;
+   const remote=(row.bets||[]).find(x=>String(x.bet_id)===String(b.serverBetId));
+   if(!remote)continue;
+   b.status=statusForUI(remote.status);
+   b.payout=Number(remote.payout||0);
+   b.result=result[Number(b.position||1)-1];
+   b.settledAt=remote.settled_at?Date.parse(remote.settled_at):Date.now();
+  }
+  const old=db.rounds.findIndex(r=>String(r.period)===period);
+  const entry={period,roundIndex:idx,result,createdAt:Date.now(),serverAuthoritative:true};
+  if(old>=0)db.rounds[old]=entry;else db.rounds.unshift(entry);
+  db.rounds=db.rounds.slice(0,100);
+  save();
+  try{await refreshWallet();}catch(e){console.warn('MotoRace wallet refresh after settlement failed:',e);}
+  try{await syncMotoHistory();await syncMotoBets();}catch(e){console.warn('MotoRace history sync after settlement failed:',e);}
+  renderRecent();
+  renderPanel(currentPanel||'history');
+  return {row,result,period};
+ })();
+ serverSettlementPromises.set(key,promise);
+ try{return await promise;}finally{serverSettlementPromises.delete(key);}
 }
 async function settlePendingOlderRounds(currentPeriod){
- if(settlementBusy) return;
+ if(settlementBusy)return;
  settlementBusy=true;
  try{
-   const periods=[...new Set(db.bets.filter(b=>b.status==='PENDING'&&b.period!==currentPeriod).map(b=>b.period))];
-   for(const period of periods){
-     await settlePeriod(period,resultFor(period));
-   }
- }finally{
-   settlementBusy=false;
- }
+  await syncMotoBets();
+  const nowIndex=Math.floor(Date.now()/60000);
+  const indices=[...new Set((db.bets||[]).filter(b=>b.status==='PENDING'&&b.serverBetId&&Number(b.serverRoundIndex)<nowIndex).map(b=>Number(b.serverRoundIndex)))].sort((a,b)=>a-b);
+  for(const idx of indices){
+   try{await settleMotoRound(idx);}
+   catch(e){console.warn('MotoRace delayed settlement remains pending:',e?.message||e);}
+  }
+  await syncMotoHistory();
+ }finally{settlementBusy=false;}
 }
 function ensureRound(){
  const p=periodFor();
  if(p!==activePeriod){
-   const previousPeriod=activePeriod;
-   activePeriod=p;
-   $('period').textContent=p;
-   raceStartedFor=null;
-   clearTimeout(resultCloseTimer);
-   $('result').classList.remove('show');
-   if(!db.rounds.some(r=>r.period===p)){
-     db.rounds.unshift({period:p,result:resultFor(p),createdAt:Date.now()});
-     db.rounds=db.rounds.slice(0,100);
-     save();
-   }
-   resetBikes();
-   renderRecent();
-   $('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
-   if(previousPeriod) void settlePendingOlderRounds(p);
+  const previousPeriod=activePeriod;
+  activePeriod=p;
+  $('period').textContent=p;
+  raceStartedFor=null;
+  clearTimeout(resultCloseTimer);
+  $('result').classList.remove('show');
+  resetBikes();
+  renderRecent();
+  $('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
+  void syncServerMotoRound(true).catch(e=>console.error('MotoRace server round sync failed:',e));
+  if(previousPeriod)void settlePendingOlderRounds(p);
  }
 }
 function resetBikes(){
