@@ -10,6 +10,10 @@ declare
  round_id uuid; lost_round_id uuid; request_one uuid:='66666666-6666-4666-8666-666666666666';
  request_two uuid:='77777777-7777-4777-8777-777777777777';
  request_three uuid:='88888888-8888-4888-8888-888888888888';
+ request_four uuid:='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+ late_bet jsonb;
+ late_row public.nplus_aviator_demo_bets%rowtype;
+ late_round_id uuid;
  balance_after numeric(12,2); payout_one numeric(12,2); multiplier_one numeric(8,2);
  win_count integer; bet_count integer;
 begin
@@ -91,6 +95,39 @@ begin
  select balance into balance_after from public.demo_wallets where user_id=u;
  if balance_after<>round(101.00+payout_one,2) then
   raise exception 'Aviator post-crash cash-out changed balance unexpectedly: %.',balance_after;
+ end if;
+
+ -- Force the prior crash beyond the visual grace period and open another round.
+ update public.nplus_aviator_demo_rounds
+ set crashes_at=clock_timestamp()-interval '3 seconds',status='crashed'
+ where id=lost_round_id;
+
+ r:=public.nplus_aviator_demo_current_round();
+ late_round_id:=(r->>'round_id')::uuid;
+ late_bet:=public.nplus_aviator_demo_place_bet(late_round_id,0,2.00,request_four,2.00);
+
+ -- Simulate browser polling only after crash. A 2x auto target below a 3x crash
+ -- must still pay exactly once based on server-owned timing, not a client claim.
+ update public.nplus_aviator_demo_rounds
+ set flight_starts_at=clock_timestamp()-interval '20 seconds',
+     crashes_at=clock_timestamp()-interval '4 seconds',
+     crash_point=3.00,
+     status='flying'
+ where id=late_round_id;
+
+ perform public.nplus_aviator_demo_current_round();
+
+ select * into late_row
+ from public.nplus_aviator_demo_bets
+ where user_id=u and request_id=request_four;
+
+ if late_row.status<>'cashed_out' or late_row.cashout_multiplier<>2.00 or late_row.payout<>4.00 then
+   raise exception 'Late-polled Aviator auto cash-out did not pay once at 2x.';
+ end if;
+
+ select balance into balance_after from public.demo_wallets where user_id=u;
+ if balance_after<>round(103.00+payout_one,2) then
+   raise exception 'Late-polled auto cash-out expected balance %; got %.',round(103.00+payout_one,2),balance_after;
  end if;
 
  if has_table_privilege('anon','public.nplus_aviator_demo_bets','SELECT')
