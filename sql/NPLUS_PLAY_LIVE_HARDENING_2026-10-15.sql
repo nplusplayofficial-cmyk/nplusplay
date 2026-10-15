@@ -51,7 +51,7 @@ EXECUTE FUNCTION public.nplus_guard_profile_role_update();
 -- Trigger functions should not be directly exposed as REST RPC endpoints.
 REVOKE ALL ON FUNCTION public.create_nplus_profile() FROM PUBLIC, anon, authenticated;
 
--- Signed-in wallet balance reads use SELECT; all writes must use controlled RPCs.
+-- Signed-in users can read their own wallet/ledger rows; admins can read all rows for admin deposit/report screens. All writes must use controlled RPCs.
 ALTER TABLE public.demo_wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.demo_wallet_transactions ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.demo_wallets FROM PUBLIC, anon, authenticated;
@@ -60,15 +60,17 @@ GRANT SELECT ON TABLE public.demo_wallets, public.demo_wallet_transactions TO au
 
 DROP POLICY IF EXISTS "wallet own row" ON public.demo_wallets;
 DROP POLICY IF EXISTS wallet_own_row ON public.demo_wallets;
-CREATE POLICY wallet_own_row
+DROP POLICY IF EXISTS wallet_owner_or_admin_read ON public.demo_wallets;
+CREATE POLICY wallet_owner_or_admin_read
   ON public.demo_wallets FOR SELECT TO authenticated
-  USING (user_id = (SELECT auth.uid()));
+  USING (user_id = (SELECT auth.uid()) OR (SELECT public.nplus_is_admin()));
 
 DROP POLICY IF EXISTS "wallet tx own rows" ON public.demo_wallet_transactions;
 DROP POLICY IF EXISTS wallet_tx_own_rows ON public.demo_wallet_transactions;
-CREATE POLICY wallet_tx_own_rows
+DROP POLICY IF EXISTS wallet_transactions_owner_or_admin_read ON public.demo_wallet_transactions;
+CREATE POLICY wallet_transactions_owner_or_admin_read
   ON public.demo_wallet_transactions FOR SELECT TO authenticated
-  USING (user_id = (SELECT auth.uid()));
+  USING (user_id = (SELECT auth.uid()) OR (SELECT public.nplus_is_admin()));
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "profiles own row" ON public.profiles;
