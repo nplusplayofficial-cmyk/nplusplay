@@ -24,7 +24,7 @@
 
 ## Remaining release blockers
 
-1. **K3, 5D and TRX WINGO payout rules are not specified in the current source pages.** They currently calculate outcomes client-side and charge demo stakes, but the inspected source contains no matching wallet-win settlement/payout table. Do not guess return rates; define and approve those rules, then migrate them to server-side rounds/settlement.
+1. **K3, 5D and TRX WINGO wagers are temporarily paused in the security branch.** Their payout/return rates are not specified in the inspected source pages, which previously generated outcomes client-side and debited demo stakes without a server payout table. Do not guess return rates. Once those rules are approved, implement/test their server settlement, then re-enable the buttons.
 2. The live generic `nplus_wallet_change` RPC still accepts authenticated positive deltas. Do not close that legacy path until the remaining active game flows are migrated and regression-tested; then block arbitrary positive client credits without breaking legitimate demo bets.
 3. WINGO, MotoRace and Aviator now require matching new schema/RPC migrations. Never deploy these updated HTML pages without their reviewed server schema/functions.
 4. Legacy bets kept only in browser `localStorage` have no server-issued settlement record. The migrated pages deliberately will not award credits for those records. Plan and test a user-safe reconciliation/transition notice; never reset or silently alter existing wallet balances.
