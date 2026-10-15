@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - fixes/premium-audit-2026-10-15
+      - security/server-game-settlement-2026-10-15
   pull_request:
     branches:
       - main
