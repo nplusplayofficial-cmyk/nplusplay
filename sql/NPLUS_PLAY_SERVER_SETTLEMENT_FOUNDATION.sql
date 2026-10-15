@@ -403,6 +403,10 @@ declare
   v_before numeric(12,2);
   v_after numeric(12,2);
   v_result_bets jsonb := '[]'::jsonb;
+  v_period text;
+  v_code text;
+  v_manual public.wingo_manual_results%rowtype;
+  v_has_manual boolean := false;
 begin
   if v_user_id is null then
     raise exception 'Authentication required.';
@@ -442,10 +446,48 @@ begin
   end if;
 
   if v_round.status <> 'settled' then
+    -- Preserve the existing admin-controlled result feature, but resolve it
+    -- inside the trusted database function rather than in browser code.
+    v_code := case p_duration_seconds
+      when 30 then '1000'
+      when 60 then '2000'
+      when 180 then '3000'
+      when 300 then '4000'
+    end;
+    v_period :=
+      to_char(v_round.starts_at at time zone 'Asia/Kolkata', 'YYYYMMDD')
+      || v_code
+      || lpad(mod(v_round.round_index, 100000)::text, 5, '0');
+
+    select * into v_manual
+    from public.wingo_manual_results
+    where duration_seconds = p_duration_seconds
+      and period = v_period
+      and mode = 'MANUAL'
+    order by created_at desc
+    limit 1;
+    v_has_manual := found;
+
+    if v_has_manual
+       and v_manual.number between 0 and 9
+       and upper(coalesce(v_manual.color, '')) in ('RED', 'GREEN', 'VIOLET')
+       and upper(coalesce(v_manual.size, '')) in ('BIG', 'SMALL') then
+      v_round.outcome := jsonb_build_object(
+        'number', v_manual.number,
+        'color', lower(v_manual.color),
+        'colorName', upper(v_manual.color),
+        'colors', jsonb_build_array(upper(v_manual.color)),
+        'size', case when upper(v_manual.size) = 'BIG' then 'Big' else 'Small' end
+      );
+      update public.nplus_wingo_demo_rounds
+      set outcome = v_round.outcome
+      where id = v_round.id;
+    end if;
+
     for v_bet in
       select * from public.nplus_wingo_demo_bets
       where round_id = v_round.id and status = 'pending'
-      order by created_at, id
+      order by user_id, id
       for update
     loop
       v_multiplier := public.nplus_wingo_payout_multiplier(
