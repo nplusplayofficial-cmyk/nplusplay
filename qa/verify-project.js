@@ -77,8 +77,11 @@ try {
   if (/type\s*:\s*["']GAME_WIN["']/.test(wingo)) {
     fail('WINGO must not issue client-authoritative GAME_WIN credits');
   }
-  if (!wingo.includes('nplus_wingo_demo_place_bet') || !wingo.includes('nplus_wingo_demo_settle_round')) {
-    fail('WINGO server placement/settlement RPC integration missing');
+  if (!wingo.includes('nplus_wingo_demo_place_bet') ||
+      !wingo.includes('nplus_wingo_demo_settle_round') ||
+      !wingo.includes('nplus_wingo_demo_my_bets') ||
+      !wingo.includes('nplus_wingo_demo_history')) {
+    fail('WINGO server placement, settlement, history or recovery integration missing');
   }
   const settlementSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql'), 'utf8');
   for (const required of [
@@ -86,6 +89,8 @@ try {
     'create table if not exists public.nplus_wingo_demo_bets',
     'public.nplus_wingo_demo_place_bet',
     'public.nplus_wingo_demo_settle_round',
+    'public.nplus_wingo_demo_my_bets',
+    'public.nplus_wingo_demo_history',
     'revoke all on function public.nplus_wingo_demo_place_bet',
     'revoke all on function public.nplus_wingo_demo_settle_round'
   ]) {
