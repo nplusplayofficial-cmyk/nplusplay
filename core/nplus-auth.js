@@ -179,12 +179,8 @@
     if (cleanName.length > 40) throw new Error("Display name is too long.");
     if (!password || password.length < 6) throw new Error("Password must be at least 6 characters.");
 
-    const { data: phoneUsed, error: phoneCheckError } = await client.rpc(
-      "nplus_phone_is_registered",
-      { p_phone: cleanMobile }
-    );
-    if (phoneCheckError) throw new Error("Could not check the mobile number. Please try again.");
-    if (phoneUsed === true) throw new Error("Mobile number already used. Please use another number.");
+    // Duplicate mobiles are prevented atomically by the database unique index
+    // profiles_phone_digits_unique_idx. Avoid exposing an anonymous phone-existence RPC.
 
     const { data, error } = await client.auth.signUp({
       email: cleanEmail,
@@ -205,6 +201,11 @@
           msg.includes("user already exists") ||
           msg.includes("already exists")) {
         throw new Error("Email address already used. Please use another email.");
+      }
+      if (msg.includes("database error saving new user") ||
+          msg.includes("profiles_phone_digits_unique_idx") ||
+          msg.includes("duplicate key")) {
+        throw new Error("Account could not be created. The mobile number or email may already be registered. Check the details and try again.");
       }
       throw error;
     }
