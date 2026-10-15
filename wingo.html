@@ -438,7 +438,8 @@ function serverOutcomeToLocal(period,outcome){
     color,
     colorName,
     colors:Array.isArray(outcome.colors)?outcome.colors.map(String):colorsFor(number),
-    size:String(outcome.size|| (number>=5?"Big":"Small"))
+    size:String(outcome.size|| (number>=5?"Big":"Small")),
+    serverAuthoritative:true
   };
 }
 
@@ -463,9 +464,9 @@ async function settleServerRound(sec,roundIndex,period,showPopup=false){
   const history=state.history[sec]||[];
   const historyIndex=history.findIndex(item=>item.period===period);
   if(historyIndex>=0){
-    history[historyIndex]={...history[historyIndex],...x,period,ts:periodStartFromPeriod(period,sec)};
+    history[historyIndex]={...history[historyIndex],...x,period,ts:periodStartFromPeriod(period,sec),serverAuthoritative:true};
   }else{
-    history.unshift({...x,ts:periodStartFromPeriod(period,sec)});
+    history.unshift({...x,ts:periodStartFromPeriod(period,sec),serverAuthoritative:true});
   }
   state.history[sec]=history.slice(0,500);
 
@@ -561,34 +562,99 @@ async function getAdminWingoResult(period, sec){
   }
 }
 
-function ensureHistory(){
-  const r=round();
-  const arr=state.history[state.sec];
-  const known=new Set(arr.map(x=>x.period));
+async function syncServerHistory(sec=state.sec){
+  const client=window.NPlusAuth?.client;
+  if(!client)throw new Error("Authentication client unavailable.");
 
-  for(let i=1;i<=500;i++){
-    const st=
-      r.start-i*state.sec*1000;
+  const {data,error}=await client.rpc(
+    "nplus_wingo_demo_history",
+    {p_duration_seconds:sec,p_limit:100}
+  );
+  if(error)throw error;
 
-    const p=periodAt(st,state.sec);
+  const rows=Array.isArray(data)?data:[];
+  state.history[sec]=rows
+    .filter(row=>row?.status==="settled"&&row?.outcome&&row?.period)
+    .map(row=>({
+      ...serverOutcomeToLocal(String(row.period),row.outcome),
+      ts:Date.parse(row.starts_at)||periodStartFromPeriod(String(row.period),sec),
+      serverRoundIndex:Number(row.round_index),
+      settledAt:row.settled_at?Date.parse(row.settled_at):null,
+      serverAuthoritative:true
+    }))
+    .sort((a,b)=>(b.ts||0)-(a.ts||0))
+    .slice(0,500);
 
-    if(!known.has(p)){
-      arr.push({
-        ...resultFor(p),
-        ts:st
-      });
+  return state.history[sec];
+}
 
-      known.add(p);
-    }
+async function syncServerBets(sec=state.sec){
+  const client=window.NPlusAuth?.client;
+  if(!client)throw new Error("Authentication client unavailable.");
+
+  const {data,error}=await client.rpc(
+    "nplus_wingo_demo_my_bets",
+    {p_duration_seconds:sec,p_limit:200}
+  );
+  if(error)throw error;
+
+  const rows=Array.isArray(data)?data:[];
+  const local=state.bets[sec]||[];
+  const legacy=local
+    .filter(b=>!b.serverBetId)
+    .map(b=>b.status==="PENDING"?{...b,status:"UNVERIFIED"}:b);
+
+  const serverBets=rows
+    .filter(row=>row?.bet_id&&row?.period)
+    .map(row=>{
+      const selection=row.selection||{};
+      const qty=Math.max(1,Number(selection.qty)||1);
+      const multi=Math.max(1,Number(selection.multi)||1);
+      return {
+        betId:String(row.bet_id),
+        serverBetId:String(row.bet_id),
+        requestId:row.request_id||null,
+        serverRoundIndex:Number(row.round_index),
+        period:String(row.period),
+        type:String(selection.type||""),
+        value:selection.value??"",
+        total:Number(row.stake||0),
+        qty,
+        multi,
+        status:String(row.status||"pending").toUpperCase(),
+        returnAmount:Number(row.payout||0),
+        netAmount:Number((Number(row.payout||0)-Number(row.stake||0)).toFixed(2)),
+        ts:Date.parse(row.created_at)||Date.now(),
+        settledAt:row.settled_at?Date.parse(row.settled_at):null,
+        serverAuthoritative:true
+      };
+    });
+
+  state.bets[sec]=[...serverBets,...legacy]
+    .sort((a,b)=>(b.ts||0)-(a.ts||0))
+    .slice(0,500);
+
+  save();
+  return state.bets[sec];
+}
+
+async function ensureHistory(sec=state.sec){
+  state.history[sec]=[];
+  try{
+    await Promise.all([
+      syncServerHistory(sec),
+      syncServerBets(sec)
+    ]);
+  }catch(err){
+    console.error("WINGO server history sync failed:",err);
   }
 
-  arr.sort(
-    (a,b)=>(b.ts||0)-(a.ts||0)
-  );
-
-  state.history[state.sec]=arr.slice(0,500);
-  save();
+  if(state.sec===sec){
+    renderRecent();
+    renderPanel();
+  }
 }
+
 
 function periodStartFromPeriod(p,sec){
   const str=String(p||"");
@@ -878,7 +944,7 @@ function setMode(sec){
     )
   );
 
-  ensureHistory();
+  void ensureHistory(sec);
   renderRecent();
   renderSelection();
   renderPanel();
@@ -1147,7 +1213,7 @@ function toast(t){
 
     load();
 
-    ensureHistory();
+    await ensureHistory(state.sec);
 
     await syncWallet();
 
@@ -1355,7 +1421,13 @@ $("#confirm").onclick=async()=>{
       "nplus_wingo_demo_place_bet",
       {
         p_duration_seconds:state.sec,
-        p_selection:{type:state.selection.type,value:state.selection.value},
+        p_selection:{
+          type:state.selection.type,
+          value:state.selection.value,
+          amount:Number($("#amount").value||0),
+          qty:state.qty,
+          multi:state.multi
+        },
         p_stake:Number(total.toFixed(2)),
         p_request_id:requestId
       }
@@ -1494,15 +1566,10 @@ document.addEventListener(
   "visibilitychange",
   ()=>{
     if(!document.hidden){
-      ensureHistory();
-
-      syncWallet()
-        .then(
-          ()=>settlePastRounds(false)
-        )
-        .then(
-          ()=>update()
-        )
+      ensureHistory(state.sec)
+        .then(()=>syncWallet())
+        .then(()=>settlePastRounds(false))
+        .then(()=>update())
         .then(()=>{
           renderRecent();
           renderPanel();
