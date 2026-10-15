@@ -4,7 +4,7 @@
 - Created local custom-format Supabase database backup and verified its archive list (not restore-tested).
 - Live DB: added a role-change guard trigger; rollback-only test confirmed non-admin role escalation is blocked.
 - Live DB: removed anonymous EXECUTE from the wallet/admin RPC set, removed direct wallet/ledger browser writes, preserved own-row reads plus admin-role reads required by admin pages, and verified authenticated RPC access.
-- Live DB: consolidated duplicate deposit policies, optimized RLS policy expressions and added FK/ledger indexes.
+- Live DB: consolidated duplicate deposit policies, optimized RLS policy expressions, applied least-privilege table grants, retained admin-only reads needed by admin screens, and added FK/ledger indexes.
 - Live DB: created `profiles_phone_digits_unique_idx`; current profile values were checked and no duplicate digit-normalized phone groups existed. Aligned the future wallet default to ₹108 (no existing wallet balance changed).
 - Branch: fixed missing admin-users page, PWA icon path, missing demo deposit route, legacy REAL_MONEY flag and forgot-password links.
 - Branch: restored email OTP signup UI and added static QA checks/CI. The latest recorded static QA run passed, but subsequent branch edits need a fresh check.
