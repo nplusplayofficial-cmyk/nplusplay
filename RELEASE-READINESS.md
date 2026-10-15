@@ -11,7 +11,7 @@
 
 ## Not release-ready until these gates pass
 1. Run a restore test in an isolated/staging database using a separate test project. Do not restore over production.
-2. Confirm Supabase Confirm signup email template uses `{{ .Token }}`; test code delivery and verifyOtp end-to-end.
+2. Confirm Supabase Confirm signup email template uses `{{ .Token }}`; test code delivery and verifyOtp end-to-end. Once this branch is deployed and duplicate-mobile signup is tested, revoke anon EXECUTE on the now-unused `nplus_phone_is_registered` RPC.
 3. Enable leaked-password protection in Supabase Auth settings, then test sign-up and login.
 4. Verify profile trigger and new-wallet balance ₹108 on a test account; do not change existing wallet balances.
 5. **Critical:** replace client-authoritative wins with server-authoritative bet/round/result/idempotent payout RPCs for WINGO, K3, 5D, TRX WINGO, MotoRace and Aviator. Generic `nplus_wallet_change` still allows authenticated clients to submit positive deltas.
