@@ -414,78 +414,39 @@ $('confirm').onclick=async()=>{
  const fee=stake*FEE,total=stake+fee;
  if(walletBalance===null){alert('Wallet is still syncing. Please try again.');return}
  if(total>walletBalance){alert('Insufficient demo balance.');return}
- const betId='BET-'+Date.now();
+ const requestId=crypto.randomUUID();
  try{
-   const after=await window.NPlusWallet.changeBalance(-total,{
-     type:'GAME_BET',
-     source:'MOTORACE',
-     note:`MOTORACE BET ${activePeriod} ${betId} selection=${selected.kind}:${selected.value} position=${pos} stake=${stake.toFixed(2)} fee=${fee.toFixed(2)} qty=${qty} multi=${multiplier}`
+   const client=window.NPlusAuth?.client;
+   if(!client)throw new Error('Authentication client unavailable.');
+   const {data,error}=await client.rpc('nplus_moto_demo_place_bet',{
+     p_selection:{...selected,position:pos,qty,multi:multiplier},
+     p_stake:Number(stake.toFixed(2)),
+     p_request_id:requestId
    });
-   walletBalance=Number(after);
+   if(error)throw error;
+   const placed=Array.isArray(data)?data[0]:data;
+   if(!placed?.bet_id)throw new Error('Server did not confirm the MotoRace bet.');
+   walletBalance=Number(placed.balance);
    db.bets.unshift({
-     id:betId,
-     period:activePeriod,
-     position:pos,
-     selection:{...selected},
-     stake,fee,total,
-     status:'PENDING',
-     placedAt:Date.now()
+     id:String(placed.bet_id),serverBetId:String(placed.bet_id),requestId,
+     period:String(placed.period),serverRoundIndex:Number(placed.round_index),
+     position:pos,selection:{...selected},stake:Number(placed.stake),
+     fee:Number(placed.fee),total:Number(placed.total),
+     qty,multiplier,status:statusForUI(placed.status),payout:0,
+     placedAt:Date.now(),serverAuthoritative:true
    });
    save();
    renderBalance();
    renderPanel('my');
+   syncSheet();
    $('overlay').classList.remove('show');
-   toast('✓ Demo bet confirmed');
+   toast('✓ Server-confirmed demo bet');
  }catch(e){
    console.error(e);
    alert(e?.message||'Unable to place demo bet.');
  }
 };
 
-function matches(bet,result){
- const n=result[bet.position-1];
- if(bet.selection.kind==='bike')return n===bet.selection.value;
- if(bet.selection.kind==='oe')return bet.selection.value==='ODD' ? n%2===1 : n%2===0;
- if(bet.selection.kind==='bs')return bet.selection.value==='BIG' ? n>=6 : n<=5;
- return false;
-}
-async function settlePeriod(period,result){
- const pending=db.bets.filter(b=>b.period===period&&b.status==='PENDING');
- if(!pending.length)return true;
-
- const winners=pending.filter(b=>matches(b,result));
- const payoutTotal=winners.reduce((a,b)=>a+(b.stake*PAYOUT),0);
-
- if(payoutTotal>0){
-   try{
-     const after=await window.NPlusWallet.changeBalance(payoutTotal,{
-       type:'GAME_WIN',
-       source:'MOTORACE',
-       note:`MOTORACE WIN ${period} bets=${winners.map(b=>b.id).join(',')} payout=${payoutTotal.toFixed(2)}`
-     });
-     walletBalance=Number(after);
-   }catch(e){
-     console.error('Moto Race settlement wallet error:',e);
-     return false;
-   }
- }
-
- for(const bet of pending){
-   bet.result=result[bet.position-1];
-   if(matches(bet,result)){
-     bet.status='WIN';
-     bet.payout=bet.stake*PAYOUT;
-   }else{
-     bet.status='LOSS';
-     bet.payout=0;
-   }
- }
- db.lastSettledPeriod=period;
- save();
- renderBalance();
- renderPanel(currentPanel);
- return true;
-}
 function renderBalance(){$('balance').textContent=walletBalance===null?'SYNCING…':money(walletBalance)}
 function renderRecent(){
  const rounds=db.rounds.slice(0,10);
