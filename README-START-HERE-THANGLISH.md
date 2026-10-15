@@ -22,7 +22,7 @@ The archive listing was read successfully with `pg_restore --list` (661 TOC entr
 - Removed anonymous EXECUTE from the generic wallet RPC and administrative SECURITY DEFINER RPCs, while preserving authenticated access and each function's internal authorization checks.
 - Revoked direct anon/authenticated writes to wallet and transaction tables; normal users read their own rows, while admin-role reads remain available for admin deposit/report screens.
 - Added a unique index on normalized profile phone numbers after confirming no current duplicate phone groups.
-- Consolidated redundant deposit policies and optimized RLS expressions; added profile owner/admin reads, aligned the wallet default to ₹108 (existing balances unchanged), and added missing FK/ledger indexes.
+- Consolidated redundant deposit policies and optimized RLS expressions; tightened table grants to least privilege, retained owner/admin read access where the UI needs it, aligned the wallet default to ₹108 (existing balances unchanged), and added missing FK/ledger indexes.
 - The exact migration is recorded in `sql/NPLUS_PLAY_LIVE_HARDENING_2026-10-15.sql`. Do not rerun manually on this production project; the change is already applied.
 
 ## Remaining database/auth checks
