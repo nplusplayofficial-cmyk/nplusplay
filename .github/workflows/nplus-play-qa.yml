@@ -16,6 +16,20 @@ permissions:
 jobs:
   static-qa:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: nplus_test
+          POSTGRES_DB: nplus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nplus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -23,5 +37,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Check syntax and local links
         run: node qa/verify-project.js
+      - name: Test WINGO settlement against disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-wingo-settlement.sql
