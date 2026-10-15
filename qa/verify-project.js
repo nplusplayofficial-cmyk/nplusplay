@@ -114,6 +114,15 @@ try {
 
 // Release guard: migrated games must use server settlement, never client-authored wins.
 try {
+  const withdraw = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
+  if (/function\s+addRequest\s*\(/.test(withdraw) || /addRequest\s*\(\s*\{/.test(withdraw)) {
+    fail('Withdraw page must not store withdrawal requests in localStorage');
+  }
+  if (!withdraw.includes('WITHDRAWALS DISABLED') ||
+      !withdraw.includes('virtual demo credits have no cash value')) {
+    fail('Withdraw page must clearly disable cash withdrawals in demo mode');
+  }
+
   const moto = fs.readFileSync(path.join(root, 'motorace.html'), 'utf8');
   if (/type\s*:\s*['"]GAME_WIN['"]/.test(moto) || /window\.NPlusWallet\.changeBalance/.test(moto)) {
     fail('MotoRace must not use generic client-controlled wallet writes');
