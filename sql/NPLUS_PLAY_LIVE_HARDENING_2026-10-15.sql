@@ -137,6 +137,12 @@ BEGIN
 END;
 $revoke_anonymous$;
 
+-- Database-level uniqueness for normalized Indian mobile values. The current five
+-- profiles were checked for duplicates before this index was created.
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_phone_digits_unique_idx
+  ON public.profiles ((regexp_replace(phone, '[^0-9]', '', 'g')))
+  WHERE phone IS NOT NULL AND trim(phone) <> '';
+
 CREATE INDEX IF NOT EXISTS deposit_requests_reviewed_by_idx
   ON public.deposit_requests(reviewed_by);
 CREATE INDEX IF NOT EXISTS game_settings_updated_by_idx
