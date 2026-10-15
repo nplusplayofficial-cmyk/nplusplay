@@ -1,21 +1,20 @@
 # N+ PLAY — Release readiness (2026-10-15)
 
-## Branch-only changes included
-- Add the missing, correctly named admin-users.html page and remove the misspelled duplicate admin-users.htlm.
-- Add assets/nplus-icon.svg, align PWA paths, and bump the service-worker cache version.
-- Add a pending virtual-credit deposit request page; route deposit UI only to demo mode.
-- Disable REAL_MONEY in legacy configuration.
-- Fix forgot-password.html links to auth.html.
-- Restore email-OTP signup while retaining password login.
-- Add SQL drafts, a QA script, and a GitHub Actions static-QA workflow.
+## Done
+- Created local custom-format Supabase database backup and verified its archive list (not restore-tested).
+- Live DB: added a role-change guard trigger; rollback-only test confirmed non-admin role escalation is blocked.
+- Live DB: removed anonymous EXECUTE from the wallet/admin RPC set, removed direct wallet/ledger browser writes, preserved authenticated own-row reads and RPC access.
+- Live DB: consolidated duplicate deposit policies, optimized RLS policy expressions and added FK/ledger indexes.
+- Branch: fixed missing admin-users page, PWA icon path, missing demo deposit route, legacy REAL_MONEY flag and forgot-password links.
+- Branch: restored email OTP signup UI and added static QA checks/CI. The latest recorded static QA run passed, but subsequent branch edits need a fresh check.
 
 ## Not release-ready until these gates pass
-1. Take and verify a database backup before running either SQL migration.
-2. Reconcile SQL drafts against live tables, policies, triggers, and existing RPC bodies; execute only after review.
-3. Set the Supabase Confirm signup email template to use {{ .Token }}; confirm SMTP/email delivery, verify nplus_phone_is_registered exists, and test a new signup/OTP flow end-to-end.
-4. Confirm the profile trigger stores email/phone and creates a new virtual wallet with ₹108; test existing-user login with email + mobile + password.
-5. Implement server-authoritative bets, round outcomes and idempotent payouts. Do not rely on client-supplied positive GAME_WIN deltas.
-6. Test user isolation for wallet/ledger, admin role checks, deposit approve/reject (pending/rejected requests leave the balance unchanged; only admin approval credits), and every game settlement.
-7. Run node qa/verify-project.js, then test GitHub Pages runtime on desktop/mobile and inspect the service worker in DevTools.
+1. Run a restore test in an isolated/staging database using a separate test project. Do not restore over production.
+2. Confirm Supabase Confirm signup email template uses `{{ .Token }}`; test code delivery and verifyOtp end-to-end.
+3. Enable leaked-password protection in Supabase Auth settings, then test sign-up and login.
+4. Verify profile trigger and new-wallet balance ₹108 on a test account; do not change existing wallet balances.
+5. **Critical:** replace client-authoritative wins with server-authoritative bet/round/result/idempotent payout RPCs for WINGO, K3, 5D, TRX WINGO, MotoRace and Aviator. Generic `nplus_wallet_change` still allows authenticated clients to submit positive deltas.
+6. Verify pending / approved / rejected demo-credit requests: pending and rejected preserve balance; only admin approval credits.
+7. Test all user/admin pages and games on desktop and mobile, then review the PR and deployment.
 
-This branch is not merged into main. Static CI checks do not test live Supabase or browser runtime.
+Production DB hardening was applied through Supabase and is recorded in `sql/NPLUS_PLAY_LIVE_HARDENING_2026-10-15.sql`. No code PR is merged to main.
