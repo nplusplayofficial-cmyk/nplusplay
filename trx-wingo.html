@@ -55,7 +55,7 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
 </header>
 
 <main class="content">
-<div class="notice">18+ · N+ PLAY VIRTUAL-CREDIT DEMO · NO REAL-MONEY WAGERING</div>
+<div class="notice">TRX WINGO BETTING PAUSED · DEMO RESULTS ONLY · PAYOUT RULES UNDER REVIEW</div>
 
 <section class="head">
  <div class="headtop"><strong>TRX WINGO · 1 MIN</strong><span class="live">● LIVE</span></div>
@@ -136,7 +136,7 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
   <div class="qty"><span>Quantity</span><div class="step"><button onclick="changeQty(-1)">−</button><b id="q">1</b><button onclick="changeQty(1)">+</button></div></div>
   <div class="total"><span>Total Demo Stake</span><b id="tot">₹10.00</b></div>
   <div class="rules">Virtual credits only. No cash deposit, payout, withdrawal, or real-money wagering is processed.</div>
-  <button class="confirm" onclick="confirmBet()">CONFIRM DEMO BET</button>
+  <button class="confirm" onclick="confirmBet()" disabled>BETTING PAUSED</button>
  </div>
 </div>
 
@@ -265,36 +265,7 @@ function closeSheet(){document.getElementById('sheet').classList.remove('open')}
 function changeQty(d){state.qty=Math.max(1,Math.min(20,state.qty+d));document.getElementById('q').textContent=state.qty;updateTotal()}
 function updateTotal(){document.getElementById('tot').textContent='₹'+(state.amount*state.qty*state.mult).toFixed(2)}
 document.querySelectorAll('.amt').forEach(b=>b.onclick=()=>{document.querySelectorAll('.amt').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.amount=+b.dataset.a;updateTotal()})
-async function confirmBet(){
- if(walletBusy)return;
- const total=Number(state.amount)*Number(state.qty)*Number(state.mult);
- if(!Number.isFinite(total)||total<1){alert('Invalid demo stake.');return}
- if(!bettingOpen()){updateBetStatus();return}
-
- const bal=await readWallet();
- if(bal===null){alert('Unable to load the shared demo wallet.');return}
- if(total>bal){alert('Demo wallet balance insufficient.');return}
-
- walletBusy=true;
- try{
-  await window.NPlusWallet.changeBalance(-total,{
-   type:'GAME_BET',
-   source:'TRX_WINGO',
-   note:`TRX WINGO BET ${state.period} selection=${state.selected} amount=${state.amount} qty=${state.qty} mult=${state.mult}`
-  });
-  state.bets.unshift({period:state.period,selection:state.selected,stake:total,time:Date.now()});
-  state.bets=state.bets.slice(0,100);
-  save();closeSheet();renderPanel('my');
- }catch(e){
-  console.error(e);
-  alert(e?.message||'Unable to place demo bet.');
- }finally{
-  walletBusy=false;
-  await readWallet();
- }
-}
-
-function renderPanel(panel='history'){
+async function confirmBet(){ alert('TRX WINGO betting is temporarily paused while server payout rules are reviewed. Your wallet will not be debited.'); return; } function renderPanel(panel='history'){
  state.panel=panel;document.querySelectorAll('.pt').forEach(b=>b.classList.toggle('active',b.dataset.panel===panel));
  const body=document.getElementById('panelBody');
  if(panel==='history'){
