@@ -21,6 +21,7 @@ The archive listing was read successfully with `pg_restore --list` (661 TOC entr
 - Added a trigger to prevent non-admin role changes on profiles. A rollback-only test confirmed a non-admin promotion attempt is blocked.
 - Removed anonymous EXECUTE from the generic wallet RPC and administrative SECURITY DEFINER RPCs, while preserving authenticated access and each function's internal authorization checks.
 - Revoked direct anon/authenticated write access to wallet and transaction tables; authenticated own-row reads remain.
+- Added a unique index on normalized profile phone numbers after confirming no current duplicate phone groups.
 - Consolidated redundant deposit policies and optimized RLS expressions; added profile owner/admin reads and missing FK/ledger indexes.
 - The exact migration is recorded in `sql/NPLUS_PLAY_LIVE_HARDENING_2026-10-15.sql`. Do not rerun manually on this production project; the change is already applied.
 
