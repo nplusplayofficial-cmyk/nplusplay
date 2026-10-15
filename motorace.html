@@ -487,11 +487,13 @@ async function startRace(){
  $('raceState').textContent='SYNCING SERVER RESULT…';
 
  let roundIndex;
+ let roundEndsAtMs;
  let result;
  try{
   const current=await syncServerMotoRound(true);
   roundIndex=Number(current?.round_index);
-  if(!Number.isFinite(roundIndex))throw new Error('Server round unavailable.');
+  roundEndsAtMs=Date.parse(current?.ends_at);
+  if(!Number.isFinite(roundIndex)||!Number.isFinite(roundEndsAtMs))throw new Error('Server round unavailable.');
   serverRoundIndex=roundIndex;
   const {data,error}=await getMotoClient().rpc('nplus_moto_demo_reveal_round',{p_round_index:roundIndex});
   if(error)throw error;
@@ -519,13 +521,13 @@ async function startRace(){
    if(el)el.style.left=(4+eased*84)+'%';
   });
   if(t<1)requestAnimationFrame(frame);
-  else void finishRace(racePeriod,result,roundIndex);
+  else void finishRace(racePeriod,result,roundIndex,roundEndsAtMs);
  }
  requestAnimationFrame(frame);
 }
-async function finishRace(racePeriod,shownResult,roundIndex){
- // Let the one-minute round reach its server-owned end time before settlement.
- const wait=Math.max(0,msUntilNextRound()+75);
+async function finishRace(racePeriod,shownResult,roundIndex,roundEndsAtMs){
+ // Wait only until the exact server-owned end time; do not accidentally wait a full extra minute.
+ const wait=Math.max(0,Number(roundEndsAtMs)-Date.now()+75);
  if(wait>0)await new Promise(resolve=>setTimeout(resolve,wait));
 
  let settlement;
