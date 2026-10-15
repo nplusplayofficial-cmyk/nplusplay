@@ -12,7 +12,7 @@ create index if not exists demo_wallets_user_id_idx
 alter table public.demo_wallets enable row level security;
 alter table public.demo_wallet_transactions enable row level security;
 
--- Rebuild wallet-table policies to ensure users can read only their own rows.
+-- Rebuild wallet-table policies so normal users read only their own rows and the existing admin helper grants admins the access required by admin screens.
 do $policy_reset$
 declare p record;
 begin
@@ -26,10 +26,18 @@ begin
 end;
 $policy_reset$;
 
-create policy nplus_users_read_own_demo_wallet
-  on public.demo_wallets for select to authenticated using (user_id = auth.uid());
-create policy nplus_users_read_own_demo_wallet_transactions
-  on public.demo_wallet_transactions for select to authenticated using (user_id = auth.uid());
+create policy nplus_wallet_owner_or_admin_read
+  on public.demo_wallets for select to authenticated
+  using (user_id = auth.uid() OR public.nplus_is_admin());
+create policy nplus_wallet_transactions_owner_or_admin_read
+  on public.demo_wallet_transactions for select to authenticated
+  using (user_id = auth.uid() OR public.nplus_is_admin());
+
+-- Admin pages need profile details; normal users remain own-row only.
+drop policy if exists nplus_admin_read_profiles on public.profiles;
+create policy nplus_admin_read_profiles
+  on public.profiles for select to authenticated
+  using (id = auth.uid() OR public.nplus_is_admin());
 
 revoke all on public.demo_wallets from anon, authenticated;
 revoke all on public.demo_wallet_transactions from anon, authenticated;
