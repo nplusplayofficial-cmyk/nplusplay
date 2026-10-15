@@ -8,7 +8,7 @@ The following database hardening was then applied and read-only verified:
 - Removed anonymous EXECUTE on the generic wallet RPC and the admin SECURITY DEFINER RPC set; authenticated calls remain granted and the RPCs retain their own authorization checks.
 - Removed direct anon/authenticated write privileges from wallet and transaction tables; normal users retain own-row SELECT, and admin-role SELECT access remains for admin deposit/report screens.
 - Added a unique expression index on digit-normalized profile phone values after confirming 5 existing profiles had no duplicate phone groups.
-- Consolidated duplicate deposit SELECT/INSERT policies and optimized RLS expressions using `(SELECT auth.uid())`.
+- Consolidated duplicate deposit SELECT/INSERT policies, optimized RLS expressions using `(SELECT auth.uid())`, and restricted direct table grants: deposit updates/deletes, profile inserts/deletes, and direct game-control writes are revoked; controlled SECURITY DEFINER RPCs perform trusted writes.
 - Added profile owner/admin SELECT policy, kept own-row profile update policy, aligned future wallet inserts to ₹108 without changing existing balances, and added reviewed_by/updated_by/transaction indexes.
 - Removed public EXECUTE on the auth profile trigger function.
 
