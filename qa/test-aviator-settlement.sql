@@ -18,7 +18,7 @@ begin
  perform set_config('request.jwt.claim.sub',u::text,true);
 
  r:=public.nplus_aviator_demo_current_round();
- if r ? 'crash_point' or r ? 'crashes_at' then
+ if coalesce(r->>'crash_point','')<>'' or r ? 'crashes_at' then
    raise exception 'Aviator current-round RPC leaks crash point/timing before crash.';
  end if;
  round_id:=(r->>'round_id')::uuid;
@@ -44,7 +44,7 @@ begin
  current_state:=public.nplus_aviator_demo_current_round();
  select balance into balance_after from public.demo_wallets where user_id=u;
  if balance_after<>103.00 then raise exception 'Aviator server auto cash-out should return 10, got balance %.',balance_after; end if;
- if current_state ? 'crash_point' or current_state ? 'crashes_at' then
+ if coalesce(current_state->>'crash_point','')<>'' or current_state ? 'crashes_at' then
    raise exception 'Aviator flying response leaked crash point/timing.';
  end if;
 
