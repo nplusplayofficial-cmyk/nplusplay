@@ -65,9 +65,36 @@ for (const required of [
   'manifest.webmanifest', 'sw.js', 'offline.html', 'assets/nplus-icon.svg',
   'core/nplus-config.js', 'core/nplus-auth.js', 'core/nplus-wallet-bridge.js',
   'admin-users.html', 'deposit-demo.html',
-  'sql/NPLUS_PLAY_PREMIUM_FOUNDATION.sql', 'sql/NPLUS_PLAY_PROFILE_DEPOSIT_GUARDS.sql'
+  'sql/NPLUS_PLAY_PREMIUM_FOUNDATION.sql', 'sql/NPLUS_PLAY_PROFILE_DEPOSIT_GUARDS.sql',
+  'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql'
 ]) {
   if (!exists(required)) fail('required file missing: ' + required);
+}
+
+// Release guard: WINGO must not credit wins through the legacy generic client RPC.
+try {
+  const wingo = fs.readFileSync(path.join(root, 'wingo.html'), 'utf8');
+  if (/type\s*:\s*["']GAME_WIN["']/.test(wingo)) {
+    fail('WINGO must not issue client-authoritative GAME_WIN credits');
+  }
+  if (!wingo.includes('nplus_wingo_demo_place_bet') || !wingo.includes('nplus_wingo_demo_settle_round')) {
+    fail('WINGO server placement/settlement RPC integration missing');
+  }
+  const settlementSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql'), 'utf8');
+  for (const required of [
+    'create table if not exists public.nplus_wingo_demo_rounds',
+    'create table if not exists public.nplus_wingo_demo_bets',
+    'public.nplus_wingo_demo_place_bet',
+    'public.nplus_wingo_demo_settle_round',
+    'revoke all on function public.nplus_wingo_demo_place_bet',
+    'revoke all on function public.nplus_wingo_demo_settle_round'
+  ]) {
+    if (!settlementSql.toLowerCase().includes(required.toLowerCase())) {
+      fail('WINGO settlement SQL contract missing: ' + required);
+    }
+  }
+} catch (e) {
+  fail('WINGO server settlement guard failed: ' + e.message);
 }
 
 try {
