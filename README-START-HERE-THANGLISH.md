@@ -27,7 +27,7 @@ The archive listing was read successfully with `pg_restore --list` (661 TOC entr
 
 ## Remaining database/auth checks
 - Supabase leaked-password protection is still disabled and must be enabled in Auth settings.
-- `nplus_phone_is_registered(text)` remains anon-executable for signup compatibility and exposes whether a mobile number is registered. Replace with a rate-limited/less-enumerable design before wider public launch.
+- Live `main` still calls `nplus_phone_is_registered(text)` until this branch is merged/deployed, so anon EXECUTE remains temporarily to avoid breaking current signup. This branch removes that lookup and relies on the database unique mobile index. After deployment and signup testing, revoke anon EXECUTE on the old RPC.
 - For signup OTP, the Confirm signup email template must use `{{ .Token }}`; test actual email delivery and verification in the live project. Current code expects a six-digit code.
 - Verify a test signup creates a profile and ₹108 wallet, and that normal login works. Do not modify existing balances.
 - Do not use the old `supabase-schema.sql` basic template over the production database; it has an obsolete ₹1,000 default.
