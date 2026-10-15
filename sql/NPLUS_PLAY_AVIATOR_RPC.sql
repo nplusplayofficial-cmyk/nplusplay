@@ -70,7 +70,7 @@ begin
      for v_bet in
        select * from public.nplus_aviator_demo_bets
        where round_id=v_round.id and status='open'
-         and auto_cashout is not null and auto_cashout<=v_mult
+         and auto_cashout is not null and auto_cashout<=v_mult and auto_cashout<v_round.crash_point
        order by user_id,id
        for update
      loop
@@ -91,6 +91,31 @@ begin
    end if;
 
    if v_now>=v_round.crashes_at and v_round.status<>'crashed' then
+     -- Late polling must not lose a server-qualified auto cash-out that was
+     -- below the crash point. Targets equal to or above the crash point never pay.
+     for v_bet in
+       select * from public.nplus_aviator_demo_bets
+       where round_id=v_round.id and status='open'
+         and auto_cashout is not null
+         and auto_cashout<v_round.crash_point
+       order by user_id,id
+       for update
+     loop
+       select balance into v_before from public.demo_wallets
+       where user_id=v_bet.user_id for update;
+       if not found then raise exception 'Wallet missing during late Aviator auto cash-out.'; end if;
+       v_payout:=round(v_bet.stake*v_bet.auto_cashout,2);
+       v_after:=v_before+v_payout;
+       update public.demo_wallets set balance=v_after,updated_at=clock_timestamp()
+       where user_id=v_bet.user_id;
+       insert into public.demo_wallet_transactions(user_id,delta,balance_before,balance_after,type,source,note)
+       values(v_bet.user_id,v_payout,v_before,v_after,'GAME_WIN','AVIATOR',
+         format('Aviator late server auto cash-out bet %s at %sx before crash',v_bet.id,v_bet.auto_cashout));
+       update public.nplus_aviator_demo_bets
+       set status='cashed_out',cashout_multiplier=v_bet.auto_cashout,payout=v_payout,settled_at=clock_timestamp()
+       where id=v_bet.id;
+     end loop;
+
      update public.nplus_aviator_demo_rounds
      set status='crashed',crashed_at=crashes_at
      where id=v_round.id returning * into v_round;
