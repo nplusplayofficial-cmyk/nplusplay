@@ -636,13 +636,15 @@ begin
   ) order by b.created_at desc), '[]'::jsonb)
   into v_rows
   from (
-    select * from public.nplus_wingo_demo_bets
-    where user_id = v_user_id
-    order by created_at desc
+    select b0.*
+    from public.nplus_wingo_demo_bets b0
+    join public.nplus_wingo_demo_rounds r0 on r0.id = b0.round_id
+    where b0.user_id = v_user_id
+      and r0.duration_seconds = p_duration_seconds
+    order by b0.created_at desc
     limit least(greatest(coalesce(p_limit, 100), 1), 200)
   ) b
-  join public.nplus_wingo_demo_rounds r on r.id = b.round_id
-  where r.duration_seconds = p_duration_seconds;
+  join public.nplus_wingo_demo_rounds r on r.id = b.round_id;
 
   return v_rows;
 end;
