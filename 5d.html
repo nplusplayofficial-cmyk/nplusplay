@@ -238,7 +238,7 @@ body{display:flex;justify-content:center}
 </header>
 
 <main class="content">
-  <div class="notice">18+ · N+ PLAY VIRTUAL-CREDIT DEMO · NO REAL-MONEY WAGERING</div>
+  <div class="notice">5D BETTING PAUSED · DEMO RESULTS ONLY · PAYOUT RULES UNDER REVIEW</div>
 
   <div class="modes" id="modes">
     <button class="mode active" data-sec="60">5D 1 Min</button>
@@ -327,7 +327,7 @@ body{display:flex;justify-content:center}
     <div class="qty"><span>Quantity</span><div class="step"><button onclick="changeQty(-1)">−</button><b id="qty">1</b><button onclick="changeQty(1)">+</button></div></div>
     <div class="total"><span>Total demo stake</span><b id="total">₹10.00</b></div>
     <div class="rules">Virtual credits only. No cash deposit, payout, withdrawal, or real-money wagering is processed by this page.</div>
-    <button class="confirm" onclick="confirmBet()">CONFIRM DEMO BET</button>
+    <button class="confirm" onclick="confirmBet()" disabled>BETTING PAUSED</button>
   </div>
 </div>
 
@@ -712,48 +712,7 @@ function updateTotal(){
 }
 let betBusy=false;
 
-async function confirmBet(){
-  if(betBusy) return;
-
-  const total=state.amount*state.qty;
-  if(!state.selected){alert('Select a 5D option first.');return}
-  if(!Number.isFinite(total)||total<1){alert('Invalid demo stake.');return}
-
-  betBusy=true;
-  try{
-    const after=await window.NPlusWallet.changeBalance(
-      -total,
-      {
-        type:'GAME_BET',
-        source:'5D',
-        note:`5D BET period=${state.period} selection=${state.selected} amount=${state.amount} qty=${state.qty}`
-      }
-    );
-
-    const bet={
-      period:state.period,
-      selection:state.selected,
-      amount:state.amount,
-      qty:state.qty,
-      total,
-      time:Date.now()
-    };
-
-    state.betsByMode[state.sec].unshift(bet);
-    state.betsByMode[state.sec]=state.betsByMode[state.sec].slice(0,100);
-    save();
-    renderWallet(after);
-    closeSheet();
-    renderPanel('bets');
-  }catch(e){
-    alert(e?.message||'Unable to place demo bet.');
-    syncWallet();
-  }finally{
-    betBusy=false;
-  }
-}
-
-document.querySelectorAll('.mode').forEach(btn=>{
+async function confirmBet(){ alert('5D betting is temporarily paused while server payout rules are reviewed. Your wallet will not be debited.'); return; } document.querySelectorAll('.mode').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const sec=+btn.dataset.sec;
     if(state.sec===sec)return;
