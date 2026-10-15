@@ -6,10 +6,10 @@ A verified custom-format backup was created locally at `C:\\Users\\Natarajan K\\
 The following database hardening was then applied and read-only verified:
 - Added `profiles.role` trigger protection; a rollback-only test confirmed a non-admin promotion attempt is blocked.
 - Removed anonymous EXECUTE on the generic wallet RPC and the admin SECURITY DEFINER RPC set; authenticated calls remain granted and the RPCs retain their own authorization checks.
-- Removed direct anon/authenticated write privileges from wallet and transaction tables; authenticated users retain own-row SELECT.
+- Removed direct anon/authenticated write privileges from wallet and transaction tables; normal users retain own-row SELECT, and admin-role SELECT access remains for admin deposit/report screens.
 - Added a unique expression index on digit-normalized profile phone values after confirming 5 existing profiles had no duplicate phone groups.
 - Consolidated duplicate deposit SELECT/INSERT policies and optimized RLS expressions using `(SELECT auth.uid())`.
-- Added profile owner/admin SELECT policy, kept own-row profile update policy, and added reviewed_by/updated_by/transaction indexes.
+- Added profile owner/admin SELECT policy, kept own-row profile update policy, aligned future wallet inserts to ₹108 without changing existing balances, and added reviewed_by/updated_by/transaction indexes.
 - Removed public EXECUTE on the auth profile trigger function.
 
 These changes did not change existing wallet balances or execute any game result/settlement. The backup remains sensitive and must not be committed/uploaded to GitHub.
