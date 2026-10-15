@@ -12,28 +12,31 @@
 
 ## Security-branch progress (not deployed)
 
-- Added `sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql`: private server-owned WINGO round/bet tables, server-side round result, atomic bet debit, idempotency, locked one-time settlement and payout ledger writes.
-- Updated only the WINGO branch page to call server placement/settlement RPCs; removed its direct client-issued `GAME_WIN` wallet credit calls.
-- Added a static QA guard and an isolated PostgreSQL test harness/workflow. Check the current GitHub Actions result before calling the SQL tested.
-- No settlement SQL has been run against the live Supabase project. The migration is draft-only and needs code review plus disposable PostgreSQL and isolated Supabase runtime tests.
+- Added a server-owned WINGO backend: private rounds/bets tables, server-side outcomes, atomic wallet debit, idempotent requests, one-time settlement, history and reload recovery.
+- Migrated `wingo.html` to server-side placement/settlement; its browser no longer issues generic `GAME_WIN` credits.
+- Added a MotoRace backend: server-owned round outcomes, validated selections, server-computed 1.5% demo fee, server-side 2x winner return, one-time settlement and own-bet/history recovery.
+- Migrated `motorace.html` away from browser-generated results and generic wallet credit/debit calls.
+- Added an Aviator backend: server-owned crash points/timing, atomic server-side stake debit, server-time-based manual cash-out, server-handled auto cash-out and post-crash loss settlement. The client no longer decides crash points or credits its own cash-out amount.
+- Migrated `aviator.html` to those RPCs and removed its local-balance fallback.
+- Added an isolated PostgreSQL 17 QA workflow. Latest recorded successful run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/38768941850. It passed the 36-page static check and disposable database tests for WINGO, MotoRace and Aviator.
+- These are branch/CI tests only. No new settlement SQL has been run against the live Supabase project, and no code PR has been merged to `main`.
 
-## Still blocks release
+## Remaining release blockers
 
-1. **Only WINGO is migrated in the security branch.** K3, 5D, TRX WINGO, MotoRace and Aviator still contain client-derived results, legacy wallet calls or incomplete settlement behavior.
-2. The live generic `nplus_wallet_change` RPC still accepts caller-supplied positive deltas. Keep PR #2 unmerged and do not label the product secure until all legitimate game pages move to server-owned settlement and the legacy credit path is closed.
-3. WINGO uses a new schema. Apply it only through a reviewed migration after tests; do not deploy the updated WINGO HTML without its matching schema/RPCs.
-4. Legacy WINGO bets in browser `localStorage` do not have server-issued bet IDs. The new frontend intentionally does not award credits from such local-only records. Decide and test a migration/reconciliation plan before deployment; do not reset wallet balances.
-5. The live anonymous `nplus_phone_is_registered(text)` RPC and disabled leaked-password protection remain outstanding. Confirm signup/email OTP settings have not been switched on in production.
-6. Backup archive is readable but not restore-tested. Test restore only in a separate isolated database/project.
-7. Test deposits, admin pages and every game on desktop/mobile, then review the whole PR before merging.
+1. **K3, 5D and TRX WINGO payout rules are not specified in the current source pages.** They currently calculate outcomes client-side and charge demo stakes, but the inspected source contains no matching wallet-win settlement/payout table. Do not guess return rates; define and approve those rules, then migrate them to server-side rounds/settlement.
+2. The live generic `nplus_wallet_change` RPC still accepts authenticated positive deltas. Do not close that legacy path until the remaining active game flows are migrated and regression-tested; then block arbitrary positive client credits without breaking legitimate demo bets.
+3. WINGO, MotoRace and Aviator now require matching new schema/RPC migrations. Never deploy these updated HTML pages without their reviewed server schema/functions.
+4. Legacy bets kept only in browser `localStorage` have no server-issued settlement record. The migrated pages deliberately will not award credits for those records. Plan and test a user-safe reconciliation/transition notice; never reset or silently alter existing wallet balances.
+5. The live anonymous `nplus_phone_is_registered(text)` RPC can reveal phone registration. After the updated signup code is deployed and duplicate-mobile signup is verified, revoke its client EXECUTE permission.
+6. Leaked-password protection is unavailable on the current Free plan according to the project dashboard. Do not upgrade just to clear the advisor; retain strong password rules and document the remaining warning.
+7. The database backup archive was readable but has not been restore-tested. Test restore in a separate isolated database/project, never production.
+8. End-to-end Supabase Auth/email OTP, profile + ₹108 wallet creation for a new test account, deposits/admin workflows, and real browser desktop/mobile regression are still pending. Email template `Confirm signup` already contains `{{ .Token }}`; keep production email confirmation OFF until the new signup flow is actually deployed/tested.
 
-## Not release-ready until these gates pass
-1. Run a restore test in an isolated/staging database using a separate test project. Do not restore over production.
-2. Confirm Supabase Confirm signup email template uses `{{ .Token }}`; test code delivery and verifyOtp end-to-end. Once this branch is deployed and duplicate-mobile signup is tested, revoke anon EXECUTE on the now-unused `nplus_phone_is_registered` RPC.
-3. Enable leaked-password protection in Supabase Auth settings, then test sign-up and login.
-4. Verify profile trigger and new-wallet balance ₹108 on a test account; do not change existing wallet balances.
-5. **Critical:** replace client-authoritative wins with server-authoritative bet/round/result/idempotent payout RPCs for WINGO, K3, 5D, TRX WINGO, MotoRace and Aviator. Generic `nplus_wallet_change` still allows authenticated clients to submit positive deltas.
-6. Verify pending / approved / rejected demo-credit requests: pending and rejected preserve balance; only admin approval credits.
-7. Test all user/admin pages and games on desktop and mobile, then review the PR and deployment.
+## Merge gates
+
+- Approve K3/5D/TRX demo payout rules.
+- Pass automated tests for all six games, including duplicate/replayed settlement, insufficient balance, bad selection/amount, reload and parallel requests.
+- Validate RPC permissions/RLS and Auth/deposit/admin behavior against an isolated Supabase test project.
+- Review the final diff and workflow logs, then deploy the matching SQL + frontend in a controlled order. Keep PR #2 and this security branch unmerged until these gates pass.
 
 Production DB hardening was applied through Supabase and is recorded in `sql/NPLUS_PLAY_LIVE_HARDENING_2026-10-15.sql`. No code PR is merged to main.
