@@ -614,6 +614,18 @@ begin
     'request_id', b.request_id,
     'round_id', r.id,
     'round_index', r.round_index,
+    'period', (
+      to_char(r.starts_at at time zone 'Asia/Kolkata', 'YYYYMMDD')
+      || case r.duration_seconds
+        when 30 then '1000'
+        when 60 then '2000'
+        when 180 then '3000'
+        when 300 then '4000'
+      end
+      || lpad(mod(r.round_index, 100000)::text, 5, '0')
+    ),
+    'starts_at', r.starts_at,
+    'ends_at', r.ends_at,
     'selection', b.selection,
     'stake', b.stake,
     'status', b.status,
@@ -636,6 +648,63 @@ begin
 end;
 $function$;
 
+create or replace function public.nplus_wingo_demo_history(
+  p_duration_seconds integer,
+  p_limit integer default 100
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = pg_catalog, public
+as $function$
+declare
+  v_user_id uuid := auth.uid();
+  v_rows jsonb;
+begin
+  if v_user_id is null then
+    raise exception 'Authentication required.';
+  end if;
+  if p_duration_seconds not in (30, 60, 180, 300) then
+    raise exception 'Unsupported WINGO duration.';
+  end if;
+
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'round_id', q.id,
+    'duration_seconds', q.duration_seconds,
+    'round_index', q.round_index,
+    'period', q.period,
+    'starts_at', q.starts_at,
+    'ends_at', q.ends_at,
+    'status', q.status,
+    'outcome', q.outcome,
+    'settled_at', q.settled_at
+  ) order by q.starts_at desc), '[]'::jsonb)
+  into v_rows
+  from (
+    select r.*,
+      (
+        to_char(r.starts_at at time zone 'Asia/Kolkata', 'YYYYMMDD')
+        || case r.duration_seconds
+          when 30 then '1000'
+          when 60 then '2000'
+          when 180 then '3000'
+          when 300 then '4000'
+        end
+        || lpad(mod(r.round_index, 100000)::text, 5, '0')
+      ) as period
+    from public.nplus_wingo_demo_rounds r
+    where r.duration_seconds = p_duration_seconds
+      and r.status = 'settled'
+      and r.ends_at <= clock_timestamp()
+    order by r.starts_at desc
+    limit least(greatest(coalesce(p_limit, 100), 1), 500)
+  ) q;
+
+  return v_rows;
+end;
+$function$;
+
 revoke all on function public.nplus_wingo_make_outcome() from public, anon, authenticated;
 revoke all on function public.nplus_wingo_payout_multiplier(jsonb, jsonb) from public, anon, authenticated;
 revoke all on function public.nplus_wingo_demo_current_round(integer) from public, anon;
@@ -646,5 +715,6 @@ grant execute on function public.nplus_wingo_demo_current_round(integer) to auth
 grant execute on function public.nplus_wingo_demo_place_bet(integer, jsonb, numeric, uuid) to authenticated;
 grant execute on function public.nplus_wingo_demo_settle_round(integer, bigint) to authenticated;
 grant execute on function public.nplus_wingo_demo_my_bets(integer, integer) to authenticated;
+grant execute on function public.nplus_wingo_demo_history(integer, integer) to authenticated;
 
 commit;
