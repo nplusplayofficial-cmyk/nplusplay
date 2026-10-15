@@ -70,6 +70,8 @@ declare
   v_changed jsonb;
   v_settled jsonb;
   v_settled_again jsonb;
+  v_recovered_bets jsonb;
+  v_history jsonb;
   v_round_id uuid;
   v_round_index bigint;
   v_start timestamptz;
@@ -110,6 +112,19 @@ begin
   );
   if coalesce((v_placed->>'bet_id')::text, '') = '' then
     raise exception 'Place-bet RPC did not return a bet id.';
+  end if;
+
+  v_recovered_bets := public.nplus_wingo_demo_my_bets(30, 100);
+  if jsonb_array_length(v_recovered_bets) <> 1
+     or v_recovered_bets->0->>'bet_id' <> v_placed->>'bet_id'
+     or coalesce(v_recovered_bets->0->>'period','') = ''
+     or coalesce(v_recovered_bets->0->>'starts_at','') = '' then
+    raise exception 'Server-backed bet recovery did not return the original bet/period.';
+  end if;
+
+  v_history := public.nplus_wingo_demo_history(30, 100);
+  if jsonb_array_length(v_history) <> 0 then
+    raise exception 'Unsettled current round appeared in the public-to-user result history.';
   end if;
 
   select balance into v_balance from public.demo_wallets where user_id = v_user;
@@ -203,6 +218,13 @@ begin
     raise exception 'Expected one GAME_WIN ledger entry, found %.', v_after_count;
   end if;
 
+  v_history := public.nplus_wingo_demo_history(30, 100);
+  if jsonb_array_length(v_history) <> 1
+     or (v_history->0->'outcome'->>'number')::integer <> 8
+     or v_history->0->>'status' <> 'settled' then
+    raise exception 'Server-backed WINGO history did not return the settled outcome.';
+  end if;
+
   -- Direct browser reads must remain blocked; RPCs are only for signed-in users.
   if has_table_privilege('anon', 'public.nplus_wingo_demo_bets', 'SELECT')
      or has_table_privilege('authenticated', 'public.nplus_wingo_demo_bets', 'SELECT') then
@@ -213,6 +235,10 @@ begin
   end if;
   if not has_function_privilege('authenticated', 'public.nplus_wingo_demo_place_bet(integer,jsonb,numeric,uuid)', 'EXECUTE') then
     raise exception 'Authenticated execution of place-bet RPC is missing.';
+  end if;
+  if has_function_privilege('anon', 'public.nplus_wingo_demo_history(integer,integer)', 'EXECUTE')
+     or not has_function_privilege('authenticated', 'public.nplus_wingo_demo_history(integer,integer)', 'EXECUTE') then
+    raise exception 'WINGO history RPC permissions are incorrect.';
   end if;
 
   -- Public invocation without a user must fail.
