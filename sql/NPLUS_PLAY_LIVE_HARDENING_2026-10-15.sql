@@ -150,6 +150,10 @@ CREATE INDEX IF NOT EXISTS game_settings_updated_by_idx
 CREATE INDEX IF NOT EXISTS demo_wallet_transactions_user_created_idx
   ON public.demo_wallet_transactions(user_id, created_at DESC);
 
+-- Align fallback wallet default with create_nplus_profile() which explicitly inserts ₹108.
+-- Changes future inserts only; existing balances are untouched.
+ALTER TABLE public.demo_wallets ALTER COLUMN balance SET DEFAULT 108.00;
+
 COMMIT;
 
 -- Known remaining risk:
