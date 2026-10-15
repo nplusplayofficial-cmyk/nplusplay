@@ -16,6 +16,7 @@
 - Migrated `wingo.html` to server-side placement/settlement; its browser no longer issues generic `GAME_WIN` credits.
 - Added a MotoRace backend: server-owned round outcomes, validated selections, server-computed 1.5% demo fee, server-side 2x winner return, one-time settlement and own-bet/history recovery.
 - Migrated `motorace.html` away from browser-generated results and generic wallet credit/debit calls.
+- Added `sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql` plus a disposable PostgreSQL test. After the matching frontend/server RPC rollout only, this migration rejects caller-supplied positive deltas while preserving negative virtual-stake debits. It has not been run against production.
 - Added an Aviator backend: server-owned crash points/timing, atomic server-side stake debit, server-time-based manual cash-out, server-handled auto cash-out and post-crash loss settlement. The client no longer decides crash points or credits its own cash-out amount.
 - Migrated `aviator.html` to those RPCs and removed its local-balance fallback.
 - Added an isolated PostgreSQL 17 QA workflow. Latest recorded successful run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/38768941850. It passed the 36-page static check and disposable database tests for WINGO, MotoRace and Aviator.
