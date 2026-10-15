@@ -109,6 +109,38 @@ try {
   fail('WINGO server settlement guard failed: ' + e.message);
 }
 
+// Release guard: migrated games must use server settlement, never client-authored wins.
+try {
+  const moto = fs.readFileSync(path.join(root, 'motorace.html'), 'utf8');
+  if (/type\s*:\s*['"]GAME_WIN['"]/.test(moto) || /window\.NPlusWallet\.changeBalance/.test(moto)) {
+    fail('MotoRace must not use generic client-controlled wallet writes');
+  }
+  for (const rpc of ['nplus_moto_demo_place_bet','nplus_moto_demo_reveal_round','nplus_moto_demo_settle_round']) {
+    if (!moto.includes(rpc)) fail('MotoRace server RPC integration missing: ' + rpc);
+  }
+
+  const aviator = fs.readFileSync(path.join(root, 'aviator.html'), 'utf8');
+  if (/type\s*:\s*['"]GAME_WIN['"]/.test(aviator) || /wallet\.changeBalance\s*\(/.test(aviator)) {
+    fail('Aviator must not use generic client-controlled wallet credits');
+  }
+  for (const rpc of ['nplus_aviator_demo_current_round','nplus_aviator_demo_place_bet','nplus_aviator_demo_cashout']) {
+    if (!aviator.includes(rpc)) fail('Aviator server RPC integration missing: ' + rpc);
+  }
+  if (aviator.includes('function crashForRound(')) fail('Aviator must not generate crash points in the browser');
+
+  const aviatorSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_AVIATOR_RPC.sql'), 'utf8').toLowerCase();
+  for (const required of [
+    'public.nplus_aviator_demo_current_round',
+    'public.nplus_aviator_demo_place_bet',
+    'public.nplus_aviator_demo_cashout',
+    'revoke all on function public.nplus_aviator_demo_cashout'
+  ]) {
+    if (!aviatorSql.includes(required.toLowerCase())) fail('Aviator settlement SQL contract missing: ' + required);
+  }
+} catch (e) {
+  fail('Server-authoritative game guard failed: ' + e.message);
+}
+
 try {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
   for (const icon of manifest.icons || []) {
