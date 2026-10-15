@@ -70,7 +70,7 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <header><div class="hleft"><button class="ib" id="back">‹</button><div class="brand"><div class="mark">N+</div> PLAY</div><span class="live"><i></i>LIVE</span></div><div class="hright"><button class="ib" id="rulesBtn">?</button></div></header>
 <main>
 <section class="wallet"><div class="walletrow"><div><div class="label">Available balance</div><div class="balance" id="balance">₹1,000.00</div></div><div class="wa"><button class="wit" id="withdraw">WITHDRAW</button><button class="dep" id="deposit">DEPOSIT</button></div></div></section>
-<div class="notice"><span>🎲 <b>K3 LIVE</b> · Virtual-credit experience</span><span>DETAIL ›</span></div>
+<div class="notice"><span>🎲 <b>K3 BETTING PAUSED</b> · Demo results only until payout rules are approved</span><span>DETAIL ›</span></div>
 <div class="modes" id="modes"><button class="mode active" data-sec="60"><strong>K3</strong><small>1 MIN</small></button><button class="mode" data-sec="180"><strong>K3</strong><small>3 MIN</small></button><button class="mode" data-sec="300"><strong>K3</strong><small>5 MIN</small></button><button class="mode" data-sec="600"><strong>K3</strong><small>10 MIN</small></button></div>
 <section class="round" id="round"><div class="roundtop"><button class="how" id="how">HOW TO PLAY</button><div class="timer"><div class="tl">Time remaining</div><div class="time" id="time">01:00</div></div></div><div class="period"><span>Current period</span><code id="period">—</code></div><div class="progress"><div class="bar" id="bar"></div></div><div class="status" id="status">BETTING OPEN</div><div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div></section>
 <div class="title">Recent results</div><div class="recent" id="recent"></div>
@@ -191,39 +191,7 @@ $("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">₹${v
 document.addEventListener("click",e=>{const a=e.target.closest("[data-amt]");if(a){$("#amount").value=a.dataset.amt;syncSheet()}const m=e.target.closest("[data-m]");if(m){state.multi=+m.dataset.m;$$(".multi").forEach(x=>x.classList.toggle("active",x===m));syncSheet()}});
 $("#amount").oninput=syncSheet;$("#minus").onclick=()=>{state.qty=Math.max(1,state.qty-1);$("#qty").textContent=state.qty;syncSheet()};$("#plus").onclick=()=>{state.qty=Math.min(100,state.qty+1);$("#qty").textContent=state.qty;syncSheet()};$("#agree").onchange=syncSheet;
 $("#close").onclick=$("#cancel").onclick=closeSheet;$("#overlay").onclick=e=>{if(e.target===e.currentTarget)closeSheet()};
-$("#confirm").onclick=async()=>{
-  const r=round(),total=Number($("#amount").value||0)*state.qty*state.multi;
-  if(r.remaining<=5){toast("Betting closed");return}
-  if(!Number.isFinite(total)||total<1){toast("Invalid amount");return}
-  if(total>Number(state.balance)){toast("Insufficient demo credits");return}
-  if(!state.selection){toast("Choose a K3 selection first");return}
-  const confirmBtn=$("#confirm");
-  if(confirmBtn.disabled) return;
-  confirmBtn.disabled=true;
-  confirmBtn.textContent="SYNCING…";
-  try{
-    const after=await window.NPlusWallet.changeBalance(-total,{
-      type:"GAME_BET",
-      source:"K3",
-      note:`K3 BET ${r.period} type=${state.selection.type} value=${state.selection.value} qty=${state.qty} multi=${state.multi}`
-    });
-    state.balance=Number(after);
-    const b={period:r.period,type:state.selection.type,value:state.selection.value,total,qty:state.qty,multi:state.multi,status:"PENDING",ts:Date.now()};
-    state.bets[state.sec].unshift(b);
-    save();
-    renderBalance();
-    renderPanel();
-    closeSheet();
-    toast("✓ Demo selection confirmed");
-  }catch(err){
-    console.error("K3 bet sync error:",err);
-    toast(err?.message||"Unable to place demo selection");
-  }finally{
-    confirmBtn.textContent="CONFIRM";
-    syncSheet();
-  }
-};
-$("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;state.tab=b.dataset.tab;$$(".tab").forEach(x=>x.classList.toggle("active",x===b));renderPanel()};
+$("#confirm").onclick=()=>{toast("K3 betting is temporarily paused while server payout rules are reviewed.");}; $("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;state.tab=b.dataset.tab;$$(".tab").forEach(x=>x.classList.toggle("active",x===b));renderPanel()};
 $("#rulesBtn").onclick=$("#how").onclick=()=>$("#rules").classList.add("show");$("#ruleClose").onclick=()=>$("#rules").classList.remove("show");$("#deposit").onclick=()=>location.href="deposit.html";$("#withdraw").onclick=()=>location.href="withdraw.html";$("#back").onclick=()=>history.back();
 setInterval(update,200);update();
 })();
