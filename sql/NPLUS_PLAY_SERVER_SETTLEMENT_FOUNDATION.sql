@@ -717,6 +717,7 @@ grant execute on function public.nplus_wingo_demo_current_round(integer) to auth
 grant execute on function public.nplus_wingo_demo_place_bet(integer, jsonb, numeric, uuid) to authenticated;
 grant execute on function public.nplus_wingo_demo_settle_round(integer, bigint) to authenticated;
 grant execute on function public.nplus_wingo_demo_my_bets(integer, integer) to authenticated;
+revoke all on function public.nplus_wingo_demo_history(integer, integer) from public, anon, authenticated;
 grant execute on function public.nplus_wingo_demo_history(integer, integer) to authenticated;
 
 commit;
