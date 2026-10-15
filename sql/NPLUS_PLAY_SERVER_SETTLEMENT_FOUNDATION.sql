@@ -276,6 +276,32 @@ begin
   end if;
   v_stake := p_stake;
 
+  -- Resolve completed retries before checking the current round's cutoff.
+  -- A network retry after the round closes must return the original bet,
+  -- not make the same request look like a new late bet.
+  select * into v_bet
+  from public.nplus_wingo_demo_bets
+  where user_id = v_user_id and request_id = p_request_id;
+
+  if found then
+    if v_bet.selection <> p_selection or v_bet.stake <> v_stake then
+      raise exception 'Request id was already used for a different bet.';
+    end if;
+
+    select balance into v_balance_after
+    from public.demo_wallets where user_id = v_user_id;
+
+    return jsonb_build_object(
+      'bet_id', v_bet.id,
+      'round_id', v_bet.round_id,
+      'round_index', (select r.round_index from public.nplus_wingo_demo_rounds r where r.id = v_bet.round_id),
+      'stake', v_bet.stake,
+      'balance', v_balance_after,
+      'status', v_bet.status,
+      'duplicate_request', true
+    );
+  end if;
+
   v_epoch := extract(epoch from v_now);
   v_index := floor(v_epoch / p_duration_seconds)::bigint;
   v_start := to_timestamp(v_index * p_duration_seconds);
