@@ -4,7 +4,7 @@
   const CFG = window.NPlusConfig || {};
   const IDLE_LIMIT_MS = 2 * 60 * 60 * 1000; // 2 hours
 
-  const PUBLIC_PAGES = new Set(["", "index.html", "auth.html"]);
+  const PUBLIC_PAGES = new Set(["", "index.html", "auth.html", "forgot-password.html"]);
   const SEPARATE_PAGES = new Set(["admin.html", "owner.html"]);
 
   const IDLE_KEY = "nplus_last_activity_v1";
@@ -163,71 +163,26 @@
   // SIGNUP
   // -----------------------------
 
-  async function signUp({
+  async function sendSignupOtp({
     email,
     mobile,
     password,
     name = ""
   }) {
-    if (!client) {
-      throw new Error("Supabase is not configured.");
-    }
+    if (!client) throw new Error("Supabase is not configured.");
 
     const cleanEmail = normalizeEmail(email);
     const cleanMobile = normalizeMobile(mobile);
     const cleanName = String(name || "").trim();
 
-    if (!cleanName) {
-      throw new Error("Display name is required.");
-    }
+    if (!cleanName) throw new Error("Display name is required.");
+    if (cleanName.length > 40) throw new Error("Display name is too long.");
+    if (!password || password.length < 6) throw new Error("Password must be at least 6 characters.");
 
-    if (cleanName.length > 40) {
-      throw new Error("Display name is too long.");
-    }
+    // Duplicate mobiles are prevented atomically by the database unique index
+    // profiles_phone_digits_unique_idx. Avoid exposing an anonymous phone-existence RPC.
 
-    if (!password || password.length < 6) {
-      throw new Error(
-        "Password must be at least 6 characters."
-      );
-    }
-
-    // -----------------------------------------
-    // CHECK DUPLICATE MOBILE
-    // -----------------------------------------
-
-    const {
-      data: phoneUsed,
-      error: phoneCheckError
-    } = await client.rpc(
-      "nplus_phone_is_registered",
-      {
-        p_phone: cleanMobile
-      }
-    );
-
-    if (phoneCheckError) {
-      throw new Error(
-        "Could not check the mobile number. Please try again."
-      );
-    }
-
-    if (phoneUsed === true) {
-      throw new Error(
-        "Mobile number already used. Please use another number."
-      );
-    }
-
-    // -----------------------------------------
-    // CREATE AUTH USER
-    //
-    // IMPORTANT:
-    // Supabase Email Confirmation must be OFF.
-    // -----------------------------------------
-
-    const {
-      data,
-      error
-    } = await client.auth.signUp({
+    const { data, error } = await client.auth.signUp({
       email: cleanEmail,
       password,
       options: {
@@ -240,49 +195,81 @@
     });
 
     if (error) {
-      const msg = String(
-        error.message || ""
-      ).toLowerCase();
-
-      if (
-        msg.includes("already registered") ||
-        msg.includes("already been registered") ||
-        msg.includes("user already exists") ||
-        msg.includes("already exists")
-      ) {
-        throw new Error(
-          "Email address already used. Please use another email."
-        );
+      const msg = String(error.message || "").toLowerCase();
+      if (msg.includes("already registered") ||
+          msg.includes("already been registered") ||
+          msg.includes("user already exists") ||
+          msg.includes("already exists")) {
+        throw new Error("Email address already used. Please use another email.");
       }
-
+      if (msg.includes("database error saving new user") ||
+          msg.includes("profiles_phone_digits_unique_idx") ||
+          msg.includes("duplicate key")) {
+        throw new Error("Account could not be created. The mobile number or email may already be registered. Check the details and try again.");
+      }
       throw error;
     }
 
     const user = data?.user;
-
-    if (!user) {
-      throw new Error(
-        "Account could not be created."
-      );
+    if (!user) throw new Error("Account could not be created.");
+    if (Array.isArray(user.identities) && user.identities.length === 0) {
+      throw new Error("Email address already used. Please use another email.");
     }
 
-    // With email confirmation OFF,
-    // Supabase should return an active session.
-    if (!data?.session) {
-      throw new Error(
-        "Account was created, but automatic login is unavailable. Please check Supabase Email confirmation settings."
-      );
+    // Email confirmation must be enabled for the requested signup-OTP flow.
+    if (data?.session) {
+      await client.auth.signOut();
+      throw new Error("Email confirmation is disabled. Enable Confirm email in Supabase to use signup OTP.");
     }
-
-    markActivity();
 
     return {
       user,
-      session: data.session,
       email: cleanEmail,
       mobile: cleanMobile,
       name: cleanName
     };
+  }
+
+  async function verifySignupEmailOtp({ email, token, mobile, name = "" }) {
+    if (!client) throw new Error("Supabase is not configured.");
+
+    const cleanEmail = normalizeEmail(email);
+    const cleanMobile = normalizeMobile(mobile);
+    const cleanName = String(name || "").trim();
+    const code = String(token || "").trim();
+
+    if (!/^\d{6}$/.test(code)) throw new Error("Enter the 6-digit email verification code.");
+
+    const { data, error } = await client.auth.verifyOtp({
+      email: cleanEmail,
+      token: code,
+      type: "email"
+    });
+    if (error) throw new Error("The email code is invalid or expired. Request a new code and try again.");
+
+    const user = data?.user || data?.session?.user;
+    if (!user?.id || !data?.session) throw new Error("Email verification did not create an active session.");
+
+    const { data: profile, error: profileError } = await client
+      .from("profiles")
+      .select("phone,email")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileError || !profile) {
+      await client.auth.signOut();
+      throw new Error("Email verified, but account profile setup failed. Please contact support before retrying signup.");
+    }
+
+    const profileEmail = String(profile.email || "").trim().toLowerCase();
+    const profilePhone = String(profile.phone || "").trim();
+    if (profileEmail !== cleanEmail || profilePhone !== cleanMobile) {
+      await client.auth.signOut();
+      throw new Error("Email verified, but the profile email/mobile does not match. Check the database profile trigger before logging in.");
+    }
+
+    markActivity();
+    return { user, session: data.session, email: cleanEmail, mobile: cleanMobile, name: cleanName };
   }
 
   // -----------------------------
@@ -465,7 +452,8 @@
     normalizeEmail,
     normalizeMobile,
 
-    signUp,
+    sendSignupOtp,
+    verifySignupEmailOtp,
     signIn,
     signOut,
     current,

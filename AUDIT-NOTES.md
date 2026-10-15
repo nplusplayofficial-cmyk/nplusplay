@@ -1,8 +1,39 @@
-# Audit notes
+# N+ PLAY audit notes — 2026-10-15
 
-Observed from the supplied current files:
-- Inline JavaScript syntax checks pass for the staged HTML pages.
-- Shared wallet pages invoke the existing NPlusWallet bridge / `nplus_wallet_change` RPC.
-- The current repo already has an email-OTP-capable `core/nplus-auth.js`; this package intentionally preserves it rather than replacing it.
-- The browser cannot run a real Supabase integration test in this environment.
-- The `nplus_wallet_change` function body was not supplied as SQL in this runtime, so its actual server-side validation cannot be verified here. Treat positive client-side win credits as an unresolved security blocker until the legacy function is inspected and replaced by server-authoritative settlement RPCs.
+## Confirmed live changes (Supabase Production)
+A verified custom-format backup was created locally at `C:\\Users\\Natarajan K\\NPLUS-PLAY-DB-BACKUP\\nplus-play-full-2026-10-15.dump`. Archive metadata is readable with `pg_restore --list`; a restore into an isolated database has not yet been tested.
+
+The following database hardening was then applied and read-only verified:
+- Added `profiles.role` trigger protection; a rollback-only test confirmed a non-admin promotion attempt is blocked.
+- Removed anonymous EXECUTE on the generic wallet RPC and the admin SECURITY DEFINER RPC set; authenticated calls remain granted and the RPCs retain their own authorization checks.
+- Removed direct anon/authenticated write privileges from wallet and transaction tables; authenticated users retain own-row SELECT.
+- Added a unique expression index on digit-normalized profile phone values after confirming 5 existing profiles had no duplicate phone groups.
+- Consolidated duplicate deposit SELECT/INSERT policies and optimized RLS expressions using `(SELECT auth.uid())`.
+- Added profile owner/admin SELECT policy, kept own-row profile update policy, and added reviewed_by/updated_by/transaction indexes.
+- Removed public EXECUTE on the auth profile trigger function.
+
+These changes did not change existing wallet balances or execute any game result/settlement. The backup remains sensitive and must not be committed/uploaded to GitHub.
+
+## Repository defects fixed on the branch
+- Correct admin User Management page and removed the misspelled duplicate.
+- Add PWA icon at the manifest/service-worker expected path and bump shell cache version.
+- Add a pending virtual-credit request page and route deposits only to demo mode; payment gateway placeholder is disabled.
+- Set legacy REAL_MONEY configuration to false.
+- Fix forgot-password links to the existing auth page.
+- Restore signup email-OTP UI while retaining email + mobile + password login.
+- Add a static QA GitHub Actions workflow and release-readiness docs.
+
+## Authentication / release checks
+- Signup uses Supabase signUp and verifyOtp({ email, token, type: "email" }); Confirm signup email template must use `{{ .Token }}` for a six-digit code, rather than only `{{ .ConfirmationURL }}`.
+- The live `main` signup code still calls `nplus_phone_is_registered`, so that function remains anon-executable until the PR is merged and deployed. The branch removes the lookup and relies on `profiles_phone_digits_unique_idx`, which is a database-enforced unique index. After deployment and signup testing, revoke anon EXECUTE on the old RPC.
+- Verify that Auth email OTP delivers successfully and that the auth.users trigger stores email/mobile and creates exactly ₹108 for new users. Do not modify existing balances.
+- The checked-in `supabase-schema.sql` is an old/basic template with a ₹1,000 default; do not run it over production.
+- Leaked password protection still needs to be enabled in Supabase Auth settings.
+
+## Critical game-security blocker
+- The live `nplus_wallet_change` function accepts a client-supplied delta and prevents negative balances but does not prove positive `GAME_WIN` deltas were earned.
+- WINGO, MotoRace, and Aviator browser code currently asks the generic wallet RPC for positive wins; some other games' settlement flow is unverified.
+- Do not claim tamper-resistant game settlement until bets, outcomes, payout amounts and replay/idempotency are validated on the server and every game is tested.
+
+## Limits
+The database hardening has been applied in Production and verified by catalog/privilege queries. It has not undergone a full browser signup/login/deposit/game end-to-end test, and there is no verified restore test yet. PR changes remain on the separate branch, not merged into main.

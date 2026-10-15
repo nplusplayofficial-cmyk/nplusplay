@@ -18,8 +18,8 @@ NPLUS.CONFIG = Object.freeze({
         REWARDS: true,
         ADMIN: true,
 
-        // Production real-money features remain disabled
-        REAL_MONEY: true,
+        // Real-money payments/payouts are disabled; deposit/withdraw screens are demo requests only.
+        REAL_MONEY: false,
         DEPOSIT: true,
         WITHDRAWAL: true
     }
