@@ -149,9 +149,10 @@ modal.onclick=e=>{if(e.target===modal)close()};
 let selectedMethod="Demo Wallet";
 document.querySelector("#depositBtn").onclick=()=>{
  const amount=Number(document.querySelector("#amount").value);
- if(!Number.isFinite(amount)||amount<=0){alert("Please enter a valid amount.");return}
- const params=new URLSearchParams({amount:String(amount),method:selectedMethod});
- location.href=(selectedMethod==="Demo Wallet"?"deposit-demo.html?":"deposit-gateway.html?")+params.toString();
+ if(!Number.isFinite(amount)||amount<10||amount>100000){alert("Enter a demo-credit request amount between ₹10 and ₹1,00,000.");return}
+ if(selectedMethod!=="Demo Wallet"){alert("Payment gateway is not enabled. N+ PLAY supports virtual-credit demo requests only.");return}
+ const params=new URLSearchParams({amount:String(amount),method:"Demo Wallet"});
+ location.href="deposit-demo.html?"+params.toString();
 };
 function chooseMethod(method){
  selectedMethod=method;
