@@ -73,6 +73,8 @@ CREATE POLICY wallet_transactions_owner_or_admin_read
   USING (user_id = (SELECT auth.uid()) OR (SELECT public.nplus_is_admin()));
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.profiles FROM PUBLIC, anon, authenticated;
+GRANT SELECT, UPDATE ON TABLE public.profiles TO authenticated;
 DROP POLICY IF EXISTS "profiles own row" ON public.profiles;
 DROP POLICY IF EXISTS profiles_owner_or_admin_read ON public.profiles;
 CREATE POLICY profiles_owner_or_admin_read
@@ -87,6 +89,8 @@ CREATE POLICY profiles_own_update
   WITH CHECK (id = (SELECT auth.uid()));
 
 ALTER TABLE public.deposit_requests ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.deposit_requests FROM PUBLIC, anon, authenticated;
+GRANT SELECT, INSERT ON TABLE public.deposit_requests TO authenticated;
 DROP POLICY IF EXISTS admins_select_deposit_requests ON public.deposit_requests;
 DROP POLICY IF EXISTS "admins_select_deposit_requests" ON public.deposit_requests;
 DROP POLICY IF EXISTS users_select_own_deposit_requests ON public.deposit_requests;
@@ -108,15 +112,18 @@ CREATE POLICY deposit_requests_insert
   );
 
 ALTER TABLE public.game_settings ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.game_settings FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON TABLE public.game_settings TO authenticated;
 DROP POLICY IF EXISTS "admins can update game settings" ON public.game_settings;
 DROP POLICY IF EXISTS game_settings_admin_update ON public.game_settings;
-CREATE POLICY game_settings_admin_update
-  ON public.game_settings FOR UPDATE TO authenticated
-  USING ((SELECT public.nplus_is_admin()))
-  WITH CHECK ((SELECT public.nplus_is_admin()));
 
 ALTER TABLE public.demo_game_controls ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.demo_game_controls FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON TABLE public.demo_game_controls TO authenticated;
+
 ALTER TABLE public.wingo_manual_results ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.wingo_manual_results FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON TABLE public.wingo_manual_results TO authenticated;
 
 DO $revoke_anonymous$
 DECLARE
