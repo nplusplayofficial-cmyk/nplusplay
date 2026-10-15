@@ -66,7 +66,11 @@ for (const required of [
   'core/nplus-config.js', 'core/nplus-auth.js', 'core/nplus-wallet-bridge.js',
   'admin-users.html', 'deposit-demo.html',
   'sql/NPLUS_PLAY_PREMIUM_FOUNDATION.sql', 'sql/NPLUS_PLAY_PROFILE_DEPOSIT_GUARDS.sql',
-  'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql'
+  'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql',
+  'sql/NPLUS_PLAY_MOTORACE_SCHEMA.sql',
+  'sql/NPLUS_PLAY_MOTORACE_RPC.sql',
+  'qa/test-wingo-settlement.sql',
+  'qa/test-motorace-settlement.sql'
 ]) {
   if (!exists(required)) fail('required file missing: ' + required);
 }
