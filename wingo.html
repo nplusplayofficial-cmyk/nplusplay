@@ -407,7 +407,7 @@ async function ensureServerRound(sec=state.sec){
   const now=Date.now();
   const expectedIndex=Math.floor(now/(sec*1000));
   const cached=serverRoundCache[sec];
-  if(cached && Number(cached.round_index)===expectedIndex)return cached;
+  if(cached && Number(cached.round_index)===expectedIndex && cached.starts_at && cached.ends_at)return cached;
   if(now-(serverRoundAttemptAt[sec]||0)<3000)return cached||null;
   serverRoundAttemptAt[sec]=now;
 
