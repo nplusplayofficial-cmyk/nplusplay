@@ -6,6 +6,7 @@ on:
       - main
       - fixes/premium-audit-2026-10-15
       - security/server-game-settlement-2026-10-15
+      - release-candidate/security-rollout-2026-10-17
   pull_request:
     branches:
       - main
