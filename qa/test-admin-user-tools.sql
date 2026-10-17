@@ -42,18 +42,21 @@ begin
 
   perform set_config('request.jwt.claim.sub',v_admin::text,true);
 
-  v_directory := public.nplus_admin_user_directory('',200);
+  v_directory := public.nplus_admin_user_directory('QA-ADMIN',200);
   if jsonb_typeof(v_directory->'rows')<>'array'
-     or jsonb_array_length(v_directory->'rows')<>2 then
-    raise exception 'Admin user directory did not return both test profiles.';
+     or jsonb_array_length(v_directory->'rows')<>1
+     or v_directory->'rows'->0->>'user_id'<>v_admin::text
+     or v_directory->'rows'->0->>'role'<>'admin' then
+    raise exception 'Admin user directory did not find the unique test admin profile.';
   end if;
-  if not exists (
-    select 1 from jsonb_array_elements(v_directory->'rows') x
-    where x->>'user_id'=v_user::text
-      and x->>'display_name'='Demo User QA'
-      and (x->>'balance')::numeric=108.00
-  ) then
-    raise exception 'Admin directory did not return expected user/wallet fields.';
+
+  v_directory := public.nplus_admin_user_directory('QA-USER',200);
+  if jsonb_typeof(v_directory->'rows')<>'array'
+     or jsonb_array_length(v_directory->'rows')<>1
+     or v_directory->'rows'->0->>'user_id'<>v_user::text
+     or v_directory->'rows'->0->>'display_name'<>'Demo User QA'
+     or (v_directory->'rows'->0->>'balance')::numeric<>108.00 then
+    raise exception 'Admin directory did not return expected test user/wallet fields.';
   end if;
 
   v_directory := public.nplus_admin_user_directory('Demo User',200);
