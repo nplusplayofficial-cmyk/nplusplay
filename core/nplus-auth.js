@@ -230,6 +230,28 @@
     };
   }
 
+  async function resendSignupEmailOtp({ email }) {
+    if (!client) throw new Error("Supabase is not configured.");
+
+    const cleanEmail = normalizeEmail(email);
+    if (!cleanEmail) throw new Error("Enter the email used to create the account.");
+
+    const { error } = await client.auth.resend({
+      type: "signup",
+      email: cleanEmail
+    });
+
+    if (error) {
+      const msg = String(error.message || "").toLowerCase();
+      if (msg.includes("rate limit") || msg.includes("too many")) {
+        throw new Error("Too many code requests. Wait a little before requesting another email.");
+      }
+      throw new Error("Unable to resend the verification code. Check the email and try again.");
+    }
+
+    return { email: cleanEmail };
+  }
+
   async function verifySignupEmailOtp({ email, token, mobile, name = "" }) {
     if (!client) throw new Error("Supabase is not configured.");
 
@@ -453,6 +475,7 @@
     normalizeMobile,
 
     sendSignupOtp,
+    resendSignupEmailOtp,
     verifySignupEmailOtp,
     signIn,
     signOut,
