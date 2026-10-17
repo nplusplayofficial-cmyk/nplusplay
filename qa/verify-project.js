@@ -61,6 +61,15 @@ for (const file of htmls) {
   }
 }
 
+// Repository-wide guard: browser code must never award a generic GAME_WIN credit.
+for (const file of htmls) {
+  const html = fs.readFileSync(path.join(root, file), 'utf8');
+  const forgedWin = /(?:NPlusWallet|wallet)\.changeBalance\s*\(\s*(?!-)\s*[\s\S]{0,350}?\btype\s*:\s*['"]GAME_WIN['"]/i;
+  if (forgedWin.test(html)) {
+    fail(file + ' contains a client-authored positive GAME_WIN wallet credit');
+  }
+}
+
 for (const required of [
   'manifest.webmanifest', 'sw.js', 'offline.html', 'assets/nplus-icon.svg',
   'core/nplus-config.js', 'core/nplus-auth.js', 'core/nplus-wallet-bridge.js',
