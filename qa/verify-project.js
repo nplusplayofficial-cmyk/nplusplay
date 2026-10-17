@@ -220,8 +220,10 @@ try {
 
   const adminGames = fs.readFileSync(path.join(root, 'admin-games.html'), 'utf8');
   if (!adminGames.includes('HARD_PAUSED_GAMES = new Set(["K3", "5D", "TRX"])') ||
-      !adminGames.includes('BETTING PAUSED')) {
-    fail('N+ ADMIN game cards must show the paused wagering state');
+      !adminGames.includes('BETTING PAUSED') ||
+      !adminGames.includes('LOCKED · PAYOUT RULES PENDING') ||
+      !adminGames.includes('PAUSED · RULES PENDING')) {
+    fail('N+ ADMIN game cards must show and lock paused wagers until payout rules are approved');
   }
   if (!adminGames.includes('from("game_settings")') ||
       !adminGames.includes('nplus_set_game_status') ||
