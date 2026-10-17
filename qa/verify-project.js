@@ -138,6 +138,12 @@ try {
     if (!source.includes('BETTING PAUSED')) {
       fail(page + ' must visibly pause bets until server payout rules are approved');
     }
+    if (page === 'k3.html' && source.includes('<span class="live"><i></i>LIVE</span>')) {
+      fail('K3 must not display a LIVE badge while wagering is paused');
+    }
+    if (page === 'trx-wingo.html' && source.includes('<span class="live">● LIVE</span>')) {
+      fail('TRX WINGO must not display a LIVE badge while wagering is paused');
+    }
   }
 
   const withdraw = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
