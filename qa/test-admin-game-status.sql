@@ -42,6 +42,13 @@ begin
     (v_admin,'QA-GAME-ADMIN','Game Admin QA','game-admin-qa@example.invalid','9000000081','admin'),
     (v_user,'QA-GAME-USER','Game User QA','game-user-qa@example.invalid','9000000082','user');
 
+  if exists (
+    select 1 from public.game_settings
+    where game_key in ('K3','5D','TRX') and enabled is distinct from false
+  ) then
+    raise exception 'Migration did not default K3/5D/TRX to disabled.';
+  end if;
+
   perform set_config('request.jwt.claim.sub',v_admin::text,true);
   v_result:=public.nplus_set_game_status('WINGO',false);
   if coalesce((v_result->>'enabled')::boolean,true) is not false then
