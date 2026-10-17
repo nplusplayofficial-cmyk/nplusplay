@@ -58,6 +58,23 @@ create table public.wingo_manual_results (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.game_settings (
+  game_key text primary key,
+  game_name text not null,
+  enabled boolean not null default true,
+  updated_at timestamptz not null default now(),
+  updated_by uuid
+);
+insert into public.game_settings(game_key, game_name, enabled)
+values
+  ('WINGO','WINGO',true),
+  ('K3','K3 WINGO',true),
+  ('5D','5D',true),
+  ('TRX','TRX WINGO',true),
+  ('AVIATOR','AVIATOR',true),
+  ('MOTO','MOTO RACE',true)
+on conflict (game_key) do nothing;
+
 \ir ../sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql
 
 do $tests$
@@ -273,6 +290,23 @@ begin
      or not has_function_privilege('authenticated', 'public.nplus_wingo_demo_history(integer,integer)', 'EXECUTE') then
     raise exception 'WINGO history RPC permissions are incorrect.';
   end if;
+
+  -- Admin game status must be enforced in the server bet RPC.
+  update public.game_settings set enabled=false where game_key='WINGO';
+  begin
+    perform public.nplus_wingo_demo_place_bet(
+      30,
+      '{"type":"number","value":"8","amount":10,"qty":1,"multi":1}'::jsonb,
+      10.00,
+      gen_random_uuid()
+    );
+    raise exception 'TEST_FAILURE: disabled WINGO accepted a new bet.';
+  exception when others then
+    if sqlerrm not like '%WINGO betting is disabled by admin%' then
+      raise;
+    end if;
+  end;
+  update public.game_settings set enabled=true where game_key='WINGO';
 
   -- Public invocation without a user must fail.
   perform set_config('request.jwt.claim.sub', '', true);
