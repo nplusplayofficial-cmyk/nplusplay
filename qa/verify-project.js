@@ -90,6 +90,7 @@ for (const required of [
   'qa/test-admin-game-status.sql',
   'qa/test-admin-user-tools.sql',
   'qa/test-admin-deposits.sql',
+  'qa/test-phone-enumeration-revoke.sql',
   'qa/test-wingo-settlement.sql',
   'qa/test-motorace-settlement.sql',
   'qa/test-aviator-settlement.sql',
