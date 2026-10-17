@@ -166,6 +166,16 @@ try {
     fail('Signup OTP recovery must provide a resend-code action');
   }
 
+  const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  if (home.includes('readLegacyWallet') || home.includes('LEGACY_STORE') ||
+      /localStorage\.getItem\([^)]*balance/i.test(home)) {
+    fail('Home wallet must not fall back to a browser-stored balance');
+  }
+  if (!home.includes('walletEl.textContent = "SYNCING…";') ||
+      !home.includes('walletEl.textContent = "UNAVAILABLE";')) {
+    fail('Home wallet must show loading/unavailable state until Supabase sync succeeds');
+  }
+
   const deposit = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
   if (deposit.includes('nplusplay_wallet_v1') ||
       /localStorage\.getItem\(LEGACY\)/.test(deposit)) {
