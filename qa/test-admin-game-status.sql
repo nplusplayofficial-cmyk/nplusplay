@@ -58,7 +58,7 @@ begin
   if v_enabled is not true then raise exception 'Admin status RPC did not re-enable the allowed WINGO flag.'; end if;
 
   begin
-    perform public.nplus_set_game_status('WINGO',false);
+    perform public.nplus_set_game_status('WINGO',null::boolean);
     raise exception 'TEST_FAILURE: null status should be rejected.';
   exception when others then
     if sqlerrm not like '%Enabled status must be true or false%' then raise; end if;
