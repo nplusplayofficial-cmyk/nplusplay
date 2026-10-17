@@ -77,6 +77,8 @@ declare
   v_start timestamptz;
   v_end timestamptz;
   v_period text;
+  v_expected_period text;
+  v_bet_note text;
   v_balance numeric(12,2);
   v_before_count integer;
   v_after_count integer;
@@ -112,6 +114,22 @@ begin
   );
   if coalesce((v_placed->>'bet_id')::text, '') = '' then
     raise exception 'Place-bet RPC did not return a bet id.';
+  end if;
+
+  -- The existing N+ ADMIN WINGO round report parses "WINGO BET <period>"
+  -- and type/value/qty/multi from the ledger note. Keep that contract stable.
+  v_round_index := (v_placed->>'round_index')::bigint;
+  v_start := to_timestamp(v_round_index * 30);
+  v_expected_period :=
+    to_char(v_start at time zone 'Asia/Kolkata','YYYYMMDD')
+    || '1000'
+    || lpad(mod(v_round_index,100000)::text,5,'0');
+  select t.note into v_bet_note
+  from public.demo_wallet_transactions t
+  where t.user_id=v_user and t.type='GAME_BET' and t.source='WINGO'
+  order by t.created_at desc limit 1;
+  if v_bet_note !~ ('^WINGO BET ' || v_expected_period || ' type=number value=8 qty=1 multi=1 bet_id=') then
+    raise exception 'WINGO ledger note is incompatible with the Admin round-report parser: %.',v_bet_note;
   end if;
 
   v_recovered_bets := public.nplus_wingo_demo_my_bets(30, 100);
