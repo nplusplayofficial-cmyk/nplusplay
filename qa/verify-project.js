@@ -297,6 +297,21 @@ try {
       !withdraw.includes('virtual demo credits have no cash value')) {
     fail('Withdraw page must clearly disable cash withdrawals in demo mode');
   }
+  if (/id=["'](?:holder|bank|accountNo|ifsc|branch|upiId|upiHolder|upiBank)["']/i.test(withdraw)) {
+    fail('Withdraw page must not collect bank, account, IFSC or UPI details in demo mode');
+  }
+
+  const auth = fs.readFileSync(path.join(root, 'core/nplus-auth.js'), 'utf8');
+  if (auth.includes('nplus_phone_is_registered')) {
+    fail('Signup must not call the public phone-registration lookup RPC');
+  }
+  if (!auth.includes('verifyOtp') || !auth.includes('type: "email"')) {
+    fail('Signup must retain the six-digit email OTP verification flow');
+  }
+
+  if (exists('admin-users.htlm')) {
+    fail('Misspelled legacy admin-users.htlm duplicate must not be present in the release candidate');
+  }
 
   const moto = fs.readFileSync(path.join(root, 'motorace.html'), 'utf8');
   if (/type\s*:\s*['"]GAME_WIN['"]/.test(moto) || /window\.NPlusWallet\.changeBalance/.test(moto)) {
