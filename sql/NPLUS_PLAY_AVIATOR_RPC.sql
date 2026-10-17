@@ -222,6 +222,10 @@ begin
      'auto_cashout',v_bet.auto_cashout,'duplicate_request',true);
  end if;
 
+ if not exists (select 1 from public.game_settings where game_key='AVIATOR' and enabled=true) then
+   raise exception 'Aviator betting is disabled by admin.';
+ end if;
+
  select * into v_round from public.nplus_aviator_demo_rounds
  where id=p_round_id for update;
  if not found then raise exception 'Aviator round not found.'; end if;
