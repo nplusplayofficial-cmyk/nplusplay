@@ -174,6 +174,13 @@ try {
     }
   }
 
+  const adminLogin = fs.readFileSync(path.join(root, 'admin-login.html'), 'utf8');
+  if (!adminLogin.includes('Admin session check failed:') ||
+      !adminLogin.includes('Admin login failed:') ||
+      !adminLogin.includes('finally {')) {
+    fail('N+ ADMIN login must recover cleanly from session/network exceptions');
+  }
+
   const aiRoulette = fs.readFileSync(path.join(root, 'ai-roulette.html'), 'utf8');
   if (!aiRoulette.includes('Coming Soon') ||
       !aiRoulette.includes('AI ROULETTE') ||
