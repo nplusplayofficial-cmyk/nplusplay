@@ -85,7 +85,9 @@ for (const required of [
   'sql/POST_ROLLOUT_REVOKE_PHONE_ENUMERATION.sql',
   'sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql',
   'sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql',
+  'sql/NPLUS_PLAY_ADMIN_DEPOSIT_ACTIONS.sql',
   'qa/test-admin-user-tools.sql',
+  'qa/test-admin-deposits.sql',
   'qa/test-wingo-settlement.sql',
   'qa/test-motorace-settlement.sql',
   'qa/test-aviator-settlement.sql',
@@ -127,6 +129,21 @@ try {
 
 // Release guard: migrated games must use server settlement, never client-authored wins.
 try {
+  const adminDeposits = fs.readFileSync(path.join(root, 'admin-deposits.html'), 'utf8');
+  for (const rpc of ['nplus_approve_deposit','nplus_reject_deposit']) {
+    if (!adminDeposits.includes(rpc)) fail('N+ ADMIN deposit page RPC missing: ' + rpc);
+  }
+  const depositSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_ADMIN_DEPOSIT_ACTIONS.sql'), 'utf8').toLowerCase();
+  for (const contract of [
+    'create or replace function public.nplus_approve_deposit',
+    'create or replace function public.nplus_reject_deposit',
+    'raise exception \'admin access required.\'',
+    'for update',
+    'revoke all on function public.nplus_approve_deposit'
+  ]) {
+    if (!depositSql.includes(contract.toLowerCase())) fail('N+ ADMIN deposit RPC security contract missing: ' + contract);
+  }
+
   const adminUsers = fs.readFileSync(path.join(root, 'admin-users.html'), 'utf8');
   for (const rpc of ['nplus_admin_user_directory','nplus_admin_user_transactions','nplus_admin_adjust_demo_wallet']) {
     if (!adminUsers.includes(rpc)) fail('N+ ADMIN Users page RPC missing: ' + rpc);
