@@ -204,6 +204,7 @@ begin
     'starts_at', v_round.starts_at,
     'ends_at', v_round.ends_at,
     'status', v_round.status,
+    'betting_enabled', coalesce((select gs.enabled from public.game_settings gs where gs.game_key='WINGO'), false),
     'server_time', v_now
   );
 end;
