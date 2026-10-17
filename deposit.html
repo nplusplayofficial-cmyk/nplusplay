@@ -126,15 +126,36 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 <script>
 (()=>{
 "use strict";
-const STORE="nplusplay_wingo_ultra_final_v2", LEGACY="nplusplay_wallet_v1";
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-function read(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}}
+let walletReady=false;
 async function balance(){
- try{const u=await window.NPlusAuth.current();if(u?.id)return Number(await window.NPlusWallet.getBalance())}catch(err){console.error('Deposit wallet sync',err)}
- const n=Number(read().balance); if(Number.isFinite(n)) return n;
- const l=Number(localStorage.getItem(LEGACY)); return Number.isFinite(l)?l:0;
+ const user=await window.NPlusAuth?.current?.();
+ if(!user?.id)throw new Error("Please sign in before creating a demo-credit request.");
+ const value=Number(await window.NPlusWallet.getBalance());
+ if(!Number.isFinite(value))throw new Error("The shared demo wallet balance is unavailable.");
+ return value;
 }
-async function render(){const b=await balance(); document.querySelector("#wallet").textContent=money(b);document.querySelector("#balance").textContent=money(b)}
+async function render(){
+ const wallet=document.querySelector("#wallet");
+ const balanceEl=document.querySelector("#balance");
+ const button=document.querySelector("#depositBtn");
+ walletReady=false;
+ button.disabled=true;
+ wallet.textContent="SYNCING…";
+ balanceEl.textContent="SYNCING…";
+ try{
+  const value=await balance();
+  wallet.textContent=money(value);
+  balanceEl.textContent=money(value);
+  walletReady=true;
+  button.disabled=false;
+ }catch(err){
+  console.error("Deposit wallet sync",err);
+  wallet.textContent="UNAVAILABLE";
+  balanceEl.textContent="UNAVAILABLE";
+  button.disabled=true;
+ }
+}
 document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
  document.querySelector("#amount").value=b.dataset.a;
  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active")); b.classList.add("active");
@@ -148,6 +169,7 @@ document.querySelector("#close").onclick=close;document.querySelector("#done").o
 modal.onclick=e=>{if(e.target===modal)close()};
 let selectedMethod="Demo Wallet";
 document.querySelector("#depositBtn").onclick=()=>{
+ if(!walletReady){alert("Please sign in and wait for the shared wallet to sync before submitting a request.");return;}
  const amount=Number(document.querySelector("#amount").value);
  if(!Number.isFinite(amount)||amount<10||amount>100000){alert("Enter a demo-credit request amount between ₹10 and ₹1,00,000.");return}
  if(selectedMethod!=="Demo Wallet"){alert("Payment gateway is not enabled. N+ PLAY supports virtual-credit demo requests only.");return}
