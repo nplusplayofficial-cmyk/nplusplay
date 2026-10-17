@@ -32,31 +32,12 @@ button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{wid
 <section class="hero"><div class="kicker">WALLET</div><h1>Withdrawals unavailable</h1><p>N+ PLAY is in virtual-credit demo mode. Demo credits cannot be withdrawn as cash.</p></section>
 <section class="card">
 <div class="label">AVAILABLE BALANCE</div><div class="balance" id="balance">₹0.00</div>
-<label class="field-label">WITHDRAW AMOUNT</label><div class="amount-wrap"><span>₹</span><input id="amount" inputmode="decimal" placeholder="0"></div>
-<div class="presets"><button class="preset" data-a="500">₹500</button><button class="preset" data-a="1000">₹1,000</button><button class="preset" data-a="2000">₹2,000</button><button class="preset" data-a="5000">₹5,000</button></div>
-
-<div class="field-label">WITHDRAWAL METHOD</div>
-<div class="method selected" data-method="Bank Account"><div class="micon">⌂</div><div class="copy"><b>Bank Account</b><small>Banking details</small></div><span class="radio"></span></div>
-<div class="method" data-method="UPI"><div class="micon">U</div><div class="copy"><b>UPI</b><small>UPI ID details</small></div><span class="radio"></span></div>
-
-<div class="details">
-<label class="field-label" style="margin-top:0" id="detailTitle">BANK ACCOUNT DETAILS</label>
-<div class="grid" id="bankFields">
- <div class="input-box"><label>ACCOUNT HOLDER NAME</label><input class="detail-input" id="holder" autocomplete="off" placeholder="Full name"></div>
- <div class="input-box"><label>BANK NAME</label><input class="detail-input" id="bank" autocomplete="off" placeholder="Bank name"></div>
- <div class="input-box"><label>ACCOUNT NUMBER</label><input class="detail-input" id="accountNo" inputmode="numeric" autocomplete="off" placeholder="Account number"></div>
- <div class="input-box"><label>IFSC CODE</label><input class="detail-input" id="ifsc" autocomplete="off" placeholder="IFSC code"></div>
- <div class="input-box full"><label>BRANCH NAME</label><input class="detail-input" id="branch" autocomplete="off" placeholder="Branch name"></div>
+<div role="status" aria-live="polite" style="margin:18px 0;padding:18px 15px;border:1px solid rgba(201,165,91,.22);border-radius:14px;background:#10110f;text-align:center">
+  <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:var(--gold2)">WITHDRAWALS DISABLED</div>
+  <p style="margin:10px 0 0;color:#9a9d95;font-size:12px;line-height:1.6">N+ PLAY uses virtual demo credits only. These credits have no cash value and cannot be withdrawn.</p>
 </div>
-<div class="grid" id="upiFields" style="display:none">
- <div class="input-box"><label>ACCOUNT HOLDER NAME</label><input class="detail-input" id="upiHolder" autocomplete="off" placeholder="Full name"></div>
- <div class="input-box"><label>BANK NAME</label><input class="detail-input" id="upiBank" autocomplete="off" placeholder="Bank name"></div>
- <div class="input-box full"><label>UPI ID</label><input class="detail-input" id="upiId" autocomplete="off" placeholder="example@upi"></div>
-</div>
-</div>
-
-<button class="cta" id="submitBtn">SUBMIT WITHDRAWAL REQUEST</button>
-<div class="note"><b>Demo mode:</b> withdrawals are disabled. No bank, UPI or withdrawal details are collected or saved.</div>
+<button class="cta" id="submitBtn" type="button" disabled aria-disabled="true">WITHDRAWALS DISABLED</button>
+<div class="note"><b>Privacy:</b> This demo page does not ask for bank, account, IFSC or UPI details.</div>
 <a class="backlink" href="account.html">← Back to Account</a>
 </section></div>
 
