@@ -240,9 +240,9 @@ try {
       !motoSql.includes('MotoRace betting is disabled by admin')) {
     fail('MotoRace backend must enforce the Admin pause on the server');
   }
-  const aviatorSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_AVIATOR_RPC.sql'), 'utf8');
-  if (!aviatorSql.includes("game_key='AVIATOR' and enabled=true") ||
-      !aviatorSql.includes('Aviator betting is disabled by admin')) {
+  const aviatorGameGateSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_AVIATOR_RPC.sql'), 'utf8');
+  if (!aviatorGameGateSql.includes("game_key='AVIATOR' and enabled=true") ||
+      !aviatorGameGateSql.includes('Aviator betting is disabled by admin')) {
     fail('Aviator backend must enforce the Admin pause on the server');
   }
 
