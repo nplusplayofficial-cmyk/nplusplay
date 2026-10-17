@@ -57,6 +57,16 @@ begin
   select enabled into v_enabled from public.game_settings where game_key='WINGO';
   if v_enabled is not true then raise exception 'Admin status RPC did not re-enable the allowed WINGO flag.'; end if;
 
+  update public.game_settings set enabled=false where game_key='K3';
+  begin
+    perform public.nplus_set_game_status('K3',true);
+    raise exception 'TEST_FAILURE: paused K3 was re-enabled without payout approval.';
+  exception when others then
+    if sqlerrm not like '%Payout rules pending%' then raise; end if;
+  end;
+  select enabled into v_enabled from public.game_settings where game_key='K3';
+  if v_enabled is not false then raise exception 'Server guard did not preserve paused K3 status.'; end if;
+
   begin
     perform public.nplus_set_game_status('WINGO',null::boolean);
     raise exception 'TEST_FAILURE: null status should be rejected.';
