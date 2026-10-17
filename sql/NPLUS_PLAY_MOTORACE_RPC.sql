@@ -98,6 +98,10 @@ begin
    'stake',b.stake,'fee',b.fee,'total',b.amount_debited,'balance',after_amt,'status',b.status,'duplicate_request',true);
  end if;
 
+ if not exists (select 1 from public.game_settings where game_key='MOTO' and enabled=true) then
+  raise exception 'MotoRace betting is disabled by admin.';
+ end if;
+
  idx:=floor(extract(epoch from now_at)/60)::bigint; st:=to_timestamp(idx*60); en:=st+interval '60 seconds';
  if now_at>=en-interval '5 seconds' then raise exception 'Betting is closed for this round.'; end if;
  insert into public.nplus_moto_demo_rounds(round_index,starts_at,ends_at,outcome)
