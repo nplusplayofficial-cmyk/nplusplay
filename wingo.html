@@ -425,6 +425,45 @@ async function ensureServerRound(sec=state.sec){
   return row;
 }
 
+let lastWingoAdminStatusSyncAt=0;
+let wingoAdminStatusSyncBusy=false;
+
+async function syncWingoAdminStatus(force=false){
+  const now=Date.now();
+  if(wingoAdminStatusSyncBusy)return;
+  if(!force&&now-lastWingoAdminStatusSyncAt<3000)return;
+  lastWingoAdminStatusSyncAt=now;
+  const client=window.NPlusAuth?.client;
+  if(!client)return;
+
+  wingoAdminStatusSyncBusy=true;
+  try{
+    const {data,error}=await client
+      .from("game_settings")
+      .select("enabled")
+      .eq("game_key","WINGO")
+      .maybeSingle();
+    if(error)throw error;
+    if(!data)throw new Error("WINGO server status is unavailable.");
+    for(const sec of [30,60,180,300]){
+      if(serverRoundCache[sec]){
+        serverRoundCache[sec].betting_enabled=data.enabled===true;
+        serverRoundCache[sec].admin_status_unavailable=false;
+      }
+    }
+  }catch(error){
+    console.error("WINGO Admin status sync failed:",error);
+    for(const sec of [30,60,180,300]){
+      if(serverRoundCache[sec]){
+        serverRoundCache[sec].betting_enabled=false;
+        serverRoundCache[sec].admin_status_unavailable=true;
+      }
+    }
+  }finally{
+    wingoAdminStatusSyncBusy=false;
+  }
+}
+
 function serverOutcomeToLocal(period,outcome){
   const number=Number(outcome?.number);
   const colorName=String(outcome?.colorName||"").toUpperCase();
@@ -984,6 +1023,7 @@ function update(){
     .then(async()=>{
       const r=round();
       try{await ensureServerRound(state.sec);}catch(err){console.error("WINGO server round sync failed:",err);}
+      await syncWingoAdminStatus();
       const closed=r.remaining<=5;
 
       const roundChanged=
@@ -1006,14 +1046,20 @@ function update(){
       $("#bar").style.width=
         (r.remaining/state.sec*100)+"%";
 
+      const adminDisabled=serverRoundCache[state.sec]?.betting_enabled===false;
+      const adminStatusUnavailable=serverRoundCache[state.sec]?.admin_status_unavailable===true;
       $("#status").textContent=
-        closed
+        adminStatusUnavailable
+          ?"STATUS UNAVAILABLE · RETRYING"
+          :adminDisabled
+          ?"BETTING DISABLED BY ADMIN"
+          :closed
           ?"BETTING CLOSED"
           :"BETTING OPEN";
 
       $("#round").classList.toggle(
         "closed",
-        closed
+        closed||adminDisabled||adminStatusUnavailable
       );
 
       const stage=
