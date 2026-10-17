@@ -32,12 +32,16 @@ The archive listing was read successfully with `pg_restore --list` (661 TOC entr
 - Verify a test signup creates a profile and ₹108 wallet, and that normal login works. Do not modify existing balances.
 - Do not use the old `supabase-schema.sql` basic template over the production database; it has an obsolete ₹1,000 default.
 
-## Critical game-security blocker
-The browser game pages can call `nplus_wallet_change` with positive `GAME_WIN` deltas. That RPC prevents negative balances but does not itself verify that a positive win was earned. Client-generated outcomes can be forged.
-
-Do not merge this branch as a fully secured release until every game uses server-authoritative bets/rounds/results/payouts with replay/idempotency protection. Removing positive credits immediately would break current winning settlements; the server settlement replacement has to land before tightening those credits.
+## Current game-security and release status
+- The candidate migrates WINGO, MotoRace and Aviator to server-owned virtual-credit bet/round/settlement RPCs with replay protection and wallet-ledger writes.
+- K3, 5D and TRX WINGO betting are intentionally paused in the candidate until their payout rules are reviewed and matching server settlement is implemented.
+- The live production `main` still uses the legacy wallet path and does not yet have the new settlement tables. Do not deploy the candidate HTML before its matching reviewed SQL, and do not apply the post-rollout wallet guard before every active frontend path has migrated.
+- No cash deposits, cash payouts or withdrawals are supported; demo credits have no cash value.
 
 ## Verification
-- Static QA workflow completed successfully on the latest branch commit: 36 HTML pages checked, 0 warnings and 0 static errors. This is static validation only.
-- It does not test live Supabase auth, RLS, RPC or browser/game settlement behaviour.
-- Production SQL hardening was applied via Supabase, but app code remains isolated on this branch. The Pull Request is draft and not merged into main.
+- Candidate commit `cc10da4e4e2d78436e3dd49f147ce36408413935` passed static HTML/JavaScript/local-link QA and all eight disposable PostgreSQL suites.
+- Push CI: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017662316
+- Pull-request CI: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017665739
+- The tests cover WINGO, Admin game status, MotoRace, Aviator, generic wallet guard, phone-enumeration revocation, Admin user tools and Admin deposit actions. They do not test live Supabase Auth or a real browser.
+- Latest read-only production inspection found no new settlement tables; all six live game toggles remain enabled; anon can still execute `nplus_phone_is_registered(text)`; authenticated users can still execute the legacy wallet RPC. This is why production rollout remains blocked.
+- The PR is draft and unmerged. No production writes were made during this verification, and existing wallet balances were not changed.
