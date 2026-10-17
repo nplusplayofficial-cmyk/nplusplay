@@ -86,6 +86,8 @@ for (const required of [
   'sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql',
   'sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql',
   'sql/NPLUS_PLAY_ADMIN_DEPOSIT_ACTIONS.sql',
+  'sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql',
+  'qa/test-admin-game-status.sql',
   'qa/test-admin-user-tools.sql',
   'qa/test-admin-deposits.sql',
   'qa/test-wingo-settlement.sql',
