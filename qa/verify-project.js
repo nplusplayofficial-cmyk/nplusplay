@@ -262,6 +262,14 @@ try {
     fail('Aviator UI must show and enforce the Admin pause state');
   }
 
+  const adminReports = fs.readFileSync(path.join(root, 'admin-reports.html'), 'utf8');
+  if (!adminReports.includes('ESTIMATED ALL-TIME COMMISSION') ||
+      !adminReports.includes('Estimate only') ||
+      !adminReports.includes('MotoRace charges a 1.5% demo stake fee') ||
+      !adminReports.includes('Aviator has no entry fee')) {
+    fail('N+ ADMIN commission figures must be labelled estimated until a recorded fee ledger exists');
+  }
+
   const deposit = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
   if (deposit.includes('nplusplay_wallet_v1') ||
       /localStorage\.getItem\(LEGACY\)/.test(deposit)) {
