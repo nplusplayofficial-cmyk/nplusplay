@@ -1,4 +1,15 @@
 \set ON_ERROR_STOP on
+create table if not exists public.game_settings (
+  game_key text primary key,
+  game_name text not null,
+  enabled boolean not null default true,
+  updated_at timestamptz not null default now(),
+  updated_by uuid
+);
+insert into public.game_settings(game_key,game_name,enabled)
+values ('AVIATOR','AVIATOR',true)
+on conflict (game_key) do nothing;
+
 \ir ../sql/NPLUS_PLAY_AVIATOR_SCHEMA.sql
 \ir ../sql/NPLUS_PLAY_AVIATOR_RPC.sql
 
@@ -195,6 +206,15 @@ begin
     or not has_function_privilege('authenticated','public.nplus_aviator_demo_cashout(uuid)','EXECUTE') then
   raise exception 'Aviator cash-out RPC grants are incorrect.';
  end if;
+ update public.game_settings set enabled=false where game_key='AVIATOR';
+ begin
+   perform public.nplus_aviator_demo_place_bet(round_id,0,1.00,gen_random_uuid(),null);
+   raise exception 'TEST_FAILURE: disabled Aviator accepted a new bet.';
+ exception when others then
+   if sqlerrm not like '%Aviator betting is disabled by admin%' then raise; end if;
+ end;
+ update public.game_settings set enabled=true where game_key='AVIATOR';
+
  raise notice 'Aviator server-settlement tests passed.';
 end
 $tests$;
