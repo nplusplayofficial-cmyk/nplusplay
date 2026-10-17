@@ -263,6 +263,7 @@ declare
  v_user uuid:=auth.uid();
  v_now timestamptz:=clock_timestamp();
  v_bet public.nplus_aviator_demo_bets%rowtype;
+ v_auto_bet public.nplus_aviator_demo_bets%rowtype;
  v_round public.nplus_aviator_demo_rounds%rowtype;
  v_elapsed double precision;
  v_mult numeric(8,2);
@@ -284,12 +285,45 @@ begin
    return jsonb_build_object('bet_id',v_bet.id,'status',v_bet.status,
      'multiplier',v_bet.cashout_multiplier,'payout',v_bet.payout,'round_id',v_bet.round_id,'duplicate_cashout',true);
  end if;
- if v_bet.status='lost' or v_round.status='crashed' or v_now>=v_round.crashes_at then
-   if v_round.status<>'crashed' then
-     update public.nplus_aviator_demo_rounds set status='crashed',crashed_at=crashes_at where id=v_round.id returning * into v_round;
-     update public.nplus_aviator_demo_bets set status='lost',payout=0,settled_at=clock_timestamp()
-     where round_id=v_round.id and status='open';
-   end if;
+ if v_now>=v_round.crashes_at and v_round.status<>'crashed' then
+   -- If this request is the first one to finalize a crashed round, pay every
+   -- server-qualified auto target below the crash point before marking losses.
+   -- The round lock makes this one-time even when manual cash-out requests race.
+   for v_auto_bet in
+     select * from public.nplus_aviator_demo_bets
+     where round_id=v_round.id and status='open'
+       and auto_cashout is not null and auto_cashout<v_round.crash_point
+     order by user_id,id
+     for update
+   loop
+     select balance into v_before from public.demo_wallets
+     where user_id=v_auto_bet.user_id for update;
+     if not found then raise exception 'Wallet missing during late Aviator auto cash-out.'; end if;
+     v_payout:=round(v_auto_bet.stake*v_auto_bet.auto_cashout,2);
+     v_after:=v_before+v_payout;
+     update public.demo_wallets set balance=v_after,updated_at=clock_timestamp()
+     where user_id=v_auto_bet.user_id;
+     insert into public.demo_wallet_transactions(user_id,delta,balance_before,balance_after,type,source,note)
+     values(v_auto_bet.user_id,v_payout,v_before,v_after,'GAME_WIN','AVIATOR',
+       format('Aviator server late auto cash-out %s at %sx',v_auto_bet.id,v_auto_bet.auto_cashout));
+     update public.nplus_aviator_demo_bets
+     set status='cashed_out',cashout_multiplier=v_auto_bet.auto_cashout,payout=v_payout,settled_at=clock_timestamp()
+     where id=v_auto_bet.id;
+   end loop;
+
+   update public.nplus_aviator_demo_rounds set status='crashed',crashed_at=crashes_at
+   where id=v_round.id returning * into v_round;
+   update public.nplus_aviator_demo_bets set status='lost',payout=0,settled_at=clock_timestamp()
+   where round_id=v_round.id and status='open';
+   select * into v_bet from public.nplus_aviator_demo_bets
+   where id=p_bet_id and user_id=v_user;
+ end if;
+
+ if v_bet.status='cashed_out' then
+   return jsonb_build_object('bet_id',v_bet.id,'status',v_bet.status,
+     'multiplier',v_bet.cashout_multiplier,'payout',v_bet.payout,'round_id',v_bet.round_id,'duplicate_cashout',true);
+ end if;
+ if v_bet.status='lost' or v_round.status='crashed' then
    return jsonb_build_object('bet_id',v_bet.id,'status','lost','payout',0,
      'crash_point',v_round.crash_point,'round_id',v_round.id);
  end if;
