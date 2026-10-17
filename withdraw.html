@@ -22,51 +22,30 @@ button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{wid
 .cta{width:100%;margin-top:18px;border:0;border-radius:15px;padding:15px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:12px}.note{margin-top:13px;padding:13px;border-radius:13px;background:rgba(201,165,91,.045);border:1px solid rgba(201,165,91,.1);color:#777a72;font-size:9px;line-height:1.55}.backlink{display:block;text-align:center;margin-top:17px;color:#8b8e86;font-size:10px}
 .modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);z-index:50}.modal.show{display:grid}.modal-card{width:min(100%,420px);background:#11130f;border:1px solid rgba(201,165,91,.2);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000}.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa}.modal-card h2{font-size:18px}.modal-card p{margin-top:8px;color:#777a72;font-size:10px;line-height:1.6}.done{width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950}
 @media(max-width:430px){.presets{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+/* Virtual-credit-only mode: do not collect or save payment/withdrawal details. */
+.amount-wrap,.presets,.field-label,.method,.details{display:none !important}
+#submitBtn{opacity:.55;cursor:not-allowed;background:#292a26!important;color:#9a9b94!important;border:1px solid var(--line)}
 </style>
 </head>
 <body><div class="app">
 <header class="header"><div class="left"><button class="back" onclick="location.href='account.html'">‹</button><div class="brand"><span class="mark">N+</span>PLAY</div></div><div class="wallet" id="wallet">₹0.00</div></header>
-<section class="hero"><div class="kicker">WALLET</div><h1>Withdraw</h1><p>Enter your withdrawal request details.</p></section>
+<section class="hero"><div class="kicker">WALLET</div><h1>Withdrawals unavailable</h1><p>N+ PLAY is in virtual-credit demo mode. Demo credits cannot be withdrawn as cash.</p></section>
 <section class="card">
 <div class="label">AVAILABLE BALANCE</div><div class="balance" id="balance">₹0.00</div>
-<label class="field-label">WITHDRAW AMOUNT</label><div class="amount-wrap"><span>₹</span><input id="amount" inputmode="decimal" placeholder="0"></div>
-<div class="presets"><button class="preset" data-a="500">₹500</button><button class="preset" data-a="1000">₹1,000</button><button class="preset" data-a="2000">₹2,000</button><button class="preset" data-a="5000">₹5,000</button></div>
-
-<div class="field-label">WITHDRAWAL METHOD</div>
-<div class="method selected" data-method="Bank Account"><div class="micon">⌂</div><div class="copy"><b>Bank Account</b><small>Banking details</small></div><span class="radio"></span></div>
-<div class="method" data-method="UPI"><div class="micon">U</div><div class="copy"><b>UPI</b><small>UPI ID details</small></div><span class="radio"></span></div>
-
-<div class="details">
-<label class="field-label" style="margin-top:0" id="detailTitle">BANK ACCOUNT DETAILS</label>
-<div class="grid" id="bankFields">
- <div class="input-box"><label>ACCOUNT HOLDER NAME</label><input class="detail-input" id="holder" autocomplete="off" placeholder="Full name"></div>
- <div class="input-box"><label>BANK NAME</label><input class="detail-input" id="bank" autocomplete="off" placeholder="Bank name"></div>
- <div class="input-box"><label>ACCOUNT NUMBER</label><input class="detail-input" id="accountNo" inputmode="numeric" autocomplete="off" placeholder="Account number"></div>
- <div class="input-box"><label>IFSC CODE</label><input class="detail-input" id="ifsc" autocomplete="off" placeholder="IFSC code"></div>
- <div class="input-box full"><label>BRANCH NAME</label><input class="detail-input" id="branch" autocomplete="off" placeholder="Branch name"></div>
+<div role="status" aria-live="polite" style="margin:18px 0;padding:18px 15px;border:1px solid rgba(201,165,91,.22);border-radius:14px;background:#10110f;text-align:center">
+  <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:var(--gold2)">WITHDRAWALS DISABLED</div>
+  <p style="margin:10px 0 0;color:#9a9d95;font-size:12px;line-height:1.6">N+ PLAY virtual demo credits have no cash value and cannot be withdrawn.</p>
 </div>
-<div class="grid" id="upiFields" style="display:none">
- <div class="input-box"><label>ACCOUNT HOLDER NAME</label><input class="detail-input" id="upiHolder" autocomplete="off" placeholder="Full name"></div>
- <div class="input-box"><label>BANK NAME</label><input class="detail-input" id="upiBank" autocomplete="off" placeholder="Bank name"></div>
- <div class="input-box full"><label>UPI ID</label><input class="detail-input" id="upiId" autocomplete="off" placeholder="example@upi"></div>
-</div>
-</div>
-
-<button class="cta" id="submitBtn">SUBMIT WITHDRAWAL REQUEST</button>
-<div class="note"><b>Virtual-credit mode:</b> this creates a demo withdrawal request for testing. No real-money transfer is processed.</div>
+<button class="cta" id="submitBtn" type="button" disabled aria-disabled="true">WITHDRAWALS DISABLED</button>
+<div class="note"><b>Privacy:</b> This demo page does not ask for bank, account, IFSC or UPI details.</div>
 <a class="backlink" href="account.html">← Back to Account</a>
 </section></div>
-
-<div class="modal" id="modal"><div class="modal-card"><button class="close" id="close">×</button><h2>Request Submitted</h2><p id="modalText"></p><button class="done" id="done">DONE</button></div></div>
 
 <script>
 (()=>{
 "use strict";
 
-const REQ="nplusplay_withdraw_requests_demo_v1";
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-
-let selected="Bank Account";
 let currentBalance=0;
 let refreshBusy=false;
 
@@ -86,15 +65,12 @@ async function syncBalance(){
     if(!window.NPlusAuth?.current || !window.NPlusWallet?.getBalance){
       throw new Error("Wallet sync system unavailable.");
     }
-
     const user=await window.NPlusAuth.current();
     if(!user?.id){
       window.location.href="auth.html";
       return currentBalance;
     }
-
-    const value=await window.NPlusWallet.getBalance();
-    setBalanceUI(value);
+    setBalanceUI(await window.NPlusWallet.getBalance());
     return currentBalance;
   }catch(err){
     console.error("Withdraw wallet sync error:",err);
@@ -104,117 +80,23 @@ async function syncBalance(){
   }
 }
 
-async function getFreshBalance(){
-  await syncBalance();
-  return currentBalance;
-}
+const submitButton=document.getElementById("submitBtn");
+submitButton.disabled=true;
+submitButton.setAttribute("aria-disabled","true");
 
-function addRequest(req){
-  let a=[];
-  try{a=JSON.parse(localStorage.getItem(REQ)||"[]")}catch{}
-  a.unshift(req);
-  localStorage.setItem(REQ,JSON.stringify(a.slice(0,100)));
-}
-
-document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
-  amount.value=b.dataset.a;
-  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active");
-});
-
-document.querySelectorAll(".method").forEach(m=>m.onclick=()=>{
-  selected=m.dataset.method;
-  document.querySelectorAll(".method").forEach(x=>x.classList.remove("selected"));
-  m.classList.add("selected");
-
-  const bankMode=selected==="Bank Account";
-  bankFields.style.display=bankMode?"grid":"none";
-  upiFields.style.display=bankMode?"none":"grid";
-  detailTitle.textContent=bankMode?"BANK ACCOUNT DETAILS":"UPI DETAILS";
-});
-
-submitBtn.onclick=async()=>{
-  const n=Number(amount.value);
-
-  if(!Number.isFinite(n)||n<=0){
-    alert("Please enter a valid amount.");
-    return;
-  }
-
-  const bal=await getFreshBalance();
-
-  if(n>bal){
-    alert("Amount exceeds available balance.");
-    return;
-  }
-
-  let details={};
-
-  if(selected==="Bank Account"){
-    details={
-      holder:holder.value.trim(),
-      bank:bank.value.trim(),
-      accountNo:accountNo.value.trim(),
-      ifsc:ifsc.value.trim(),
-      branch:branch.value.trim()
-    };
-
-    if(Object.values(details).some(v=>!v)){
-      alert("Please fill all bank details.");
-      return;
-    }
-  }else{
-    details={
-      holder:upiHolder.value.trim(),
-      bank:upiBank.value.trim(),
-      upiId:upiId.value.trim()
-    };
-
-    if(Object.values(details).some(v=>!v)){
-      alert("Please fill all UPI details.");
-      return;
-    }
-  }
-
-  const id="WD-"+Date.now().toString(36).toUpperCase();
-
-  addRequest({
-    id,
-    createdAt:new Date().toISOString(),
-    status:"PENDING",
-    amount:n,
-    method:selected,
-    details
-  });
-
-  modalText.textContent=
-    `${id} · ${money(n)} · ${selected}. Demo request saved for the local admin request queue.`;
-
-  modal.classList.add("show");
-};
-
-const modal=document.getElementById("modal");
-const close=()=>modal.classList.remove("show");
-
-document.getElementById("close").onclick=close;
-document.getElementById("done").onclick=()=>location.href="account.html";
-modal.onclick=e=>{if(e.target===modal)close()};
-
-/* Keep the displayed balance synced when the user changes it elsewhere. */
 window.addEventListener("nplus:wallet-change",e=>{
   const after=e?.detail?.after;
-  if(Number.isFinite(Number(after))) setBalanceUI(Number(after));
-  else syncBalance();
+  if(Number.isFinite(Number(after)))setBalanceUI(Number(after));
+  else void syncBalance();
 });
-
-window.addEventListener("storage",()=>syncBalance());
-window.addEventListener("pageshow",()=>syncBalance());
+window.addEventListener("storage",()=>void syncBalance());
+window.addEventListener("pageshow",()=>void syncBalance());
 document.addEventListener("visibilitychange",()=>{
-  if(!document.hidden) syncBalance();
+  if(!document.hidden)void syncBalance();
 });
 
-/* Cross-page refresh protection: re-read Supabase wallet periodically. */
-setInterval(()=>syncBalance(),2000);
+// This page only displays the shared demo balance; refresh at a modest interval.
+setInterval(()=>void syncBalance(),15000);
 
 (async()=>{
   try{

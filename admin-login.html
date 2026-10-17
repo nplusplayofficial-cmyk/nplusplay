@@ -156,18 +156,25 @@ button:disabled{opacity:.55;cursor:not-allowed}
   }
 
   (async () => {
-    const { data } = await supabase.auth.getSession();
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
 
-    if (data.session?.user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.session.user.id)
-        .maybeSingle();
+      if (data.session?.user) {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.session.user.id)
+          .maybeSingle();
 
-      if (profile?.role === "admin") {
-        location.replace("admin.html");
+        if (profileError) throw profileError;
+        if (String(profile?.role || "").toLowerCase() === "admin") {
+          location.replace("admin.html");
+        }
       }
+    } catch (error) {
+      console.error("Admin session check failed:", error);
+      showError("Unable to verify the admin session. Please try again.");
     }
   })();
 
@@ -177,36 +184,36 @@ button:disabled{opacity:.55;cursor:not-allowed}
     btn.disabled = true;
     btn.textContent = "CHECKING...";
 
-    const email = document.getElementById("email").value.trim().toLowerCase();
-    const password = document.getElementById("password").value;
+    try {
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    if (error) {
-      showError(error.message || "Admin login failed.");
+      if (error) throw error;
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (profileError || String(profile?.role || "").toLowerCase() !== "admin") {
+        await supabase.auth.signOut();
+        throw new Error("Admin access denied. This account is not authorized.");
+      }
+
+      location.replace("admin.html");
+    } catch (error) {
+      console.error("Admin login failed:", error);
+      showError(error?.message || "Unable to complete admin login. Please try again.");
+    } finally {
       btn.disabled = false;
       btn.textContent = "ADMIN LOGIN";
-      return;
     }
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .maybeSingle();
-
-    if (profileError || profile?.role !== "admin") {
-      await supabase.auth.signOut();
-      showError("Admin access denied. This account is not authorized.");
-      btn.disabled = false;
-      btn.textContent = "ADMIN LOGIN";
-      return;
-    }
-
-    location.replace("admin.html");
   });
 })();
 </script>

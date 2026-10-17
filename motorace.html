@@ -158,8 +158,14 @@ let walletBalance=null;
 let walletBusy=false;
 let pos=1, selected=null, qty=1, multiplier=1;
 let activePeriod='';
+let serverRoundIndex=null;
+let serverRoundCache=null;
+let serverRoundSyncBusy=false;
+let lastMotoAdminStatusSyncAt=0;
+let motoAdminStatusSyncBusy=false;
 let raceStartedFor=null;
 let settlementBusy=false;
+const serverSettlementPromises=new Map();
 let lastDisplayedSecond=-1;
 let resultCloseTimer=null;
 
@@ -200,47 +206,165 @@ function msUntilNextRound(){
  const r=ROUND_MS-(Date.now()%ROUND_MS);
  return r===ROUND_MS?0:r;
 }
-function resultFor(period){
- let x=2166136261;
- for(const c of period){x^=c.charCodeAt(0);x=Math.imul(x,16777619)}
- const arr=[];
- while(arr.length<10){
-   x^=x<<13;x^=x>>>17;x^=x<<5;
-   const n=Math.abs(x)%10+1;
-   if(!arr.includes(n))arr.push(n);
+function validateMotoOutcome(outcome){
+ if(!Array.isArray(outcome)||outcome.length!==10)throw new Error('Server returned an invalid MotoRace result.');
+ const numbers=outcome.map(Number);
+ if(numbers.some(n=>!Number.isInteger(n)||n<1||n>10)||new Set(numbers).size!==10)throw new Error('Server returned an invalid MotoRace result.');
+ return numbers;
+}
+function statusForUI(status){
+ const s=String(status||'pending').toLowerCase();
+ return s==='won'?'WIN':s==='lost'?'LOSS':'PENDING';
+}
+function getMotoClient(){
+ const client=window.NPlusAuth?.client;
+ if(!client)throw new Error('Authentication client unavailable.');
+ return client;
+}
+async function syncServerMotoRound(force=false){
+ const localIndex=Math.floor(Date.now()/60000);
+ if(!force&&serverRoundCache&&Number(serverRoundCache.round_index)===localIndex)return serverRoundCache;
+ if(serverRoundSyncBusy)return serverRoundCache;
+ serverRoundSyncBusy=true;
+ try{
+  const {data,error}=await getMotoClient().rpc('nplus_moto_demo_current_round');
+  if(error)throw error;
+  const row=Array.isArray(data)?data[0]:data;
+  if(!row||row.round_index===undefined)throw new Error('Server round unavailable.');
+  serverRoundCache=row;
+  serverRoundIndex=Number(row.round_index);
+  return row;
+ }finally{serverRoundSyncBusy=false;}
+}
+async function syncMotoAdminStatus(force=false){
+ const now=Date.now();
+ if(motoAdminStatusSyncBusy)return;
+ if(!force&&now-lastMotoAdminStatusSyncAt<3000)return;
+ lastMotoAdminStatusSyncAt=now;
+ if(!serverRoundCache)return;
+ motoAdminStatusSyncBusy=true;
+ try{
+  const {data,error}=await getMotoClient()
+   .from('game_settings')
+   .select('enabled')
+   .eq('game_key','MOTO')
+   .maybeSingle();
+  if(error)throw error;
+  if(!data)throw new Error('MotoRace server status unavailable.');
+  serverRoundCache.betting_enabled=data.enabled===true;
+  serverRoundCache.admin_status_unavailable=false;
+ }catch(error){
+  console.error('MotoRace Admin status sync failed:',error);
+  serverRoundCache.betting_enabled=false;
+  serverRoundCache.admin_status_unavailable=true;
+ }finally{
+  motoAdminStatusSyncBusy=false;
  }
- return arr;
+}
+async function syncMotoHistory(){
+ const {data,error}=await getMotoClient().rpc('nplus_moto_demo_history',{p_limit:100});
+ if(error)throw error;
+ const rows=Array.isArray(data)?data:[];
+ db.rounds=rows.filter(r=>r?.status==='settled'&&r?.period&&r?.outcome).map(r=>({
+  period:String(r.period),
+  roundIndex:Number(r.round_index),
+  result:validateMotoOutcome(r.outcome),
+  createdAt:Date.parse(r.settled_at)||Date.parse(r.starts_at)||Date.now(),
+  serverAuthoritative:true
+ })).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,100);
+ save();
+ renderRecent();
+ return db.rounds;
+}
+async function syncMotoBets(){
+ const {data,error}=await getMotoClient().rpc('nplus_moto_demo_my_bets',{p_limit:200});
+ if(error)throw error;
+ const rows=Array.isArray(data)?data:[];
+ const legacy=(db.bets||[]).filter(b=>!b.serverBetId).map(b=>b.status==='PENDING'?{...b,status:'UNVERIFIED'}:b);
+ const remote=rows.filter(b=>b?.bet_id&&b?.period).map(b=>{
+  const sel=b.selection||{};
+  return {
+   id:String(b.bet_id),serverBetId:String(b.bet_id),requestId:b.request_id||null,
+   period:String(b.period),serverRoundIndex:Number(b.round_index),
+   position:Number(sel.position)||1,
+   selection:{kind:String(sel.kind||''),value:sel.value??''},
+   stake:Number(b.stake||0),fee:Number(b.fee||0),total:Number(b.total||0),
+   qty:Math.max(1,Number(sel.qty)||1),multiplier:Math.max(1,Number(sel.multi)||1),
+   status:statusForUI(b.status),payout:Number(b.payout||0),
+   result:null,placedAt:Date.parse(b.created_at)||Date.now(),
+   settledAt:b.settled_at?Date.parse(b.settled_at):null,serverAuthoritative:true
+  };
+ });
+ db.bets=[...remote,...legacy].sort((a,b)=>(b.placedAt||0)-(a.placedAt||0)).slice(0,500);
+ save();
+ renderPanel(currentPanel||'history');
+ return db.bets;
+}
+async function settleMotoRound(roundIndex){
+ const idx=Number(roundIndex);
+ if(!Number.isFinite(idx))throw new Error('Invalid MotoRace round index.');
+ const key=String(idx);
+ if(serverSettlementPromises.has(key))return serverSettlementPromises.get(key);
+ const promise=(async()=>{
+  const {data,error}=await getMotoClient().rpc('nplus_moto_demo_settle_round',{p_round_index:idx});
+  if(error)throw error;
+  const row=Array.isArray(data)?data[0]:data;
+  if(!row?.outcome||!Array.isArray(row.bets))throw new Error('Server settlement response was incomplete.');
+  const result=validateMotoOutcome(row.outcome);
+  const period=String(row.period||periodFor(new Date(idx*60000)));
+  for(const b of db.bets||[]){
+   if(Number(b.serverRoundIndex)!==idx||!b.serverBetId)continue;
+   const remote=(row.bets||[]).find(x=>String(x.bet_id)===String(b.serverBetId));
+   if(!remote)continue;
+   b.status=statusForUI(remote.status);
+   b.payout=Number(remote.payout||0);
+   b.result=result[Number(b.position||1)-1];
+   b.settledAt=remote.settled_at?Date.parse(remote.settled_at):Date.now();
+  }
+  const old=db.rounds.findIndex(r=>String(r.period)===period);
+  const entry={period,roundIndex:idx,result,createdAt:Date.now(),serverAuthoritative:true};
+  if(old>=0)db.rounds[old]=entry;else db.rounds.unshift(entry);
+  db.rounds=db.rounds.slice(0,100);
+  save();
+  try{await refreshWallet();}catch(e){console.warn('MotoRace wallet refresh after settlement failed:',e);}
+  try{await syncMotoHistory();await syncMotoBets();}catch(e){console.warn('MotoRace history sync after settlement failed:',e);}
+  renderRecent();
+  renderPanel(currentPanel||'history');
+  return {row,result,period};
+ })();
+ serverSettlementPromises.set(key,promise);
+ try{return await promise;}finally{serverSettlementPromises.delete(key);}
 }
 async function settlePendingOlderRounds(currentPeriod){
- if(settlementBusy) return;
+ if(settlementBusy)return;
  settlementBusy=true;
  try{
-   const periods=[...new Set(db.bets.filter(b=>b.status==='PENDING'&&b.period!==currentPeriod).map(b=>b.period))];
-   for(const period of periods){
-     await settlePeriod(period,resultFor(period));
-   }
- }finally{
-   settlementBusy=false;
- }
+  await syncMotoBets();
+  const nowIndex=Math.floor(Date.now()/60000);
+  const indices=[...new Set((db.bets||[]).filter(b=>b.status==='PENDING'&&b.serverBetId&&Number(b.serverRoundIndex)<nowIndex).map(b=>Number(b.serverRoundIndex)))].sort((a,b)=>a-b);
+  for(const idx of indices){
+   try{await settleMotoRound(idx);}
+   catch(e){console.warn('MotoRace delayed settlement remains pending:',e?.message||e);}
+  }
+  await syncMotoHistory();
+ }finally{settlementBusy=false;}
 }
 function ensureRound(){
  const p=periodFor();
  if(p!==activePeriod){
-   const previousPeriod=activePeriod;
-   activePeriod=p;
-   $('period').textContent=p;
-   raceStartedFor=null;
-   clearTimeout(resultCloseTimer);
-   $('result').classList.remove('show');
-   if(!db.rounds.some(r=>r.period===p)){
-     db.rounds.unshift({period:p,result:resultFor(p),createdAt:Date.now()});
-     db.rounds=db.rounds.slice(0,100);
-     save();
-   }
-   resetBikes();
-   renderRecent();
-   $('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
-   if(previousPeriod) void settlePendingOlderRounds(p);
+  const previousPeriod=activePeriod;
+  activePeriod=p;
+  $('period').textContent=p;
+  raceStartedFor=null;
+  clearTimeout(resultCloseTimer);
+  $('result').classList.remove('show');
+  resetBikes();
+  renderRecent();
+  $('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
+  if(previousPeriod){
+   void syncServerMotoRound(true).catch(e=>console.error('MotoRace server round sync failed:',e));
+   void settlePendingOlderRounds(p);
+  }
  }
 }
 function resetBikes(){
@@ -311,6 +435,8 @@ $('agree').onchange=syncSheet;
 $('cancel').onclick=()=>{$('overlay').classList.remove('show')};
 
 $('confirm').onclick=async()=>{
+ if(serverRoundCache?.admin_status_unavailable){$('overlay').classList.remove('show');alert('MotoRace status is unavailable. Please retry.');return}
+ if(serverRoundCache?.betting_enabled===false){$('overlay').classList.remove('show');alert('MotoRace betting is disabled by Admin.');return}
  if(!isBettingOpen()){$('overlay').classList.remove('show');alert('Betting closed for this round.');return}
  if(walletBalance===null)await refreshWallet();
  const unit=Math.max(0,Number($('amount').value)||0);
@@ -319,78 +445,39 @@ $('confirm').onclick=async()=>{
  const fee=stake*FEE,total=stake+fee;
  if(walletBalance===null){alert('Wallet is still syncing. Please try again.');return}
  if(total>walletBalance){alert('Insufficient demo balance.');return}
- const betId='BET-'+Date.now();
+ const requestId=crypto.randomUUID();
  try{
-   const after=await window.NPlusWallet.changeBalance(-total,{
-     type:'GAME_BET',
-     source:'MOTORACE',
-     note:`MOTORACE BET ${activePeriod} ${betId} selection=${selected.kind}:${selected.value} position=${pos} stake=${stake.toFixed(2)} fee=${fee.toFixed(2)} qty=${qty} multi=${multiplier}`
+   const client=window.NPlusAuth?.client;
+   if(!client)throw new Error('Authentication client unavailable.');
+   const {data,error}=await client.rpc('nplus_moto_demo_place_bet',{
+     p_selection:{...selected,position:pos,qty,multi:multiplier},
+     p_stake:Number(stake.toFixed(2)),
+     p_request_id:requestId
    });
-   walletBalance=Number(after);
+   if(error)throw error;
+   const placed=Array.isArray(data)?data[0]:data;
+   if(!placed?.bet_id)throw new Error('Server did not confirm the MotoRace bet.');
+   walletBalance=Number(placed.balance);
    db.bets.unshift({
-     id:betId,
-     period:activePeriod,
-     position:pos,
-     selection:{...selected},
-     stake,fee,total,
-     status:'PENDING',
-     placedAt:Date.now()
+     id:String(placed.bet_id),serverBetId:String(placed.bet_id),requestId,
+     period:String(placed.period),serverRoundIndex:Number(placed.round_index),
+     position:pos,selection:{...selected},stake:Number(placed.stake),
+     fee:Number(placed.fee),total:Number(placed.total),
+     qty,multiplier,status:statusForUI(placed.status),payout:0,
+     placedAt:Date.now(),serverAuthoritative:true
    });
    save();
    renderBalance();
    renderPanel('my');
+   syncSheet();
    $('overlay').classList.remove('show');
-   toast('✓ Demo bet confirmed');
+   toast('✓ Server-confirmed demo bet');
  }catch(e){
    console.error(e);
    alert(e?.message||'Unable to place demo bet.');
  }
 };
 
-function matches(bet,result){
- const n=result[bet.position-1];
- if(bet.selection.kind==='bike')return n===bet.selection.value;
- if(bet.selection.kind==='oe')return bet.selection.value==='ODD' ? n%2===1 : n%2===0;
- if(bet.selection.kind==='bs')return bet.selection.value==='BIG' ? n>=6 : n<=5;
- return false;
-}
-async function settlePeriod(period,result){
- const pending=db.bets.filter(b=>b.period===period&&b.status==='PENDING');
- if(!pending.length)return true;
-
- const winners=pending.filter(b=>matches(b,result));
- const payoutTotal=winners.reduce((a,b)=>a+(b.stake*PAYOUT),0);
-
- if(payoutTotal>0){
-   try{
-     const after=await window.NPlusWallet.changeBalance(payoutTotal,{
-       type:'GAME_WIN',
-       source:'MOTORACE',
-       note:`MOTORACE WIN ${period} bets=${winners.map(b=>b.id).join(',')} payout=${payoutTotal.toFixed(2)}`
-     });
-     walletBalance=Number(after);
-   }catch(e){
-     console.error('Moto Race settlement wallet error:',e);
-     return false;
-   }
- }
-
- for(const bet of pending){
-   bet.result=result[bet.position-1];
-   if(matches(bet,result)){
-     bet.status='WIN';
-     bet.payout=bet.stake*PAYOUT;
-   }else{
-     bet.status='LOSS';
-     bet.payout=0;
-   }
- }
- db.lastSettledPeriod=period;
- save();
- renderBalance();
- renderPanel(currentPanel);
- return true;
-}
 function renderBalance(){$('balance').textContent=walletBalance===null?'SYNCING…':money(walletBalance)}
 function renderRecent(){
  const rounds=db.rounds.slice(0,10);
@@ -419,51 +506,74 @@ document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('[data-panel]').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderPanel(b.dataset.panel);
 });
 
-function startRace(){
- const racePeriod=activePeriod;
+async function startRace(){
+ let racePeriod=activePeriod;
  if(raceStartedFor===racePeriod)return;
  raceStartedFor=racePeriod;
  $('status').textContent='BETTING CLOSED · RACE LIVE';
  $('status').style.color='var(--red)';
  $('betState').textContent='BETTING CLOSED';
+ $('raceState').textContent='SYNCING SERVER RESULT…';
+
+ let roundIndex;
+ let roundEndsAtMs;
+ let result;
+ try{
+  const current=await syncServerMotoRound(true);
+  roundIndex=Number(current?.round_index);
+  roundEndsAtMs=Date.parse(current?.ends_at);
+  if(!Number.isFinite(roundIndex)||!Number.isFinite(roundEndsAtMs))throw new Error('Server round unavailable.');
+  serverRoundIndex=roundIndex;
+  const {data,error}=await getMotoClient().rpc('nplus_moto_demo_reveal_round',{p_round_index:roundIndex});
+  if(error)throw error;
+  const reveal=Array.isArray(data)?data[0]:data;
+  result=validateMotoOutcome(reveal?.outcome);
+  racePeriod=String(reveal.period||current.period||racePeriod);
+  activePeriod=racePeriod;
+  $('period').textContent=racePeriod;
+ }catch(e){
+  console.error('MotoRace server result reveal failed:',e);
+  raceStartedFor=null;
+  $('raceState').textContent='SERVER RESULT SYNC · RETRYING';
+  return;
+ }
+
  $('raceState').textContent='10 BIKES RACING…';
- const result=resultFor(racePeriod);
  const start=performance.now();
- // Finish before the absolute minute boundary, even when a user opens the page late.
- const duration=Math.max(450,Math.min(4800,Math.max(450,msUntilNextRound()-100)));
+ const duration=Math.max(300,Math.min(4800,Math.max(300,msUntilNextRound()-100)));
  function frame(now){
-   const t=Math.min(1,(now-start)/duration);
-   result.forEach((bike,rank)=>{
-     const laneProgress=Math.min(1,Math.max(0,(t-rank*0.025)/0.975));
-     const eased=1-Math.pow(1-laneProgress,3);
-     const el=$('bike-'+bike);
-     if(el)el.style.left=(4+eased*84)+'%';
-   });
-   if(t<1)requestAnimationFrame(frame);
-   else finishRace(racePeriod,result);
+  const t=Math.min(1,(now-start)/duration);
+  result.forEach((bike,rank)=>{
+   const laneProgress=Math.min(1,Math.max(0,(t-rank*0.025)/0.975));
+   const eased=1-Math.pow(1-laneProgress,3);
+   const el=$('bike-'+bike);
+   if(el)el.style.left=(4+eased*84)+'%';
+  });
+  if(t<1)requestAnimationFrame(frame);
+  else void finishRace(racePeriod,result,roundIndex,roundEndsAtMs);
  }
  requestAnimationFrame(frame);
 }
-async function finishRace(racePeriod,result){
+async function finishRace(racePeriod,shownResult,roundIndex,roundEndsAtMs){
+ // Wait only until the exact server-owned end time; do not accidentally wait a full extra minute.
+ const wait=Math.max(0,Number(roundEndsAtMs)-Date.now()+75);
+ if(wait>0)await new Promise(resolve=>setTimeout(resolve,wait));
+
+ let settlement;
+ try{
+  settlement=await settleMotoRound(roundIndex);
+ }catch(e){
+  console.error('MotoRace server settlement pending:',e);
+  $('raceState').textContent='RESULT READY · SERVER SETTLEMENT RETRY NEEDED';
+  return;
+ }
+ const result=settlement.result;
+ const finalPeriod=settlement.period||racePeriod;
  $('raceState').textContent='1ST BIKE '+result[0]+' · 2ND BIKE '+result[1]+' · 3RD BIKE '+result[2];
 
- const myBets=db.bets.filter(b=>b.period===racePeriod);
- const hadBet=myBets.length>0;
+ const myBets=db.bets.filter(b=>b.serverBetId&&Number(b.serverRoundIndex)===Number(roundIndex));
+ if(!myBets.length)return;
 
- // Settle this exact completed round first.
- const settled=await settlePeriod(racePeriod,result);
- if(!settled){
-   $('raceState').textContent='RESULT READY · WALLET SYNC RETRY NEEDED';
-   return;
- }
-
- // Only show the result popup if the user actually bet in this round.
- if(!hadBet){
-   return;
- }
-
- // A round can contain multiple bets. Show WIN if at least one bet won,
- // otherwise LOSS. Only the user's own result is shown.
  const wins=myBets.filter(b=>b.status==='WIN');
  const won=wins.length>0;
  const card=$('resultCard'),out=$('resultOutcome');
@@ -474,12 +584,12 @@ async function finishRace(racePeriod,result){
  out.textContent=won?'YOU WON':'YOU LOST';
 
  const firstBet=myBets[0];
- const winningPosition=won?wins[0].position:firstBet.position;
+ const winningPosition=won?Number(wins[0].position):Number(firstBet.position);
  const winningBike=result[winningPosition-1];
  $('resultNum').textContent=winningBike;
  $('resultMeta').innerHTML='YOUR BET · '+(firstBet.selection.kind==='bike'?'BIKE '+firstBet.selection.value:firstBet.selection.value)+' · '+positionTextFor(firstBet.position)+'<br>Winning order: <b>1ST '+result[0]+' · 2ND '+result[1]+' · 3RD '+result[2]+'</b>';
- const totalStake=myBets.reduce((a,b)=>a+b.total,0);
- const payout=wins.reduce((a,b)=>a+(b.payout||0),0);
+ const totalStake=myBets.reduce((a,b)=>a+Number(b.total||0),0);
+ const payout=wins.reduce((a,b)=>a+Number(b.payout||0),0);
  $('resultStake').textContent='Total demo deduction '+money(totalStake)+(won?' · Demo return '+money(payout):'');
 
  $('result').classList.add('show');
@@ -491,29 +601,68 @@ $('continue').onclick=()=>{$('result').classList.remove('show')};
 
 function updateClock(){
  ensureRound();
+ void syncMotoAdminStatus().catch(console.error);
  const sec=secondsRemaining();
  $('timer').textContent='00:'+String(sec).padStart(2,'0');
  const closed=sec<=5;
- $('timerBox').classList.toggle('closed',closed);
- $('status').textContent=closed?'BETTING CLOSED · RACE STARTING':'BETTING OPEN';
- $('status').style.color=closed?'var(--red)':'var(--green)';
- $('betState').textContent=closed?'BETTING CLOSED':'BETTING OPEN';
+ const adminDisabled=serverRoundCache?.betting_enabled===false;
+ const adminStatusUnavailable=serverRoundCache?.admin_status_unavailable===true;
+ $('timerBox').classList.toggle('closed',closed||adminDisabled||adminStatusUnavailable);
+ $('status').textContent=adminStatusUnavailable?'STATUS UNAVAILABLE · RETRYING':adminDisabled?'BETTING DISABLED BY ADMIN':closed?'BETTING CLOSED · RACE STARTING':'BETTING OPEN';
+ $('status').style.color=(closed||adminDisabled||adminStatusUnavailable)?'var(--red)':'var(--green)';
+ $('betState').textContent=adminStatusUnavailable?'STATUS UNAVAILABLE':adminDisabled?'BETTING DISABLED BY ADMIN':closed?'BETTING CLOSED':'BETTING OPEN';
  if(closed){
    if(sec===5 || sec<5)startRace();
  }else if(sec===60){
    resetBikes();
-   $('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
+   if(!adminDisabled && !adminStatusUnavailable)$('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
  }
 }
 
-buildTrack();renderNumbers();renderBalance();ensureRound();renderRecent();renderPanel('history');syncSheet();
-void settlePendingOlderRounds(activePeriod);
-refreshWallet();
+buildTrack();
+renderNumbers();
+renderBalance();
+ensureRound();
+renderPanel('history');
+syncSheet();
+
+(async()=>{
+ try{
+  const user=await window.NPlusAuth?.current?.();
+  if(!user?.id){
+   $('raceState').textContent='SIGN IN TO PLAY DEMO ROUNDS';
+   return;
+  }
+  const serverRound=await syncServerMotoRound(true);
+  activePeriod=String(serverRound.period||periodFor());
+  serverRoundIndex=Number(serverRound.round_index);
+  $('period').textContent=activePeriod;
+  await Promise.all([syncMotoHistory(),syncMotoBets()]);
+  await refreshWallet();
+  await settlePendingOlderRounds(activePeriod);
+  renderRecent();
+  renderPanel('history');
+  syncSheet();
+ }catch(e){
+  console.error('MotoRace server initialization failed:',e);
+  $('raceState').textContent='SERVER SYNC NEEDED · PLEASE REFRESH';
+ }
+})();
 window.addEventListener('nplus:wallet-change',()=>refreshWallet());
-window.addEventListener('focus',()=>refreshWallet());
+window.addEventListener('focus',()=>{
+ refreshWallet();
+ void syncMotoBets().catch(console.error);
+ void syncMotoHistory().catch(console.error);
+});
 window.addEventListener('pageshow',()=>refreshWallet());
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshWallet()});
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden){
+  void syncServerMotoRound(true).then(()=>syncMotoBets()).then(()=>syncMotoHistory()).then(()=>settlePendingOlderRounds(activePeriod)).catch(console.error);
+  void refreshWallet();
+ }
+});
 setInterval(refreshWallet,2000);
+
 setInterval(updateClock,100);
 updateClock();
 

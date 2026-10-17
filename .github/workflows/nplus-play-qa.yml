@@ -1,0 +1,76 @@
+name: N+ PLAY static QA
+
+on:
+  push:
+    branches:
+      - main
+      - fixes/premium-audit-2026-10-15
+      - security/server-game-settlement-2026-10-15
+      - release-candidate/security-rollout-2026-10-17
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  static-qa:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: nplus_test
+          POSTGRES_DB: nplus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nplus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Check syntax and local links
+        run: node qa/verify-project.js
+      - name: Test WINGO settlement against disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-wingo-settlement.sql
+      - name: Test N+ ADMIN game status against disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-admin-game-status.sql
+      - name: Test MotoRace settlement against disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-motorace-settlement.sql
+      - name: Test Aviator server settlement against disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-aviator-settlement.sql
+      - name: Test generic wallet positive-credit guard in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-generic-wallet-credit-guard.sql
+      - name: Test phone-enumeration revocation in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-phone-enumeration-revoke.sql
+      - name: Test N+ ADMIN user tools in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-admin-user-tools.sql
+      - name: Test N+ ADMIN deposit actions in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-admin-deposits.sql

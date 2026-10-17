@@ -771,6 +771,10 @@ button:disabled{
 .page-dashboard .hero,.page-dashboard .game-controls,.page-dashboard .commission,.page-dashboard .deposit-report,.page-dashboard .requests{display:none!important}
 @media(max-width:850px){.dashboard{grid-template-columns:1fr}.adminnav a{min-width:100%;}}
 
+.game-status.paused{color:#d58a8a;border-color:rgba(213,138,138,.32);background:rgba(120,35,35,.12)}
+
+.server-toggle{width:100%;margin-top:9px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#151515;color:var(--gold2);font-weight:900;font-size:10px;letter-spacing:.4px}
+.server-toggle:hover:not(:disabled){border-color:rgba(201,165,91,.55)}
 </style>
 </head>
 
@@ -1206,6 +1210,10 @@ button:disabled{
   let selectedNumber = null;
   let selectedSize = null;
   let selectedDuration = 30;
+  let serverGameSettings = Object.create(null);
+  let serverGameSettingsError = null;
+  const serverGameToggleBusy = new Set();
+  const HARD_PAUSED_GAMES = new Set(["K3", "5D", "TRX"]);
 
   const DEMO_GAMES = [
     { name:"WINGO", key:"WINGO", icon:"🎯" },
@@ -1409,38 +1417,131 @@ button:disabled{
     }
   }
 
+  async function loadServerGameSettings() {
+    const { data, error } = await supabase
+      .from("game_settings")
+      .select("game_key,game_name,enabled,updated_at");
+
+    if (error) {
+      serverGameSettingsError = error.message || "Unable to load server game status.";
+      renderGameCards();
+      throw error;
+    }
+
+    serverGameSettings = Object.create(null);
+    for (const row of data || []) {
+      serverGameSettings[String(row.game_key || "").toUpperCase()] = row;
+    }
+    serverGameSettingsError = null;
+    renderGameCards();
+    return serverGameSettings;
+  }
+
+  async function toggleServerGameStatus(key) {
+    const gameKey = String(key || "").toUpperCase();
+    const setting = serverGameSettings[gameKey];
+
+    if (!setting) {
+      showStatus("Server game status is unavailable. Controls are locked.", "err");
+      return;
+    }
+    if (serverGameToggleBusy.has(gameKey)) return;
+
+    const nextEnabled = setting.enabled !== true;
+    if (HARD_PAUSED_GAMES.has(gameKey) && nextEnabled) {
+      showStatus(
+        gameKey + " cannot be enabled until its server payout rules are approved and tested.",
+        "err"
+      );
+      return;
+    }
+
+    serverGameToggleBusy.add(gameKey);
+    renderGameCards();
+
+    try {
+      const { data, error } = await supabase.rpc("nplus_set_game_status", {
+        p_game_key: gameKey,
+        p_enabled: nextEnabled
+      });
+      if (error) throw error;
+
+      await loadServerGameSettings();
+      showStatus(
+        (setting.game_name || gameKey) + " server status saved: " +
+        (nextEnabled ? "ENABLED" : "DISABLED") + ".",
+        "ok"
+      );
+    } catch (error) {
+      console.error("Server game status update failed:", error);
+      showStatus(error?.message || "Unable to save server game status.", "err");
+    } finally {
+      serverGameToggleBusy.delete(gameKey);
+      renderGameCards();
+    }
+  }
+
   function renderGameCards() {
-    const state = getDemoState();
+    const localState = getDemoState();
     const grid = $("gameGrid");
 
     grid.innerHTML = DEMO_GAMES.map(game => {
-      const item = state[game.key] || {};
+      const item = localState[game.key] || {};
       const durationState =
         game.key === "WINGO"
           ? (item.durations?.[30] || {})
           : item;
-
       const mode = durationState.mode || "AUTO";
       const result = durationState.result || "—";
+      const setting = serverGameSettings[game.key];
+      const isHardPaused = HARD_PAUSED_GAMES.has(game.key);
+      const unavailable = !setting;
+      const enabled = setting?.enabled === true;
+      const paused = isHardPaused || unavailable || !enabled;
+      const gameStatus = unavailable
+        ? "STATUS UNAVAILABLE"
+        : isHardPaused
+        ? "BETTING PAUSED · PAYOUT RULES"
+        : enabled
+        ? "SERVER ENABLED"
+        : "DISABLED BY ADMIN";
+      const toggleDisabled =
+        unavailable ||
+        serverGameToggleBusy.has(game.key) ||
+        isHardPaused;
+      const toggleLabel = unavailable
+        ? "SERVER STATUS UNAVAILABLE"
+        : serverGameToggleBusy.has(game.key)
+        ? "SAVING…"
+        : isHardPaused
+        ? "LOCKED · PAYOUT RULES PENDING"
+        : enabled
+        ? "DISABLE BETTING"
+        : "ENABLE BETTING";
+      const serverStatusLabel = unavailable
+        ? "UNAVAILABLE"
+        : isHardPaused
+        ? "PAUSED · RULES PENDING"
+        : enabled
+        ? "ENABLED"
+        : "DISABLED";
 
       return `
         <article class="game-box">
           <div class="game-icon">${game.icon}</div>
           <h4>${escapeHTML(game.name)}</h4>
-          <div class="game-status">● DEMO ACTIVE</div>
-
+          <div class="game-status ${paused ? "paused" : ""}">● ${gameStatus}</div>
           <div class="game-mini">
             <div>
-              <span>MODE</span>
+              <span>SERVER STATUS</span>
+              <strong>${serverStatusLabel}</strong>
+            </div>
+            <div>
+              <span>DISPLAY MODE</span>
               <strong>${escapeHTML(mode)}</strong>
             </div>
-
-            <div>
-              <span>LAST RESULT</span>
-              <strong>${escapeHTML(result)}</strong>
-            </div>
           </div>
-
+          <button type="button" class="server-toggle" data-toggle-game="${escapeHTML(game.key)}" ${toggleDisabled ? "disabled" : ""}>${toggleLabel}</button>
           <button class="open-game" data-game="${escapeHTML(game.key)}">
             OPEN GAME CONTROL →
           </button>
@@ -1451,6 +1552,11 @@ button:disabled{
     document.querySelectorAll("[data-game]").forEach(btn => {
       btn.addEventListener("click", () => {
         openGame(btn.dataset.game);
+      });
+    });
+    document.querySelectorAll("[data-toggle-game]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        toggleServerGameStatus(btn.dataset.toggleGame);
       });
     });
   }
@@ -3068,6 +3174,10 @@ button:disabled{
     if (!allowed) return;
 
     await Promise.all([
+      loadServerGameSettings().catch(error => {
+        console.error("Unable to load server game settings:", error);
+        showStatus("Server game status unavailable; toggles are locked.", "err");
+      }),
       loadRequests(),
       loadCommission(),
       loadDepositReport(),
@@ -3092,6 +3202,9 @@ button:disabled{
       }
 
       await Promise.all([
+        loadServerGameSettings().catch(error => {
+          console.error("Server game status refresh failed:", error);
+        }),
         loadRequests(),
         loadCommission(),
         loadDepositReport()
