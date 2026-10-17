@@ -242,8 +242,9 @@ try {
     fail('WINGO backend must enforce and expose the Admin pause status');
   }
   const wingoPage = fs.readFileSync(path.join(root, 'wingo.html'), 'utf8');
-  if (!wingoPage.includes('serverRoundCache[state.sec]?.betting_enabled===false')) {
-    fail('WINGO UI must explain an Admin pause before attempting a wager');
+  if (!wingoPage.includes('serverRoundCache[state.sec]?.betting_enabled===false') ||
+      !wingoPage.includes('async function syncWingoAdminStatus')) {
+    fail('WINGO UI must refresh and explain an Admin pause before attempting a wager');
   }
   const motoSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_MOTORACE_RPC.sql'), 'utf8');
   if (!motoSql.includes("game_key='MOTO' and enabled=true") ||
@@ -252,8 +253,9 @@ try {
     fail('MotoRace backend must enforce and expose the Admin pause status');
   }
   const motoPage = fs.readFileSync(path.join(root, 'motorace.html'), 'utf8');
-  if (!motoPage.includes('serverRoundCache?.betting_enabled===false')) {
-    fail('MotoRace UI must explain an Admin pause before attempting a wager');
+  if (!motoPage.includes('serverRoundCache?.betting_enabled===false') ||
+      !motoPage.includes('async function syncMotoAdminStatus')) {
+    fail('MotoRace UI must refresh and explain an Admin pause before attempting a wager');
   }
   const aviatorGameGateSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_AVIATOR_RPC.sql'), 'utf8');
   if (!aviatorGameGateSql.includes("game_key='AVIATOR' and enabled=true") ||
