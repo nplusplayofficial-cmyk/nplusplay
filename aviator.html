@@ -521,8 +521,13 @@ async function syncAviatorRound(force=false){
    waitLeft=Math.max(0,(Date.parse(row.flight_starts_at)-serverNowMs())/1000);
    multiplier.className='mult wait';
    multiplier.textContent='NEXT ROUND '+waitLeft.toFixed(1)+'s';
-   statusEl.textContent='BETTING OPEN';
-   statusEl.className='status live';
+   if(row.betting_enabled===false){
+    statusEl.textContent='BETTING DISABLED BY ADMIN';
+    statusEl.className='status closed';
+   }else{
+    statusEl.textContent='BETTING OPEN';
+    statusEl.className='status live';
+   }
    placePlane(0);drawGraph(0);
   }else if(row.phase==='FLY'){
    crashPoint=0;
@@ -696,10 +701,14 @@ function frame(){
  requestAnimationFrame(frame);
 }
 async function placeDemoBet(i,auto=false){
+ const box=$('.betbox')[i];
+ if(serverRound?.betting_enabled===false){
+  box.querySelector('.state').textContent='Betting disabled by Admin';
+  return false;
+ }
  if(walletBusy[i])return false;
  if(phase!=='WAIT'||!serverRound||!aviatorWalletReady)return false;
  walletBusy[i]=true;
- const box=$$('.betbox')[i];
  const input=box.querySelector('.amountInput');
  const stake=Number((Math.max(MIN_BET,Number(input.value)||0)).toFixed(2));
  const autoTarget=auto?Math.max(1.01,Number(box.querySelector('.autoTarget').value)||2):null;
