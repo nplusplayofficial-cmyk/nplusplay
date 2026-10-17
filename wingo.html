@@ -1411,6 +1411,10 @@ $("#overlay").onclick=e=>{
 
 $("#confirm").onclick=async()=>{
   const r=round();
+  if(serverRoundCache[state.sec]?.admin_status_unavailable){
+    toast("Game status unavailable. Please retry.");
+    return;
+  }
   if(serverRoundCache[state.sec]?.betting_enabled===false){
     toast("Betting is disabled by Admin");
     return;
