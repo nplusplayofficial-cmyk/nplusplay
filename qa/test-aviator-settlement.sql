@@ -6,11 +6,12 @@ do $tests$
 declare
  u uuid:='55555555-5555-4555-8555-555555555555';
  r jsonb; placed jsonb; auto_placed jsonb; current_state jsonb;
- cashed jsonb; retry jsonb; mine jsonb; history jsonb; lost_bet jsonb; loss_result jsonb;
+ cashed jsonb; retry jsonb; mine jsonb; history jsonb; lost_bet jsonb; loss_result jsonb; late_manual_bet jsonb;
  round_id uuid; lost_round_id uuid; request_one uuid:='66666666-6666-4666-8666-666666666666';
  request_two uuid:='77777777-7777-4777-8777-777777777777';
  request_three uuid:='88888888-8888-4888-8888-888888888888';
  request_four uuid:='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+ request_five uuid:='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
  late_bet jsonb;
  late_row public.nplus_aviator_demo_bets%rowtype;
  late_round_id uuid;
