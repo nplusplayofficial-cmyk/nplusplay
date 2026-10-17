@@ -21,6 +21,10 @@
 - Migrated `aviator.html` to those RPCs and removed its local-balance fallback.
 - Added an isolated PostgreSQL 17 QA workflow. Latest recorded successful run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39010096765. Static checks and disposable database tests passed for WINGO, MotoRace, Aviator, the generic positive-credit guard, and N+ ADMIN user tools.
 - Added a draft SQL migration for N+ ADMIN user directory/search, per-user transaction ledger and audited virtual-credit adjustment. Each RPC checks the current signed-in profile role on the server. The isolated PostgreSQL test covers admin success and unauthorized denial.
+- Added `sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql` and a disposable PostgreSQL test for authenticated-admin-only game status changes, invalid/null values, persistence and anon/user denial.
+- Connected `admin-games.html` global on/off controls to `game_settings` and the role-guarded `nplus_set_game_status` RPC. It no longer treats localStorage as the global game-enabled switch.
+- WINGO, MotoRace and Aviator bet RPCs now reject new wagers when their corresponding server `game_settings.enabled` flag is false; current-round RPCs expose the flag and their player UIs show the Admin-paused state.
+- Latest recorded successful CI run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39013914477 (commit `d719b9923a87e00768713010d615e9b9b44c01a2`). It passed static checks and disposable Postgres tests for WINGO, Admin game-status, MotoRace, Aviator, positive-credit guard, Admin user tools and Admin deposits.
 - Fixed the security branch's admin-users filename/link mismatch. Live main still has the legacy misspelled admin-users.htlm, so the corrected page has not yet been deployed.
 - Paused K3, 5D and TRX WINGO wagers in the security branch until payout rules are approved; disabled withdrawal submission and collection of bank/UPI details in virtual-credit demo mode.
 - These are branch/CI tests only. No new settlement SQL has been run against the live Supabase project, and no code PR has been merged to `main`.
@@ -28,7 +32,7 @@
 ## Remaining release blockers
 
 1. **K3, 5D and TRX WINGO wagering is temporarily paused in the security branch.** Their payout/return rules were not found in the inspected source. Approve those rules before building server settlement and re-enabling these games.
-2. **N+ ADMIN user-management RPCs are missing in live Supabase.** The migration exists only in the security branch. The current live site also has the admin-users.htlm filename mismatch. Deploy the matching frontend and run the reviewed migration together.
+2. **N+ ADMIN enhancements are not deployed to live.** The new user-directory/ledger/adjustment migration and Admin game-status migration are only in the security branch; the current live site also has the admin-users.htlm filename mismatch. The existing live `nplus_set_game_status` RPC and `game_settings` table exist, but the current main frontend still stores the global control locally. Deploy the matching reviewed SQL and frontend together.
 3. The live generic nplus_wallet_change RPC still accepts authenticated positive deltas. The tested blocker is post-rollout only: deploy/test server settlement and keep unported game betting paused before blocking generic positive credits.
 4. WINGO, MotoRace and Aviator require their matching new schema/RPC migrations. Never deploy their new HTML before the matching SQL functions and tables are installed.
 5. Legacy bets stored only in browser localStorage have no server-issued settlement proof. Migrated pages will not award credits for those records. Provide a user-facing transition/reconciliation plan; never reset existing wallet balances.
