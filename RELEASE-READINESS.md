@@ -31,6 +31,16 @@
 - Paused K3, 5D and TRX WINGO wagers in the security branch until payout rules are approved; disabled withdrawal submission and collection of bank/UPI details in virtual-credit demo mode.
 - These are branch/CI tests only. No new settlement SQL has been run against the live Supabase project, and no code PR has been merged to `main`.
 
+## Latest verification update — 2026-10-17
+
+- Candidate commit `830d621b4032cca1b8cd7a93237da57739da1d34` passed both the pull-request CI run and candidate-branch push CI run:
+  - PR run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017205402
+  - Push run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017213779
+- Each run passed static HTML/JavaScript/local-link checks and seven disposable PostgreSQL suites: WINGO settlement, Admin game status, MotoRace settlement, Aviator settlement, generic wallet guard, Admin user tools and Admin deposit actions.
+- A fresh read-only production catalog/privilege inspection confirmed the release is still blocked: none of the six new server-settlement tables exist; all six existing game settings are currently enabled; anon can still execute `nplus_phone_is_registered(text)`; authenticated users can still execute legacy `nplus_wallet_change(...)`. The live database has 5 profiles, 5 wallets and 145 ledger rows at the time of this inspection. These counts are operational facts, not a request to modify or reset data.
+- Security advisor continues to flag the anonymous phone-registration lookup and disabled leaked-password protection. Authenticated SECURITY DEFINER functions must be reviewed by their internal authorization checks; an advisor warning alone is not proof of a bypass.
+- No production writes were made during this verification. No paid Supabase branch was created. Existing balances were not changed.
+
 ## Remaining release blockers
 
 1. **K3, 5D and TRX WINGO wagering is temporarily paused in the security branch.** Their payout/return rules were not found in the inspected source. Approve those rules before building server settlement and re-enabling these games.
