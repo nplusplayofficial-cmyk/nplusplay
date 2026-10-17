@@ -45,7 +45,7 @@ begin
  select * into r from public.nplus_moto_demo_rounds where round_index=idx;
  return jsonb_build_object('round_id',r.id,'round_index',r.round_index,
   'period',to_char(r.starts_at at time zone 'Asia/Kolkata','YYYYMMDDHH24MI'),
-  'starts_at',r.starts_at,'ends_at',r.ends_at,'status',r.status,'server_time',now_at);
+  'starts_at',r.starts_at,'ends_at',r.ends_at,'status',r.status,'betting_enabled',coalesce((select gs.enabled from public.game_settings gs where gs.game_key='MOTO'),false),'server_time',now_at);
 end;
 $function$;
 
