@@ -5,8 +5,8 @@
 -- direct wallet-RPC callers, deploy matching server-side settlement RPCs, and
 -- complete isolated Supabase regression testing first.
 --
--- This guard preserves negative demo-stake debits for any remaining legacy UI,
--- but rejects every caller-supplied positive credit. Server-side game settlement,
+-- This guard blocks generic GAME_BET debits (the migrated games use dedicated
+-- server-authoritative RPCs) and rejects every caller-supplied positive credit. Server-side game settlement,
 -- admin adjustment and admin-approved demo deposits update wallets/ledger in
 -- their own trusted SECURITY DEFINER transactions and must not call this RPC.
 -- It does not alter/reset any existing wallet balance.
@@ -39,6 +39,11 @@ begin
      or p_delta = 'Infinity'::numeric
      or p_delta = '-Infinity'::numeric then
     raise exception 'Invalid wallet amount.';
+  end if;
+
+  if upper(coalesce(nullif(trim(p_type), ''), 'GAME')) = 'GAME_BET' then
+    raise exception 'Game bets must use server-authoritative settlement RPCs.'
+      using errcode = '42501';
   end if;
 
   if p_delta > 0 then
