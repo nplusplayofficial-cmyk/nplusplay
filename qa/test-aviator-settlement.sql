@@ -7,14 +7,18 @@ declare
  u uuid:='55555555-5555-4555-8555-555555555555';
  r jsonb; placed jsonb; auto_placed jsonb; current_state jsonb;
  cashed jsonb; retry jsonb; mine jsonb; history jsonb; lost_bet jsonb; loss_result jsonb; late_manual_bet jsonb;
+ multiplier_auto_bet jsonb; multiplier_manual_bet jsonb; multiplier_row public.nplus_aviator_demo_bets%rowtype;
  round_id uuid; lost_round_id uuid; request_one uuid:='66666666-6666-4666-8666-666666666666';
  request_two uuid:='77777777-7777-4777-8777-777777777777';
  request_three uuid:='88888888-8888-4888-8888-888888888888';
  request_four uuid:='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
  request_five uuid:='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+ request_six uuid:='99999999-9999-4999-8999-999999999996';
+ request_seven uuid:='99999999-9999-4999-8999-999999999997';
  late_bet jsonb;
  late_row public.nplus_aviator_demo_bets%rowtype;
  late_round_id uuid;
+ multiplier_round_id uuid;
  balance_after numeric(12,2); payout_one numeric(12,2); multiplier_one numeric(8,2);
  win_count integer; bet_count integer;
 begin
@@ -142,6 +146,41 @@ begin
  where user_id=u and round_id=late_round_id and status='lost';
  if bet_count<>1 then
    raise exception 'Only the manual bet should be marked lost after late finalization.';
+ end if;
+
+ -- Separately exercise the boundary where the server multiplier reaches the crash
+ -- point while the stored estimated deadline is still in the future.
+ update public.nplus_aviator_demo_rounds
+ set crashed_at=clock_timestamp()-interval '3 seconds'
+ where id=late_round_id;
+
+ r:=public.nplus_aviator_demo_current_round();
+ multiplier_round_id:=(r->>'round_id')::uuid;
+ multiplier_auto_bet:=public.nplus_aviator_demo_place_bet(multiplier_round_id,0,2.00,request_six,2.00);
+ multiplier_manual_bet:=public.nplus_aviator_demo_place_bet(multiplier_round_id,1,1.00,request_seven,null);
+
+ update public.nplus_aviator_demo_rounds
+ set flight_starts_at=clock_timestamp()-interval '20 seconds',
+     crashes_at=clock_timestamp()+interval '20 seconds',
+     crash_point=3.00,
+     status='flying'
+ where id=multiplier_round_id;
+
+ loss_result:=public.nplus_aviator_demo_cashout((multiplier_manual_bet->>'bet_id')::uuid);
+ if loss_result->>'status'<>'lost' then
+   raise exception 'Manual cash-out after multiplier crossed crash point must lose.';
+ end if;
+
+ select * into multiplier_row
+ from public.nplus_aviator_demo_bets
+ where user_id=u and request_id=request_six;
+ if multiplier_row.status<>'cashed_out' or multiplier_row.cashout_multiplier<>2.00 or multiplier_row.payout<>4.00 then
+   raise exception 'Multiplier-crossing crash finalization did not settle auto cash-out once at 2x.';
+ end if;
+
+ select balance into balance_after from public.demo_wallets where user_id=u;
+ if balance_after<>round(103.00+payout_one,2) then
+   raise exception 'Multiplier-crossing auto cash-out expected balance %; got %.',round(103.00+payout_one,2),balance_after;
  end if;
 
  if has_table_privilege('anon','public.nplus_aviator_demo_bets','SELECT')
