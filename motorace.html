@@ -161,6 +161,8 @@ let activePeriod='';
 let serverRoundIndex=null;
 let serverRoundCache=null;
 let serverRoundSyncBusy=false;
+let lastMotoAdminStatusSyncAt=0;
+let motoAdminStatusSyncBusy=false;
 let raceStartedFor=null;
 let settlementBusy=false;
 const serverSettlementPromises=new Map();
@@ -233,6 +235,31 @@ async function syncServerMotoRound(force=false){
   serverRoundIndex=Number(row.round_index);
   return row;
  }finally{serverRoundSyncBusy=false;}
+}
+async function syncMotoAdminStatus(force=false){
+ const now=Date.now();
+ if(motoAdminStatusSyncBusy)return;
+ if(!force&&now-lastMotoAdminStatusSyncAt<3000)return;
+ lastMotoAdminStatusSyncAt=now;
+ if(!serverRoundCache)return;
+ motoAdminStatusSyncBusy=true;
+ try{
+  const {data,error}=await getMotoClient()
+   .from('game_settings')
+   .select('enabled')
+   .eq('game_key','MOTO')
+   .maybeSingle();
+  if(error)throw error;
+  if(!data)throw new Error('MotoRace server status unavailable.');
+  serverRoundCache.betting_enabled=data.enabled===true;
+  serverRoundCache.admin_status_unavailable=false;
+ }catch(error){
+  console.error('MotoRace Admin status sync failed:',error);
+  serverRoundCache.betting_enabled=false;
+  serverRoundCache.admin_status_unavailable=true;
+ }finally{
+  motoAdminStatusSyncBusy=false;
+ }
 }
 async function syncMotoHistory(){
  const {data,error}=await getMotoClient().rpc('nplus_moto_demo_history',{p_limit:100});
@@ -408,6 +435,7 @@ $('agree').onchange=syncSheet;
 $('cancel').onclick=()=>{$('overlay').classList.remove('show')};
 
 $('confirm').onclick=async()=>{
+ if(serverRoundCache?.admin_status_unavailable){$('overlay').classList.remove('show');alert('MotoRace status is unavailable. Please retry.');return}
  if(serverRoundCache?.betting_enabled===false){$('overlay').classList.remove('show');alert('MotoRace betting is disabled by Admin.');return}
  if(!isBettingOpen()){$('overlay').classList.remove('show');alert('Betting closed for this round.');return}
  if(walletBalance===null)await refreshWallet();
@@ -573,18 +601,21 @@ $('continue').onclick=()=>{$('result').classList.remove('show')};
 
 function updateClock(){
  ensureRound();
+ void syncMotoAdminStatus().catch(console.error);
  const sec=secondsRemaining();
  $('timer').textContent='00:'+String(sec).padStart(2,'0');
  const closed=sec<=5;
- $('timerBox').classList.toggle('closed',closed);
- $('status').textContent=closed?'BETTING CLOSED · RACE STARTING':'BETTING OPEN';
- $('status').style.color=closed?'var(--red)':'var(--green)';
- $('betState').textContent=closed?'BETTING CLOSED':'BETTING OPEN';
+ const adminDisabled=serverRoundCache?.betting_enabled===false;
+ const adminStatusUnavailable=serverRoundCache?.admin_status_unavailable===true;
+ $('timerBox').classList.toggle('closed',closed||adminDisabled||adminStatusUnavailable);
+ $('status').textContent=adminStatusUnavailable?'STATUS UNAVAILABLE · RETRYING':adminDisabled?'BETTING DISABLED BY ADMIN':closed?'BETTING CLOSED · RACE STARTING':'BETTING OPEN';
+ $('status').style.color=(closed||adminDisabled||adminStatusUnavailable)?'var(--red)':'var(--green)';
+ $('betState').textContent=adminStatusUnavailable?'STATUS UNAVAILABLE':adminDisabled?'BETTING DISABLED BY ADMIN':closed?'BETTING CLOSED':'BETTING OPEN';
  if(closed){
    if(sec===5 || sec<5)startRace();
  }else if(sec===60){
    resetBikes();
-   $('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
+   if(!adminDisabled && !adminStatusUnavailable)$('raceState').textContent='SELECT A BIKE TO PLACE A DEMO BET';
  }
 }
 
