@@ -34,26 +34,28 @@
 ## Remaining release blockers
 
 1. **K3, 5D and TRX WINGO wagering is temporarily paused in the security branch.** Their payout/return rules were not found in the inspected source. Approve those rules before building server settlement and re-enabling these games.
-2. **N+ ADMIN enhancements are not deployed to live.** The new user-directory/ledger/adjustment migration and Admin game-status migration are only in the security branch; the current live site also has the admin-users.htlm filename mismatch. The existing live `nplus_set_game_status` RPC and `game_settings` table exist, but the current main frontend still stores the global control locally. Deploy the matching reviewed SQL and frontend together.
-3. The live generic nplus_wallet_change RPC still accepts authenticated positive deltas. The tested blocker is post-rollout only: deploy/test server settlement and keep unported game betting paused before blocking generic positive credits and generic `GAME_BET` debits.
-4. WINGO, MotoRace and Aviator require their matching new schema/RPC migrations. Never deploy their new HTML before the matching SQL functions and tables are installed.
-5. Legacy bets stored only in browser localStorage have no server-issued settlement proof. Migrated pages will not award credits for those records. Provide a user-facing transition/reconciliation plan; never reset existing wallet balances.
-6. The live anonymous nplus_phone_is_registered(text) RPC reveals whether a phone is registered. After the new signup code is deployed and duplicate-mobile signup is tested, revoke client EXECUTE as a post-rollout action.
-7. **Email OTP requires Confirm email ON.** The branch signup code deliberately rejects an immediate session, which happens when Confirm email is OFF. The dashboard setting is currently OFF; the signup template already contains {{ .Token }}. Deploy the matching frontend, enable confirmation, then verify delivery, six-digit OTP, profile creation and ₹108 wallet initialization.
-8. N+ ADMIN commission reports currently estimate a uniform 2% on every negative GAME_BET transaction. The new MotoRace flow charges 1.5% inside the total debit; Aviator has no separate entry fee and WINGO's 2% is currently applied to winning returns. Approve one accounting model and update reporting so commission figures are accurate.
-9. Leaked-password protection is unavailable on the current Free plan according to the Supabase dashboard. Keep this documented unless a plan change is separately approved.
-10. The database backup archive can be listed but has not been restored into a separate test database. Test restore only in an isolated environment.
-11. Live browser testing is still pending for Supabase Auth, admin login, deposit approve/reject, game control, reports, user search/ledger/adjustment, every active game, reload and mobile layouts. The separate nplus-play-final repository is only a localStorage prototype with username-only login and incomplete game routes; it has no N+ ADMIN and must not be treated as the Supabase-backed production app.
+2. **Production still has the legacy game status and wallet paths.** A live read-only check on 2026-10-17 found `game_settings.enabled=true` for WINGO, K3, 5D, TRX, AVIATOR and MOTO. The security-branch migration that defaults K3/5D/TRX off is not deployed, and current `main` does not enforce game status in its wager path. During rollout, prevent new wagers on legacy pages until the new schemas/RPCs and matching frontend are deployed and verified.
+3. **N+ ADMIN enhancements are not deployed to live.** The new user-directory/ledger/adjustment migration and Admin game-status migration are only in the security branch; the current live site also has the admin-users.htlm filename mismatch. The existing live `nplus_set_game_status` RPC and `game_settings` table exist, but the current main frontend still stores the global control locally. Deploy the matching reviewed SQL and frontend together.
+4. The live generic `nplus_wallet_change` RPC still accepts authenticated positive deltas and can be called by signed-in clients. The tested blocker is post-rollout only: safely transition the frontend first, verify every active game uses server settlement, then block generic positive credits and generic `GAME_BET` debits.
+5. WINGO, MotoRace and Aviator require their matching new schema/RPC migrations. Never deploy their new HTML before the matching SQL functions and tables are installed.
+6. Legacy bets stored only in browser localStorage have no server-issued settlement proof. Migrated pages will not award credits for those records. Provide a user-facing transition/reconciliation plan; never reset existing wallet balances.
+7. The live anonymous `nplus_phone_is_registered(text)` RPC still reveals whether a phone is registered (confirmed by the Supabase security advisor on 2026-10-17). After the new signup code is deployed and duplicate-mobile signup is tested, revoke client EXECUTE as a post-rollout action.
+8. **Email OTP requires Confirm email ON.** The branch signup code deliberately rejects an immediate session, which happens when Confirm email is OFF. The dashboard setting is currently OFF; the signup template already contains {{ .Token }}. Deploy the matching frontend, enable confirmation, then verify delivery, six-digit OTP, profile creation and ₹108 wallet initialization.
+9. N+ ADMIN commission reports currently estimate a uniform 2% on every negative GAME_BET transaction. The new MotoRace flow charges 1.5% inside the total debit; Aviator has no separate entry fee and WINGO's 2% is currently applied to winning returns. Approve one accounting model and update reporting so commission figures are accurate.
+10. Leaked-password protection is disabled on the current Free plan according to the Supabase dashboard. Keep this documented unless a plan change is separately approved.
+11. The database backup archive can be listed but has not been restored into a separate test database. Test restore only in an isolated environment.
+12. Live browser testing is still pending for Supabase Auth, admin login, deposit approve/reject, game control, reports, user search/ledger/adjustment, every active game, reload and mobile layouts. The separate nplus-play-final repository is only a localStorage prototype with username-only login and incomplete game routes; it has no N+ ADMIN and must not be treated as the Supabase-backed production app.
 
 ## Safe rollout order
 
 1. Restore-test the existing backup in a separate database; never use production as the restore-test target.
-2. Apply reviewed additive SQL during a controlled rollout: WINGO server settlement; MotoRace schema then RPCs; Aviator schema then RPCs; N+ ADMIN user tools. Do not rerun the recorded live hardening migration.
-3. Deploy the matching security-branch frontend to the actual configured N+ PLAY host. Keep K3/5D/TRX paused and cash withdrawals disabled until their requirements are approved.
-4. Enable Supabase Confirm email only after the matching signup UI is deployed; then test a fresh account end-to-end.
-5. Test admin login, non-admin rejection, pending deposit approval/rejection, game control, reports, user search/ledger/adjustment, and all active games on desktop and mobile.
-6. Verify no active frontend still uses generic positive wallet credits. Only then apply the post-rollout generic-wallet guard and phone-enumeration revocation scripts.
-7. Approve payout rates and commission accounting; review all diffs and repeat CI before merging or deploying.
+2. Schedule a controlled rollout/maintenance window and stop new wagers through the currently deployed UI/routes first; do not rely on the new Admin toggle to control legacy HTML pages.
+3. Apply reviewed, matching additive SQL: set K3/5D/TRX disabled with the Admin game-status migration, then install WINGO settlement, MotoRace schema/RPCs, Aviator schema/RPCs, and Admin user tools. Do not rerun the recorded live hardening migration.
+4. Deploy the matching security-branch frontend to the actual configured N+ PLAY host in the same window. Verify that Admin game pause blocks server wagers for WINGO/MotoRace/Aviator and leave K3/5D/TRX off. Keep cash withdrawals disabled until separately approved.
+5. Enable Supabase Confirm email only after the matching signup UI is deployed; then test a fresh account end-to-end.
+6. Test admin login, non-admin rejection, pending deposit approval/rejection, game control, reports, user search/ledger/adjustment, and all active games on desktop and mobile.
+7. Verify no active frontend still uses generic positive wallet credits or generic GAME_BET debits. Only then apply the post-rollout generic-wallet guard and phone-enumeration revocation scripts.
+8. Approve payout rates and commission accounting; review all diffs and repeat CI before merging or deploying.
 
 ## Merge gates
 
