@@ -741,7 +741,7 @@ $function$;
     end if;
     v_unit_amount := (p_selection->>'amount')::numeric(12,2);
     if v_unit_amount <= 0 or round(v_unit_amount * v_qty * v_multi, 2) <> round(p_stake, 2) then
-      raise exception 'WINGO amount × quantity × multiplier does not match the total stake.';
+      raise exception 'WINGO amount, quantity and multiplier do not match the total stake.';
     end if;
   end if;
 
