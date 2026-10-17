@@ -771,6 +771,7 @@ button:disabled{
 .page-dashboard .hero,.page-dashboard .game-controls,.page-dashboard .commission,.page-dashboard .deposit-report,.page-dashboard .requests{display:none!important}
 @media(max-width:850px){.dashboard{grid-template-columns:1fr}.adminnav a{min-width:100%;}}
 
+.game-status.paused{color:#d58a8a;border-color:rgba(213,138,138,.32);background:rgba(120,35,35,.12)}
 </style>
 </head>
 
@@ -1422,12 +1423,14 @@ button:disabled{
 
       const mode = durationState.mode || "AUTO";
       const result = durationState.result || "—";
+      const paused = ["K3", "5D", "TRX"].includes(game.key);
+      const gameStatus = paused ? "BETTING PAUSED" : "DEMO ACTIVE";
 
       return `
         <article class="game-box">
           <div class="game-icon">${game.icon}</div>
           <h4>${escapeHTML(game.name)}</h4>
-          <div class="game-status">● DEMO ACTIVE</div>
+          <div class="game-status ${paused ? "paused" : ""}">● ${gameStatus}</div>
 
           <div class="game-mini">
             <div>
