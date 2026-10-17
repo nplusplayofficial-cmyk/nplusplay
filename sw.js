@@ -1,5 +1,5 @@
 /* N+ PLAY PWA shell. Never cache Supabase/auth/API requests or authenticated data. */
-const VERSION = "nplus-play-shell-v1";
+const VERSION = "nplus-play-shell-v2";
 const SHELL = ["./offline.html", "./manifest.webmanifest", "./assets/nplus-icon.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));

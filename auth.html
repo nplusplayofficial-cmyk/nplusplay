@@ -293,7 +293,9 @@
       }
 
     }
-  </style>
+    .otp{text-align:center;letter-spacing:8px;font-size:1.15rem;font-weight:900}
+  .secondary{width:100%;margin-top:10px;padding:11px;border:1px solid var(--line);background:transparent;color:#aaa;font-weight:850;font-size:.56rem;border-radius:12px}
+</style>
 </head>
 
 <body>
@@ -542,7 +544,18 @@
         </div>
 
 
-        <!-- SUBMIT BUTTON -->
+        <!-- EMAIL OTP VERIFICATION -->
+      <div id="otpFields" class="hidden">
+        <div class="field">
+          <label for="signupOtp">EMAIL OTP</label>
+          <input id="signupOtp" class="otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+        </div>
+        <div class="notice">Enter the 6-digit code sent to your email to activate your N+ PLAY account.</div>
+        <button class="secondary" id="resendOtpBtn" type="button">RESEND VERIFICATION CODE</button>
+        <button class="secondary" id="backBtn" type="button">BACK TO SIGNUP</button>
+      </div>
+
+      <!-- SUBMIT BUTTON -->
         <button
           class="action"
           id="submitBtn"
@@ -559,8 +572,7 @@
 
         <b>Free demo:</b>
         New accounts start with ₹108 virtual credits.
-        No email OTP or SMS OTP is required.
-        Login requires email + mobile number + password.
+        Email OTP verifies new accounts only. Login requires email + mobile number + password.
 
       </div>
 
@@ -622,6 +634,8 @@
 
 
       let mode = "login";
+      let stage = "credentials";
+      let pendingSignup = {};
 
 
       // =====================================
@@ -666,6 +680,8 @@
       function setMode(next){
 
         mode = next;
+        stage = "credentials";
+        pendingSignup = {};
 
         clearStatus();
 
@@ -704,6 +720,9 @@
             !signup
           );
 
+        $("otpFields").classList.add("hidden");
+        $("signupOtp").value = "";
+
 
         // IMPORTANT:
         // Only visible fields are required.
@@ -736,7 +755,7 @@
 
         $("submitBtn").textContent =
           signup
-            ? "CREATE N+ PLAY ACCOUNT"
+            ? "SEND EMAIL OTP"
             : "LOGIN TO N+ PLAY";
 
       }
@@ -863,6 +882,16 @@
 
         };
 
+      $("backBtn").onclick = () => {
+        stage = "credentials";
+        pendingSignup = {};
+        $("otpFields").classList.add("hidden");
+        $("signupFields").classList.remove("hidden");
+        $("submitBtn").textContent = "SEND EMAIL OTP";
+        $("signupOtp").value = "";
+        clearStatus();
+      };
+
 
       // =====================================
       // FORM SUBMIT
@@ -979,132 +1008,42 @@
 
 
             // =================================
-            // SIGNUP
+            // SIGNUP — EMAIL OTP
             // =================================
+            if (stage === "credentials") {
+              const name = $("name").value.trim();
+              const email = $("signupEmail").value.trim();
+              const mobile = $("signupMobile").value.trim();
+              const password = $("signupPassword").value;
+              const confirm = $("confirm").value;
 
-            const name =
-              $("name")
-                .value
-                .trim();
+              if (!name) throw new Error("Display name is required.");
+              if (!email) throw new Error("Email address is required.");
+              if (!mobile) throw new Error("Mobile number is required.");
+              if (password.length < 6) throw new Error("Password must be at least 6 characters.");
+              if (password !== confirm) throw new Error("Passwords do not match.");
 
+              pendingSignup = { name, email, mobile, password };
+              await NPlusAuth.sendSignupOtp(pendingSignup);
 
-            const email =
-              $("signupEmail")
-                .value
-                .trim();
-
-
-            const mobile =
-              $("signupMobile")
-                .value
-                .trim();
-
-
-            const password =
-              $("signupPassword")
-                .value;
-
-
-            const confirm =
-              $("confirm")
-                .value;
-
-
-            if(!name){
-
-              throw new Error(
-                "Display name is required."
-              );
-
+              stage = "otp";
+              $("signupFields").classList.add("hidden");
+              $("loginFields").classList.add("hidden");
+              $("otpFields").classList.remove("hidden");
+              $("submitBtn").textContent = "VERIFY EMAIL OTP";
+              setStatus("Verification code sent. Check your email and enter the 6-digit code.", "ok");
+              return;
             }
 
-
-            if(!email){
-
-              throw new Error(
-                "Email address is required."
-              );
-
-            }
-
-
-            if(!mobile){
-
-              throw new Error(
-                "Mobile number is required."
-              );
-
-            }
-
-
-            if(!password){
-
-              throw new Error(
-                "Password is required."
-              );
-
-            }
-
-
-            if(password.length < 6){
-
-              throw new Error(
-                "Password must be at least 6 characters."
-              );
-
-            }
-
-
-            if(password !== confirm){
-
-              throw new Error(
-                "Passwords do not match."
-              );
-
-            }
-
-
-            // =================================
-            // CREATE ACCOUNT
-            // =================================
-
-            const result =
-              await NPlusAuth.signUp({
-
-                name,
-                email,
-                mobile,
-                password
-
-              });
-
-
-            if(!result || !result.user){
-
-              throw new Error(
-                "Account could not be created."
-              );
-
-            }
-
-
-            setStatus(
-              "Account created successfully. Welcome to N+ PLAY!",
-              "ok"
-            );
-
-
-            setTimeout(
-              () => {
-
-                location.replace(
-                  nextUrl()
-                );
-
-              },
-              700
-            );
-
+            const token = $("signupOtp").value.trim();
+            await NPlusAuth.verifySignupEmailOtp({
+              email: pendingSignup.email,
+              mobile: pendingSignup.mobile,
+              name: pendingSignup.name,
+              token
+            });
+            setStatus("Email verified. Account created successfully. Opening N+ PLAY…", "ok");
+            setTimeout(() => location.replace(nextUrl()), 700);
 
           }catch(error){
 
@@ -1130,6 +1069,23 @@
 
         };
 
+
+      $("resendOtpBtn").addEventListener("click", async () => {
+        if (stage !== "otp" || !pendingSignup) return;
+        const button = $("resendOtpBtn");
+        button.disabled = true;
+        const previousText = button.textContent;
+        button.textContent = "SENDING…";
+        try {
+          await NPlusAuth.resendSignupEmailOtp({ email: pendingSignup.email });
+          setStatus("A new verification code has been requested. Check your inbox and spam folder.", "ok");
+        } catch (error) {
+          setStatus(error?.message || "Unable to resend the verification code.", "err");
+        } finally {
+          button.disabled = false;
+          button.textContent = previousText;
+        }
+      });
 
       // =====================================
       // INITIAL MODE
