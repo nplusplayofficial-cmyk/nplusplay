@@ -39,6 +39,10 @@ begin
     raise exception 'Invalid game.';
   end if;
 
+  if v_key in ('K3','5D','TRX') and p_enabled then
+    raise exception 'Payout rules pending; this game cannot be enabled.';
+  end if;
+
   update public.game_settings
   set enabled = p_enabled,
       updated_at = clock_timestamp(),
