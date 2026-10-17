@@ -143,7 +143,7 @@ begin
        'phase',v_phase,
        'created_at',v_round.created_at,
        'flight_starts_at',v_round.flight_starts_at,
-       'server_time',v_now,
+       'betting_enabled',coalesce((select gs.enabled from public.game_settings gs where gs.game_key='AVIATOR'),false),'server_time',v_now,
        'current_multiplier',v_mult,
        'crash_point',case when v_phase='CRASH' then v_round.crash_point else null end,
        'wait_seconds',greatest(0,extract(epoch from (v_round.flight_starts_at-v_now)))
@@ -169,7 +169,7 @@ begin
    'phase','WAIT',
    'created_at',v_round.created_at,
    'flight_starts_at',v_round.flight_starts_at,
-   'server_time',v_now,
+   'betting_enabled',coalesce((select gs.enabled from public.game_settings gs where gs.game_key='AVIATOR'),false),'server_time',v_now,
    'current_multiplier',1.00,
    'crash_point',null,
    'wait_seconds',5.0
