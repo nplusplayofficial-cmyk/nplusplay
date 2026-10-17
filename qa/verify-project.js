@@ -229,6 +229,11 @@ try {
       !adminGames.includes('loadServerGameSettings')) {
     fail('N+ ADMIN game status toggles must read/write persistent Supabase settings');
   }
+  const adminGameStatusSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql'), 'utf8');
+  if (!adminGameStatusSql.includes('Payout rules pending; this game cannot be enabled.') ||
+      !adminGameStatusSql.includes("v_key in ('K3','5D','TRX') and p_enabled")) {
+    fail('N+ ADMIN must server-lock K3/5D/TRX until payout rules are approved');
+  }
 
   const wingoSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql'), 'utf8');
   if (!wingoSql.includes("game_key = 'WINGO' and enabled = true") ||
