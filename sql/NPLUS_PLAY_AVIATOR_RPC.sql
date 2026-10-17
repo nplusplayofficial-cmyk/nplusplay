@@ -333,9 +333,42 @@ begin
  v_elapsed:=extract(epoch from (v_now-v_round.flight_starts_at));
  v_mult:=round((1.0+0.12*v_elapsed+0.019*v_elapsed*v_elapsed)::numeric,2);
  if v_mult>=v_round.crash_point then
-   update public.nplus_aviator_demo_rounds set status='crashed',crashed_at=crashes_at where id=v_round.id returning * into v_round;
+   -- A client can reach the server after the modeled multiplier crosses the crash point
+   -- but before the precomputed deadline timestamp. Finalize the round consistently.
+   for v_auto_bet in
+     select * from public.nplus_aviator_demo_bets
+     where round_id=v_round.id and status='open'
+       and auto_cashout is not null and auto_cashout<v_round.crash_point
+     order by user_id,id
+     for update
+   loop
+     select balance into v_before from public.demo_wallets
+     where user_id=v_auto_bet.user_id for update;
+     if not found then raise exception 'Wallet missing during Aviator multiplier-crossing auto cash-out.'; end if;
+     v_payout:=round(v_auto_bet.stake*v_auto_bet.auto_cashout,2);
+     v_after:=v_before+v_payout;
+     update public.demo_wallets set balance=v_after,updated_at=clock_timestamp()
+     where user_id=v_auto_bet.user_id;
+     insert into public.demo_wallet_transactions(user_id,delta,balance_before,balance_after,type,source,note)
+     values(v_auto_bet.user_id,v_payout,v_before,v_after,'GAME_WIN','AVIATOR',
+       format('Aviator server auto cash-out %s at %sx before crash finalization',v_auto_bet.id,v_auto_bet.auto_cashout));
+     update public.nplus_aviator_demo_bets
+     set status='cashed_out',cashout_multiplier=v_auto_bet.auto_cashout,payout=v_payout,settled_at=clock_timestamp()
+     where id=v_auto_bet.id;
+   end loop;
+
+   update public.nplus_aviator_demo_rounds
+   set status='crashed',crashed_at=clock_timestamp()
+   where id=v_round.id returning * into v_round;
    update public.nplus_aviator_demo_bets set status='lost',payout=0,settled_at=clock_timestamp()
    where round_id=v_round.id and status='open';
+   select * into v_bet from public.nplus_aviator_demo_bets
+   where id=p_bet_id and user_id=v_user;
+
+   if v_bet.status='cashed_out' then
+     return jsonb_build_object('bet_id',v_bet.id,'status',v_bet.status,
+       'multiplier',v_bet.cashout_multiplier,'payout',v_bet.payout,'round_id',v_bet.round_id,'duplicate_cashout',true);
+   end if;
    return jsonb_build_object('bet_id',v_bet.id,'status','lost','payout',0,
      'crash_point',v_round.crash_point,'round_id',v_round.id);
  end if;
