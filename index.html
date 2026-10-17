@@ -1866,6 +1866,7 @@ document.querySelectorAll('.cat').forEach(tab=>{
     const walletEl = document.getElementById("homeWalletValue");
     const walletBox = document.getElementById("homeWallet");
     if (!walletEl) return;
+    walletEl.textContent = "SYNCING…";
 
     const money = (value) => {
         const n = Number(value);
@@ -1944,13 +1945,6 @@ document.querySelectorAll('.cat').forEach(tab=>{
     // Same-tab wallet bridge event used by game pages.
     window.addEventListener("nplus:wallet-change", () => {
         syncWallet(true);
-    });
-
-    // Browser/tab changes.
-    window.addEventListener("storage", (event) => {
-        if (event.key === LEGACY_STORE) {
-            syncWallet(true);
-        }
     });
 
     document.addEventListener("visibilitychange", () => {
