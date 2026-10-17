@@ -174,6 +174,15 @@ try {
     }
   }
 
+  const aiRoulette = fs.readFileSync(path.join(root, 'ai-roulette.html'), 'utf8');
+  if (!aiRoulette.includes('Coming Soon') ||
+      !aiRoulette.includes('AI ROULETTE') ||
+      /₹\s*50,000|\b50,000\.00\b/.test(aiRoulette) ||
+      /Math\.random\s*\(/.test(aiRoulette) ||
+      /GAME_WIN|NPlusWallet|localStorage.*balance/i.test(aiRoulette)) {
+    fail('AI Roulette must not show fake balance or unbacked betting; keep it Coming Soon until wallet/RPC integration exists');
+  }
+
   const authPage = fs.readFileSync(path.join(root, 'auth.html'), 'utf8');
   const authCore = fs.readFileSync(path.join(root, 'core/nplus-auth.js'), 'utf8');
   if (!authPage.includes('resendOtpBtn') ||
