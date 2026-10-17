@@ -132,6 +132,21 @@ begin
     raise exception 'WINGO ledger note is incompatible with the Admin round-report parser: %.',v_bet_note;
   end if;
 
+  -- Reject a tampered unit amount/quantity/multiplier combination.
+  begin
+    perform public.nplus_wingo_demo_place_bet(
+      30,
+      '{"type":"number","value":"8","amount":10,"qty":2,"multi":5}'::jsonb,
+      10.00,
+      gen_random_uuid()
+    );
+    raise exception 'TEST_FAILURE: inconsistent WINGO amount/qty/multiplier was accepted.';
+  exception when others then
+    if sqlerrm not like '%amount, quantity and multiplier do not match%' then
+      raise;
+    end if;
+  end;
+
   v_recovered_bets := public.nplus_wingo_demo_my_bets(30, 100);
   if jsonb_array_length(v_recovered_bets) <> 1
      or v_recovered_bets->0->>'bet_id' <> v_placed->>'bet_id'
