@@ -1,4 +1,4 @@
-# N+ PLAY — Release readiness (2026-10-15)
+# N+ PLAY + N+ ADMIN — Release readiness (2026-10-17)
 
 ## Done
 - Created local custom-format Supabase database backup and verified its archive list (not restore-tested).
@@ -7,7 +7,7 @@
 - Live DB: consolidated duplicate deposit policies, optimized RLS policy expressions, applied least-privilege table grants, retained admin-only reads needed by admin screens, and added FK/ledger indexes.
 - Live DB: created `profiles_phone_digits_unique_idx`; current profile values were checked and no duplicate digit-normalized phone groups existed. Aligned the future wallet default to ₹108 (no existing wallet balance changed).
 - Branch: fixed missing admin-users page, PWA icon path, missing demo deposit route, legacy REAL_MONEY flag and forgot-password links.
-- Branch: restored email OTP signup UI and added static QA checks/CI. The latest recorded static QA run passed, but subsequent branch edits need a fresh check.
+- Branch: restored email OTP signup UI and added static QA checks/CI. The latest security-branch workflow passed after the newest admin-tools changes.
 
 
 ## Security-branch progress (not deployed)
@@ -19,25 +19,40 @@
 - Added `sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql` plus a disposable PostgreSQL test. After the matching frontend/server RPC rollout only, this migration rejects caller-supplied positive deltas while preserving negative virtual-stake debits. It has not been run against production.
 - Added an Aviator backend: server-owned crash points/timing, atomic server-side stake debit, server-time-based manual cash-out, server-handled auto cash-out and post-crash loss settlement. The client no longer decides crash points or credits its own cash-out amount.
 - Migrated `aviator.html` to those RPCs and removed its local-balance fallback.
-- Added an isolated PostgreSQL 17 QA workflow. Latest recorded successful run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/38768941850. It passed the 36-page static check and disposable database tests for WINGO, MotoRace and Aviator.
+- Added an isolated PostgreSQL 17 QA workflow. Latest recorded successful run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39010096765. Static checks and disposable database tests passed for WINGO, MotoRace, Aviator, the generic positive-credit guard, and N+ ADMIN user tools.
+- Added a draft SQL migration for N+ ADMIN user directory/search, per-user transaction ledger and audited virtual-credit adjustment. Each RPC checks the current signed-in profile role on the server. The isolated PostgreSQL test covers admin success and unauthorized denial.
+- Fixed the security branch's admin-users filename/link mismatch. Live main still has the legacy misspelled admin-users.htlm, so the corrected page has not yet been deployed.
+- Paused K3, 5D and TRX WINGO wagers in the security branch until payout rules are approved; disabled withdrawal submission and collection of bank/UPI details in virtual-credit demo mode.
 - These are branch/CI tests only. No new settlement SQL has been run against the live Supabase project, and no code PR has been merged to `main`.
 
 ## Remaining release blockers
 
-1. **K3, 5D and TRX WINGO wagers are temporarily paused in the security branch.** Their payout/return rates are not specified in the inspected source pages, which previously generated outcomes client-side and debited demo stakes without a server payout table. Do not guess return rates. Once those rules are approved, implement/test their server settlement, then re-enable the buttons.
-2. The live generic `nplus_wallet_change` RPC still accepts authenticated positive deltas. Do not close that legacy path until the remaining active game flows are migrated and regression-tested; then block arbitrary positive client credits without breaking legitimate demo bets.
-3. WINGO, MotoRace and Aviator now require matching new schema/RPC migrations. Never deploy these updated HTML pages without their reviewed server schema/functions.
-4. Legacy bets kept only in browser `localStorage` have no server-issued settlement record. The migrated pages deliberately will not award credits for those records. Plan and test a user-safe reconciliation/transition notice; never reset or silently alter existing wallet balances.
-5. The live anonymous `nplus_phone_is_registered(text)` RPC can reveal phone registration. After the updated signup code is deployed and duplicate-mobile signup is verified, revoke its client EXECUTE permission.
-6. Leaked-password protection is unavailable on the current Free plan according to the project dashboard. Do not upgrade just to clear the advisor; retain strong password rules and document the remaining warning.
-7. The database backup archive was readable but has not been restore-tested. Test restore in a separate isolated database/project, never production.
-8. End-to-end Supabase Auth/email OTP, profile + ₹108 wallet creation for a new test account, deposits/admin workflows, and real browser desktop/mobile regression are still pending. Email template `Confirm signup` already contains `{{ .Token }}`; keep production email confirmation OFF until the new signup flow is actually deployed/tested.
+1. **K3, 5D and TRX WINGO wagering is temporarily paused in the security branch.** Their payout/return rules were not found in the inspected source. Approve those rules before building server settlement and re-enabling these games.
+2. **N+ ADMIN user-management RPCs are missing in live Supabase.** The migration exists only in the security branch. The current live site also has the admin-users.htlm filename mismatch. Deploy the matching frontend and run the reviewed migration together.
+3. The live generic nplus_wallet_change RPC still accepts authenticated positive deltas. The tested blocker is post-rollout only: deploy/test server settlement and keep unported game betting paused before blocking generic positive credits.
+4. WINGO, MotoRace and Aviator require their matching new schema/RPC migrations. Never deploy their new HTML before the matching SQL functions and tables are installed.
+5. Legacy bets stored only in browser localStorage have no server-issued settlement proof. Migrated pages will not award credits for those records. Provide a user-facing transition/reconciliation plan; never reset existing wallet balances.
+6. The live anonymous nplus_phone_is_registered(text) RPC reveals whether a phone is registered. After the new signup code is deployed and duplicate-mobile signup is tested, revoke client EXECUTE as a post-rollout action.
+7. **Email OTP requires Confirm email ON.** The branch signup code deliberately rejects an immediate session, which happens when Confirm email is OFF. The dashboard setting is currently OFF; the signup template already contains {{ .Token }}. Deploy the matching frontend, enable confirmation, then verify delivery, six-digit OTP, profile creation and ₹108 wallet initialization.
+8. N+ ADMIN commission reports currently estimate a uniform 2% on every negative GAME_BET transaction. The new MotoRace flow charges 1.5% inside the total debit; Aviator has no separate entry fee and WINGO's 2% is currently applied to winning returns. Approve one accounting model and update reporting so commission figures are accurate.
+9. Leaked-password protection is unavailable on the current Free plan according to the Supabase dashboard. Keep this documented unless a plan change is separately approved.
+10. The database backup archive can be listed but has not been restored into a separate test database. Test restore only in an isolated environment.
+11. Live browser testing is still pending for Supabase Auth, admin login, deposit approve/reject, game control, reports, user search/ledger/adjustment, every active game, reload and mobile layouts. The separate nplus-play-final repository is only a localStorage prototype with username-only login and incomplete game routes; it has no N+ ADMIN and must not be treated as the Supabase-backed production app.
+
+## Safe rollout order
+
+1. Restore-test the existing backup in a separate database; never use production as the restore-test target.
+2. Apply reviewed additive SQL during a controlled rollout: WINGO server settlement; MotoRace schema then RPCs; Aviator schema then RPCs; N+ ADMIN user tools. Do not rerun the recorded live hardening migration.
+3. Deploy the matching security-branch frontend to the actual configured N+ PLAY host. Keep K3/5D/TRX paused and cash withdrawals disabled until their requirements are approved.
+4. Enable Supabase Confirm email only after the matching signup UI is deployed; then test a fresh account end-to-end.
+5. Test admin login, non-admin rejection, pending deposit approval/rejection, game control, reports, user search/ledger/adjustment, and all active games on desktop and mobile.
+6. Verify no active frontend still uses generic positive wallet credits. Only then apply the post-rollout generic-wallet guard and phone-enumeration revocation scripts.
+7. Approve payout rates and commission accounting; review all diffs and repeat CI before merging or deploying.
 
 ## Merge gates
 
-- Approve K3/5D/TRX demo payout rules.
-- Pass automated tests for all six games, including duplicate/replayed settlement, insufficient balance, bad selection/amount, reload and parallel requests.
-- Validate RPC permissions/RLS and Auth/deposit/admin behavior against an isolated Supabase test project.
-- Review the final diff and workflow logs, then deploy the matching SQL + frontend in a controlled order. Keep PR #2 and this security branch unmerged until these gates pass.
-
+- Approve K3/5D/TRX demo payout rules and the N+ ADMIN commission accounting model.
+- Pass automated tests for all enabled games: duplicate/replayed settlement, insufficient balance, invalid selections/stakes, reload, parallel requests, and wallet/ledger consistency.
+- Validate Auth, RLS/RPC permissions, deposits/admin workflows and real browser behavior against an isolated Supabase test project.
+- Review the final diff and workflow evidence before any production deployment. Keep PR #2 and the security branch unmerged until these gates pass.
 Production DB hardening was applied through Supabase and is recorded in `sql/NPLUS_PLAY_LIVE_HARDENING_2026-10-15.sql`. No code PR is merged to main.
