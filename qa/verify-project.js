@@ -64,9 +64,11 @@ for (const file of htmls) {
 // Repository-wide guard: browser code must never award a generic GAME_WIN credit.
 for (const file of htmls) {
   const html = fs.readFileSync(path.join(root, file), 'utf8');
-  const forgedWin = /(?:NPlusWallet|wallet)\.changeBalance\s*\(\s*(?!-)\s*[\s\S]{0,350}?\btype\s*:\s*['"]GAME_WIN['"]/i;
-  if (forgedWin.test(html)) {
-    fail(file + ' contains a client-authored positive GAME_WIN wallet credit');
+  const calls = /(?:NPlusWallet|wallet)\.changeBalance\s*\(\s*([^,]+),\s*\{[^}]{0,250}?\btype\s*:\s*['"]GAME_WIN['"]/gi;
+  for (const match of html.matchAll(calls)) {
+    if (!String(match[1] || '').trim().startsWith('-')) {
+      fail(file + ' contains a client-authored positive GAME_WIN wallet credit');
+    }
   }
 }
 
