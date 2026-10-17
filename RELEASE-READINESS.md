@@ -7,7 +7,7 @@
 - Live DB: consolidated duplicate deposit policies, optimized RLS policy expressions, applied least-privilege table grants, retained admin-only reads needed by admin screens, and added FK/ledger indexes.
 - Live DB: created `profiles_phone_digits_unique_idx`; current profile values were checked and no duplicate digit-normalized phone groups existed. Aligned the future wallet default to ₹108 (no existing wallet balance changed).
 - Branch: fixed missing admin-users page, PWA icon path, missing demo deposit route, legacy REAL_MONEY flag and forgot-password links.
-- Branch: restored email OTP signup UI and added static QA checks/CI. The latest security-branch workflow passed after the newest admin-tools changes.
+- Branch: restored email OTP signup UI and added static QA checks/CI. Latest full disposable-Postgres CI is green (run linked below).
 
 
 ## Security-branch progress (not deployed)
@@ -23,8 +23,10 @@
 - Added a draft SQL migration for N+ ADMIN user directory/search, per-user transaction ledger and audited virtual-credit adjustment. Each RPC checks the current signed-in profile role on the server. The isolated PostgreSQL test covers admin success and unauthorized denial.
 - Added `sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql` and a disposable PostgreSQL test for authenticated-admin-only game status changes, invalid/null values, persistence and anon/user denial.
 - Connected `admin-games.html` global on/off controls to `game_settings` and the role-guarded `nplus_set_game_status` RPC. It no longer treats localStorage as the global game-enabled switch.
-- WINGO, MotoRace and Aviator bet RPCs now reject new wagers when their corresponding server `game_settings.enabled` flag is false; current-round RPCs expose the flag and their player UIs show the Admin-paused state.
-- Latest recorded successful CI run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39013914477 (commit `d719b9923a87e00768713010d615e9b9b44c01a2`). It passed static checks and disposable Postgres tests for WINGO, Admin game-status, MotoRace, Aviator, positive-credit guard, Admin user tools and Admin deposits.
+- `sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql` now sets K3/5D/TRX to disabled during the reviewed rollout and the server RPC refuses to re-enable them without approved payout rules. Admin cards show those games as paused and lock their UI toggle.
+- WINGO and MotoRace periodically refresh the authenticated-readable `game_settings` status and fail closed if it cannot be read. Aviator receives the status from its server-round RPC. All three bet RPCs independently reject new bets when their corresponding server setting is disabled.
+- Admin commission cards are labelled estimated, with a note explaining that the flat 2% report is not an exact ledger until game-specific commission accounting is implemented.
+- Latest recorded successful full CI run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39014567618 (commit `4f1ae293de53d8d7edd108003f0a7cb1c9da7806`). All jobs passed: static checks; WINGO settlement; Admin game-status migration/lock; MotoRace settlement; Aviator settlement; generic wallet credit/debit guard; Admin user tools; Admin deposits. Tests use a disposable PostgreSQL 17 database only, not live Supabase or a real browser.
 - Fixed the security branch's admin-users filename/link mismatch. Live main still has the legacy misspelled admin-users.htlm, so the corrected page has not yet been deployed.
 - Paused K3, 5D and TRX WINGO wagers in the security branch until payout rules are approved; disabled withdrawal submission and collection of bank/UPI details in virtual-credit demo mode.
 - These are branch/CI tests only. No new settlement SQL has been run against the live Supabase project, and no code PR has been merged to `main`.
