@@ -408,6 +408,7 @@ $('agree').onchange=syncSheet;
 $('cancel').onclick=()=>{$('overlay').classList.remove('show')};
 
 $('confirm').onclick=async()=>{
+ if(serverRoundCache?.betting_enabled===false){$('overlay').classList.remove('show');alert('MotoRace betting is disabled by Admin.');return}
  if(!isBettingOpen()){$('overlay').classList.remove('show');alert('Betting closed for this round.');return}
  if(walletBalance===null)await refreshWallet();
  const unit=Math.max(0,Number($('amount').value)||0);
