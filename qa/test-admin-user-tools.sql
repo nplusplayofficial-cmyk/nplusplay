@@ -90,9 +90,9 @@ begin
 
   begin
     perform public.nplus_admin_adjust_demo_wallet(v_user,-200.00,'QA below zero');
-    raise exception 'Expected negative resulting balance to be rejected.';
+    raise exception 'TEST_FAILURE: overdraw unexpectedly allowed.';
   exception when others then
-    if sqlerrm not like '%negative%' then raise; end if;
+    if sqlerrm not like '%Adjustment would make the virtual balance negative%' then raise; end if;
   end;
 
   perform set_config('request.jwt.claim.sub',v_user::text,true);
