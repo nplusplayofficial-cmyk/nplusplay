@@ -33,10 +33,10 @@
 
 ## Latest verification update — 2026-10-17
 
-- Candidate commit `830d621b4032cca1b8cd7a93237da57739da1d34` passed both the pull-request CI run and candidate-branch push CI run:
-  - PR run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017205402
-  - Push run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017213779
-- Each run passed static HTML/JavaScript/local-link checks and seven disposable PostgreSQL suites: WINGO settlement, Admin game status, MotoRace settlement, Aviator settlement, generic wallet guard, Admin user tools and Admin deposit actions.
+- Candidate commit `cc10da4e4e2d78436e3dd49f147ce36408413935` passed both the pull-request CI run and candidate-branch push CI run:
+  - PR run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017665739
+  - Push run: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017662316
+- Each run passed static HTML/JavaScript/local-link checks and eight disposable PostgreSQL suites: WINGO settlement, Admin game status, MotoRace settlement, Aviator settlement, generic wallet guard, phone-enumeration revocation, Admin user tools and Admin deposit actions.
 - A fresh read-only production catalog/privilege inspection confirmed the release is still blocked: none of the six new server-settlement tables exist; all six existing game settings are currently enabled; anon can still execute `nplus_phone_is_registered(text)`; authenticated users can still execute legacy `nplus_wallet_change(...)`. The live database has 5 profiles, 5 wallets and 145 ledger rows at the time of this inspection. These counts are operational facts, not a request to modify or reset data.
 - Security advisor continues to flag the anonymous phone-registration lookup and disabled leaked-password protection. Authenticated SECURITY DEFINER functions must be reviewed by their internal authorization checks; an advisor warning alone is not proof of a bypass.
 - No production writes were made during this verification. No paid Supabase branch was created. Existing balances were not changed.
