@@ -2,6 +2,13 @@
 -- Safe additive/re-runnable migration. Game keys match the existing game_settings table.
 begin;
 
+-- Keep games without approved server payout rules disabled whenever this
+-- reviewed migration is rolled out. The Admin RPC below also refuses re-enable.
+update public.game_settings
+set enabled = false,
+    updated_at = clock_timestamp()
+where game_key in ('K3','5D','TRX');
+
 create or replace function public.nplus_set_game_status(
   p_game_key text,
   p_enabled boolean
