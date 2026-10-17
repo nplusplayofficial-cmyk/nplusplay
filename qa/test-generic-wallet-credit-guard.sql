@@ -12,10 +12,17 @@ begin
  insert into public.demo_wallets(user_id,balance) values(u,108.00);
  perform set_config('request.jwt.claim.sub',u::text,true);
 
- result:=public.nplus_wallet_change(-2.00,'GAME_BET','QA','test virtual stake debit');
+ result:=public.nplus_wallet_change(-2.00,'ADJUSTMENT','QA','test negative adjustment');
  if (result->>'after')::numeric<>106.00 then
-   raise exception 'Negative demo debit should still be allowed.';
+   raise exception 'Negative non-game adjustment should still be allowed.';
  end if;
+
+ begin
+   perform public.nplus_wallet_change(-5.00,'GAME_BET','QA','stale client game debit');
+   raise exception 'Generic wallet RPC allowed a caller-supplied GAME_BET debit.';
+ exception when insufficient_privilege then
+   null;
+ end;
 
  begin
    perform public.nplus_wallet_change(5.00,'GAME_WIN','QA','forged credit attempt');
@@ -30,6 +37,6 @@ begin
    raise exception 'Positive credit attempt modified wallet/ledger unexpectedly.';
  end if;
 
- raise notice 'Generic wallet positive-credit guard tests passed.';
+ raise notice 'Generic wallet credit and debit guard tests passed.';
 end
 $tests$;
