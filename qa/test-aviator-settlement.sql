@@ -142,8 +142,8 @@ begin
  if win_count<>3 then
    raise exception 'Expected one late auto-cashout credit; GAME_WIN count is %.',win_count;
  end if;
- select count(*) into bet_count from public.nplus_aviator_demo_bets
- where user_id=u and round_id=late_round_id and status='lost';
+ select count(*) into bet_count from public.nplus_aviator_demo_bets b
+ where b.user_id=u and b.round_id=late_round_id and b.status='lost';
  if bet_count<>1 then
    raise exception 'Only the manual bet should be marked lost after late finalization.';
  end if;
