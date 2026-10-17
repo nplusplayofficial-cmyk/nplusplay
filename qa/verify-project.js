@@ -146,6 +146,16 @@ try {
     }
   }
 
+  const deposit = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
+  if (deposit.includes('nplusplay_wallet_v1') ||
+      /localStorage\.getItem\(LEGACY\)/.test(deposit)) {
+    fail('Deposit page must not display a stale localStorage wallet balance');
+  }
+  if (!deposit.includes('walletReady=false') ||
+      !deposit.includes('Please sign in and wait for the shared wallet to sync')) {
+    fail('Deposit page must disable requests when the shared wallet cannot sync');
+  }
+
   const withdraw = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
   if (/function\s+addRequest\s*\(/.test(withdraw) || /addRequest\s*\(\s*\{/.test(withdraw)) {
     fail('Withdraw page must not store withdrawal requests in localStorage');
