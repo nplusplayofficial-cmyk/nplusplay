@@ -332,6 +332,13 @@ begin
     );
   end if;
 
+  if not exists (
+    select 1 from public.game_settings
+    where game_key = 'WINGO' and enabled = true
+  ) then
+    raise exception 'WINGO betting is disabled by admin.';
+  end if;
+
   v_epoch := extract(epoch from v_now);
   v_index := floor(v_epoch / p_duration_seconds)::bigint;
   v_start := to_timestamp(v_index * p_duration_seconds);
