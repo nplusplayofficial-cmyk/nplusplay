@@ -217,9 +217,31 @@ try {
   }
 
   const adminGames = fs.readFileSync(path.join(root, 'admin-games.html'), 'utf8');
-  if (!adminGames.includes('const paused = ["K3", "5D", "TRX"]') ||
+  if (!adminGames.includes('HARD_PAUSED_GAMES = new Set(["K3", "5D", "TRX"])') ||
       !adminGames.includes('BETTING PAUSED')) {
     fail('N+ ADMIN game cards must show the paused wagering state');
+  }
+  if (!adminGames.includes('from("game_settings")') ||
+      !adminGames.includes('nplus_set_game_status') ||
+      !adminGames.includes('toggleServerGameStatus') ||
+      !adminGames.includes('loadServerGameSettings')) {
+    fail('N+ ADMIN game status toggles must read/write persistent Supabase settings');
+  }
+
+  const wingoSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql'), 'utf8');
+  if (!wingoSql.includes("game_key = 'WINGO' and enabled = true") ||
+      !wingoSql.includes('WINGO betting is disabled by admin')) {
+    fail('WINGO backend must enforce the Admin pause on the server');
+  }
+  const motoSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_MOTORACE_RPC.sql'), 'utf8');
+  if (!motoSql.includes("game_key='MOTO' and enabled=true") ||
+      !motoSql.includes('MotoRace betting is disabled by admin')) {
+    fail('MotoRace backend must enforce the Admin pause on the server');
+  }
+  const aviatorSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_AVIATOR_RPC.sql'), 'utf8');
+  if (!aviatorSql.includes("game_key='AVIATOR' and enabled=true") ||
+      !aviatorSql.includes('Aviator betting is disabled by admin')) {
+    fail('Aviator backend must enforce the Admin pause on the server');
   }
 
   const deposit = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
