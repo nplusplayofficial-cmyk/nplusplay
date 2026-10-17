@@ -234,13 +234,13 @@ declare
   v_bet public.nplus_wingo_demo_bets%rowtype;
   v_inserted_id uuid;
   v_stake numeric(12,2);
+  v_unit_amount numeric(12,2);
   v_balance_before numeric(12,2);
   v_balance_after numeric(12,2);
   v_type text;
   v_value text;
   v_qty integer;
   v_multi integer;
-  v_unit_amount numeric(12,2);
   v_code text;
   v_period text;
 begin
@@ -251,11 +251,9 @@ begin
   if p_duration_seconds not in (30, 60, 180, 300) then
     raise exception 'Unsupported WINGO duration.';
   end if;
-
   if p_request_id is null then
     raise exception 'Request id is required.';
   end if;
-
   if p_selection is null or jsonb_typeof(p_selection) <> 'object' then
     raise exception 'Invalid selection.';
   end if;
@@ -266,9 +264,6 @@ begin
   if v_type not in ('number', 'color', 'size') then
     raise exception 'Unsupported WINGO selection type.';
   end if;
-
-  if coalesce(p_selection->>'qty','') <> '' and p_selection->>'qty' !~ '^[0-9]{1,3}
-
   if v_type = 'number' and not (v_value ~ '^[0-9]$') then
     raise exception 'Number selection must be from 0 to 9.';
   elsif v_type = 'color' and upper(v_value) not in ('RED', 'GREEN', 'VIOLET') then
@@ -277,15 +272,42 @@ begin
     raise exception 'Unsupported size selection.';
   end if;
 
+  if coalesce(p_selection->>'qty', '') <> ''
+     and (p_selection->>'qty') !~ '^[0-9]{1,3}$' then
+    raise exception 'WINGO quantity must be between 1 and 100.';
+  end if;
+  if coalesce(p_selection->>'multi', '') <> ''
+     and (p_selection->>'multi') !~ '^[0-9]{1,3}$' then
+    raise exception 'Unsupported WINGO multiplier.';
+  end if;
+
+  v_qty := coalesce(nullif(p_selection->>'qty', '')::integer, 1);
+  v_multi := coalesce(nullif(p_selection->>'multi', '')::integer, 1);
+  if v_qty not between 1 and 100 then
+    raise exception 'WINGO quantity must be between 1 and 100.';
+  end if;
+  if v_multi not in (1,5,10,20,50,100) then
+    raise exception 'Unsupported WINGO multiplier.';
+  end if;
+
+  if coalesce(p_selection->>'amount', '') <> '' then
+    if (p_selection->>'amount') !~ '^[0-9]+([.][0-9]{1,2})?$' then
+      raise exception 'Invalid WINGO unit amount.';
+    end if;
+    v_unit_amount := (p_selection->>'amount')::numeric(12,2);
+    if v_unit_amount <= 0
+       or round(v_unit_amount * v_qty * v_multi, 2) <> round(p_stake, 2) then
+      raise exception 'WINGO amount, quantity and multiplier do not match the total stake.';
+    end if;
+  end if;
+
   if p_stake is null or p_stake < 1 or p_stake > 100000
      or p_stake <> round(p_stake, 2) then
     raise exception 'Demo stake must be between 1 and 100000 credits.';
   end if;
   v_stake := p_stake;
 
-  -- Resolve completed retries before checking the current round's cutoff.
-  -- A network retry after the round closes must return the original bet,
-  -- not make the same request look like a new late bet.
+  -- Resolve retries first, including those arriving after the betting cutoff.
   select * into v_bet
   from public.nplus_wingo_demo_bets
   where user_id = v_user_id and request_id = p_request_id;
@@ -296,7 +318,8 @@ begin
     end if;
 
     select balance into v_balance_after
-    from public.demo_wallets where user_id = v_user_id;
+    from public.demo_wallets
+    where user_id = v_user_id;
 
     return jsonb_build_object(
       'bet_id', v_bet.id,
@@ -358,7 +381,8 @@ begin
     end if;
 
     select balance into v_balance_after
-    from public.demo_wallets where user_id = v_user_id;
+    from public.demo_wallets
+    where user_id = v_user_id;
 
     return jsonb_build_object(
       'bet_id', v_bet.id,
@@ -379,19 +403,17 @@ begin
   if not found then
     raise exception 'Wallet not found.';
   end if;
-
   if v_balance_before < v_stake then
     raise exception 'Insufficient virtual balance.';
   end if;
 
   v_balance_after := v_balance_before - v_stake;
-
   update public.demo_wallets
-  set balance = v_balance_after, updated_at = clock_timestamp()
+  set balance = v_balance_after,
+      updated_at = clock_timestamp()
   where user_id = v_user_id;
 
-  -- Keep the ledger note compatible with the Admin WINGO round parser.
-  -- Its report extracts period/type/value/qty/multi from "WINGO BET ..." notes.
+  -- Preserve the existing N+ ADMIN WINGO round-report ledger format.
   v_code := case p_duration_seconds
     when 30 then '1000'
     when 60 then '2000'
@@ -427,468 +449,6 @@ begin
 end;
 $function$;
 
--- Settles a completed round once. A round-level row lock plus one transaction
--- prevents concurrent callers from crediting the same bet more than once.
- then
-    raise exception 'WINGO quantity must be between 1 and 100.';
-  end if;
-  if coalesce(p_selection->>'multi','') <> '' and p_selection->>'multi' !~ '^[0-9]{1,3}
-
-  if v_type = 'number' and not (v_value ~ '^[0-9]$') then
-    raise exception 'Number selection must be from 0 to 9.';
-  elsif v_type = 'color' and upper(v_value) not in ('RED', 'GREEN', 'VIOLET') then
-    raise exception 'Unsupported color selection.';
-  elsif v_type = 'size' and upper(v_value) not in ('BIG', 'SMALL') then
-    raise exception 'Unsupported size selection.';
-  end if;
-
-  if p_stake is null or p_stake < 1 or p_stake > 100000
-     or p_stake <> round(p_stake, 2) then
-    raise exception 'Demo stake must be between 1 and 100000 credits.';
-  end if;
-  v_stake := p_stake;
-
-  -- Resolve completed retries before checking the current round's cutoff.
-  -- A network retry after the round closes must return the original bet,
-  -- not make the same request look like a new late bet.
-  select * into v_bet
-  from public.nplus_wingo_demo_bets
-  where user_id = v_user_id and request_id = p_request_id;
-
-  if found then
-    if v_bet.selection <> p_selection or v_bet.stake <> v_stake then
-      raise exception 'Request id was already used for a different bet.';
-    end if;
-
-    select balance into v_balance_after
-    from public.demo_wallets where user_id = v_user_id;
-
-    return jsonb_build_object(
-      'bet_id', v_bet.id,
-      'round_id', v_bet.round_id,
-      'round_index', (select r.round_index from public.nplus_wingo_demo_rounds r where r.id = v_bet.round_id),
-      'stake', v_bet.stake,
-      'balance', v_balance_after,
-      'status', v_bet.status,
-      'duplicate_request', true
-    );
-  end if;
-
-  v_epoch := extract(epoch from v_now);
-  v_index := floor(v_epoch / p_duration_seconds)::bigint;
-  v_start := to_timestamp(v_index * p_duration_seconds);
-  v_end := v_start + make_interval(secs => p_duration_seconds);
-
-  if v_now >= v_end - interval '5 seconds' then
-    raise exception 'Betting is closed for this round.';
-  end if;
-
-  insert into public.nplus_wingo_demo_rounds (
-    duration_seconds, round_index, starts_at, ends_at, outcome
-  )
-  values (
-    p_duration_seconds, v_index, v_start, v_end,
-    public.nplus_wingo_make_outcome()
-  )
-  on conflict (duration_seconds, round_index) do nothing;
-
-  select * into v_round
-  from public.nplus_wingo_demo_rounds
-  where duration_seconds = p_duration_seconds
-    and round_index = v_index
-  for update;
-
-  if v_round.status <> 'open' or v_now >= v_round.ends_at - interval '5 seconds' then
-    raise exception 'Betting is closed for this round.';
-  end if;
-
-  insert into public.nplus_wingo_demo_bets (
-    round_id, user_id, request_id, selection, stake
-  )
-  values (
-    v_round.id, v_user_id, p_request_id, p_selection, v_stake
-  )
-  on conflict (user_id, request_id) do nothing
-  returning id into v_inserted_id;
-
-  if v_inserted_id is null then
-    select * into v_bet
-    from public.nplus_wingo_demo_bets
-    where user_id = v_user_id and request_id = p_request_id;
-
-    if v_bet.round_id <> v_round.id
-       or v_bet.selection <> p_selection
-       or v_bet.stake <> v_stake then
-      raise exception 'Request id was already used for a different bet.';
-    end if;
-
-    select balance into v_balance_after
-    from public.demo_wallets where user_id = v_user_id;
-
-    return jsonb_build_object(
-      'bet_id', v_bet.id,
-      'round_id', v_round.id,
-      'round_index', v_round.round_index,
-      'stake', v_bet.stake,
-      'balance', v_balance_after,
-      'status', v_bet.status,
-      'duplicate_request', true
-    );
-  end if;
-
-  select balance into v_balance_before
-  from public.demo_wallets
-  where user_id = v_user_id
-  for update;
-
-  if not found then
-    raise exception 'Wallet not found.';
-  end if;
-
-  if v_balance_before < v_stake then
-    raise exception 'Insufficient virtual balance.';
-  end if;
-
-  v_balance_after := v_balance_before - v_stake;
-
-  update public.demo_wallets
-  set balance = v_balance_after, updated_at = clock_timestamp()
-  where user_id = v_user_id;
-
-  insert into public.demo_wallet_transactions (
-    user_id, delta, balance_before, balance_after, type, source, note
-  )
-  values (
-    v_user_id, -v_stake, v_balance_before, v_balance_after,
-    'GAME_BET', 'WINGO',
-    format('WINGO server bet %s round %s', v_inserted_id, v_round.round_index)
-  );
-
-  return jsonb_build_object(
-    'bet_id', v_inserted_id,
-    'round_id', v_round.id,
-    'round_index', v_round.round_index,
-    'stake', v_stake,
-    'balance', v_balance_after,
-    'status', 'pending',
-    'duplicate_request', false
-  );
-end;
-$function$;
-
--- Settles a completed round once. A round-level row lock plus one transaction
--- prevents concurrent callers from crediting the same bet more than once.
- then
-    raise exception 'Unsupported WINGO multiplier.';
-  end if;
-  v_qty := coalesce(nullif(p_selection->>'qty','')::integer, 1);
-  v_multi := coalesce(nullif(p_selection->>'multi','')::integer, 1);
-  if v_qty not between 1 and 100 then
-    raise exception 'WINGO quantity must be between 1 and 100.';
-  end if;
-  if v_multi not in (1,5,10,20,50,100) then
-    raise exception 'Unsupported WINGO multiplier.';
-  end if;
-  if coalesce(p_selection->>'amount','') <> '' then
-    if p_selection->>'amount' !~ '^[0-9]+([.][0-9]{1,2})?
-
-  if v_type = 'number' and not (v_value ~ '^[0-9]$') then
-    raise exception 'Number selection must be from 0 to 9.';
-  elsif v_type = 'color' and upper(v_value) not in ('RED', 'GREEN', 'VIOLET') then
-    raise exception 'Unsupported color selection.';
-  elsif v_type = 'size' and upper(v_value) not in ('BIG', 'SMALL') then
-    raise exception 'Unsupported size selection.';
-  end if;
-
-  if p_stake is null or p_stake < 1 or p_stake > 100000
-     or p_stake <> round(p_stake, 2) then
-    raise exception 'Demo stake must be between 1 and 100000 credits.';
-  end if;
-  v_stake := p_stake;
-
-  -- Resolve completed retries before checking the current round's cutoff.
-  -- A network retry after the round closes must return the original bet,
-  -- not make the same request look like a new late bet.
-  select * into v_bet
-  from public.nplus_wingo_demo_bets
-  where user_id = v_user_id and request_id = p_request_id;
-
-  if found then
-    if v_bet.selection <> p_selection or v_bet.stake <> v_stake then
-      raise exception 'Request id was already used for a different bet.';
-    end if;
-
-    select balance into v_balance_after
-    from public.demo_wallets where user_id = v_user_id;
-
-    return jsonb_build_object(
-      'bet_id', v_bet.id,
-      'round_id', v_bet.round_id,
-      'round_index', (select r.round_index from public.nplus_wingo_demo_rounds r where r.id = v_bet.round_id),
-      'stake', v_bet.stake,
-      'balance', v_balance_after,
-      'status', v_bet.status,
-      'duplicate_request', true
-    );
-  end if;
-
-  v_epoch := extract(epoch from v_now);
-  v_index := floor(v_epoch / p_duration_seconds)::bigint;
-  v_start := to_timestamp(v_index * p_duration_seconds);
-  v_end := v_start + make_interval(secs => p_duration_seconds);
-
-  if v_now >= v_end - interval '5 seconds' then
-    raise exception 'Betting is closed for this round.';
-  end if;
-
-  insert into public.nplus_wingo_demo_rounds (
-    duration_seconds, round_index, starts_at, ends_at, outcome
-  )
-  values (
-    p_duration_seconds, v_index, v_start, v_end,
-    public.nplus_wingo_make_outcome()
-  )
-  on conflict (duration_seconds, round_index) do nothing;
-
-  select * into v_round
-  from public.nplus_wingo_demo_rounds
-  where duration_seconds = p_duration_seconds
-    and round_index = v_index
-  for update;
-
-  if v_round.status <> 'open' or v_now >= v_round.ends_at - interval '5 seconds' then
-    raise exception 'Betting is closed for this round.';
-  end if;
-
-  insert into public.nplus_wingo_demo_bets (
-    round_id, user_id, request_id, selection, stake
-  )
-  values (
-    v_round.id, v_user_id, p_request_id, p_selection, v_stake
-  )
-  on conflict (user_id, request_id) do nothing
-  returning id into v_inserted_id;
-
-  if v_inserted_id is null then
-    select * into v_bet
-    from public.nplus_wingo_demo_bets
-    where user_id = v_user_id and request_id = p_request_id;
-
-    if v_bet.round_id <> v_round.id
-       or v_bet.selection <> p_selection
-       or v_bet.stake <> v_stake then
-      raise exception 'Request id was already used for a different bet.';
-    end if;
-
-    select balance into v_balance_after
-    from public.demo_wallets where user_id = v_user_id;
-
-    return jsonb_build_object(
-      'bet_id', v_bet.id,
-      'round_id', v_round.id,
-      'round_index', v_round.round_index,
-      'stake', v_bet.stake,
-      'balance', v_balance_after,
-      'status', v_bet.status,
-      'duplicate_request', true
-    );
-  end if;
-
-  select balance into v_balance_before
-  from public.demo_wallets
-  where user_id = v_user_id
-  for update;
-
-  if not found then
-    raise exception 'Wallet not found.';
-  end if;
-
-  if v_balance_before < v_stake then
-    raise exception 'Insufficient virtual balance.';
-  end if;
-
-  v_balance_after := v_balance_before - v_stake;
-
-  update public.demo_wallets
-  set balance = v_balance_after, updated_at = clock_timestamp()
-  where user_id = v_user_id;
-
-  insert into public.demo_wallet_transactions (
-    user_id, delta, balance_before, balance_after, type, source, note
-  )
-  values (
-    v_user_id, -v_stake, v_balance_before, v_balance_after,
-    'GAME_BET', 'WINGO',
-    format('WINGO server bet %s round %s', v_inserted_id, v_round.round_index)
-  );
-
-  return jsonb_build_object(
-    'bet_id', v_inserted_id,
-    'round_id', v_round.id,
-    'round_index', v_round.round_index,
-    'stake', v_stake,
-    'balance', v_balance_after,
-    'status', 'pending',
-    'duplicate_request', false
-  );
-end;
-$function$;
-
--- Settles a completed round once. A round-level row lock plus one transaction
--- prevents concurrent callers from crediting the same bet more than once.
- then
-      raise exception 'Invalid WINGO unit amount.';
-    end if;
-    v_unit_amount := (p_selection->>'amount')::numeric(12,2);
-    if v_unit_amount <= 0 or round(v_unit_amount * v_qty * v_multi, 2) <> round(p_stake, 2) then
-      raise exception 'WINGO amount, quantity and multiplier do not match the total stake.';
-    end if;
-  end if;
-
-  if v_type = 'number' and not (v_value ~ '^[0-9]$') then
-    raise exception 'Number selection must be from 0 to 9.';
-  elsif v_type = 'color' and upper(v_value) not in ('RED', 'GREEN', 'VIOLET') then
-    raise exception 'Unsupported color selection.';
-  elsif v_type = 'size' and upper(v_value) not in ('BIG', 'SMALL') then
-    raise exception 'Unsupported size selection.';
-  end if;
-
-  if p_stake is null or p_stake < 1 or p_stake > 100000
-     or p_stake <> round(p_stake, 2) then
-    raise exception 'Demo stake must be between 1 and 100000 credits.';
-  end if;
-  v_stake := p_stake;
-
-  -- Resolve completed retries before checking the current round's cutoff.
-  -- A network retry after the round closes must return the original bet,
-  -- not make the same request look like a new late bet.
-  select * into v_bet
-  from public.nplus_wingo_demo_bets
-  where user_id = v_user_id and request_id = p_request_id;
-
-  if found then
-    if v_bet.selection <> p_selection or v_bet.stake <> v_stake then
-      raise exception 'Request id was already used for a different bet.';
-    end if;
-
-    select balance into v_balance_after
-    from public.demo_wallets where user_id = v_user_id;
-
-    return jsonb_build_object(
-      'bet_id', v_bet.id,
-      'round_id', v_bet.round_id,
-      'round_index', (select r.round_index from public.nplus_wingo_demo_rounds r where r.id = v_bet.round_id),
-      'stake', v_bet.stake,
-      'balance', v_balance_after,
-      'status', v_bet.status,
-      'duplicate_request', true
-    );
-  end if;
-
-  v_epoch := extract(epoch from v_now);
-  v_index := floor(v_epoch / p_duration_seconds)::bigint;
-  v_start := to_timestamp(v_index * p_duration_seconds);
-  v_end := v_start + make_interval(secs => p_duration_seconds);
-
-  if v_now >= v_end - interval '5 seconds' then
-    raise exception 'Betting is closed for this round.';
-  end if;
-
-  insert into public.nplus_wingo_demo_rounds (
-    duration_seconds, round_index, starts_at, ends_at, outcome
-  )
-  values (
-    p_duration_seconds, v_index, v_start, v_end,
-    public.nplus_wingo_make_outcome()
-  )
-  on conflict (duration_seconds, round_index) do nothing;
-
-  select * into v_round
-  from public.nplus_wingo_demo_rounds
-  where duration_seconds = p_duration_seconds
-    and round_index = v_index
-  for update;
-
-  if v_round.status <> 'open' or v_now >= v_round.ends_at - interval '5 seconds' then
-    raise exception 'Betting is closed for this round.';
-  end if;
-
-  insert into public.nplus_wingo_demo_bets (
-    round_id, user_id, request_id, selection, stake
-  )
-  values (
-    v_round.id, v_user_id, p_request_id, p_selection, v_stake
-  )
-  on conflict (user_id, request_id) do nothing
-  returning id into v_inserted_id;
-
-  if v_inserted_id is null then
-    select * into v_bet
-    from public.nplus_wingo_demo_bets
-    where user_id = v_user_id and request_id = p_request_id;
-
-    if v_bet.round_id <> v_round.id
-       or v_bet.selection <> p_selection
-       or v_bet.stake <> v_stake then
-      raise exception 'Request id was already used for a different bet.';
-    end if;
-
-    select balance into v_balance_after
-    from public.demo_wallets where user_id = v_user_id;
-
-    return jsonb_build_object(
-      'bet_id', v_bet.id,
-      'round_id', v_round.id,
-      'round_index', v_round.round_index,
-      'stake', v_bet.stake,
-      'balance', v_balance_after,
-      'status', v_bet.status,
-      'duplicate_request', true
-    );
-  end if;
-
-  select balance into v_balance_before
-  from public.demo_wallets
-  where user_id = v_user_id
-  for update;
-
-  if not found then
-    raise exception 'Wallet not found.';
-  end if;
-
-  if v_balance_before < v_stake then
-    raise exception 'Insufficient virtual balance.';
-  end if;
-
-  v_balance_after := v_balance_before - v_stake;
-
-  update public.demo_wallets
-  set balance = v_balance_after, updated_at = clock_timestamp()
-  where user_id = v_user_id;
-
-  insert into public.demo_wallet_transactions (
-    user_id, delta, balance_before, balance_after, type, source, note
-  )
-  values (
-    v_user_id, -v_stake, v_balance_before, v_balance_after,
-    'GAME_BET', 'WINGO',
-    format('WINGO server bet %s round %s', v_inserted_id, v_round.round_index)
-  );
-
-  return jsonb_build_object(
-    'bet_id', v_inserted_id,
-    'round_id', v_round.id,
-    'round_index', v_round.round_index,
-    'stake', v_stake,
-    'balance', v_balance_after,
-    'status', 'pending',
-    'duplicate_request', false
-  );
-end;
-$function$;
-
--- Settles a completed round once. A round-level row lock plus one transaction
--- prevents concurrent callers from crediting the same bet more than once.
 create or replace function public.nplus_wingo_demo_settle_round(
   p_duration_seconds integer,
   p_round_index bigint
