@@ -1508,16 +1508,23 @@ button:disabled{
       const toggleDisabled =
         unavailable ||
         serverGameToggleBusy.has(game.key) ||
-        (isHardPaused && !enabled);
+        isHardPaused;
       const toggleLabel = unavailable
         ? "SERVER STATUS UNAVAILABLE"
         : serverGameToggleBusy.has(game.key)
         ? "SAVING…"
-        : isHardPaused && !enabled
+        : isHardPaused
         ? "LOCKED · PAYOUT RULES PENDING"
         : enabled
         ? "DISABLE BETTING"
         : "ENABLE BETTING";
+      const serverStatusLabel = unavailable
+        ? "UNAVAILABLE"
+        : isHardPaused
+        ? "PAUSED · RULES PENDING"
+        : enabled
+        ? "ENABLED"
+        : "DISABLED";
 
       return `
         <article class="game-box">
@@ -1527,7 +1534,7 @@ button:disabled{
           <div class="game-mini">
             <div>
               <span>SERVER STATUS</span>
-              <strong>${unavailable ? "UNAVAILABLE" : enabled ? "ENABLED" : "DISABLED"}</strong>
+              <strong>${serverStatusLabel}</strong>
             </div>
             <div>
               <span>DISPLAY MODE</span>
