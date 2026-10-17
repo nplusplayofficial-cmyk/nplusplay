@@ -146,6 +146,15 @@ try {
     }
   }
 
+  const authPage = fs.readFileSync(path.join(root, 'auth.html'), 'utf8');
+  const authCore = fs.readFileSync(path.join(root, 'core/nplus-auth.js'), 'utf8');
+  if (!authPage.includes('resendOtpBtn') ||
+      !authPage.includes('NPlusAuth.resendSignupEmailOtp') ||
+      !authCore.includes('client.auth.resend') ||
+      !authCore.includes('resendSignupEmailOtp')) {
+    fail('Signup OTP recovery must provide a resend-code action');
+  }
+
   const deposit = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
   if (deposit.includes('nplusplay_wallet_v1') ||
       /localStorage\.getItem\(LEGACY\)/.test(deposit)) {
