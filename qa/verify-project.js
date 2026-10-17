@@ -232,18 +232,31 @@ try {
 
   const wingoSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql'), 'utf8');
   if (!wingoSql.includes("game_key = 'WINGO' and enabled = true") ||
-      !wingoSql.includes('WINGO betting is disabled by admin')) {
-    fail('WINGO backend must enforce the Admin pause on the server');
+      !wingoSql.includes('WINGO betting is disabled by admin') ||
+      !wingoSql.includes("'betting_enabled'")) {
+    fail('WINGO backend must enforce and expose the Admin pause status');
+  }
+  if (!wingo.includes('serverRoundCache[state.sec]?.betting_enabled===false')) {
+    fail('WINGO UI must explain an Admin pause before attempting a wager');
   }
   const motoSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_MOTORACE_RPC.sql'), 'utf8');
   if (!motoSql.includes("game_key='MOTO' and enabled=true") ||
-      !motoSql.includes('MotoRace betting is disabled by admin')) {
-    fail('MotoRace backend must enforce the Admin pause on the server');
+      !motoSql.includes('MotoRace betting is disabled by admin') ||
+      !motoSql.includes("'betting_enabled'")) {
+    fail('MotoRace backend must enforce and expose the Admin pause status');
+  }
+  if (!moto.includes('serverRoundCache?.betting_enabled===false')) {
+    fail('MotoRace UI must explain an Admin pause before attempting a wager');
   }
   const aviatorGameGateSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_AVIATOR_RPC.sql'), 'utf8');
   if (!aviatorGameGateSql.includes("game_key='AVIATOR' and enabled=true") ||
-      !aviatorGameGateSql.includes('Aviator betting is disabled by admin')) {
-    fail('Aviator backend must enforce the Admin pause on the server');
+      !aviatorGameGateSql.includes('Aviator betting is disabled by admin') ||
+      !aviatorGameGateSql.includes("'betting_enabled'")) {
+    fail('Aviator backend must enforce and expose the Admin pause status');
+  }
+  if (!aviator.includes('row.betting_enabled===false') ||
+      !aviator.includes('serverRound?.betting_enabled===false')) {
+    fail('Aviator UI must show and enforce the Admin pause state');
   }
 
   const deposit = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
