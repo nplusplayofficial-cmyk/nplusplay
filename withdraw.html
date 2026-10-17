@@ -41,16 +41,11 @@ button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{wid
 <a class="backlink" href="account.html">← Back to Account</a>
 </section></div>
 
-<div class="modal" id="modal"><div class="modal-card"><button class="close" id="close">×</button><h2>Withdrawals unavailable</h2><p id="modalText">N+ PLAY uses virtual demo credits only. Cash withdrawals are not available.</p><button class="done" id="done">DONE</button></div></div>
-
 <script>
 (()=>{
 "use strict";
 
-const REQ="nplusplay_withdraw_requests_demo_v1";
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-
-let selected="Bank Account";
 let currentBalance=0;
 let refreshBusy=false;
 
@@ -70,15 +65,12 @@ async function syncBalance(){
     if(!window.NPlusAuth?.current || !window.NPlusWallet?.getBalance){
       throw new Error("Wallet sync system unavailable.");
     }
-
     const user=await window.NPlusAuth.current();
     if(!user?.id){
       window.location.href="auth.html";
       return currentBalance;
     }
-
-    const value=await window.NPlusWallet.getBalance();
-    setBalanceUI(value);
+    setBalanceUI(await window.NPlusWallet.getBalance());
     return currentBalance;
   }catch(err){
     console.error("Withdraw wallet sync error:",err);
@@ -88,58 +80,23 @@ async function syncBalance(){
   }
 }
 
-async function getFreshBalance(){
-  await syncBalance();
-  return currentBalance;
-}
-
-document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
-  amount.value=b.dataset.a;
-  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active");
-});
-
-document.querySelectorAll(".method").forEach(m=>m.onclick=()=>{
-  selected=m.dataset.method;
-  document.querySelectorAll(".method").forEach(x=>x.classList.remove("selected"));
-  m.classList.add("selected");
-
-  const bankMode=selected==="Bank Account";
-  bankFields.style.display=bankMode?"grid":"none";
-  upiFields.style.display=bankMode?"none":"grid";
-  detailTitle.textContent=bankMode?"BANK ACCOUNT DETAILS":"UPI DETAILS";
-});
-
 const submitButton=document.getElementById("submitBtn");
-submitButton.textContent="WITHDRAWALS DISABLED";
 submitButton.disabled=true;
 submitButton.setAttribute("aria-disabled","true");
-submitButton.onclick=()=>{
-  alert("Withdrawals are disabled. N+ PLAY virtual demo credits have no cash value.");
-};
 
-const modal=document.getElementById("modal");
-const close=()=>modal.classList.remove("show");
-
-document.getElementById("close").onclick=close;
-document.getElementById("done").onclick=()=>location.href="account.html";
-modal.onclick=e=>{if(e.target===modal)close()};
-
-/* Keep the displayed balance synced when the user changes it elsewhere. */
 window.addEventListener("nplus:wallet-change",e=>{
   const after=e?.detail?.after;
-  if(Number.isFinite(Number(after))) setBalanceUI(Number(after));
-  else syncBalance();
+  if(Number.isFinite(Number(after)))setBalanceUI(Number(after));
+  else void syncBalance();
 });
-
-window.addEventListener("storage",()=>syncBalance());
-window.addEventListener("pageshow",()=>syncBalance());
+window.addEventListener("storage",()=>void syncBalance());
+window.addEventListener("pageshow",()=>void syncBalance());
 document.addEventListener("visibilitychange",()=>{
-  if(!document.hidden) syncBalance();
+  if(!document.hidden)void syncBalance();
 });
 
-/* Cross-page refresh protection: re-read Supabase wallet periodically. */
-setInterval(()=>syncBalance(),2000);
+// This page only displays the shared demo balance; refresh at a modest interval.
+setInterval(()=>void syncBalance(),15000);
 
 (async()=>{
   try{
@@ -151,8 +108,7 @@ setInterval(()=>syncBalance(),2000);
     alert(err.message||"Unable to load wallet.");
   }
 })();
-})();
-</script>
+})();>
 
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 </body></html>
