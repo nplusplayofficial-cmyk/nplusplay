@@ -1,6 +1,17 @@
 \set ON_ERROR_STOP on
 
 -- Uses the disposable database/bootstrap prepared by test-wingo-settlement.sql.
+create table if not exists public.game_settings (
+  game_key text primary key,
+  game_name text not null,
+  enabled boolean not null default true,
+  updated_at timestamptz not null default now(),
+  updated_by uuid
+);
+insert into public.game_settings(game_key,game_name,enabled)
+values ('MOTO','MOTO RACE',true)
+on conflict (game_key) do nothing;
+
 \ir ../sql/NPLUS_PLAY_MOTORACE_SCHEMA.sql
 \ir ../sql/NPLUS_PLAY_MOTORACE_RPC.sql
 
@@ -125,6 +136,19 @@ begin
      or not has_function_privilege('authenticated','public.nplus_moto_demo_reveal_round(bigint)','EXECUTE') then
     raise exception 'MotoRace reveal RPC grants are incorrect.';
   end if;
+
+  update public.game_settings set enabled=false where game_key='MOTO';
+  begin
+    perform public.nplus_moto_demo_place_bet(
+      '{"kind":"bike","value":8,"position":1,"qty":1,"multi":1}'::jsonb,
+      1.00,
+      gen_random_uuid()
+    );
+    raise exception 'TEST_FAILURE: disabled MotoRace accepted a new bet.';
+  exception when others then
+    if sqlerrm not like '%MotoRace betting is disabled by admin%' then raise; end if;
+  end;
+  update public.game_settings set enabled=true where game_key='MOTO';
 
   raise notice 'MotoRace server-settlement tests passed.';
 end
