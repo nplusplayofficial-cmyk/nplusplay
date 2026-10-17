@@ -105,9 +105,11 @@ begin
  r:=public.nplus_aviator_demo_current_round();
  late_round_id:=(r->>'round_id')::uuid;
  late_bet:=public.nplus_aviator_demo_place_bet(late_round_id,0,2.00,request_four,2.00);
+ late_manual_bet:=public.nplus_aviator_demo_place_bet(late_round_id,1,1.00,request_five,null);
 
- -- Simulate browser polling only after crash. A 2x auto target below a 3x crash
- -- must still pay exactly once based on server-owned timing, not a client claim.
+ -- Simulate all background polling being delayed until a manual cash-out request arrives
+ -- after crash. The server must settle eligible auto targets first, then mark remaining
+ -- bets lost; a client request cannot change the crash result.
  update public.nplus_aviator_demo_rounds
  set flight_starts_at=clock_timestamp()-interval '20 seconds',
      crashes_at=clock_timestamp()-interval '4 seconds',
@@ -115,19 +117,30 @@ begin
      status='flying'
  where id=late_round_id;
 
- perform public.nplus_aviator_demo_current_round();
+ loss_result:=public.nplus_aviator_demo_cashout((late_manual_bet->>'bet_id')::uuid);
+ if loss_result->>'status'<>'lost' then
+   raise exception 'Manual cash-out after crash must lose.';
+ end if;
 
  select * into late_row
  from public.nplus_aviator_demo_bets
  where user_id=u and request_id=request_four;
-
  if late_row.status<>'cashed_out' or late_row.cashout_multiplier<>2.00 or late_row.payout<>4.00 then
-   raise exception 'Late-polled Aviator auto cash-out did not pay once at 2x.';
+   raise exception 'Late-finalized Aviator auto cash-out did not pay once at 2x.';
  end if;
 
  select balance into balance_after from public.demo_wallets where user_id=u;
- if balance_after<>round(103.00+payout_one,2) then
-   raise exception 'Late-polled auto cash-out expected balance %; got %.',round(103.00+payout_one,2),balance_after;
+ if balance_after<>round(102.00+payout_one,2) then
+   raise exception 'Late-finalized auto cash-out expected balance %; got %.',round(102.00+payout_one,2),balance_after;
+ end if;
+ select count(*) into win_count from public.demo_wallet_transactions where user_id=u and type='GAME_WIN';
+ if win_count<>3 then
+   raise exception 'Expected one late auto-cashout credit; GAME_WIN count is %.',win_count;
+ end if;
+ select count(*) into bet_count from public.nplus_aviator_demo_bets
+ where user_id=u and round_id=late_round_id and status='lost';
+ if bet_count<>1 then
+   raise exception 'Only the manual bet should be marked lost after late finalization.';
  end if;
 
  if has_table_privilege('anon','public.nplus_aviator_demo_bets','SELECT')
