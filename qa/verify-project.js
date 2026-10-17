@@ -193,6 +193,19 @@ try {
     fail('Home wallet must show loading/unavailable state until Supabase sync succeeds');
   }
 
+  if (!home.includes('VIRTUAL DEMO') || !home.includes('Demo Leaderboard') ||
+      !home.includes('Sample scores • virtual credits only') ||
+      !home.includes('class="badge paused"') ||
+      /class="live-label"><span><\/span> LIVE/.test(home)) {
+    fail('Homepage must clearly label virtual-demo mode, sample scores and paused games');
+  }
+
+  const adminGames = fs.readFileSync(path.join(root, 'admin-games.html'), 'utf8');
+  if (!adminGames.includes('const paused = ["K3", "5D", "TRX"]') ||
+      !adminGames.includes('BETTING PAUSED')) {
+    fail('N+ ADMIN game cards must show the paused wagering state');
+  }
+
   const deposit = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
   if (deposit.includes('nplusplay_wallet_v1') ||
       /localStorage\.getItem\(LEGACY\)/.test(deposit)) {
