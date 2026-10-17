@@ -34,7 +34,7 @@ button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{wid
 <div class="label">AVAILABLE BALANCE</div><div class="balance" id="balance">₹0.00</div>
 <div role="status" aria-live="polite" style="margin:18px 0;padding:18px 15px;border:1px solid rgba(201,165,91,.22);border-radius:14px;background:#10110f;text-align:center">
   <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:var(--gold2)">WITHDRAWALS DISABLED</div>
-  <p style="margin:10px 0 0;color:#9a9d95;font-size:12px;line-height:1.6">N+ PLAY uses virtual demo credits only. These credits have no cash value and cannot be withdrawn.</p>
+  <p style="margin:10px 0 0;color:#9a9d95;font-size:12px;line-height:1.6">N+ PLAY virtual demo credits have no cash value and cannot be withdrawn.</p>
 </div>
 <button class="cta" id="submitBtn" type="button" disabled aria-disabled="true">WITHDRAWALS DISABLED</button>
 <div class="note"><b>Privacy:</b> This demo page does not ask for bank, account, IFSC or UPI details.</div>
@@ -108,7 +108,8 @@ setInterval(()=>void syncBalance(),15000);
     alert(err.message||"Unable to load wallet.");
   }
 })();
-})();>
+})();
+</script>
 
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 </body></html>
