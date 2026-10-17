@@ -73,6 +73,8 @@ for (const required of [
   'sql/NPLUS_PLAY_AVIATOR_RPC.sql',
   'sql/POST_ROLLOUT_REVOKE_PHONE_ENUMERATION.sql',
   'sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql',
+  'sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql',
+  'qa/test-admin-user-tools.sql',
   'qa/test-wingo-settlement.sql',
   'qa/test-motorace-settlement.sql',
   'qa/test-aviator-settlement.sql',
@@ -114,6 +116,20 @@ try {
 
 // Release guard: migrated games must use server settlement, never client-authored wins.
 try {
+  const adminUsers = fs.readFileSync(path.join(root, 'admin-users.html'), 'utf8');
+  for (const rpc of ['nplus_admin_user_directory','nplus_admin_user_transactions','nplus_admin_adjust_demo_wallet']) {
+    if (!adminUsers.includes(rpc)) fail('N+ ADMIN Users page RPC missing: ' + rpc);
+  }
+  const adminSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql'), 'utf8').toLowerCase();
+  for (const contract of [
+    'create or replace function public.nplus_admin_user_directory',
+    'create or replace function public.nplus_admin_user_transactions',
+    'create or replace function public.nplus_admin_adjust_demo_wallet',
+    'raise exception \'admin access required.\'',
+    'revoke all on function public.nplus_admin_adjust_demo_wallet'
+  ]) {
+    if (!adminSql.includes(contract.toLowerCase())) fail('N+ ADMIN RPC security contract missing: ' + contract);
+  }
   for (const [page, label] of [['k3.html','K3'], ['5d.html','5D'], ['trx-wingo.html','TRX WINGO']]) {
     const source = fs.readFileSync(path.join(root, page), 'utf8');
     if (/NPlusWallet\.changeBalance\s*\(/.test(source) || /type\s*:\s*['"]GAME_WIN['"]/.test(source)) {
