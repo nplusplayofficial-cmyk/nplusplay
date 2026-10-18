@@ -108,6 +108,18 @@ try {
       /localStorage\.getItem\(\s*LEGACY\s*\)/i.test(accountPage)) {
     fail('Account wallet must fail closed when Supabase balance cannot be loaded; no local balance fallback');
   }
+  for (const rpc of [
+    'nplus_wingo_demo_my_bets',
+    'nplus_moto_demo_my_bets',
+    'nplus_aviator_demo_my_bets'
+  ]) {
+    if (!accountPage.includes(rpc)) fail('Account game stats must use server history RPC: ' + rpc);
+  }
+  if (/function\s+legacyBets\s*\(/.test(accountPage) ||
+      /setInterval\(renderStats,\s*1500\)/.test(accountPage) ||
+      !accountPage.includes('statsStatusEl.textContent="UNAVAILABLE"')) {
+    fail('Account game stats must be server-backed, throttled and fail closed');
+  }
 } catch (e) {
   fail('Account wallet consistency guard failed: ' + e.message);
 }
