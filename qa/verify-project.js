@@ -100,6 +100,18 @@ try {
   fail('Demo wallet request guards failed: ' + e.message);
 }
 
+// The account page must not display a stale browser-local balance as authoritative.
+try {
+  const accountPage = fs.readFileSync(path.join(root, 'account.html'), 'utf8');
+  if (!accountPage.includes('syncEl.textContent="UNAVAILABLE"') ||
+      /paintWallet\(\s*legacy\s*,\s*["']LOCAL FALLBACK["']\s*\)/i.test(accountPage) ||
+      /localStorage\.getItem\(\s*LEGACY\s*\)/i.test(accountPage)) {
+    fail('Account wallet must fail closed when Supabase balance cannot be loaded; no local balance fallback');
+  }
+} catch (e) {
+  fail('Account wallet consistency guard failed: ' + e.message);
+}
+
 // Repository-wide guard: browser code must never award a generic GAME_WIN credit.
 for (const file of htmls) {
   const html = fs.readFileSync(path.join(root, file), 'utf8');
