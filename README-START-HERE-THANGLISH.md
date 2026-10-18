@@ -5,7 +5,9 @@ This branch is a review candidate, not a claim that N+ PLAY is production-secure
 ## Repository/code changes in this branch
 - Adds the missing, correctly named admin-users.html user-management page and removes the typo duplicate.
 - Adds assets/nplus-icon.svg, matching the icon path used by manifest.webmanifest and sw.js.
-- Adds deposit-demo.html so the demo request route exists; it submits a pending virtual-credit request and does not immediately change the balance.
+- Adds deposit-demo.html and deposit-history.html for idempotent server-side virtual-credit requests and per-user history.
+- Adds withdraw.html, withdrawal-history.html and admin-withdrawals.html for status-only demo withdrawal requests; review never moves wallet credits or pays cash.
+- Adds sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql plus a disposable PostgreSQL request/idempotency/authorization test. Review and stage this SQL and the matching frontend together before any production rollout.
 - Updates deposit.html to use virtual-credit requests only and block the unimplemented gateway route.
 - Sets legacy core/config.js to REAL_MONEY: false.
 - Bumps the service-worker cache version and fixes forgot-password links to use auth.html.
@@ -36,12 +38,12 @@ The archive listing was read successfully with `pg_restore --list` (661 TOC entr
 - The candidate migrates WINGO, MotoRace and Aviator to server-owned virtual-credit bet/round/settlement RPCs with replay protection and wallet-ledger writes.
 - K3, 5D and TRX WINGO betting are intentionally paused in the candidate until their payout rules are reviewed and matching server settlement is implemented.
 - The live production `main` still uses the legacy wallet path and does not yet have the new settlement tables. Do not deploy the candidate HTML before its matching reviewed SQL, and do not apply the post-rollout wallet guard before every active frontend path has migrated.
-- No cash deposits, cash payouts or withdrawals are supported; demo credits have no cash value.
+- No cash deposits, cash payouts or cash withdrawals are supported; demo credits have no cash value. The candidate withdrawal screen is a status-only simulation.
 
 ## Verification
 - Candidate commit `cc10da4e4e2d78436e3dd49f147ce36408413935` passed static HTML/JavaScript/local-link QA and all eight disposable PostgreSQL suites.
 - Push CI: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017662316
 - Pull-request CI: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017665739
-- The tests cover WINGO, Admin game status, MotoRace, Aviator, generic wallet guard, phone-enumeration revocation, Admin user tools and Admin deposit actions. They do not test live Supabase Auth or a real browser.
+- The baseline eight-suite set covers WINGO, Admin game status, MotoRace, Aviator, generic wallet guard, phone-enumeration revocation, Admin user tools and Admin deposit actions. This candidate adds a ninth disposable PostgreSQL suite for demo request idempotency, Admin authorization and unchanged wallet/ledger checks. CI for the current head must pass before treating the updated candidate as verified. These tests do not cover live Supabase Auth or a real browser.
 - Latest read-only production inspection found no new settlement tables; all six live game toggles remain enabled; anon can still execute `nplus_phone_is_registered(text)`; authenticated users can still execute the legacy wallet RPC. This is why production rollout remains blocked.
 - The PR is draft and unmerged. No production writes were made during this verification, and existing wallet balances were not changed.

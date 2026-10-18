@@ -61,6 +61,45 @@ for (const file of htmls) {
   }
 }
 
+// Demo request pages must use guarded RPCs and remain virtual-credit-only.
+try {
+  const depositPage = fs.readFileSync(path.join(root, 'deposit-demo.html'), 'utf8');
+  if (!depositPage.includes('nplus_create_demo_deposit_request') ||
+      /\.from\s*\(\s*['"]deposit_requests['"]\s*\)\s*\.insert\s*\(/i.test(depositPage)) {
+    fail('Deposit request page must use the server-side idempotent RPC, not direct inserts');
+  }
+  const withdrawalPage = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
+  if (!withdrawalPage.includes('nplus_create_demo_withdrawal_request') ||
+      !/no cash payout/i.test(withdrawalPage) ||
+      !withdrawalPage.includes('withdrawal-history.html')) {
+    fail('Withdrawal page must use the protected demo RPC, show history link and state no cash payout');
+  }
+  const depositHistory = fs.readFileSync(path.join(root, 'deposit-history.html'), 'utf8');
+  const withdrawalHistory = fs.readFileSync(path.join(root, 'withdrawal-history.html'), 'utf8');
+  if (!depositHistory.includes('deposit_requests') || !withdrawalHistory.includes('withdrawal_requests')) {
+    fail('Deposit/withdrawal history pages must query their own request table');
+  }
+  const adminWithdrawal = fs.readFileSync(path.join(root, 'admin-withdrawals.html'), 'utf8');
+  if (!adminWithdrawal.includes('nplus_admin_resolve_demo_withdrawal') ||
+      !adminWithdrawal.includes('No wallet credits or cash will move')) {
+    fail('Admin withdrawal review must use the guarded status-only RPC');
+  }
+  const requestSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql'), 'utf8').toLowerCase();
+  for (const contract of [
+    'public.nplus_create_demo_deposit_request',
+    'public.nplus_create_demo_withdrawal_request',
+    'public.nplus_admin_resolve_demo_withdrawal',
+    'withdrawal_requests_one_pending_per_user_uidx',
+    'wallet_changed',
+    'cash_paid',
+    'revoke all on function public.nplus_admin_resolve_demo_withdrawal'
+  ]) {
+    if (!requestSql.includes(contract.toLowerCase())) fail('Demo request SQL contract missing: ' + contract);
+  }
+} catch (e) {
+  fail('Demo wallet request guards failed: ' + e.message);
+}
+
 // Repository-wide guard: browser code must never award a generic GAME_WIN credit.
 for (const file of htmls) {
   const html = fs.readFileSync(path.join(root, file), 'utf8');
@@ -94,7 +133,10 @@ for (const required of [
   'qa/test-wingo-settlement.sql',
   'qa/test-motorace-settlement.sql',
   'qa/test-aviator-settlement.sql',
-  'qa/test-generic-wallet-credit-guard.sql'
+  'qa/test-generic-wallet-credit-guard.sql',
+  'sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql',
+  'qa/test-demo-wallet-requests.sql',
+  'deposit-history.html', 'withdrawal-history.html', 'admin-withdrawals.html'
 ]) {
   if (!exists(required)) fail('required file missing: ' + required);
 }

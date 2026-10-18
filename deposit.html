@@ -48,6 +48,7 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 .cta{width:100%;margin-top:18px;border:0;border-radius:15px;padding:15px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:12px;letter-spacing:.3px;cursor:pointer}
 .note{margin-top:14px;padding:13px;border-radius:13px;background:rgba(201,165,91,.045);border:1px solid rgba(201,165,91,.10);color:#777a72;font-size:9px;line-height:1.55}
 .notice{margin-top:15px;color:#666960;font-size:9px;text-align:center;line-height:1.5}
+.history-link{display:inline-block;margin-top:12px;color:var(--gold2);font-size:10px;font-weight:900;letter-spacing:.7px;text-decoration:none}.history-link:hover{text-decoration:underline}
 .modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);z-index:50}
 .modal.show{display:grid}
 .modal-card{width:min(100%,420px);background:#11130f;border:1px solid var(--line);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000}
@@ -75,7 +76,7 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 <section class="hero">
   <div class="kicker">WALLET</div>
   <h1>Deposit</h1>
-  <p>Add credits to your N+ PLAY wallet.</p>
+  <p>Add virtual demo credits to your N+ PLAY wallet.</p><a class="history-link" href="deposit-history.html">VIEW DEPOSIT HISTORY →</a>
 </section>
 
 <section class="card">
@@ -171,7 +172,7 @@ let selectedMethod="Demo Wallet";
 document.querySelector("#depositBtn").onclick=()=>{
  if(!walletReady){alert("Please sign in and wait for the shared wallet to sync before submitting a request.");return;}
  const amount=Number(document.querySelector("#amount").value);
- if(!Number.isFinite(amount)||amount<10||amount>100000){alert("Enter a demo-credit request amount between ₹10 and ₹1,00,000.");return}
+ if(!Number.isFinite(amount)||amount<100||amount>50000){alert("Enter a demo-credit request amount between ₹100 and ₹50,000.");return}
  if(selectedMethod!=="Demo Wallet"){alert("Payment gateway is not enabled. N+ PLAY supports virtual-credit demo requests only.");return}
  const params=new URLSearchParams({amount:String(amount),method:"Demo Wallet"});
  location.href="deposit-demo.html?"+params.toString();

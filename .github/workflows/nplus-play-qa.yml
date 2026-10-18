@@ -74,3 +74,7 @@ jobs:
         env:
           PGPASSWORD: nplus_test
         run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-admin-deposits.sql
+      - name: Test demo deposit and withdrawal requests in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-demo-wallet-requests.sql
