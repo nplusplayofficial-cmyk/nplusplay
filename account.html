@@ -100,11 +100,11 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 </section>
 
 <section class="section">
- <div class="sectionhead"><h2>Gaming Overview</h2><span class="view">ALL GAMES</span></div>
+ <div class="sectionhead"><h2>Gaming Overview</h2><span class="view" id="gameStatsStatus">RECENT SERVER DATA</span></div>
  <div class="overview">
-  <div class="ov"><span>TOTAL GAMES</span><strong id="totalGames">0</strong></div>
-  <div class="ov green"><span>WINS</span><strong id="wins">0</strong></div>
-  <div class="ov red"><span>LOSSES</span><strong id="losses">0</strong></div>
+  <div class="ov"><span>ROUNDS LOADED</span><strong id="totalGames">—</strong></div>
+  <div class="ov green"><span>WINNING BETS</span><strong id="wins">—</strong></div>
+  <div class="ov red"><span>LOSING BETS</span><strong id="losses">—</strong></div>
  </div>
 </section>
 
@@ -160,24 +160,10 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 (()=>{
  "use strict";
 
- const STORE="nplusplay_wingo_ultra_final_v2";
- const LEGACY="nplusplay_wallet_v1";
- const modes=[30,60,180,300];
  const walletEl=document.querySelector("#wallet");
  const balanceEl=document.querySelector("#balance");
  const syncEl=document.querySelector("#syncText");
  const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-
- function readLegacy(){
-   try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}
- }
- function legacyBets(){
-   const x=readLegacy(),out=[];
-   for(const sec of modes){
-     if(Array.isArray(x.bets?.[sec])) out.push(...x.bets[sec].map(b=>({...b,sec:Number(b.sec||sec)})));
-   }
-   return out.sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0));
- }
 
  function paintWallet(value, status="SYNCED"){
    const n=Number(value);
@@ -244,22 +230,67 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
    }
  }
 
- function renderStats(){
-   const a=legacyBets();
-   const settled=a.filter(x=>["WON","LOST"].includes(String(x.status).toUpperCase()));
+ async function rowsFromRpc(client,name,args){
+   const {data,error}=await client.rpc(name,args);
+   if(error) throw new Error(name+": "+error.message);
+   if(data==null) return [];
+   if(!Array.isArray(data)) throw new Error(name+" returned an unexpected response.");
+   return data;
+ }
 
-   document.querySelector("#totalGames").textContent=
-     new Set(a.map(x=>x.gameName||x.game||"N+ PLAY GAME")).size;
+ let statsBusy=false;
+ const statsStatusEl=document.querySelector("#gameStatsStatus");
 
-   document.querySelector("#wins").textContent=
-     settled.filter(x=>String(x.status).toUpperCase()==="WON").length;
+ async function renderStats(){
+   if(statsBusy) return;
+   statsBusy=true;
+   statsStatusEl.textContent="SYNCING";
+   try{
+     const client=window.NPlusAuth?.client;
+     if(!client) throw new Error("Account service unavailable.");
+     const {data:userData,error:userError}=await client.auth.getUser();
+     if(userError || !userData?.user?.id) throw new Error("Sign in to load server game stats.");
 
-   document.querySelector("#losses").textContent=
-     settled.filter(x=>String(x.status).toUpperCase()==="LOST").length;
+     const wingoCalls=await Promise.all([30,60,180,300].map(duration=>
+       rowsFromRpc(client,"nplus_wingo_demo_my_bets",{p_duration_seconds:duration,p_limit:200})
+     ));
+     const [motoRows,aviatorRows]=await Promise.all([
+       rowsFromRpc(client,"nplus_moto_demo_my_bets",{p_limit:200}),
+       rowsFromRpc(client,"nplus_aviator_demo_my_bets",{p_limit:200})
+     ]);
+
+     const entries=[
+       ...wingoCalls.flat().map(row=>({game:"WINGO",row})),
+       ...motoRows.map(row=>({game:"MOTO",row})),
+       ...aviatorRows.map(row=>({game:"AVIATOR",row}))
+     ];
+     const rounds=new Set();
+     let wins=0,losses=0;
+
+     for(const {game,row} of entries){
+       if(row.round_id) rounds.add(game+":"+row.round_id);
+       const status=String(row.status||"").toLowerCase();
+       if(status==="won" || status==="cashed_out") wins++;
+       else if(status==="lost") losses++;
+     }
+
+     document.querySelector("#totalGames").textContent=String(rounds.size);
+     document.querySelector("#wins").textContent=String(wins);
+     document.querySelector("#losses").textContent=String(losses);
+     statsStatusEl.textContent="SYNCED";
+   }catch(err){
+     console.error("N+ PLAY server game stats unavailable:",err);
+     document.querySelector("#totalGames").textContent="—";
+     document.querySelector("#wins").textContent="—";
+     document.querySelector("#losses").textContent="—";
+     statsStatusEl.textContent="UNAVAILABLE";
+   }finally{
+     statsBusy=false;
+   }
  }
 
  async function render(){
-   renderStats();
+   void renderStats();
    await renderWallet();
  }
 
@@ -281,20 +312,20 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 
  window.addEventListener("nplus:wallet-change",()=>{
    renderWallet();
+   void renderStats();
  });
 
- window.addEventListener("storage",e=>{
-   if(e.key===STORE||e.key===LEGACY) render();
+ window.addEventListener("focus",()=>{
+   renderWallet();
+   void renderStats();
  });
-
- window.addEventListener("focus",()=>renderWallet());
  window.addEventListener("pageshow",()=>render());
  document.addEventListener("visibilitychange",()=>{
    if(!document.hidden) render();
  });
 
  setInterval(renderWallet,2000);
- setInterval(renderStats,1500);
+ setInterval(()=>void renderStats(),15000);
 
  render();
 })();
