@@ -336,9 +336,11 @@ try {
   if (/function\s+addRequest\s*\(/.test(withdraw) || /addRequest\s*\(\s*\{/.test(withdraw)) {
     fail('Withdraw page must not store withdrawal requests in localStorage');
   }
-  if (!withdraw.includes('WITHDRAWALS DISABLED') ||
-      !withdraw.includes('virtual demo credits have no cash value')) {
-    fail('Withdraw page must clearly disable cash withdrawals in demo mode');
+  if (!withdraw.includes('nplus_create_demo_withdrawal_request') ||
+      !/no cash payout/i.test(withdraw) ||
+      !withdraw.includes('withdrawal-history.html') ||
+      !withdraw.includes('credits have no cash value')) {
+    fail('Withdraw page must use the server-side demo request flow and clearly disable cash payouts');
   }
   if (/id=["'](?:holder|bank|accountNo|ifsc|branch|upiId|upiHolder|upiBank)["']/i.test(withdraw)) {
     fail('Withdraw page must not collect bank, account, IFSC or UPI details in demo mode');
