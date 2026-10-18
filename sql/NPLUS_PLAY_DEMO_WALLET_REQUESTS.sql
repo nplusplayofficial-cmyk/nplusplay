@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.withdrawal_requests(
 CREATE UNIQUE INDEX IF NOT EXISTS withdrawal_requests_one_pending_per_user_uidx ON public.withdrawal_requests(user_id) WHERE status='pending';
 ALTER TABLE public.withdrawal_requests ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS withdrawal_requests_owner_admin_read ON public.withdrawal_requests;
-CREATE POLICY withdrawal_requests_owner_admin_read ON public.withdrawal_requests FOR SELECT TO authenticated USING(user_id=auth.uid() OR public.nplus_is_admin());
+CREATE POLICY withdrawal_requests_owner_admin_read ON public.withdrawal_requests FOR SELECT TO authenticated USING(user_id=auth.uid() OR EXISTS (SELECT 1 FROM public.profiles p WHERE p.id=auth.uid() AND lower(coalesce(p.role,''))='admin'));
 REVOKE ALL ON TABLE public.withdrawal_requests FROM PUBLIC,anon,authenticated;
 GRANT SELECT ON TABLE public.withdrawal_requests TO authenticated;
 REVOKE INSERT ON TABLE public.deposit_requests FROM PUBLIC,anon,authenticated;
