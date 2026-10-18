@@ -233,19 +233,12 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
        return;
      }
 
-     // Legacy fallback only when Supabase is unavailable/not authenticated.
-     const legacy=Number(readLegacy().balance);
-     if(Number.isFinite(legacy)){
-       paintWallet(legacy,"LOCAL FALLBACK");
-       lastBalance=legacy;
-       return;
-     }
-
-     const old=Number(localStorage.getItem(LEGACY));
-     if(Number.isFinite(old)){
-       paintWallet(old,"LOCAL FALLBACK");
-       lastBalance=old;
-     }
+     // Never present browser-local values as the authoritative wallet balance.
+     // If Supabase cannot provide the signed-in user's balance, fail closed.
+     walletEl.textContent="—";
+     balanceEl.textContent="—";
+     syncEl.textContent="UNAVAILABLE";
+     console.warn("N+ PLAY wallet balance unavailable from Supabase; local balance fallback disabled.");
    } finally {
      refreshBusy=false;
    }
