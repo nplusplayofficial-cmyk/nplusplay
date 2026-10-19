@@ -17,6 +17,7 @@ const statusSql = read('sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql');
 const phoneSql = read('sql/POST_ROLLOUT_REVOKE_PHONE_ENUMERATION.sql');
 const walletSql = read('sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql');
 const aviatorPage = read('aviator.html');
+const schedulerDoc = read('docs/NPLUS_AVIATOR_SCHEDULER_RECOVERY_DESIGN_2026-10-19.md');
 
 check(admin.includes('nplus_set_game_status'), 'Admin game status must call server-side RPC.');
 check(admin.includes('HARD_PAUSED_GAMES'), 'Unsupported games must remain hard-paused in Admin UI.');
@@ -37,6 +38,8 @@ check(/revoke all on function public\.nplus_aviator_demo_make_crash_point\(\) fr
 check(/grant execute on function public\.nplus_aviator_demo_place_bet\(uuid,integer,numeric,uuid,numeric\) to authenticated/i.test(aviator), 'Aviator bet RPC must explicitly grant authenticated execution.');
 check(/grant execute on function public\.nplus_aviator_demo_cashout\(uuid\) to authenticated/i.test(aviator), 'Aviator cash-out RPC must explicitly grant authenticated execution.');
 check(/'crash_point',case when v_phase='CRASH' then v_round\.crash_point else null end/i.test(aviator), 'Aviator RPC must not disclose the crash point before crash phase.');
+check(schedulerDoc.includes('BLOCKED — design only') && schedulerDoc.includes('Do not schedule this function directly.'), 'Aviator scheduler must remain explicitly blocked until a safe worker is verified.');
+check(schedulerDoc.includes('service-role credentials') && schedulerDoc.includes('disposable database'), 'Aviator scheduler design must document secret isolation and disposable-database testing.');
 
 if (admin.includes('nplus_admin_demo_controls')) warnings.push('Admin localStorage demo controls remain: trace all consumers; privileged/outcome-affecting state must be server-authoritative.');
 if (!/nplus_recent_demo_activity/.test(home)) warnings.push('No verified homepage recent-activity RPC contract; do not claim a genuine activity feed.');
