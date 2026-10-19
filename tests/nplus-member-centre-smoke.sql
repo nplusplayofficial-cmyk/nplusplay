@@ -164,7 +164,7 @@ BEGIN
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: safe transfer out failed: %',v_result; END IF;
   SELECT balance INTO v_balance FROM public.demo_wallets WHERE user_id=v_invitee;
   SELECT balance INTO v_safe FROM public.nplus_demo_safe_balances WHERE user_id=v_invitee;
-  IF v_balance <> 78 OR v_safe <> 30 THEN RAISE EXCEPTION 'FAIL: safe transfer ledger mismatch wallet=% safe=%',v_balance,v_safe; END IF;
+  IF v_balance <> 128 OR v_safe <> 30 THEN RAISE EXCEPTION 'FAIL: safe transfer ledger mismatch wallet=% safe=%',v_balance,v_safe; END IF;
 
   v_result := public.nplus_demo_attendance_claim();
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE OR (v_result->>'reward_amount')::numeric <> 4 THEN
@@ -217,4 +217,4 @@ BEGIN
 END;
 $qa$;
 
-SELECT 'N+ VIP/referral/gift/safe/attendance/support DB smoke QA passed' AS result;
+SELECT 'N+ Daman-tier referral, duplicate-claim, gift, safe, attendance, and support DB smoke QA passed' AS result;
