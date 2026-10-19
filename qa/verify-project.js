@@ -164,6 +164,29 @@ try {
   fail('Bonus ledger guard failed: ' + e.message);
 }
 
+// Promotions must show account-ledger entries only and must not claim a universal referral code or fake campaign.
+try {
+  const promotionPage = fs.readFileSync(path.join(root, 'promotion.html'), 'utf8');
+  for (const required of [
+    'window.NPlusAuth.requireAuth()',
+    'window.NPlusWallet.getBalance()',
+    'window.NPlusWallet.transactions(500)',
+    'Referral tracking is not enabled',
+    'No active campaigns configured',
+    'promoSync',
+    'historyStatus'
+  ]) {
+    if (!promotionPage.includes(required)) fail('Promotion account flow missing: ' + required);
+  }
+  if (/localStorage\.getItem/i.test(promotionPage) ||
+      /value=["']NPLUSPLAY["']/i.test(promotionPage) ||
+      /data-title=["']Weekly Reward Campaign["']/i.test(promotionPage)) {
+    fail('Promotion page must not show local balances, universal referral codes or sample live campaigns');
+  }
+} catch (e) {
+  fail('Promotion account-ledger guard failed: ' + e.message);
+}
+
 // The account page must not display a stale browser-local balance as authoritative.
 try {
   const accountPage = fs.readFileSync(path.join(root, 'account.html'), 'utf8');
