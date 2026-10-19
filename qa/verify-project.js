@@ -141,6 +141,29 @@ try {
   fail('Activity game-history guard failed: ' + e.message);
 }
 
+// Bonus values must come from the signed-in account ledger, not stale localStorage or placeholder campaigns.
+try {
+  const bonusPage = fs.readFileSync(path.join(root, 'bonus.html'), 'utf8');
+  for (const required of [
+    'window.NPlusAuth.requireAuth()',
+    'window.NPlusWallet.getBalance()',
+    'window.NPlusWallet.transactions(500)',
+    'BONUS_CREDIT',
+    'REFERRAL_CREDIT',
+    'heroStatus.textContent = "UNAVAILABLE"',
+    'Reward-code redemption is unavailable until server-side validation'
+  ]) {
+    if (!bonusPage.includes(required)) fail('Bonus ledger flow missing: ' + required);
+  }
+  if (/localStorage\.getItem/i.test(bonusPage) ||
+      /return\s+b\s*\?\?\s*1000/i.test(bonusPage) ||
+      /id="redeem"/i.test(bonusPage)) {
+    fail('Bonus Center must not use browser-local wallet fallback or fake reward-code redemption');
+  }
+} catch (e) {
+  fail('Bonus ledger guard failed: ' + e.message);
+}
+
 // The account page must not display a stale browser-local balance as authoritative.
 try {
   const accountPage = fs.readFileSync(path.join(root, 'account.html'), 'utf8');
