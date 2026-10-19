@@ -61,3 +61,12 @@ Updated: 2026-10-19
 
 ## Current release decision
 **NOT READY TO MERGE/DEPLOY.** Remaining live RPC risks, unapplied candidate migrations, restore test, authenticated integration, and runtime game tests are blockers. Passing static/disposable tests alone is insufficient.
+
+## Targeted source review — 2026-10-19
+
+- [ ] **Admin demo controls need a trust-boundary review:** candidate `admin-games.html` reads/writes `nplus_admin_demo_controls` in browser localStorage. Trace every consumer (including manual-result controls) and confirm localStorage only stores harmless UI preferences. Any outcome-affecting or privileged setting must be persisted and authorized server-side; never trust localStorage as an Admin permission or authoritative result.
+- [ ] **Homepage activity is not yet verified:** candidate `index.html` changes the ticker label to “VIRTUAL DEMO,” but this alone does not prove that recent bets/wins are database-backed. Implement a real, privacy-safe feed only after the authoritative settled-bet source is confirmed; otherwise show an empty state.
+- [ ] **Aviator scheduler/recovery remains unverified:** the RPC candidate advances/settles rounds when called. Confirm a persistent scheduled invocation exists in the target free hosting environment, or explicitly document that rounds progress only while RPC calls occur. Do not claim 24/7 autonomous operation without a running scheduler/worker and monitoring.
+- [ ] **No hidden crash-point override:** do not add an Admin control to secretly choose live-user crash points. If a demo QA override is needed, make it a separately labeled test mode, unavailable in normal sessions, audited server-side, and excluded from ordinary user rounds.
+
+These are review findings, not proof that an exploit has occurred. Resolve with code-level tests before release.
