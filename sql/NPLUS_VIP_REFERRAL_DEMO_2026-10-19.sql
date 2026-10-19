@@ -105,6 +105,40 @@ SET qualification_amount = EXCLUDED.qualification_amount,
     bonus_amount = EXCLUDED.bonus_amount,
     updated_at = now();
 
+-- The event period mirrors the dates shown in the supplied Daman invitation screen.
+-- All amounts stay in N+ virtual demo points; never treat them as money.
+CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_campaign (
+  campaign_id smallint PRIMARY KEY CHECK (campaign_id = 1),
+  starts_at timestamptz NOT NULL,
+  ends_at timestamptz NOT NULL CHECK (ends_at > starts_at),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+INSERT INTO public.nplus_demo_referral_campaign(campaign_id, starts_at, ends_at)
+VALUES (1, '2000-01-01 00:00:00+00', '2099-01-01 00:00:00+00')
+ON CONFLICT (campaign_id) DO NOTHING;
+
+-- Only an Admin can log that a specific invited account has met the
+-- screenshot-matched qualification using verified virtual-demo activity.
+CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_qualifications (
+  referred_user_id uuid PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+  referrer_user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  qualifying_virtual_amount numeric(14,2) NOT NULL CHECK (qualifying_virtual_amount >= 500.00),
+  verified_by uuid NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
+  verified_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (referrer_user_id, referred_user_id)
+);
+CREATE INDEX IF NOT EXISTS nplus_demo_referral_qualifications_referrer_idx
+  ON public.nplus_demo_referral_qualifications(referrer_user_id, verified_at DESC);
+
+-- One claim per invitation-count milestone, so replays cannot credit the same tier twice.
+CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_bonus_claims (
+  user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  invitee_count integer NOT NULL REFERENCES public.nplus_demo_referral_tier_rules(invitee_count),
+  reward_amount numeric(14,2) NOT NULL CHECK (reward_amount > 0),
+  claimed_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, invitee_count)
+);
+
 -- VIP experience is demo progression only. It is not based on client-submitted bets.
 CREATE TABLE IF NOT EXISTS public.nplus_demo_vip_state (
   user_id uuid PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -348,6 +382,201 @@ $function$;
 
 DROP TRIGGER IF EXISTS nplus_demo_referral_approved_request ON public.deposit_requests;
 
+CREATE OR REPLACE FUNCTION public.nplus_demo_admin_qualify_referral(
+  p_referred_user_id uuid,
+  p_verified_virtual_amount numeric
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+DECLARE
+  v_actor uuid := auth.uid();
+  v_referrer uuid;
+  v_status text;
+BEGIN
+  IF NOT coalesce(public.nplus_is_admin(), false) THEN
+    RAISE EXCEPTION 'Administrator access required.' USING ERRCODE='42501';
+  END IF;
+  IF p_referred_user_id IS NULL OR p_verified_virtual_amount IS NULL OR p_verified_virtual_amount < 500.00 THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'qualification_below_minimum',
+      'message', 'Verify at least 500 virtual demo points for this invited account.');
+  END IF;
+
+  SELECT user_id, status INTO v_referrer, v_status
+  FROM public.nplus_demo_referrals
+  WHERE referred_user_id = p_referred_user_id
+  FOR UPDATE;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'referral_not_found',
+      'message', 'No referral record exists for that account.');
+  END IF;
+  IF v_status = 'qualified' THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'already_qualified',
+      'message', 'This invited account is already verified.');
+  END IF;
+  IF v_status <> 'pending' THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'invalid_status',
+      'message', 'Only a pending invitation can be verified.');
+  END IF;
+
+  INSERT INTO public.nplus_demo_referral_qualifications
+    (referred_user_id, referrer_user_id, qualifying_virtual_amount, verified_by, verified_at)
+  VALUES (p_referred_user_id, v_referrer, p_verified_virtual_amount, v_actor, now())
+  ON CONFLICT (referred_user_id) DO NOTHING;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'already_qualified',
+      'message', 'This invited account is already verified.');
+  END IF;
+
+  UPDATE public.nplus_demo_referrals
+  SET status = 'qualified', reward_amount = 0, qualifying_request_id = NULL, qualified_at = now()
+  WHERE referred_user_id = p_referred_user_id AND status = 'pending';
+
+  RETURN jsonb_build_object('success', true, 'reason', 'qualified',
+    'referrer_user_id', v_referrer, 'referred_user_id', p_referred_user_id,
+    'verified_virtual_amount', p_verified_virtual_amount,
+    'message', 'Invited account verified for the Daman-reference demo bonus tiers.');
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.nplus_demo_referral_bonus_dashboard()
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+DECLARE
+  v_actor uuid := auth.uid();
+  v_invited_count integer := 0;
+  v_qualified_count integer := 0;
+  v_starts_at timestamptz;
+  v_ends_at timestamptz;
+  v_active boolean := false;
+  v_tiers jsonb;
+BEGIN
+  IF v_actor IS NULL THEN RAISE EXCEPTION 'Authentication required.'; END IF;
+
+  SELECT starts_at, ends_at INTO v_starts_at, v_ends_at
+  FROM public.nplus_demo_referral_campaign WHERE campaign_id = 1;
+  v_active := coalesce(now() >= v_starts_at AND now() < v_ends_at, false);
+
+  SELECT count(*) INTO v_invited_count
+  FROM public.nplus_demo_referrals WHERE user_id = v_actor;
+  SELECT count(*) INTO v_qualified_count
+  FROM public.nplus_demo_referral_qualifications WHERE referrer_user_id = v_actor;
+
+  SELECT coalesce(jsonb_agg(jsonb_build_object(
+    'invitee_count', t.invitee_count,
+    'qualification_amount', t.qualification_amount,
+    'bonus_amount', t.bonus_amount,
+    'invitee_progress', least(v_invited_count, t.invitee_count),
+    'qualification_progress', least(v_qualified_count, t.invitee_count),
+    'claimed', (c.user_id IS NOT NULL),
+    'claimable', (c.user_id IS NULL AND v_active AND v_invited_count >= t.invitee_count AND v_qualified_count >= t.invitee_count),
+    'status', CASE
+      WHEN NOT v_active THEN 'EXPIRED'
+      WHEN c.user_id IS NOT NULL THEN 'RECEIVED'
+      WHEN v_invited_count >= t.invitee_count AND v_qualified_count >= t.invitee_count THEN 'CLAIMABLE'
+      ELSE 'UNFINISHED'
+    END
+  ) ORDER BY t.invitee_count), '[]'::jsonb)
+  INTO v_tiers
+  FROM public.nplus_demo_referral_tier_rules t
+  LEFT JOIN public.nplus_demo_referral_bonus_claims c
+    ON c.user_id = v_actor AND c.invitee_count = t.invitee_count;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'invited_count', v_invited_count,
+    'qualified_count', v_qualified_count,
+    'campaign_start', v_starts_at,
+    'campaign_end', v_ends_at,
+    'campaign_active', v_active,
+    'tiers', coalesce(v_tiers, '[]'::jsonb),
+    'notice', 'Virtual demo points only. Invitees must be verified by N+ ADMIN at the 500-point qualification level.'
+  );
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.nplus_demo_claim_referral_bonus(p_invitee_count integer)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+DECLARE
+  v_actor uuid := auth.uid();
+  v_starts_at timestamptz;
+  v_ends_at timestamptz;
+  v_qualification numeric(14,2);
+  v_bonus numeric(14,2);
+  v_invited_count integer := 0;
+  v_qualified_count integer := 0;
+  v_claimed_user uuid;
+  v_before numeric(14,2);
+  v_after numeric(14,2);
+BEGIN
+  IF v_actor IS NULL THEN RAISE EXCEPTION 'Authentication required.'; END IF;
+
+  SELECT starts_at, ends_at INTO v_starts_at, v_ends_at
+  FROM public.nplus_demo_referral_campaign WHERE campaign_id = 1;
+  IF NOT FOUND OR now() < v_starts_at OR now() >= v_ends_at THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'event_expired',
+      'message', 'The invitation event is not active.');
+  END IF;
+
+  SELECT qualification_amount, bonus_amount INTO v_qualification, v_bonus
+  FROM public.nplus_demo_referral_tier_rules
+  WHERE invitee_count = p_invitee_count;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'invalid_tier',
+      'message', 'Select a valid invitation bonus tier.');
+  END IF;
+
+  SELECT count(*) INTO v_invited_count
+  FROM public.nplus_demo_referrals WHERE user_id = v_actor;
+  SELECT count(*) INTO v_qualified_count
+  FROM public.nplus_demo_referral_qualifications
+  WHERE referrer_user_id = v_actor AND qualifying_virtual_amount >= v_qualification;
+
+  IF v_invited_count < p_invitee_count OR v_qualified_count < p_invitee_count THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'not_eligible',
+      'required_invitees', p_invitee_count, 'invited_count', v_invited_count,
+      'qualified_count', v_qualified_count,
+      'message', 'The invited-account target and every required 500-point demo qualification must be complete before claiming.');
+  END IF;
+
+  INSERT INTO public.nplus_demo_referral_bonus_claims(user_id, invitee_count, reward_amount)
+  VALUES (v_actor, p_invitee_count, v_bonus)
+  ON CONFLICT (user_id, invitee_count) DO NOTHING
+  RETURNING user_id INTO v_claimed_user;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'already_claimed',
+      'message', 'This invitation bonus tier has already been claimed.');
+  END IF;
+
+  INSERT INTO public.demo_wallets(user_id, balance) VALUES (v_actor, 0)
+  ON CONFLICT (user_id) DO NOTHING;
+  UPDATE public.demo_wallets
+  SET balance = balance + v_bonus, updated_at = now()
+  WHERE user_id = v_actor
+  RETURNING balance - v_bonus, balance INTO v_before, v_after;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Member demo wallet is missing.'; END IF;
+
+  INSERT INTO public.demo_wallet_transactions
+    (user_id, delta, balance_before, balance_after, type, source, note)
+  VALUES
+    (v_actor, v_bonus, v_before, v_after, 'REFERRAL_REWARD', 'REFERRAL',
+     format('Daman-reference demo invitation tier %s bonus', p_invitee_count));
+
+  RETURN jsonb_build_object('success', true, 'invitee_count', p_invitee_count,
+    'reward_amount', v_bonus, 'wallet_balance', v_after,
+    'message', format('Invitation tier %s claimed: %s virtual demo points.', p_invitee_count, v_bonus));
+END;
+$function$;
+
 CREATE OR REPLACE FUNCTION public.nplus_demo_referral_dashboard()
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -371,14 +600,16 @@ BEGIN
     'referral_link', 'auth.html?ref=' || v_code,
     'referral_count', count(*),
     'pending_count', count(*) FILTER (WHERE r.status = 'pending'),
-    'rewarded_count', count(*) FILTER (WHERE r.status = 'rewarded'),
-    'total_rewards', coalesce(sum(r.reward_amount) FILTER (WHERE r.status = 'rewarded'), 0),
+    'qualified_count', count(*) FILTER (WHERE r.status = 'qualified'),
+    'rewarded_count', (SELECT count(*) FROM public.nplus_demo_referral_bonus_claims WHERE user_id = v_actor),
+    'total_rewards', coalesce((SELECT sum(reward_amount) FROM public.nplus_demo_referral_bonus_claims WHERE user_id = v_actor), 0),
     'referrals', coalesce(
       jsonb_agg(jsonb_build_object(
         'uid', p.uid,
         'display_name', coalesce(nullif(p.display_name, ''), 'N+ member'),
         'status', r.status,
-        'reward_points', r.reward_amount,
+        'qualifying_virtual_amount', q.qualifying_virtual_amount,
+        'qualified_at', q.verified_at,
         'created_at', r.created_at,
         'awarded_at', r.awarded_at
       ) ORDER BY r.created_at DESC) FILTER (WHERE r.referred_user_id IS NOT NULL),
@@ -387,11 +618,12 @@ BEGIN
   ) INTO v_payload
   FROM public.nplus_demo_referrals r
   LEFT JOIN public.profiles p ON p.id = r.referred_user_id
+  LEFT JOIN public.nplus_demo_referral_qualifications q ON q.referred_user_id = r.referred_user_id
   WHERE r.user_id = v_actor;
 
   RETURN coalesce(v_payload, jsonb_build_object(
     'success', true, 'referral_code', v_code, 'referral_link', 'auth.html?ref=' || v_code,
-    'referral_count', 0, 'pending_count', 0, 'rewarded_count', 0,
+    'referral_count', 0, 'pending_count', 0, 'qualified_count', 0, 'rewarded_count', 0,
     'total_rewards', 0, 'referrals', '[]'::jsonb
   ));
 END;
@@ -699,8 +931,9 @@ BEGIN
     'users', (SELECT count(*) FROM public.profiles WHERE lower(coalesce(role,'user')) <> 'admin'),
     'referrals_total', (SELECT count(*) FROM public.nplus_demo_referrals),
     'referrals_pending', (SELECT count(*) FROM public.nplus_demo_referrals WHERE status='pending'),
-    'referrals_rewarded', (SELECT count(*) FROM public.nplus_demo_referrals WHERE status='rewarded'),
-    'referral_points_awarded', (SELECT coalesce(sum(reward_amount),0) FROM public.nplus_demo_referrals WHERE status='rewarded'),
+    'referrals_rewarded', (SELECT count(*) FROM public.nplus_demo_referral_bonus_claims),
+    'referral_points_awarded', (SELECT coalesce(sum(reward_amount),0) FROM public.nplus_demo_referral_bonus_claims),
+    'referrals_qualified', (SELECT count(*) FROM public.nplus_demo_referral_qualifications),
     'gift_codes', (SELECT count(*) FROM public.nplus_demo_gift_codes),
     'gift_claims', (SELECT count(*) FROM public.nplus_demo_gift_claims),
     'attendance_claims', (SELECT count(*) FROM public.nplus_demo_attendance_claims),
@@ -723,7 +956,9 @@ BEGIN
       'referred_uid', invitee.uid,
       'referral_code', r.referral_code,
       'status', r.status,
-      'reward_points', r.reward_amount,
+      'reward_points', coalesce((SELECT sum(c.reward_amount) FROM public.nplus_demo_referral_bonus_claims c WHERE c.user_id = r.user_id), 0),
+      'qualifying_virtual_amount', q.qualifying_virtual_amount,
+      'qualified_at', q.verified_at,
       'created_at', r.created_at,
       'awarded_at', r.awarded_at
     ) ORDER BY r.created_at DESC)
@@ -733,6 +968,7 @@ BEGIN
     ) r
     LEFT JOIN public.profiles inviter ON inviter.id=r.user_id
     LEFT JOIN public.profiles invitee ON invitee.id=r.referred_user_id
+    LEFT JOIN public.nplus_demo_referral_qualifications q ON q.referred_user_id=r.referred_user_id
   ),'[]'::jsonb);
 END;
 $function$;
@@ -865,6 +1101,9 @@ $function$;
 ALTER TABLE public.nplus_demo_referral_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_referrals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_referral_tier_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nplus_demo_referral_campaign ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nplus_demo_referral_qualifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nplus_demo_referral_bonus_claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_vip_state ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_safe_balances ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_safe_transfers ENABLE ROW LEVEL SECURITY;
@@ -874,6 +1113,7 @@ ALTER TABLE public.nplus_demo_attendance_claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_support_requests ENABLE ROW LEVEL SECURITY;
 
 REVOKE ALL ON TABLE public.nplus_demo_referral_codes, public.nplus_demo_referrals, public.nplus_demo_referral_tier_rules,
+  public.nplus_demo_referral_campaign, public.nplus_demo_referral_qualifications, public.nplus_demo_referral_bonus_claims,
   public.nplus_demo_vip_state, public.nplus_demo_safe_balances, public.nplus_demo_safe_transfers,
   public.nplus_demo_gift_codes, public.nplus_demo_gift_claims, public.nplus_demo_attendance_claims,
   public.nplus_demo_support_requests
@@ -884,6 +1124,9 @@ REVOKE ALL ON FUNCTION public.nplus_demo_on_profile_created() FROM PUBLIC, anon,
 REVOKE ALL ON FUNCTION public.nplus_demo_award_referral_on_approved_request() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.nplus_demo_referral_apply(text) FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.nplus_demo_referral_dashboard() FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.nplus_demo_referral_bonus_dashboard() FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.nplus_demo_claim_referral_bonus(integer) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.nplus_demo_admin_qualify_referral(uuid,numeric) FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.nplus_demo_vip_dashboard() FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.nplus_demo_gift_redeem(text) FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.nplus_demo_gift_dashboard() FROM PUBLIC, anon;
@@ -900,6 +1143,9 @@ REVOKE ALL ON FUNCTION public.nplus_demo_admin_support_list(integer) FROM PUBLIC
 REVOKE ALL ON FUNCTION public.nplus_demo_admin_support_update(uuid,text,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.nplus_demo_referral_apply(text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.nplus_demo_referral_dashboard() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_demo_referral_bonus_dashboard() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_demo_claim_referral_bonus(integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_qualify_referral(uuid,numeric) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.nplus_demo_vip_dashboard() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.nplus_demo_gift_redeem(text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.nplus_demo_gift_dashboard() TO authenticated;
@@ -917,6 +1163,8 @@ GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_support_update(uuid,text,text)
 
 COMMIT;
 
--- Before deployment: test signup/OTP/referral attribution, request approval and one-time award,
--- two simultaneous reward attempts, gift claim duplication, safe transfers and daily claim race
--- against LOCAL STAGING. Do not apply directly to production without a verified backup and review.
+-- Before deployment: test signup/OTP/referral attribution, Admin verification at the 500-point
+-- virtual-demo threshold, each screenshot-based tier amount, duplicate/concurrent tier claims,
+-- and verify that generic deposit_requests approvals never award a referral bonus. Also test gift
+-- claim duplication, safe transfers and daily claim race against LOCAL STAGING. Do not apply
+-- directly to production without a verified backup and review.
