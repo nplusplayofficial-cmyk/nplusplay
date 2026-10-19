@@ -47,3 +47,11 @@ The archive listing was read successfully with `pg_restore --list` (661 TOC entr
 - The baseline eight-suite set covers WINGO, Admin game status, MotoRace, Aviator, generic wallet guard, phone-enumeration revocation, Admin user tools and Admin deposit actions. This candidate adds a ninth disposable PostgreSQL suite for demo request idempotency, Admin authorization and unchanged wallet/ledger checks. CI for the current head must pass before treating the updated candidate as verified. These tests do not cover live Supabase Auth or a real browser.
 - Latest read-only production inspection found no new settlement tables; all six live game toggles remain enabled; anon can still execute `nplus_phone_is_registered(text)`; authenticated users can still execute the legacy wallet RPC. This is why production rollout remains blocked.
 - The PR is draft and unmerged. No production writes were made during this verification, and existing wallet balances were not changed.
+
+
+## Demo referral (virtual credits only)
+- Each existing/new profile receives its own unique referral code from the database.
+- Share the link shown in Promotion Center. It opens `auth.html?ref=CODE`, pre-fills the optional signup field and applies attribution only after successful email OTP verification.
+- The referrer earns 20 virtual demo credits once only after N+ ADMIN approves the referred account's `DEMO_CREDIT` request for 200 or more virtual credits. This is not a real deposit or cash reward; demo credits have no cash value.
+- Local SQL order: make sure the demo request schema exists, then apply `supabase/migrations/20261019000200_demo_referrals.sql` with `npx supabase migration up --local`. Do not run `supabase db reset`; that would reset local staging data.
+- CI includes a disposable PostgreSQL test for unique codes, self-referral rejection, immutable attribution, the 200-credit qualification threshold, one-time reward and wallet/ledger consistency. The UI and migration remain candidate-only until the local signup flow and Admin approval are browser-tested.
