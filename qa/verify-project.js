@@ -344,6 +344,7 @@ for (const required of [
   'qa/test-aviator-settlement.sql',
   'qa/test-generic-wallet-credit-guard.sql',
   'sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql',
+  'supabase/migrations/20261019000150_demo_wallet_requests.sql',
   'qa/test-demo-wallet-requests.sql',
   'sql/NPLUS_PLAY_DEMO_REFERRALS.sql',
   'supabase/migrations/20261019000200_demo_referrals.sql',
