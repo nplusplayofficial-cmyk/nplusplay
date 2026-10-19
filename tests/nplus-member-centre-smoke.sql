@@ -36,17 +36,20 @@ BEGIN
     RAISE EXCEPTION 'FAIL: self/duplicate referral was not rejected: %',v_result;
   END IF;
 
-  INSERT INTO public.deposit_requests(user_id,amount,status) VALUES(v_invitee,200,'pending') RETURNING id INTO v_request;
+  -- Approval in the generic deposit_requests table must NOT trigger an invitation payout.
+  -- This avoids coupling a possible real-money deposit workflow to demo reward logic.
+  INSERT INTO public.deposit_requests(user_id,amount,status) VALUES(v_invitee,500,'pending') RETURNING id INTO v_request;
   UPDATE public.deposit_requests SET status='approved', reviewed_at=now(), reviewed_by=v_admin WHERE id=v_request;
   SELECT balance INTO v_balance FROM public.demo_wallets WHERE user_id=v_referrer;
-  IF v_balance <> 128 THEN
-    RAISE EXCEPTION 'FAIL: qualifying approved referral should credit exactly 20 points; balance=%',v_balance;
+  IF v_balance <> 108 THEN
+    RAISE EXCEPTION 'FAIL: a generic deposit request incorrectly triggered a referral reward; balance=%',v_balance;
   END IF;
-
-  -- Repeating an approved update must not award the same referral twice.
+  IF (SELECT status FROM public.nplus_demo_referrals WHERE referred_user_id=v_invitee) <> 'pending' THEN
+    RAISE EXCEPTION 'FAIL: generic deposit approval incorrectly changed referral qualification status';
+  END IF;
   UPDATE public.deposit_requests SET status='approved', reviewed_at=now(), reviewed_by=v_admin WHERE id=v_request;
   SELECT balance INTO v_balance FROM public.demo_wallets WHERE user_id=v_referrer;
-  IF v_balance <> 128 THEN RAISE EXCEPTION 'FAIL: referral reward was duplicated'; END IF;
+  IF v_balance <> 108 THEN RAISE EXCEPTION 'FAIL: repeated deposit approval changed inviter balance'; END IF;
 
   v_result := public.nplus_demo_gift_redeem('NPLUS50');
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE OR (v_result->>'amount')::numeric <> 50 THEN
@@ -63,7 +66,7 @@ BEGIN
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: safe transfer out failed: %',v_result; END IF;
   SELECT balance INTO v_balance FROM public.demo_wallets WHERE user_id=v_invitee;
   SELECT balance INTO v_safe FROM public.nplus_demo_safe_balances WHERE user_id=v_invitee;
-  IF v_balance <> 128 OR v_safe <> 30 THEN RAISE EXCEPTION 'FAIL: safe transfer ledger mismatch wallet=% safe=%',v_balance,v_safe; END IF;
+  IF v_balance <> 78 OR v_safe <> 30 THEN RAISE EXCEPTION 'FAIL: safe transfer ledger mismatch wallet=% safe=%',v_balance,v_safe; END IF;
 
   v_result := public.nplus_demo_attendance_claim();
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE OR (v_result->>'reward_amount')::numeric <> 4 THEN
