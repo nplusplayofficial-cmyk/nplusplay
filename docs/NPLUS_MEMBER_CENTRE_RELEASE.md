@@ -62,3 +62,10 @@ The draft PR's GitHub Actions workflow automatically runs:
 - `psql -v ON_ERROR_STOP=1 -f tests/nplus-member-centre-smoke.sql`
 
 The database tests use a disposable CI-only PostgreSQL database with minimal Supabase-like auth functions; they do not use production credentials or production data.
+
+
+## Browser smoke update — 2026-10-19
+
+- The same credential-free Playwright Chromium smoke test now runs for this Member Centre branch.
+- **PASS:** [push run 39275107359](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39275107359) and [PR run 39275122292](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39275122292): all 36/36 HTML pages in this branch rendered and all 12/12 mobile-critical viewports passed.
+- This validates page rendering/layout only. It does not prove live OTP delivery, signed-in session behavior, Supabase RLS/RPC authorization, admin ticket actions, or the real referral approval flow. Those still require isolated Supabase staging with two test accounts.
