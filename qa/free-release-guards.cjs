@@ -44,14 +44,19 @@ check(/'crash_point',case when v_phase='CRASH' then v_round\.crash_point else nu
 check(schedulerDoc.includes('BLOCKED — design only') && schedulerDoc.includes('Do not schedule this function directly.'), 'Aviator scheduler must remain explicitly blocked until a safe worker is verified.');
 check(schedulerDoc.includes('service-role credentials') && schedulerDoc.includes('disposable database'), 'Aviator scheduler design must document secret isolation and disposable-database testing.');
 check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_referred_uidx/i.test(memberSql), 'Referral system must enforce one inviter per referred account.');
-check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_request_uidx/i.test(memberSql), 'Referral rewards must uniquely bind a qualifying request.');
+check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_request_uidx/i.test(memberSql), 'Referral attribution must prevent reuse of one qualifying request.');
 check(memberSql.includes('CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_tier_rules') && memberSql.includes('(100000, 500.00, 7555555.00)'), 'Referral tiers must match the Daman screenshot tier table.');
 check(memberSql.includes('DROP TRIGGER IF EXISTS nplus_demo_referral_approved_request ON public.deposit_requests') && !memberSql.includes('CREATE TRIGGER nplus_demo_referral_approved_request'), 'Generic deposit approvals must not trigger demo referral rewards.');
 check(/UNIQUE \(user_id, code\)/i.test(memberSql) && /ON CONFLICT \(user_id, code\) DO NOTHING/i.test(memberSql), 'Gift claims must be idempotent per user/code.');
 check(/PRIMARY KEY \(user_id, claim_date\)/i.test(memberSql) && /ON CONFLICT \(user_id,claim_date\) DO NOTHING/i.test(memberSql), 'Attendance must be one claim per account/day.');
 check(memberSmoke.includes('generic deposit request incorrectly triggered a referral reward') && memberSmoke.includes('Direct access to new feature tables'), 'Disposable DB smoke tests must block generic deposit-linked rewards and guard private table access.');
 check(memberQa.includes('Legacy 200-point qualification rule must be removed.') && memberQa.includes('Admin RPCs must check the server-side admin role.'), 'Member Centre static QA must reject the invented 200/20 rule and check server-side Admin guards.');
-check(memberHtml.includes('7,555,555') && memberHtml.includes('500 virtual demo-credit qualification'), 'Member Centre referral page must show screenshot-matched demo tiers.');
+check(memberSql.includes('CREATE OR REPLACE FUNCTION public.nplus_demo_admin_qualify_referral(') && memberSql.includes('p_verified_virtual_amount < 500.00'), 'Admin qualification must enforce the screenshot 500-point virtual threshold.');
+check(memberSql.includes('CREATE OR REPLACE FUNCTION public.nplus_demo_claim_referral_bonus(p_invitee_count integer)') && memberSql.includes('PRIMARY KEY (user_id, invitee_count)'), 'Invitation tier claim must be server-side and idempotent.');
+check(memberSql.includes('CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_qualifications') && memberSql.includes('UNIQUE (referrer_user_id, referred_user_id)'), 'Verified invite qualification must be unique per inviter/invitee.');
+check(memberHtml.includes('nplus_demo_referral_bonus_dashboard') && memberHtml.includes('nplus_demo_claim_referral_bonus') && memberHtml.includes('id="tierRows"'), 'Member Centre must display server-backed screenshot tier progress and claim action.');
+check(memberHtml.includes('500 virtual demo points') && memberHtml.includes('virtual demo points only'), 'Member Centre must state the screenshot qualification threshold and demo-only unit.');
+check(memberSmoke.includes('tier claims should award exactly 210 demo points once each') && memberSmoke.includes('repeat tier 1 claim must be rejected'), 'Disposable DB smoke must verify tier award values and replay protection.');
 
 
 if (admin.includes('nplus_admin_demo_controls')) warnings.push('Admin localStorage demo controls remain: trace all consumers; privileged/outcome-affecting state must be server-authoritative.');
