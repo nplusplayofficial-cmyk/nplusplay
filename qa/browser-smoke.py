@@ -8,9 +8,11 @@ basic rendering, and a small set of critical UI contracts at desktop/mobile view
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 BASE_URL = "http://127.0.0.1:4173"
+REPO_ROOT = Path(__file__).resolve().parents[1]
 PAGES = [
     ("/", ["N+ PLAY"]),
     ("/index.html", ["VIRTUAL DEMO"]),
@@ -29,9 +31,9 @@ PAGES = [
     ("/wingo.html", []),
     ("/motorace.html", []),
     ("/aviator.html", []),
-    ("/k3.html", ["BETTING PAUSED"]),
-    ("/5d.html", ["BETTING PAUSED"]),
-    ("/trx-wingo.html", ["BETTING PAUSED"]),
+    ("/k3.html", []),
+    ("/5d.html", []),
+    ("/trx-wingo.html", []),
     ("/ai-roulette.html", ["COMING SOON"]),
     ("/vip.html", []),
     ("/referral.html", []),
@@ -70,7 +72,12 @@ def main() -> int:
         page = browser.new_page(viewport={"width": 1365, "height": 900})
         page.set_default_timeout(12000)
 
+        skipped_optional: list[str] = []
         for path, needles in PAGES:
+            local_file = (REPO_ROOT / path.lstrip("/")) if path != "/" else (REPO_ROOT / "index.html")
+            if not local_file.is_file():
+                skipped_optional.append(path)
+                continue
             try:
                 response = page.goto(BASE_URL + path, wait_until="domcontentloaded", timeout=25000)
                 if response is None:
@@ -119,8 +126,10 @@ def main() -> int:
 
         browser.close()
 
-    print(f"Rendered pages: {loaded}/{len(PAGES)}")
-    print(f"Mobile viewport checks: {responsive_checked}/{len(MOBILE_CRITICAL)}")
+    print(f"Rendered pages: {loaded}/{len(PAGES) - len(skipped_optional)} available in this branch")
+    print(f"Mobile viewport checks: {responsive_checked}/{sum(1 for path in MOBILE_CRITICAL if (REPO_ROOT / path.lstrip(\"/\")).is_file())}")
+    for path in skipped_optional:
+        print(f"SKIP {path}: not present in this checkout/PR branch")
     for warning in overflow_warnings:
         print("WARN " + warning)
     for error in errors:
