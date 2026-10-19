@@ -100,6 +100,27 @@ try {
   fail('Demo wallet request guards failed: ' + e.message);
 }
 
+// Activity must show server-recorded history for supported games and fail visibly if RPCs are unavailable.
+try {
+  const activityPage = fs.readFileSync(path.join(root, 'activity.html'), 'utf8');
+  for (const required of [
+    'id="gameHistoryStatus"',
+    'id="gameRows"',
+    'nplus_wingo_demo_my_bets',
+    'nplus_moto_demo_my_bets',
+    'nplus_aviator_demo_my_bets',
+    'Game history is unavailable in this environment',
+    'readRpc(client,name,args)'
+  ]) {
+    if (!activityPage.includes(required)) fail('Activity game-history flow missing: ' + required);
+  }
+  if (/localStorage\\.getItem\\([^)]*(?:bets|game)/i.test(activityPage)) {
+    fail('Activity game history must not be sourced from browser-local bet data');
+  }
+} catch (e) {
+  fail('Activity game-history guard failed: ' + e.message);
+}
+
 // The account page must not display a stale browser-local balance as authoritative.
 try {
   const accountPage = fs.readFileSync(path.join(root, 'account.html'), 'utf8');
