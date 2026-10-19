@@ -35,7 +35,7 @@ check(home.includes('VIRTUAL DEMO'), 'Homepage must disclose virtual demo mode.'
 check(home.includes('id="recent-demo-activity"') && home.includes('No verified recent activity yet'), 'Homepage must show an honest empty state until a server-backed activity feed is verified.');
 check(admin.includes('Local browser storage is a display cache, not a source of authority.'), 'Admin page must disclose localStorage is not authoritative.');
 check(/nplus_phone_is_registered/i.test(phoneSql) && /revoke/i.test(phoneSql), 'Phone enumeration revoke candidate missing.');
-check(/create or replace function public\\.nplus_wallet_change/i.test(walletSql) && /p_delta > 0/i.test(walletSql) && /positive virtual credits must be awarded/i.test(walletSql) && /do not run before/i.test(walletSql), 'Wallet mutation candidate must reject direct positive credits and remain gated post-rollout.');
+check(walletSql.includes('create or replace function public.nplus_wallet_change(') && walletSql.includes('p_delta > 0') && walletSql.toLowerCase().includes('positive virtual credits must be awarded') && walletSql.toLowerCase().includes('do not run before'), 'Wallet mutation candidate must reject direct positive credits and remain gated post-rollout.');
 check(/rpc\(['\"]nplus_aviator_demo_place_bet['\"]/.test(aviatorPage) && /rpc\(['\"]nplus_aviator_demo_cashout['\"]/.test(aviatorPage), 'Aviator page must submit bets and cash-outs through server RPCs.');
 check(!/p_crash_point\s*:/.test(aviatorPage), 'Aviator client must not submit a crash point override.');
 check(/No demo bets yet/.test(aviatorPage) && /No real-money payments, withdrawals or real-money winnings/.test(aviatorPage), 'Aviator page must retain honest demo-only disclosures and empty state.');
