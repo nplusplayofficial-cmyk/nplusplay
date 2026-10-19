@@ -5,7 +5,7 @@
 - Member Centre implementation is in draft PR [#5](https://github.com/nplusplayofficial-cmyk/nplusplay/pull/5), targeting `release-candidate/security-rollout-2026-10-17`.
 - Static CI passes: 308 checks covering 17 member/admin pages.
 - Database CI passes in a disposable PostgreSQL 17 service: the migration applies and the server-side smoke tests pass.
-- The connected production Supabase database has **not** received the member-centre migration. Keep the PR in draft until an isolated Supabase branch and desktop/mobile browser tests also pass.
+- Basic Chromium desktop/mobile page-rendering smoke now passes (36/36 pages and 12/12 mobile-critical viewport checks). The connected production Supabase database has **not** received the member-centre migration. Keep the PR in draft until an isolated Supabase branch and authenticated browser/RPC tests pass.
 
 ## Included pages
 
@@ -60,8 +60,9 @@ The draft PR's GitHub Actions workflow automatically runs:
 - `psql -v ON_ERROR_STOP=1 -f tests/nplus-member-centre-prelude.sql`
 - `psql -v ON_ERROR_STOP=1 -f sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql`
 - `psql -v ON_ERROR_STOP=1 -f tests/nplus-member-centre-smoke.sql`
+- The `member-centre-browser-smoke` CI job installs Playwright/Chromium, serves this checkout locally, and runs `python qa/browser-smoke.py` at desktop and mobile sizes.
 
-The database tests use a disposable CI-only PostgreSQL database with minimal Supabase-like auth functions; they do not use production credentials or production data.
+The database tests use a disposable CI-only PostgreSQL database with minimal Supabase-like auth functions; they do not use production credentials or production data. Browser smoke validates rendering/layout only and does not log in or mutate wallets.
 
 
 ## Browser smoke update — 2026-10-19
