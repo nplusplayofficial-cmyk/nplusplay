@@ -120,6 +120,26 @@ try {
       !accountPage.includes('statsStatusEl.textContent="UNAVAILABLE"')) {
     fail('Account game stats must be server-backed, throttled and fail closed');
   }
+  for (const required of [
+    '.from("profiles")',
+    'client.auth.getSession()',
+    'client.auth.getUser()',
+    'notifyGameResults',
+    'prefReduceMotion',
+    'bindPreferenceControls()',
+    'window.NPlusAuth.signOut("user_requested")'
+  ]) {
+    if (!accountPage.includes(required)) fail('Account profile/security/preferences behavior missing: ' + required);
+  }
+  for (const fake of [
+    'Profile ID <b>NPLUS-PLAYER</b>',
+    'Device check <b>Protected</b>',
+    'Security status <b>Good</b>',
+    'Notification controls will manage game results',
+    'Platform terms and privacy controls can be connected here'
+  ]) {
+    if (accountPage.includes(fake)) fail('Hard-coded placeholder account claim remains: ' + fake);
+  }
 } catch (e) {
   fail('Account wallet consistency guard failed: ' + e.message);
 }
