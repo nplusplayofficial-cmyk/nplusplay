@@ -97,7 +97,7 @@ The Daman screenshots the user supplied are the UI/feature reference. The requir
 15. Add tests for access control, limits, ordering, and privacy before connecting a public feed.
 
 ### P1 — user flows and screenshot parity
-16. Test referrals against the screenshot tiers, 500 virtual demo-credit qualification per counted invite, event-period rules, duplicate-claim prevention, and no self-referral. Keep claims disabled until a trusted demo-only qualification/claim RPC is implemented and tested.
+16. The screenshot-based tier table, Admin qualification RPC, user tier-progress RPC, exactly-once claim RPC, and corresponding draft UI are implemented on the feature branch. Keep merge/deploy blocked until disposable PostgreSQL tests pass for the 500-point threshold, tier 1/3 payouts, duplicate and concurrent claims, event expiry, Admin-only qualification, privacy/RLS, and proof that generic deposit requests never trigger bonuses.
 17. Test gifts/transfers/support/VIP/attendance for ownership, role permissions, replay prevention and ledger consistency.
 18. Implement and verify every applicable Account, history, notifications, service centre, help, language, gift, promotion/agency/team, rebate, virtual-safe, VIP, coupon, and statistics screen listed above.
 19. Test desktop/mobile flows and auth recovery with a dedicated test account. Do not change production Auth settings until the candidate frontend flow passes.
