@@ -51,7 +51,7 @@ for (const file of requiredPages) {
 const sql = read("sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql");
 check(sql.includes("BEGIN;") && (sql.match(/COMMIT;/g) || []).length === 1, "Migration should be a single transaction.");
 for (const table of [
-  "nplus_demo_referral_codes", "nplus_demo_referrals", "nplus_demo_vip_state",
+  "nplus_demo_referral_codes", "nplus_demo_referrals", "nplus_demo_referral_tier_rules", "nplus_demo_vip_state",
   "nplus_demo_safe_balances", "nplus_demo_safe_transfers", "nplus_demo_gift_codes",
   "nplus_demo_gift_claims", "nplus_demo_attendance_claims", "nplus_demo_support_requests"
 ]) {
@@ -64,8 +64,14 @@ check(sql.includes("REVOKE ALL ON FUNCTION public.nplus_demo_admin_vip_dashboard
 check(sql.includes("REVOKE ALL ON FUNCTION public.nplus_demo_admin_support_update(uuid,text,text) FROM PUBLIC, anon;"), "Admin support RPC must revoke anonymous execution.");
 check(sql.includes("GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_vip_dashboard() TO authenticated;"), "Admin VIP RPC must grant authenticated execution.");
 check(sql.includes("IF NOT coalesce(public.nplus_is_admin(),false)"), "Admin RPCs must check the server-side admin role.");
-check(sql.includes("NEW.amount, 0) < 200"), "Referral award must enforce 200-point qualifying request.");
-check(sql.includes("reward_amount numeric(12,2) NOT NULL DEFAULT 20.00"), "Referral reward must default to 20 virtual points.");
+check(!sql.includes("NEW.amount, 0) < 200"), "Legacy 200-point qualification rule must be removed.");
+check(!sql.includes("reward_amount numeric(12,2) NOT NULL DEFAULT 20.00"), "Legacy 20-point per-referral reward must be removed.");
+check(sql.includes("nplus_demo_referral_tier_rules"), "Migration must contain screenshot-based invitation tier rules.");
+for (const rule of ["(1, 500.00, 55.00)", "(3, 500.00, 155.00)", "(10, 500.00, 555.00)", "(100000, 500.00, 7555555.00)"]) check(sql.includes(rule), `Missing Daman screenshot invitation tier: ${rule}`);
+const referralHtml = read("referral.html");
+check(referralHtml.includes("7,555,555"), "Referral UI must show the top invitation tier from the screenshot.");
+check(referralHtml.includes("500 virtual demo-credit qualification"), "Referral UI must show the screenshot-matched qualification amount as demo credits.");
+check(referralHtml.includes("legacy automatic 200/20 reward has been removed"), "Referral UI must not imply the old reward rule is active.");
 check(sql.includes("ON CONFLICT (user_id, code) DO NOTHING"), "Gift redemption must prevent duplicate code claims.");
 check(sql.includes("PRIMARY KEY (user_id, claim_date)"), "Attendance must enforce one claim per account/day.");
 check(sql.includes("ON CONFLICT (user_id,claim_date) DO NOTHING"), "Attendance award must be duplicate-safe.");
