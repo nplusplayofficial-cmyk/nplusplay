@@ -110,3 +110,12 @@ Production DB hardening was applied through Supabase and is recorded in `sql/NPL
 - No development branches currently exist in the Supabase project, and no paid branch was created. Do not create a billed development branch until the exact organization/cost quote is reviewed and explicitly approved.
 - This remains a release blocker. Do not merge/deploy the candidate or run either `POST_ROLLOUT_*` script yet. Required next gates are isolated backup restore, approved staging environment, real desktop/mobile Auth and Admin/game browser tests, payout/commission decisions, then coordinated SQL + matching frontend release.
 - No production SQL, auth settings, game toggles, or wallet balances were changed by this recheck.
+
+
+## Admin null-profile authorization guard — 2026-10-19
+
+- A targeted read-only catalog/body audit found nine Admin/game RPC signatures (including both `nplus_admin_set_wingo_demo` overloads) using `IF v_role <> 'admin'` after selecting a profile role. If an authenticated user has no matching `profiles` row, `v_role` is NULL and that comparison alone is not fail-closed.
+- Current catalog counts showed 5 Auth users, 5 profiles, zero missing-profile Auth users, zero orphan profiles, zero NULL roles and one admin. This means no missing-profile account was observed in this snapshot; the authorization logic is still hardened defensively for future account/profile edge cases.
+- Added candidate-only migration `sql/NPLUS_PLAY_ADMIN_NULL_PROFILE_GUARD_2026-10-19.sql`. It replaces the nine affected function definitions with NULL-safe `coalesce(v_role, '') <> 'admin'` checks and reapplies least-privilege EXECUTE grants (`authenticated` plus `service_role`; no `PUBLIC`/`anon` access). It does not edit wallet balances.
+- Added `qa/test-admin-null-profile-guard.sql` and wired it into CI. It creates an isolated Auth user without a profile row and checks that the relevant Admin RPCs fail closed, and verifies grants/guards on all nine signatures. The disposable PostgreSQL run at https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39249711367 completed all 12 suites successfully.
+- This migration has **not** been applied to live Supabase. It must be reviewed and tested on an isolated Supabase staging branch/database before a controlled production rollout. Continue to keep PR #3 draft/unmerged until the backup restore, staging/Auth tests, browser regressions, and coordinated release prerequisites pass.
