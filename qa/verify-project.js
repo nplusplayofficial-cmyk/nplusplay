@@ -114,7 +114,7 @@ try {
   ]) {
     if (!activityPage.includes(required)) fail('Activity game-history flow missing: ' + required);
   }
-  if (/localStorage\\.getItem\\([^)]*(?:bets|game)/i.test(activityPage)) {
+  if (/localStorage\.getItem\([^)]*(?:bets|game)/i.test(activityPage)) {
     fail('Activity game history must not be sourced from browser-local bet data');
   }
 } catch (e) {
