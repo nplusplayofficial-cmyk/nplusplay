@@ -82,3 +82,11 @@ Production DB hardening was applied through Supabase and is recorded in `sql/NPL
 - A valid recovery callback must establish a Supabase session before the page shows the password form; the password update uses Supabase Auth `updateUser({ password })`.
 - No fixed OTP, phone-number lookup, or browser-local-only password change is used.
 - Before deployment, configure the matching N+ PLAY recovery URL in Supabase Auth's redirect allowlist and test email delivery, link expiry, password update, logout and a fresh login. This has not been live-tested and no production settings were changed.
+
+
+## Account module updates — 2026-10-19
+- Activity now loads supported-game history from authenticated WINGO, MotoRace and Aviator history RPCs and displays it separately from the wallet transaction ledger. It reports unavailable history explicitly if matching settlement RPCs are absent.
+- Bonus Center now reads balance and transaction history through the authenticated wallet bridge. Only explicitly typed reward transactions are counted. The browser-local balance fallback, sample weekly streak and fake reward-code success flow were removed.
+- Promotion page now reads account balance and promotion/referral ledger entries through Supabase. The shared `NPLUSPLAY` code and sample “active campaign” cards were removed. Campaign claiming and referral tracking remain unavailable until a server-side campaign/referral backend and Admin rules exist.
+- Static QA now guards the Activity, Bonus, Promotion, Account and password-recovery flows against the specific local/mock behaviors removed in this candidate.
+- These frontend changes are still an unmerged candidate. CI and local browser QA must pass at the latest candidate head. No production deployment or DB/settings changes were made for these page updates.
