@@ -209,7 +209,7 @@ a{text-decoration:none;color:inherit}button{font:inherit}
 <header class="header">
   <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
   <div class="headright">
-    <div class="wallet" id="wallet">₹1,000.00</div>
+    <div class="wallet" id="wallet">₹—</div>
     <span class="live"><i></i>LIVE</span>
     <span class="age">18+</span>
   </div>
@@ -217,82 +217,52 @@ a{text-decoration:none;color:inherit}button{font:inherit}
 
 <section class="hero">
   <div class="kicker">N+ PLAY • PROMOTION CENTER</div>
-  <h1>More ways to play. More rewards to discover.</h1>
-  <p>Explore current campaigns, missions, invitations and limited-time events across N+ PLAY.</p>
+  <h1>Promotions & Referrals</h1>
+  <p>Only server-recorded campaign credits appear in history. Campaign claims and referral tracking are shown as active only when their backend is configured.</p>
   <div class="balance">
-    <div><small>AVAILABLE BALANCE</small><strong id="heroBalance">₹1,000.00</strong></div>
-    <div class="sync"><i></i> SYNCED</div>
+    <div><small>ACCOUNT BALANCE</small><strong id="heroBalance">₹—</strong></div>
+    <div class="sync"><i></i> <span id="promoSync">CHECKING</span></div>
   </div>
 </section>
 
 <section class="section">
-  <div class="sectionhead"><h2>Featured Promotion</h2><span class="view">LIMITED CAMPAIGN</span></div>
-  <article class="feature promo-click"
-    data-title="Weekly Reward Campaign"
-    data-meta="FEATURED • WEEKLY"
-    data-body="Complete eligible platform activities during the campaign period and unlock virtual rewards."
-    data-points="Open campaign details|Complete listed missions|Track reward progress">
-    <span class="tag">FEATURED CAMPAIGN</span>
-    <h3>Weekly Reward Campaign</h3>
-    <p>Check missions, progress milestones and available virtual rewards in one place.</p>
-    <span class="cta">VIEW CAMPAIGN →</span>
-  </article>
+  <div class="sectionhead"><h2>Campaign Availability</h2><span class="view" id="campaignStatus">STATUS</span></div>
+  <div class="history" id="campaignNotice">
+    <b>No active campaigns configured</b>
+    Campaigns will appear here after server-side campaign rules and Admin controls are implemented.
+  </div>
 </section>
 
 <section class="section">
-  <div class="sectionhead"><h2>Promotion Center</h2><span class="view">EXPLORE</span></div>
+  <div class="sectionhead"><h2>Account Tools</h2><span class="view">READY</span></div>
   <div class="promos">
-    <article class="promo promo-click" data-title="Daily Mission" data-meta="DAILY" data-body="Keep your daily activity streak going with simple platform missions and virtual reward milestones." data-points="Review today's mission|Complete eligible activity|Claim when available">
-      <span class="tag">DAILY OFFER</span><h3>Daily Mission</h3>
-      <p>Small daily goals with simple reward milestones.</p><div class="arrow">›</div>
-    </article>
-
-    <article class="promo promo-click" data-title="New Game Spotlight" data-meta="NEW & FEATURED" data-body="Discover newly featured games and platform updates. Open Games to explore available titles." data-points="Open Games|Explore featured titles|Start demo play">
-      <span class="tag">NEW & FEATURED</span><h3>New Game Spotlight</h3>
-      <p>Discover what's newly featured across N+ PLAY.</p><div class="arrow">›</div>
-    </article>
-
-    <article class="promo promo-click" data-title="Event Challenges" data-meta="EVENT" data-body="Special event campaigns can include limited missions, leaderboard challenges and virtual rewards." data-points="Read event rules|Complete eligible tasks|Check progress">
-      <span class="tag">SPECIAL EVENT</span><h3>Event Challenges</h3>
-      <p>Limited-time missions and challenge-based rewards.</p><div class="arrow">›</div>
-    </article>
-
-    <article class="promo promo-click" data-title="Invite & Earn" data-meta="INVITATION" data-body="Share your invitation code with friends and track eligible referral activity. Rewards shown are virtual platform rewards." data-points="Copy invite code|Share with friends|Track eligible referrals">
-      <span class="tag">INVITE</span><h3>Invite & Earn</h3>
-      <p>Share N+ PLAY and track eligible referral rewards.</p><div class="arrow">›</div>
-    </article>
+    <a class="promo" href="activity.html"><span class="tag">ACCOUNT</span><h3>Activity History</h3><p>Review accepted bets and wallet transactions from your account.</p><div class="arrow">›</div></a>
+    <a class="promo" href="bonus.html"><span class="tag">LEDGER</span><h3>Rewards Ledger</h3><p>View reward credits only when they are recorded by the server.</p><div class="arrow">›</div></a>
   </div>
 </section>
 
 <section class="section">
-  <div class="sectionhead"><h2>Invitation</h2><span class="view">SHARE YOUR CODE</span></div>
-  <section class="invite">
+  <div class="sectionhead"><h2>Referral Program</h2><span class="view">NOT CONFIGURED</span></div>
+  <div class="invite">
     <div class="ref">
       <div class="reficon">↗</div>
       <div class="refbody">
-        <h3>My Invitation Code</h3>
-        <p>Use your personal code when sharing N+ PLAY with friends.</p>
+        <h3>Referral tracking is not enabled</h3>
+        <p>No shared invitation code is active. A unique code and reward tracking will be displayed only after the server-side referral workflow is implemented.</p>
       </div>
     </div>
-    <div class="code">
-      <input id="invite" value="NPLUSPLAY" readonly>
-      <button id="copy">COPY</button>
-    </div>
-  </section>
+  </div>
 </section>
 
 <section class="section">
-  <div class="sectionhead"><h2>Promotion History</h2><span class="view">RECENT</span></div>
-  <div class="history" id="history">
-    <b>No promotion activity yet</b>
-    Your promotion claims and campaign progress will appear here.
-  </div>
+  <div class="sectionhead"><h2>Promotion Credit History</h2><span class="view" id="historyStatus">CHECKING</span></div>
+  <div class="history" id="history">Loading recorded promotion credits…</div>
 </section>
 
 <section class="section">
   <div class="notice">
     <strong>18+ · PLAY RESPONSIBLY</strong><br>
-    N+ PLAY is currently a virtual-credit/demo platform. Promotions shown here do not represent cash payouts or real-money wagering.
+    Only actual reward or promotion transactions from the signed-in account ledger are shown. Viewing a campaign or sharing a link does not create a credit or cash payout.
   </div>
 </section>
 
@@ -311,94 +281,78 @@ a{text-decoration:none;color:inherit}button{font:inherit}
   <a class="nav" href="account.html"><span class="ni">◯</span>Account</a>
 </nav>
 
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <button class="close" id="close">×</button>
-    <div class="meta" id="mMeta"></div>
-    <h2 id="mTitle"></h2>
-    <p id="mBody"></p>
-    <ul id="mPoints"></ul>
-    <button class="primary" id="mAction">GOT IT</button>
-  </div>
-</div>
-<div class="toast" id="toast">Copied</div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261019"></script>
+<script src="core/nplus-auth.js?v=20261019"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261019"></script>
 <script>
-(()=>{"use strict";
-const STORE="nplusplay_wingo_ultra_final_v2";
-const LEGACY="nplusplay_wallet_v1";
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const money = n => "₹" + Number(n || 0).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2});
+  const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const types = new Set(["PROMOTION_CREDIT","REFERRAL_CREDIT","BONUS_CREDIT","REWARD_CREDIT","PROMOTION","REFERRAL"]);
+  let busy = false;
 
-const walletEl=document.getElementById("wallet");
-const heroBalanceEl=document.getElementById("heroBalance");
-const overlay=document.getElementById("overlay");
-const closeBtn=document.getElementById("close");
-const actionBtn=document.getElementById("mAction");
-const mMeta=document.getElementById("mMeta");
-const mTitle=document.getElementById("mTitle");
-const mBody=document.getElementById("mBody");
-const mPoints=document.getElementById("mPoints");
-const invite=document.getElementById("invite");
-const copyBtn=document.getElementById("copy");
-const toast=document.getElementById("toast");
-
-function readBalance(){
-  let b=null;
-  try{
-    const x=JSON.parse(localStorage.getItem(STORE)||"null");
-    if(x && typeof x.balance==="number") b=x.balance;
-  }catch(e){}
-  if(b===null){
-    try{
-      const x=JSON.parse(localStorage.getItem(LEGACY)||"null");
-      if(x && typeof x.balance==="number") b=x.balance;
-    }catch(e){}
+  function unavailable(message) {
+    $("wallet").textContent = "—";
+    $("heroBalance").textContent = "—";
+    $("promoSync").textContent = "UNAVAILABLE";
+    $("historyStatus").textContent = "UNAVAILABLE";
+    $("history").textContent = message;
   }
-  return b ?? 0;
-}
 
-function money(n){
-  return "₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-
-function sync(){
-  const value=money(readBalance());
-  walletEl.textContent=value;
-  heroBalanceEl.textContent=value;
-}
-
-sync();
-addEventListener("storage",sync);
-addEventListener("pageshow",sync);
-addEventListener("visibilitychange",()=>{if(!document.hidden)sync()});
-
-document.querySelectorAll(".promo-click").forEach(card=>{
-  card.addEventListener("click",()=>{
-    mMeta.textContent=card.dataset.meta||"PROMOTION";
-    mTitle.textContent=card.dataset.title||"Promotion";
-    mBody.textContent=card.dataset.body||"";
-    mPoints.innerHTML=(card.dataset.points||"")
-      .split("|").filter(Boolean)
-      .map(x=>"<li>"+x+"</li>").join("");
-    overlay.classList.add("show");
-  });
-});
-
-function closeModal(){overlay.classList.remove("show")}
-closeBtn.addEventListener("click",closeModal);
-actionBtn.addEventListener("click",closeModal);
-overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
-
-copyBtn.addEventListener("click",async()=>{
-  try{
-    await navigator.clipboard.writeText(invite.value);
-  }catch(e){
-    invite.select();
-    document.execCommand("copy");
+  function renderHistory(entries) {
+    const history = $("history");
+    if (!entries.length) {
+      history.className = "history";
+      history.innerHTML = "<b>No promotion credits recorded</b>There are no matching promotion or referral transactions in your account ledger yet.";
+      return;
+    }
+    history.className = "";
+    history.innerHTML = entries.slice(0,50).map(tx => {
+      const delta = Number(tx.delta || 0);
+      const title = String(tx.type || "PROMOTION").replaceAll("_"," ");
+      const date = tx.created_at ? new Date(tx.created_at).toLocaleString("en-IN") : "Time unavailable";
+      return '<div class="history-row"><div class="hicon">' + (delta >= 0 ? "↑" : "•") + '</div><div><b>' + esc(title) + '</b><small>' + esc(tx.note || tx.source || "Promotion ledger entry") + ' · ' + esc(date) + '</small></div><div class="history-amt">' + (delta > 0 ? "+" : "") + money(delta) + '</div></div>';
+    }).join("");
   }
-  toast.classList.add("show");
-  setTimeout(()=>toast.classList.remove("show"),1300);
-});
+
+  async function refresh() {
+    if (busy) return;
+    busy = true;
+    $("promoSync").textContent = "SYNCING";
+    $("historyStatus").textContent = "SYNCING";
+    try {
+      const user = await window.NPlusAuth.requireAuth();
+      if (!user || !user.id) throw new Error("Sign in to view promotion history.");
+      const [balance, transactions] = await Promise.all([
+        window.NPlusWallet.getBalance(),
+        window.NPlusWallet.transactions(500)
+      ]);
+      $("wallet").textContent = money(balance);
+      $("heroBalance").textContent = money(balance);
+      $("promoSync").textContent = "SYNCED";
+      $("historyStatus").textContent = "SYNCED";
+      const entries = (transactions || [])
+        .filter(tx => types.has(String(tx.type || "").toUpperCase()))
+        .sort((a,b)=>Date.parse(b.created_at || 0)-Date.parse(a.created_at || 0));
+      renderHistory(entries);
+    } catch (error) {
+      console.error("N+ PLAY promotion ledger unavailable:", error);
+      unavailable("Unable to load promotion history from your account ledger. Refresh and try again.");
+    } finally {
+      busy = false;
+    }
+  }
+
+  window.addEventListener("focus", refresh);
+  window.addEventListener("pageshow", refresh);
+  window.addEventListener("nplus:wallet-change", refresh);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
+  refresh();
 })();
 </script>
 </body>
