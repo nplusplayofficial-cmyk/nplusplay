@@ -1019,4 +1019,25 @@ begin
 end;
 $function$;
 
+
+-- Preserve least-privilege RPC access even if this migration is first applied to a clean staging database.
+REVOKE ALL ON FUNCTION public.nplus_admin_clear_wingo_manual(integer,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_clear_wingo_manual(integer,text) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.nplus_admin_commission_summary() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_commission_summary() TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.nplus_admin_deposit_summary() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_deposit_summary() TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.nplus_admin_save_wingo_manual(integer,text,text,integer,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_save_wingo_manual(integer,text,text,integer,text) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.nplus_admin_wingo_live_bets(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_wingo_live_bets(text) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.nplus_admin_wingo_round_summary(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_wingo_round_summary(text) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.nplus_set_game_status(text,boolean) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_set_game_status(text,boolean) TO authenticated, service_role;
+
 COMMIT;
