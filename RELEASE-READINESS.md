@@ -134,3 +134,10 @@ Production DB hardening was applied through Supabase and is recorded in `sql/NPL
 - **PASS:** direct wallet/ledger table writes are revoked for anon/authenticated; profile role-change trigger exists; public schema CREATE is restricted from browser roles; wallet and ledger RLS are enabled.
 - **BLOCK:** the nine-signature NULL-safe Admin guard is not installed in production; generic wallet credit guard is not active; public phone lookup is still callable; WINGO/MotoRace/Aviator settlement tables are absent; K3/5D/TRX remain enabled.
 - This preflight is intended for repeated use in isolated staging before rollout. Its red statuses are expected against the current legacy production schema, and it must not be used as permission to deploy. Auth dashboard settings and backup restore still need separate verification.
+
+
+## Chromium browser smoke — 2026-10-19
+
+- Added `qa/browser-smoke.py` and a dedicated Playwright Chromium job in `.github/workflows/nplus-play-qa.yml`.
+- **PASS:** latest candidate browser smoke run [39275087456](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39275087456); [PR run 39275098899](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39275098899) also passed. It rendered 22/22 HTML pages present in the security candidate and checked 9/9 core desktop/mobile-critical paths.
+- This is page-rendering smoke only: no credentials were used and no forms/wallet actions were submitted. It does not replace real Supabase Auth, Admin permission, server RPC, PWA update, or isolated-staging interaction tests.
