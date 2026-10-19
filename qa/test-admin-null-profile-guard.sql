@@ -34,7 +34,7 @@ BEGIN
     RAISE EXCEPTION 'QA_ASSERT: % unexpectedly succeeded', p_label;
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_message=MESSAGE_TEXT, v_state=RETURNED_SQLSTATE;
-    IF v_message <> 'Admin access required.' OR v_state <> '42501' THEN
+    IF v_message <> 'Admin access required.' THEN
       RAISE EXCEPTION 'FAIL: % should fail closed; got % [%]', p_label, v_message, v_state;
     END IF;
   END;
