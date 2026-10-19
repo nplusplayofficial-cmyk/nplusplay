@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.nplus_demo_referrals (
   referred_user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   referral_code text NOT NULL,
   status text NOT NULL DEFAULT 'pending',
-  reward_amount numeric(12,2) NOT NULL DEFAULT 20.00,
+  reward_amount numeric(12,2) NOT NULL DEFAULT 0.00,
   qualifying_request_id uuid REFERENCES public.deposit_requests(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   qualified_at timestamptz,
@@ -41,11 +41,12 @@ ALTER TABLE public.nplus_demo_referrals
   ADD COLUMN IF NOT EXISTS referred_user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
   ADD COLUMN IF NOT EXISTS referral_code text,
   ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'pending',
-  ADD COLUMN IF NOT EXISTS reward_amount numeric(12,2) NOT NULL DEFAULT 20.00,
+  ADD COLUMN IF NOT EXISTS reward_amount numeric(12,2) NOT NULL DEFAULT 0.00,
   ADD COLUMN IF NOT EXISTS qualifying_request_id uuid REFERENCES public.deposit_requests(id) ON DELETE SET NULL,
   ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
   ADD COLUMN IF NOT EXISTS qualified_at timestamptz,
   ADD COLUMN IF NOT EXISTS awarded_at timestamptz;
+ALTER TABLE public.nplus_demo_referrals ALTER COLUMN reward_amount SET DEFAULT 0.00;
 
 DO $preflight$
 BEGIN
@@ -73,6 +74,36 @@ CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_request_uidx
   WHERE qualifying_request_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS nplus_demo_referrals_inviter_created_idx
   ON public.nplus_demo_referrals(user_id, created_at DESC);
+
+-- Invitation reward tiers copied from the user-provided Daman reference screenshots.
+-- Figures are represented as virtual demo points in N+; they are not cash amounts.
+CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_tier_rules (
+  invitee_count integer PRIMARY KEY CHECK (invitee_count > 0),
+  qualification_amount numeric(14,2) NOT NULL DEFAULT 500.00 CHECK (qualification_amount = 500.00),
+  bonus_amount numeric(14,2) NOT NULL CHECK (bonus_amount > 0),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+INSERT INTO public.nplus_demo_referral_tier_rules(invitee_count, qualification_amount, bonus_amount)
+VALUES
+  (1, 500.00, 55.00),
+  (3, 500.00, 155.00),
+  (10, 500.00, 555.00),
+  (30, 500.00, 1555.00),
+  (50, 500.00, 2555.00),
+  (70, 500.00, 3355.00),
+  (100, 500.00, 5555.00),
+  (200, 500.00, 10955.00),
+  (500, 500.00, 25555.00),
+  (1000, 500.00, 48555.00),
+  (5000, 500.00, 355555.00),
+  (10000, 500.00, 755555.00),
+  (20000, 500.00, 1555555.00),
+  (50000, 500.00, 3555555.00),
+  (100000, 500.00, 7555555.00)
+ON CONFLICT (invitee_count) DO UPDATE
+SET qualification_amount = EXCLUDED.qualification_amount,
+    bonus_amount = EXCLUDED.bonus_amount,
+    updated_at = now();
 
 -- VIP experience is demo progression only. It is not based on client-submitted bets.
 CREATE TABLE IF NOT EXISTS public.nplus_demo_vip_state (
@@ -286,7 +317,7 @@ BEGIN
 
   INSERT INTO public.nplus_demo_referrals
     (user_id, referred_user_id, referral_code, status, reward_amount, created_at)
-  VALUES (v_referrer, v_actor, v_code, 'pending', 20.00, now())
+  VALUES (v_referrer, v_actor, v_code, 'pending', 0.00, now())
   ON CONFLICT DO NOTHING;
 
   IF NOT FOUND THEN
@@ -295,86 +326,27 @@ BEGIN
   END IF;
 
   RETURN jsonb_build_object('success', true, 'reason', 'attached',
-    'message', 'Referral code attached. The virtual reward is pending an approved qualifying demo-credit request.');
+    'message', 'Referral code attached. Invitation bonuses follow the published tier rules and are not auto-awarded on deposit-request approval.');
 END;
 $function$;
 
--- Single-level referral reward: one award, only after a qualifying virtual request
--- is approved. Direct table/wallet writes by browser users are never allowed.
+-- Deliberately disable the old per-referral 200/20 auto-award logic.
+-- The Daman reference uses invitation-count tiers and a 500-per-invite qualification
+-- amount. Do not connect rewards to the generic deposit_requests table: it may
+-- represent a real-money workflow. A verified demo-only qualification/claim RPC
+-- must be implemented and tested separately before any tier credits are issued.
 CREATE OR REPLACE FUNCTION public.nplus_demo_award_referral_on_approved_request()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = pg_catalog, public
 AS $function$
-DECLARE
-  v_referrer uuid;
-  v_reward numeric(12,2);
-  v_before numeric(14,2);
-  v_after numeric(14,2);
 BEGIN
-  IF NEW.status IS DISTINCT FROM 'approved'
-     OR OLD.status = 'approved'
-     OR coalesce(NEW.amount, 0) < 200 THEN
-    RETURN NEW;
-  END IF;
-
-  SELECT user_id, reward_amount
-    INTO v_referrer, v_reward
-    FROM public.nplus_demo_referrals
-   WHERE referred_user_id = NEW.user_id
-     AND status = 'pending'
-   FOR UPDATE;
-
-  IF NOT FOUND THEN
-    RETURN NEW;
-  END IF;
-
-  UPDATE public.nplus_demo_referrals
-     SET status = 'rewarded',
-         qualifying_request_id = NEW.id,
-         qualified_at = now(),
-         awarded_at = now()
-   WHERE referred_user_id = NEW.user_id
-     AND status = 'pending';
-
-  IF NOT FOUND THEN
-    RETURN NEW;
-  END IF;
-
-  INSERT INTO public.demo_wallets(user_id, balance)
-  VALUES (v_referrer, 0)
-  ON CONFLICT (user_id) DO NOTHING;
-
-  UPDATE public.demo_wallets
-     SET balance = balance + v_reward, updated_at = now()
-   WHERE user_id = v_referrer
-   RETURNING balance - v_reward, balance INTO v_before, v_after;
-
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Referrer demo wallet is missing.';
-  END IF;
-
-  INSERT INTO public.demo_wallet_transactions
-    (user_id, delta, balance_before, balance_after, type, source, note)
-  VALUES
-    (v_referrer, v_reward, v_before, v_after, 'REFERRAL_REWARD', 'REFERRAL',
-     format('Demo referral reward for approved virtual request %s', NEW.id));
-
-  INSERT INTO public.nplus_demo_vip_state(user_id, experience_points)
-  VALUES (v_referrer, v_reward::bigint)
-  ON CONFLICT (user_id) DO UPDATE
-    SET experience_points = public.nplus_demo_vip_state.experience_points + EXCLUDED.experience_points,
-        updated_at = now();
-
   RETURN NEW;
 END;
 $function$;
 
 DROP TRIGGER IF EXISTS nplus_demo_referral_approved_request ON public.deposit_requests;
-CREATE TRIGGER nplus_demo_referral_approved_request
-AFTER UPDATE OF status ON public.deposit_requests
-FOR EACH ROW EXECUTE FUNCTION public.nplus_demo_award_referral_on_approved_request();
 
 CREATE OR REPLACE FUNCTION public.nplus_demo_referral_dashboard()
 RETURNS jsonb
@@ -892,6 +864,7 @@ $function$;
 -- Keep every new table server-owned. Browser clients interact through narrowly scoped RPCs.
 ALTER TABLE public.nplus_demo_referral_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_referrals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nplus_demo_referral_tier_rules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_vip_state ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_safe_balances ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_safe_transfers ENABLE ROW LEVEL SECURITY;
@@ -900,7 +873,7 @@ ALTER TABLE public.nplus_demo_gift_claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_attendance_claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_support_requests ENABLE ROW LEVEL SECURITY;
 
-REVOKE ALL ON TABLE public.nplus_demo_referral_codes, public.nplus_demo_referrals,
+REVOKE ALL ON TABLE public.nplus_demo_referral_codes, public.nplus_demo_referrals, public.nplus_demo_referral_tier_rules,
   public.nplus_demo_vip_state, public.nplus_demo_safe_balances, public.nplus_demo_safe_transfers,
   public.nplus_demo_gift_codes, public.nplus_demo_gift_claims, public.nplus_demo_attendance_claims,
   public.nplus_demo_support_requests
