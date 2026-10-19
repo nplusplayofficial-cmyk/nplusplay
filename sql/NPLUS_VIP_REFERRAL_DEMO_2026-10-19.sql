@@ -139,6 +139,24 @@ CREATE TABLE IF NOT EXISTS public.nplus_demo_attendance_claims (
 CREATE INDEX IF NOT EXISTS nplus_demo_attendance_user_date_idx
   ON public.nplus_demo_attendance_claims(user_id, claim_date DESC);
 
+-- Member feedback/customer support requests. User records stay private; admins use RPCs.
+CREATE TABLE IF NOT EXISTS public.nplus_demo_support_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  category text NOT NULL DEFAULT 'other',
+  subject text NOT NULL,
+  message text NOT NULL,
+  status text NOT NULL DEFAULT 'open',
+  admin_note text NOT NULL DEFAULT '',
+  handled_by uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS nplus_demo_support_user_created_idx
+  ON public.nplus_demo_support_requests(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS nplus_demo_support_status_created_idx
+  ON public.nplus_demo_support_requests(status, created_at DESC);
+
 -- Private RPC helper: ensures the caller's account has exactly one unique code.
 CREATE OR REPLACE FUNCTION public.nplus_demo_ensure_referral_code(p_user_id uuid)
 RETURNS text
@@ -777,6 +795,100 @@ EXCEPTION WHEN unique_violation THEN
 END;
 $function$;
 
+CREATE OR REPLACE FUNCTION public.nplus_demo_support_submit(p_category text, p_subject text, p_message text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+DECLARE
+  v_actor uuid := auth.uid();
+  v_category text := lower(trim(coalesce(p_category,'other')));
+  v_subject text := trim(coalesce(p_subject,''));
+  v_message text := trim(coalesce(p_message,''));
+  v_id uuid;
+BEGIN
+  IF v_actor IS NULL THEN RAISE EXCEPTION 'Authentication required.'; END IF;
+  IF v_category NOT IN ('feedback','account','virtual_credit','gift_code','bug','other') THEN
+    RETURN jsonb_build_object('success',false,'reason','invalid_category','message','Choose a valid support category.');
+  END IF;
+  IF length(v_subject) < 3 OR length(v_subject) > 100 THEN
+    RETURN jsonb_build_object('success',false,'reason','invalid_subject','message','Subject must be 3–100 characters.');
+  END IF;
+  IF length(v_message) < 10 OR length(v_message) > 3000 THEN
+    RETURN jsonb_build_object('success',false,'reason','invalid_message','message','Message must be 10–3,000 characters.');
+  END IF;
+  INSERT INTO public.nplus_demo_support_requests(user_id,category,subject,message)
+  VALUES(v_actor,v_category,v_subject,v_message)
+  RETURNING id INTO v_id;
+  RETURN jsonb_build_object('success',true,'request_id',v_id,'message','Support request submitted.');
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.nplus_demo_support_dashboard()
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+DECLARE v_actor uuid := auth.uid();
+BEGIN
+  IF v_actor IS NULL THEN RAISE EXCEPTION 'Authentication required.'; END IF;
+  RETURN jsonb_build_object(
+    'success',true,
+    'requests',coalesce((
+      SELECT jsonb_agg(jsonb_build_object('id',id,'category',category,'subject',subject,
+        'status',status,'admin_note',admin_note,'created_at',created_at,'updated_at',updated_at)
+        ORDER BY created_at DESC)
+      FROM (SELECT * FROM public.nplus_demo_support_requests WHERE user_id=v_actor ORDER BY created_at DESC LIMIT 50) q
+    ),'[]'::jsonb)
+  );
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.nplus_demo_admin_support_list(p_limit integer DEFAULT 100)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+BEGIN
+  IF NOT coalesce(public.nplus_is_admin(),false) THEN RAISE EXCEPTION 'Administrator access required.' USING ERRCODE='42501'; END IF;
+  RETURN coalesce((
+    SELECT jsonb_agg(jsonb_build_object('id',q.id,'uid',p.uid,'category',q.category,
+      'subject',q.subject,'message',q.message,'status',q.status,'admin_note',q.admin_note,
+      'created_at',q.created_at,'updated_at',q.updated_at) ORDER BY q.created_at DESC)
+    FROM (SELECT * FROM public.nplus_demo_support_requests ORDER BY created_at DESC
+      LIMIT greatest(1,least(coalesce(p_limit,100),500))) q
+    LEFT JOIN public.profiles p ON p.id=q.user_id
+  ),'[]'::jsonb);
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.nplus_demo_admin_support_update(p_ticket_id uuid, p_status text, p_admin_note text DEFAULT '')
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+DECLARE
+  v_status text := lower(trim(coalesce(p_status,'')));
+  v_actor uuid := auth.uid();
+BEGIN
+  IF NOT coalesce(public.nplus_is_admin(),false) THEN RAISE EXCEPTION 'Administrator access required.' USING ERRCODE='42501'; END IF;
+  IF v_status NOT IN ('open','in_review','closed') THEN
+    RETURN jsonb_build_object('success',false,'reason','invalid_status','message','Choose open, in_review, or closed.');
+  END IF;
+  UPDATE public.nplus_demo_support_requests
+     SET status=v_status, admin_note=left(coalesce(p_admin_note,''),2000),
+         handled_by=v_actor, updated_at=now()
+   WHERE id=p_ticket_id;
+  IF NOT FOUND THEN RETURN jsonb_build_object('success',false,'reason','not_found','message','Support request not found.'); END IF;
+  RETURN jsonb_build_object('success',true,'message','Support request updated.');
+END;
+$function$;
+
 -- Keep every new table server-owned. Browser clients interact through narrowly scoped RPCs.
 ALTER TABLE public.nplus_demo_referral_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_referrals ENABLE ROW LEVEL SECURITY;
@@ -786,10 +898,12 @@ ALTER TABLE public.nplus_demo_safe_transfers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_gift_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_gift_claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nplus_demo_attendance_claims ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nplus_demo_support_requests ENABLE ROW LEVEL SECURITY;
 
 REVOKE ALL ON TABLE public.nplus_demo_referral_codes, public.nplus_demo_referrals,
   public.nplus_demo_vip_state, public.nplus_demo_safe_balances, public.nplus_demo_safe_transfers,
-  public.nplus_demo_gift_codes, public.nplus_demo_gift_claims, public.nplus_demo_attendance_claims
+  public.nplus_demo_gift_codes, public.nplus_demo_gift_claims, public.nplus_demo_attendance_claims,
+  public.nplus_demo_support_requests
 FROM PUBLIC, anon, authenticated;
 
 REVOKE ALL ON FUNCTION public.nplus_demo_ensure_referral_code(uuid) FROM PUBLIC, anon, authenticated;
@@ -807,6 +921,10 @@ GRANT EXECUTE ON FUNCTION public.nplus_demo_attendance_dashboard() TO authentica
 GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_vip_dashboard() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_referrals(integer) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_create_gift_code(text,numeric,integer,timestamptz) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_demo_support_submit(text,text,text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_demo_support_dashboard() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_support_list(integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_support_update(uuid,text,text) TO authenticated;
 
 COMMIT;
 
