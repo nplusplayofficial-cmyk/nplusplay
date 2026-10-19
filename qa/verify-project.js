@@ -100,6 +100,26 @@ try {
   fail('Demo wallet request guards failed: ' + e.message);
 }
 
+// Password recovery must use Supabase Auth, never a fixed OTP or browser-local fake reset.
+try {
+  const recoveryPage = fs.readFileSync(path.join(root, 'forgot-password.html'), 'utf8');
+  for (const required of [
+    'resetPasswordForEmail(email, { redirectTo })',
+    'PASSWORD_RECOVERY',
+    'client.auth.updateUser({ password })',
+    'mode=reset',
+    'getSession()'
+  ]) {
+    if (!recoveryPage.includes(required)) fail('Secure password recovery behavior missing: ' + required);
+  }
+  if (/Demo:\s*123456|localStorage\.setItem\(\s*['"]nplus_user['"]/i.test(recoveryPage) ||
+      /function\s+sendOTP\s*\(/i.test(recoveryPage)) {
+    fail('Password recovery must not use a fixed OTP or browser-local fake password reset');
+  }
+} catch (e) {
+  fail('Password recovery guard failed: ' + e.message);
+}
+
 // Activity must show server-recorded history for supported games and fail visibly if RPCs are unavailable.
 try {
   const activityPage = fs.readFileSync(path.join(root, 'activity.html'), 'utf8');
