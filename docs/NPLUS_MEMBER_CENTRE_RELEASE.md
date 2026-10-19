@@ -30,13 +30,14 @@
 ## Demo rules implemented
 
 - Every account receives its own unique referral code.
-- A referred account can attach one code only. Self-referrals are rejected.
-- A referral reward is 20 **virtual demo points** and is applied once only when the invited account's virtual-credit request for 200 points or more is approved by N+ ADMIN.
+- A referred account can attach one code only. Self-referrals are rejected. The old 200-point qualification / 20-point automatic reward is removed.
+- Invitation tiers match the supplied Daman screenshot: 1/3/10/30/50/70/100/200/500/1,000/5,000/10,000/20,000/50,000/100,000 invited accounts; each counted account must meet a 500-point qualification and the listed tier bonuses are 55/155/555/1,555/2,555/3,355/5,555/10,955/25,555/48,555/355,555/755,555/1,555,555/3,555,555/7,555,555 virtual demo points. These figures are reference-matched demo units, not rupees or cash.
 - Gift codes are checked server-side and each account can redeem the same code only once.
 - Virtual-safe transfers move points between two demo balances. They do not calculate interest.
 - Attendance is limited to one claim per user per day and requires a previously admin-approved virtual-credit request.
 - Admin RPCs check the server-side admin role. New feature tables have RLS enabled and direct browser-role table access revoked.
 - The rebate page does not generate or claim credits until validated server-side game settlement exists.
+- Tier rows are displayed, but bonus qualification/claiming is deliberately disabled until a demo-only event source and idempotent claim RPC are implemented and tested. Generic `deposit_requests` approval no longer triggers referral rewards.
 - No real-money investment, deposit, cash withdrawal, interest or guaranteed-return promise is implemented in these member pages.
 
 ## Required isolated Supabase staging test
@@ -46,7 +47,7 @@
 3. Apply `sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql` to that branch only.
 4. Confirm every new table has RLS enabled, anonymous execution is revoked on feature RPCs, and only authenticated or server-admin RPC execution is available as intended.
 5. Register two test accounts. Confirm they receive different codes. Open the second account's invite URL and verify the signup code is prefilled.
-6. Submit a virtual-credit request for 200 points from the invited account and approve it from N+ ADMIN. Confirm the referring member receives exactly 20 virtual points once; repeat the approval/update and confirm no second credit.
+6. Confirm the invitation rules table matches the screenshot tier values. Verify that approval in generic `deposit_requests` does not issue an invitation bonus; a dedicated virtual-demo qualification/claim flow must be designed and tested before enabling claims.
 7. Test invalid, self and already-attached referral codes; gift-code redeem and duplicate rejection; virtual-safe IN/OUT and insufficient-balance cases; first and duplicate attendance claims; support ticket submission and admin status update.
 8. Confirm a normal member cannot execute admin reports/support updates, directly read other users' private records, or modify feature tables.
 9. Test sign-up/OTP, refresh, logout, PWA install/update, narrow-mobile navigation and desktop layout in a real browser.
