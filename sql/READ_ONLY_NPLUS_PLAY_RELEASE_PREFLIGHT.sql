@@ -45,9 +45,17 @@ checks AS (
   UNION ALL
   SELECT
     'Generic wallet credit guard active',
-    NOT coalesce(has_function_privilege('authenticated',
+    coalesce(position(
+      'positive virtual credits must be awarded by server-authoritative settlement or admin approval.'
+      IN lower(pg_get_functiondef(to_regprocedure('public.nplus_wallet_change(numeric,text,text,text)')))
+    ) > 0, false)
+    AND coalesce(position(
+      'game bets must use server-authoritative settlement rpcs.'
+      IN lower(pg_get_functiondef(to_regprocedure('public.nplus_wallet_change(numeric,text,text,text)')))
+    ) > 0, false)
+    AND coalesce(has_function_privilege('authenticated',
       to_regprocedure('public.nplus_wallet_change(numeric,text,text,text)'), 'EXECUTE'), false),
-    'Expected blocked until reviewed post-rollout wallet guard is active; only apply after every active frontend is migrated.'
+    'PASS only when the guarded function rejects generic positive credits and GAME_BET debits; authenticated execution remains so documented negative non-game adjustments can continue.'
 
   UNION ALL
   SELECT
