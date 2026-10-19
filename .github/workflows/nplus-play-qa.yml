@@ -90,3 +90,30 @@ jobs:
         env:
           PGPASSWORD: nplus_test
         run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-demo-referrals.sql
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Playwright
+        run: pip install playwright==1.55.0
+      - name: Install Chromium
+        run: python -m playwright install --with-deps chromium
+      - name: Start local candidate server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/nplus-play-http.log 2>&1 &
+          echo $! > /tmp/nplus-play-http.pid
+      - name: Wait for local server and test desktop/mobile page rendering
+        run: |
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4173/ >/dev/null
+          python qa/browser-smoke.py
