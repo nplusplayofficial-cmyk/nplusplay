@@ -3,9 +3,9 @@
 ## Current release state
 
 - Member Centre implementation is in draft PR [#5](https://github.com/nplusplayofficial-cmyk/nplusplay/pull/5), targeting `release-candidate/security-rollout-2026-10-17`.
-- Earlier candidate baseline: 308 static checks, disposable PostgreSQL migration/smoke tests, and Chromium rendering smoke (36/36 pages; 12/12 mobile-critical viewport checks) passed before the Daman screenshot tier correction.
-- The latest referral SQL, UI, and smoke tests have changed since that baseline. Latest GitHub Actions run for the current branch is **queued**, with no result yet; do not treat previous baseline passes as proof of the new tier-claim code.
-- The connected production Supabase database has **not** received the member-centre migration. Keep the PR in draft until current static/database/browser CI passes and authenticated RPC/access-control tests are completed in a separate no-cost test environment.
+- **Current branch CI passed** on 2026-10-19: 333 static checks across 17 required member/Admin pages; the updated migration applied and referral-tier/gift/safe/attendance/support smoke tests passed on a disposable PostgreSQL 17 service.
+- Playwright Chromium rendered 36/36 available HTML pages and passed 12/12 mobile-critical viewport checks. [Passing workflow run](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39287117614).
+- The connected production Supabase database has **not** received the member-centre migration. These tests do not prove production OTP, live Supabase RLS/authenticated RPC integration, concurrent claim behavior in a deployed database, or full real-device/PWA acceptance. Keep the PR in draft until the separate release blockers and authenticated integration review are cleared.
 
 ## Included pages
 
