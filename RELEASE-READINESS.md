@@ -126,3 +126,11 @@ Production DB hardening was applied through Supabase and is recorded in `sql/NPL
 - The null-profile regression now also checks that a valid Admin can still read the commission summary after the patch.
 - It snapshots `demo_wallets.balance` and per-user wallet-ledger row counts before the candidate migration and confirms they are unchanged afterward.
 - Latest full CI: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39250331072 — **all 12 disposable PostgreSQL suites passed** on commit `bbaa31554473bd4752076d602537a1e3eb01afc9`.
+
+
+## Read-only preflight execution — 2026-10-19
+
+- Added `sql/READ_ONLY_NPLUS_PLAY_RELEASE_PREFLIGHT.sql` and executed its SELECT-only checks against live Supabase. It returned **4 PASS / 5 BLOCK** and did not alter rows, grants, schema, game settings, or balances.
+- **PASS:** direct wallet/ledger table writes are revoked for anon/authenticated; profile role-change trigger exists; public schema CREATE is restricted from browser roles; wallet and ledger RLS are enabled.
+- **BLOCK:** the nine-signature NULL-safe Admin guard is not installed in production; generic wallet credit guard is not active; public phone lookup is still callable; WINGO/MotoRace/Aviator settlement tables are absent; K3/5D/TRX remain enabled.
+- This preflight is intended for repeated use in isolated staging before rollout. Its red statuses are expected against the current legacy production schema, and it must not be used as permission to deploy. Auth dashboard settings and backup restore still need separate verification.
