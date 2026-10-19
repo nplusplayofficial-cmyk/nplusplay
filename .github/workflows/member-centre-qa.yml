@@ -40,6 +40,8 @@ jobs:
           node-version: 22
       - name: Static member centre QA
         run: node tests/nplus-member-centre-qa.mjs
+      - name: Free release source safety guards
+        run: node qa/free-release-guards.cjs
       - name: Prepare disposable Supabase-like PostgreSQL fixture
         run: psql -v ON_ERROR_STOP=1 -f tests/nplus-member-centre-prelude.sql
       - name: Apply member centre migration in disposable database only
