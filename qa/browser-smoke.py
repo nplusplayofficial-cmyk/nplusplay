@@ -127,7 +127,8 @@ def main() -> int:
         browser.close()
 
     print(f"Rendered pages: {loaded}/{len(PAGES) - len(skipped_optional)} available in this branch")
-    print(f"Mobile viewport checks: {responsive_checked}/{sum(1 for path in MOBILE_CRITICAL if (REPO_ROOT / path.lstrip(\"/\")).is_file())}")
+    available_mobile = sum(1 for path in MOBILE_CRITICAL if (REPO_ROOT / path.lstrip("/")).is_file())
+    print(f"Mobile viewport checks: {responsive_checked}/{available_mobile}")
     for path in skipped_optional:
         print(f"SKIP {path}: not present in this checkout/PR branch")
     for warning in overflow_warnings:
