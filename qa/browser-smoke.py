@@ -61,6 +61,9 @@ MOBILE_CRITICAL = {
 def fail(message: str) -> None:
     print(f"FAIL {message}", file=sys.stderr)
 
+def file_for_path(path: str) -> Path:
+    return (REPO_ROOT / "index.html") if path == "/" else (REPO_ROOT / path.lstrip("/"))
+
 def main() -> int:
     errors: list[str] = []
     loaded = 0
@@ -74,8 +77,7 @@ def main() -> int:
 
         skipped_optional: list[str] = []
         for path, needles in PAGES:
-            local_file = (REPO_ROOT / path.lstrip("/")) if path != "/" else (REPO_ROOT / "index.html")
-            if not local_file.is_file():
+            if not file_for_path(path).is_file():
                 skipped_optional.append(path)
                 continue
             try:
@@ -127,7 +129,7 @@ def main() -> int:
         browser.close()
 
     print(f"Rendered pages: {loaded}/{len(PAGES) - len(skipped_optional)} available in this branch")
-    available_mobile = sum(1 for path in MOBILE_CRITICAL if (REPO_ROOT / path.lstrip("/")).is_file())
+    available_mobile = sum(1 for path in MOBILE_CRITICAL if file_for_path(path).is_file())
     print(f"Mobile viewport checks: {responsive_checked}/{available_mobile}")
     for path in skipped_optional:
         print(f"SKIP {path}: not present in this checkout/PR branch")
