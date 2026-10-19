@@ -41,7 +41,7 @@ The Daman screenshots the user supplied are the UI/feature reference. The requir
 
 ### Referral demo business rules
 - Each account has its own referral code/link; a user cannot refer themselves.
-- A qualifying approved virtual/demo request of 200 credits awards exactly 20 virtual/demo points to the inviter, once only.
+- The supplied Daman screenshot shows invite-count tiers 1/3/10/30/50/70/100/200/500/1,000/5,000/10,000/20,000/50,000/100,000, a 500-per-invite qualification amount, and the corresponding tier bonuses 55/155/555/1,555/2,555/3,355/5,555/10,955/25,555/48,555/355,555/755,555/1,555,555/3,555,555/7,555,555. In N+ these values are virtual demo points only, not cash. The former 200/20 rule was invented and is rejected.
 - A referred user can be attributed to only one inviter; duplicate qualifying requests/replays must not issue another reward.
 - The UI must explain the qualification, approval, reward status, and any reason a reward remains pending.
 - Never present virtual/demo credits as cash or promise a real-money payout.
@@ -97,7 +97,7 @@ The Daman screenshots the user supplied are the UI/feature reference. The requir
 15. Add tests for access control, limits, ordering, and privacy before connecting a public feed.
 
 ### P1 — user flows and screenshot parity
-16. Test referrals: unique referral codes, eligible 200 virtual-credit event, one-time 20 virtual-point reward, replay protection, no self-referral, and server-side approval.
+16. Test referrals against the screenshot tiers, 500 virtual demo-credit qualification per counted invite, event-period rules, duplicate-claim prevention, and no self-referral. Keep claims disabled until a trusted demo-only qualification/claim RPC is implemented and tested.
 17. Test gifts/transfers/support/VIP/attendance for ownership, role permissions, replay prevention and ledger consistency.
 18. Implement and verify every applicable Account, history, notifications, service centre, help, language, gift, promotion/agency/team, rebate, virtual-safe, VIP, coupon, and statistics screen listed above.
 19. Test desktop/mobile flows and auth recovery with a dedicated test account. Do not change production Auth settings until the candidate frontend flow passes.
