@@ -157,8 +157,9 @@ try {
   }
   if (/localStorage\.getItem/i.test(bonusPage) ||
       /return\s+b\s*\?\?\s*1000/i.test(bonusPage) ||
-      /id="redeem"/i.test(bonusPage)) {
-    fail('Bonus Center must not use browser-local wallet fallback or fake reward-code redemption');
+      /id="redeem"/i.test(bonusPage) ||
+      /virtual-credit activity system|Platform mode/i.test(bonusPage)) {
+    fail('Bonus Center must not use browser-local wallet fallback, fake reward-code redemption or legacy platform-mode copy');
   }
 } catch (e) {
   fail('Bonus ledger guard failed: ' + e.message);
@@ -180,8 +181,9 @@ try {
   }
   if (/localStorage\.getItem/i.test(promotionPage) ||
       /value=["']NPLUSPLAY["']/i.test(promotionPage) ||
-      /data-title=["']Weekly Reward Campaign["']/i.test(promotionPage)) {
-    fail('Promotion page must not show local balances, universal referral codes or sample live campaigns');
+      /data-title=["']Weekly Reward Campaign["']/i.test(promotionPage) ||
+      /Promotion Center · Platform mode/i.test(promotionPage)) {
+    fail('Promotion page must not show local balances, universal referral codes, sample live campaigns or legacy mode copy');
   }
 } catch (e) {
   fail('Promotion account-ledger guard failed: ' + e.message);
