@@ -21,6 +21,8 @@ const schedulerDoc = read('docs/NPLUS_AVIATOR_SCHEDULER_RECOVERY_DESIGN_2026-10-
 const memberSql = read('sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql');
 const memberSmoke = read('tests/nplus-member-centre-smoke.sql');
 const memberQa = read('tests/nplus-member-centre-qa.mjs');
+const memberHtml = read('referral.html');
+const adminVipHtml = read('admin-vip.html');
 
 check(admin.includes('nplus_set_game_status'), 'Admin game status must call server-side RPC.');
 check(admin.includes('HARD_PAUSED_GAMES'), 'Unsupported games must remain hard-paused in Admin UI.');
@@ -56,6 +58,7 @@ check(memberSql.includes('CREATE OR REPLACE FUNCTION public.nplus_demo_claim_ref
 check(memberSql.includes('CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_qualifications') && memberSql.includes('UNIQUE (referrer_user_id, referred_user_id)'), 'Verified invite qualification must be unique per inviter/invitee.');
 check(memberHtml.includes('nplus_demo_referral_bonus_dashboard') && memberHtml.includes('nplus_demo_claim_referral_bonus') && memberHtml.includes('id="tierRows"'), 'Member Centre must display server-backed screenshot tier progress and claim action.');
 check(memberHtml.includes('500 virtual demo points') && memberHtml.includes('virtual demo points only'), 'Member Centre must state the screenshot qualification threshold and demo-only unit.');
+check(adminVipHtml.includes('id="qualifyForm"') && adminVipHtml.includes('nplus_demo_admin_qualify_referral') && adminVipHtml.includes("v.referred_user_id||'UUID unavailable'"), 'N+ ADMIN must verify invitations using the protected RPC and actual profile UUID.');
 check(memberSmoke.includes('tier claims should award exactly 210 demo points once each') && memberSmoke.includes('repeat tier 1 claim must be rejected'), 'Disposable DB smoke must verify tier award values and replay protection.');
 
 
