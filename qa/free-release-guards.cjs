@@ -33,6 +33,10 @@ check(/nplus_wallet_change/i.test(walletSql) && /revoke/i.test(walletSql), 'Lega
 check(/rpc\(['\"]nplus_aviator_demo_place_bet['\"]/.test(aviatorPage) && /rpc\(['\"]nplus_aviator_demo_cashout['\"]/.test(aviatorPage), 'Aviator page must submit bets and cash-outs through server RPCs.');
 check(!/p_crash_point\s*:/.test(aviatorPage), 'Aviator client must not submit a crash point override.');
 check(/No demo bets yet/.test(aviatorPage) && /No real-money payments, withdrawals or real-money winnings/.test(aviatorPage), 'Aviator page must retain honest demo-only disclosures and empty state.');
+check(/revoke all on function public\.nplus_aviator_demo_make_crash_point\(\) from public,anon,authenticated/i.test(aviator), 'Aviator crash-point helper must not be callable by client roles.');
+check(/grant execute on function public\.nplus_aviator_demo_place_bet\(uuid,integer,numeric,uuid,numeric\) to authenticated/i.test(aviator), 'Aviator bet RPC must explicitly grant authenticated execution.');
+check(/grant execute on function public\.nplus_aviator_demo_cashout\(uuid\) to authenticated/i.test(aviator), 'Aviator cash-out RPC must explicitly grant authenticated execution.');
+check(/'crash_point',case when v_phase='CRASH' then v_round\.crash_point else null end/i.test(aviator), 'Aviator RPC must not disclose the crash point before crash phase.');
 
 if (admin.includes('nplus_admin_demo_controls')) warnings.push('Admin localStorage demo controls remain: trace all consumers; privileged/outcome-affecting state must be server-authoritative.');
 if (!/nplus_recent_demo_activity/.test(home)) warnings.push('No verified homepage recent-activity RPC contract; do not claim a genuine activity feed.');
