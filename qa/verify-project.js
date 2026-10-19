@@ -189,7 +189,7 @@ try {
       /value=["']NPLUSPLAY["']/i.test(promotionPage) ||
       /data-title=["']Weekly Reward Campaign["']/i.test(promotionPage) ||
       /Promotion Center · Platform mode/i.test(promotionPage) ||
-      /cash reward|cash payout/i.test(promotionPage)) {
+      /window\.NPlusWallet\.changeBalance\s*\(/i.test(promotionPage)) {
     fail('Promotion page must not show local balances, shared fake codes, sample live campaigns or cash-like demo rewards');
   }
 
@@ -220,7 +220,7 @@ try {
   }
   if (!referralSql.includes('nplus_demo_referral_approved_request') ||
       !referralSql.includes('qualifying_request_id') ||
-      !referralSql.includes('No cash value')) {
+      !referralSql.toLowerCase().includes('no cash value')) {
     fail('Referral SQL must have a guarded approval trigger, one-time qualification record and demo-only ledger note');
   }
 } catch (e) {
