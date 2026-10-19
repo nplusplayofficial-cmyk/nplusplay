@@ -1,13 +1,16 @@
 name: N+ Free Release Source Guards
 
 on:
-  push:
-    branches: [feature/nplus-free-release-audit-2026-10-19]
+  workflow_dispatch:
   pull_request:
     branches: [feature/nplus-member-centre-demo-2026-10-19]
 
 permissions:
   contents: read
+
+concurrency:
+  group: nplus-free-release-source-guards-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   source-safety:
