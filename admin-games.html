@@ -907,7 +907,7 @@ button:disabled{
         </div>
 
         <div class="demo-warning">
-          DEMO ONLY. Local browser storage is a display cache, not a source of authority.
+          DEMO ONLY. Admin demo display state is temporary and never controls game outcomes.
           Only server-authorized RPC/database results may affect a round or wallet ledger.
           WINGO manual results can determine a demo round's outcome: use only in clearly
           disclosed test/demo sessions, never as a hidden control for a user-facing live round.
@@ -1320,21 +1320,20 @@ button:disabled{
     return true;
   }
 
+  // Transient UI-only cache. Authoritative manual WINGO results are fetched
+  // from and written to the server RPC/database; this cache never settles games.
+  let demoDisplayState = Object.create(null);
+
   function getDemoState() {
-    try {
-      return JSON.parse(
-        localStorage.getItem("nplus_admin_demo_controls") || "{}"
-      );
-    } catch {
-      return {};
-    }
+    return demoDisplayState;
   }
 
   function saveDemoState(state) {
-    localStorage.setItem(
-      "nplus_admin_demo_controls",
-      JSON.stringify(state)
-    );
+    if (!state || typeof state !== "object" || Array.isArray(state)) {
+      demoDisplayState = Object.create(null);
+      return;
+    }
+    demoDisplayState = state;
   }
 
   async function getDbWingoManual(period, sec) {
