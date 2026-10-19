@@ -1,0 +1,23 @@
+name: N+ Member Centre Static QA
+
+on:
+  pull_request:
+    branches: [release-candidate/security-rollout-2026-10-17]
+  push:
+    branches: [feature/nplus-member-centre-demo-2026-10-19]
+
+permissions:
+  contents: read
+
+jobs:
+  member-centre-static-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate member pages, links, and migration guardrails
+        run: node tests/nplus-member-centre-qa.mjs
