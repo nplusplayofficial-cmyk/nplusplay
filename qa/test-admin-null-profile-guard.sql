@@ -10,6 +10,14 @@ BEGIN
 END
 $roles$;
 
+-- Capture wallet invariants before applying a DDL-only authorization patch.
+CREATE TEMP TABLE qa_null_guard_wallet_snapshot AS
+SELECT user_id, balance FROM public.demo_wallets;
+CREATE TEMP TABLE qa_null_guard_ledger_snapshot AS
+SELECT user_id, count(*)::bigint AS row_count
+FROM public.demo_wallet_transactions
+GROUP BY user_id;
+
 \ir ../sql/NPLUS_PLAY_ADMIN_NULL_PROFILE_GUARD_2026-10-19.sql
 
 INSERT INTO auth.users(id,email)
@@ -78,6 +86,28 @@ BEGIN
     'select public.nplus_admin_wingo_round_summary(''qa-orphan-profile'')',
     'read WINGO round summary without profiles row'
   );
+
+  -- This patch is DDL/grants only: existing demo balances and ledger row counts must not change.
+  IF EXISTS (
+    SELECT 1
+    FROM qa_null_guard_wallet_snapshot s
+    FULL JOIN public.demo_wallets w USING (user_id)
+    WHERE s.user_id IS NULL OR w.user_id IS NULL OR s.balance IS DISTINCT FROM w.balance
+  ) THEN
+    RAISE EXCEPTION 'Admin guard migration changed or removed an existing demo wallet balance.';
+  END IF;
+  IF EXISTS (
+    SELECT 1
+    FROM qa_null_guard_ledger_snapshot s
+    FULL JOIN (
+      SELECT user_id, count(*)::bigint AS row_count
+      FROM public.demo_wallet_transactions
+      GROUP BY user_id
+    ) t USING (user_id)
+    WHERE s.user_id IS NULL OR t.user_id IS NULL OR s.row_count IS DISTINCT FROM t.row_count
+  ) THEN
+    RAISE EXCEPTION 'Admin guard migration changed existing wallet ledger row counts.';
+  END IF;
 
   -- Both overloaded WINGO demo setters and every targeted function must carry
   -- the explicit NULL-safe test, not merely rely on the runtime cases above.
