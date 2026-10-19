@@ -16,8 +16,8 @@ INSERT INTO auth.users(id,email)
 VALUES ('e1111111-1111-4111-8111-111111111111','orphan-profile-qa@example.invalid')
 ON CONFLICT (id) DO NOTHING;
 -- Deliberately do not insert a matching profiles row.
-SELECT set_config('request.jwt.claim.sub','e1111111-1111-4111-8111-111111111111',true);
-SELECT set_config('request.jwt.claim.role','authenticated',true);
+SELECT set_config('request.jwt.claim.sub','e1111111-1111-4111-8111-111111111111',false);
+SELECT set_config('request.jwt.claim.role','authenticated',false);
 
 CREATE TEMP TABLE qa_temp_schema_bootstrap (id integer);
 DROP TABLE qa_temp_schema_bootstrap;
