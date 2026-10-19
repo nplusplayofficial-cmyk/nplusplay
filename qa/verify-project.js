@@ -633,6 +633,17 @@ try {
   if (!workflow.includes('qa/test-admin-null-profile-guard.sql')) {
     fail('Admin NULL-profile regression must remain wired into CI');
   }
+
+  const preflight = fs.readFileSync(path.join(root, 'sql/READ_ONLY_NPLUS_PLAY_RELEASE_PREFLIGHT.sql'), 'utf8');
+  if (!/\\bWITH checks AS\\b/i.test(preflight) ||
+      !preflight.includes('nplus_wallet_change(numeric,text,text,text)') ||
+      !preflight.includes('nplus_phone_is_registered(text)') ||
+      !preflight.includes('nplus_wingo_demo_rounds')) {
+    fail('Read-only release preflight is missing required security/schema checks');
+  }
+  if (/^\\s*(?:insert|update|delete|alter|drop|create|grant|revoke|truncate|begin|commit)\\b/im.test(preflight)) {
+    fail('Release preflight must remain read-only; do not include schema/data/grant mutations');
+  }
 } catch (e) {
   fail('Admin NULL-profile static contract failed: ' + e.message);
 }
