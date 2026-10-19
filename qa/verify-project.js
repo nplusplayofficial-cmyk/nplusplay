@@ -165,6 +165,44 @@ try {
   fail('Account wallet consistency guard failed: ' + e.message);
 }
 
+// Account settings are authenticated and server-persisted, not browser-local placeholders.
+try {
+  const accountPage = fs.readFileSync(path.join(root, 'account.html'), 'utf8').toLowerCase();
+  const accountMigration = fs.readFileSync(path.join(root, 'supabase/migrations/20261019000100_account_preferences.sql'), 'utf8').toLowerCase();
+
+  for (const required of [
+    'client.from("user_preferences")',
+    'client.from("profiles").update({display_name:name})',
+    'client.auth.updateuser({password:newpassword})',
+    'client.auth.signinwithpassword({email:user.email,password:currentpassword})',
+    'id="profileeditform"',
+    'id="passwordform"'
+  ]) {
+    if (!accountPage.includes(required)) fail('Account settings implementation missing: ' + required);
+  }
+  if (accountPage.includes('nplus_account_preferences_v1') ||
+      accountPage.includes('localstorage.setitem(local_prefs_key')) {
+    fail('Account preferences must not be browser-local-only');
+  }
+  for (const contract of [
+    'create table if not exists public.user_preferences',
+    'alter table public.user_preferences enable row level security',
+    'grant select, insert, update on table public.user_preferences to authenticated',
+    'auth.uid() = user_id',
+    'grant update (display_name) on table public.profiles to authenticated',
+    'auth.uid() = id'
+  ]) {
+    if (!accountMigration.includes(contract)) fail('Account settings migration contract missing: ' + contract);
+  }
+  if (/grant update\s*\([^)]*role/i.test(accountMigration) ||
+      /grant update\s*\([^)]*email/i.test(accountMigration) ||
+      /grant update\s*\([^)]*phone/i.test(accountMigration)) {
+    fail('Account migration must not grant edits to role, email or phone');
+  }
+} catch (e) {
+  fail('Account settings persistence QA failed: ' + e.message);
+}
+
 // Repository-wide guard: browser code must never award a generic GAME_WIN credit.
 for (const file of htmls) {
   const html = fs.readFileSync(path.join(root, file), 'utf8');
