@@ -81,6 +81,7 @@ check(referralHtml.includes('id="tierRows"'), "Referral UI must render the tier-
 check(referralHtml.includes("virtual demo points only"), "Referral UI must label the tier bonuses as virtual demo points.");
 const adminVipHtml = read("admin-vip.html");
 check(adminVipHtml.includes('id="qualifyForm"') && adminVipHtml.includes("nplus_demo_admin_qualify_referral"), "Admin UI must use the protected referral qualification RPC.");
+check(adminVipHtml.includes("v.referred_user_id||'UUID unavailable'") && sql.includes("'referred_user_id', r.referred_user_id"), "Admin referral report must expose the profile UUID used by the qualification RPC.");
 check(sql.includes("ON CONFLICT (user_id, code) DO NOTHING"), "Gift redemption must prevent duplicate code claims.");
 check(sql.includes("PRIMARY KEY (user_id, claim_date)"), "Attendance must enforce one claim per account/day.");
 check(sql.includes("ON CONFLICT (user_id,claim_date) DO NOTHING"), "Attendance award must be duplicate-safe.");
