@@ -18,6 +18,9 @@ const phoneSql = read('sql/POST_ROLLOUT_REVOKE_PHONE_ENUMERATION.sql');
 const walletSql = read('sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql');
 const aviatorPage = read('aviator.html');
 const schedulerDoc = read('docs/NPLUS_AVIATOR_SCHEDULER_RECOVERY_DESIGN_2026-10-19.md');
+const memberSql = read('sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql');
+const memberSmoke = read('tests/nplus-member-centre-smoke.sql');
+const memberQa = read('tests/nplus-member-centre-qa.mjs');
 
 check(admin.includes('nplus_set_game_status'), 'Admin game status must call server-side RPC.');
 check(admin.includes('HARD_PAUSED_GAMES'), 'Unsupported games must remain hard-paused in Admin UI.');
@@ -40,6 +43,15 @@ check(/grant execute on function public\.nplus_aviator_demo_cashout\(uuid\) to a
 check(/'crash_point',case when v_phase='CRASH' then v_round\.crash_point else null end/i.test(aviator), 'Aviator RPC must not disclose the crash point before crash phase.');
 check(schedulerDoc.includes('BLOCKED — design only') && schedulerDoc.includes('Do not schedule this function directly.'), 'Aviator scheduler must remain explicitly blocked until a safe worker is verified.');
 check(schedulerDoc.includes('service-role credentials') && schedulerDoc.includes('disposable database'), 'Aviator scheduler design must document secret isolation and disposable-database testing.');
+check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_referred_uidx/i.test(memberSql), 'Referral system must enforce one inviter per referred account.');
+check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_request_uidx/i.test(memberSql), 'Referral rewards must uniquely bind a qualifying request.');
+check(/status = 'pending'[\s\S]*FOR UPDATE/i.test(memberSql), 'Referral award must lock a pending referral before settlement.');
+check(/NEW\.amount, 0\) < 200/i.test(memberSql) && /reward_amount numeric\(12,2\) NOT NULL DEFAULT 20\.00/i.test(memberSql), 'Referral qualification/reward must remain 200 virtual points / 20 virtual points.');
+check(/UNIQUE \(user_id, code\)/i.test(memberSql) && /ON CONFLICT \(user_id, code\) DO NOTHING/i.test(memberSql), 'Gift claims must be idempotent per user/code.');
+check(/PRIMARY KEY \(user_id, claim_date\)/i.test(memberSql) && /ON CONFLICT \(user_id,claim_date\) DO NOTHING/i.test(memberSql), 'Attendance must be one claim per account/day.');
+check(memberSmoke.includes('referral reward was duplicated') && memberSmoke.includes('Direct access to new feature tables'), 'Disposable DB smoke tests must cover duplicate referral rewards and private table access.');
+check(memberQa.includes('Referral award must enforce 200-point qualifying request.') && memberQa.includes('Admin RPCs must check the server-side admin role.'), 'Member Centre static QA must check referral qualification and server-side Admin guards.');
+
 
 if (admin.includes('nplus_admin_demo_controls')) warnings.push('Admin localStorage demo controls remain: trace all consumers; privileged/outcome-affecting state must be server-authoritative.');
 if (!/nplus_recent_demo_activity/.test(home)) warnings.push('No verified homepage recent-activity RPC contract; do not claim a genuine activity feed.');
