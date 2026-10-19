@@ -60,6 +60,7 @@ check(memberHtml.includes('nplus_demo_referral_bonus_dashboard') && memberHtml.i
 check(memberHtml.includes('500 verified virtual demo points') && memberHtml.includes('virtual demo points only'), 'Member Centre must state the screenshot qualification threshold and demo-only unit.');
 check(adminVipHtml.includes('id="qualifyForm"') && adminVipHtml.includes('nplus_demo_admin_qualify_referral') && adminVipHtml.includes("v.referred_user_id||'UUID unavailable'"), 'N+ ADMIN must verify invitations using the protected RPC and actual profile UUID.');
 check(memberSmoke.includes('tier claims should award exactly 210 demo points once each') && memberSmoke.includes('repeat tier 1 claim must be rejected'), 'Disposable DB smoke must verify tier award values and replay protection.');
+check(memberSmoke.includes('invitation claim must be rejected after the event ends') && memberSmoke.includes('actual invited profile UUID for qualification'), 'Disposable DB smoke must cover event expiry and Admin invitation UUID lookup.');
 
 
 if (admin.includes('nplus_admin_demo_controls')) warnings.push('Admin localStorage demo controls remain: trace all consumers; privileged/outcome-affecting state must be server-authoritative.');
