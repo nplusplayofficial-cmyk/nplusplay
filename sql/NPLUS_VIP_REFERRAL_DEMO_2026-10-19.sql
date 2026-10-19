@@ -361,7 +361,6 @@ FOR EACH ROW EXECUTE FUNCTION public.nplus_demo_award_referral_on_approved_reque
 CREATE OR REPLACE FUNCTION public.nplus_demo_referral_dashboard()
 RETURNS jsonb
 LANGUAGE plpgsql
-STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
 AS $function$
@@ -411,7 +410,6 @@ $function$;
 CREATE OR REPLACE FUNCTION public.nplus_demo_vip_dashboard()
 RETURNS jsonb
 LANGUAGE plpgsql
-STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
 AS $function$
@@ -675,9 +673,10 @@ STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
 AS $function$
-DECLARE v_actor uuid := auth.uid();
-DECLARE v_last_date date;
-DECLARE v_streak integer;
+DECLARE
+  v_actor uuid := auth.uid();
+  v_last_date date;
+  v_streak integer;
 BEGIN
   IF v_actor IS NULL THEN RAISE EXCEPTION 'Authentication required.'; END IF;
   SELECT max(claim_date) INTO v_last_date FROM public.nplus_demo_attendance_claims WHERE user_id=v_actor;
