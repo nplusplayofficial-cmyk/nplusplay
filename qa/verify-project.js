@@ -165,28 +165,66 @@ try {
   fail('Bonus ledger guard failed: ' + e.message);
 }
 
-// Promotions must show account-ledger entries only and must not claim a universal referral code or fake campaign.
+// Promotion balances and referral tracking must be server-backed; demo rewards must never be cash.
 try {
   const promotionPage = fs.readFileSync(path.join(root, 'promotion.html'), 'utf8');
   for (const required of [
     'window.NPlusAuth.requireAuth()',
     'window.NPlusWallet.getBalance()',
     'window.NPlusWallet.transactions(500)',
-    'Referral tracking is not enabled',
+    'nplus_demo_referral_dashboard',
+    'id="referralCode"',
+    'id="referralLink"',
+    'copyReferralCode',
+    'copyReferralLink',
+    '200 credits or more',
+    '20 virtual demo credits exactly once',
     'No active campaigns configured',
     'promoSync',
     'historyStatus'
   ]) {
-    if (!promotionPage.includes(required)) fail('Promotion account flow missing: ' + required);
+    if (!promotionPage.includes(required)) fail('Promotion/referral flow missing: ' + required);
   }
   if (/localStorage\.getItem/i.test(promotionPage) ||
       /value=["']NPLUSPLAY["']/i.test(promotionPage) ||
       /data-title=["']Weekly Reward Campaign["']/i.test(promotionPage) ||
-      /Promotion Center · Platform mode/i.test(promotionPage)) {
-    fail('Promotion page must not show local balances, universal referral codes, sample live campaigns or legacy mode copy');
+      /Promotion Center · Platform mode/i.test(promotionPage) ||
+      /cash reward|cash payout/i.test(promotionPage)) {
+    fail('Promotion page must not show local balances, shared fake codes, sample live campaigns or cash-like demo rewards');
+  }
+
+  const signupPage = fs.readFileSync(path.join(root, 'auth.html'), 'utf8');
+  const authCore = fs.readFileSync(path.join(root, 'core/nplus-auth.js'), 'utf8');
+  if (!signupPage.includes('id="signupReferralCode"') ||
+      !signupPage.includes('new URLSearchParams(location.search).get("ref")') ||
+      !signupPage.includes('referralCode: pendingSignup.referralCode') ||
+      !authCore.includes('nplus_demo_referral_apply') ||
+      !authCore.includes('referralResult')) {
+    fail('Signup must prefill, preserve and server-apply the optional referral code after email OTP');
+  }
+
+  const referralSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_DEMO_REFERRALS.sql'), 'utf8');
+  for (const required of [
+    'create table if not exists public.nplus_demo_referral_codes',
+    'create table if not exists public.nplus_demo_referrals',
+    'public.nplus_demo_referral_dashboard',
+    'public.nplus_demo_referral_apply',
+    'public.nplus_demo_award_referral_on_approved_request',
+    "NEW.amount < 200",
+    "NEW.payment_method, '') <> 'DEMO_CREDIT'",
+    "'REFERRAL_CREDIT', 'DEMO_REFERRAL'",
+    'revoke all on table public.nplus_demo_referrals from public, anon, authenticated',
+    'revoke all on function public.nplus_demo_referral_apply(text) from public, anon, authenticated'
+  ]) {
+    if (!referralSql.toLowerCase().includes(required.toLowerCase())) fail('Demo referral SQL contract missing: ' + required);
+  }
+  if (!referralSql.includes('nplus_demo_referral_approved_request') ||
+      !referralSql.includes('qualifying_request_id') ||
+      !referralSql.includes('No cash value')) {
+    fail('Referral SQL must have a guarded approval trigger, one-time qualification record and demo-only ledger note');
   }
 } catch (e) {
-  fail('Promotion account-ledger guard failed: ' + e.message);
+  fail('Promotion/referral guard failed: ' + e.message);
 }
 
 // The account page must not display a stale browser-local balance as authoritative.
@@ -307,6 +345,9 @@ for (const required of [
   'qa/test-generic-wallet-credit-guard.sql',
   'sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql',
   'qa/test-demo-wallet-requests.sql',
+  'sql/NPLUS_PLAY_DEMO_REFERRALS.sql',
+  'supabase/migrations/20261019000200_demo_referrals.sql',
+  'qa/test-demo-referrals.sql',
   'deposit-history.html', 'withdrawal-history.html', 'admin-withdrawals.html'
 ]) {
   if (!exists(required)) fail('required file missing: ' + required);
