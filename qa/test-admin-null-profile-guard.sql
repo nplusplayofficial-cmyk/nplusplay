@@ -53,6 +53,7 @@ DO $tests$
 DECLARE
   r record;
   v_count integer := 0;
+  v_admin_report jsonb;
 BEGIN
   PERFORM pg_temp.expect_admin_denied(
     'select public.nplus_set_game_status(''WINGO'', false)',
@@ -86,6 +87,14 @@ BEGIN
     'select public.nplus_admin_wingo_round_summary(''qa-orphan-profile'')',
     'read WINGO round summary without profiles row'
   );
+
+  -- A valid admin profile must still be allowed through the guarded report RPC.
+  PERFORM set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
+  v_admin_report := public.nplus_admin_commission_summary();
+  IF jsonb_typeof(v_admin_report) <> 'object' THEN
+    RAISE EXCEPTION 'A valid admin was unexpectedly blocked from the commission report.';
+  END IF;
+  PERFORM set_config('request.jwt.claim.sub','e1111111-1111-4111-8111-111111111111',false);
 
   -- This patch is DDL/grants only: existing demo balances and ledger row counts must not change.
   IF EXISTS (
