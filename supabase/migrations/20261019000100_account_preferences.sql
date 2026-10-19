@@ -19,9 +19,9 @@ create table if not exists public.user_preferences (
   user_id uuid primary key references auth.users(id) on delete cascade,
   notification_game_results boolean not null default true,
   notification_rewards boolean not null default true,
-  notification_promotions boolean not null default true,
+  notification_promotions boolean not null default false,
   reduce_motion boolean not null default false,
-  compact_layout boolean not null default true,
+  compact_layout boolean not null default false,
   updated_at timestamptz not null default now()
 );
 
