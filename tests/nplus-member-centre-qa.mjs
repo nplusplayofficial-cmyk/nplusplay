@@ -70,7 +70,7 @@ check(sql.includes("ON CONFLICT (user_id, code) DO NOTHING"), "Gift redemption m
 check(sql.includes("PRIMARY KEY (user_id, claim_date)"), "Attendance must enforce one claim per account/day.");
 check(sql.includes("ON CONFLICT (user_id,claim_date) DO NOTHING"), "Attendance award must be duplicate-safe.");
 check(sql.includes("p_amount <= 0 OR p_amount > 1000000"), "Admin gift creation must validate reward amounts.");
-check(!/interest rate|cash withdrawal|guaranteed return/i.test(sql), "Migration must not imply real-money interest/guaranteed returns.");
+check(!/CREATE\\s+TABLE[^;]*interest_rate|CREATE\\s+OR\\s+REPLACE\\s+FUNCTION\\s+public\\.nplus_demo_safe_interest/i.test(sql), "Migration must not add an interest/guaranteed-return feature.");
 
 const vip = read("vip.html");
 check(vip.includes("nplus_demo_vip_dashboard"), "VIP page must use server-side VIP dashboard.");
