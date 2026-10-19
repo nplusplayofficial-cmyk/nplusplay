@@ -99,3 +99,14 @@ Production DB hardening was applied through Supabase and is recorded in `sql/NPL
 - The migration revokes direct table access and exposes only authenticated security-definer RPCs. The reward has no cash value; no payment, real deposit or cash payout is performed.
 - Added `qa/test-demo-referrals.sql` and a tenth disposable PostgreSQL CI suite. It checks per-user unique codes, OTP-side attribution contract, invalid/self-referral behavior, immutable attribution, the 199-credit non-qualifying boundary, the 200-credit qualifying boundary, one-time reward and wallet/ledger consistency.
 - Candidate only: apply the matching local Supabase migration in isolated local staging, then test a second account and admin-approved virtual-credit request. No production SQL, settings or deployment changes were made.
+
+
+## Latest verification refresh — 2026-10-19
+
+- Candidate head `ccedda7608421107271a11a8e784baf03a24c390` passed CI run https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39248321488. The job passed static HTML/JavaScript/local-link QA and 11 disposable PostgreSQL suites, including the new profile-role escalation regression (self-promotion, cross-account promotion, unauthenticated/anonymous changes, allowed admin change, and browser-role EXECUTE revocation).
+- Fresh read-only Supabase catalog recheck on 2026-10-19 confirms the WINGO, MotoRace and Aviator settlement tables are still absent. `game_settings.enabled` is still true for all six keys: WINGO, K3, 5D, TRX, AVIATOR and MOTO.
+- Fresh privilege check confirms anonymous EXECUTE remains available for `public.nplus_phone_is_registered(text)`, and authenticated EXECUTE remains available for legacy `public.nplus_wallet_change(numeric,text,text,text)`. The `nplus_guard_profile_role_update` trigger is present on `public.profiles`.
+- Supabase Security Advisor again flags the public phone lookup and disabled leaked-password protection. It also lists authenticated EXECUTE on 14 SECURITY DEFINER functions (including Admin and wallet RPCs); this is an audit queue, not automatic proof that each function is exploitable. Inspect each function's internal role/ownership checks and remove grants that are not required.
+- No development branches currently exist in the Supabase project, and no paid branch was created. Do not create a billed development branch until the exact organization/cost quote is reviewed and explicitly approved.
+- This remains a release blocker. Do not merge/deploy the candidate or run either `POST_ROLLOUT_*` script yet. Required next gates are isolated backup restore, approved staging environment, real desktop/mobile Auth and Admin/game browser tests, payout/commission decisions, then coordinated SQL + matching frontend release.
+- No production SQL, auth settings, game toggles, or wallet balances were changed by this recheck.
