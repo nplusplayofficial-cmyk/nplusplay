@@ -635,14 +635,18 @@ try {
   }
 
   const preflight = fs.readFileSync(path.join(root, 'sql/READ_ONLY_NPLUS_PLAY_RELEASE_PREFLIGHT.sql'), 'utf8');
-  if (!/\\bWITH checks AS\\b/i.test(preflight) ||
+  const preflightLower = preflight.toLowerCase();
+  if (!preflightLower.includes('with target_admin_functions as') ||
       !preflight.includes('nplus_wallet_change(numeric,text,text,text)') ||
       !preflight.includes('nplus_phone_is_registered(text)') ||
       !preflight.includes('nplus_wingo_demo_rounds')) {
     fail('Read-only release preflight is missing required security/schema checks');
   }
-  if (/^\\s*(?:insert|update|delete|alter|drop|create|grant|revoke|truncate|begin|commit)\\b/im.test(preflight)) {
-    fail('Release preflight must remain read-only; do not include schema/data/grant mutations');
+  const mutationPrefixes = ['insert ', 'update ', 'delete ', 'alter ', 'drop ', 'create ', 'grant ', 'revoke ', 'truncate ', 'begin;', 'commit;'];
+  const mutationLine = preflight.split('\n').map(line => line.trim().toLowerCase())
+    .find(line => line && !line.startsWith('--') && mutationPrefixes.some(prefix => line.startsWith(prefix)));
+  if (mutationLine) {
+    fail('Release preflight must remain read-only; found a possible mutation statement: ' + mutationLine);
   }
 } catch (e) {
   fail('Admin NULL-profile static contract failed: ' + e.message);
