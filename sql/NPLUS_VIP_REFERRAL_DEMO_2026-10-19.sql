@@ -954,6 +954,8 @@ BEGIN
     SELECT jsonb_agg(jsonb_build_object(
       'referrer_uid', inviter.uid,
       'referred_uid', invitee.uid,
+      'referred_user_id', r.referred_user_id,
+      'referrer_user_id', r.user_id,
       'referral_code', r.referral_code,
       'status', r.status,
       'reward_points', coalesce((SELECT sum(c.reward_amount) FROM public.nplus_demo_referral_bonus_claims c WHERE c.user_id = r.user_id), 0),
