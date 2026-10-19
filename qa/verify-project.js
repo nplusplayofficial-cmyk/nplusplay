@@ -619,7 +619,7 @@ try {
       fail('NULL-safe Admin guard migration missing function: ' + signature);
     }
   }
-  const roleGuards = [...adminGuardSql.matchAll(/if coalesce\\(v_role, ''\\) <> 'admin' then/g)].length;
+  const roleGuards = adminGuardSql.split("if coalesce(v_role, '') <> 'admin' then").length - 1;
   if (roleGuards !== 9) fail('Admin null-profile migration must have 9 NULL-safe role guards; found ' + roleGuards);
 
   const guardTest = fs.readFileSync(path.join(root, 'qa/test-admin-null-profile-guard.sql'), 'utf8');
