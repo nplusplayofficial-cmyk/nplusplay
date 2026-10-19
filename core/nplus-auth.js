@@ -252,12 +252,13 @@
     return { email: cleanEmail };
   }
 
-  async function verifySignupEmailOtp({ email, token, mobile, name = "" }) {
+  async function verifySignupEmailOtp({ email, token, mobile, name = "", referralCode = "" }) {
     if (!client) throw new Error("Supabase is not configured.");
 
     const cleanEmail = normalizeEmail(email);
     const cleanMobile = normalizeMobile(mobile);
     const cleanName = String(name || "").trim();
+    const cleanReferralCode = String(referralCode || "").trim().toUpperCase();
     const code = String(token || "").trim();
 
     if (!/^\d{6}$/.test(code)) throw new Error("Enter the 6-digit email verification code.");
@@ -290,8 +291,31 @@
       throw new Error("Email verified, but the profile email/mobile does not match. Check the database profile trigger before logging in.");
     }
 
+    let referralResult = null;
+    if (cleanReferralCode) {
+      try {
+        const { data: result, error: referralError } = await client.rpc(
+          "nplus_demo_referral_apply",
+          { p_code: cleanReferralCode }
+        );
+        if (referralError) throw referralError;
+        referralResult = result;
+      } catch (referralError) {
+        // Signup was verified. Referral failures must not invalidate the new account.
+        console.warn("N+ PLAY referral attribution skipped:", referralError);
+        referralResult = {
+          success: false,
+          reason: "unavailable",
+          message: "Referral service is not available yet."
+        };
+      }
+    }
+
     markActivity();
-    return { user, session: data.session, email: cleanEmail, mobile: cleanMobile, name: cleanName };
+    return {
+      user, session: data.session, email: cleanEmail, mobile: cleanMobile,
+      name: cleanName, referralResult
+    };
   }
 
   // -----------------------------
