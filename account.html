@@ -59,6 +59,13 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 .wallet-action .arrow{font-size:.75rem;color:#686b64}
 @media(max-width:460px){.wallet-actions{grid-template-columns:1fr}}
 
+ .pref-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px;border-radius:12px;background:rgba(255,255,255,.03);font-size:.58rem;color:#e8e1d1}
+ .pref-row input{width:18px;height:18px;accent-color:#c9a55b;flex:0 0 auto}
+ #notifyMessage,#appearanceMessage,#profileMessage,#securityMessage{overflow-wrap:anywhere}
+ body[data-layout="compact"] .section{margin-top:14px}
+ body[data-layout="compact"] .profile{padding:15px}
+ body[data-layout="compact"] .quick a{padding:9px 6px}
+ body[data-reduce-motion="true"] *,body[data-reduce-motion="true"] *::before,body[data-reduce-motion="true"] *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 </style>
 </head>
 <body>
@@ -71,7 +78,7 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 <section class="profile">
  <div class="profile-row">
   <div class="avatar">N+</div>
-  <div class="profile-info"><h1>Welcome to N+ PLAY</h1><p>Your gaming profile & preferences</p><span class="verified">● ACCOUNT ACTIVE</span></div>
+  <div class="profile-info"><h1 id="accountGreeting">Welcome to N+ PLAY</h1><p>Your gaming profile & preferences</p><span class="verified" id="accountProfileStatus">CHECKING ACCOUNT…</span></div>
   <button class="profile-edit" id="editProfile">✎</button>
  </div>
  <div class="profile-balance"><div><small>AVAILABLE BALANCE</small><strong id="balance">₹1,000.00</strong></div><div class="sync"><i></i><span id="syncText">SYNCED</span></div></div>
@@ -145,13 +152,13 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 </nav>
 
 <div class="toast" id="toast"></div>
-<div class="modal" id="profileModal"><div class="modal-card"><button class="close">×</button><h2>Profile</h2><p>Your N+ PLAY profile is ready for the next platform modules.</p><div class="modal-list"><div>Account <b>Active</b></div><div>Profile ID <b>NPLUS-PLAYER</b></div><div>Balance sync <b>Live</b></div></div><button class="done">DONE</button></div></div>
-<div class="modal" id="securityModal"><div class="modal-card"><button class="close">×</button><h2>Security</h2><p>Keep your account protected with secure credentials and trusted devices.</p><div class="modal-list"><div>Session status <b>Active</b></div><div>Device check <b>Protected</b></div><div>Security status <b>Good</b></div></div><button class="done">DONE</button></div></div>
-<div class="modal" id="notifyModal"><div class="modal-card"><button class="close">×</button><h2>Notifications</h2><p>Notification controls will manage game results, rewards and platform updates.</p><div class="modal-list"><div>Game results <b>ON</b></div><div>Rewards <b>ON</b></div><div>Promotions <b>ON</b></div></div><button class="done">DONE</button></div></div>
-<div class="modal" id="appearanceModal"><div class="modal-card"><button class="close">×</button><h2>App Preferences</h2><p>Your current N+ PLAY experience uses the dark premium interface.</p><div class="modal-list"><div>Theme <b>Dark Premium</b></div><div>Interface <b>Compact</b></div><div>Motion <b>Standard</b></div></div><button class="done">DONE</button></div></div>
+<div class="modal" id="profileModal"><div class="modal-card"><button class="close">×</button><h2>Profile details</h2><p id="profileMessage">Loading your signed-in profile from Supabase…</p><div class="modal-list"><div>Email <b id="profileEmail">—</b></div><div>Mobile <b id="profilePhone">—</b></div><div>Display name <b id="profileName">—</b></div><div>Account ID <b id="profileUid">—</b></div><div>Role <b id="profileRole">—</b></div><div>Joined <b id="profileCreated">—</b></div></div><button class="done" id="refreshProfile">REFRESH PROFILE</button></div></div>
+<div class="modal" id="securityModal"><div class="modal-card"><button class="close">×</button><h2>Security & session</h2><p id="securityMessage">Checking the current Supabase session…</p><div class="modal-list"><div>Session <b id="securitySession">—</b></div><div>Email verification <b id="securityEmail">—</b></div><div>Last sign-in <b id="securityLastSignIn">—</b></div><div>Session expiry <b id="securityExpiry">—</b></div></div><button class="done" id="signOutButton" type="button">SIGN OUT THIS SESSION</button></div></div>
+<div class="modal" id="notifyModal"><div class="modal-card"><button class="close">×</button><h2>Notification preferences</h2><p>These preferences are saved on this browser. Email/push delivery is not connected yet.</p><div class="modal-list"><label class="pref-row"><span>Game results</span><input type="checkbox" id="notifyGameResults"></label><label class="pref-row"><span>Rewards</span><input type="checkbox" id="notifyRewards"></label><label class="pref-row"><span>Promotions</span><input type="checkbox" id="notifyPromotions"></label></div><p id="notifyMessage" role="status">Changes save automatically on this browser.</p><button class="done">DONE</button></div></div>
+<div class="modal" id="appearanceModal"><div class="modal-card"><button class="close">×</button><h2>App preferences</h2><p>Changes affect the layout on this browser; the N+ PLAY dark-and-gold brand theme stays the same.</p><div class="modal-list"><label class="pref-row"><span>Compact layout</span><input type="checkbox" id="prefCompact"></label><label class="pref-row"><span>Reduce motion</span><input type="checkbox" id="prefReduceMotion"></label></div><p id="appearanceMessage" role="status">Changes save automatically on this browser.</p><button class="done">DONE</button></div></div>
 <div class="modal" id="helpModal"><div class="modal-card"><button class="close">×</button><h2>Help Center</h2><p>Use Activity for settled game records, WINGO for supported game rounds, and the account page for platform preferences.</p><button class="done">DONE</button></div></div>
 <div class="modal" id="rulesModal"><div class="modal-card"><button class="close">×</button><h2>Game Rules</h2><p>Game-specific rules are available from each supported game page. Always review the rules before using a game.</p><button class="done">DONE</button></div></div>
-<div class="modal" id="termsModal"><div class="modal-card"><button class="close">×</button><h2>Terms & Privacy</h2><p>Platform terms and privacy controls can be connected here when the full account backend is introduced.</p><button class="done">DONE</button></div></div>
+<div class="modal" id="termsModal"><div class="modal-card"><button class="close">×</button><h2>Terms & Privacy</h2><p>The final Terms of Service and Privacy Notice must be published and legally reviewed before launch. Account data export and deletion controls are not available in this screen yet.</p><button class="done">DONE</button></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/nplus-config.js?v=20261007"></script>
@@ -290,12 +297,150 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
  }
 
  async function render(){
+   void loadProfile();
    void renderStats();
    await renderWallet();
  }
 
+ const LOCAL_PREFS_KEY="nplus_account_preferences_v1";
+ const DEFAULT_PREFS={
+   notifications:{gameResults:true,rewards:true,promotions:false},
+   appearance:{compact:false,reduceMotion:false}
+ };
+
+ function readPreferences(){
+   try{
+     const raw=localStorage.getItem(LOCAL_PREFS_KEY);
+     if(!raw) return JSON.parse(JSON.stringify(DEFAULT_PREFS));
+     const parsed=JSON.parse(raw);
+     return {
+       notifications:{...DEFAULT_PREFS.notifications,...(parsed.notifications||{})},
+       appearance:{...DEFAULT_PREFS.appearance,...(parsed.appearance||{})}
+     };
+   }catch(err){
+     console.warn("Could not read local account preferences:",err);
+     return JSON.parse(JSON.stringify(DEFAULT_PREFS));
+   }
+ }
+
+ function applyAppearance(prefs){
+   document.body.dataset.layout=prefs.appearance.compact?"compact":"standard";
+   document.body.dataset.reduceMotion=String(Boolean(prefs.appearance.reduceMotion));
+ }
+
+ function savePreferences(prefs,area){
+   const target=area==="notifications"?document.querySelector("#notifyMessage"):document.querySelector("#appearanceMessage");
+   try{
+     localStorage.setItem(LOCAL_PREFS_KEY,JSON.stringify(prefs));
+     applyAppearance(prefs);
+     if(target) target.textContent="Saved on this browser at "+new Date().toLocaleTimeString();
+   }catch(err){
+     console.error("Could not save account preferences:",err);
+     if(target) target.textContent="Unable to save preferences in this browser. Check browser storage settings.";
+   }
+ }
+
+ function renderPreferenceControls(){
+   const prefs=readPreferences();
+   document.querySelector("#notifyGameResults").checked=Boolean(prefs.notifications.gameResults);
+   document.querySelector("#notifyRewards").checked=Boolean(prefs.notifications.rewards);
+   document.querySelector("#notifyPromotions").checked=Boolean(prefs.notifications.promotions);
+   document.querySelector("#prefCompact").checked=Boolean(prefs.appearance.compact);
+   document.querySelector("#prefReduceMotion").checked=Boolean(prefs.appearance.reduceMotion);
+   applyAppearance(prefs);
+ }
+
+ function bindPreferenceControls(){
+   for(const [id,key] of [["notifyGameResults","gameResults"],["notifyRewards","rewards"],["notifyPromotions","promotions"]]){
+     document.querySelector("#"+id).addEventListener("change",event=>{
+       const prefs=readPreferences();
+       prefs.notifications[key]=event.target.checked;
+       savePreferences(prefs,"notifications");
+     });
+   }
+   for(const [id,key] of [["prefCompact","compact"],["prefReduceMotion","reduceMotion"]]){
+     document.querySelector("#"+id).addEventListener("change",event=>{
+       const prefs=readPreferences();
+       prefs.appearance[key]=event.target.checked;
+       savePreferences(prefs,"appearance");
+     });
+   }
+ }
+
+ async function loadProfile(){
+   const message=document.querySelector("#profileMessage");
+   const status=document.querySelector("#accountProfileStatus");
+   message.textContent="Loading your signed-in profile from Supabase…";
+   status.textContent="CHECKING ACCOUNT…";
+   try{
+     const client=window.NPlusAuth?.client;
+     if(!client) throw new Error("Account service is unavailable.");
+     const {data:userData,error:userError}=await client.auth.getUser();
+     const user=userData?.user;
+     if(userError||!user?.id) throw new Error("No signed-in user was returned.");
+     const {data:profile,error:profileError}=await client
+       .from("profiles")
+       .select("uid,display_name,email,phone,role,created_at")
+       .eq("id",user.id)
+       .maybeSingle();
+     if(profileError) throw profileError;
+     if(!profile) throw new Error("Your account profile row was not found.");
+     const name=String(profile.display_name||"").trim();
+     document.querySelector("#accountGreeting").textContent=name?("Welcome, "+name):"Welcome to N+ PLAY";
+     document.querySelector("#profileEmail").textContent=String(profile.email||user.email||"Not set");
+     document.querySelector("#profilePhone").textContent=String(profile.phone||"Not set");
+     document.querySelector("#profileName").textContent=name||"Not set";
+     document.querySelector("#profileUid").textContent=String(profile.uid||user.id);
+     document.querySelector("#profileRole").textContent=String(profile.role||"user");
+     document.querySelector("#profileCreated").textContent=profile.created_at?new Date(profile.created_at).toLocaleDateString():"Not available";
+     message.textContent="Profile loaded from your signed-in account.";
+     status.textContent="PROFILE LOADED";
+   }catch(err){
+     console.error("Account profile load failed:",err);
+     message.textContent=err.message||"Could not load your account profile.";
+     status.textContent="PROFILE UNAVAILABLE";
+   }
+ }
+
+ async function loadSecurity(){
+   const message=document.querySelector("#securityMessage");
+   message.textContent="Checking the current Supabase session…";
+   try{
+     const client=window.NPlusAuth?.client;
+     if(!client) throw new Error("Authentication service is unavailable.");
+     const [{data:sessionData,error:sessionError},{data:userData,error:userError}]=await Promise.all([
+       client.auth.getSession(),client.auth.getUser()
+     ]);
+     if(sessionError) throw sessionError;
+     if(userError) throw userError;
+     const session=sessionData?.session,user=userData?.user;
+     if(!session||!user?.id){
+       document.querySelector("#securitySession").textContent="NO ACTIVE SESSION";
+       document.querySelector("#securityEmail").textContent="—";
+       document.querySelector("#securityLastSignIn").textContent="—";
+       document.querySelector("#securityExpiry").textContent="—";
+       message.textContent="No valid sign-in session is available.";
+       return;
+     }
+     document.querySelector("#securitySession").textContent="SIGNED IN";
+     document.querySelector("#securityEmail").textContent=user.email_confirmed_at?"VERIFIED":"NOT VERIFIED";
+     document.querySelector("#securityLastSignIn").textContent=user.last_sign_in_at?new Date(user.last_sign_in_at).toLocaleString():"Not available";
+     document.querySelector("#securityExpiry").textContent=session.expires_at?new Date(session.expires_at*1000).toLocaleString():"Managed by Supabase";
+     message.textContent="Session details read from Supabase. Passwords and secret tokens are never displayed here.";
+   }catch(err){
+     console.error("Account security status failed:",err);
+     message.textContent=err.message||"Could not check the current session.";
+     document.querySelector("#securitySession").textContent="UNAVAILABLE";
+   }
+ }
+
  document.querySelectorAll("[data-modal]").forEach(b=>{
-   b.onclick=()=>document.getElementById(b.dataset.modal).classList.add("show");
+   b.onclick=()=>{
+     document.getElementById(b.dataset.modal).classList.add("show");
+     if(b.dataset.modal==="profileModal") void loadProfile();
+     if(b.dataset.modal==="securityModal") void loadSecurity();
+     if(b.dataset.modal==="notifyModal"||b.dataset.modal==="appearanceModal") renderPreferenceControls();
+   };
  });
 
  document.querySelectorAll(".modal").forEach(m=>{
@@ -308,7 +453,22 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 
  document.querySelector("#editProfile").onclick=()=>{
    document.getElementById("profileModal").classList.add("show");
+   void loadProfile();
  };
+ document.querySelector("#refreshProfile").onclick=()=>void loadProfile();
+ document.querySelector("#signOutButton").onclick=async()=>{
+   if(!window.confirm("Sign out of N+ PLAY on this browser?")) return;
+   document.querySelector("#securityMessage").textContent="Signing out…";
+   try{
+     await window.NPlusAuth.signOut("user_requested");
+   }catch(err){
+     console.error("Sign out failed:",err);
+     document.querySelector("#securityMessage").textContent="Could not sign out. Please try again.";
+   }
+ };
+
+ bindPreferenceControls();
+ renderPreferenceControls();
 
  window.addEventListener("nplus:wallet-change",()=>{
    renderWallet();
