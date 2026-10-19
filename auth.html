@@ -483,6 +483,19 @@
 
           </div>
 
+          <div class="field">
+            <label for="signupReferralCode">REFERRAL CODE (OPTIONAL)</label>
+            <input
+              id="signupReferralCode"
+              type="text"
+              maxlength="16"
+              placeholder="Friend's unique code"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+            >
+            <small class="field-hint">Demo only: referral rewards are virtual credits with no cash value.</small>
+          </div>
 
           <div class="field">
 
@@ -1023,7 +1036,8 @@
               if (password.length < 6) throw new Error("Password must be at least 6 characters.");
               if (password !== confirm) throw new Error("Passwords do not match.");
 
-              pendingSignup = { name, email, mobile, password };
+              const referralCode = $("signupReferralCode").value.trim().toUpperCase();
+              pendingSignup = { name, email, mobile, password, referralCode };
               await NPlusAuth.sendSignupOtp(pendingSignup);
 
               stage = "otp";
@@ -1036,14 +1050,25 @@
             }
 
             const token = $("signupOtp").value.trim();
-            await NPlusAuth.verifySignupEmailOtp({
+            const verification = await NPlusAuth.verifySignupEmailOtp({
               email: pendingSignup.email,
               mobile: pendingSignup.mobile,
               name: pendingSignup.name,
+              referralCode: pendingSignup.referralCode,
               token
             });
-            setStatus("Email verified. Account created successfully. Opening N+ PLAY…", "ok");
-            setTimeout(() => location.replace(nextUrl()), 700);
+            let successMessage = "Email verified. Account created successfully.";
+            let redirectDelay = 700;
+            if (pendingSignup.referralCode) {
+              if (verification.referralResult?.success) {
+                successMessage += " Demo referral code attached.";
+              } else {
+                successMessage += " Account is ready, but the referral code was not applied.";
+                redirectDelay = 1800;
+              }
+            }
+            setStatus(successMessage + " Opening N+ PLAY…", "ok");
+            setTimeout(() => location.replace(nextUrl()), redirectDelay);
 
           }catch(error){
 
@@ -1091,7 +1116,13 @@
       // INITIAL MODE
       // =====================================
 
-      setMode("login");
+      const referralFromUrl = new URLSearchParams(location.search).get("ref");
+      if (referralFromUrl && $("signupReferralCode")) {
+        $("signupReferralCode").value = referralFromUrl.trim().toUpperCase().slice(0, 16);
+        setMode("signup");
+      } else {
+        setMode("login");
+      }
 
 
     })();
