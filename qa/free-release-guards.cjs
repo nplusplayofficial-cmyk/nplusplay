@@ -35,7 +35,7 @@ check(home.includes('VIRTUAL DEMO'), 'Homepage must disclose virtual demo mode.'
 check(home.includes('id="recent-demo-activity"') && home.includes('No verified recent activity yet'), 'Homepage must show an honest empty state until a server-backed activity feed is verified.');
 check(admin.includes('Local browser storage is a display cache, not a source of authority.'), 'Admin page must disclose localStorage is not authoritative.');
 check(/nplus_phone_is_registered/i.test(phoneSql) && /revoke/i.test(phoneSql), 'Phone enumeration revoke candidate missing.');
-check(/nplus_wallet_change/i.test(walletSql) && /revoke/i.test(walletSql), 'Legacy generic wallet mutation revoke candidate missing.');
+check(/create or replace function public\\.nplus_wallet_change/i.test(walletSql) && /p_delta > 0/i.test(walletSql) && /positive virtual credits must be awarded/i.test(walletSql) && /do not run before/i.test(walletSql), 'Wallet mutation candidate must reject direct positive credits and remain gated post-rollout.');
 check(/rpc\(['\"]nplus_aviator_demo_place_bet['\"]/.test(aviatorPage) && /rpc\(['\"]nplus_aviator_demo_cashout['\"]/.test(aviatorPage), 'Aviator page must submit bets and cash-outs through server RPCs.');
 check(!/p_crash_point\s*:/.test(aviatorPage), 'Aviator client must not submit a crash point override.');
 check(/No demo bets yet/.test(aviatorPage) && /No real-money payments, withdrawals or real-money winnings/.test(aviatorPage), 'Aviator page must retain honest demo-only disclosures and empty state.');
@@ -57,7 +57,7 @@ check(memberSql.includes('CREATE OR REPLACE FUNCTION public.nplus_demo_admin_qua
 check(memberSql.includes('CREATE OR REPLACE FUNCTION public.nplus_demo_claim_referral_bonus(p_invitee_count integer)') && memberSql.includes('PRIMARY KEY (user_id, invitee_count)'), 'Invitation tier claim must be server-side and idempotent.');
 check(memberSql.includes('CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_qualifications') && memberSql.includes('UNIQUE (referrer_user_id, referred_user_id)'), 'Verified invite qualification must be unique per inviter/invitee.');
 check(memberHtml.includes('nplus_demo_referral_bonus_dashboard') && memberHtml.includes('nplus_demo_claim_referral_bonus') && memberHtml.includes('id="tierRows"'), 'Member Centre must display server-backed screenshot tier progress and claim action.');
-check(memberHtml.includes('500 virtual demo points') && memberHtml.includes('virtual demo points only'), 'Member Centre must state the screenshot qualification threshold and demo-only unit.');
+check(memberHtml.includes('500 verified virtual demo points') && memberHtml.includes('virtual demo points only'), 'Member Centre must state the screenshot qualification threshold and demo-only unit.');
 check(adminVipHtml.includes('id="qualifyForm"') && adminVipHtml.includes('nplus_demo_admin_qualify_referral') && adminVipHtml.includes("v.referred_user_id||'UUID unavailable'"), 'N+ ADMIN must verify invitations using the protected RPC and actual profile UUID.');
 check(memberSmoke.includes('tier claims should award exactly 210 demo points once each') && memberSmoke.includes('repeat tier 1 claim must be rejected'), 'Disposable DB smoke must verify tier award values and replay protection.');
 
