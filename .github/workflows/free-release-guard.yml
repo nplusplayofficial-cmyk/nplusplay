@@ -1,0 +1,20 @@
+name: N+ Free Release Guard
+on:
+  push:
+    branches:
+      - feature/nplus-free-release-audit-2026-10-19
+  pull_request:
+    branches:
+      - feature/nplus-member-centre-demo-2026-10-19
+permissions:
+  contents: read
+jobs:
+  no-cost-release-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check virtual game and admin contracts
+        run: node qa/free-release-guard.cjs
