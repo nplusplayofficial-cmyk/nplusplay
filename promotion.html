@@ -137,7 +137,23 @@ a{text-decoration:none;color:inherit}button{font:inherit}
   border:0;background:linear-gradient(135deg,#f0dfb5,#c9a55b);
   color:#17150f;font-weight:900;border-radius:10px;padding:0 14px;cursor:pointer
 }
-.code button{font-size:.6rem}
+.code button{font-size:.6rem}.code button:disabled{opacity:.5;cursor:not-allowed}
+.referral-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:13px}
+.referral-stat{min-width:0;padding:11px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
+.referral-stat span{display:block;color:#797b73;font-size:.47rem;font-weight:850;letter-spacing:.45px}
+.referral-stat b{display:block;margin-top:6px;font-size:.85rem;color:var(--bronze2)}
+.referral-rules{margin-top:12px;padding:12px;border:1px solid rgba(201,165,91,.16);border-radius:12px;background:rgba(201,165,91,.035);color:#86877f;font-size:.55rem;line-height:1.6}
+.referral-rules b{display:block;margin-bottom:4px;color:#d8c28d}
+.referral-message{min-height:16px;margin-top:10px;color:#8ce4c3;font-size:.56rem;line-height:1.5;overflow-wrap:anywhere}
+.referral-message.error{color:#ff9da6}
+.referral-history{margin-top:10px;text-align:left;padding:12px}
+.referral-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.referral-row:last-child{border-bottom:0}
+.referral-row b{display:block;color:#dad7cc;font-size:.59rem}
+.referral-row small{display:block;margin-top:4px;color:#75776f;font-size:.5rem;line-height:1.4}
+.referral-row .rstatus{font-size:.52rem;font-weight:900;color:#cbb47e;text-align:right}
+.referral-row .rstatus.rewarded{color:#83e5c2}
+@media(max-width:360px){.referral-stats{grid-template-columns:1fr}.code button{padding:0 9px;font-size:.52rem}}
 
 .history{
   padding:20px 15px;border:1px solid var(--line);border-radius:18px;
@@ -218,7 +234,7 @@ a{text-decoration:none;color:inherit}button{font:inherit}
 <section class="hero">
   <div class="kicker">N+ PLAY • PROMOTION CENTER</div>
   <h1>Promotions & Referrals</h1>
-  <p>Only server-recorded campaign credits appear in history. Campaign claims and referral tracking are shown as active only when their backend is configured.</p>
+  <p>Track your unique demo referral code, invited signups and server-recorded virtual-credit rewards. Real-money payments and cash rewards are not part of this demo.</p>
   <div class="balance">
     <div><small>ACCOUNT BALANCE</small><strong id="heroBalance">₹—</strong></div>
     <div class="sync"><i></i> <span id="promoSync">CHECKING</span></div>
@@ -242,15 +258,34 @@ a{text-decoration:none;color:inherit}button{font:inherit}
 </section>
 
 <section class="section">
-  <div class="sectionhead"><h2>Referral Program</h2><span class="view">NOT CONFIGURED</span></div>
+  <div class="sectionhead"><h2>Refer & Earn · Demo</h2><span class="view" id="referralState">LOADING</span></div>
   <div class="invite">
     <div class="ref">
       <div class="reficon">↗</div>
       <div class="refbody">
-        <h3>Referral tracking is not enabled</h3>
-        <p>No shared invitation code is active. A unique code and reward tracking will be displayed only after the server-side referral workflow is implemented.</p>
+        <h3>Your personal referral code</h3>
+        <p>Each account gets its own code. Share the invite link with a friend to attribute their new signup.</p>
       </div>
     </div>
+    <div class="code">
+      <input id="referralCode" type="text" maxlength="16" value="" placeholder="Loading your code…" readonly aria-label="Your unique referral code">
+      <button id="copyReferralCode" type="button" disabled>COPY CODE</button>
+    </div>
+    <div class="code">
+      <input id="referralLink" type="url" value="" placeholder="Loading your invite link…" readonly aria-label="Your referral invitation link">
+      <button id="copyReferralLink" type="button" disabled>COPY LINK</button>
+    </div>
+    <div class="referral-stats">
+      <div class="referral-stat"><span>TOTAL INVITES</span><b id="referralTotal">—</b></div>
+      <div class="referral-stat"><span>PENDING</span><b id="referralPending">—</b></div>
+      <div class="referral-stat"><span>REWARDED</span><b id="referralRewarded">—</b></div>
+    </div>
+    <div class="referral-rules">
+      <b>Virtual-credit demo rule</b>
+      When a referred account has a demo-credit request of 200 credits or more approved by N+ ADMIN, the referrer receives 20 virtual demo credits exactly once. No real money is deposited or paid, and demo credits have no cash value.
+    </div>
+    <p id="referralMessage" class="referral-message" role="status" aria-live="polite">Loading referral details from Supabase…</p>
+    <div class="history referral-history" id="referralList">Loading your referrals…</div>
   </div>
 </section>
 
@@ -320,6 +355,88 @@ a{text-decoration:none;color:inherit}button{font:inherit}
     }).join("");
   }
 
+  const referralCodeInput = $("referralCode");
+  const referralLinkInput = $("referralLink");
+  const referralState = $("referralState");
+  const referralMessage = $("referralMessage");
+  const referralList = $("referralList");
+  let referralBusy = false;
+
+  function setReferralMessage(message, isError = false) {
+    referralMessage.textContent = message;
+    referralMessage.classList.toggle("error", Boolean(isError));
+  }
+
+  function renderReferrals(data) {
+    const code = String(data.referral_code || "");
+    if (!/^NP[A-Z0-9]{10}$/.test(code)) throw new Error("The server returned an invalid referral code.");
+    referralCodeInput.value = code;
+    const inviteUrl = new URL("auth.html", window.location.href);
+    inviteUrl.searchParams.set("ref", code);
+    referralLinkInput.value = inviteUrl.toString();
+    $("copyReferralCode").disabled = false;
+    $("copyReferralLink").disabled = false;
+    $("referralTotal").textContent = String(Number(data.total_referrals || 0));
+    $("referralPending").textContent = String(Number(data.pending_referrals || 0));
+    $("referralRewarded").textContent = String(Number(data.rewarded_referrals || 0));
+    referralState.textContent = "DEMO · SYNCED";
+    const rows = Array.isArray(data.referrals) ? data.referrals : [];
+    if (!rows.length) {
+      referralList.className = "history referral-history";
+      referralList.textContent = "No referred signups yet. Your invited members will appear here after their accounts are created.";
+    } else {
+      referralList.className = "history referral-history";
+      referralList.innerHTML = rows.slice(0,100).map(row => {
+        const status = String(row.status || "pending").toLowerCase();
+        const rewarded = status === "rewarded";
+        const name = esc(row.display_name || "N+ PLAY Member");
+        const date = row.created_at ? esc(new Date(row.created_at).toLocaleDateString("en-IN")) : "Date unavailable";
+        const reward = rewarded ? "20 virtual credits awarded" : "Waiting for 200-credit demo approval";
+        return '<div class="referral-row"><div><b>' + name + '</b><small>Joined ' + date + ' · ' + reward + '</small></div><div class="rstatus ' + (rewarded ? "rewarded" : "") + '">' + (rewarded ? "REWARDED" : "PENDING") + '</div></div>';
+      }).join("");
+    }
+    setReferralMessage("Demo only: 200+ virtual-credit request approved by Admin → 20 virtual credits for the referrer. No cash value.");
+  }
+
+  async function refreshReferrals() {
+    if (referralBusy) return;
+    referralBusy = true;
+    referralState.textContent = "SYNCING";
+    try {
+      const user = await window.NPlusAuth.requireAuth();
+      if (!user || !user.id) throw new Error("Sign in to view your referral code.");
+      const { data, error } = await window.NPlusAuth.client.rpc("nplus_demo_referral_dashboard");
+      if (error) throw error;
+      if (!data || data.success !== true) throw new Error("The referral service is not ready.");
+      renderReferrals(data);
+    } catch (error) {
+      console.error("N+ PLAY demo referral dashboard unavailable:", error);
+      referralState.textContent = "UNAVAILABLE";
+      $("copyReferralCode").disabled = true;
+      $("copyReferralLink").disabled = true;
+      referralList.className = "history referral-history";
+      referralList.textContent = "Referral tracking is unavailable until the matching local Supabase migration is applied.";
+      setReferralMessage("Unable to load your referral dashboard. Refresh after the demo-referral SQL migration is applied.", true);
+    } finally {
+      referralBusy = false;
+    }
+  }
+
+  async function copyReferralInput(input, label) {
+    if (!input.value) return;
+    try {
+      await navigator.clipboard.writeText(input.value);
+      setReferralMessage(label + " copied. Share it with a friend. Demo rewards have no cash value.");
+    } catch (error) {
+      input.focus();
+      input.select();
+      setReferralMessage("Clipboard permission was blocked. The " + label.toLowerCase() + " is selected; press Ctrl+C to copy it.");
+    }
+  }
+
+  $("copyReferralCode").addEventListener("click", () => copyReferralInput(referralCodeInput, "Referral code"));
+  $("copyReferralLink").addEventListener("click", () => copyReferralInput(referralLinkInput, "Invite link"));
+
   async function refresh() {
     if (busy) return;
     busy = true;
@@ -349,10 +466,11 @@ a{text-decoration:none;color:inherit}button{font:inherit}
   }
 
   window.addEventListener("focus", refresh);
-  window.addEventListener("pageshow", refresh);
+  window.addEventListener("pageshow", () => { refresh(); refreshReferrals(); });
   window.addEventListener("nplus:wallet-change", refresh);
-  document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden){refresh();refreshReferrals()}});
   refresh();
+  refreshReferrals();
 })();
 </script>
 </body>
