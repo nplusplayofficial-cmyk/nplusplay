@@ -1,4 +1,4 @@
-name: N+ Member Centre Static QA
+name: N+ Member Centre Static and Database QA
 
 on:
   pull_request:
@@ -12,6 +12,25 @@ permissions:
 jobs:
   member-centre-static-qa:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nplus_qa
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nplus_qa"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: nplus_qa
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,5 +38,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate member pages, links, and migration guardrails
+      - name: Static member centre QA
         run: node tests/nplus-member-centre-qa.mjs
+      - name: Prepare disposable Supabase-like PostgreSQL fixture
+        run: psql -v ON_ERROR_STOP=1 -f tests/nplus-member-centre-prelude.sql
+      - name: Apply member centre migration in disposable database only
+        run: psql -v ON_ERROR_STOP=1 -f sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql
+      - name: Exercise referral, reward, gift, safe, attendance and support RPCs
+        run: psql -v ON_ERROR_STOP=1 -f tests/nplus-member-centre-smoke.sql
