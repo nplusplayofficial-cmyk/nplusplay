@@ -1163,6 +1163,8 @@ GRANT EXECUTE ON FUNCTION public.nplus_demo_admin_support_update(uuid,text,text)
 
 COMMIT;
 
--- Before deployment: test signup/OTP/referral attribution, request approval and one-time award,
--- two simultaneous reward attempts, gift claim duplication, safe transfers and daily claim race
--- against LOCAL STAGING. Do not apply directly to production without a verified backup and review.
+-- Before deployment: test signup/OTP/referral attribution, Admin verification at the 500-point
+-- virtual-demo threshold, each screenshot-based tier amount, duplicate/concurrent tier claims,
+-- and verify that generic deposit_requests approvals never award a referral bonus. Also test gift
+-- claim duplication, safe transfers and daily claim race against LOCAL STAGING. Do not apply
+-- directly to production without a verified backup and review.
