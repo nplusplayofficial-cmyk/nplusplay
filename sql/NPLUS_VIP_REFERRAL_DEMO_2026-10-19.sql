@@ -46,6 +46,7 @@ ALTER TABLE public.nplus_demo_referrals
   ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
   ADD COLUMN IF NOT EXISTS qualified_at timestamptz,
   ADD COLUMN IF NOT EXISTS awarded_at timestamptz;
+ALTER TABLE public.nplus_demo_referrals ALTER COLUMN reward_amount SET DEFAULT 0.00;
 
 DO $preflight$
 BEGIN
