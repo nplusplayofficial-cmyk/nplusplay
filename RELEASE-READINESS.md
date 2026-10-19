@@ -74,3 +74,11 @@
 - Validate Auth, RLS/RPC permissions, deposits/admin workflows and real browser behavior against an isolated Supabase test project.
 - Review the final diff and workflow evidence before any production deployment. Keep PR #2 and the security branch unmerged until these gates pass.
 Production DB hardening was applied through Supabase and is recorded in `sql/NPLUS_PLAY_LIVE_HARDENING_2026-10-15.sql`. No code PR is merged to main.
+
+
+## Password recovery update — 2026-10-19
+- Replaced the fixed mobile OTP / localStorage password-reset prototype with a Supabase Auth email-recovery flow.
+- The request screen returns a generic message that does not confirm whether an email address is registered.
+- A valid recovery callback must establish a Supabase session before the page shows the password form; the password update uses Supabase Auth `updateUser({ password })`.
+- No fixed OTP, phone-number lookup, or browser-local-only password change is used.
+- Before deployment, configure the matching N+ PLAY recovery URL in Supabase Auth's redirect allowlist and test email delivery, link expiry, password update, logout and a fresh login. This has not been live-tested and no production settings were changed.
