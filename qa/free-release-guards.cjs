@@ -7,7 +7,8 @@ const root = path.resolve(__dirname, '..');
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 const failures = [];
 const warnings = [];
-const check = (ok, message) => { if (!ok) failures.push(message); };
+let checks = 0;
+const check = (ok, message) => { checks++; if (!ok) failures.push(message); };
 
 const admin = read('admin-games.html');
 const aviator = read('sql/NPLUS_PLAY_AVIATOR_RPC.sql');
@@ -15,6 +16,7 @@ const home = read('index.html');
 const statusSql = read('sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql');
 const phoneSql = read('sql/POST_ROLLOUT_REVOKE_PHONE_ENUMERATION.sql');
 const walletSql = read('sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql');
+const aviatorPage = read('aviator.html');
 
 check(admin.includes('nplus_set_game_status'), 'Admin game status must call server-side RPC.');
 check(admin.includes('HARD_PAUSED_GAMES'), 'Unsupported games must remain hard-paused in Admin UI.');
@@ -28,6 +30,9 @@ check(home.includes('id="recent-demo-activity"') && home.includes('No verified r
 check(admin.includes('Local browser storage is a display cache, not a source of authority.'), 'Admin page must disclose localStorage is not authoritative.');
 check(/nplus_phone_is_registered/i.test(phoneSql) && /revoke/i.test(phoneSql), 'Phone enumeration revoke candidate missing.');
 check(/nplus_wallet_change/i.test(walletSql) && /revoke/i.test(walletSql), 'Legacy generic wallet mutation revoke candidate missing.');
+check(/rpc\(['\"]nplus_aviator_demo_place_bet['\"]/.test(aviatorPage) && /rpc\(['\"]nplus_aviator_demo_cashout['\"]/.test(aviatorPage), 'Aviator page must submit bets and cash-outs through server RPCs.');
+check(!/p_crash_point\s*:/.test(aviatorPage), 'Aviator client must not submit a crash point override.');
+check(/No demo bets yet/.test(aviatorPage) && /No real-money payments, withdrawals or real-money winnings/.test(aviatorPage), 'Aviator page must retain honest demo-only disclosures and empty state.');
 
 if (admin.includes('nplus_admin_demo_controls')) warnings.push('Admin localStorage demo controls remain: trace all consumers; privileged/outcome-affecting state must be server-authoritative.');
 if (!/nplus_recent_demo_activity/.test(home)) warnings.push('No verified homepage recent-activity RPC contract; do not claim a genuine activity feed.');
@@ -35,4 +40,4 @@ if (!/cron\.schedule|pg_cron/i.test(aviator)) warnings.push('Aviator SQL does no
 for (const warning of warnings) console.warn('REVIEW: ' + warning);
 for (const failure of failures) console.error('FAIL: ' + failure);
 if (failures.length) process.exit(1);
-console.log('PASS: 12 static source-contract checks. ' + warnings.length + ' release blockers remain for human/runtime verification.');
+console.log('PASS: ' + checks + ' static source-contract checks. ' + warnings.length + ' release blockers remain for human/runtime verification.');
