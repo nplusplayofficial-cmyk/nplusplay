@@ -90,3 +90,12 @@ Production DB hardening was applied through Supabase and is recorded in `sql/NPL
 - Promotion page now reads account balance and promotion/referral ledger entries through Supabase. The shared `NPLUSPLAY` code and sample “active campaign” cards were removed. Campaign claiming and referral tracking remain unavailable until a server-side campaign/referral backend and Admin rules exist.
 - Static QA now guards the Activity, Bonus, Promotion, Account and password-recovery flows against the specific local/mock behaviors removed in this candidate.
 - These frontend changes are still an unmerged candidate. CI and local browser QA must pass at the latest candidate head. No production deployment or DB/settings changes were made for these page updates.
+
+
+## Demo referral system — 2026-10-19
+- Added unique stable referral codes for existing and newly created profiles, plus authenticated signup attribution after email OTP verification.
+- Promotion Center displays the signed-in account's code, an `auth.html?ref=CODE` invite link, and server-recorded invite/pending/rewarded counts. The signup page accepts the optional code and pre-fills it from shared links.
+- **Demo rule only:** when N+ ADMIN approves a referred account's `DEMO_CREDIT` request of 200 or more virtual credits, the referrer receives 20 virtual credits once. The database trigger updates the referral status, wallet and ledger in a single transaction and rejects self-referrals, invalid codes, attribution changes and duplicate rewards.
+- The migration revokes direct table access and exposes only authenticated security-definer RPCs. The reward has no cash value; no payment, real deposit or cash payout is performed.
+- Added `qa/test-demo-referrals.sql` and a tenth disposable PostgreSQL CI suite. It checks per-user unique codes, OTP-side attribution contract, invalid/self-referral behavior, immutable attribution, the 199-credit non-qualifying boundary, the 200-credit qualifying boundary, one-time reward and wallet/ledger consistency.
+- Candidate only: apply the matching local Supabase migration in isolated local staging, then test a second account and admin-approved virtual-credit request. No production SQL, settings or deployment changes were made.
