@@ -142,6 +142,18 @@ BEGIN
     RAISE EXCEPTION 'FAIL: tier 10 must not be claimable with only 3 qualified invites: %',v_result;
   END IF;
 
+  -- Screenshot rule: a tier cannot be claimed outside the promotion period.
+  UPDATE public.nplus_demo_referral_campaign
+  SET ends_at = now() - interval '1 minute'
+  WHERE campaign_id = 1;
+  v_result := public.nplus_demo_claim_referral_bonus(10);
+  IF coalesce((v_result->>'success')::boolean,true) IS TRUE OR v_result->>'reason' <> 'event_expired' THEN
+    RAISE EXCEPTION 'FAIL: invitation claim must be rejected after the event ends: %',v_result;
+  END IF;
+  UPDATE public.nplus_demo_referral_campaign
+  SET starts_at = '2000-01-01 00:00:00+00', ends_at = '2099-01-01 00:00:00+00'
+  WHERE campaign_id = 1;
+
   SELECT balance INTO v_balance FROM public.demo_wallets WHERE user_id=v_referrer;
   IF v_balance <> 318 THEN RAISE EXCEPTION 'FAIL: tier claims should award exactly 210 demo points once each; balance=%',v_balance; END IF;
   IF (SELECT count(*) FROM public.demo_wallet_transactions WHERE user_id=v_referrer AND type='REFERRAL_REWARD') <> 2 THEN
@@ -184,6 +196,12 @@ BEGIN
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: admin VIP dashboard failed: %',v_result; END IF;
   v_result := public.nplus_demo_admin_referrals(100);
   IF v_result IS NULL THEN RAISE EXCEPTION 'FAIL: admin referral report returned NULL'; END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM jsonb_array_elements(v_result) AS report_row
+    WHERE report_row->>'referred_user_id' = v_invitee::text
+  ) THEN
+    RAISE EXCEPTION 'FAIL: Admin referral report must expose the actual invited profile UUID for qualification.';
+  END IF;
   v_result := public.nplus_demo_admin_create_gift_code('QA-CAMPAIGN',100,2,NULL);
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE THEN RAISE EXCEPTION 'FAIL: admin gift-code creation failed: %',v_result; END IF;
   v_result := public.nplus_demo_admin_support_list(100);
