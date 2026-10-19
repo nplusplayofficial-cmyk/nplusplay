@@ -119,3 +119,10 @@ Production DB hardening was applied through Supabase and is recorded in `sql/NPL
 - Added candidate-only migration `sql/NPLUS_PLAY_ADMIN_NULL_PROFILE_GUARD_2026-10-19.sql`. It replaces the nine affected function definitions with NULL-safe `coalesce(v_role, '') <> 'admin'` checks and reapplies least-privilege EXECUTE grants (`authenticated` plus `service_role`; no `PUBLIC`/`anon` access). It does not edit wallet balances.
 - Added `qa/test-admin-null-profile-guard.sql` and wired it into CI. It creates an isolated Auth user without a profile row and checks that the relevant Admin RPCs fail closed, and verifies grants/guards on all nine signatures. The disposable PostgreSQL run at https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39249711367 completed all 12 suites successfully.
 - This migration has **not** been applied to live Supabase. It must be reviewed and tested on an isolated Supabase staging branch/database before a controlled production rollout. Continue to keep PR #3 draft/unmerged until the backup restore, staging/Auth tests, browser regressions, and coordinated release prerequisites pass.
+
+
+### Additional invariants checked
+
+- The null-profile regression now also checks that a valid Admin can still read the commission summary after the patch.
+- It snapshots `demo_wallets.balance` and per-user wallet-ledger row counts before the candidate migration and confirms they are unchanged afterward.
+- Latest full CI: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39250331072 — **all 12 disposable PostgreSQL suites passed** on commit `bbaa31554473bd4752076d602537a1e3eb01afc9`.
