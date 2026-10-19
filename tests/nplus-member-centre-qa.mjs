@@ -51,7 +51,8 @@ for (const file of requiredPages) {
 const sql = read("sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql");
 check(sql.includes("BEGIN;") && (sql.match(/COMMIT;/g) || []).length === 1, "Migration should be a single transaction.");
 for (const table of [
-  "nplus_demo_referral_codes", "nplus_demo_referrals", "nplus_demo_referral_tier_rules", "nplus_demo_vip_state",
+  "nplus_demo_referral_codes", "nplus_demo_referrals", "nplus_demo_referral_tier_rules",
+  "nplus_demo_referral_campaign", "nplus_demo_referral_qualifications", "nplus_demo_referral_bonus_claims", "nplus_demo_vip_state",
   "nplus_demo_safe_balances", "nplus_demo_safe_transfers", "nplus_demo_gift_codes",
   "nplus_demo_gift_claims", "nplus_demo_attendance_claims", "nplus_demo_support_requests"
 ]) {
@@ -68,10 +69,18 @@ check(!sql.includes("NEW.amount, 0) < 200"), "Legacy 200-point qualification rul
 check(!sql.includes("reward_amount numeric(12,2) NOT NULL DEFAULT 20.00"), "Legacy 20-point per-referral reward must be removed.");
 check(sql.includes("nplus_demo_referral_tier_rules"), "Migration must contain screenshot-based invitation tier rules.");
 for (const rule of ["(1, 500.00, 55.00)", "(3, 500.00, 155.00)", "(10, 500.00, 555.00)", "(100000, 500.00, 7555555.00)"]) check(sql.includes(rule), `Missing Daman screenshot invitation tier: ${rule}`);
+check(sql.includes("CREATE OR REPLACE FUNCTION public.nplus_demo_admin_qualify_referral("), "Admin qualification RPC must exist.");
+check(sql.includes("CREATE OR REPLACE FUNCTION public.nplus_demo_referral_bonus_dashboard()"), "Referral tier progress RPC must exist.");
+check(sql.includes("CREATE OR REPLACE FUNCTION public.nplus_demo_claim_referral_bonus(p_invitee_count integer)"), "Server-side invitation tier claim RPC must exist.");
+check(sql.includes("PRIMARY KEY (user_id, invitee_count)"), "Each invitation bonus tier must be claimable only once.");
+check(sql.includes("DROP TRIGGER IF EXISTS nplus_demo_referral_approved_request ON public.deposit_requests;"), "Legacy generic deposit-linked referral trigger must be removed.");
 const referralHtml = read("referral.html");
-check(referralHtml.includes("7,555,555"), "Referral UI must show the top invitation tier from the screenshot.");
-check(referralHtml.includes("500 virtual demo-credit qualification"), "Referral UI must show the screenshot-matched qualification amount as demo credits.");
-check(referralHtml.includes("legacy automatic 200/20 reward has been removed"), "Referral UI must not imply the old reward rule is active.");
+check(referralHtml.includes("nplus_demo_referral_bonus_dashboard"), "Referral UI must read server-side tier progress.");
+check(referralHtml.includes("nplus_demo_claim_referral_bonus"), "Referral UI must claim eligible tiers through the server.");
+check(referralHtml.includes('id="tierRows"'), "Referral UI must render the tier-progress table.");
+check(referralHtml.includes("virtual demo points only"), "Referral UI must label the tier bonuses as virtual demo points.");
+const adminVipHtml = read("admin-vip.html");
+check(adminVipHtml.includes('id="qualifyForm"') && adminVipHtml.includes("nplus_demo_admin_qualify_referral"), "Admin UI must use the protected referral qualification RPC.");
 check(sql.includes("ON CONFLICT (user_id, code) DO NOTHING"), "Gift redemption must prevent duplicate code claims.");
 check(sql.includes("PRIMARY KEY (user_id, claim_date)"), "Attendance must enforce one claim per account/day.");
 check(sql.includes("ON CONFLICT (user_id,claim_date) DO NOTHING"), "Attendance award must be duplicate-safe.");
