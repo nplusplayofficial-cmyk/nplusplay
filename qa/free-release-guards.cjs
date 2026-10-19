@@ -45,12 +45,13 @@ check(schedulerDoc.includes('BLOCKED — design only') && schedulerDoc.includes(
 check(schedulerDoc.includes('service-role credentials') && schedulerDoc.includes('disposable database'), 'Aviator scheduler design must document secret isolation and disposable-database testing.');
 check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_referred_uidx/i.test(memberSql), 'Referral system must enforce one inviter per referred account.');
 check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_request_uidx/i.test(memberSql), 'Referral rewards must uniquely bind a qualifying request.');
-check(/status = 'pending'[\s\S]*FOR UPDATE/i.test(memberSql), 'Referral award must lock a pending referral before settlement.');
-check(/NEW\.amount, 0\) < 200/i.test(memberSql) && /reward_amount numeric\(12,2\) NOT NULL DEFAULT 20\.00/i.test(memberSql), 'Referral qualification/reward must remain 200 virtual points / 20 virtual points.');
+check(/CREATE TABLE IF NOT EXISTS public\\.nplus_demo_referral_tier_rules/i.test(memberSql) && /\\(100000, 500\\.00, 7555555\\.00\\)/i.test(memberSql), 'Referral tiers must match the Daman screenshot tier table.');
+check(/DROP TRIGGER IF EXISTS nplus_demo_referral_approved_request ON public\\.deposit_requests/i.test(memberSql) && !/CREATE TRIGGER nplus_demo_referral_approved_request[\\s\\S]*?ON public\\.deposit_requests/i.test(memberSql), 'Generic deposit approvals must not trigger demo referral rewards.');
 check(/UNIQUE \(user_id, code\)/i.test(memberSql) && /ON CONFLICT \(user_id, code\) DO NOTHING/i.test(memberSql), 'Gift claims must be idempotent per user/code.');
 check(/PRIMARY KEY \(user_id, claim_date\)/i.test(memberSql) && /ON CONFLICT \(user_id,claim_date\) DO NOTHING/i.test(memberSql), 'Attendance must be one claim per account/day.');
 check(memberSmoke.includes('referral reward was duplicated') && memberSmoke.includes('Direct access to new feature tables'), 'Disposable DB smoke tests must cover duplicate referral rewards and private table access.');
-check(memberQa.includes('Referral award must enforce 200-point qualifying request.') && memberQa.includes('Admin RPCs must check the server-side admin role.'), 'Member Centre static QA must check referral qualification and server-side Admin guards.');
+check(memberQa.includes('Legacy 200-point qualification rule must be removed.') && memberQa.includes('Admin RPCs must check the server-side admin role.'), 'Member Centre static QA must reject the invented 200/20 rule and check server-side Admin guards.');
+check(memberHtml.includes('7,555,555') && memberHtml.includes('500 virtual demo-credit qualification'), 'Member Centre referral page must show screenshot-matched demo tiers.');
 
 
 if (admin.includes('nplus_admin_demo_controls')) warnings.push('Admin localStorage demo controls remain: trace all consumers; privileged/outcome-affecting state must be server-authoritative.');
