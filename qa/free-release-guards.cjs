@@ -24,6 +24,8 @@ check(aviator.includes('pg_advisory_xact_lock'), 'Aviator transaction-level roun
 check(/for update/i.test(aviator), 'Aviator row-locking contract missing.');
 check(aviator.includes('auth.uid()'), 'Aviator user-scoped authentication contract missing.');
 check(home.includes('VIRTUAL DEMO'), 'Homepage must disclose virtual demo mode.');
+check(home.includes('id="recent-demo-activity"') && home.includes('No verified recent activity yet'), 'Homepage must show an honest empty state until a server-backed activity feed is verified.');
+check(admin.includes('Local browser storage is a display cache, not a source of authority.'), 'Admin page must disclose localStorage is not authoritative.');
 check(/nplus_phone_is_registered/i.test(phoneSql) && /revoke/i.test(phoneSql), 'Phone enumeration revoke candidate missing.');
 check(/nplus_wallet_change/i.test(walletSql) && /revoke/i.test(walletSql), 'Legacy generic wallet mutation revoke candidate missing.');
 
@@ -33,4 +35,4 @@ if (!/cron\.schedule|pg_cron/i.test(aviator)) warnings.push('Aviator SQL does no
 for (const warning of warnings) console.warn('REVIEW: ' + warning);
 for (const failure of failures) console.error('FAIL: ' + failure);
 if (failures.length) process.exit(1);
-console.log('PASS: 10 static source-contract checks. ' + warnings.length + ' release blockers remain for human/runtime verification.');
+console.log('PASS: 12 static source-contract checks. ' + warnings.length + ' release blockers remain for human/runtime verification.');
