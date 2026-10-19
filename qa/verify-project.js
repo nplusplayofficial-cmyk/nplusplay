@@ -603,6 +603,41 @@ try {
 }
 
 try {
+  const adminGuardSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_ADMIN_NULL_PROFILE_GUARD_2026-10-19.sql'), 'utf8').toLowerCase();
+  const guardedFunctions = [
+    'public.nplus_admin_clear_wingo_manual',
+    'public.nplus_admin_commission_summary',
+    'public.nplus_admin_deposit_summary',
+    'public.nplus_admin_save_wingo_manual',
+    'public.nplus_admin_set_wingo_demo',
+    'public.nplus_admin_wingo_live_bets',
+    'public.nplus_admin_wingo_round_summary',
+    'public.nplus_set_game_status'
+  ];
+  for (const signature of guardedFunctions) {
+    if (!adminGuardSql.includes('create or replace function ' + signature)) {
+      fail('NULL-safe Admin guard migration missing function: ' + signature);
+    }
+  }
+  const roleGuards = [...adminGuardSql.matchAll(/if coalesce\\(v_role, ''\\) <> 'admin' then/g)].length;
+  if (roleGuards !== 9) fail('Admin null-profile migration must have 9 NULL-safe role guards; found ' + roleGuards);
+
+  const guardTest = fs.readFileSync(path.join(root, 'qa/test-admin-null-profile-guard.sql'), 'utf8');
+  if (!guardTest.includes('qa_null_guard_wallet_snapshot') ||
+      !guardTest.includes('qa_null_guard_ledger_snapshot') ||
+      !guardTest.includes('A valid admin was unexpectedly blocked') ||
+      !guardTest.includes('public.nplus_set_game_status')) {
+    fail('Admin NULL-profile regression must cover profile-missing denial, valid Admin access and unchanged wallet/ledger state');
+  }
+  const workflow = fs.readFileSync(path.join(root, '.github/workflows/nplus-play-qa.yml'), 'utf8');
+  if (!workflow.includes('qa/test-admin-null-profile-guard.sql')) {
+    fail('Admin NULL-profile regression must remain wired into CI');
+  }
+} catch (e) {
+  fail('Admin NULL-profile static contract failed: ' + e.message);
+}
+
+try {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
   for (const icon of manifest.icons || []) {
     const ref = cleanLocalRef(icon.src);
