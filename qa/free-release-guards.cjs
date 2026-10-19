@@ -45,11 +45,11 @@ check(schedulerDoc.includes('BLOCKED — design only') && schedulerDoc.includes(
 check(schedulerDoc.includes('service-role credentials') && schedulerDoc.includes('disposable database'), 'Aviator scheduler design must document secret isolation and disposable-database testing.');
 check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_referred_uidx/i.test(memberSql), 'Referral system must enforce one inviter per referred account.');
 check(/CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referrals_request_uidx/i.test(memberSql), 'Referral rewards must uniquely bind a qualifying request.');
-check(/CREATE TABLE IF NOT EXISTS public\\.nplus_demo_referral_tier_rules/i.test(memberSql) && /\\(100000, 500\\.00, 7555555\\.00\\)/i.test(memberSql), 'Referral tiers must match the Daman screenshot tier table.');
-check(/DROP TRIGGER IF EXISTS nplus_demo_referral_approved_request ON public\\.deposit_requests/i.test(memberSql) && !/CREATE TRIGGER nplus_demo_referral_approved_request[\\s\\S]*?ON public\\.deposit_requests/i.test(memberSql), 'Generic deposit approvals must not trigger demo referral rewards.');
+check(memberSql.includes('CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_tier_rules') && memberSql.includes('(100000, 500.00, 7555555.00)'), 'Referral tiers must match the Daman screenshot tier table.');
+check(memberSql.includes('DROP TRIGGER IF EXISTS nplus_demo_referral_approved_request ON public.deposit_requests') && !memberSql.includes('CREATE TRIGGER nplus_demo_referral_approved_request'), 'Generic deposit approvals must not trigger demo referral rewards.');
 check(/UNIQUE \(user_id, code\)/i.test(memberSql) && /ON CONFLICT \(user_id, code\) DO NOTHING/i.test(memberSql), 'Gift claims must be idempotent per user/code.');
 check(/PRIMARY KEY \(user_id, claim_date\)/i.test(memberSql) && /ON CONFLICT \(user_id,claim_date\) DO NOTHING/i.test(memberSql), 'Attendance must be one claim per account/day.');
-check(memberSmoke.includes('referral reward was duplicated') && memberSmoke.includes('Direct access to new feature tables'), 'Disposable DB smoke tests must cover duplicate referral rewards and private table access.');
+check(memberSmoke.includes('generic deposit request incorrectly triggered a referral reward') && memberSmoke.includes('Direct access to new feature tables'), 'Disposable DB smoke tests must block generic deposit-linked rewards and guard private table access.');
 check(memberQa.includes('Legacy 200-point qualification rule must be removed.') && memberQa.includes('Admin RPCs must check the server-side admin role.'), 'Member Centre static QA must reject the invented 200/20 rule and check server-side Admin guards.');
 check(memberHtml.includes('7,555,555') && memberHtml.includes('500 virtual demo-credit qualification'), 'Member Centre referral page must show screenshot-matched demo tiers.');
 
