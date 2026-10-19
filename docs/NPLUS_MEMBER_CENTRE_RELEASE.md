@@ -37,7 +37,7 @@
 - Attendance is limited to one claim per user per day and requires a previously admin-approved virtual-credit request.
 - Admin RPCs check the server-side admin role. New feature tables have RLS enabled and direct browser-role table access revoked.
 - The rebate page does not generate or claim credits until validated server-side game settlement exists.
-- Tier rows are displayed, but bonus qualification/claiming is deliberately disabled until a demo-only event source and idempotent claim RPC are implemented and tested. Generic `deposit_requests` approval no longer triggers referral rewards.
+- The invitation tiers now have a server-side progress RPC and exactly-once claim RPC. N+ ADMIN must verify trusted virtual-demo qualification of at least 500 points for each counted invite; a member can then claim each eligible tier once. Generic `deposit_requests` approval never triggers referral rewards. The RPC workflow is in draft and remains unapproved for release until disposable PostgreSQL and authenticated browser/RPC tests pass.
 - No real-money investment, deposit, cash withdrawal, interest or guaranteed-return promise is implemented in these member pages.
 
 ## Required isolated Supabase staging test
@@ -47,10 +47,10 @@
 3. Apply `sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql` to that branch only.
 4. Confirm every new table has RLS enabled, anonymous execution is revoked on feature RPCs, and only authenticated or server-admin RPC execution is available as intended.
 5. Register two test accounts. Confirm they receive different codes. Open the second account's invite URL and verify the signup code is prefilled.
-6. Confirm the invitation rules table matches the screenshot tier values. Verify that approval in generic `deposit_requests` does not issue an invitation bonus; a dedicated virtual-demo qualification/claim flow must be designed and tested before enabling claims.
+6. Confirm the tier table matches the screenshot values. Attach three invitees to one test inviter, verify each invite in N+ ADMIN with 500 virtual demo points, then claim tier 1 (55 points) and tier 3 (155 points). Confirm repeat claims fail without another ledger entry and tier 10 remains unavailable with only three qualified invitees. Also verify that generic `deposit_requests` approval does not award anything.
 7. Test invalid, self and already-attached referral codes; gift-code redeem and duplicate rejection; virtual-safe IN/OUT and insufficient-balance cases; first and duplicate attendance claims; support ticket submission and admin status update.
 8. Confirm a normal member cannot execute admin reports/support updates, directly read other users' private records, or modify feature tables.
-9. Test sign-up/OTP, refresh, logout, PWA install/update, narrow-mobile navigation and desktop layout in a real browser.
+9. Test sign-up/OTP, refresh, logout, PWA install/update, narrow-mobile navigation and desktop layout in a real browser. Confirm the referral dashboard/claim UI reads server status and never hardcodes a claimed result.
 10. Only after the above checks and review should the draft PR be marked ready. Keep the main/live site unchanged until the larger security rollout has separately cleared its release blockers.
 
 ## CI commands
