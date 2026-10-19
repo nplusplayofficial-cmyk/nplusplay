@@ -1,13 +1,16 @@
 name: N+ Member Centre Static and Database QA
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [release-candidate/security-rollout-2026-10-17]
-  push:
-    branches: [feature/nplus-member-centre-demo-2026-10-19]
 
 permissions:
   contents: read
+
+concurrency:
+  group: nplus-member-centre-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   member-centre-static-qa:
