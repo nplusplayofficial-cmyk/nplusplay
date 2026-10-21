@@ -13,6 +13,8 @@ const check = (ok, message) => { checks++; if (!ok) failures.push(message); };
 const admin = read('admin-games.html');
 const aviator = read('sql/NPLUS_PLAY_AVIATOR_RPC.sql');
 const home = read('index.html');
+const recentActivityJs = read('core/recent-demo-activity.js');
+const recentActivitySql = read('sql/NPLUS_PLAY_RECENT_DEMO_ACTIVITY.sql');
 const statusSql = read('sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql');
 const phoneSql = read('sql/POST_ROLLOUT_REVOKE_PHONE_ENUMERATION.sql');
 const walletSql = read('sql/POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql');
@@ -33,6 +35,19 @@ check(/for update/i.test(aviator), 'Aviator row-locking contract missing.');
 check(aviator.includes('auth.uid()'), 'Aviator user-scoped authentication contract missing.');
 check(home.includes('VIRTUAL DEMO'), 'Homepage must disclose virtual demo mode.');
 check(home.includes('id="recent-demo-activity"') && home.includes('No verified recent activity yet'), 'Homepage must show an honest empty state until a server-backed activity feed is verified.');
+check(home.includes('id="recentDemoActivityRows"') && home.includes('core/recent-demo-activity.js'), 'Homepage must mount the recent demo activity widget.');
+check(/client\.rpc\(\s*["']nplus_recent_demo_activity["']/.test(recentActivityJs), 'Homepage activity widget must call the recent activity RPC.');
+check(
+  /create or replace function public\.nplus_recent_demo_activity\s*\(/i.test(recentActivitySql) &&
+  /returns table\s*\(\s*game_key text,\s*activity_count bigint\s*\)/i.test(recentActivitySql) &&
+  recentActivitySql.includes('public.nplus_wingo_demo_bets') &&
+  recentActivitySql.includes('public.nplus_moto_demo_bets') &&
+  recentActivitySql.includes('public.nplus_aviator_demo_bets') &&
+  /security definer/i.test(recentActivitySql) &&
+  /revoke all on function public\.nplus_recent_demo_activity\(integer\)\s+from public, anon, authenticated/i.test(recentActivitySql) &&
+  /grant execute on function public\.nplus_recent_demo_activity\(integer\)\s+to anon, authenticated/i.test(recentActivitySql),
+  'Recent-activity SQL must aggregate the three bet tables and restrict function grants.'
+);
 check(!admin.includes('nplus_admin_demo_controls') && !/localStorage/.test(admin) && admin.includes('Admin demo display state is temporary and never controls game outcomes.'), 'Admin demo state must remain in-memory display-only; never store privileged/outcome-affecting controls in browser storage.');
 check(/nplus_phone_is_registered/i.test(phoneSql) && /revoke/i.test(phoneSql), 'Phone enumeration revoke candidate missing.');
 check(walletSql.includes('create or replace function public.nplus_wallet_change(') && walletSql.includes('p_delta > 0') && walletSql.toLowerCase().includes('positive virtual credits must be awarded') && walletSql.toLowerCase().includes('do not run before'), 'Wallet mutation candidate must reject direct positive credits and remain gated post-rollout.');
@@ -64,8 +79,38 @@ check(memberSmoke.includes('invitation claim must be rejected after the event en
 
 
 if (admin.includes('nplus_admin_demo_controls')) warnings.push('Admin localStorage demo controls remain: trace all consumers; privileged/outcome-affecting state must be server-authoritative.');
-if (!/nplus_recent_demo_activity/.test(home)) warnings.push('No verified homepage recent-activity RPC contract; do not claim a genuine activity feed.');
-if (!/cron\.schedule|pg_cron/i.test(aviator)) warnings.push('Aviator SQL does not declare a persistent scheduler; browser-independent round progression remains unverified.');
+const activityMigrationPath = path.join(root, 'supabase/migrations/20261021182728_nplus_recent_demo_activity.sql');
+const activityMigration = fs.existsSync(activityMigrationPath)
+  ? fs.readFileSync(activityMigrationPath, 'utf8')
+  : '';
+
+if (
+  !home.includes('core/recent-demo-activity.js') ||
+  !/client\.rpc\(\s*["']nplus_recent_demo_activity["']/.test(recentActivityJs) ||
+  !/create or replace function public\.nplus_recent_demo_activity\s*\(/i.test(recentActivitySql) ||
+  !/create or replace function public\.nplus_recent_demo_activity\s*\(/i.test(activityMigration) ||
+  !/security definer/i.test(activityMigration) ||
+  !/grant execute on function public\.nplus_recent_demo_activity\(integer\)\s+to anon, authenticated/i.test(activityMigration)
+) {
+  warnings.push('Recent-activity source or versioned migration is incomplete; do not claim a genuine activity feed.');
+} else {
+  warnings.push('Recent-activity migration is present; verify target Supabase deployment and live browser rendering before release.');
+}
+const schedulerMigrationPath = path.join(root, 'supabase/migrations/20261021182724_nplus_aviator_persistent_scheduler.sql');
+const schedulerMigration = fs.existsSync(schedulerMigrationPath)
+  ? fs.readFileSync(schedulerMigrationPath, 'utf8')
+  : '';
+
+if (
+  !/create extension if not exists pg_cron/i.test(schedulerMigration) ||
+  !/cron\.schedule\s*\(/i.test(schedulerMigration) ||
+  !/nplus-aviator-worker/.test(schedulerMigration) ||
+  !/nplus_aviator_demo_worker_tick/.test(schedulerMigration)
+) {
+  warnings.push('Aviator persistent scheduler migration is missing or incomplete; do not release.');
+} else {
+  warnings.push('Aviator scheduler migration is present; verify target deployment and monitor cron runs and worker heartbeat before release.');
+}
 for (const warning of warnings) console.warn('REVIEW: ' + warning);
 for (const failure of failures) console.error('FAIL: ' + failure);
 if (failures.length) process.exit(1);

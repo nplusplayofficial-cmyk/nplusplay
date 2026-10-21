@@ -17,8 +17,8 @@ on conflict (game_key) do nothing;
 
 do $tests$
 declare
-  v_user uuid := '33333333-3333-4333-8333-333333333333';
-  v_request uuid := '44444444-4444-4444-8444-444444444444';
+  v_user uuid := gen_random_uuid();
+  v_request uuid := gen_random_uuid();
   v_round jsonb;
   v_placed jsonb;
   v_retry jsonb;
@@ -33,7 +33,7 @@ declare
   v_before_count integer;
   v_after_count integer;
 begin
-  insert into auth.users(id,email) values(v_user,'moto-qa@example.invalid');
+  insert into auth.users(id,email) values(v_user, 'moto-' || replace(v_user::text, '-', '') || '@example.invalid');
   insert into public.demo_wallets(user_id,balance) values(v_user,108.00);
   perform set_config('request.jwt.claim.sub',v_user::text,true);
 
@@ -120,8 +120,18 @@ begin
     or v_bets->0->>'period' is null then raise exception 'MotoRace server bet recovery failed.'; end if;
 
   v_history := public.nplus_moto_demo_history(100);
-  if jsonb_array_length(v_history)<>1 or jsonb_array_length(v_history->0->'outcome')<>10 then
-    raise exception 'MotoRace server history failed.';
+  if not exists (
+    select 1
+    from jsonb_array_elements(v_history) as h(item)
+    where (h.item->>'round_index')::bigint = v_idx
+      and h.item->>'status' = 'settled'
+      and case
+        when jsonb_typeof(h.item->'outcome') = 'array'
+          then jsonb_array_length(h.item->'outcome') = 10
+        else false
+      end
+  ) then
+    raise exception 'MotoRace server history failed for test round %.', v_idx;
   end if;
 
   if has_table_privilege('anon','public.nplus_moto_demo_bets','SELECT')

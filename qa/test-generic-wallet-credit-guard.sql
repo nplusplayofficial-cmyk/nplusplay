@@ -3,12 +3,12 @@
 
 do $tests$
 declare
- u uuid:='99999999-9999-4999-8999-999999999999';
+ u uuid:=gen_random_uuid();
  result jsonb;
  bal numeric(12,2);
  bet_count integer;
 begin
- insert into auth.users(id,email) values(u,'wallet-guard-qa@example.invalid');
+ insert into auth.users(id,email) values(u,'wallet-' || replace(u::text, '-', '') || '@example.invalid');
  insert into public.demo_wallets(user_id,balance) values(u,108.00);
  perform set_config('request.jwt.claim.sub',u::text,true);
 

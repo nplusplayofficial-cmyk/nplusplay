@@ -1658,7 +1658,7 @@ body{
         </div>
         <span class="view">DEMO</span>
     </div>
-    <div class="champions" role="status" aria-live="polite">
+    <div class="champions" id="recentDemoActivityRows" role="status" aria-live="polite">
         <div class="champion">
             <div class="player">No verified recent activity yet
                 <small>We will show activity here only when a privacy-safe, server-backed feed is available.</small>
@@ -1984,6 +1984,7 @@ document.querySelectorAll('.cat').forEach(tab=>{
 </script>
 
 
+<script src="core/recent-demo-activity.js"></script>
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 </body>
 </html>

@@ -218,3 +218,5 @@ begin
  raise notice 'Aviator server-settlement tests passed.';
 end
 $tests$;
+
+\ir test-aviator-worker.sql
