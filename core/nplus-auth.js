@@ -216,17 +216,65 @@
       throw new Error("Email address already used. Please use another email.");
     }
 
-    // Email confirmation must be enabled for the requested signup-OTP flow.
+    // With Supabase Confirm email ON, signUp returns no session and the user verifies by OTP.
+    // With Confirm email OFF, Supabase returns an authenticated session. In that case,
+    // validate the server-created profile before letting the account continue.
     if (data?.session) {
-      await client.auth.signOut();
-      throw new Error("Email confirmation is disabled. Enable Confirm email in Supabase to use signup OTP.");
+      const { data: profile, error: profileError } = await client
+        .from("profiles")
+        .select("phone,email")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profileError || !profile) {
+        await client.auth.signOut();
+        throw new Error("Account was created, but profile setup could not be verified. Please contact support.");
+      }
+
+      const profileEmail = String(profile.email || "").trim().toLowerCase();
+      const profilePhone = String(profile.phone || "").trim();
+      if (profileEmail !== cleanEmail || profilePhone !== cleanMobile) {
+        await client.auth.signOut();
+        throw new Error("Account profile details could not be verified. Please contact support before retrying.");
+      }
+
+      let referralResult = null;
+      if (cleanReferralCode) {
+        try {
+          const { data: result, error: referralError } = await client.rpc(
+            "nplus_demo_referral_apply",
+            { p_code: cleanReferralCode }
+          );
+          if (referralError) throw referralError;
+          referralResult = result;
+        } catch (referralError) {
+          console.warn("N+ PLAY referral attribution skipped:", referralError);
+          referralResult = {
+            success: false,
+            reason: "unavailable",
+            message: "Referral service is not available yet."
+          };
+        }
+      }
+
+      markActivity();
+      return {
+        user,
+        session: data.session,
+        email: cleanEmail,
+        mobile: cleanMobile,
+        name: cleanName,
+        immediateSession: true,
+        referralResult
+      };
     }
 
     return {
       user,
       email: cleanEmail,
       mobile: cleanMobile,
-      name: cleanName
+      name: cleanName,
+      immediateSession: false
     };
   }
 
