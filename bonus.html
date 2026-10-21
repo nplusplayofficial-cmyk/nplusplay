@@ -40,46 +40,37 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:poi
 <div class="app">
 <header class="header">
  <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
- <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="age">18+</span></div>
+ <div class="headright"><div class="wallet" id="wallet">₹—</div><span class="age">18+</span></div>
 </header>
 
 <section class="hero">
  <div class="kicker">N+ PLAY • REWARD CENTER</div>
- <h1>Bonus & Rewards</h1>
- <p>Track your available rewards, progress and activity-based bonus opportunities from one place.</p>
- <div class="balance-row"><div><small>AVAILABLE BALANCE</small><strong id="balance">₹1,000.00</strong></div><div class="sync"><i></i><span id="sync">SYNCED</span></div></div>
+ <h1>Rewards Ledger</h1>
+ <p>Review reward credits actually recorded to your signed-in account. Unverified offers are not counted as rewards.</p>
+ <div class="balance-row"><div><small>ACCOUNT BALANCE</small><strong id="balance">₹—</strong></div><div class="sync"><i></i><span id="sync">CHECKING</span></div></div>
 </section>
 
 <section class="summary">
- <div><span>TODAY'S BONUS</span><b id="today">₹0.00</b></div>
- <div><span>TOTAL REWARDS</span><b class="positive" id="rewards">₹0.00</b></div>
- <div><span>ACTIVE REWARDS</span><b id="active">0</b></div>
+ <div><span>TODAY'S NET REWARD CREDITS</span><b id="today">—</b></div>
+ <div><span>TOTAL NET REWARD CREDITS</span><b class="positive" id="rewards">—</b></div>
+ <div><span>REWARD LEDGER ENTRIES</span><b id="active">—</b></div>
 </section>
 
 <section class="section">
- <div class="sectionhead"><h2>Reward Center</h2><span class="view">EXPLORE</span></div>
+ <div class="sectionhead"><h2>Account Activity</h2><span class="view">LIVE DATA</span></div>
  <div class="cards">
-  <a class="card" href="promotion.html"><span class="icon">★</span><span class="tag">POPULAR</span><h3>Activity Award</h3><p>Track platform activity and eligible demo reward progress.</p><span class="action">VIEW DETAILS →</span></a>
-  <a class="card" href="promotion.html"><span class="icon">＋</span><span class="tag">INVITE</span><h3>Invitation Bonus</h3><p>Build your referral activity and follow your reward progress.</p><span class="action">EXPLORE →</span></a>
-  <a class="card" href="promotion.html"><span class="icon">◈</span><span class="tag">REBATE</span><h3>Activity Rebate</h3><p>See eligible activity-based reward progress in one place.</p><span class="action">CHECK →</span></a>
-  <a class="card" href="promotion.html"><span class="icon">◆</span><span class="tag">REWARD</span><h3>Super Jackpot</h3><p>Premium reward campaign information and progress.</p><span class="action">VIEW →</span></a>
-  <a class="card" href="promotion.html"><span class="icon">◎</span><span class="tag">SOON</span><h3>Invite Wheel</h3><p>Reward wheel experience will be available in a future module.</p><span class="action">COMING SOON</span></a>
-  <a class="card" href="promotion.html"><span class="icon">✦</span><span class="tag">NEW</span><h3>Daily Mission</h3><p>Complete platform missions and monitor your progress.</p><span class="action">EXPLORE →</span></a>
+  <a class="card" href="activity.html"><span class="icon">◷</span><span class="tag">LEDGER</span><h3>Transaction History</h3><p>Review balance changes and recorded reward entries.</p><span class="action">OPEN ACTIVITY →</span></a>
+  <a class="card" href="promotion.html"><span class="icon">◇</span><span class="tag">CAMPAIGNS</span><h3>Promotion Center</h3><p>View campaign availability and current setup status.</p><span class="action">VIEW STATUS →</span></a>
  </div>
 </section>
 
 <section class="section">
- <div class="sectionhead"><h2>Attendance Progress</h2><span class="view">7 DAY TRACK</span></div>
- <div class="progress-card">
-  <div class="prog-top"><b>Weekly Activity Streak</b><span id="streakText">3 / 7 days</span></div>
-  <div class="bar"><i id="streakBar"></i></div>
-  <p>Keep your N+ PLAY activity consistent to progress through the demo reward track.</p>
- </div>
+ <div class="notice"><b>Reward ledger status</b><br>Only transactions with an explicit reward credit type are counted above. A game win, campaign view, or copied invitation code is not automatically a bonus credit.</div>
 </section>
 
 <section class="section">
- <div class="sectionhead"><h2>Redeem Code</h2><span class="view">OPTIONAL</span></div>
- <div class="codebox"><input id="code" maxlength="24" placeholder="Enter reward code"><button id="redeem">REDEEM</button></div>
+ <div class="sectionhead"><h2>Reward Codes</h2><span class="view">NOT ENABLED</span></div>
+ <div class="notice">Reward-code redemption is unavailable until server-side validation and Admin-issued codes are configured. No code will be marked as redeemed on this page.</div>
 </section>
 
 <section class="section">
@@ -88,10 +79,10 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:poi
 </section>
 
 <section class="section">
- <div class="notice"><b>18+ · PLAY RESPONSIBLY</b><br>This Bonus Center is currently a platform-mode reward interface. Reward balances shown here are informational and synchronised with the shared N+ PLAY virtual-credit activity system.</div>
+ <div class="notice"><b>18+ · PLAY RESPONSIBLY</b><br>This page shows reward credits only when they are recorded in your account ledger. Viewing this page does not create a reward. Campaigns and reward-code redemption remain unavailable until their server-side workflows are enabled.</div>
 </section>
 
-<footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:18px 0 20px"><strong style="color:#7d6a3d">N+ PLAY</strong><br>Bonus Center · Platform mode</footer>
+<footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:18px 0 20px"><strong style="color:#7d6a3d">N+ PLAY</strong><br>Rewards ledger · Account-recorded entries only</footer>
 </div>
 
 <nav class="bottom">
@@ -101,43 +92,85 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:poi
  <a class="nav" href="promotion.html"><span class="ni">◇</span>Promotion</a>
  <a class="nav" href="account.html"><span class="ni">◯</span>Account</a>
 </nav>
-<div class="toast" id="toast"></div>
-
-<div class="modal" id="infoModal"><div class="modal-card"><button class="close" id="closeModal">×</button><h2>Reward Information</h2><p>Reward campaigns and eligibility details can be connected here as the N+ PLAY platform modules are expanded.</p><div class="modal-list"><div>Status <b>Available</b></div><div>Wallet sync <b>Live</b></div><div>Mode <b>Platform</b></div></div><button class="done" id="done">DONE</button></div></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261019"></script>
+<script src="core/nplus-auth.js?v=20261019"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261019"></script>
 <script>
-(()=>{
-"use strict";
-const STORE="nplusplay_wingo_ultra_final_v2",LEGACY="nplusplay_wallet_v1";
-const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-function read(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch{return{}}}
-function getBalance(){const n=Number(read().balance);if(Number.isFinite(n))return n;const l=Number(localStorage.getItem(LEGACY));return Number.isFinite(l)?l:1000}
-function allBets(){const x=read(),out=[];for(const sec of [30,60,180,300])if(Array.isArray(x.bets?.[sec]))out.push(...x.bets[sec]);return out.sort((a,b)=>(b.settledAt||b.ts||0)-(a.settledAt||a.ts||0))}
-let last=null;
-function render(){
- const b=getBalance();document.querySelector("#wallet").textContent=money(b);document.querySelector("#balance").textContent=money(b);
- if(last!==null&&last!==b){document.querySelector("#sync").textContent="UPDATED";setTimeout(()=>document.querySelector("#sync").textContent="SYNCED",900)}last=b;
- const bets=allBets(),settled=bets.filter(x=>["WON","LOST"].includes(String(x.status).toUpperCase()));
- const wins=settled.filter(x=>String(x.status).toUpperCase()==="WON");
- const todayStart=new Date();todayStart.setHours(0,0,0,0);
- const todayWins=wins.filter(x=>Number(x.settledAt||x.ts||0)>=todayStart.getTime());
- const todayReward=todayWins.reduce((s,x)=>s+Math.max(0,Number(x.returnAmount||0)-Number(x.total||0)),0);
- const totalReward=wins.reduce((s,x)=>s+Math.max(0,Number(x.returnAmount||0)-Number(x.total||0)),0);
- document.querySelector("#today").textContent=money(todayReward);document.querySelector("#rewards").textContent=money(totalReward);document.querySelector("#active").textContent=bets.length;
- const days=new Set(settled.map(x=>new Date(x.settledAt||x.ts||0).toDateString())).size;
- const progress=Math.min(100,days/7*100);document.querySelector("#streakBar").style.width=progress+"%";document.querySelector("#streakText").textContent=Math.min(7,days)+" / 7 days";
- const hist=document.querySelector("#history");
- if(!bets.length){hist.innerHTML='<div style="padding:22px;text-align:center;color:#686b64;font-size:.55rem">No reward activity yet.<br>Settled game rewards will appear here.</div>';return}
- hist.innerHTML=bets.slice(0,8).map(x=>{
-  const won=String(x.status).toUpperCase()==="WON",amount=won?Math.max(0,Number(x.returnAmount||0)-Number(x.total||0)):0;
-  return `<div class="history-row"><div class="hicon">${won?"↑":"•"}</div><div><b>${won?"Game Reward":"Game Activity"}</b><small>${x.gameName||x.game||"N+ PLAY GAME"} · ${x.period||"—"}</small></div><div class="history-amt">${won?"+"+money(amount):"—"}</div></div>`
- }).join("");
-}
-function toast(msg){const t=document.querySelector("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}
-document.querySelector("#redeem").onclick=()=>{const c=document.querySelector("#code").value.trim();if(!c)return toast("Enter a reward code");toast("Code received — verification module pending")};
-document.querySelectorAll(".card").forEach(c=>c.addEventListener("click",e=>{if(c.getAttribute("href")==="promotion.html")return}));
-document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
-window.addEventListener("storage",e=>{if(e.key===STORE||e.key===LEGACY)render()});window.addEventListener("pageshow",render);document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});setInterval(render,1500);render();
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const money = n => "₹" + Number(n || 0).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2});
+  const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const rewardTypes = new Set(["BONUS_CREDIT","REWARD_CREDIT","PROMOTION_CREDIT","REFERRAL_CREDIT","BONUS","REWARD","PROMOTION","REFERRAL"]);
+  const heroStatus = $("sync");
+  let busy = false;
+
+  function setUnavailable(message) {
+    $("wallet").textContent = "—";
+    $("balance").textContent = "—";
+    heroStatus.textContent = "UNAVAILABLE";
+    $("today").textContent = "—";
+    $("rewards").textContent = "—";
+    $("active").textContent = "—";
+    $("history").className = "history";
+    $("history").textContent = message;
+  }
+
+  function renderHistory(entries) {
+    const history = $("history");
+    if (!entries.length) {
+      history.className = "history";
+      history.textContent = "No reward-credit transactions are recorded in your account ledger yet.";
+      return;
+    }
+    history.className = "";
+    history.innerHTML = entries.slice(0,50).map(tx => {
+      const delta = Number(tx.delta || 0);
+      const positive = delta > 0;
+      const title = String(tx.type || "REWARD").replaceAll("_"," ");
+      const date = tx.created_at ? new Date(tx.created_at).toLocaleString("en-IN") : "Time unavailable";
+      return '<div class="history-row"><div class="hicon">' + (positive ? "↑" : "•") + '</div><div><b>' + esc(title) + '</b><small>' + esc(tx.note || tx.source || "Reward ledger entry") + ' · ' + esc(date) + '</small></div><div class="history-amt" style="color:' + (positive ? "#83e5c2" : "#ff8b93") + '">' + (positive ? "+" : "") + money(delta) + '</div></div>';
+    }).join("");
+  }
+
+  async function refresh() {
+    if (busy) return;
+    busy = true;
+    heroStatus.textContent = "SYNCING";
+    try {
+      const user = await window.NPlusAuth.requireAuth();
+      if (!user || !user.id) throw new Error("Sign in to view rewards.");
+      const result = await Promise.all([
+        window.NPlusWallet.getBalance(),
+        window.NPlusWallet.transactions(500)
+      ]);
+      const balance = result[0];
+      const transactions = result[1] || [];
+      const entries = transactions.filter(tx => rewardTypes.has(String(tx.type || "").toUpperCase()));
+      const todayKey = new Date().toDateString();
+      const sum = list => list.reduce((total,tx)=>total+Number(tx.delta || 0),0);
+      const todayEntries = entries.filter(tx => tx.created_at && new Date(tx.created_at).toDateString() === todayKey);
+      $("wallet").textContent = money(balance);
+      $("balance").textContent = money(balance);
+      $("today").textContent = money(sum(todayEntries));
+      $("rewards").textContent = money(sum(entries));
+      $("active").textContent = String(entries.length);
+      heroStatus.textContent = "SYNCED";
+      renderHistory(entries);
+    } catch (error) {
+      console.error("N+ PLAY rewards ledger unavailable:", error);
+      setUnavailable("Unable to load reward entries from your account ledger. Refresh the page and try again.");
+    } finally {
+      busy = false;
+    }
+  }
+
+  window.addEventListener("focus", refresh);
+  window.addEventListener("pageshow", refresh);
+  window.addEventListener("nplus:wallet-change", refresh);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
+  refresh();
 })();
 </script>
 </body>

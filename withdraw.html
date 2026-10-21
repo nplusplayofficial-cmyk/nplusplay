@@ -1,233 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<link rel="manifest" href="./manifest.webmanifest">
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta name="theme-color" content="#080908"><title>N+ PLAY — Withdraw</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/nplus-config.js?v=20261007"></script>
-<script src="core/nplus-auth.js?v=20261007"></script>
-<script src="core/nplus-wallet-bridge.js?v=20261007"></script>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080908"><link rel="manifest" href="./manifest.webmanifest"><title>N+ PLAY — Demo Withdrawal Request</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script><script src="core/nplus-auth.js"></script><script src="core/nplus-wallet-bridge.js"></script>
 <style>
-:root{--bg:#080908;--panel:#11130f;--line:rgba(255,255,255,.075);--gold:#c9a55b;--gold2:#f0dfb5;--text:#f4f1e8;--muted:#777a72;--green:#42d9a5}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,sans-serif}body{min-height:100vh;color:var(--text);background:radial-gradient(650px 450px at 50% -160px,rgba(201,165,91,.075),transparent 68%),#080908}
-button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}.app{width:min(100%,590px);margin:auto;padding:0 16px 35px}.header{height:70px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,165,91,.09)}
-.left{display:flex;align-items:center;gap:9px}.back{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#11120f;color:#ddd;font-size:22px}.brand{display:flex;align-items:center;gap:9px;font-weight:950;letter-spacing:1px}.mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#f2e5c3,#c9a55b);color:#111;font-size:11px}.wallet{padding:9px 12px;border:1px solid rgba(66,217,165,.2);border-radius:999px;background:rgba(66,217,165,.055);color:#bdf4df;font-size:.72rem;font-weight:900}
-.hero{padding:27px 2px 17px}.kicker{font-size:9px;color:var(--gold);letter-spacing:2px;font-weight:900}h1{font-size:28px;margin:7px 0 5px}.hero p{color:var(--muted);font-size:11px}.card{padding:21px;border-radius:24px;border:1px solid rgba(201,165,91,.16);background:linear-gradient(145deg,#171813,#0c0d0b);box-shadow:0 25px 80px rgba(0,0,0,.5)}
-.label{font-size:9px;color:#62655e;letter-spacing:1.2px}.balance{font-size:29px;font-weight:950;margin-top:5px}.field-label{display:block;margin:20px 0 8px;font-size:9px;color:#aaa99f;font-weight:900;letter-spacing:.8px}
-.amount-wrap{display:flex;align-items:center;border:1px solid rgba(255,255,255,.09);background:#0b0c0a;border-radius:15px;padding:0 14px}.amount-wrap span{font-size:19px;color:var(--gold);font-weight:900}input{width:100%;height:48px;background:transparent;border:0;outline:0;color:#fff;font-size:12px;font-weight:750;padding:0 10px}
-.amount-wrap input{font-size:20px}.presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}.preset{padding:10px 5px;border:1px solid var(--line);border-radius:11px;background:#10110f;color:#aaa;font-weight:850}.preset.active{border-color:rgba(201,165,91,.55);color:var(--gold2);background:rgba(201,165,91,.07)}
-.method{display:flex;align-items:center;gap:11px;padding:13px;border:1px solid rgba(255,255,255,.07);background:#10110f;border-radius:15px;margin-top:8px}.method.selected{border-color:rgba(201,165,91,.55);background:rgba(201,165,91,.045)}.micon{width:39px;height:39px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#dcefe8,#42b991);color:#13251e;font-weight:1000}.copy{flex:1}.copy b{font-size:11px}.copy small{display:block;color:#666961;font-size:9px;margin-top:3px}.radio{width:17px;height:17px;border:1px solid #555;border-radius:50%;position:relative}.selected .radio{border-color:var(--gold)}.selected .radio:after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--gold)}
-.details{margin-top:18px;padding-top:15px;border-top:1px solid rgba(255,255,255,.055)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.full{grid-column:1/-1}.input-box label{display:block;font-size:8px;color:#73766e;font-weight:900;margin:0 0 6px 2px}.detail-input{width:100%;height:45px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:#0b0c0a;padding:0 12px;font-size:10px}
-.cta{width:100%;margin-top:18px;border:0;border-radius:15px;padding:15px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:12px}.note{margin-top:13px;padding:13px;border-radius:13px;background:rgba(201,165,91,.045);border:1px solid rgba(201,165,91,.1);color:#777a72;font-size:9px;line-height:1.55}.backlink{display:block;text-align:center;margin-top:17px;color:#8b8e86;font-size:10px}
-.modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);z-index:50}.modal.show{display:grid}.modal-card{width:min(100%,420px);background:#11130f;border:1px solid rgba(201,165,91,.2);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000}.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa}.modal-card h2{font-size:18px}.modal-card p{margin-top:8px;color:#777a72;font-size:10px;line-height:1.6}.done{width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950}
-@media(max-width:430px){.presets{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
-</style>
-</head>
-<body><div class="app">
-<header class="header"><div class="left"><button class="back" onclick="location.href='account.html'">‹</button><div class="brand"><span class="mark">N+</span>PLAY</div></div><div class="wallet" id="wallet">₹0.00</div></header>
-<section class="hero"><div class="kicker">WALLET</div><h1>Withdraw</h1><p>Enter your withdrawal request details.</p></section>
-<section class="card">
-<div class="label">AVAILABLE BALANCE</div><div class="balance" id="balance">₹0.00</div>
-<label class="field-label">WITHDRAW AMOUNT</label><div class="amount-wrap"><span>₹</span><input id="amount" inputmode="decimal" placeholder="0"></div>
-<div class="presets"><button class="preset" data-a="500">₹500</button><button class="preset" data-a="1000">₹1,000</button><button class="preset" data-a="2000">₹2,000</button><button class="preset" data-a="5000">₹5,000</button></div>
-
-<div class="field-label">WITHDRAWAL METHOD</div>
-<div class="method selected" data-method="Bank Account"><div class="micon">⌂</div><div class="copy"><b>Bank Account</b><small>Banking details</small></div><span class="radio"></span></div>
-<div class="method" data-method="UPI"><div class="micon">U</div><div class="copy"><b>UPI</b><small>UPI ID details</small></div><span class="radio"></span></div>
-
-<div class="details">
-<label class="field-label" style="margin-top:0" id="detailTitle">BANK ACCOUNT DETAILS</label>
-<div class="grid" id="bankFields">
- <div class="input-box"><label>ACCOUNT HOLDER NAME</label><input class="detail-input" id="holder" autocomplete="off" placeholder="Full name"></div>
- <div class="input-box"><label>BANK NAME</label><input class="detail-input" id="bank" autocomplete="off" placeholder="Bank name"></div>
- <div class="input-box"><label>ACCOUNT NUMBER</label><input class="detail-input" id="accountNo" inputmode="numeric" autocomplete="off" placeholder="Account number"></div>
- <div class="input-box"><label>IFSC CODE</label><input class="detail-input" id="ifsc" autocomplete="off" placeholder="IFSC code"></div>
- <div class="input-box full"><label>BRANCH NAME</label><input class="detail-input" id="branch" autocomplete="off" placeholder="Branch name"></div>
-</div>
-<div class="grid" id="upiFields" style="display:none">
- <div class="input-box"><label>ACCOUNT HOLDER NAME</label><input class="detail-input" id="upiHolder" autocomplete="off" placeholder="Full name"></div>
- <div class="input-box"><label>BANK NAME</label><input class="detail-input" id="upiBank" autocomplete="off" placeholder="Bank name"></div>
- <div class="input-box full"><label>UPI ID</label><input class="detail-input" id="upiId" autocomplete="off" placeholder="example@upi"></div>
-</div>
-</div>
-
-<button class="cta" id="submitBtn">SUBMIT WITHDRAWAL REQUEST</button>
-<div class="note"><b>Virtual-credit mode:</b> this creates a demo withdrawal request for testing. No real-money transfer is processed.</div>
-<a class="backlink" href="account.html">← Back to Account</a>
-</section></div>
-
-<div class="modal" id="modal"><div class="modal-card"><button class="close" id="close">×</button><h2>Request Submitted</h2><p id="modalText"></p><button class="done" id="done">DONE</button></div></div>
-
+:root{--line:rgba(201,165,91,.17);--gold:#c9a55b;--gold2:#f0dfb5;--text:#f4f1e8;--muted:#83857d}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(650px 450px at 50% -160px,rgba(201,165,91,.075),transparent 68%),#080908;color:var(--text);font:14px Inter,system-ui,sans-serif}.app{width:min(590px,100% - 28px);margin:auto;padding:14px 0 38px}.top{height:54px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06)}a{color:inherit;text-decoration:none}.brand{display:flex;align-items:center;gap:8px;font-weight:950;letter-spacing:1px}.mark{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#f0dfb5,#c9a55b);color:#17140d}.balance-pill{padding:8px 11px;border:1px solid rgba(66,217,165,.2);border-radius:999px;color:#bdf4df;font-size:11px;font-weight:900}.hero{padding:25px 2px 16px}.eyebrow{font-size:9px;letter-spacing:2px;color:var(--gold);font-weight:900}h1{margin:8px 0;font-size:27px}.hero p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.card{padding:20px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#171813,#0c0d0b);box-shadow:0 25px 70px rgba(0,0,0,.4)}.label{font-size:9px;letter-spacing:1.4px;color:#73766e;font-weight:900}.balance{font-size:29px;font-weight:950;margin:5px 0 16px}.field-label{display:block;margin:18px 0 8px;font-size:10px;font-weight:850;color:#aaa99f}.amount-wrap{display:flex;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:#0b0c0a;padding:0 12px}.amount-wrap span{font-size:20px;color:var(--gold);font-weight:900}.amount-wrap input{width:100%;min-width:0;padding:14px 10px;background:transparent;border:0;outline:0;color:white;font-size:20px;font-weight:900}.presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}.preset{border:1px solid rgba(255,255,255,.08);background:#11120f;color:#bbb;border-radius:11px;padding:11px 4px;font-weight:850;cursor:pointer}.preset.active{border-color:rgba(201,165,91,.6);color:var(--gold2);background:rgba(201,165,91,.08)}.btn{width:100%;margin-top:17px;border:0;border-radius:13px;padding:14px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}.notice{margin-top:14px;padding:13px;border:1px solid rgba(66,217,165,.15);border-radius:13px;background:rgba(66,217,165,.04);color:#9bd8c1;font-size:10px;line-height:1.65}.status{margin-top:13px;font-size:11px;line-height:1.6;overflow-wrap:anywhere;color:#b7b5aa}.status.error{color:#ff9da4}.status.success{color:#8de4bd}.links{display:flex;gap:14px;flex-wrap:wrap;margin-top:17px}.links a{font-size:11px;color:var(--gold2)}@media(max-width:430px){.presets{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><main class="app">
+<header class="top"><a class="brand" href="account.html"><span class="mark">N+</span>PLAY</a><div class="balance-pill" id="wallet">SYNCING…</div></header>
+<section class="hero"><div class="eyebrow">WALLET · VIRTUAL CREDITS</div><h1>Demo withdrawal request</h1><p>Submit a request for a simulated Admin review. This is not a cash withdrawal.</p></section>
+<section class="card"><div class="label">AVAILABLE DEMO BALANCE</div><div class="balance" id="balance">₹—</div><label class="field-label" for="amount">REQUEST AMOUNT</label>
+<div class="amount-wrap"><span>₹</span><input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Enter demo credits"></div>
+<div class="presets"><button class="preset" type="button" data-amount="10">₹10</button><button class="preset" type="button" data-amount="25">₹25</button><button class="preset" type="button" data-amount="50">₹50</button><button class="preset" type="button" data-amount="100">₹100</button></div>
+<button class="btn" id="submitBtn" type="button" disabled>SUBMIT DEMO REQUEST</button>
+<div class="notice"><b>Demo only:</b> N+ PLAY credits have no cash value. Submitting or approving this request does not deduct credits, transfer money, or initiate a payout. Admin approval changes status only.</div>
+<div class="status" id="status" role="status" aria-live="polite">Checking account…</div>
+<div class="links"><a href="withdrawal-history.html">VIEW WITHDRAWAL HISTORY →</a><a href="account.html">BACK TO ACCOUNT →</a></div></section></main>
 <script>
-(()=>{
-"use strict";
-
-const REQ="nplusplay_withdraw_requests_demo_v1";
-const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-
-let selected="Bank Account";
-let currentBalance=0;
-let refreshBusy=false;
-
-function setBalanceUI(value){
-  currentBalance=Number.isFinite(Number(value))?Number(value):0;
-  const formatted=money(currentBalance);
-  const walletEl=document.getElementById("wallet");
-  const balanceEl=document.getElementById("balance");
-  if(walletEl) walletEl.textContent=formatted;
-  if(balanceEl) balanceEl.textContent=formatted;
-}
-
-async function syncBalance(){
-  if(refreshBusy)return currentBalance;
-  refreshBusy=true;
-  try{
-    if(!window.NPlusAuth?.current || !window.NPlusWallet?.getBalance){
-      throw new Error("Wallet sync system unavailable.");
-    }
-
-    const user=await window.NPlusAuth.current();
-    if(!user?.id){
-      window.location.href="auth.html";
-      return currentBalance;
-    }
-
-    const value=await window.NPlusWallet.getBalance();
-    setBalanceUI(value);
-    return currentBalance;
-  }catch(err){
-    console.error("Withdraw wallet sync error:",err);
-    return currentBalance;
-  }finally{
-    refreshBusy=false;
-  }
-}
-
-async function getFreshBalance(){
-  await syncBalance();
-  return currentBalance;
-}
-
-function addRequest(req){
-  let a=[];
-  try{a=JSON.parse(localStorage.getItem(REQ)||"[]")}catch{}
-  a.unshift(req);
-  localStorage.setItem(REQ,JSON.stringify(a.slice(0,100)));
-}
-
-document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
-  amount.value=b.dataset.a;
-  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active");
-});
-
-document.querySelectorAll(".method").forEach(m=>m.onclick=()=>{
-  selected=m.dataset.method;
-  document.querySelectorAll(".method").forEach(x=>x.classList.remove("selected"));
-  m.classList.add("selected");
-
-  const bankMode=selected==="Bank Account";
-  bankFields.style.display=bankMode?"grid":"none";
-  upiFields.style.display=bankMode?"none":"grid";
-  detailTitle.textContent=bankMode?"BANK ACCOUNT DETAILS":"UPI DETAILS";
-});
-
-submitBtn.onclick=async()=>{
-  const n=Number(amount.value);
-
-  if(!Number.isFinite(n)||n<=0){
-    alert("Please enter a valid amount.");
-    return;
-  }
-
-  const bal=await getFreshBalance();
-
-  if(n>bal){
-    alert("Amount exceeds available balance.");
-    return;
-  }
-
-  let details={};
-
-  if(selected==="Bank Account"){
-    details={
-      holder:holder.value.trim(),
-      bank:bank.value.trim(),
-      accountNo:accountNo.value.trim(),
-      ifsc:ifsc.value.trim(),
-      branch:branch.value.trim()
-    };
-
-    if(Object.values(details).some(v=>!v)){
-      alert("Please fill all bank details.");
-      return;
-    }
-  }else{
-    details={
-      holder:upiHolder.value.trim(),
-      bank:upiBank.value.trim(),
-      upiId:upiId.value.trim()
-    };
-
-    if(Object.values(details).some(v=>!v)){
-      alert("Please fill all UPI details.");
-      return;
-    }
-  }
-
-  const id="WD-"+Date.now().toString(36).toUpperCase();
-
-  addRequest({
-    id,
-    createdAt:new Date().toISOString(),
-    status:"PENDING",
-    amount:n,
-    method:selected,
-    details
-  });
-
-  modalText.textContent=
-    `${id} · ${money(n)} · ${selected}. Demo request saved for the local admin request queue.`;
-
-  modal.classList.add("show");
-};
-
-const modal=document.getElementById("modal");
-const close=()=>modal.classList.remove("show");
-
-document.getElementById("close").onclick=close;
-document.getElementById("done").onclick=()=>location.href="account.html";
-modal.onclick=e=>{if(e.target===modal)close()};
-
-/* Keep the displayed balance synced when the user changes it elsewhere. */
-window.addEventListener("nplus:wallet-change",e=>{
-  const after=e?.detail?.after;
-  if(Number.isFinite(Number(after))) setBalanceUI(Number(after));
-  else syncBalance();
-});
-
-window.addEventListener("storage",()=>syncBalance());
-window.addEventListener("pageshow",()=>syncBalance());
-document.addEventListener("visibilitychange",()=>{
-  if(!document.hidden) syncBalance();
-});
-
-/* Cross-page refresh protection: re-read Supabase wallet periodically. */
-setInterval(()=>syncBalance(),2000);
-
-(async()=>{
-  try{
-    const user=await window.NPlusAuth.requireAuth();
-    if(!user)return;
-    await syncBalance();
-  }catch(err){
-    console.error("Withdraw init error:",err);
-    alert(err.message||"Unable to load wallet.");
-  }
+(async function(){"use strict";const $=id=>document.getElementById(id),status=$("status"),button=$("submitBtn"),input=$("amount"),money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});let user=null,balance=NaN;
+function tokenFor(amount){const key="nplus_demo_withdraw_request_token_v1:"+user.id+":"+amount.toFixed(2);let value=sessionStorage.getItem(key);if(!value){if(window.crypto&&typeof crypto.randomUUID==="function")value=crypto.randomUUID();else{const b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;const h=[...b].map(x=>x.toString(16).padStart(2,"0")).join("");value=h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20)}sessionStorage.setItem(key,value)}return {key,value}}
+function setBalance(n){balance=Number(n);$("balance").textContent=money(balance);$("wallet").textContent=money(balance);button.disabled=!Number.isFinite(balance)||balance<=0}
+document.querySelectorAll("[data-amount]").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.amount;document.querySelectorAll(".preset").forEach(x=>x.classList.toggle("active",x===b))}));
+button.addEventListener("click",async()=>{if(button.disabled||!user)return;const amount=Number(input.value);if(!Number.isFinite(amount)||amount<=0||amount>balance){status.className="status error";status.textContent="Enter an amount greater than zero and no greater than your displayed demo balance.";return}button.disabled=true;button.textContent="SUBMITTING…";status.className="status";status.textContent="Submitting demo request…";const token=tokenFor(amount);try{const response=await window.NPlusAuth.client.rpc("nplus_create_demo_withdrawal_request",{p_amount:Math.round(amount*100)/100,p_request_token:token.value,p_request_note:"Submitted from N+ PLAY demo withdrawal page"});if(response.error)throw response.error;const result=Array.isArray(response.data)?response.data[0]:response.data;if(!result||result.success!==true)throw new Error("The withdrawal request did not return a valid result.");sessionStorage.removeItem(token.key);status.className="status success";status.textContent=(result.duplicate_request?"Existing request recovered: ":"Request submitted: ")+result.request_id+" · Status: "+result.status+". Demo balance remains "+money(balance)+". No cash payout.";button.textContent="REQUEST SAVED"}catch(e){console.error("Demo withdrawal request failed",e);status.className="status error";status.textContent=e.message||"Request failed. Retry safely; the same request token will be reused.";button.disabled=false;button.textContent="RETRY DEMO REQUEST"}});
+window.addEventListener("nplus:wallet-change",e=>{const after=Number(e&&e.detail&&e.detail.after);if(Number.isFinite(after))setBalance(after)});
+try{if(!window.NPlusAuth||!window.NPlusAuth.client)throw new Error("Supabase is not configured.");user=await window.NPlusAuth.requireAuth();if(!user)return;setBalance(await window.NPlusWallet.getBalance());status.textContent="Ready. Submit a virtual-credit request for Admin review."}catch(e){status.className="status error";status.textContent=e.message||"Could not load your demo wallet.";button.disabled=true}
 })();
-})();
-</script>
-
-<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
-</body></html>
+</script><script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("PWA registration skipped",e)));</script></body></html>

@@ -1,32 +1,57 @@
-# N+ PLAY — Premium Upgrade Pack (virtual-credit demo only)
+# N+ PLAY — Premium Audit Fixes (virtual-credit demo only)
 
-## Included in this pack
-- Updated shared-wallet HTML pages for Home, Account, WINGO, K3, MotoRace, 5D, TRX WINGO and Aviator.
-- Premium `activity.html` reading the signed-in user's Supabase wallet transaction ledger.
-- `admin-users.html` with admin-only user search, ledger view, and auditable virtual-credit adjustments.
-- `sql/NPLUS_PLAY_PREMIUM_FOUNDATION.sql` with owner-only admin RPCs, own-wallet read policies and direct table-write revocations.
-- PWA manifest, icon, offline page and a service worker that does **not** cache Supabase API/auth responses.
-- PWA manifest, icon, offline page and service worker, plus a Node QA script.
+This branch is a review candidate, not a claim that N+ PLAY is production-secure. It keeps the current plain HTML/CSS/JavaScript + Supabase architecture and does not migrate to Next.js.
 
-## Upload / merge steps (GitHub Pages)
-1. Take a ZIP/branch backup of the current repository first.
-2. Upload the root HTML files in this pack to the repository root using the same filenames. Keep any existing files not included here (especially any other game pages).
-3. **Preserve your current `core/nplus-config.js`, `core/nplus-auth.js`, and `core/nplus-wallet-bridge.js`**. Your current auth flow uses email OTP methods; do not replace it with a generic auth file. The main Home page also references legacy `core/config.js`, `storage.js`, `user.js`, `wallet.js`, `activity.js`, and `games.js`; preserve those existing files.
-4. Add `manifest.webmanifest`, `sw.js`, `offline.html`, and `assets/nplus-icon.svg` at their indicated paths.
-5. Run `sql/NPLUS_PLAY_PREMIUM_FOUNDATION.sql` once in Supabase SQL Editor using project-owner access. It resets policies on `demo_wallets` and `demo_wallet_transactions` to authenticated own-row SELECT only, revokes direct browser writes, and adds admin-only RPCs used by `admin-users.html`. Back up and review current RLS policies before running any migration in a live project.
-6. After deployment, hard refresh the site (Ctrl+Shift+R). For PWA/service-worker cache changes, update `VERSION` in `sw.js` when making future releases.
-7. Open `admin.html` → User Management card. Verify admin role, user list, ledger, and a small test adjustment on a test account.
+## Repository/code changes in this branch
+- Adds the missing, correctly named admin-users.html user-management page and removes the typo duplicate.
+- Adds assets/nplus-icon.svg, matching the icon path used by manifest.webmanifest and sw.js.
+- Adds deposit-demo.html and deposit-history.html for idempotent server-side virtual-credit requests and per-user history.
+- Adds withdraw.html, withdrawal-history.html and admin-withdrawals.html for status-only demo withdrawal requests; review never moves wallet credits or pays cash.
+- Adds sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql plus a disposable PostgreSQL request/idempotency/authorization test. Review and stage this SQL and the matching frontend together before any production rollout.
+- Updates deposit.html to use virtual-credit requests only and block the unimplemented gateway route.
+- Sets legacy core/config.js to REAL_MONEY: false.
+- Bumps the service-worker cache version and fixes forgot-password links to use auth.html.
+- Restores email-OTP signup while retaining email + mobile + password login.
+- Adds static QA checks, GitHub Actions CI, a live-hardening migration record and release checklist.
 
-## QA
-Run `node qa/verify-project.js` from this folder (Node.js 18+ recommended). It checks inline and included external script syntax and PWA/SQL assets. It deliberately does not require the existing core auth/wallet files to be copied into this overlay pack. It cannot connect to your live Supabase project, verify deployed GitHub Pages, or prove database RPCs work; those checks must be run after applying the SQL.
+## Verified local database backup
+A custom-format backup archive was created on the operator's computer:
+`C:\Users\Natarajan K\NPLUS-PLAY-DB-BACKUP\nplus-play-full-2026-10-15.dump`
+The archive listing was read successfully with `pg_restore --list` (661 TOC entries). It has not been restored into a separate test database; keep the dump file private and never upload it to GitHub.
 
-## Important security status — do not skip
-This is a **virtual-credit demo** and not a real-money wagering/payments platform. This pack improves private table access and adds admin-only audited tooling, but it does **not yet make every existing game outcome/settlement tamper-proof**. The current legacy `nplus_wallet_change` RPC is used by client game pages and can accept client-supplied positive win credits unless its function body already enforces a stronger rule. A proper next deployment gate is to move each game's bet records, round results and payout calculation to server-authoritative RPC/Edge Functions, then remove arbitrary positive calls from that legacy RPC. Do not describe the system as production-secure until that phase is implemented and tested.
+## Confirmed live database hardening (applied 2026-10-15)
+- Added a trigger to prevent non-admin role changes on profiles. A rollback-only test confirmed a non-admin promotion attempt is blocked.
+- Removed anonymous EXECUTE from the generic wallet RPC and administrative SECURITY DEFINER RPCs, while preserving authenticated access and each function's internal authorization checks.
+- Revoked direct anon/authenticated writes to wallet and transaction tables; normal users read their own rows, while admin-role reads remain available for admin deposit/report screens.
+- Added a unique index on normalized profile phone numbers after confirming no current duplicate phone groups.
+- Consolidated redundant deposit policies and optimized RLS expressions; tightened table grants to least privilege, retained owner/admin read access where the UI needs it, aligned the wallet default to ₹108 (existing balances unchanged), and added missing FK/ledger indexes.
+- The exact migration is recorded in `sql/NPLUS_PLAY_LIVE_HARDENING_2026-10-15.sql`. Do not rerun manually on this production project; the change is already applied.
 
-## User flows to verify
-- Sign in, refresh, log out, re-login, and check idle timeout.
-- Test user A and test user B; each must only read their own wallet/transactions.
-- User A: game bet lowers wallet; each supported game's win/settlement should be checked separately; Home/Account/Activity should converge on the same Supabase balance.
-- Admin: search users, view ledger, apply a test adjustment with a meaningful note, confirm the ledger entry is written exactly once.
-- WINGO: save manual result for the current period, ensure the exact result row exists and the game reads the same duration+period.
-- Check mobile and desktop. Network/offline state should never pretend to modify wallet balances without Supabase confirmation.
+## Remaining database/auth checks
+- Supabase leaked-password protection is still disabled and must be enabled in Auth settings.
+- Live `main` still calls `nplus_phone_is_registered(text)` until this branch is merged/deployed, so anon EXECUTE remains temporarily to avoid breaking current signup. This branch removes that lookup and relies on the database unique mobile index. After deployment and signup testing, revoke anon EXECUTE on the old RPC.
+- For signup OTP, the Confirm signup email template must use `{{ .Token }}`; test actual email delivery and verification in the live project. Current code expects a six-digit code.
+- Verify a test signup creates a profile and ₹108 wallet, and that normal login works. Do not modify existing balances.
+- Do not use the old `supabase-schema.sql` basic template over the production database; it has an obsolete ₹1,000 default.
+
+## Current game-security and release status
+- The candidate migrates WINGO, MotoRace and Aviator to server-owned virtual-credit bet/round/settlement RPCs with replay protection and wallet-ledger writes.
+- K3, 5D and TRX WINGO betting are intentionally paused in the candidate until their payout rules are reviewed and matching server settlement is implemented.
+- The live production `main` still uses the legacy wallet path and does not yet have the new settlement tables. Do not deploy the candidate HTML before its matching reviewed SQL, and do not apply the post-rollout wallet guard before every active frontend path has migrated.
+- No cash deposits, cash payouts or cash withdrawals are supported; demo credits have no cash value. The candidate withdrawal screen is a status-only simulation.
+
+## Verification
+- Candidate commit `cc10da4e4e2d78436e3dd49f147ce36408413935` passed static HTML/JavaScript/local-link QA and all eight disposable PostgreSQL suites.
+- Push CI: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017662316
+- Pull-request CI: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/39017665739
+- The baseline eight-suite set covers WINGO, Admin game status, MotoRace, Aviator, generic wallet guard, phone-enumeration revocation, Admin user tools and Admin deposit actions. This candidate adds a ninth disposable PostgreSQL suite for demo request idempotency, Admin authorization and unchanged wallet/ledger checks. CI for the current head must pass before treating the updated candidate as verified. These tests do not cover live Supabase Auth or a real browser.
+- Latest read-only production inspection found no new settlement tables; all six live game toggles remain enabled; anon can still execute `nplus_phone_is_registered(text)`; authenticated users can still execute the legacy wallet RPC. This is why production rollout remains blocked.
+- The PR is draft and unmerged. No production writes were made during this verification, and existing wallet balances were not changed.
+
+
+## Demo referral (virtual credits only)
+- Each existing/new profile receives its own unique referral code from the database.
+- Share the link shown in Promotion Center. It opens `auth.html?ref=CODE`, pre-fills the optional signup field and applies attribution only after successful email OTP verification.
+- The referrer earns 20 virtual demo credits once only after N+ ADMIN approves the referred account's `DEMO_CREDIT` request for 200 or more virtual credits. This is not a real deposit or cash reward; demo credits have no cash value.
+- Local migration order: `20261019000150_demo_wallet_requests.sql` → `20261019000175_admin_deposit_actions.sql` → `20261019000200_demo_referrals.sql`; `npx supabase migration up --local` applies pending migrations only. Do not run `supabase db reset`; that would reset local staging data.
+- CI includes a disposable PostgreSQL test for unique codes, self-referral rejection, immutable attribution, the 200-credit qualification threshold, one-time reward and wallet/ledger consistency. The UI and migration remain candidate-only until the local signup flow and Admin approval are browser-tested.

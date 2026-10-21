@@ -1,10 +1,131 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080908"><link rel="manifest" href="./manifest.webmanifest"><title>N+ PLAY — Activity</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080908"><link rel="manifest" href="./manifest.webmanifest"><title>N+ PLAY — Activity & Game History</title>
 <style>
 :root{color-scheme:dark;--bg:#080908;--panel:#11130f;--line:rgba(255,255,255,.08);--text:#f4f1e8;--muted:#82847c;--gold:#c9a55b;--gold2:#f0dfb5;--green:#42d9a5;--red:#ff6d77}*{box-sizing:border-box}body{margin:0;background:radial-gradient(600px 360px at 50% -100px,#292315,transparent 70%),var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,sans-serif}.app{width:min(100%,850px);margin:auto;padding:0 14px 40px}.top{height:68px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:inherit;text-decoration:none}.brand{font-weight:950;letter-spacing:2px}.brand span{display:inline-grid;place-items:center;background:linear-gradient(135deg,#f0dfb5,#b9914b);color:#15120b;width:36px;height:36px;border-radius:12px;margin-right:8px}.back,.btn{border:1px solid #39352a;border-radius:10px;background:#171713;color:var(--gold2);padding:10px 13px;font-weight:800}.hero{margin-top:18px;padding:20px;border:1px solid rgba(201,165,91,.18);border-radius:20px;background:linear-gradient(145deg,#1b1a14,#10110f)}.eyebrow{font-size:10px;letter-spacing:2px;color:var(--gold)}h1{font-size:24px;margin:8px 0}p{color:var(--muted);font-size:12px;margin:0}.balance{font-size:26px;font-weight:950;margin-top:10px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.filter,.search{border:1px solid var(--line);border-radius:10px;background:#111310;color:var(--text);padding:10px 12px}.search{flex:1;min-width:190px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat,.panel{border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025);padding:14px}.stat small{color:var(--muted);font-size:9px}.stat b{display:block;margin-top:7px;font-size:16px}.panel{padding:0;overflow:hidden}.panelhead{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);font-size:12px;font-weight:900}.state{padding:20px;text-align:center;color:var(--muted);font-size:12px}.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:13px 14px;border-bottom:1px solid var(--line)}.row:last-child{border:0}.kind{font-size:12px;font-weight:850}.meta{color:var(--muted);font-size:10px;margin-top:5px;overflow-wrap:anywhere}.amount{text-align:right;font-size:13px;font-weight:950}.positive{color:var(--green)}.negative{color:var(--red)}.foot{padding:17px;text-align:center;color:#55574f;font-size:10px}@media(max-width:520px){.summary{grid-template-columns:1fr 1fr}.summary .stat:last-child{grid-column:1/-1}.hero{padding:16px}h1{font-size:21px}}
-</style></head><body><main class="app"><header class="top"><a class="brand" href="index.html"><span>N+</span>PLAY</a><a class="back" href="account.html">ACCOUNT</a></header><section class="hero"><div class="eyebrow">YOUR ACCOUNT</div><h1>Wallet Activity</h1><p>Supabase demo-credit transaction ledger. Entries are read from your account only.</p><div class="balance" id="balance">₹—</div><p id="accountMeta">Loading account…</p></section><div class="summary"><div class="stat"><small>TRANSACTIONS LOADED</small><b id="txCount">—</b></div><div class="stat"><small>DEMO CREDITS ADDED</small><b class="positive" id="creditsIn">₹0.00</b></div><div class="stat"><small>DEMO CREDITS USED</small><b class="negative" id="creditsOut">₹0.00</b></div></div><div class="toolbar"><select id="filter" class="filter" aria-label="Filter transactions"><option value="ALL">All activity</option><option value="GAME_BET">Game bets</option><option value="GAME_WIN">Game wins</option><option value="DEPOSIT_APPROVED">Approved credits</option><option value="ADMIN_ADJUSTMENT">Admin adjustments</option></select><input id="search" class="search" placeholder="Search game, note or period…" aria-label="Search activity"><button id="refresh" class="btn">REFRESH</button></div><section class="panel"><div class="panelhead"><span>TRANSACTION HISTORY</span><span id="updated">—</span></div><div id="rows" class="state">Checking your session…</div></section><footer class="foot">N+ PLAY · VIRTUAL-CREDIT DEMO · No real-money transfers</footer></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script><script src="core/nplus-auth.js"></script><script src="core/nplus-wallet-bridge.js"></script><script>
-(()=>{"use strict";const $=id=>document.getElementById(id);const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));let rows=[],user=null;function render(){const f=$('filter').value,q=$('search').value.trim().toLowerCase();const filtered=rows.filter(t=>(f==='ALL'||String(t.type||'').toUpperCase()===f)&&(!q||`${t.type} ${t.source} ${t.note} ${t.created_at}`.toLowerCase().includes(q)));$('txCount').textContent=rows.length;$('creditsIn').textContent=money(rows.filter(t=>Number(t.delta)>0).reduce((a,t)=>a+Number(t.delta),0));$('creditsOut').textContent=money(-rows.filter(t=>Number(t.delta)<0).reduce((a,t)=>a+Number(t.delta),0));if(!filtered.length){$('rows').className='state';$('rows').textContent=rows.length?'No matching transactions.':'No wallet transactions recorded yet.';return} $('rows').className='';$('rows').innerHTML=filtered.map(t=>{const d=Number(t.delta)||0;return `<article class="row"><div><div class="kind">${esc(String(t.type||'ACTIVITY').replaceAll('_',' '))} · ${esc(t.source||'SYSTEM')}</div><div class="meta">${esc(t.note||'No note')}<br>${esc(t.created_at?new Date(t.created_at).toLocaleString('en-IN'):'')}</div><div class="meta">Balance after: ${money(t.balance_after)}</div></div><div class="amount ${d>=0?'positive':'negative'}">${d>0?'+':''}${money(d)}</div></article>`}).join('')}
-async function refresh(){ $('rows').className='state';$('rows').textContent='Refreshing from Supabase…';try{user=await window.NPlusAuth.requireAuth();const [b,tx]=await Promise.all([window.NPlusWallet.getBalance(),window.NPlusWallet.transactions(500)]);rows=tx;$('balance').textContent=money(b);$('accountMeta').textContent=`${user.display_name||'N+ PLAY User'} · UID ${user.uid||'pending'}`;$('updated').textContent='Updated '+new Date().toLocaleTimeString('en-IN');render()}catch(e){console.error(e);$('rows').className='state';$('rows').textContent=e.message||'Could not load wallet activity.'}}
-$('filter').addEventListener('change',render);$('search').addEventListener('input',render);$('refresh').addEventListener('click',refresh);window.addEventListener('nplus:wallet-change',refresh);window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});refresh();
+</style></head><body><main class="app"><header class="top"><a class="brand" href="index.html"><span>N+</span>PLAY</a><a class="back" href="account.html">ACCOUNT</a></header><section class="hero"><div class="eyebrow">YOUR ACCOUNT</div><h1>Activity & Game History</h1><p>View accepted game bets and your account wallet ledger. Records load from Supabase for the signed-in account.</p><div class="balance" id="balance">₹—</div><p id="accountMeta">Loading account…</p></section><section class="panel" style="margin-top:14px"><div class="panelhead"><span>SERVER-RECORDED GAME HISTORY</span><span id="gameHistoryStatus">CHECKING</span></div><div id="gameRows" class="state">Loading recent accepted bets…</div></section><div class="summary"><div class="stat"><small>TRANSACTIONS LOADED</small><b id="txCount">—</b></div><div class="stat"><small>DEMO CREDITS ADDED</small><b class="positive" id="creditsIn">₹0.00</b></div><div class="stat"><small>DEMO CREDITS USED</small><b class="negative" id="creditsOut">₹0.00</b></div></div><div class="toolbar"><select id="filter" class="filter" aria-label="Filter transactions"><option value="ALL">All activity</option><option value="GAME_BET">Game bets</option><option value="GAME_WIN">Game wins</option><option value="DEPOSIT_APPROVED">Approved credits</option><option value="ADMIN_ADJUSTMENT">Admin adjustments</option></select><input id="search" class="search" placeholder="Search game, note or period…" aria-label="Search activity"><button id="refresh" class="btn">REFRESH</button></div><section class="panel"><div class="panelhead"><span>WALLET TRANSACTION LEDGER</span><span id="updated">—</span></div><div id="rows" class="state">Checking your session…</div></section><footer class="foot">N+ PLAY · Account activity and supported-game history</footer></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script><script src="core/nplus-auth.js"></script><script src="core/nplus-wallet-bridge.js"></script><script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id);
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let rows=[],gameRows=[],user=null,gameHistoryUnavailable=false;
+
+function renderWalletRows(){
+ const f=$('filter').value,q=$('search').value.trim().toLowerCase();
+ const filtered=rows.filter(t=>(f==='ALL'||String(t.type||'').toUpperCase()===f)&&(!q||`${t.type} ${t.source} ${t.note} ${t.created_at}`.toLowerCase().includes(q)));
+ $('txCount').textContent=rows.length;
+ $('creditsIn').textContent=money(rows.filter(t=>Number(t.delta)>0).reduce((a,t)=>a+Number(t.delta),0));
+ $('creditsOut').textContent=money(-rows.filter(t=>Number(t.delta)<0).reduce((a,t)=>a+Number(t.delta),0));
+ if(!filtered.length){
+  $('rows').className='state';
+  $('rows').textContent=rows.length?'No matching wallet transactions.':'No wallet transactions recorded yet.';
+  return;
+ }
+ $('rows').className='';
+ $('rows').innerHTML=filtered.map(t=>{
+  const d=Number(t.delta)||0;
+  return `<article class="row"><div><div class="kind">${esc(String(t.type||'ACTIVITY').replaceAll('_',' '))} · ${esc(t.source||'SYSTEM')}</div><div class="meta">${esc(t.note||'No note')}<br>${esc(t.created_at?new Date(t.created_at).toLocaleString('en-IN'):'')}</div><div class="meta">Balance after: ${money(t.balance_after)}</div></div><div class="amount ${d>=0?'positive':'negative'}">${d>0?'+':''}${money(d)}</div></article>`;
+ }).join('');
+}
+
+async function readRpc(client,name,args){
+ const {data,error}=await client.rpc(name,args);
+ if(error) throw error;
+ if(data==null) return [];
+ if(!Array.isArray(data)) throw new Error("Unexpected response from "+name);
+ return data;
+}
+
+function gameDescription(entry){
+ const row=entry.row;
+ if(entry.game==="AVIATOR"){
+  return "Slot "+(Number(row.slot||0)+1)+(row.auto_cashout?" · Auto cash-out "+Number(row.auto_cashout).toFixed(2)+"x":"");
+ }
+ const selection=row.selection;
+ if(selection==null) return "Selection unavailable";
+ if(typeof selection==="string") return selection;
+ try{return JSON.stringify(selection)}catch{return "Selection recorded"}
+}
+
+function renderGameHistory(){
+ const status=$('gameHistoryStatus'),target=$('gameRows');
+ if(gameHistoryUnavailable){
+  status.textContent="UNAVAILABLE";
+  target.className="state";
+  target.textContent="Game history is unavailable in this environment. The server history functions may need their matching database migration; wallet ledger remains available.";
+  return;
+ }
+ status.textContent="SYNCED";
+ if(!gameRows.length){
+  target.className="state";
+  target.textContent="No accepted server-recorded bets yet. Supported game history will appear here after the server records a bet.";
+  return;
+ }
+ target.className="";
+ target.innerHTML=gameRows.map(entry=>{
+  const r=entry.row;
+  const state=String(r.status||"pending").toUpperCase();
+  const stateClass=["WON","CASHED_OUT"].includes(state)?"positive":state==="LOST"?"negative":"";
+  const stamp=r.created_at?new Date(r.created_at).toLocaleString("en-IN"):"Time unavailable";
+  const period=r.period?String(r.period):r.round_index!=null?String(r.round_index):"—";
+  const payout=Number(r.payout||0);
+  const outcome=r.outcome!=null?(typeof r.outcome==="string"?r.outcome:JSON.stringify(r.outcome)):r.crash_point!=null?("Crash point "+Number(r.crash_point).toFixed(2)+"x"):"Not revealed";
+  const stake=Number(r.stake||0);
+  return `<article class="row"><div><div class="kind">${esc(entry.game)} · Round ${esc(period)}</div><div class="meta">Bet: ${esc(gameDescription(entry))}<br>Stake: ${money(stake)} · Payout: ${money(payout)}</div><div class="meta">${esc(stamp)} · Result: ${esc(outcome)}</div></div><div class="amount ${stateClass}">${esc(state.replaceAll("_"," "))}</div></article>`;
+ }).join("");
+}
+
+async function loadGameHistory(client){
+ $('gameHistoryStatus').textContent="LOADING";
+ $('gameRows').className="state";
+ $('gameRows').textContent="Loading server-recorded game bets…";
+ try{
+  const wingo=await Promise.all([30,60,180,300].map(duration=>
+   readRpc(client,"nplus_wingo_demo_my_bets",{p_duration_seconds:duration,p_limit:200})
+  ));
+  const [moto,aviator]=await Promise.all([
+   readRpc(client,"nplus_moto_demo_my_bets",{p_limit:200}),
+   readRpc(client,"nplus_aviator_demo_my_bets",{p_limit:200})
+  ]);
+  gameRows=[
+   ...wingo.flat().map(row=>({game:"WINGO",row})),
+   ...moto.map(row=>({game:"MOTORACE",row})),
+   ...aviator.map(row=>({game:"AVIATOR",row}))
+  ].sort((a,b)=>Date.parse(b.row.created_at||0)-Date.parse(a.row.created_at||0));
+  gameHistoryUnavailable=false;
+ }catch(error){
+  console.error("N+ PLAY game history unavailable:",error);
+  gameRows=[];
+  gameHistoryUnavailable=true;
+ }
+ renderGameHistory();
+}
+
+async function refresh(){
+ $('rows').className='state';
+ $('rows').textContent='Refreshing account records from Supabase…';
+ try{
+  user=await window.NPlusAuth.requireAuth();
+  if(!user?.id) throw new Error("Sign in to view your account activity.");
+  const [b,tx]=await Promise.all([window.NPlusWallet.getBalance(),window.NPlusWallet.transactions(500)]);
+  rows=tx;
+  $('balance').textContent=money(b);
+  $('accountMeta').textContent=`${user.display_name||user.email||'N+ PLAY User'} · Signed in`;
+  $('updated').textContent='Updated '+new Date().toLocaleTimeString('en-IN');
+  renderWalletRows();
+  await loadGameHistory(window.NPlusAuth.client);
+ }catch(e){
+  console.error(e);
+  $('rows').className='state';
+  $('rows').textContent=e.message||'Could not load wallet activity.';
+ }
+}
+
+$('filter').addEventListener('change',renderWalletRows);
+$('search').addEventListener('input',renderWalletRows);
+$('refresh').addEventListener('click',refresh);
+window.addEventListener('nplus:wallet-change',refresh);
+window.addEventListener('focus',refresh);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+refresh();
 })();
 </script><script>if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('PWA registration skipped',e)));</script></body></html>

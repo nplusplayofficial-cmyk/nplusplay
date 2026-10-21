@@ -1013,7 +1013,8 @@ button:disabled{
     <div class="section-head">
       <div>
         <h3>Commission & Game Report</h3>
-        <div class="commission-note">Virtual/demo platform fee report • current rate: 2%</div>
+        <div class="commission-note">Virtual/demo platform fee report • legacy flat 2% estimate</div>
+        <div class="commission-note" role="note">Estimate only — per-game fee accounting is not yet reconciled. MotoRace currently uses a 1.5% stake fee, WINGO reduces winning returns by 2%, and Aviator has no separate entry fee. Do not use these figures as actual earnings until the accounting model is approved.</div>
       </div>
       <button class="refresh" id="commissionRefreshBtn">↻ REFRESH</button>
     </div>
@@ -1036,11 +1037,11 @@ button:disabled{
         <strong id="totalWinningAmount">₹0.00</strong>
       </div>
       <div class="commission-card highlight">
-        <span>TODAY COMMISSION</span>
+        <span>ESTIMATED TODAY COMMISSION</span>
         <strong id="todayCommission">₹0.00</strong>
       </div>
       <div class="commission-card highlight">
-        <span>ALL-TIME COMMISSION</span>
+        <span>ESTIMATED ALL-TIME COMMISSION</span>
         <strong id="allTimeCommission">₹0.00</strong>
       </div>
       <div class="commission-card">
@@ -1055,7 +1056,7 @@ button:disabled{
 
     <div class="card" style="margin-top:15px">
       <div class="section-head">
-        <h3>Game-wise Commission</h3>
+        <div><h3>Game-wise Commission Estimate</h3><div class="commission-note" id="commissionNotice">Estimate only — the current report applies a uniform 2% to GAME_BET volume. It is not an accounting ledger: MotoRace charges a 1.5% demo stake fee, WINGO withholds 2% from winning returns, and Aviator has no entry fee. Do not use these figures as exact fees until the commission model is approved and a recorded fee ledger is implemented.</div></div>
       </div>
       <div id="gameCommissionList">
         <div class="loading">Loading commission...</div>
@@ -2677,7 +2678,7 @@ button:disabled{
               <th>GAME</th>
               <th>BETS</th>
               <th>BET AMOUNT</th>
-              <th>COMMISSION</th>
+              <th>EST. COMMISSION</th>
             </tr>
           </thead>
           <tbody>
