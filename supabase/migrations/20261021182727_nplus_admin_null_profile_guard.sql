@@ -960,63 +960,109 @@ end;
 $function$;
 
 CREATE OR REPLACE FUNCTION public.nplus_set_game_status(p_game_key text, p_enabled boolean)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
 AS $function$
-declare
+DECLARE
+  v_user_id uuid := auth.uid();
   v_role text;
-  v_key text;
+  v_key text := upper(trim(coalesce(p_game_key, '')));
   v_name text;
-begin
+  v_worker_scheduled boolean := false;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required.';
+  END IF;
 
-  select lower(coalesce(role, ''))
-  into v_role
-  from public.profiles
-  where id = auth.uid();
+  SELECT lower(coalesce(p.role, ''))
+    INTO v_role
+  FROM public.profiles AS p
+  WHERE p.id = v_user_id;
 
-  if auth.uid() is null then
-    raise exception 'Authentication required.';
-  end if;
+  IF coalesce(v_role, '') <> 'admin' THEN
+    RAISE EXCEPTION 'Admin access required.';
+  END IF;
 
-  if coalesce(v_role, '') <> 'admin' then
-    raise exception 'Admin access required.';
-  end if;
+  IF p_enabled IS NULL THEN
+    RAISE EXCEPTION 'Enabled status must be true or false.';
+  END IF;
 
-  v_key := upper(trim(coalesce(p_game_key, '')));
+  IF v_key NOT IN ('WINGO', 'K3', '5D', 'TRX', 'AVIATOR', 'MOTO') THEN
+    RAISE EXCEPTION 'Invalid game.';
+  END IF;
 
-  if v_key not in (
-    'WINGO',
-    'K3',
-    '5D',
-    'TRX',
-    'AVIATOR',
-    'MOTO'
-  ) then
-    raise exception 'Invalid game.';
-  end if;
+  IF v_key IN ('K3', '5D', 'TRX') AND p_enabled THEN
+    RAISE EXCEPTION 'Payout rules pending; this game cannot be enabled.';
+  END IF;
 
-  update public.game_settings
-  set
-    enabled = coalesce(p_enabled, true),
-    updated_at = now(),
-    updated_by = auth.uid()
-  where game_key = v_key
-  returning game_name
-  into v_name;
+  IF p_enabled AND v_key = 'WINGO' AND (
+    to_regclass('public.nplus_wingo_demo_rounds') IS NULL
+    OR to_regprocedure('public.nplus_wingo_demo_current_round(integer)') IS NULL
+    OR to_regprocedure('public.nplus_wingo_demo_place_bet(integer,jsonb,numeric,uuid)') IS NULL
+    OR to_regprocedure('public.nplus_wingo_demo_settle_round(integer,bigint)') IS NULL
+  ) THEN
+    RAISE EXCEPTION 'WINGO server settlement is not installed.';
+  END IF;
 
-  if not found then
-    raise exception 'Game setting not found.';
-  end if;
+  IF p_enabled AND v_key = 'MOTO' AND (
+    to_regclass('public.nplus_moto_demo_rounds') IS NULL
+    OR to_regprocedure('public.nplus_moto_demo_current_round()') IS NULL
+    OR to_regprocedure('public.nplus_moto_demo_place_bet(jsonb,numeric,uuid)') IS NULL
+    OR to_regprocedure('public.nplus_moto_demo_settle_round(bigint)') IS NULL
+  ) THEN
+    RAISE EXCEPTION 'MotoRace server settlement is not installed.';
+  END IF;
 
-  return jsonb_build_object(
+  IF p_enabled AND v_key = 'AVIATOR' AND (
+    to_regclass('public.nplus_aviator_demo_rounds') IS NULL
+    OR to_regclass('public.nplus_aviator_worker_health') IS NULL
+    OR to_regprocedure('public.nplus_aviator_demo_current_round()') IS NULL
+    OR to_regprocedure('public.nplus_aviator_demo_place_bet(uuid,integer,numeric,uuid,numeric)') IS NULL
+    OR to_regprocedure('public.nplus_aviator_demo_worker_tick()') IS NULL
+  ) THEN
+    RAISE EXCEPTION 'Aviator server settlement and worker are not installed.';
+  END IF;
+
+  IF p_enabled AND v_key = 'AVIATOR' THEN
+    IF to_regclass('cron.job') IS NULL THEN
+      RAISE EXCEPTION 'Aviator scheduler is not installed.';
+    END IF;
+
+    EXECUTE
+      'SELECT EXISTS (
+         SELECT 1 FROM cron.job
+         WHERE jobname = $1
+           AND database = current_database()
+           AND active
+       )'
+      INTO v_worker_scheduled
+      USING 'nplus-aviator-worker';
+
+    IF NOT v_worker_scheduled THEN
+      RAISE EXCEPTION 'Aviator scheduler is not active.';
+    END IF;
+  END IF;
+
+  UPDATE public.game_settings
+  SET enabled = p_enabled,
+      updated_at = clock_timestamp(),
+      updated_by = v_user_id
+  WHERE game_key = v_key
+  RETURNING game_name INTO v_name;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Game setting not found.';
+  END IF;
+
+  RETURN jsonb_build_object(
     'game_key', v_key,
     'game_name', v_name,
-    'enabled', p_enabled
+    'enabled', p_enabled,
+    'updated_by', v_user_id
   );
-
-end;
+END;
 $function$;
 
 
