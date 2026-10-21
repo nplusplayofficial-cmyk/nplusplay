@@ -13,8 +13,15 @@ CREATE TABLE IF NOT EXISTS public.nplus_demo_referral_codes (
 );
 ALTER TABLE public.nplus_demo_referral_codes
   ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS code text,
   ADD COLUMN IF NOT EXISTS referral_code text,
   ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+
+-- Preserve referral codes created by the older prototype and satisfy its code NOT NULL/check constraint.
+UPDATE public.nplus_demo_referral_codes
+SET referral_code = COALESCE(referral_code, code),
+    code = COALESCE(code, referral_code)
+WHERE referral_code IS NULL OR code IS NULL;
 
 CREATE UNIQUE INDEX IF NOT EXISTS nplus_demo_referral_codes_user_uidx
   ON public.nplus_demo_referral_codes(user_id);
@@ -37,6 +44,7 @@ CREATE TABLE IF NOT EXISTS public.nplus_demo_referrals (
 );
 ALTER TABLE public.nplus_demo_referrals
   ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS referrer_user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
   ADD COLUMN IF NOT EXISTS referred_user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
   ADD COLUMN IF NOT EXISTS referral_code text,
   ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'pending',
@@ -252,10 +260,10 @@ BEGIN
       RAISE EXCEPTION 'Unable to generate a unique referral code. Please retry.';
     END IF;
 
-    v_code := 'NPLUS' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 10));
+    v_code := 'NP' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 10));
 
-    INSERT INTO public.nplus_demo_referral_codes(user_id, referral_code, created_at)
-    VALUES (p_user_id, v_code, now())
+    INSERT INTO public.nplus_demo_referral_codes(user_id, code, referral_code, created_at)
+    VALUES (p_user_id, v_code, v_code, now())
     ON CONFLICT DO NOTHING
     RETURNING referral_code INTO v_code;
 
@@ -349,8 +357,8 @@ BEGIN
   END IF;
 
   INSERT INTO public.nplus_demo_referrals
-    (user_id, referred_user_id, referral_code, status, reward_amount, created_at)
-  VALUES (v_referrer, v_actor, v_code, 'pending', 0.00, now())
+    (user_id, referrer_user_id, referred_user_id, referral_code, status, reward_amount, created_at)
+  VALUES (v_referrer, v_referrer, v_actor, v_code, 'pending', 0.00, now())
   ON CONFLICT DO NOTHING;
 
   IF NOT FOUND THEN
