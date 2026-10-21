@@ -585,7 +585,7 @@
 
         <b>Free demo:</b>
         New accounts start with ₹108 virtual credits.
-        Email OTP verifies new accounts only. Login requires email + mobile number + password.
+        New accounts use email OTP when confirmation is enabled; otherwise sign-up signs you in immediately. Login requires email + mobile number + password.
 
       </div>
 
@@ -1038,7 +1038,27 @@
 
               const referralCode = $("signupReferralCode").value.trim().toUpperCase();
               pendingSignup = { name, email, mobile, password, referralCode };
-              await NPlusAuth.sendSignupOtp(pendingSignup);
+              const signupStart = await NPlusAuth.sendSignupOtp(pendingSignup);
+
+              // Some Supabase projects have email confirmation enabled (OTP required);
+              // others return a session immediately. Support both server responses.
+              if (signupStart.immediateSession) {
+                let successMessage = "Account created successfully.";
+                let redirectDelay = 700;
+
+                if (pendingSignup.referralCode) {
+                  if (signupStart.referralResult?.success) {
+                    successMessage += " Demo referral code attached.";
+                  } else {
+                    successMessage += " Account is ready, but the referral code was not applied.";
+                    redirectDelay = 1800;
+                  }
+                }
+
+                setStatus(successMessage + " Opening N+ PLAY…", "ok");
+                setTimeout(() => location.replace(nextUrl()), redirectDelay);
+                return;
+              }
 
               stage = "otp";
               $("signupFields").classList.add("hidden");
