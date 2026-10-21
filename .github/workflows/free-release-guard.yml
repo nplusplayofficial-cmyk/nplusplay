@@ -1,0 +1,23 @@
+name: N+ Free Release Guard
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - feature/nplus-member-centre-demo-2026-10-19
+permissions:
+  contents: read
+
+concurrency:
+  group: nplus-free-release-guard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  no-cost-release-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check virtual game and admin contracts
+        run: node qa/free-release-guard.cjs

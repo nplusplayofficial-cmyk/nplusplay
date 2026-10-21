@@ -79,8 +79,8 @@ on conflict (game_key) do nothing;
 
 do $tests$
 declare
-  v_user uuid := '11111111-1111-4111-8111-111111111111';
-  v_request uuid := '22222222-2222-4222-8222-222222222222';
+  v_user uuid := gen_random_uuid();
+  v_request uuid := gen_random_uuid();
   v_round jsonb;
   v_placed jsonb;
   v_repeat jsonb;
@@ -100,7 +100,7 @@ declare
   v_before_count integer;
   v_after_count integer;
 begin
-  insert into auth.users(id, email) values (v_user, 'qa-user@example.invalid');
+  insert into auth.users(id, email) values (v_user, 'qa-' || replace(v_user::text, '-', '') || '@example.invalid');
   insert into public.demo_wallets(user_id, balance) values (v_user, 108.00);
   perform set_config('request.jwt.claim.sub', v_user::text, true);
 

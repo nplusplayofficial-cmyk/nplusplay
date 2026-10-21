@@ -1,0 +1,6 @@
+
+# Local database backups - sensitive data
+/backups/
+
+# Supabase CLI local metadata
+/supabase/.temp/

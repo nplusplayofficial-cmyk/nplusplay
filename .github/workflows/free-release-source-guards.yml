@@ -1,0 +1,28 @@
+name: N+ Free Release Source Guards
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [feature/nplus-member-centre-demo-2026-10-19]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nplus-free-release-source-guards-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax and local references
+        run: node qa/verify-project.js
+      - name: Run free release source safety guards
+        run: node qa/free-release-guards.cjs
