@@ -23,4 +23,27 @@ BEGIN
 END
 $scheduler$;
 
+-- Supabase documents that job_run_details grows indefinitely unless cleaned.
+-- Keep the most recent seven days of history while the 1-second worker runs.
+DO $history_cleanup$
+DECLARE
+    v_job_id bigint;
+BEGIN
+    FOR v_job_id IN
+        SELECT jobid
+        FROM cron.job
+        WHERE jobname = 'nplus-aviator-job-history-cleanup'
+          AND database = current_database()
+    LOOP
+        PERFORM cron.unschedule(v_job_id);
+    END LOOP;
+
+    PERFORM cron.schedule(
+        'nplus-aviator-job-history-cleanup',
+        '17 3 * * *',
+        'DELETE FROM cron.job_run_details WHERE end_time < now() - interval ''7 days'''
+    );
+END
+$history_cleanup$;
+
 COMMIT;
