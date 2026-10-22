@@ -55,14 +55,14 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 .modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);z-index:50}
 .modal.show{display:grid}
 .modal-card{width:min(100%,420px);background:#11130f;border:1px solid var(--line);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000;text-align: center;}
-.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa;cursor:pointer}
+.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa;cursor:pointer;font-size: 16px;}
+.close:hover { background: #222; color: #fff; }
 .modal-card h2{font-size:18px;margin:2px 0 8px}.modal-card p{font-size:10px;color:#777a72;line-height:1.6}
-.demo{padding:12px;border:1px solid rgba(66,214,160,.15);background:rgba(66,214,160,.04);border-radius:12px;color:#86d7bd;font-size:10px;line-height:1.5; text-align: left;}
-.done{width:100%;margin-top:14px;border:0;border-radius:12px;padding:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950;cursor:pointer}
+.done{width:100%;margin-top:14px;border:0;border-radius:12px;padding:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950;cursor:pointer;font-size: 14px;}
 
 /* UPI Specifics */
 .qr-box { background: #fff; padding: 10px; border-radius: 12px; display: inline-block; margin: 15px 0; }
-.qr-box img { width: 150px; height: 150px; display: block; }
+.qr-box img { width: 200px; height: 200px; object-fit: contain; display: block; }
 .upi-id-box { background: #1a1c18; border: 1px dashed var(--gold); padding: 10px; border-radius: 8px; font-weight: 900; font-size: 14px; color: var(--gold2); margin-bottom: 15px; letter-spacing: 1px; }
 .utr-input { width: 100%; padding: 12px; border-radius: 8px; background: #0b0c0a; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 14px; margin-bottom: 10px; text-align: center; text-transform: uppercase; }
 .utr-input:focus { outline: none; border-color: var(--gold); }
@@ -107,12 +107,9 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
   <div class="methods">
     <div class="section-title">SELECT METHOD</div>
     
+    <!-- Only UPI Option -->
     <div class="method selected" data-method="UPI" id="upiMethod">
-      <div class="method-icon">🏦</div><div><b>UPI / Bank Transfer</b><small>Pay via GPay, PhonePe, Paytm</small></div><span class="radio"></span>
-    </div>
-
-    <div class="method" data-method="Crypto" id="cryptoMethod">
-      <div class="method-icon">₿</div><div><b>Crypto (USDT)</b><small>Fast & Secure via NOWPayments</small></div><span class="radio"></span>
+      <div class="method-icon">🏦</div><div><b>UPI Transfer</b><small>Pay via GPay, PhonePe, Paytm</small></div><span class="radio"></span>
     </div>
     
   </div>
@@ -128,30 +125,19 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 <div class="notice">N+ PLAY · Wallet Center · 18+ · Play responsibly</div>
 </div>
 
-<!-- Modal 1: Processing Crypto -->
-<div class="modal" id="cryptoModal">
- <div class="modal-card">
-  <button class="close" onclick="closeModal()">×</button>
-  <h2 id="modalTitle">Processing...</h2>
-  <p id="modalText">Please wait while we redirect you to the secure payment gateway.</p>
-  <div class="demo" id="modalStatus">Connecting to NOWPayments...</div>
-  <button class="done" id="cryptoDoneBtn" style="display:none;" onclick="closeModal()">CLOSE</button>
- </div>
-</div>
-
-<!-- Modal 2: UPI QR Code & UTR -->
+<!-- UPI QR Code & UTR Modal -->
 <div class="modal" id="upiModal">
  <div class="modal-card">
-  <button class="close" onclick="closeModal()">×</button>
+  <button class="close" onclick="closeModal()">✕</button>
   <h2>Pay via UPI</h2>
   <p>Scan the QR or use UPI ID to pay <b id="upiAmountText" style="color:var(--gold2);">₹0</b></p>
   
   <div class="qr-box">
-    <!-- QR Code Placeholder - Replace data with your actual UPI ID -->
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=YOUR_UPI_ID_HERE&pn=N+PLAY" alt="UPI QR">
+    <!-- ✅ UNGA QR IMAGE INGA ADD PANNIRUKEN -->
+    <img src="my-qr.png" alt="UPI QR">
   </div>
   
-  <div class="upi-id-box" id="upiIdText">YOUR_UPI_ID_HERE</div>
+  <div class="upi-id-box" id="upiIdText">yourname@airtel</div>
   
   <p style="margin-bottom:5px; text-align:left; font-size:10px; color:#aaa;">Enter 12-digit UTR / Ref No:</p>
   <input type="text" id="utrInput" class="utr-input" placeholder="e.g. 302456789012">
@@ -165,18 +151,13 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 "use strict";
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 let walletReady=false;
-let selectedMethod = 'UPI'; // Default
 let currentDepositAmount = 0;
 
-// ✅ UNGA NOWPAYMENTS API KEY INGA PUDUNGA
-const NOWPAYMENTS_API_KEY = '1CEHZQ1-PC84EM3-GX2N7GE-0BNNXBV'; 
-
-// ✅ UNGA UPI ID INGA PUDUNGA (Airtel Bank UPI)
+// ✅ UNGA UPI ID INGA PUDUNGA
 const MY_UPI_ID = 'yourname@airtel'; // Example: 9876543210@airtel
 
-// Update UPI UI dynamically
+// Update UPI ID Text dynamically
 document.getElementById('upiIdText').textContent = MY_UPI_ID;
-document.querySelector('#upiModal .qr-box img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${MY_UPI_ID}&pn=N+PLAY`;
 
 async function balance(){
  const user=await window.NPlusAuth?.current?.();
@@ -213,23 +194,20 @@ document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active")); b.classList.add("active");
 });
 
-// Method Selection Logic
-document.querySelectorAll(".method").forEach(m => {
-    m.onclick = () => {
-        document.querySelectorAll(".method").forEach(x => x.classList.remove("selected"));
-        m.classList.add("selected");
-        selectedMethod = m.dataset.method;
-    }
-});
-
+// Close Modal Function
 function closeModal(){
-    document.getElementById('cryptoModal').classList.remove('show');
     document.getElementById('upiModal').classList.remove('show');
 }
 
+// Close when clicking outside the modal card
+document.getElementById('upiModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
 // MAIN DEPOSIT BUTTON LOGIC
 document.querySelector("#depositBtn").onclick = async () => {
- // ✅ QA FIX: Added "shared" to match the exact phrase expected by the test
  if(!walletReady){alert("Please sign in and wait for the shared wallet to sync.");return;}
  
  const amount = Number(document.querySelector("#amount").value);
@@ -240,57 +218,10 @@ document.querySelector("#depositBtn").onclick = async () => {
     return;
  }
 
- if (selectedMethod === 'UPI') {
-     // Show UPI Modal
-     document.getElementById('upiAmountText').textContent = '₹' + amount;
-     document.getElementById('utrInput').value = ''; // Clear previous
-     document.getElementById('upiModal').classList.add('show');
- } else {
-     // Show Crypto Modal & Redirect
-     const modal = document.getElementById('cryptoModal');
-     const modalStatus = document.getElementById('modalStatus');
-     const doneBtn = document.getElementById('cryptoDoneBtn');
-     
-     modal.classList.add('show');
-     modalStatus.textContent = 'Connecting to NOWPayments...';
-     doneBtn.style.display = 'none';
-
-     try {
-         const user = await window.NPlusAuth.current();
-         const proxyUrl = 'https://corsproxy.io/?';
-         const apiUrl = 'https://api.nowpayments.io/v1/invoice';
-
-         const response = await fetch(proxyUrl + encodeURIComponent(apiUrl), {
-             method: 'POST',
-             headers: {
-                 'x-api-key': NOWPAYMENTS_API_KEY,
-                 'Content-Type': 'application/json'
-             },
-             body: JSON.stringify({
-                 price_amount: amount, 
-                 price_currency: 'inr',
-                 order_id: user.id + '-' + Date.now(),
-                 order_description: 'N+ PLAY Deposit',
-                 ipn_callback_url: 'https://nplusplayofficial-cmyk.github.io/nplusplay/', 
-                 success_url: 'https://nplusplayofficial-cmyk.github.io/nplusplay/index.html',
-                 cancel_url: 'https://nplusplayofficial-cmyk.github.io/nplusplay/deposit.html'
-             })
-         });
-
-         const data = await response.json();
-
-         if (data.invoice_url) {
-             modalStatus.textContent = 'Redirecting to secure checkout...';
-             window.location.href = data.invoice_url;
-         } else {
-             modalStatus.textContent = 'Payment gateway initialization failed.';
-             doneBtn.style.display = 'block';
-         }
-     } catch (error) {
-         modalStatus.textContent = 'Network error. Please try again.';
-         doneBtn.style.display = 'block';
-     }
- }
+ // Show UPI Modal
+ document.getElementById('upiAmountText').textContent = '₹' + amount;
+ document.getElementById('utrInput').value = ''; // Clear previous UTR
+ document.getElementById('upiModal').classList.add('show');
 };
 
 // UPI SUBMIT LOGIC (Saves to Supabase)
@@ -308,8 +239,7 @@ async function submitUpiPayment() {
     try {
         const user = await window.NPlusAuth.current();
         
-        // 💡 SUPABASE DATABASE LA SAVE PANNROM
-        // Inga namma 'manual_deposits' nu oru table use panrom (Idha Supabase la create pannanum)
+        // SUPABASE DATABASE LA SAVE PANNROM
         const { data, error } = await window.supabase
             .from('manual_deposits')
             .insert([
