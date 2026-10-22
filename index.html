@@ -1573,6 +1573,23 @@ body{
 <script src="core/activity.js"></script>
 <script src="core/games.js"></script>
 
+
+<style>
+/* Fix single-column empty-state layout in the Recent Demo Activity panel. */
+#recentDemoActivityRows .champion {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+#recentDemoActivityRows .player {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#recentDemoActivityRows .player small {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+</style>
+
 </head>
 
 <body>
