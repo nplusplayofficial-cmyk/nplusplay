@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>N+ PLAY — Payment Settings</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#070707; --panel:#101010; --panel2:#151515;
+  --gold:#c9a55b; --gold2:#f1e5c3; --text:#f5f2e9; --muted:#8e8e8e; --green:#23d39a; --red:#ff5260; --line:rgba(201,165,91,.16);
+}
+body{margin:0;background:radial-gradient(circle at top right,rgba(201,165,91,.08),transparent 30%),radial-gradient(circle at bottom left,rgba(201,165,91,.04),transparent 35%),var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif;min-height:100vh;}
+button{font:inherit;cursor:pointer}
+.app{width:min(1180px,94%);margin:auto;padding:28px 0 50px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px 22px;border:1px solid var(--line);background:rgba(16,16,16,.92);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.brand{display:flex;align-items:center;gap:12px;}
+.mark{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#f1e5c3,#c9a55b);color:#080808;font-weight:1000;font-size:20px;}
+.brand h1{margin:0;font-size:19px;letter-spacing:3px;}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:10px;letter-spacing:2px;}
+.logout{border:1px solid rgba(255,82,96,.3);color:#ff8b94;background:rgba(255,82,96,.06);border-radius:12px;padding:11px 16px;font-weight:800;}
+.adminnav{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px;padding:8px;border:1px solid var(--line);border-radius:14px;background:#101010}
+.adminnav a{flex:1;min-width:150px;text-align:center;text-decoration:none;border:1px solid rgba(255,255,255,.08);background:#151515;color:var(--muted);border-radius:10px;padding:11px 10px;font-size:11px;font-weight:900;letter-spacing:.5px}
+.adminnav a.active{background:rgba(201,165,91,.12);border-color:rgba(201,165,91,.55);color:var(--gold2)}
+.hero{margin-top:22px;padding:26px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,rgba(201,165,91,.08),rgba(16,16,16,.96));}
+.hero .eyebrow{color:var(--gold);font-size:11px;font-weight:900;letter-spacing:2px;}
+.hero h2{margin:9px 0 5px;font-size:30px;}
+.hero p{color:var(--muted);margin:0;}
+
+.form-card{background:rgba(16,16,16,.94);border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:22px;max-width:600px;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;color:var(--muted);font-size:11px;margin-bottom:8px;letter-spacing:1px;}
+.form-group input{width:100%;background:#151515;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;color:#fff;font-size:14px;font-weight:700;}
+.form-group input:focus{outline:none;border-color:var(--gold);}
+.btn-save{width:100%;background:linear-gradient(135deg,#f1e5c3,#c9a55b);color:#080808;border:0;border-radius:12px;padding:15px;font-weight:1000;font-size:14px;cursor:pointer;transition:0.2s;}
+.btn-save:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,165,91,.3);}
+.status{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#171717;border:1px solid var(--line);padding:13px 18px;border-radius:12px;transition:.25s;z-index:20;font-weight:800;font-size:13px;}
+.status.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.status.ok{border-color:rgba(35,211,154,.5);color:var(--green);}
+.status.err{border-color:rgba(255,82,96,.5);color:var(--red);}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261006"></script>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">N+</div>
+      <div><h1>N+ PLAY</h1><p>SECURE ADMIN PANEL</p></div>
+    </div>
+    <button class="logout" id="logoutBtn">LOGOUT</button>
+  </header>
+  
+  <nav class="adminnav">
+    <a href="admin.html">DASHBOARD</a>
+    <a href="admin-deposits.html">DEPOSITS &amp; WALLET</a>
+    <a href="admin-withdrawals.html">WITHDRAWAL REQUESTS</a>
+    <a href="admin-games.html">GAME CONTROL</a>
+    <a href="admin-users.html">USERS</a>
+    <a href="admin-reports.html">COMMISSION &amp; REPORTS</a>
+    <a href="admin-payment-settings.html" class="active">PAYMENT SETTINGS</a>
+  </nav>
+
+  <section class="hero">
+    <div class="eyebrow">PAYMENT CONFIGURATION</div>
+    <h2>Deposit Settings</h2>
+    <p>These details will be shown to customers on the Deposit page for UPI/Bank transfers.</p>
+  </section>
+
+  <div class="form-card">
+    <form id="paymentForm">
+      <div class="form-group">
+        <label>UPI ID (e.g., 9876543210@airtel)</label>
+        <input type="text" id="upiId" placeholder="Enter UPI ID" required>
+      </div>
+      <div class="form-group">
+        <label>Account Holder Name</label>
+        <input type="text" id="accHolder" placeholder="Enter Full Name" required>
+      </div>
+      <div class="form-group">
+        <label>Bank Name</label>
+        <input type="text" id="bankName" placeholder="e.g., Airtel Payments Bank" required>
+      </div>
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="text" id="accNum" placeholder="Enter Account Number" required>
+      </div>
+      <div class="form-group">
+        <label>IFSC Code</label>
+        <input type="text" id="ifsc" placeholder="e.g., AIRL0000001" required>
+      </div>
+      <button type="submit" class="btn-save" id="saveBtn">SAVE PAYMENT DETAILS</button>
+    </form>
+  </div>
+</div>
+
+<div class="status" id="statusBox"></div>
+
+<script>
+(()=>{
+  const cfg=window.NPlusConfig;
+  if(!cfg?.supabaseUrl||!cfg?.supabaseAnonKey)return;
+  const supabase=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+  
+  const logout=document.getElementById('logoutBtn');
+  const form=document.getElementById('paymentForm');
+  const statusBox=document.getElementById('statusBox');
+  const saveBtn=document.getElementById('saveBtn');
+
+  function showStatus(msg, isError=false) {
+      statusBox.textContent = msg;
+      statusBox.className = 'status show ' + (isError ? 'err' : 'ok');
+      setTimeout(() => { statusBox.className = 'status'; }, 3000);
+  }
+
+  // Auth Guard
+  async function guard(){
+    const {data,error}=await supabase.auth.getSession();
+    if(error||!data.session){location.replace('admin-login.html');return;}
+    const {data:profile,error:profileError}=await supabase.from('profiles').select('role').eq('id',data.session.user.id).maybeSingle();
+    if(profileError||String(profile?.role||'').toLowerCase()!=='admin'){await supabase.auth.signOut();location.replace('admin-login.html');}
+  }
+  logout.addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('admin-login.html');});
+
+  // Fetch current settings
+  async function loadSettings() {
+    const { data, error } = await supabase.from('payment_settings').select('*').eq('id', 1).single();
+    if (error) {
+        console.error("Error fetching settings:", error);
+        return;
+    }
+    if (data) {
+        document.getElementById('upiId').value = data.upi_id || '';
+        document.getElementById('accHolder').value = data.account_holder || '';
+        document.getElementById('bankName').value = data.bank_name || '';
+        document.getElementById('accNum').value = data.account_number || '';
+        document.getElementById('ifsc').value = data.ifsc_code || '';
+    }
+  }
+
+  // Save settings
+  form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'SAVING...';
+
+      const updates = {
+          upi_id: document.getElementById('upiId').value.trim(),
+          account_holder: document.getElementById('accHolder').value.trim(),
+          bank_name: document.getElementById('bankName').value.trim(),
+          account_number: document.getElementById('accNum').value.trim(),
+          ifsc_code: document.getElementById('ifsc').value.trim(),
+          updated_at: new Date()
+      };
+
+      const { error } = await supabase.from('payment_settings').update(updates).eq('id', 1);
+
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'SAVE PAYMENT DETAILS';
+
+      if (error) {
+          console.error(error);
+          showStatus('Failed to save settings.', true);
+      } else {
+          showStatus('Payment details updated successfully!');
+      }
+  });
+
+  guard();
+  loadSettings();
+})();
+</script>
+<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
+</body>
+</html>
