@@ -63,7 +63,11 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 /* UPI Specifics */
 .qr-box { background: #fff; padding: 10px; border-radius: 12px; display: inline-block; margin: 15px 0; }
 .qr-box img { width: 200px; height: 200px; object-fit: contain; display: block; }
-.upi-id-box { background: #1a1c18; border: 1px dashed var(--gold); padding: 10px; border-radius: 8px; font-weight: 900; font-size: 14px; color: var(--gold2); margin-bottom: 15px; letter-spacing: 1px; }
+.pay-details { background: #1a1c18; border: 1px solid var(--line); border-radius: 10px; padding: 12px; text-align: left; margin-bottom: 15px; }
+.pay-details .row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
+.pay-details .row:last-child { margin-bottom: 0; }
+.pay-details .row span:first-child { color: #777a72; }
+.pay-details .row span:last-child { color: var(--gold2); font-weight: 800; font-family: monospace; letter-spacing: 0.5px;}
 .utr-input { width: 100%; padding: 12px; border-radius: 8px; background: #0b0c0a; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 14px; margin-bottom: 10px; text-align: center; text-transform: uppercase; }
 .utr-input:focus { outline: none; border-color: var(--gold); }
 
@@ -106,12 +110,9 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 
   <div class="methods">
     <div class="section-title">SELECT METHOD</div>
-    
-    <!-- Only UPI Option -->
     <div class="method selected" data-method="UPI" id="upiMethod">
-      <div class="method-icon">🏦</div><div><b>UPI Transfer</b><small>Pay via GPay, PhonePe, Paytm</small></div><span class="radio"></span>
+      <div class="method-icon">🏦</div><div><b>UPI / Bank Transfer</b><small>Pay via GPay, PhonePe, Paytm</small></div><span class="radio"></span>
     </div>
-    
   </div>
 
   <button class="cta" id="depositBtn" disabled>CONTINUE TO PAY</button>
@@ -121,7 +122,6 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
     UPI payments are verified manually by our team within 5-10 minutes.
   </div>
 </section>
-
 <div class="notice">N+ PLAY · Wallet Center · 18+ · Play responsibly</div>
 </div>
 
@@ -129,15 +129,21 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 <div class="modal" id="upiModal">
  <div class="modal-card">
   <button class="close" onclick="closeModal()">✕</button>
-  <h2>Pay via UPI</h2>
-  <p>Scan the QR or use UPI ID to pay <b id="upiAmountText" style="color:var(--gold2);">₹0</b></p>
+  <h2>Pay via UPI / Bank</h2>
+  <p>Scan the QR or use details below to pay <b id="upiAmountText" style="color:var(--gold2);">₹0</b></p>
   
   <div class="qr-box">
-    <!-- ✅ UNGA QR IMAGE INGA ADD PANNIRUKEN -->
-    <img src="my-qr.png" alt="UPI QR">
+    <!-- Dynamic QR Code generating image -->
+    <img id="dynamicQrImg" src="" alt="UPI QR">
   </div>
   
-  <div class="upi-id-box" id="upiIdText">yourname@airtel</div>
+  <div class="pay-details" id="payDetailsBox">
+    <div class="row"><span>UPI ID:</span> <span id="dynUpiId">loading...</span></div>
+    <div class="row"><span>Bank Name:</span> <span id="dynBankName">loading...</span></div>
+    <div class="row"><span>A/C Holder:</span> <span id="dynAccHolder">loading...</span></div>
+    <div class="row"><span>A/C Number:</span> <span id="dynAccNum">loading...</span></div>
+    <div class="row"><span>IFSC Code:</span> <span id="dynIfsc">loading...</span></div>
+  </div>
   
   <p style="margin-bottom:5px; text-align:left; font-size:10px; color:#aaa;">Enter 12-digit UTR / Ref No:</p>
   <input type="text" id="utrInput" class="utr-input" placeholder="e.g. 302456789012">
@@ -152,12 +158,6 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 let walletReady=false;
 let currentDepositAmount = 0;
-
-// ✅ UNGA UPI ID INGA PUDUNGA
-const MY_UPI_ID = 'yourname@airtel'; // Example: 9876543210@airtel
-
-// Update UPI ID Text dynamically
-document.getElementById('upiIdText').textContent = MY_UPI_ID;
 
 async function balance(){
  const user=await window.NPlusAuth?.current?.();
@@ -194,19 +194,43 @@ document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active")); b.classList.add("active");
 });
 
-// Close Modal Function
 function closeModal(){
     document.getElementById('upiModal').classList.remove('show');
 }
 
-// Close when clicking outside the modal card
 document.getElementById('upiModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeModal();
-    }
+    if (e.target === this) closeModal();
 });
 
-// MAIN DEPOSIT BUTTON LOGIC
+// ✅ FETCH PAYMENT SETTINGS FROM SUPABASE
+async function fetchPaymentSettings() {
+    try {
+        const { data, error } = await window.supabase
+            .from('payment_settings')
+            .select('*')
+            .eq('id', 1)
+            .single();
+            
+        if (error || !data) throw error || new Error("No settings found");
+        
+        // Update UI
+        document.getElementById('dynUpiId').textContent = data.upi_id;
+        document.getElementById('dynBankName').textContent = data.bank_name;
+        document.getElementById('dynAccHolder').textContent = data.account_holder;
+        document.getElementById('dynAccNum').textContent = data.account_number;
+        document.getElementById('dynIfsc').textContent = data.ifsc_code;
+
+        // Generate Dynamic QR Code from UPI ID
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${data.upi_id}&pn=${data.account_holder.replace(/ /g,'+')}`;
+        document.getElementById('dynamicQrImg').src = qrUrl;
+        
+    } catch (err) {
+        console.error("Settings fetch failed", err);
+        document.getElementById('dynUpiId').textContent = "Error loading details";
+    }
+}
+
+// MAIN DEPOSIT BUTTON
 document.querySelector("#depositBtn").onclick = async () => {
  if(!walletReady){alert("Please sign in and wait for the shared wallet to sync.");return;}
  
@@ -218,13 +242,15 @@ document.querySelector("#depositBtn").onclick = async () => {
     return;
  }
 
- // Show UPI Modal
  document.getElementById('upiAmountText').textContent = '₹' + amount;
- document.getElementById('utrInput').value = ''; // Clear previous UTR
+ document.getElementById('utrInput').value = ''; 
+ 
+ // Fetch settings every time modal opens
+ fetchPaymentSettings();
+ 
  document.getElementById('upiModal').classList.add('show');
 };
 
-// UPI SUBMIT LOGIC (Saves to Supabase)
 async function submitUpiPayment() {
     const utr = document.getElementById('utrInput').value.trim();
     if (utr.length < 12) {
@@ -239,7 +265,6 @@ async function submitUpiPayment() {
     try {
         const user = await window.NPlusAuth.current();
         
-        // SUPABASE DATABASE LA SAVE PANNROM
         const { data, error } = await window.supabase
             .from('manual_deposits')
             .insert([
@@ -254,15 +279,14 @@ async function submitUpiPayment() {
 
         if (error) throw error;
 
-        // Success Modal Update
         document.querySelector('#upiModal h2').textContent = "Request Submitted!";
         document.querySelector('#upiModal p').textContent = "Your deposit is pending verification.";
         document.querySelector('.qr-box').style.display = 'none';
-        document.getElementById('upiIdText').style.display = 'none';
+        document.getElementById('payDetailsBox').style.display = 'none';
         document.getElementById('utrInput').style.display = 'none';
         
         btn.textContent = "DONE";
-        btn.onclick = closeModal; // Reset button function
+        btn.onclick = closeModal; 
         btn.disabled = false;
 
     } catch (err) {
