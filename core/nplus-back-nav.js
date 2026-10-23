@@ -1,6 +1,10 @@
 /* Shared N+ PLAY / N+ ADMIN same-origin back navigation. */
 (() => {
   "use strict";
+  const primaryNavPages = new Set(["index.html", "activity.html", "bonus.html", "promotion.html", "account.html"]);
+  const currentFile = (location.pathname.split("/").pop() || "").toLowerCase();
+  // Primary sections use the shared bottom navigation; do not overlay a floating back button there.
+  if (primaryNavPages.has(currentFile)) return;
   if (window.__nplusBackNavInstalled) return;
   window.__nplusBackNavInstalled = true;
   const STACK_KEY = "nplus.inAppBackStack.v1";
