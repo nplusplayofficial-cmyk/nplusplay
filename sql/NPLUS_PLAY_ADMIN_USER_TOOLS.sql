@@ -128,6 +128,10 @@ begin
 end;
 $function$;
 
+-- Drop the legacy same-signature RPC if its parameter names/body are from an older build.
+-- CREATE OR REPLACE cannot rename input parameters, so remove this signature first.
+drop function if exists public.nplus_admin_adjust_demo_wallet(uuid, numeric, text);
+
 create or replace function public.nplus_admin_adjust_demo_wallet(
   p_target_user uuid,
   p_delta numeric,
