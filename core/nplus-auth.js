@@ -168,6 +168,7 @@
     mobile,
     password,
     name = "",
+    referralCode = "",
     captchaToken
   }) {
     if (!client) throw new Error("Supabase is not configured.");
@@ -175,12 +176,18 @@
     const cleanEmail = normalizeEmail(email);
     const cleanMobile = normalizeMobile(mobile);
     const cleanName = String(name || "").trim();
+    const cleanReferralCode = String(referralCode || "").trim().toUpperCase();
+
+    if (cleanReferralCode.length > 16) {
+      throw new Error("Referral code is too long.");
+    }
 
     if (!cleanName) throw new Error("Display name is required.");
     if (cleanName.length > 40) throw new Error("Display name is too long.");
     if (
       !password ||
       password.length < 12 ||
+      password.length > 128 ||
       !/[a-z]/.test(password) ||
       !/[A-Z]/.test(password) ||
       !/\d/.test(password) ||
