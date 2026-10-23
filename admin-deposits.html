@@ -25,7 +25,7 @@
 "use strict";
 const $=id=>document.getElementById(id), status=$("status"), demoRows=$("demoRows"), legacyRows=$("legacyRows");
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-const esc=s=>String(s??"").replace(/[&<>\\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}[c]));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let client=null, busyId="";
 function setStatus(message,type=""){status.className="status"+(type?" "+type:"");status.textContent=message}
 async function loadDemoRequests(){
