@@ -61,25 +61,39 @@ for (const file of htmls) {
   }
 }
 
-// Every N+ PLAY and N+ ADMIN HTML page must include the shared in-app back control.
+// Primary sections share one fixed five-item bottom bar and intentionally omit the floating back arrow.
 try {
   const backNavPath = path.join(root, 'core/nplus-back-nav.js');
   if (!fs.existsSync(backNavPath)) fail('Shared in-app back navigation script is missing');
   const backNav = fs.readFileSync(backNavPath, 'utf8');
-  for (const required of ['nplus-global-back','nplus.inAppBackStack.v1','referrerPath()','fallbackPath()','window.location.replace(target)']) {
+  for (const required of ['nplus-global-back','nplus.inAppBackStack.v1','referrerPath()','fallbackPath()','window.location.replace(target)','primaryNavPages']) {
     if (!backNav.includes(required)) fail('Shared back-navigation contract missing: ' + required);
   }
+  const primaryNavPages = new Set(['index.html','activity.html','bonus.html','promotion.html','account.html']);
   for (const file of htmls) {
     const html = fs.readFileSync(path.join(root, file), 'utf8');
-    if (!/<script\s+defer\s+src=["']\.\/core\/nplus-back-nav\.js["']><\/script>/i.test(html)) {
-      fail('Shared back arrow is not included on HTML page: ' + file);
+    if (!/<script\s+defer\s+src=["']\.\/core\/nplus-back-nav\.js(?:\?[^"']*)?["']><\/script>/i.test(html)) {
+      fail('Shared back-navigation script is not included on HTML page: ' + file);
+    }
+    if (primaryNavPages.has(file)) {
+      const nav = html.match(/<nav class=["']nplus-bottom-nav["'][\s\S]*?<\/nav>/i)?.[0] || '';
+      const items = [...nav.matchAll(/class=["']nplus-nav-item(?:\s+active)?["']/g)];
+      const active = [...nav.matchAll(/class=["']nplus-nav-item active["']/g)];
+      if (!nav || items.length !== 5 || active.length !== 1) {
+        fail('Primary section must have five equal bottom-nav items and exactly one active item: ' + file);
+      }
+      if (!html.includes('core/nplus-bottom-nav.css?v=20261023-unified-nav')) {
+        fail('Primary section is missing shared bottom-nav styles: ' + file);
+      }
     }
   }
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  if (!worker.includes('nplus-play-shell-v6') || !worker.includes('"./core/nplus-back-nav.js"')) {
-    fail('Service worker must bump its shell cache and precache the shared back-navigation script');
+  if (!worker.includes('nplus-play-shell-v7') ||
+      !worker.includes('"./core/nplus-back-nav.js"') ||
+      !worker.includes('"./core/nplus-bottom-nav.css"')) {
+    fail('Service worker must bump its shell cache and precache shared navigation assets');
   }
-} catch (e) { fail('Shared in-app back navigation guard failed: ' + e.message); }
+} catch (e) { fail('Shared navigation static guard failed: ' + e.message); }
 
 // Admin login and wallet-adjustment source must remain aligned with the server security contract.
 try {
