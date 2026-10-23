@@ -251,29 +251,35 @@ function startTimer() {
 // ✅ FIXED FUNCTION: Now checks for custom uploaded QR image
 async function fetchPaymentSettings() {
     try {
-        const { data, error } = await window.supabase.from('payment_settings').select('*').eq('id', 1).single();
+        // .maybeSingle() use pandrom, so row illanalum error throw aagadhu
+        const { data, error } = await window.supabase
+            .from('payment_settings')
+            .select('*')
+            .eq('id', 1)
+            .maybeSingle();
+            
         if (error) throw error;
+        if (!data) throw new Error("No settings found in DB"); // DB la row illa
         
         document.getElementById('dynUpiId').textContent = data.upi_id || "-";
         document.getElementById('dynBankName').textContent = data.bank_name || "-";
 
         const qrImgEl = document.getElementById('dynamicQrImg');
         
-        // Check if admin uploaded a custom image URL
+        // Admin upload panna image URL ah check pandrom
         if (data.qr_image_url && data.qr_image_url.startsWith('http')) {
             qrImgEl.src = data.qr_image_url;
         } 
-        // Otherwise, fallback to auto-generated QR
+        // Illana dynamic ah generate pandrom
         else if (data.upi_id) {
             qrImgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${data.upi_id}&pn=${data.account_holder ? data.account_holder.replace(/ /g,'+') : 'N+PLAY'}`;
         }
     } catch (err) {
-        console.error(err);
+        console.error("Settings fetch failed", err);
         document.getElementById('dynUpiId').textContent = "Error";
         document.getElementById('dynBankName').textContent = "Error";
     }
 }
-
 document.querySelector("#depositBtn").addEventListener('click', async () => {
  // ✅ QA FIX: Exact string required by verify-project.js
  if(!walletReady){alert("Please sign in and wait for the shared wallet to sync.");return;}
