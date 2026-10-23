@@ -48,9 +48,18 @@ ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON public.profiles TO anon, authenticated;
-DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
-DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
-DROP POLICY IF EXISTS "profiles_owner_or_admin_read" ON public.profiles;
+DO $drop_existing_profile_policies$
+DECLARE v_policy record;
+BEGIN
+  FOR v_policy IN
+    SELECT policyname FROM pg_policies
+    WHERE schemaname='public' AND tablename='profiles'
+  LOOP
+    EXECUTE format('DROP POLICY %I ON public.profiles',v_policy.policyname);
+  END LOOP;
+END
+$drop_existing_profile_policies$;
+
 CREATE POLICY "Admins can view all profiles" ON public.profiles
   FOR SELECT TO public
   USING (EXISTS (SELECT 1 FROM public.profiles p2 WHERE p2.id=auth.uid() AND p2.role='admin'));
