@@ -8,6 +8,7 @@ Main's `core/nplus-auth.js` had a defect in `sendSignupOtp()`: its immediate-ses
 - Accepts and normalizes `referralCode` in `sendSignupOtp()`.
 - Enforces the 16-character referral-code limit and the shared 12–128 character password length rule.
 - Updates `auth.html`'s Auth script cache-busting value so clients load the candidate fix.
+- Clears the password input and pending signup object's password as soon as Supabase accepts the signup request, so the OTP stage does not retain the password needlessly.
 
 Static checks confirm the new declaration is before use, the password limit is present, the auth page points to the new cache key, the email OTP path uses `verifyOtp(type: "email")`, and the current main auth code does not call `nplus_phone_is_registered`.
 
@@ -21,6 +22,7 @@ Candidate code is NOT merged or deployed. Test the branch before merging.
 - Normalized-phone unique index `profiles_phone_digits_unique_idx` is present and unique.
 - Old phone-existence function `nplus_phone_is_registered(text)` still exists, but EXECUTE is denied to `anon` and `authenticated`. Keep it locked; do not drop it ad hoc before migration reconciliation.
 - `core/nplus-captcha.js` has the public Turnstile site key, not a secret key.
+- Supabase Security Advisor still flags leaked-password protection as disabled. The supplied handover says this is a Pro-plan feature; don't upgrade the Free project automatically. Keep the 12-character client policy and verify the server-side minimum in Dashboard.
 - Read-only assertions in `qa/test-auth-security-contract.sql` were executed against live catalog/invariants without errors. They did not send test emails or create accounts.
 
 ## Reviewed Auth flow
