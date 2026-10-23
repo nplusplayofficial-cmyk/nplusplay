@@ -65,3 +65,22 @@ This source map is an audit aid, **not** a migration repair. It distinguishes fi
 ## Current status
 
 **Source discovery has progressed; production history is not yet reconciled.** Some migration SQL sources are available, but exact original SQL for several operations is still missing or ambiguous. A clean replay has not been proven. This document records that limitation rather than treating filename similarity as evidence of equivalence.
+
+
+## Additional source-recovery pass — 2026-10-23
+
+A targeted repository pass checked the expected migration-file paths for the five unresolved operations below on these existing branches: `audit/supabase-migration-history-map-2026-10-23`, `feature/nplus-free-release-audit-2026-10-19`, `fixes/premium-audit-2026-10-15`, and `security/live-security-audit-2026-10-23`.
+
+| Unresolved live operation | Result of expected-path check | Commit-message search |
+|---|---|---|
+| `temporarily_pause_games_until_authoritative_backend_rollout` | Exact expected migration path not found on checked branches | No matching commit result |
+| `null_safe_admin_rpc_authorization_guard` | Exact expected migration path not found on checked branches | No matching commit result |
+| `enable_server_backed_virtual_demo_games` | Exact expected migration path not found on checked branches | No matching commit result |
+| `enable_supported_virtual_demo_games_preview` | Exact expected migration path not found on checked branches | No matching commit result |
+| `pause_unverified_games_and_lockdown_settlement_rpcs_20261022` | Exact expected migration path not found on checked branches | No matching commit result |
+
+These are bounded search results, not proof that the SQL never existed: files may have different paths/names, commits may not mention the migration identifier, or source may exist in deployment/dashboard history rather than Git. No replacement SQL was inferred and no production database or migration history was changed.
+
+The source-recovery pass also confirmed that candidate files such as `sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql` and `sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql` exist on the audit branch, but their existence does not establish equivalence to the corresponding production-applied SQL. Their ambiguity status remains unchanged.
+
+**Next evidence source:** inspect the full migration-related file tree and historical commit diffs across the recovery branches, then request/inspect Supabase SQL Editor history or deployment artifacts for the five unresolved operations. Continue to keep all games disabled and do not replay candidate SQL on production.
