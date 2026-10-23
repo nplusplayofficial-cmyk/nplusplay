@@ -263,7 +263,7 @@ async function fetchPaymentSettings() {
 }
 
 document.querySelector("#depositBtn").addEventListener('click', async () => {
- if(!walletReady){alert("Please wait for wallet to sync.");return;}
+ if(!walletReady){alert("Please sign in and wait for the shared wallet to sync.");return;}
  const amount = Number(document.querySelector("#amount").value);
  currentDepositAmount = amount;
  if(!Number.isFinite(amount) || amount < 100 || amount > 50000){
