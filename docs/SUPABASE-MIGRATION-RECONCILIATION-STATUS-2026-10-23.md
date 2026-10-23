@@ -41,3 +41,8 @@ No Supabase development branch/project was created in this audit because a free/
 - Recovered live SQL evidence directory: https://github.com/nplusplayofficial-cmyk/nplusplay/tree/audit/supabase-migration-history-map-2026-10-23/docs/recovered-live-migration-sql-2026-10-23/
 
 **Final status: source recovery substantially improved; replay/restore acceptance remains blocked. Work #1 must not be marked complete yet.**
+
+
+## Additional duplicate-body review
+
+A text-pattern triage of the 11 exact duplicate body pairs did not find unguarded table/index creation, add-constraint/add-column, INSERT, UPDATE, or DELETE patterns in those bodies. This does not prove idempotency or replay safety; a clean disposable replay remains mandatory.
