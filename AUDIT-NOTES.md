@@ -1,3 +1,22 @@
+# N+ PLAY audit notes — current status as of 2026-10-23
+
+The authoritative release status and remaining blockers are maintained at [RELEASE-READINESS.md](./RELEASE-READINESS.md). Earlier sections in this file are historical notes from 2026-10-15; statements such as “PR changes remain on a separate branch” or that the recent-activity RPC/settlement tables do not exist describe the state at that earlier inspection and must not be treated as the current state.
+
+Latest live database changes now recorded in Supabase migration history:
+- `20261023092858_optimize_rls_policies_and_foreign_key_indexes_20261023`: 8 FK indexes, optimized owner-scoped RLS policies, one combined manual-deposit SELECT policy, removed redundant profile UPDATE policy.
+- `20261023093056_drop_duplicate_referral_unique_indexes_20261023`: removed two standalone duplicate indexes while preserving primary/constraint-backed uniqueness.
+
+Verification after those migrations:
+- 8/8 new FK indexes present.
+- 0 of the two known duplicate index names remain.
+- All six game settings remain disabled.
+- Read-only authorization regression checks denied a non-admin referral Admin RPC call and a non-admin wallet-adjustment RPC call; the generic wallet RPC denied arbitrary positive credits.
+- No balances were changed during these checks.
+
+The site deployment and navigation change are merged, but this is not a claim of complete production launch readiness. See RELEASE-READINESS.md for the residual Security Advisor notices, pending live-browser tests, untested backup restore, disabled game release gates, and draft PRs.
+
+---
+
 # N+ PLAY audit notes — 2026-10-15
 
 ## Confirmed live changes (Supabase Production)
