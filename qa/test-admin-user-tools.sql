@@ -13,7 +13,16 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
+DO $roles$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+END
+$roles$;
+
 \ir ../sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql
+\ir ../sql/NPLUS_PLAY_ADMIN_DEMO_WALLET_ADJUSTMENT_GUARD_2026-10-23.sql
 
 do $tests$
 declare

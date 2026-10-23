@@ -90,6 +90,10 @@ jobs:
         env:
           PGPASSWORD: nplus_test
         run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-demo-referrals.sql
+      - name: Test profile RLS admin login and private profile visibility
+        env:
+          PGPASSWORD: nplus_test
+        run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-profiles-rls-admin-login.sql
 
   browser-smoke:
     runs-on: ubuntu-latest

@@ -10,7 +10,7 @@
 <section id="ledger" class="panel ledger"><h2 id="ledgerTitle">User transaction ledger</h2><div id="ledgerRows"></div></section>
 <div class="grid"><section class="panel"><h2>Audited demo-wallet adjustment</h2><p>Only for virtual-credit corrections. The database RPC must verify admin access and write the ledger atomically.</p><label for="selectedUser">Selected user ID</label><input id="selectedUser" readonly placeholder="Select a user first"><label for="delta">Adjustment (+/- demo credits)</label><input id="delta" type="number" step="0.01" placeholder="e.g. 25 or -10"><label for="note">Reason / audit note</label><input id="note" maxlength="180" placeholder="Required reason (at least 4 characters)"><div class="controls"><button class="primary" id="adjust">APPLY ADJUSTMENT</button></div></section><section class="panel"><h2>Security status</h2><p>Directory, transaction ledger and balance adjustments use admin-only database RPCs. This page does not query another user's profile directly from the browser.</p><p class="muted">Legacy game settlement still needs server-authoritative bet/result/payout logic before the whole game platform can be called tamper-resistant.</p></section></div>
 <div id="message" class="message"></div><footer class="status" style="text-align:center">N+ PLAY · VIRTUAL-CREDIT DEMO ADMINISTRATION</footer></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js?v=20261023-admin-auth-fix"></script>
 <script>
 (function(){"use strict";
 const $=id=>document.getElementById(id);
@@ -25,7 +25,18 @@ async function refresh(){try{$("status").textContent="Loading users securely…"
 async function ledger(id){try{const r=await sb.rpc("nplus_admin_user_transactions",{p_user_id:id,p_limit:100});if(r.error)throw r.error;const rows=Array.isArray(r.data&&r.data.rows)?r.data.rows:[];$("ledgerTitle").textContent="Ledger · "+id;$("ledger").style.display="block";$("ledgerRows").innerHTML=rows.length?"<div class=\"tablewrap\"><table><thead><tr><th>DATE</th><th>TYPE / SOURCE</th><th>CHANGE</th><th>BEFORE → AFTER</th><th>NOTE</th></tr></thead><tbody>"+rows.map(function(t){return "<tr><td>"+esc(t.created_at?new Date(t.created_at).toLocaleString("en-IN"):"")+"</td><td>"+esc(t.type)+"<div class=\"small\">"+esc(t.source)+"</div></td><td style=\"color:"+(Number(t.delta)>=0?"#42d9a5":"#ff8188")+"\">"+(Number(t.delta)>=0?"+":"")+money(t.delta)+"</td><td>"+money(t.balance_before)+" → "+money(t.balance_after)+"</td><td>"+esc(t.note)+"</td></tr>"}).join("")+"</tbody></table></div>":"<p>No transactions found.</p>";$("ledger").scrollIntoView({behavior:"smooth",block:"start"})}catch(e){message(e.message||"Unable to load ledger.",true)}}
 document.addEventListener("click",function(e){const s=e.target.closest("[data-select]");if(s){selected=users.find(function(u){return String(u.user_id||u.id)===s.dataset.select})||null;$("selectedUser").value=selected?(selected.user_id||selected.id):"";message(selected?"User selected. Adjustment remains demo-credit only.":"User not found.",!selected)}const l=e.target.closest("[data-ledger]");if(l)ledger(l.dataset.ledger)});
 $("search").addEventListener("input",draw);$("refresh").onclick=refresh;
-$("adjust").onclick=async function(){const id=$("selectedUser").value,delta=Number($("delta").value),note=$("note").value.trim();if(!id)return message("Select a user first.",true);if(!Number.isFinite(delta)||delta===0)return message("Enter a non-zero amount.",true);if(note.length<4)return message("Enter a reason of at least 4 characters.",true);if(!confirm("Apply "+(delta>0?"+":"")+money(delta)+" virtual credits to this account?"))return;try{const r=await sb.rpc("nplus_admin_adjust_demo_wallet",{p_target_user:id,p_delta:delta,p_note:note});if(r.error)throw r.error;message("Adjustment saved. New balance: "+money(r.data&&r.data.after),false);$("delta").value="";$("note").value="";await refresh();await ledger(id)}catch(e){message(e.message||"Adjustment failed.",true)}};
+$("adjust").onclick=async function(){
+ const button=$("adjust");if(button.disabled)return;
+ const id=$("selectedUser").value,delta=Number($("delta").value),note=$("note").value.trim();
+ if(!id)return message("Select a user first.",true);
+ if(!Number.isFinite(delta)||delta===0||Math.abs(delta)>1000000||Math.round(delta*100)!==delta*100)return message("Enter a non-zero adjustment up to 1,000,000 credits with no more than two decimals.",true);
+ if(note.length<4||note.length>300)return message("Enter a reason between 4 and 300 characters.",true);
+ if(!confirm("Apply "+(delta>0?"+":"")+money(delta)+" virtual credits to this account?"))return;
+ const originalText=button.textContent;button.disabled=true;button.textContent="SAVING…";
+ try{const r=await sb.rpc("nplus_admin_adjust_demo_wallet",{p_target_user:id,p_delta:delta,p_note:note});if(r.error)throw r.error;message("Adjustment saved. New balance: "+money(r.data&&r.data.after),false);$("delta").value="";$("note").value="";await refresh();await ledger(id)}
+ catch(e){message(e.message||"Adjustment failed.",true)}
+ finally{button.disabled=false;button.textContent=originalText}
+};
 $("logout").onclick=async function(){if(sb)await sb.auth.signOut();location.replace("admin-login.html")};
 guard().then(function(ok){if(ok)refresh()});
 })();

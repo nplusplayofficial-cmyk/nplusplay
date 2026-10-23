@@ -61,6 +61,40 @@ for (const file of htmls) {
   }
 }
 
+// Admin login and wallet-adjustment source must remain aligned with the server security contract.
+try {
+  const adminLogin = fs.readFileSync(path.join(root, 'admin-login.html'), 'utf8');
+  if (!adminLogin.includes('core/nplus-config.js?v=20261023-admin-auth-fix') ||
+      !adminLogin.includes('supabase.auth.signInWithPassword') ||
+      !adminLogin.includes('Password accepted, but the admin permission check failed')) {
+    fail('Admin login must load the current config and distinguish profile-check failures from a non-admin account');
+  }
+
+  const adminUsers = fs.readFileSync(path.join(root, 'admin-users.html'), 'utf8');
+  if (!adminUsers.includes('nplus_admin_adjust_demo_wallet') ||
+      !adminUsers.includes('p_target_user:id') ||
+      !adminUsers.includes('p_delta:delta') ||
+      !adminUsers.includes('p_note:note') ||
+      !adminUsers.includes('button.disabled=true')) {
+    fail('Admin wallet-adjustment UI must call the audited RPC with matching arguments and prevent repeat clicks');
+  }
+
+  const profileRls = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_PROFILES_RLS_ADMIN_LOGIN_FIX_2026-10-23.sql'), 'utf8');
+  if (!profileRls.includes('DROP POLICY IF EXISTS "Admins can view all profiles"') ||
+      !profileRls.includes('DROP POLICY IF EXISTS "Public profiles are viewable by everyone"')) {
+    fail('Profile RLS migration must remove recursive/public profile SELECT policies');
+  }
+
+  const walletGuard = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_ADMIN_DEMO_WALLET_ADJUSTMENT_GUARD_2026-10-23.sql'), 'utf8');
+  if (!walletGuard.includes("coalesce(v_role, '') <> 'admin'") ||
+      !walletGuard.includes('REVOKE ALL ON FUNCTION public.nplus_admin_adjust_demo_wallet(uuid, numeric, text)') ||
+      !walletGuard.includes('TO authenticated, service_role')) {
+    fail('Admin wallet adjustment migration must enforce role checks and least-privilege grants');
+  }
+} catch (error) {
+  fail('Admin security guard checks could not be read: ' + (error.message || error));
+}
+
 // Demo request pages must use guarded RPCs and remain virtual-credit-only.
 try {
   const depositPage = fs.readFileSync(path.join(root, 'deposit-demo.html'), 'utf8');
