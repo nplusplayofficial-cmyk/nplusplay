@@ -52,24 +52,32 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 .history-link{display:inline-block;margin-top:12px;color:var(--gold2);font-size:10px;font-weight:900;letter-spacing:.7px;text-decoration:none}.history-link:hover{text-decoration:underline}
 
 /* Modals */
-.modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);z-index:50}
+.modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);z-index:50}
 .modal.show{display:grid}
 .modal-card{width:min(100%,420px);background:#11130f;border:1px solid var(--line);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000;text-align: center;}
 .close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa;cursor:pointer;font-size: 16px;}
 .close:hover { background: #222; color: #fff; }
-.modal-card h2{font-size:18px;margin:2px 0 8px}.modal-card p{font-size:10px;color:#777a72;line-height:1.6}
-.done{width:100%;margin-top:14px;border:0;border-radius:12px;padding:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);font-weight:950;cursor:pointer;font-size: 14px;}
+.modal-card h2{font-size:18px;margin:2px 0 8px;color:#fff;}
+.modal-card p{font-size:11px;color:#aaa;line-height:1.6;margin-bottom: 15px;}
+.done{width:100%;margin-top:14px;border:0;border-radius:12px;padding:14px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;cursor:pointer;font-size: 14px;}
 
-/* UPI Specifics */
-.qr-box { background: #fff; padding: 10px; border-radius: 12px; display: inline-block; margin: 15px 0; }
-.qr-box img { width: 200px; height: 200px; object-fit: contain; display: block; }
-.pay-details { background: #1a1c18; border: 1px solid var(--line); border-radius: 10px; padding: 12px; text-align: left; margin-bottom: 15px; }
-.pay-details .row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
-.pay-details .row:last-child { margin-bottom: 0; }
-.pay-details .row span:first-child { color: #777a72; }
-.pay-details .row span:last-child { color: var(--gold2); font-weight: 800; font-family: monospace; letter-spacing: 0.5px;}
-.utr-input { width: 100%; padding: 12px; border-radius: 8px; background: #0b0c0a; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 14px; margin-bottom: 10px; text-align: center; text-transform: uppercase; }
+/* Daman Style Payment Box */
+.timer-box { display: flex; justify-content: space-between; background: #0b0c0a; padding: 10px 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 15px; font-size: 12px; font-weight: 800; }
+.timer-box .time { color: var(--red); font-family: monospace; font-size: 14px; }
+.qr-box { background: #fff; padding: 8px; border-radius: 12px; display: inline-block; margin: 0 auto 15px; }
+.qr-box img { width: 180px; height: 180px; object-fit: contain; display: block; }
+.pay-details { background: #0b0c0a; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 15px; }
+.pay-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed rgba(255,255,255,0.08); }
+.pay-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.pay-label { color: #888; font-size: 11px; }
+.pay-value { color: var(--gold2); font-weight: 800; font-family: monospace; font-size: 13px; display: flex; align-items: center; gap: 8px;}
+.copy-btn { background: rgba(201,165,91,0.15); color: var(--gold); border: 1px solid rgba(201,165,91,0.3); padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; font-weight: 900;}
+.copy-btn:active { background: rgba(201,165,91,0.3); }
+
+.utr-wrapper { display: flex; gap: 8px; margin-bottom: 10px; }
+.utr-input { flex: 1; padding: 14px; border-radius: 10px; background: #151515; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 14px; text-align: center; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;}
 .utr-input:focus { outline: none; border-color: var(--gold); }
+.paste-btn { background: var(--gold); color: #000; border: none; border-radius: 10px; padding: 0 15px; font-weight: 900; font-size: 12px; cursor: pointer;}
 
 @media(max-width:430px){.presets{grid-template-columns:repeat(2,1fr)}h1{font-size:25px}}
 </style>
@@ -102,53 +110,61 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
   <div class="amount-wrap"><span>₹</span><input id="amount" inputmode="decimal" placeholder="0" value=""></div>
 
   <div class="presets">
+    <button class="preset" data-a="100">₹100</button>
     <button class="preset" data-a="500">₹500</button>
     <button class="preset" data-a="1000">₹1,000</button>
-    <button class="preset" data-a="2000">₹2,000</button>
     <button class="preset" data-a="5000">₹5,000</button>
   </div>
 
   <div class="methods">
     <div class="section-title">SELECT METHOD</div>
     <div class="method selected" data-method="UPI" id="upiMethod">
-      <div class="method-icon">🏦</div><div><b>UPI / Bank Transfer</b><small>Pay via GPay, PhonePe, Paytm</small></div><span class="radio"></span>
+      <div class="method-icon">🏦</div><div><b>UPI Transfer</b><small>Pay via GPay, PhonePe, Paytm</small></div><span class="radio"></span>
     </div>
   </div>
 
   <button class="cta" id="depositBtn" disabled>CONTINUE TO PAY</button>
-
-  <div class="note">
-    <b>Platform mode:</b> Deposits are processed securely. 
-    UPI payments are verified manually by our team within 5-10 minutes.
-  </div>
 </section>
 <div class="notice">N+ PLAY · Wallet Center · 18+ · Play responsibly</div>
 </div>
 
-<!-- UPI QR Code & UTR Modal -->
+<!-- Daman Style UPI Modal -->
 <div class="modal" id="upiModal">
  <div class="modal-card">
-  <button class="close" onclick="closeModal()">✕</button>
-  <h2>Pay via UPI / Bank</h2>
-  <p>Scan the QR or use details below to pay <b id="upiAmountText" style="color:var(--gold2);">₹0</b></p>
+  <button class="close" id="closeBtn">✕</button>
   
+  <div class="timer-box">
+      <span>Amount Payable: <b id="upiAmountText" style="color:var(--gold);font-size:14px;">₹0</b></span>
+      <span class="time" id="timerDisplay">15:00</span>
+  </div>
+
   <div class="qr-box">
-    <!-- Dynamic QR Code generating image -->
     <img id="dynamicQrImg" src="" alt="UPI QR">
   </div>
-  
-  <div class="pay-details" id="payDetailsBox">
-    <div class="row"><span>UPI ID:</span> <span id="dynUpiId">loading...</span></div>
-    <div class="row"><span>Bank Name:</span> <span id="dynBankName">loading...</span></div>
-    <div class="row"><span>A/C Holder:</span> <span id="dynAccHolder">loading...</span></div>
-    <div class="row"><span>A/C Number:</span> <span id="dynAccNum">loading...</span></div>
-    <div class="row"><span>IFSC Code:</span> <span id="dynIfsc">loading...</span></div>
+  <p style="font-size:10px;color:#888;margin-bottom:15px;">Scan the QR with another device to pay exactly the amount shown.</p>
+
+  <div class="pay-details">
+    <div class="pay-row">
+      <span class="pay-label">UPI ID</span>
+      <div class="pay-value">
+        <span id="dynUpiId">Loading...</span>
+        <button class="copy-btn" onclick="copyText('dynUpiId')">COPY</button>
+      </div>
+    </div>
+    <div class="pay-row">
+      <span class="pay-label">Bank Name</span>
+      <span class="pay-value" id="dynBankName">Loading...</span>
+    </div>
   </div>
   
-  <p style="margin-bottom:5px; text-align:left; font-size:10px; color:#aaa;">Enter 12-digit UTR / Ref No:</p>
-  <input type="text" id="utrInput" class="utr-input" placeholder="e.g. 302456789012">
+  <p style="text-align:left;font-size:11px;color:#aaa;margin-bottom:8px;">Input UTR / Ref No:</p>
+  <div class="utr-wrapper">
+      <input type="text" id="utrInput" class="utr-input" placeholder="12-digit UTR">
+      <button class="paste-btn" onclick="pasteUTR()">Paste</button>
+  </div>
+  <p style="text-align:left;font-size:9px;color:var(--red);margin-bottom:15px;">If you do not submit UTR, 100% will fail.</p>
   
-  <button class="done" id="submitUpiBtn" onclick="submitUpiPayment()">I HAVE PAID</button>
+  <button class="done" id="submitUpiBtn">SUBMIT UTR</button>
  </div>
 </div>
 
@@ -158,6 +174,7 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 let walletReady=false;
 let currentDepositAmount = 0;
+let timerInterval;
 
 async function balance(){
  const user=await window.NPlusAuth?.current?.();
@@ -182,7 +199,6 @@ async function render(){
   walletReady=true;
   button.disabled=false;
  }catch(err){
-  console.error("Deposit wallet sync",err);
   wallet.textContent="UNAVAILABLE";
   balanceEl.textContent="UNAVAILABLE";
   button.disabled=true;
@@ -194,118 +210,108 @@ document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active")); b.classList.add("active");
 });
 
-function closeModal(){
-    document.getElementById('upiModal').classList.remove('show');
-}
-
-document.getElementById('upiModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
+const modal = document.getElementById('upiModal');
+document.getElementById('closeBtn').addEventListener('click', () => {
+    modal.classList.remove('show');
+    clearInterval(timerInterval);
 });
 
-// ✅ FETCH PAYMENT SETTINGS FROM SUPABASE
-async function fetchPaymentSettings() {
-    try {
-        const { data, error } = await window.supabase
-            .from('payment_settings')
-            .select('*')
-            .eq('id', 1)
-            .single();
-            
-        if (error || !data) throw error || new Error("No settings found");
-        
-        // Update UI
-        document.getElementById('dynUpiId').textContent = data.upi_id;
-        document.getElementById('dynBankName').textContent = data.bank_name;
-        document.getElementById('dynAccHolder').textContent = data.account_holder;
-        document.getElementById('dynAccNum').textContent = data.account_number;
-        document.getElementById('dynIfsc').textContent = data.ifsc_code;
+window.copyText = function(elementId) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(() => { alert("Copied: " + text); });
+}
 
-        // Generate Dynamic QR Code from UPI ID
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${data.upi_id}&pn=${data.account_holder.replace(/ /g,'+')}`;
-        document.getElementById('dynamicQrImg').src = qrUrl;
-        
+window.pasteUTR = async function() {
+    try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('utrInput').value = text;
     } catch (err) {
-        console.error("Settings fetch failed", err);
-        document.getElementById('dynUpiId').textContent = "Error loading details";
+        alert("Browser doesn't support direct paste. Please paste manually.");
     }
 }
 
-// MAIN DEPOSIT BUTTON
-document.querySelector("#depositBtn").onclick = async () => {
- if(!walletReady){alert("Please sign in and wait for the shared wallet to sync.");return;}
- 
+function startTimer() {
+    let timeLeft = 900; // 15 minutes
+    const timerDisplay = document.getElementById('timerDisplay');
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timerDisplay.textContent = "00:00";
+            alert("Session expired. Please close and try again.");
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+async function fetchPaymentSettings() {
+    try {
+        const { data, error } = await window.supabase.from('payment_settings').select('*').eq('id', 1).single();
+        if (error) throw error;
+        document.getElementById('dynUpiId').textContent = data.upi_id || "-";
+        document.getElementById('dynBankName').textContent = data.bank_name || "-";
+        if(data.upi_id) {
+            document.getElementById('dynamicQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${data.upi_id}&pn=${data.account_holder ? data.account_holder.replace(/ /g,'+') : 'N+PLAY'}`;
+        }
+    } catch (err) {
+        document.getElementById('dynUpiId').textContent = "Error";
+    }
+}
+
+document.querySelector("#depositBtn").addEventListener('click', async () => {
+ if(!walletReady){alert("Please wait for wallet to sync.");return;}
  const amount = Number(document.querySelector("#amount").value);
  currentDepositAmount = amount;
- 
  if(!Number.isFinite(amount) || amount < 100 || amount > 50000){
     alert("Enter a deposit amount between ₹100 and ₹50,000.");
     return;
  }
-
  document.getElementById('upiAmountText').textContent = '₹' + amount;
  document.getElementById('utrInput').value = ''; 
- 
- // Fetch settings every time modal opens
  fetchPaymentSettings();
- 
- document.getElementById('upiModal').classList.add('show');
-};
+ startTimer();
+ modal.classList.add('show');
+});
 
-async function submitUpiPayment() {
+document.getElementById('submitUpiBtn').addEventListener('click', async function() {
+    const btn = this;
     const utr = document.getElementById('utrInput').value.trim();
-    if (utr.length < 12) {
-        alert("Please enter a valid 12-digit UTR / Transaction ID.");
-        return;
-    }
+    if (utr.length < 12) { alert("Please enter valid 12-digit UTR."); return; }
 
-    const btn = document.getElementById('submitUpiBtn');
     btn.textContent = "Verifying...";
     btn.disabled = true;
 
     try {
         const user = await window.NPlusAuth.current();
-        
-        const { data, error } = await window.supabase
-            .from('manual_deposits')
-            .insert([
-                { 
-                    user_id: user.id, 
-                    amount: currentDepositAmount, 
-                    utr: utr, 
-                    status: 'pending',
-                    created_at: new Date()
-                }
-            ]);
+        const { error } = await window.supabase.from('manual_deposits').insert([{ 
+            user_id: user.id, amount: currentDepositAmount, utr: utr, status: 'pending', created_at: new Date() 
+        }]);
 
         if (error) throw error;
-
+        
+        clearInterval(timerInterval);
         document.querySelector('#upiModal h2').textContent = "Request Submitted!";
-        document.querySelector('#upiModal p').textContent = "Your deposit is pending verification.";
+        document.querySelector('.timer-box').style.display = 'none';
         document.querySelector('.qr-box').style.display = 'none';
-        document.getElementById('payDetailsBox').style.display = 'none';
-        document.getElementById('utrInput').style.display = 'none';
+        document.querySelector('.pay-details').style.display = 'none';
+        document.querySelector('.utr-wrapper').style.display = 'none';
         
         btn.textContent = "DONE";
-        btn.onclick = closeModal; 
-        btn.disabled = false;
-
+        btn.onclick = () => { modal.classList.remove('show'); location.reload(); };
     } catch (err) {
-        console.error("UPI Error:", err);
-        alert("Failed to submit. Make sure 'manual_deposits' table exists in Supabase.");
-        btn.textContent = "I HAVE PAID";
+        alert("Failed to submit.");
+        btn.textContent = "SUBMIT UTR";
         btn.disabled = false;
     }
-}
+});
 
-window.addEventListener("storage",()=>render());
 window.addEventListener("pageshow",()=>render());
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});
-setInterval(render,1500);
 render();
-
 })();
 </script>
-
-<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 </body>
 </html>
