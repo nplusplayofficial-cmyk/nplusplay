@@ -2,9 +2,16 @@
 (() => {
   "use strict";
   const primaryNavPages = new Set(["index.html", "activity.html", "bonus.html", "promotion.html", "account.html"]);
-  const currentFile = (location.pathname.split("/").pop() || "").toLowerCase();
+  const pathname = location.pathname.toLowerCase();
+  const pathTail = pathname.split("/").pop() || "";
+  // GitHub Pages root paths ("/" and "/nplusplay/") resolve to index.html.
+  const currentFile = !pathTail || !pathTail.includes(".") ? "index.html" : pathTail;
   // Primary sections use the shared bottom navigation; do not overlay a floating back button there.
-  if (primaryNavPages.has(currentFile)) return;
+  if (primaryNavPages.has(currentFile)) {
+    const existing = document.getElementById("nplus-global-back");
+    if (existing) existing.remove();
+    return;
+  }
   if (window.__nplusBackNavInstalled) return;
   window.__nplusBackNavInstalled = true;
   const STACK_KEY = "nplus.inAppBackStack.v1";
