@@ -1,3 +1,11 @@
+-- LEGACY CONTRACT WARNING (2026-10-23):
+-- This test models an older automatic 200-credit / 20-credit referral award flow.
+-- The currently applied database instead uses Admin-verified 500 virtual-credit
+-- qualification plus explicit event-tier claims (one invitee tier awards the configured
+-- virtual bonus) through nplus_demo_admin_qualify_referral / nplus_demo_claim_referral_bonus.
+-- Do not use this script as current release acceptance until Work #1 source reconciliation
+-- decides whether this older SQL/test should be retired or intentionally brought back.
+-- Current contract regression is qa/test-wallet-admin-referral-e2e.sql.
 \set ON_ERROR_STOP on
 -- Disposable PostgreSQL test only. This migration and reward are virtual credits, never cash.
 \ir ../sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql
