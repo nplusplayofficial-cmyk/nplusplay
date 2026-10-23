@@ -110,7 +110,7 @@ btn.addEventListener("click",async function(){
     btn.textContent="RETRY DEMO REQUEST";
   }finally{
     busy=false;
-    if(!submitted) updateAmount();
+    if(!submitted) btn.disabled=!authReady||!validAmount();
   }
 });
 updateAmount();
