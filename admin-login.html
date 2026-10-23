@@ -129,7 +129,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/nplus-config.js"></script>
+<script src="core/nplus-config.js?v=20261023-admin-auth-fix"></script>
 <script>
 (() => {
   "use strict";
@@ -141,6 +141,12 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
   if (!cfg?.supabaseUrl || !cfg?.supabaseAnonKey) {
     errorBox.textContent = "N+ PLAY configuration not found.";
+    errorBox.classList.add("show");
+    return;
+  }
+
+  if (typeof window.supabase?.createClient !== "function") {
+    errorBox.textContent = "The authentication library did not load. Refresh the page and try again.";
     errorBox.classList.add("show");
     return;
   }
@@ -201,7 +207,12 @@ button:disabled{opacity:.55;cursor:not-allowed}
         .eq("id", data.user.id)
         .maybeSingle();
 
-      if (profileError || String(profile?.role || "").toLowerCase() !== "admin") {
+      if (profileError) {
+        await supabase.auth.signOut();
+        throw new Error("Password accepted, but the admin permission check failed. Refresh and try again. If this repeats, contact the site administrator.");
+      }
+
+      if (String(profile?.role || "").toLowerCase() !== "admin") {
         await supabase.auth.signOut();
         throw new Error("Admin access denied. This account is not authorized.");
       }
