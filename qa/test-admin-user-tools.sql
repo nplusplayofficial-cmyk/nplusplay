@@ -14,6 +14,7 @@ create table if not exists public.profiles (
 );
 
 \ir ../sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql
+\ir ../sql/NPLUS_PLAY_ADMIN_DEMO_WALLET_ADJUSTMENT_GUARD_2026-10-23.sql
 
 do $tests$
 declare
