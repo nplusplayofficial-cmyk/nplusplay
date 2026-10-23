@@ -138,3 +138,70 @@ The 2026-10-15 backup path is a Windows-local path supplied in the handover. The
 Do not create a Supabase cloud branch or project for replay without confirming its actual cost and obtaining approval where any nonzero cost applies. Do not upload the private backup to GitHub. To close these gates, run the replay/restore work in the existing local restore lab with the original private dump and a locally provisioned PostgreSQL/Supabase-compatible environment, then attach only redacted test output and schema/object summaries.
 
 **Status after this pass: source evidence improved; the five missing SQL sources, three conflicting copy groups, full 40-row applied-SQL equivalence, production-faithful restore, and clean canonical replay remain open. Work #1 must not be marked complete.**
+
+
+## Direct applied-SQL body comparison — 2026-10-23 (read-only)
+
+### Important correction to the earlier source-search notes
+
+The live table supabase_migrations.schema_migrations does store the SQL text in its statements array even though the standard migration-list endpoint returns only version/name. A read-only query fetched summary data from all 40 rows. Every row has one stored statement. Across the 40 history entries, the stored bodies produce **29 distinct SQL bodies and 11 repeated exact-body entries**. The 11 repeated pairs below are byte-for-byte the same after joining each row's statement array with a newline; this identifies duplicate applied bodies but does **not** itself prove that replaying them is safe.
+
+The five operations previously described as missing from the checked Git paths can now be recovered from the live applied statement history. Four recovered bodies have been committed as evidence files under docs/recovered-live-migration-sql-2026-10-23/ on this audit branch; the null-safe admin guard is also present as an exact match to the existing main-branch SQL source noted below. These evidence files are not production migration files and must not be copied into supabase/migrations/ blindly.
+
+### Repository comparisons supported by direct applied-SQL evidence
+
+| Live version(s) | Outcome from full stored-body comparison |
+|---|---|
+| 20261020135823 | Stored body is 2,371 characters and does **not** match the 2,738-character main candidate POST_ROLLOUT_BLOCK_GENERIC_WALLET_CREDITS.sql. |
+| 20261020162640 | The exact 490-character applied body was recovered and archived on this audit branch. |
+| 20261020162811 | Exact body match to sql/NPLUS_PLAY_ADMIN_NULL_PROFILE_GUARD_2026-10-19.sql (24,321 characters). This is not the same as the later 25,576-character null-profile-guard body. |
+| 20261021155813 | Stored body is 3,554 characters and is not the same as the later 2,004-character admin-game-status body. |
+| 20261021160439 | Exact body match to supabase/migrations/20261019000100_account_preferences.sql (2,112 characters). |
+| 20261021160443 | Exact body match to supabase/migrations/20261019000150_demo_wallet_requests.sql (8,761 characters). |
+| 20261021160446 | Exact body match to supabase/migrations/20261019000175_admin_deposit_actions.sql (3,998 characters). |
+| 20261021160503 | Exact body match to supabase/migrations/20261019000200_demo_referrals.sql (11,935 characters). |
+| 20261021160917 | Exact body match to feature-branch supabase/migrations/20261021182729_nplus_vip_referral_demo.sql (53,258 characters). The main-branch SQL candidate differs. |
+| 20261021160935 and 20261022055326 | Both history rows have the same 24,127-character body, which exactly matches feature-branch supabase/migrations/20261021182718_nplus_server_settlement_foundation.sql. |
+| 20261021161052 and 20261022055330 | Both history rows have the same 2,036-character body, exactly matching feature-branch supabase/migrations/20261021182719_nplus_motorace_schema.sql. |
+| 20261021161109 and 20261022055334 | Both history rows have the same 14,999-character body, exactly matching feature-branch supabase/migrations/20261021182720_nplus_motorace_rpc.sql. |
+| 20261021161129 and 20261022055340 | Both history rows have the same 2,592-character body, exactly matching feature-branch supabase/migrations/20261021182721_nplus_aviator_schema.sql. |
+| 20261021161143 and 20261022055345 | Both history rows have the same 21,231-character body, exactly matching feature-branch supabase/migrations/20261021182722_nplus_aviator_rpc.sql. |
+| 20261021161152 and 20261022055350 | Both history rows have the same 15,522-character body, exactly matching feature-branch supabase/migrations/20261021182723_nplus_aviator_worker_recovery.sql. |
+| 20261021161206 and 20261022055354 | Both history rows have the same 1,172-character body, exactly matching feature-branch supabase/migrations/20261021182724_nplus_aviator_persistent_scheduler.sql. |
+| 20261021161217 and 20261022055400 | Both history rows have the same 5,989-character body, exactly matching feature-branch supabase/migrations/20261021182725_nplus_admin_user_tools.sql. The main-branch standalone SQL differs. |
+| 20261021161233 and 20261022055404 | Both history rows have the same 2,004-character body, exactly matching supabase/migrations/20261021182726_nplus_admin_game_status.sql. |
+| 20261021161242 and 20261022055410 | Both history rows have the same 25,576-character body, exactly matching feature-branch supabase/migrations/20261021182727_nplus_admin_null_profile_guard.sql. The main-branch standalone SQL differs. |
+| 20261021161251 and 20261022055424 | Both history rows have the same 1,530-character body, exactly matching feature-branch supabase/migrations/20261021182728_nplus_recent_demo_activity.sql. |
+| 20261021162503 | Exact body match to sql/POST_ROLLOUT_REVOKE_PHONE_ENUMERATION.sql (1,115 characters). This verifies the body, not whether the operational precondition was satisfied at the time. |
+| 20261021162645 | The exact 1,050-character applied body was recovered and archived on this audit branch. |
+| 20261022062741 | The exact 4,525-character applied body was recovered and archived on this audit branch. |
+| 20261022064315 | The exact 872-character applied body was recovered and archived on this audit branch. It records the final pause/settlement-lockdown operation. |
+| 20261023081657 | Stored body is 547 characters; main candidate is 357 characters. They differ. |
+| 20261023081758 | Stored body is 3,059 characters; main candidate is 2,944 characters. They differ. |
+| 20261023081916 | Stored body is 3,040 characters; main candidate is 2,944 characters. They differ. |
+| 20261023092858 | Stored body is 5,177 characters; main migration file is 5,106 characters. They differ despite the matching version/name. |
+| 20261023093056 | Stored body is 284 characters; main migration file is 357 characters. They differ despite the matching version/name. |
+
+The exact repeated SQL-body groups are:
+- 20261021160935 / 20261022055326 — server settlement foundation
+- 20261021161052 / 20261022055330 — MotoRace schema
+- 20261021161109 / 20261022055334 — MotoRace RPC
+- 20261021161129 / 20261022055340 — Aviator schema
+- 20261021161143 / 20261022055345 — Aviator RPC
+- 20261021161152 / 20261022055350 — Aviator worker recovery
+- 20261021161206 / 20261022055354 — persistent scheduler
+- 20261021161217 / 20261022055400 — admin user tools
+- 20261021161233 / 20261022055404 — admin game status
+- 20261021161242 / 20261022055410 — null-profile guard
+- 20261021161251 / 20261022055424 — recent demo activity
+
+This closes the earlier **source-retrieval** gap for those five operations, but not clean-replay safety. The final six settings were re-queried on 2026-10-23 and remain disabled: WINGO, K3, 5D, TRX, MOTO, AVIATOR. A heuristic scan found no private-key marker, PostgreSQL credential URI, Supabase secret-key pattern, or JWT-shaped value in stored SQL. A broad service_role-proximity heuristic returned possible code-context matches and should not be treated as a definitive secret scan. No migration history rows, schema objects, wallet data, or game settings were changed by these queries.
+
+### What still blocks completion of Work #1
+
+1. The compared main-branch files with length mismatches must be corrected only through a reviewed source-of-truth decision; do not overwrite a file merely to make it match production.
+2. The exact applied SQL has not yet been fully represented as an approved canonical migration chain with replay ordering, prerequisites, role/extension assumptions, and idempotency decisions. Repeated bodies need an explicit replay-safety review.
+3. Clean replay in a disposable PostgreSQL/Supabase-compatible database is still not executed in this session.
+4. The backup restore test still has not been rerun with original ownership/grants/ACL semantics in a separate local environment. The previous --no-owner --no-acl transcript is not sufficient for restore acceptance.
+
+**Revised status:** all 40 production-applied SQL bodies are available for read-only inspection from the live history table; comparisons have verified a substantial subset and identified several checked-in-file mismatches. This improves source recovery materially, but **Work #1 remains open** until clean replay and backup-acceptance gates pass. Production was read-only throughout.
