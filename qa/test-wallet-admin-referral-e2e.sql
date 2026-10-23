@@ -24,6 +24,8 @@ DECLARE
   v_withdraw_id uuid;
   v_balance_before numeric;
   v_balance_after numeric;
+  v_referrer_before numeric;
+  v_referrer_after numeric;
   v_ledger_before bigint;
   v_ledger_after bigint;
   v_count bigint;
@@ -128,6 +130,7 @@ BEGIN
   END IF;
 
   PERFORM set_config('request.jwt.claim.sub',v_admin::text,true);
+  SELECT balance INTO v_referrer_before FROM public.demo_wallets WHERE user_id=v_referrer;
   v_result := public.nplus_approve_deposit(v_deposit_id);
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE
      OR (v_result->>'balance_after')::numeric<>(v_balance_before+500) THEN
@@ -136,6 +139,11 @@ BEGIN
   SELECT count(*) INTO v_count FROM public.demo_wallet_transactions
    WHERE user_id=v_invited AND type='credit' AND source='admin_deposit' AND delta=500;
   IF v_count<>1 THEN RAISE EXCEPTION 'FAIL: deposit approval did not create exactly one ledger row'; END IF;
+  SELECT balance INTO v_referrer_after FROM public.demo_wallets WHERE user_id=v_referrer;
+  IF v_referrer_after<>v_referrer_before
+     OR EXISTS (SELECT 1 FROM public.demo_wallet_transactions WHERE user_id=v_referrer AND type='REFERRAL_REWARD' AND source='REFERRAL') THEN
+    RAISE EXCEPTION 'FAIL: approving a deposit automatically rewarded a referrer before Admin qualification/tier claim';
+  END IF;
 
   v_error := '';
   BEGIN
@@ -155,9 +163,36 @@ BEGIN
     RAISE EXCEPTION 'FAIL: deposit rejection changed the wallet or ledger';
   END IF;
 
+  -- Positive Admin wallet adjustment is authorized, bounded, and ledger-backed.
+  PERFORM set_config('request.jwt.claim.sub',v_admin::text,true);
+  SELECT balance INTO v_balance_before FROM public.demo_wallets WHERE user_id=v_referrer;
+  SELECT count(*) INTO v_ledger_before FROM public.demo_wallet_transactions WHERE user_id=v_referrer;
+  v_result := public.nplus_admin_adjust_demo_wallet(v_referrer,5,'E2E admin adjustment');
+  IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE
+     OR (v_result->>'after')::numeric<>v_balance_before+5 THEN
+    RAISE EXCEPTION 'FAIL: Admin demo wallet adjustment did not apply the expected delta';
+  END IF;
+  SELECT balance INTO v_balance_after FROM public.demo_wallets WHERE user_id=v_referrer;
+  SELECT count(*) INTO v_ledger_after FROM public.demo_wallet_transactions WHERE user_id=v_referrer;
+  IF v_balance_after<>v_balance_before+5 OR v_ledger_after<>v_ledger_before+1 THEN
+    RAISE EXCEPTION 'FAIL: Admin wallet adjustment did not produce one balanced ledger row';
+  END IF;
+  SELECT count(*) INTO v_count FROM public.demo_wallet_transactions
+  WHERE user_id=v_referrer AND type='ADMIN_ADJUSTMENT' AND source='NPLUS_ADMIN' AND delta=5;
+  IF v_count<>1 THEN RAISE EXCEPTION 'FAIL: Admin adjustment ledger entry count is not exactly one'; END IF;
+
+  PERFORM set_config('request.jwt.claim.sub',v_other::text,true);
+  v_error := '';
+  BEGIN
+    PERFORM public.nplus_admin_adjust_demo_wallet(v_referrer,1,'non-admin attempt');
+  EXCEPTION WHEN OTHERS THEN v_error := SQLERRM;
+  END;
+  IF v_error NOT ILIKE '%Admin access required%' THEN
+    RAISE EXCEPTION 'FAIL: non-admin wallet adjustment was not denied';
+  END IF;
+
   -- Approved demo credits do not automatically pay the referrer; qualification is an
   -- explicit Admin verification step, once, after a >=500 virtual-credit check.
-  SELECT balance INTO v_balance_before FROM public.demo_wallets WHERE user_id=v_referrer;
   PERFORM set_config('request.jwt.claim.sub',v_admin::text,true);
   v_result := public.nplus_demo_admin_qualify_referral(v_invited,499.99);
   IF coalesce((v_result->>'success')::boolean,true) OR v_result->>'reason'<>'qualification_below_minimum' THEN
@@ -277,7 +312,7 @@ BEGIN
   IF v_count<>0 THEN RAISE EXCEPTION 'FAIL: test produced inconsistent ledger arithmetic'; END IF;
 
   RAISE NOTICE 'PASS: deposit idempotency/approval/rejection and Admin authorization';
-  RAISE NOTICE 'PASS: wallet adjustment/positive-credit protection';
+  RAISE NOTICE 'PASS: Admin wallet adjustment authorization/ledger and positive-credit protection';
   RAISE NOTICE 'PASS: referral uniqueness/self-referral/qualification/one-time tier claim';
   RAISE NOTICE 'PASS: withdrawal idempotency/status-only Admin review';
 END
