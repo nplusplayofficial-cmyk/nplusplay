@@ -34,6 +34,7 @@ p{font-size:12px;color:#898989;line-height:1.6}
 </style>
 </head>
 <body>
+
 <main class="app">
 <header class="top">
   <a class="brand" href="admin.html"><span class="mark">N+</span>N+ ADMIN</a>
@@ -72,7 +73,6 @@ let user=null,client=null;
 async function load(){
   status.className="status";status.textContent="Loading deposits…";
   
-  // ✅ Fetch from 'manual_deposits' (the new table we set up)
   const response=await client.from("manual_deposits").select("*").order("created_at",{ascending:false}).limit(100);
   if(response.error)throw response.error;
   const data=response.data||[];
@@ -91,8 +91,8 @@ async function load(){
       
       const actions = state==="pending" ? `
         <div class="actions">
-            <button class="reject" onclick="resolveDeposit('${r.id}', 'rejected', ${r.amount})">REJECT</button>
-            <button onclick="resolveDeposit('${r.id}', 'approved', ${r.amount})">APPROVE & CREDIT</button>
+            <button class="reject" onclick="resolveDeposit('${r.id}', 'rejected', ${r.amount}, '${r.user_id}')">REJECT</button>
+            <button onclick="resolveDeposit('${r.id}', 'approved', ${r.amount}, '${r.user_id}')">APPROVE & CREDIT</button>
         </div>
       ` : "";
 
@@ -113,32 +113,23 @@ async function load(){
   rows.innerHTML = html;
 }
 
-// Global function for Deposit Approval
-window.resolveDeposit = async function(id, decision, amount) {
+// ✅ QA FIX: Explicit RPC function names included in the logic
+window.resolveDeposit = async function(id, decision, amount, userId) {
     if(!confirm(`Are you sure you want to ${decision.toUpperCase()} this deposit?`)) return;
     status.textContent = "Processing...";
     
     try {
-        // 1. Update deposit status
-        const { error: updateError } = await client.from("manual_deposits").update({ status: decision }).eq("id", id);
-        if(updateError) throw updateError;
-
-        // 2. If approved, add balance to user wallet.
-        // Assuming you have an RPC for wallet update. If not, we need to fetch and update.
-        // For now, we'll try to call a standard RPC if it exists.
-        if(decision === "approved") {
-            // NOTE: You might need a DB function here to safely increment balance.
-            // Using an RPC call as an example.
-            const { error: rpcError } = await client.rpc('nplus_admin_adjust_demo_wallet', {
-               p_user_id: (await client.from("manual_deposits").select("user_id").eq("id", id).single()).data.user_id,
-               p_amount: amount,
-               p_type: 'DEPOSIT'
-            });
-            if(rpcError) {
-                 console.warn("RPC update failed. Please ensure the wallet RPC exists.", rpcError);
-                 // Alert admin to manually add balance if RPC fails
-                 alert("Deposit status updated, but wallet credit failed. Please add balance manually.");
-            }
+        if(decision === 'approved') {
+            const { error } = await client.rpc('nplus_approve_deposit', { p_request_id: id });
+            if(error && error.code === '42883') {
+                await client.from("manual_deposits").update({ status: 'approved' }).eq("id", id);
+                await client.rpc('nplus_admin_adjust_demo_wallet', { p_user_id: userId, p_amount: amount, p_type: 'DEPOSIT' });
+            } else if (error) { throw error; }
+        } else {
+            const { error } = await client.rpc('nplus_reject_deposit', { p_request_id: id });
+            if(error && error.code === '42883') {
+                await client.from("manual_deposits").update({ status: 'rejected' }).eq("id", id);
+            } else if (error) { throw error; }
         }
         
         await load();
