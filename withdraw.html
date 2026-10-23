@@ -9,7 +9,7 @@
 :root{
   --bg:#080907;--panel:#10110e;--line:rgba(201,165,91,.18);
   --gold:#c9a55b;--gold2:#f0dfb5;--text:#eee9dc;--muted:#777a72;
-  --green:#42d6a0;--red:#ef7770;
+  --green:#42d6a0;--red:#ef7770; --blue:#3b82f6;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;min-height:100vh}
@@ -18,6 +18,14 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-seri
 .back{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:#11120f;color:#ddd;font-size:22px;cursor:pointer}
 .mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#f0dfb5,#b88f48);color:#17140d;font-weight:1000}
 .wallet{border:1px solid rgba(66,214,160,.22);color:var(--green);padding:8px 12px;border-radius:13px;font-weight:900;font-size:12px}
+
+/* Wagering Progress Box */
+.wager-box { background: rgba(201,165,91,.05); border: 1px solid rgba(201,165,91,.2); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+.wager-title { font-size: 12px; font-weight: 800; color: var(--gold); margin-bottom: 10px; display: flex; justify-content: space-between;}
+.progress-bar { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-bottom: 8px;}
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); width: 0%; transition: width 0.5s ease; }
+.wager-text { font-size: 11px; color: #aaa; line-height: 1.5; }
+.wager-text b { color: #fff; }
 
 .card{background:linear-gradient(145deg,#151711,#0e0f0d);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:15px;}
 .card-title{font-size:14px;font-weight:800;margin-bottom:15px;display:flex;align-items:center;gap:8px;}
@@ -47,11 +55,11 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 .balance-row b{color:var(--gold);}
 
 .cta{width:100%;border:0;border-radius:15px;padding:16px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:14px;cursor:pointer;text-transform:uppercase;}
-.cta:disabled{opacity:0.5;cursor:not-allowed;}
+.cta:disabled{opacity:0.3;cursor:not-allowed;background:#555;color:#888;}
 
 .rules-box{background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:12px;padding:15px;font-size:11px;color:#aaa;line-height:1.6;}
-.rules-box p{margin:0 0 8px 0;display:flex;gap:8px;}
-.rules-box p::before{content:'◆';color:var(--red);font-size:10px;}
+.rules-box p{margin:0 0 8px 0;display:flex;gap:8px;align-items:flex-start;}
+.rules-box p::before{content:'◆';color:var(--red);font-size:10px;margin-top:2px;}
 .rules-box p:last-child{margin-bottom:0;}
 .highlight{color:var(--red);font-weight:800;}
 
@@ -76,6 +84,20 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
     </div>
     <div class="wallet" id="wallet">₹0.00</div>
   </header>
+
+  <!-- Wagering Progress Box -->
+  <div class="wager-box" id="wagerBox">
+      <div class="wager-title">
+          <span>Withdrawal Progress</span>
+          <span id="wagerPercentage">0%</span>
+      </div>
+      <div class="progress-bar">
+          <div class="progress-fill" id="wagerProgress"></div>
+      </div>
+      <div class="wager-text" id="wagerText">
+          Calculating...
+      </div>
+  </div>
 
   <div class="card">
     <div class="card-title">Withdrawal Method</div>
@@ -124,11 +146,11 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
   </div>
 
   <div class="rules-box">
-    <p>Need to bet <span class="highlight" id="betNeeded">₹0.00</span> to be able to withdraw</p>
+    <p>Minimum deposit <span class="highlight">₹150</span> required to unlock withdrawals.</p>
+    <p>You must play (wager) <span class="highlight">100% of your Deposit + Bonus (₹108)</span> to withdraw cash.</p>
     <p>Withdraw time <span class="highlight">00:00 - 23:55</span></p>
-    <p>Inday Remaining Withdrawal Times <span class="highlight">5</span></p>
     <p>Withdrawal amount range <span class="highlight">₹110.00 - ₹1,00,000.00</span></p>
-    <p>Please check your registered bank information again before making a withdrawal. If your bank info is incorrect, our company will not be responsible for any losses.</p>
+    <p>Ensure your bank info is correct. We are not responsible for wrong details.</p>
   </div>
 </div>
 
@@ -153,45 +175,80 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 <script>
 let allBalance = 0;
 let savedBank = null;
+let userStats = { total_deposited: 0, total_wagered: 0, bonus_balance: 108 };
+let canWithdraw = false;
 
 async function init() {
     const user = await window.NPlusAuth.current();
     if(!user) { location.href = 'auth.html'; return; }
 
-    // Load Balance
+    // 1. Load Wallet Balance
     const bal = Number(await window.NPlusWallet.getBalance()) || 0;
     allBalance = bal;
     document.getElementById('wallet').textContent = '₹' + bal.toFixed(2);
     document.getElementById('dispBal').textContent = '₹' + bal.toFixed(2);
 
-    // Check Withdraw Conditions
+    // 2. Load User Wagering Stats
+    const { data: profile } = await window.supabase.from('profiles').select('total_deposited, total_wagered, bonus_balance').eq('id', user.id).single();
+    if(profile) {
+        userStats.total_deposited = profile.total_deposited || 0;
+        userStats.total_wagered = profile.total_wagered || 0;
+        userStats.bonus_balance = profile.bonus_balance || 0;
+    }
+
+    // 3. Update Wagering Logic & UI
     checkWithdrawConditions(bal);
 
-    // Load Bank Details
-    const { data } = await window.supabase.from('user_bank_details').select('*').eq('user_id', user.id).maybeSingle();
-    if (data) {
-        savedBank = data;
-        document.getElementById('dispBankName').textContent = data.bank_name;
-        document.getElementById('dispAccNum').textContent = '****' + data.account_number.slice(-4);
+    // 4. Load Bank Details
+    const { data: bank } = await window.supabase.from('user_bank_details').select('*').eq('user_id', user.id).maybeSingle();
+    if (bank) {
+        savedBank = bank;
+        document.getElementById('dispBankName').textContent = bank.bank_name;
+        document.getElementById('dispAccNum').textContent = '****' + bank.account_number.slice(-4);
     }
 }
 
 function checkWithdrawConditions(bal) {
-    const minWithdraw = 110;
     const btn = document.getElementById('withdrawBtn');
+    const minDeposit = 150;
     
-    if (bal >= minWithdraw && savedBank) {
+    // Total amount user MUST wager = (Total Deposited) + (Bonus 108)
+    const requiredWager = userStats.total_deposited + userStats.bonus_balance;
+    const wagerProgress = Math.min((userStats.total_wagered / requiredWager) * 100, 100);
+    
+    // Update Progress Bar
+    document.getElementById('wagerProgress').style.width = wagerProgress + '%';
+    document.getElementById('wagerPercentage').textContent = Math.floor(wagerProgress) + '%';
+
+    let msg = "";
+    
+    if(userStats.total_deposited < minDeposit) {
+        msg = `Deposit at least <b>₹150</b> to unlock withdrawal. You have deposited: <b>₹${userStats.total_deposited}</b>.`;
+        canWithdraw = false;
+    } else if (userStats.total_wagered < requiredWager) {
+        const remaining = requiredWager - userStats.total_wagered;
+        msg = `You need to play <b>₹${remaining.toFixed(2)}</b> more to unlock withdrawal. (Played: ₹${userStats.total_wagered} / Required: ₹${requiredWager})`;
+        canWithdraw = false;
+    } else {
+        msg = `<span style="color:var(--green)">✔ Withdrawal Unlocked! You can now withdraw your cash.</span>`;
+        canWithdraw = true;
+    }
+
+    document.getElementById('wagerText').innerHTML = msg;
+
+    // Enable/Disable Button
+    if (canWithdraw && bal >= 110 && savedBank) {
         btn.disabled = false;
     } else {
         btn.disabled = true;
     }
-
-    // Example logic: User must bet 20% of their balance before withdrawing (Daman style)
-    const betNeeded = bal * 0.2; 
-    document.getElementById('betNeeded').textContent = '₹' + betNeeded.toFixed(2);
 }
 
 function setAmount(val) {
+    if(!canWithdraw) {
+        alert("Please meet the deposit and wagering requirements first.");
+        return;
+    }
     document.getElementById('amount').value = Math.floor(val);
 }
 
@@ -237,6 +294,8 @@ async function saveBankDetails() {
 }
 
 document.getElementById('withdrawBtn').addEventListener('click', async () => {
+    if(!canWithdraw) { alert("Requirements not met!"); return; }
+    
     const amount = Number(document.getElementById('amount').value);
     if(amount < 110) { alert("Minimum withdrawal is ₹110"); return; }
     if(amount > allBalance) { alert("Insufficient balance"); return; }
@@ -247,7 +306,6 @@ document.getElementById('withdrawBtn').addEventListener('click', async () => {
 
     const user = await window.NPlusAuth.current();
 
-    // Insert into withdraw_requests table
     const { error } = await window.supabase.from('withdraw_requests').insert([{
         user_id: user.id,
         amount: amount,
@@ -260,7 +318,7 @@ document.getElementById('withdrawBtn').addEventListener('click', async () => {
         btn.disabled = false;
     } else {
         alert("Withdrawal Request Submitted Successfully! Admin will review it.");
-        location.href = 'withdrawal-history.html'; // Redirect to history
+        location.href = 'withdrawal-history.html'; 
     }
 });
 
