@@ -16,6 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PAGES = [
     ("/", ["N+ PLAY"]),
     ("/index.html", ["VIRTUAL DEMO"]),
+    ("/dashboard.html", ["N+ PLAY"]),
     ("/auth.html", ["resendOtpBtn"]),
     ("/forgot-password.html", ["password"]),
     ("/admin-login.html", ["password"]),
