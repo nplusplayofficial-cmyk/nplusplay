@@ -12,13 +12,13 @@ This section supersedes older status notes below where dates or deployment state
 ### Critical repository/database migration drift discovered
 - A fresh comparison found 40 applied migration-history rows in live Supabase but only 6 files under `main/supabase/migrations/`; only the two 2026-10-23 cleanup migrations match by exact version/name. Four older tracked migration filenames do not match their live applied versions, and 38 live entries lack an exact matching file.
 - This must be reconciled before using repository migrations to recreate or modify production. Do not run `supabase db push` and do not blindly merge the old draft migration files, because some are duplicated/re-recorded under different live migration versions.
-- Full version-by-version detail and safe recovery sequence: [docs/SUPABASE-LIVE-MIGRATION-DRIFT-2026-10-23.md](./docs/SUPABASE-LIVE-MIGRATION-DRIFT-2026-10-23.md).
+- Full version-by-version detail: [docs/SUPABASE-LIVE-MIGRATION-DRIFT-2026-10-23.md](./docs/SUPABASE-LIVE-MIGRATION-DRIFT-2026-10-23.md). Latest read-only live-state and backup-restore evidence: [docs/SUPABASE-MIGRATION-RECONCILIATION-STATUS-2026-10-23.md](./docs/SUPABASE-MIGRATION-RECONCILIATION-STATUS-2026-10-23.md).
 
 ### Current release blockers / explicit limitations
 - All 6 games (WINGO, K3, 5D, TRX WINGO, MotoRace, Aviator) remain disabled intentionally. Do not enable them until browser-level regression tests and each game's server-owned round/settlement behaviour have been validated.
 - Supabase Security Advisor still reports 53 authenticated-callable SECURITY DEFINER functions. Source review found auth.uid()/the shared server-side admin check in the reviewed functions, but the remaining RPC set must be retained under regression tests and reviewed before further permission changes. The public `nplus_recent_demo_activity(integer)` function remains intentionally callable by anon because it returns only aggregate game counts for the landing page; it does not return user IDs, individual bets, or balances.
 - Leaked-password protection is still disabled. Supabase documents this feature as available on Pro and above; do not upgrade the project or incur cost without explicit approval.
-- The private local database backup has not been restore-tested. Do not upload it to GitHub.
+- The private backup was manually restored to a separate local database on 2026-10-19 and selected wallet/ledger consistency checks passed. That restore used `--no-owner --no-acl`, so production ownership/grants and full RLS/auth parity remain unverified. Never upload the backup to GitHub; see the reconciliation evidence doc.
 - Signup email-OTP delivery, full sign-up/login/password-reset, real browser deposit-request review, referral replay/anti-self-referral, and mobile end-to-end flows still require test accounts and a hands-on runtime pass. CI/disposable PostgreSQL tests are not proof of a full production browser test.
 - PR #2 and PR #6 remain open drafts. Do not merge blindly: they contain historical changes and conflicting referral-rule expectations (the earlier 200-virtual-credit/20-bonus request vs. a different screenshot-tier rule in PR #6). Reconcile against the currently intended demo rule and the source screenshots before changing rewards.
 - Real-money deposits, withdrawals, and cash payouts are not enabled. This release remains virtual/demo-credit only.
@@ -34,7 +34,7 @@ This section supersedes older status notes below where dates or deployment state
 # N+ PLAY + N+ ADMIN — Release readiness (2026-10-17)
 
 ## Done
-- Created local custom-format Supabase database backup and verified its archive list (not restore-tested).
+- Created the local custom-format Supabase backup, verified its 661-entry archive list, and later restored it to separate local database `nplus_restore_manual`. Selected wallet/ledger checks passed; original ownership and ACL restoration were skipped, so full disaster-recovery acceptance remains open.
 - Live DB: added a role-change guard trigger; rollback-only test confirmed non-admin role escalation is blocked.
 - Live DB: removed anonymous EXECUTE from the wallet/admin RPC set, removed direct wallet/ledger browser writes, preserved own-row reads plus admin-role reads required by admin pages, and verified authenticated RPC access.
 - Live DB: consolidated duplicate deposit policies, optimized RLS policy expressions, applied least-privilege table grants, retained admin-only reads needed by admin screens, and added FK/ledger indexes.
