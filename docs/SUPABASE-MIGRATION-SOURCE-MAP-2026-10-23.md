@@ -205,3 +205,8 @@ This closes the earlier **source-retrieval** gap for those five operations, but 
 4. The backup restore test still has not been rerun with original ownership/grants/ACL semantics in a separate local environment. The previous --no-owner --no-acl transcript is not sufficient for restore acceptance.
 
 **Revised status:** all 40 production-applied SQL bodies are available for read-only inspection from the live history table; comparisons have verified a substantial subset and identified several checked-in-file mismatches. This improves source recovery materially, but **Work #1 remains open** until clean replay and backup-acceptance gates pass. Production was read-only throughout.
+
+
+### Duplicate-body static replay-risk scan — 2026-10-23
+
+A read-only pattern scan was run over the 11 identical-body pairs. It did not flag unguarded CREATE TABLE/INDEX, ADD CONSTRAINT/COLUMN, INSERT, UPDATE, or DELETE patterns in these duplicate bodies. Eight bodies contain CREATE OR REPLACE syntax; three do not. This is only a text-pattern triage aid (not a SQL parser and not a replay test), so it does **not** establish idempotency, transaction safety, role prerequisites, or identical outcomes in a clean database. Duplicate records remain subject to manual review and clean replay before any canonical chain is approved.
