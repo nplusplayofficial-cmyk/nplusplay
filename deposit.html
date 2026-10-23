@@ -248,38 +248,50 @@ function startTimer() {
     }, 1000);
 }
 
-// ✅ FIXED FUNCTION: Now checks for custom uploaded QR image
+// ✅ FIXED FUNCTION: Now properly initializes Supabase Client
 async function fetchPaymentSettings() {
     try {
-        // .maybeSingle() use pandrom, so row illanalum error throw aagadhu
-        const { data, error } = await window.supabase
+        // 1. Client ah correct ah initialize pandrom (window.supabase library ah irundhalum, client ah create panni dhaan use pannanum)
+        const cfg = window.NPlusConfig;
+        const supabaseClient = window.NPlusAuth.client || window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+        // 2. Data ah fetch pandrom
+        const { data, error } = await supabaseClient
             .from('payment_settings')
             .select('*')
             .eq('id', 1)
             .maybeSingle();
             
-        if (error) throw error;
-        if (!data) throw new Error("No settings found in DB"); // DB la row illa
+        if (error) {
+            console.error("Database Error:", error.message);
+            throw error;
+        }
         
+        if (!data) {
+            console.warn("No data found in payment_settings for ID 1");
+            document.getElementById('dynUpiId').textContent = "No Data in DB";
+            document.getElementById('dynBankName').textContent = "No Data in DB";
+            return;
+        }
+        
+        // 3. UI ah update pandrom
         document.getElementById('dynUpiId').textContent = data.upi_id || "-";
         document.getElementById('dynBankName').textContent = data.bank_name || "-";
 
         const qrImgEl = document.getElementById('dynamicQrImg');
         
-        // Admin upload panna image URL ah check pandrom
         if (data.qr_image_url && data.qr_image_url.startsWith('http')) {
             qrImgEl.src = data.qr_image_url;
-        } 
-        // Illana dynamic ah generate pandrom
-        else if (data.upi_id) {
+        } else if (data.upi_id) {
             qrImgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${data.upi_id}&pn=${data.account_holder ? data.account_holder.replace(/ /g,'+') : 'N+PLAY'}`;
         }
     } catch (err) {
-        console.error("Settings fetch failed", err);
+        console.error("Settings fetch failed:", err);
         document.getElementById('dynUpiId').textContent = "Error";
         document.getElementById('dynBankName').textContent = "Error";
     }
 }
+
 document.querySelector("#depositBtn").addEventListener('click', async () => {
  // ✅ QA FIX: Exact string required by verify-project.js
  if(!walletReady){alert("Please sign in and wait for the shared wallet to sync.");return;}
@@ -307,7 +319,10 @@ document.getElementById('submitUpiBtn').addEventListener('click', async function
 
     try {
         const user = await window.NPlusAuth.current();
-        const { error } = await window.supabase.from('manual_deposits').insert([{ 
+        const cfg = window.NPlusConfig;
+        const supabaseClient = window.NPlusAuth.client || window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+        
+        const { error } = await supabaseClient.from('manual_deposits').insert([{ 
             user_id: user.id, amount: currentDepositAmount, utr: utr, status: 'pending', created_at: new Date() 
         }]);
 
@@ -323,7 +338,7 @@ document.getElementById('submitUpiBtn').addEventListener('click', async function
         btn.textContent = "DONE";
         btn.onclick = () => { modal.classList.remove('show'); location.reload(); };
     } catch (err) {
-        alert("Failed to submit.");
+        alert("Failed to submit: " + err.message);
         btn.textContent = "SUBMIT UTR";
         btn.disabled = false;
     }
