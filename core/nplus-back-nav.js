@@ -75,7 +75,7 @@
   button.addEventListener("click", () => {
     const now = currentPath(); let trail = readStack(); const index = trail.lastIndexOf(now); let target = "";
     if (index > 0) { target = trail[index - 1]; trail = trail.slice(0, index); }
-    else { const ref = referrerPath(); target = ref && ref !== now ? ref : fallbackPath(); trail = target === now ? [now] : [target]; }
+    else { target = fallbackPath(); trail = target === now ? [now] : [target]; }
     if (!target || !target.startsWith("/") || target.startsWith("//") || target.includes("\\")) { target = fallbackPath(); trail = [target]; }
     if (target === now) { button.title = "You are already at the start of this page trail"; return; }
     saveStack(trail);
