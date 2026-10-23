@@ -61,6 +61,26 @@ for (const file of htmls) {
   }
 }
 
+// Every N+ PLAY and N+ ADMIN HTML page must include the shared in-app back control.
+try {
+  const backNavPath = path.join(root, 'core/nplus-back-nav.js');
+  if (!fs.existsSync(backNavPath)) fail('Shared in-app back navigation script is missing');
+  const backNav = fs.readFileSync(backNavPath, 'utf8');
+  for (const required of ['nplus-global-back','nplus.inAppBackStack.v1','referrerPath()','fallbackPath()','window.location.replace(target)']) {
+    if (!backNav.includes(required)) fail('Shared back-navigation contract missing: ' + required);
+  }
+  for (const file of htmls) {
+    const html = fs.readFileSync(path.join(root, file), 'utf8');
+    if (!/<script\s+defer\s+src=["']\.\/core\/nplus-back-nav\.js["']><\/script>/i.test(html)) {
+      fail('Shared back arrow is not included on HTML page: ' + file);
+    }
+  }
+  const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  if (!worker.includes('nplus-play-shell-v6') || !worker.includes('"./core/nplus-back-nav.js"')) {
+    fail('Service worker must bump its shell cache and precache the shared back-navigation script');
+  }
+} catch (e) { fail('Shared in-app back navigation guard failed: ' + e.message); }
+
 // Admin login and wallet-adjustment source must remain aligned with the server security contract.
 try {
   const adminLogin = fs.readFileSync(path.join(root, 'admin-login.html'), 'utf8');
