@@ -1072,6 +1072,11 @@
               const captchaToken = await window.NPlusCaptcha.getToken();
               const signupStart = await NPlusAuth.sendSignupOtp({ ...pendingSignup, captchaToken });
 
+              // Supabase has accepted signup. Do not keep the password in the pending OTP state.
+              pendingSignup.password = "";
+              $("signupPassword").value = "";
+              $("confirm").value = "";
+
               // Some Supabase projects have email confirmation enabled (OTP required);
               // others return a session immediately. Support both server responses.
               if (signupStart.immediateSession) {
