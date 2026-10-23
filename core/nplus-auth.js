@@ -167,7 +167,8 @@
     email,
     mobile,
     password,
-    name = ""
+    name = "",
+    captchaToken
   }) {
     if (!client) throw new Error("Supabase is not configured.");
 
@@ -177,7 +178,16 @@
 
     if (!cleanName) throw new Error("Display name is required.");
     if (cleanName.length > 40) throw new Error("Display name is too long.");
-    if (!password || password.length < 6) throw new Error("Password must be at least 6 characters.");
+    if (
+      !password ||
+      password.length < 12 ||
+      !/[a-z]/.test(password) ||
+      !/[A-Z]/.test(password) ||
+      !/\d/.test(password) ||
+      !/[^A-Za-z0-9]/.test(password)
+    ) {
+      throw new Error("Use at least 12 characters with uppercase, lowercase, a number, and a symbol.");
+    }
 
     // Duplicate mobiles are prevented atomically by the database unique index
     // profiles_phone_digits_unique_idx. Avoid exposing an anonymous phone-existence RPC.
@@ -190,7 +200,8 @@
           display_name: cleanName,
           signup_email: cleanEmail,
           signup_phone: cleanMobile
-        }
+        },
+        captchaToken
       }
     });
 
@@ -278,7 +289,7 @@
     };
   }
 
-  async function resendSignupEmailOtp({ email }) {
+  async function resendSignupEmailOtp({ email, captchaToken }) {
     if (!client) throw new Error("Supabase is not configured.");
 
     const cleanEmail = normalizeEmail(email);
@@ -286,7 +297,8 @@
 
     const { error } = await client.auth.resend({
       type: "signup",
-      email: cleanEmail
+      email: cleanEmail,
+      options: { captchaToken }
     });
 
     if (error) {
@@ -373,7 +385,8 @@
   async function signIn({
     email,
     mobile,
-    password
+    password,
+    captchaToken
   }) {
     if (!client) {
       throw new Error("Supabase is not configured.");
@@ -391,10 +404,20 @@
       error
     } = await client.auth.signInWithPassword({
       email: cleanEmail,
-      password
+      password,
+      options: { captchaToken }
     });
 
     if (error) {
+      const message = String(error.message || "").toLowerCase();
+      if (
+        message.includes("weak password") ||
+        message.includes("password does not meet") ||
+        message.includes("password should be at least") ||
+        message.includes("password must contain")
+      ) {
+        throw new Error("Your password needs an update. Use Forgot Password to set a new password with at least 12 characters, including uppercase, lowercase, a number, and a symbol.");
+      }
       throw new Error(
         "Email, mobile number, or password is incorrect."
       );
