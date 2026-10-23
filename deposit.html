@@ -55,7 +55,7 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
 .modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);z-index:50}
 .modal.show{display:grid}
 .modal-card{width:min(100%,420px);background:#11130f;border:1px solid var(--line);border-radius:22px;padding:22px;position:relative;box-shadow:0 30px 100px #000;text-align: center;}
-.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa;cursor:pointer;font-size: 16px;}
+.close{position:absolute;right:13px;top:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#171916;color:#aaa;cursor:pointer;font-size: 16px; z-index: 10;}
 .close:hover { background: #222; color: #fff; }
 .modal-card h2{font-size:18px;margin:2px 0 8px;color:#fff;}
 .modal-card p{font-size:11px;color:#aaa;line-height:1.6;margin-bottom: 15px;}
@@ -133,38 +133,42 @@ input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:
  <div class="modal-card">
   <button class="close" id="closeBtn">✕</button>
   
-  <div class="timer-box">
-      <span>Amount Payable: <b id="upiAmountText" style="color:var(--gold);font-size:14px;">₹0</b></span>
-      <span class="time" id="timerDisplay">15:00</span>
-  </div>
-
-  <div class="qr-box">
-    <img id="dynamicQrImg" src="" alt="UPI QR">
-  </div>
-  <p style="font-size:10px;color:#888;margin-bottom:15px;">Scan the QR with another device to pay exactly the amount shown.</p>
-
-  <div class="pay-details">
-    <div class="pay-row">
-      <span class="pay-label">UPI ID</span>
-      <div class="pay-value">
-        <span id="dynUpiId">Loading...</span>
-        <button class="copy-btn" onclick="copyText('dynUpiId')">COPY</button>
+  <!-- Namma intha inner-content ah success aana odane JS vachu maathiduvom -->
+  <div id="modalBody">
+      <h2>Pay via UPI</h2>
+      <div class="timer-box">
+          <span>Amount Payable: <b id="upiAmountText" style="color:var(--gold);font-size:14px;">₹0</b></span>
+          <span class="time" id="timerDisplay">15:00</span>
       </div>
-    </div>
-    <div class="pay-row">
-      <span class="pay-label">Bank Name</span>
-      <span class="pay-value" id="dynBankName">Loading...</span>
-    </div>
+
+      <div class="qr-box">
+        <img id="dynamicQrImg" src="" alt="UPI QR">
+      </div>
+      <p style="font-size:10px;color:#888;margin-bottom:15px;">Scan the QR with another device to pay exactly the amount shown.</p>
+
+      <div class="pay-details">
+        <div class="pay-row">
+          <span class="pay-label">UPI ID</span>
+          <div class="pay-value">
+            <span id="dynUpiId">Loading...</span>
+            <button class="copy-btn" onclick="copyText('dynUpiId')">COPY</button>
+          </div>
+        </div>
+        <div class="pay-row">
+          <span class="pay-label">Bank Name</span>
+          <span class="pay-value" id="dynBankName">Loading...</span>
+        </div>
+      </div>
+      
+      <p style="text-align:left;font-size:11px;color:#aaa;margin-bottom:8px;">Input UTR / Ref No:</p>
+      <div class="utr-wrapper">
+          <input type="text" id="utrInput" class="utr-input" placeholder="12-digit UTR">
+          <button class="paste-btn" onclick="pasteUTR()">Paste</button>
+      </div>
+      <p style="text-align:left;font-size:9px;color:var(--red);margin-bottom:15px;">If you do not submit UTR, 100% will fail.</p>
+      
+      <button class="done" id="submitUpiBtn">SUBMIT UTR</button>
   </div>
-  
-  <p style="text-align:left;font-size:11px;color:#aaa;margin-bottom:8px;">Input UTR / Ref No:</p>
-  <div class="utr-wrapper">
-      <input type="text" id="utrInput" class="utr-input" placeholder="12-digit UTR">
-      <button class="paste-btn" onclick="pasteUTR()">Paste</button>
-  </div>
-  <p style="text-align:left;font-size:9px;color:var(--red);margin-bottom:15px;">If you do not submit UTR, 100% will fail.</p>
-  
-  <button class="done" id="submitUpiBtn">SUBMIT UTR</button>
  </div>
 </div>
 
@@ -248,33 +252,25 @@ function startTimer() {
     }, 1000);
 }
 
-// ✅ FIXED FUNCTION: Now properly initializes Supabase Client
 async function fetchPaymentSettings() {
     try {
-        // 1. Client ah correct ah initialize pandrom (window.supabase library ah irundhalum, client ah create panni dhaan use pannanum)
         const cfg = window.NPlusConfig;
         const supabaseClient = window.NPlusAuth.client || window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
 
-        // 2. Data ah fetch pandrom
         const { data, error } = await supabaseClient
             .from('payment_settings')
             .select('*')
             .eq('id', 1)
             .maybeSingle();
             
-        if (error) {
-            console.error("Database Error:", error.message);
-            throw error;
-        }
+        if (error) throw error;
         
         if (!data) {
-            console.warn("No data found in payment_settings for ID 1");
             document.getElementById('dynUpiId').textContent = "No Data in DB";
             document.getElementById('dynBankName').textContent = "No Data in DB";
             return;
         }
         
-        // 3. UI ah update pandrom
         document.getElementById('dynUpiId').textContent = data.upi_id || "-";
         document.getElementById('dynBankName').textContent = data.bank_name || "-";
 
@@ -293,7 +289,6 @@ async function fetchPaymentSettings() {
 }
 
 document.querySelector("#depositBtn").addEventListener('click', async () => {
- // ✅ QA FIX: Exact string required by verify-project.js
  if(!walletReady){alert("Please sign in and wait for the shared wallet to sync.");return;}
  
  const amount = Number(document.querySelector("#amount").value);
@@ -329,14 +324,22 @@ document.getElementById('submitUpiBtn').addEventListener('click', async function
         if (error) throw error;
         
         clearInterval(timerInterval);
-        document.querySelector('#upiModal h2').textContent = "Request Submitted!";
-        document.querySelector('.timer-box').style.display = 'none';
-        document.querySelector('.qr-box').style.display = 'none';
-        document.querySelector('.pay-details').style.display = 'none';
-        document.querySelector('.utr-wrapper').style.display = 'none';
         
-        btn.textContent = "DONE";
-        btn.onclick = () => { modal.classList.remove('show'); location.reload(); };
+        // ✅ FIX: Ippo namma antha error vacha code ah eduthutu, UI ah clean ah maathuvom
+        document.getElementById('modalBody').innerHTML = `
+            <div style="text-align:center; padding: 20px 0;">
+                <div style="font-size:50px; margin-bottom:15px;">✅</div>
+                <h2 style="font-size:22px; color:#fff; margin-bottom:10px;">Request Submitted!</h2>
+                <p style="font-size:13px; color:#aaa; line-height:1.6;">Your deposit of <b>₹${currentDepositAmount}</b> is pending verification. We will update your balance within 5-10 minutes.</p>
+                <button class="done" id="successCloseBtn" style="margin-top:25px;">DONE</button>
+            </div>
+        `;
+        
+        document.getElementById('successCloseBtn').addEventListener('click', () => {
+            modal.classList.remove('show');
+            location.reload();
+        });
+
     } catch (err) {
         alert("Failed to submit: " + err.message);
         btn.textContent = "SUBMIT UTR";
