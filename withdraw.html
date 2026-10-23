@@ -1,25 +1,270 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080908"><link rel="manifest" href="./manifest.webmanifest"><title>N+ PLAY — Demo Withdrawal Request</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script><script src="core/nplus-auth.js"></script><script src="core/nplus-wallet-bridge.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>N+ PLAY — Withdraw</title>
 <style>
-:root{--line:rgba(201,165,91,.17);--gold:#c9a55b;--gold2:#f0dfb5;--text:#f4f1e8;--muted:#83857d}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(650px 450px at 50% -160px,rgba(201,165,91,.075),transparent 68%),#080908;color:var(--text);font:14px Inter,system-ui,sans-serif}.app{width:min(590px,100% - 28px);margin:auto;padding:14px 0 38px}.top{height:54px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06)}a{color:inherit;text-decoration:none}.brand{display:flex;align-items:center;gap:8px;font-weight:950;letter-spacing:1px}.mark{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#f0dfb5,#c9a55b);color:#17140d}.balance-pill{padding:8px 11px;border:1px solid rgba(66,217,165,.2);border-radius:999px;color:#bdf4df;font-size:11px;font-weight:900}.hero{padding:25px 2px 16px}.eyebrow{font-size:9px;letter-spacing:2px;color:var(--gold);font-weight:900}h1{margin:8px 0;font-size:27px}.hero p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.card{padding:20px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#171813,#0c0d0b);box-shadow:0 25px 70px rgba(0,0,0,.4)}.label{font-size:9px;letter-spacing:1.4px;color:#73766e;font-weight:900}.balance{font-size:29px;font-weight:950;margin:5px 0 16px}.field-label{display:block;margin:18px 0 8px;font-size:10px;font-weight:850;color:#aaa99f}.amount-wrap{display:flex;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:#0b0c0a;padding:0 12px}.amount-wrap span{font-size:20px;color:var(--gold);font-weight:900}.amount-wrap input{width:100%;min-width:0;padding:14px 10px;background:transparent;border:0;outline:0;color:white;font-size:20px;font-weight:900}.presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}.preset{border:1px solid rgba(255,255,255,.08);background:#11120f;color:#bbb;border-radius:11px;padding:11px 4px;font-weight:850;cursor:pointer}.preset.active{border-color:rgba(201,165,91,.6);color:var(--gold2);background:rgba(201,165,91,.08)}.btn{width:100%;margin-top:17px;border:0;border-radius:13px;padding:14px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}.notice{margin-top:14px;padding:13px;border:1px solid rgba(66,217,165,.15);border-radius:13px;background:rgba(66,217,165,.04);color:#9bd8c1;font-size:10px;line-height:1.65}.status{margin-top:13px;font-size:11px;line-height:1.6;overflow-wrap:anywhere;color:#b7b5aa}.status.error{color:#ff9da4}.status.success{color:#8de4bd}.links{display:flex;gap:14px;flex-wrap:wrap;margin-top:17px}.links a{font-size:11px;color:var(--gold2)}@media(max-width:430px){.presets{grid-template-columns:repeat(2,1fr)}}
-</style></head><body><main class="app">
-<header class="top"><a class="brand" href="account.html"><span class="mark">N+</span>PLAY</a><div class="balance-pill" id="wallet">SYNCING…</div></header>
-<section class="hero"><div class="eyebrow">WALLET · VIRTUAL CREDITS</div><h1>Demo withdrawal request</h1><p>Submit a request for a simulated Admin review. This is not a cash withdrawal.</p></section>
-<section class="card"><div class="label">AVAILABLE DEMO BALANCE</div><div class="balance" id="balance">₹—</div><label class="field-label" for="amount">REQUEST AMOUNT</label>
-<div class="amount-wrap"><span>₹</span><input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Enter demo credits"></div>
-<div class="presets"><button class="preset" type="button" data-amount="10">₹10</button><button class="preset" type="button" data-amount="25">₹25</button><button class="preset" type="button" data-amount="50">₹50</button><button class="preset" type="button" data-amount="100">₹100</button></div>
-<button class="btn" id="submitBtn" type="button" disabled>SUBMIT DEMO REQUEST</button>
-<div class="notice"><b>Demo only:</b> N+ PLAY credits have no cash value. Submitting or approving this request does not deduct credits, transfer money, or initiate a payout. Admin approval changes status only.</div>
-<div class="status" id="status" role="status" aria-live="polite">Checking account…</div>
-<div class="links"><a href="withdrawal-history.html">VIEW WITHDRAWAL HISTORY →</a><a href="account.html">BACK TO ACCOUNT →</a></div></section></main>
+:root{
+  --bg:#080907;--panel:#10110e;--line:rgba(201,165,91,.18);
+  --gold:#c9a55b;--gold2:#f0dfb5;--text:#eee9dc;--muted:#777a72;
+  --green:#42d6a0;--red:#ef7770;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;min-height:100vh}
+.app{width:min(100%,590px);margin:auto;padding:18px 16px 35px}
+.header{height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:20px;}
+.back{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:#11120f;color:#ddd;font-size:22px;cursor:pointer}
+.mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#f0dfb5,#b88f48);color:#17140d;font-weight:1000}
+.wallet{border:1px solid rgba(66,214,160,.22);color:var(--green);padding:8px 12px;border-radius:13px;font-weight:900;font-size:12px}
+
+.card{background:linear-gradient(145deg,#151711,#0e0f0d);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:15px;}
+.card-title{font-size:14px;font-weight:800;margin-bottom:15px;display:flex;align-items:center;gap:8px;}
+.card-title::before { content:''; width:4px; height:14px; background:var(--gold); border-radius:2px;}
+
+.methods-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:15px;}
+.method-box{background:#11120f;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:15px 5px;text-align:center;cursor:pointer;}
+.method-box.active{border-color:var(--gold);background:rgba(201,165,91,.06);}
+.method-box .icon{font-size:24px;margin-bottom:5px;}
+.method-box span{font-size:10px;font-weight:800;display:block;}
+
+.saved-bank{display:flex;justify-content:space-between;align-items:center;background:#11120f;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:15px;margin-bottom:15px;cursor:pointer;}
+.saved-bank .details{display:flex;align-items:center;gap:12px;}
+.saved-bank .logo{font-size:24px;}
+.saved-bank .info b{display:block;font-size:12px;}
+.saved-bank .info span{font-size:10px;color:#aaa;font-family:monospace;}
+
+.amount-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:15px;}
+.amount-btn{background:#11120f;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 0;color:var(--gold);font-weight:800;font-size:14px;cursor:pointer;transition:0.2s;}
+.amount-btn:hover{border-color:var(--gold);background:rgba(201,165,91,.1);}
+
+.amount-wrap{display:flex;align-items:center;border:1px solid rgba(255,255,255,.09);background:#0b0c0a;border-radius:15px;padding:0 14px;margin-bottom:15px;}
+.amount-wrap span{font-size:19px;color:var(--gold);font-weight:900;}
+input{width:100%;background:transparent;border:0;outline:0;color:#fff;font-size:24px;font-weight:900;padding:15px 10px}
+
+.balance-row{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:20px;}
+.balance-row b{color:var(--gold);}
+
+.cta{width:100%;border:0;border-radius:15px;padding:16px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:1000;font-size:14px;cursor:pointer;text-transform:uppercase;}
+.cta:disabled{opacity:0.5;cursor:not-allowed;}
+
+.rules-box{background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:12px;padding:15px;font-size:11px;color:#aaa;line-height:1.6;}
+.rules-box p{margin:0 0 8px 0;display:flex;gap:8px;}
+.rules-box p::before{content:'◆';color:var(--red);font-size:10px;}
+.rules-box p:last-child{margin-bottom:0;}
+.highlight{color:var(--red);font-weight:800;}
+
+/* Modal */
+.modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);z-index:50;}
+.modal.show{display:grid;}
+.modal-card{width:min(100%,400px);background:#11130f;border:1px solid var(--line);border-radius:20px;padding:22px;text-align:center;}
+.modal-card input{background:#0b0c0a;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;font-size:14px;margin:15px 0;text-align:left;}
+.modal-card label{display:block;text-align:left;font-size:11px;color:#aaa;margin-top:10px;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js?v=20261007"></script>
+<script src="core/nplus-auth.js?v=20261007"></script>
+<script src="core/nplus-wallet-bridge.js?v=20261007"></script>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div style="display:flex;align-items:center;gap:9px">
+      <button class="back" onclick="location.href='account.html'">‹</button>
+      <span class="mark">N+</span>
+    </div>
+    <div class="wallet" id="wallet">₹0.00</div>
+  </header>
+
+  <div class="card">
+    <div class="card-title">Withdrawal Method</div>
+    <div class="methods-grid">
+      <div class="method-box active"><div class="icon">💳</div><span>BANK CARD</span></div>
+      <div class="method-box"><div class="icon">📱</div><span>UPI</span></div>
+      <div class="method-box"><div class="icon">🪙</div><span>USDT</span></div>
+    </div>
+
+    <div class="saved-bank" id="savedBankBox" onclick="openBankModal()">
+      <div class="details">
+        <div class="logo">🏦</div>
+        <div class="info">
+          <b id="dispBankName">Add Bank Account</b>
+          <span id="dispAccNum">Click to add details</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:#aaa;">›</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Withdrawal Amount</div>
+    <div class="amount-grid">
+      <button class="amount-btn" onclick="setAmount(110)">110</button>
+      <button class="amount-btn" onclick="setAmount(300)">300</button>
+      <button class="amount-btn" onclick="setAmount(500)">500</button>
+      <button class="amount-btn" onclick="setAmount(1000)">1K</button>
+      <button class="amount-btn" onclick="setAmount(2000)">2K</button>
+      <button class="amount-btn" onclick="setAmount(3000)">3K</button>
+      <button class="amount-btn" onclick="setAmount(5000)">5K</button>
+      <button class="amount-btn" onclick="setAmount(10000)">10K</button>
+    </div>
+
+    <div class="amount-wrap">
+      <span>₹</span>
+      <input id="amount" type="number" inputmode="decimal" placeholder="Please enter the amount">
+    </div>
+    
+    <div class="balance-row">
+      <span>Withdrawable balance: <b id="dispBal">₹0.00</b></span>
+      <span style="cursor:pointer;text-decoration:underline;" onclick="setAmount(allBalance)">All</span>
+    </div>
+
+    <button class="cta" id="withdrawBtn" disabled>Withdraw</button>
+  </div>
+
+  <div class="rules-box">
+    <p>Need to bet <span class="highlight" id="betNeeded">₹0.00</span> to be able to withdraw</p>
+    <p>Withdraw time <span class="highlight">00:00 - 23:55</span></p>
+    <p>Inday Remaining Withdrawal Times <span class="highlight">5</span></p>
+    <p>Withdrawal amount range <span class="highlight">₹110.00 - ₹1,00,000.00</span></p>
+    <p>Please check your registered bank information again before making a withdrawal. If your bank info is incorrect, our company will not be responsible for any losses.</p>
+  </div>
+</div>
+
+<!-- Bank Details Modal -->
+<div class="modal" id="bankModal">
+  <div class="modal-card">
+    <h2 style="margin:0 0 15px;">Add Bank Details</h2>
+    <label>Bank Name</label>
+    <input type="text" id="inpBankName" placeholder="e.g. Kotak Mahindra">
+    <label>Account Holder Name</label>
+    <input type="text" id="inpAccHolder" placeholder="Full Name">
+    <label>Account Number</label>
+    <input type="text" id="inpAccNum" placeholder="Account Number">
+    <label>IFSC Code</label>
+    <input type="text" id="inpIfsc" placeholder="IFSC Code">
+    
+    <button class="cta" style="margin-top:20px;" onclick="saveBankDetails()" id="saveBankBtn">SAVE DETAILS</button>
+    <button style="background:none;border:none;color:#aaa;margin-top:10px;cursor:pointer;" onclick="document.getElementById('bankModal').classList.remove('show')">Cancel</button>
+  </div>
+</div>
+
 <script>
-(async function(){"use strict";const $=id=>document.getElementById(id),status=$("status"),button=$("submitBtn"),input=$("amount"),money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});let user=null,balance=NaN;
-function tokenFor(amount){const key="nplus_demo_withdraw_request_token_v1:"+user.id+":"+amount.toFixed(2);let value=sessionStorage.getItem(key);if(!value){if(window.crypto&&typeof crypto.randomUUID==="function")value=crypto.randomUUID();else{const b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;const h=[...b].map(x=>x.toString(16).padStart(2,"0")).join("");value=h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20)}sessionStorage.setItem(key,value)}return {key,value}}
-function setBalance(n){balance=Number(n);$("balance").textContent=money(balance);$("wallet").textContent=money(balance);button.disabled=!Number.isFinite(balance)||balance<=0}
-document.querySelectorAll("[data-amount]").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.amount;document.querySelectorAll(".preset").forEach(x=>x.classList.toggle("active",x===b))}));
-button.addEventListener("click",async()=>{if(button.disabled||!user)return;const amount=Number(input.value);if(!Number.isFinite(amount)||amount<=0||amount>balance){status.className="status error";status.textContent="Enter an amount greater than zero and no greater than your displayed demo balance.";return}button.disabled=true;button.textContent="SUBMITTING…";status.className="status";status.textContent="Submitting demo request…";const token=tokenFor(amount);try{const response=await window.NPlusAuth.client.rpc("nplus_create_demo_withdrawal_request",{p_amount:Math.round(amount*100)/100,p_request_token:token.value,p_request_note:"Submitted from N+ PLAY demo withdrawal page"});if(response.error)throw response.error;const result=Array.isArray(response.data)?response.data[0]:response.data;if(!result||result.success!==true)throw new Error("The withdrawal request did not return a valid result.");sessionStorage.removeItem(token.key);status.className="status success";status.textContent=(result.duplicate_request?"Existing request recovered: ":"Request submitted: ")+result.request_id+" · Status: "+result.status+". Demo balance remains "+money(balance)+". No cash payout.";button.textContent="REQUEST SAVED"}catch(e){console.error("Demo withdrawal request failed",e);status.className="status error";status.textContent=e.message||"Request failed. Retry safely; the same request token will be reused.";button.disabled=false;button.textContent="RETRY DEMO REQUEST"}});
-window.addEventListener("nplus:wallet-change",e=>{const after=Number(e&&e.detail&&e.detail.after);if(Number.isFinite(after))setBalance(after)});
-try{if(!window.NPlusAuth||!window.NPlusAuth.client)throw new Error("Supabase is not configured.");user=await window.NPlusAuth.requireAuth();if(!user)return;setBalance(await window.NPlusWallet.getBalance());status.textContent="Ready. Submit a virtual-credit request for Admin review."}catch(e){status.className="status error";status.textContent=e.message||"Could not load your demo wallet.";button.disabled=true}
-})();
-</script><script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("PWA registration skipped",e)));</script></body></html>
+let allBalance = 0;
+let savedBank = null;
+
+async function init() {
+    const user = await window.NPlusAuth.current();
+    if(!user) { location.href = 'auth.html'; return; }
+
+    // Load Balance
+    const bal = Number(await window.NPlusWallet.getBalance()) || 0;
+    allBalance = bal;
+    document.getElementById('wallet').textContent = '₹' + bal.toFixed(2);
+    document.getElementById('dispBal').textContent = '₹' + bal.toFixed(2);
+
+    // Check Withdraw Conditions
+    checkWithdrawConditions(bal);
+
+    // Load Bank Details
+    const { data } = await window.supabase.from('user_bank_details').select('*').eq('user_id', user.id).maybeSingle();
+    if (data) {
+        savedBank = data;
+        document.getElementById('dispBankName').textContent = data.bank_name;
+        document.getElementById('dispAccNum').textContent = '****' + data.account_number.slice(-4);
+    }
+}
+
+function checkWithdrawConditions(bal) {
+    const minWithdraw = 110;
+    const btn = document.getElementById('withdrawBtn');
+    
+    if (bal >= minWithdraw && savedBank) {
+        btn.disabled = false;
+    } else {
+        btn.disabled = true;
+    }
+
+    // Example logic: User must bet 20% of their balance before withdrawing (Daman style)
+    const betNeeded = bal * 0.2; 
+    document.getElementById('betNeeded').textContent = '₹' + betNeeded.toFixed(2);
+}
+
+function setAmount(val) {
+    document.getElementById('amount').value = Math.floor(val);
+}
+
+function openBankModal() {
+    if(savedBank) {
+        document.getElementById('inpBankName').value = savedBank.bank_name;
+        document.getElementById('inpAccHolder').value = savedBank.account_holder;
+        document.getElementById('inpAccNum').value = savedBank.account_number;
+        document.getElementById('inpIfsc').value = savedBank.ifsc_code;
+    }
+    document.getElementById('bankModal').classList.add('show');
+}
+
+async function saveBankDetails() {
+    const user = await window.NPlusAuth.current();
+    const btn = document.getElementById('saveBankBtn');
+    btn.textContent = "SAVING...";
+    btn.disabled = true;
+
+    const payload = {
+        user_id: user.id,
+        bank_name: document.getElementById('inpBankName').value.trim(),
+        account_holder: document.getElementById('inpAccHolder').value.trim(),
+        account_number: document.getElementById('inpAccNum').value.trim(),
+        ifsc_code: document.getElementById('inpIfsc').value.trim(),
+        updated_at: new Date()
+    };
+
+    if(!payload.bank_name || !payload.account_number || !payload.ifsc_code) {
+        alert("Please fill all fields"); btn.textContent = "SAVE DETAILS"; btn.disabled = false; return;
+    }
+
+    const { error } = await window.supabase.from('user_bank_details').upsert(payload, { onConflict: 'user_id' });
+    
+    if(error) {
+        alert("Failed to save");
+    } else {
+        document.getElementById('bankModal').classList.remove('show');
+        init(); // Reload data
+    }
+    btn.textContent = "SAVE DETAILS";
+    btn.disabled = false;
+}
+
+document.getElementById('withdrawBtn').addEventListener('click', async () => {
+    const amount = Number(document.getElementById('amount').value);
+    if(amount < 110) { alert("Minimum withdrawal is ₹110"); return; }
+    if(amount > allBalance) { alert("Insufficient balance"); return; }
+
+    const btn = document.getElementById('withdrawBtn');
+    btn.textContent = "Processing...";
+    btn.disabled = true;
+
+    const user = await window.NPlusAuth.current();
+
+    // Insert into withdraw_requests table
+    const { error } = await window.supabase.from('withdraw_requests').insert([{
+        user_id: user.id,
+        amount: amount,
+        status: 'pending'
+    }]);
+
+    if(error) {
+        alert("Error submitting request");
+        btn.textContent = "Withdraw";
+        btn.disabled = false;
+    } else {
+        alert("Withdrawal Request Submitted Successfully! Admin will review it.");
+        location.href = 'withdrawal-history.html'; // Redirect to history
+    }
+});
+
+init();
+</script>
+</body>
+</html>
