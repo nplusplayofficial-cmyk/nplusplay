@@ -1590,6 +1590,7 @@ body{
 }
 </style>
 
+<link rel="stylesheet" href="core/nplus-bottom-nav.css?v=20261023-unified-nav">
 </head>
 
 <body>
@@ -1783,12 +1784,12 @@ body{
 </footer>
 </main>
 
-<nav class="bottom-nav" aria-label="Primary navigation">
-    <a href="index.html" class="nav-item active"><span class="nav-icon">⌂</span><span>Home</span></a>
-    <a href="activity.html" class="nav-item"><span class="nav-icon">◷</span><span>Activity</span></a>
-    <a href="bonus.html" class="nav-item"><span class="nav-icon">✦</span><span>Bonus</span><span class="nav-badge">NEW</span></a>
-    <a href="promotion.html" class="nav-item"><span class="nav-icon">◇</span><span>Promotion</span></a>
-    <a href="account.html" class="nav-item"><span class="nav-icon">◯</span><span>Account</span></a>
+<nav class="nplus-bottom-nav" aria-label="Primary navigation">
+  <a href="index.html" class="nplus-nav-item active" aria-current="page"><span class="nplus-nav-icon">⌂</span><span>Home</span></a>
+  <a href="activity.html" class="nplus-nav-item"><span class="nplus-nav-icon">◷</span><span>Activity</span></a>
+  <a href="bonus.html" class="nplus-nav-item"><span class="nplus-nav-icon">✦</span><span>Bonus</span></a>
+  <a href="promotion.html" class="nplus-nav-item"><span class="nplus-nav-icon">◇</span><span>Promotion</span></a>
+  <a href="account.html" class="nplus-nav-item"><span class="nplus-nav-icon">◯</span><span>Account</span></a>
 </nav>
 
 <script>
@@ -2003,6 +2004,6 @@ document.querySelectorAll('.cat').forEach(tab=>{
 
 <script src="core/recent-demo-activity.js"></script>
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
-<script defer src="./core/nplus-back-nav.js"></script>
+<script defer src="./core/nplus-back-nav.js?v=20261023-unified-nav"></script>
 </body>
 </html>
