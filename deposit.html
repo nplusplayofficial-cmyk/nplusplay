@@ -248,17 +248,29 @@ function startTimer() {
     }, 1000);
 }
 
+// ✅ FIXED FUNCTION: Now checks for custom uploaded QR image
 async function fetchPaymentSettings() {
     try {
         const { data, error } = await window.supabase.from('payment_settings').select('*').eq('id', 1).single();
         if (error) throw error;
+        
         document.getElementById('dynUpiId').textContent = data.upi_id || "-";
         document.getElementById('dynBankName').textContent = data.bank_name || "-";
-        if(data.upi_id) {
-            document.getElementById('dynamicQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${data.upi_id}&pn=${data.account_holder ? data.account_holder.replace(/ /g,'+') : 'N+PLAY'}`;
+
+        const qrImgEl = document.getElementById('dynamicQrImg');
+        
+        // Check if admin uploaded a custom image URL
+        if (data.qr_image_url && data.qr_image_url.startsWith('http')) {
+            qrImgEl.src = data.qr_image_url;
+        } 
+        // Otherwise, fallback to auto-generated QR
+        else if (data.upi_id) {
+            qrImgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${data.upi_id}&pn=${data.account_holder ? data.account_holder.replace(/ /g,'+') : 'N+PLAY'}`;
         }
     } catch (err) {
+        console.error(err);
         document.getElementById('dynUpiId').textContent = "Error";
+        document.getElementById('dynBankName').textContent = "Error";
     }
 }
 
