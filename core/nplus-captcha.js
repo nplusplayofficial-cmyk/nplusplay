@@ -3,7 +3,7 @@
 
   // Turnstile site keys are public and intended to be embedded in browser code.
   // Never place the Turnstile secret key in this file or any frontend bundle.
-  const SITE_KEY = "0x4AAAAAAAFiSyD8E8QoP0jb4";
+  const SITE_KEY = "0x4AAAAAAAFiVZEG7inxdNXKI";
   const mountId = "nplusCaptcha";
   let widgetId = null;
   let token = "";
