@@ -80,6 +80,6 @@
     if (target === now) { button.title = "You are already at the start of this page trail"; return; }
     saveStack(trail);
     try { sessionStorage.setItem(PENDING_KEY, target); } catch (_) {}
-    location.replace(target);
+    window.location.replace(target);
   });
 })();
