@@ -145,6 +145,20 @@
       margin-top:13px;
     }
 
+    .captcha-field{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+    }
+
+    .captcha-hint{
+      color:#77796f;
+      font-size:.54rem;
+      line-height:1.5;
+      text-align:center;
+    }
+
     label{
       display:block;
       margin-bottom:7px;
@@ -508,8 +522,9 @@
               <input
                 id="signupPassword"
                 type="password"
-                minlength="6"
-                placeholder="Minimum 6 characters"
+                minlength="12"
+                maxlength="128"
+                placeholder="12+ characters, mixed case, number & symbol"
                 autocomplete="new-password"
               >
 
@@ -537,7 +552,8 @@
               <input
                 id="confirm"
                 type="password"
-                minlength="6"
+                minlength="12"
+                maxlength="128"
                 placeholder="Repeat password"
                 autocomplete="new-password"
               >
@@ -566,6 +582,11 @@
         <div class="notice">Enter the 6-digit code sent to your email to activate your N+ PLAY account.</div>
         <button class="secondary" id="resendOtpBtn" type="button">RESEND VERIFICATION CODE</button>
         <button class="secondary" id="backBtn" type="button">BACK TO SIGNUP</button>
+      </div>
+
+      <div class="field captcha-field" id="nplusCaptchaField">
+        <div id="nplusCaptcha" aria-label="Cloudflare security verification"></div>
+        <small class="captcha-hint">Complete the security check before logging in, signing up, or resending an email code.</small>
       </div>
 
       <!-- SUBMIT BUTTON -->
@@ -631,7 +652,8 @@
 
   <!-- N+ PLAY AUTH -->
   <!-- Cache-busting version -->
-  <script src="core/nplus-auth.js?v=20261019-referrals"></script>
+  <script src="core/nplus-auth.js?v=20261023-turnstile"></script>
+  <script src="core/nplus-captcha.js?v=20261023-turnstile"></script>
 
 
   <!-- PAGE LOGIC -->
@@ -695,6 +717,7 @@
         mode = next;
         stage = "credentials";
         pendingSignup = {};
+        if (window.NPlusCaptcha) window.NPlusCaptcha.reset();
 
         clearStatus();
 
@@ -988,12 +1011,12 @@
               }
 
 
+              const captchaToken = await window.NPlusCaptcha.getToken();
               await NPlusAuth.signIn({
-
                 email,
                 mobile,
-                password
-
+                password,
+                captchaToken
               });
 
 
@@ -1033,12 +1056,21 @@
               if (!name) throw new Error("Display name is required.");
               if (!email) throw new Error("Email address is required.");
               if (!mobile) throw new Error("Mobile number is required.");
-              if (password.length < 6) throw new Error("Password must be at least 6 characters.");
+              if (
+                password.length < 12 ||
+                !/[a-z]/.test(password) ||
+                !/[A-Z]/.test(password) ||
+                !/\d/.test(password) ||
+                !/[^A-Za-z0-9]/.test(password)
+              ) {
+                throw new Error("Use at least 12 characters with uppercase, lowercase, a number, and a symbol.");
+              }
               if (password !== confirm) throw new Error("Passwords do not match.");
 
               const referralCode = $("signupReferralCode").value.trim().toUpperCase();
               pendingSignup = { name, email, mobile, password, referralCode };
-              const signupStart = await NPlusAuth.sendSignupOtp(pendingSignup);
+              const captchaToken = await window.NPlusCaptcha.getToken();
+              const signupStart = await NPlusAuth.sendSignupOtp({ ...pendingSignup, captchaToken });
 
               // Some Supabase projects have email confirmation enabled (OTP required);
               // others return a session immediately. Support both server responses.
@@ -1106,10 +1138,8 @@
 
 
           }finally{
-
-            submit.disabled =
-              false;
-
+            if (window.NPlusCaptcha) window.NPlusCaptcha.reset();
+            submit.disabled = false;
           }
 
         };
@@ -1122,11 +1152,13 @@
         const previousText = button.textContent;
         button.textContent = "SENDING…";
         try {
-          await NPlusAuth.resendSignupEmailOtp({ email: pendingSignup.email });
+          const captchaToken = await window.NPlusCaptcha.getToken();
+          await NPlusAuth.resendSignupEmailOtp({ email: pendingSignup.email, captchaToken });
           setStatus("A new verification code has been requested. Check your inbox and spam folder.", "ok");
         } catch (error) {
           setStatus(error?.message || "Unable to resend the verification code.", "err");
         } finally {
+          if (window.NPlusCaptcha) window.NPlusCaptcha.reset();
           button.disabled = false;
           button.textContent = previousText;
         }
