@@ -218,6 +218,7 @@ a{text-decoration:none;color:inherit}button{font:inherit}
   .bottom{width:590px}
 }
 </style>
+<link rel="stylesheet" href="core/nplus-bottom-nav.css?v=20261023-unified-nav">
 </head>
 <body>
 <div class="app">
@@ -308,12 +309,12 @@ a{text-decoration:none;color:inherit}button{font:inherit}
 
 </div>
 
-<nav class="bottom">
-  <a class="nav" href="index.html"><span class="ni">⌂</span>Home</a>
-  <a class="nav" href="activity.html"><span class="ni">◷</span>Activity</a>
-  <a class="nav" href="bonus.html"><span class="ni">✦</span>Bonus</a>
-  <a class="nav active" href="promotion.html"><span class="ni">◇</span>Promotion</a>
-  <a class="nav" href="account.html"><span class="ni">◯</span>Account</a>
+<nav class="nplus-bottom-nav" aria-label="Primary navigation">
+  <a href="index.html" class="nplus-nav-item"><span class="nplus-nav-icon">⌂</span><span>Home</span></a>
+  <a href="activity.html" class="nplus-nav-item"><span class="nplus-nav-icon">◷</span><span>Activity</span></a>
+  <a href="bonus.html" class="nplus-nav-item"><span class="nplus-nav-icon">✦</span><span>Bonus</span></a>
+  <a href="promotion.html" class="nplus-nav-item active" aria-current="page"><span class="nplus-nav-icon">◇</span><span>Promotion</span></a>
+  <a href="account.html" class="nplus-nav-item"><span class="nplus-nav-icon">◯</span><span>Account</span></a>
 </nav>
 
 
@@ -473,6 +474,6 @@ a{text-decoration:none;color:inherit}button{font:inherit}
   refreshReferrals();
 })();
 </script>
-<script defer src="./core/nplus-back-nav.js"></script>
+<script defer src="./core/nplus-back-nav.js?v=20261023-unified-nav"></script>
 </body>
 </html>
