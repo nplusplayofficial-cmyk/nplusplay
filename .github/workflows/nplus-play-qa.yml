@@ -40,6 +40,12 @@ jobs:
           node-version: 24
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Test live RLS/index migrations in a dedicated disposable database
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_migration_test
+          psql -h 127.0.0.1 -U postgres -d nplus_migration_test -v ON_ERROR_STOP=1 -f qa/test-release-index-policy-migration.sql
       - name: Check syntax and local links
         run: node qa/verify-project.js
       - name: Test WINGO settlement against disposable PostgreSQL
