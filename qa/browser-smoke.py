@@ -27,6 +27,7 @@ PAGES = [
     ("/admin-reports.html", []),
     ("/account.html", []),
     ("/activity.html", []),
+    ("/bonus.html", []),
     ("/deposit.html", []),
     ("/withdraw.html", []),
     ("/wingo.html", []),
@@ -53,10 +54,15 @@ PAGES = [
     ("/promotion.html", []),
 ]
 
+PRIMARY_NAV_PAGES = {
+    "/", "/index.html", "/activity.html", "/bonus.html", "/promotion.html", "/account.html",
+}
+
 MOBILE_CRITICAL = {
-    "/", "/auth.html", "/forgot-password.html", "/admin-login.html",
+    "/", "/index.html", "/auth.html", "/forgot-password.html", "/admin-login.html",
     "/deposit.html", "/withdraw.html", "/wingo.html", "/motorace.html",
     "/aviator.html", "/vip.html", "/referral.html", "/safe.html",
+    "/activity.html", "/bonus.html", "/promotion.html", "/account.html",
 }
 
 def fail(message: str) -> None:
@@ -70,6 +76,7 @@ def main() -> int:
     loaded = 0
     responsive_checked = 0
     overflow_warnings: list[str] = []
+    primary_nav_boxes: list[tuple[str, float, float]] = []
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -91,12 +98,32 @@ def main() -> int:
                     continue
                 page.locator("body").wait_for(state="visible")
                 back_button = page.locator("#nplus-global-back")
-                back_button.wait_for(state="visible", timeout=8000)
-                if back_button.count() != 1:
-                    errors.append(f"{path}: shared back arrow is missing or duplicated")
-                back_box = back_button.bounding_box()
-                if not back_box or back_box["width"] < 36 or back_box["height"] < 36:
-                    errors.append(f"{path}: shared back arrow has an unusable tap target")
+                if path in PRIMARY_NAV_PAGES:
+                    if back_button.count() != 0:
+                        errors.append(f"{path}: floating back arrow should be hidden on primary navigation pages")
+                    bottom_nav = page.locator(".nplus-bottom-nav")
+                    bottom_nav.wait_for(state="visible", timeout=8000)
+                    nav_items = bottom_nav.locator(".nplus-nav-item")
+                    if nav_items.count() != 5:
+                        errors.append(f"{path}: shared bottom nav must contain exactly five items")
+                    active_items = bottom_nav.locator(".nplus-nav-item.active")
+                    if active_items.count() != 1:
+                        errors.append(f"{path}: exactly one bottom-nav item must be active")
+                    expected_active = "index.html" if path == "/" else path.lstrip("/")
+                    if active_items.count() == 1 and active_items.get_attribute("href") != expected_active:
+                        errors.append(f"{path}: active bottom-nav target mismatch")
+                    nav_box = bottom_nav.bounding_box()
+                    if nav_box:
+                        primary_nav_boxes.append((path, nav_box["width"], nav_box["height"]))
+                    else:
+                        errors.append(f"{path}: shared bottom nav has no visible bounding box")
+                else:
+                    back_button.wait_for(state="visible", timeout=8000)
+                    if back_button.count() != 1:
+                        errors.append(f"{path}: shared back arrow is missing or duplicated")
+                    back_box = back_button.bounding_box()
+                    if not back_box or back_box["width"] < 36 or back_box["height"] < 36:
+                        errors.append(f"{path}: shared back arrow has an unusable tap target")
                 body = page.locator("body").inner_text(timeout=8000).strip()
                 if len(body) < 20:
                     errors.append(f"{path}: body rendered almost empty ({len(body)} chars)")
@@ -143,10 +170,19 @@ def main() -> int:
             page.wait_for_url("**/beginner-guide.html", timeout=12000)
         except Exception as exc:
             errors.append(f"same-origin back navigation: {type(exc).__name__}: {exc}")
-        # A protected direct entry may redirect to Auth; its back control must safely return Home.
+        # Compare the common bottom bar geometry across all five primary sections.
+        if len(primary_nav_boxes) >= 5:
+            widths = [box[1] for box in primary_nav_boxes]
+            heights = [box[2] for box in primary_nav_boxes]
+            if max(widths) - min(widths) > 2 or max(heights) - min(heights) > 2:
+                errors.append("primary sections have inconsistent bottom-nav dimensions: " + repr(primary_nav_boxes))
+        elif len(primary_nav_boxes) > 0:
+            errors.append("not all primary navigation pages were measured: " + repr(primary_nav_boxes))
+
+        # A direct entry on a secondary page should still have the shared back control and return Home.
         try:
             direct_page = browser.new_page(viewport={"width": 1365, "height": 900})
-            direct_page.goto(BASE_URL + "/activity.html", wait_until="domcontentloaded", timeout=25000)
+            direct_page.goto(BASE_URL + "/support.html", wait_until="domcontentloaded", timeout=25000)
             direct_page.locator("#nplus-global-back").wait_for(state="visible", timeout=8000)
             direct_page.locator("#nplus-global-back").click()
             direct_page.wait_for_url("**/index.html", timeout=12000)
