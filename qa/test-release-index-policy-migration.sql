@@ -27,7 +27,7 @@ CREATE TABLE public.user_preferences (user_id uuid NOT NULL);
 CREATE TABLE public.manual_deposits (user_id uuid NOT NULL);
 CREATE TABLE public.user_bank_details (user_id uuid NOT NULL);
 CREATE TABLE public.withdraw_requests (user_id uuid NOT NULL);
-CREATE TABLE public.withdrawal_requests (user_id uuid NOT NULL);
+CREATE TABLE public.withdrawal_requests (user_id uuid NOT NULL, reviewed_by uuid);
 CREATE TABLE public.nplus_demo_gift_claims (code uuid);
 CREATE TABLE public.nplus_demo_gift_codes (created_by uuid);
 CREATE TABLE public.nplus_demo_referral_bonus_claims (invitee_count integer);
