@@ -1,3 +1,31 @@
+## Current production verification — 2026-10-23
+
+This section supersedes older status notes below where dates or deployment state differ.
+
+### Confirmed complete
+- PR #12 (global in-app back navigation across the N+ PLAY and N+ ADMIN HTML pages) is merged to `main`; its static QA and GitHub Pages deployment runs succeeded.
+- Live Supabase migration `20261023092858_optimize_rls_policies_and_foreign_key_indexes_20261023` was applied and recorded. It adds the eight FK indexes identified by the advisor, optimizes owner-scoped RLS predicates, consolidates manual-deposit SELECT policies, removes a redundant profile UPDATE policy, and documents the intentionally public aggregate-only recent-activity RPC.
+- Live Supabase migration `20261023093056_drop_duplicate_referral_unique_indexes_20261023` was applied and recorded. It removes two standalone duplicate unique indexes while retaining the primary key / constraint-backed unique index that still enforces uniqueness.
+- Read-only verification after these migrations confirmed 8/8 FK indexes present, 0 duplicate indexes remaining, one manual-deposit SELECT policy, and all 6 game-setting rows disabled.
+- A read-only authorization check passed for a non-admin against Admin referral and wallet-adjustment RPCs. The generic wallet RPC rejected a caller-supplied positive credit. No wallet balance or game setting was changed by this check.
+
+### Current release blockers / explicit limitations
+- All 6 games (WINGO, K3, 5D, TRX WINGO, MotoRace, Aviator) remain disabled intentionally. Do not enable them until browser-level regression tests and each game's server-owned round/settlement behaviour have been validated.
+- Supabase Security Advisor still reports 53 authenticated-callable SECURITY DEFINER functions. Source review found auth.uid()/the shared server-side admin check in the reviewed functions, but the remaining RPC set must be retained under regression tests and reviewed before further permission changes. The public `nplus_recent_demo_activity(integer)` function remains intentionally callable by anon because it returns only aggregate game counts for the landing page; it does not return user IDs, individual bets, or balances.
+- Leaked-password protection is still disabled. Supabase documents this feature as available on Pro and above; do not upgrade the project or incur cost without explicit approval.
+- The private local database backup has not been restore-tested. Do not upload it to GitHub.
+- Signup email-OTP delivery, full sign-up/login/password-reset, real browser deposit-request review, referral replay/anti-self-referral, and mobile end-to-end flows still require test accounts and a hands-on runtime pass. CI/disposable PostgreSQL tests are not proof of a full production browser test.
+- PR #2 and PR #6 remain open drafts. Do not merge blindly: they contain historical changes and conflicting referral-rule expectations (the earlier 200-virtual-credit/20-bonus request vs. a different screenshot-tier rule in PR #6). Reconcile against the currently intended demo rule and the source screenshots before changing rewards.
+- Real-money deposits, withdrawals, and cash payouts are not enabled. This release remains virtual/demo-credit only.
+
+### Current check links
+- Navigation PR #12: https://github.com/nplusplayofficial-cmyk/nplusplay/pull/12
+- Latest main QA/deployment status: https://github.com/nplusplayofficial-cmyk/nplusplay/actions
+- Security Advisor: https://supabase.com/dashboard/project/pcrxlqduygvzchzxsmdv/advisors/security
+- Performance Advisor: https://supabase.com/dashboard/project/pcrxlqduygvzchzxsmdv/advisors/performance
+
+---
+
 # N+ PLAY + N+ ADMIN — Release readiness (2026-10-17)
 
 ## Done
