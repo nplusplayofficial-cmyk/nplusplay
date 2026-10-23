@@ -35,6 +35,7 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:poi
 .modal{position:fixed;z-index:250;inset:0;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(12px)}.modal.show{display:grid}.modal-card{width:min(100%,430px);padding:21px;border-radius:22px;background:#11130f;border:1px solid rgba(201,165,91,.2);box-shadow:0 30px 100px rgba(0,0,0,.8)}.modal-card h2{font-size:1rem}.modal-card p{margin-top:7px;color:#777a72;font-size:.58rem;line-height:1.55}.close{float:right;width:30px;height:30px;border:1px solid var(--line);border-radius:50%;background:#171916;color:#aaa}.modal-list{clear:both;padding-top:15px;display:grid;gap:7px}.modal-list div{padding:11px;border-radius:12px;background:rgba(255,255,255,.03);font-size:.54rem;color:#74776f}.modal-list b{color:#e9e2d2}.done{width:100%;margin-top:14px;padding:11px;border:0;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#c9a55b);color:#17140d;font-weight:950;font-size:.58rem}
 @media(max-width:460px){.summary{grid-template-columns:1fr 1fr}.summary div:last-child{grid-column:1/-1}.cards{grid-template-columns:1fr}.hero h1{font-size:1.75rem}}
 </style>
+<link rel="stylesheet" href="core/nplus-bottom-nav.css?v=20261023-unified-nav">
 </head>
 <body>
 <div class="app">
@@ -85,12 +86,12 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:poi
 <footer style="text-align:center;color:#555850;font-size:.5rem;line-height:1.6;padding:18px 0 20px"><strong style="color:#7d6a3d">N+ PLAY</strong><br>Rewards ledger · Account-recorded entries only</footer>
 </div>
 
-<nav class="bottom">
- <a class="nav" href="index.html"><span class="ni">⌂</span>Home</a>
- <a class="nav" href="activity.html"><span class="ni">◷</span>Activity</a>
- <a class="nav active" href="bonus.html"><span class="ni">✦</span>Bonus</a>
- <a class="nav" href="promotion.html"><span class="ni">◇</span>Promotion</a>
- <a class="nav" href="account.html"><span class="ni">◯</span>Account</a>
+<nav class="nplus-bottom-nav" aria-label="Primary navigation">
+  <a href="index.html" class="nplus-nav-item"><span class="nplus-nav-icon">⌂</span><span>Home</span></a>
+  <a href="activity.html" class="nplus-nav-item"><span class="nplus-nav-icon">◷</span><span>Activity</span></a>
+  <a href="bonus.html" class="nplus-nav-item active" aria-current="page"><span class="nplus-nav-icon">✦</span><span>Bonus</span></a>
+  <a href="promotion.html" class="nplus-nav-item"><span class="nplus-nav-icon">◇</span><span>Promotion</span></a>
+  <a href="account.html" class="nplus-nav-item"><span class="nplus-nav-icon">◯</span><span>Account</span></a>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/nplus-config.js?v=20261019"></script>
@@ -173,6 +174,6 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:poi
   refresh();
 })();
 </script>
-<script defer src="./core/nplus-back-nav.js"></script>
+<script defer src="./core/nplus-back-nav.js?v=20261023-unified-nav"></script>
 </body>
 </html>
