@@ -1,51 +1,147 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080908"><link rel="manifest" href="./manifest.webmanifest"><title>N+ ADMIN — Demo Withdrawal Requests</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>N+ ADMIN — Withdrawal Requests</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#070707;color:#f5f2e9;font:14px Inter,system-ui,sans-serif}.app{width:min(1100px,100% - 28px);margin:20px auto 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border:1px solid rgba(201,165,91,.16);border-radius:17px;background:#101010}.brand{display:flex;align-items:center;gap:9px;font-weight:950;letter-spacing:1px;text-decoration:none;color:inherit}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#f1e5c3,#c9a55b);color:#080808}.nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.nav a{border:1px solid rgba(201,165,91,.16);border-radius:10px;padding:10px;color:#f1e5c3;text-decoration:none;font-size:10px;font-weight:850}.hero,.panel{margin-top:16px;padding:18px;border:1px solid rgba(201,165,91,.16);border-radius:17px;background:linear-gradient(145deg,#151515,#101010)}.eyebrow{font-size:9px;letter-spacing:2px;color:#c9a55b}h1{font-size:24px;margin:8px 0}p{font-size:12px;color:#898989;line-height:1.6}.status{padding:18px;text-align:center;color:#aaa;font-size:12px;line-height:1.6}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.07)}.row:last-child{border-bottom:0}.title{font-size:12px;font-weight:900;overflow-wrap:anywhere}.meta{font-size:10px;color:#898989;line-height:1.65;margin-top:5px;overflow-wrap:anywhere}.amount{font-size:15px;font-weight:950;text-align:right}.badge{display:inline-block;margin-top:6px;padding:5px 8px;border-radius:20px;background:#252525;color:#e9d7a8;font-size:9px;font-weight:900}.approved{color:#8de4bd}.rejected{color:#ff9da4}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{border:1px solid rgba(201,165,91,.3);border-radius:9px;padding:9px 12px;background:#211c12;color:#f0dfb5;font-weight:900;font-size:10px;cursor:pointer}.actions .reject{border-color:rgba(255,109,119,.25);background:#211316;color:#ff9da4}.actions button:disabled{opacity:.5;cursor:not-allowed}.note{width:min(420px,100%);margin-top:10px;background:#0a0a0a;border:1px solid #292929;border-radius:9px;padding:9px;color:#eee;font:11px system-ui}.footer{font-size:10px;color:#666;text-align:center;padding:18px}@media(max-width:500px){.row{grid-template-columns:1fr}.amount{text-align:left}}
-</style></head><body><main class="app">
-<header class="top"><a class="brand" href="admin.html"><span class="mark">N+</span>N+ ADMIN</a><strong style="font-size:10px;color:#c9a55b">VIRTUAL-CREDIT DEMO</strong></header>
-<nav class="nav"><a href="admin.html">DASHBOARD</a><a href="admin-deposits.html">DEPOSITS &amp; WALLET</a><a href="admin-withdrawals.html">WITHDRAWAL REQUESTS</a><a href="admin-games.html">GAME CONTROL</a><a href="admin-users.html">USERS</a><a href="admin-reports.html">REPORTS</a></nav>
-<section class="hero"><div class="eyebrow">ADMIN CONTROL CENTER</div><h1>Demo withdrawal requests</h1><p>Admin approval or rejection changes the request status only. It does not deduct virtual credits, make a bank/UPI transfer, or initiate a cash payout.</p></section>
-<section class="panel"><div id="status" class="status" role="status" aria-live="polite">Checking Admin session…</div><div id="rows"></div></section>
-<footer class="footer">N+ ADMIN · Status-only demo review · No cash payouts</footer></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script><script src="core/nplus-auth.js"></script>
+*{box-sizing:border-box}
+body{margin:0;background:#070707;color:#f5f2e9;font:14px Inter,system-ui,sans-serif}
+.app{width:min(1100px,100% - 28px);margin:20px auto 40px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border:1px solid rgba(201,165,91,.16);border-radius:17px;background:#101010}
+.brand{display:flex;align-items:center;gap:9px;font-weight:950;letter-spacing:1px;text-decoration:none;color:inherit}
+.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#f1e5c3,#c9a55b);color:#080808}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.nav a{border:1px solid rgba(201,165,91,.16);border-radius:10px;padding:10px;color:#f1e5c3;text-decoration:none;font-size:10px;font-weight:850}
+.hero,.panel{margin-top:16px;padding:18px;border:1px solid rgba(201,165,91,.16);border-radius:17px;background:linear-gradient(145deg,#151515,#101010)}
+.eyebrow{font-size:9px;letter-spacing:2px;color:#c9a55b}
+h1{font-size:24px;margin:8px 0}
+p{font-size:12px;color:#898989;line-height:1.6}
+.status{padding:18px;text-align:center;color:#aaa;font-size:12px;line-height:1.6}
+
+/* Request Card */
+.req-card{border-bottom:1px solid rgba(255,255,255,.07);padding:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+.req-card:last-child{border-bottom:0}
+.req-details{font-size:12px;line-height:1.8}
+.req-details b{color:#c9a55b;}
+.req-bank{background:#111;border:1px solid #222;border-radius:8px;padding:10px;margin-top:10px;font-size:11px;color:#ddd;line-height:1.6;}
+.req-amount{text-align:right;font-size:24px;font-weight:900;color:#f1e5c3;}
+.badge{display:inline-block;margin-top:10px;padding:5px 10px;border-radius:20px;background:#252525;color:#e9d7a8;font-size:10px;font-weight:900;}
+.actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;}
+.actions button{border:1px solid rgba(201,165,91,.3);border-radius:9px;padding:9px 12px;background:#211c12;color:#f0dfb5;font-weight:900;font-size:11px;cursor:pointer;}
+.actions .reject{border-color:rgba(255,109,119,.25);background:#211316;color:#ff9da4;}
+.actions button:disabled{opacity:.5;cursor:not-allowed;}
+@media(max-width:600px){.req-card{grid-template-columns:1fr}.req-amount{text-align:left}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="top">
+  <a class="brand" href="admin.html"><span class="mark">N+</span>N+ ADMIN</a>
+  <strong style="font-size:10px;color:#c9a55b">WITHDRAWAL CONTROL</strong>
+</header>
+<nav class="nav">
+  <a href="admin.html">DASHBOARD</a>
+  <a href="admin-deposits.html">DEPOSITS</a>
+  <a href="admin-withdrawals.html" style="border-color:#c9a55b;color:#fff;">WITHDRAWALS</a>
+  <a href="admin-users.html">USERS</a>
+</nav>
+
+<section class="hero">
+  <div class="eyebrow">ADMIN CONTROL CENTER</div>
+  <h1>Withdrawal Requests</h1>
+  <p>Review the user's bank details. Once you manually transfer the money, click Approve. (No cash is moved by the system).</p>
+</section>
+
+<section class="panel">
+  <div id="status" class="status">Checking Admin session…</div>
+  <div id="rows"></div>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js"></script>
+<script src="core/nplus-auth.js"></script>
 <script>
 (async function(){
 "use strict";
-const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const $=id=>document.getElementById(id), esc=s=>String(s??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-const status=$("status"),rows=$("rows");let user=null,client=null;
+const status=$("status"),rows=$("rows");
+let user=null,client=null;
+
 async function load(){
- status.className="status";status.textContent="Loading requests…";
- const response=await client.from("withdrawal_requests").select("id,user_id,amount,status,request_note,review_note,created_at,reviewed_at,reviewed_by").order("created_at",{ascending:false}).limit(250);
- if(response.error)throw response.error;
- const data=response.data||[];
- if(!data.length){rows.innerHTML="";status.textContent="No demo withdrawal requests yet.";return}
- status.textContent=data.length+" request(s) loaded.";
- rows.innerHTML=data.map(r=>{
-  const state=String(r.status||"pending").toLowerCase(),cls=state==="approved"?"approved":state==="rejected"?"rejected":"";
-  const actions=state==="pending"?'<div class="actions"><button data-decision="approved" data-id="'+esc(r.id)+'">APPROVE STATUS</button><button class="reject" data-decision="rejected" data-id="'+esc(r.id)+'">REJECT STATUS</button></div>':"";
-  const note=state==="pending"?'<input class="note" maxlength="180" data-note="'+esc(r.id)+'" placeholder="Optional Admin note">':"";
-  return '<article class="row"><div><div class="title">Request '+esc(r.id)+'</div><div class="meta">User: '+esc(r.user_id)+'</div><div class="meta">Created: '+esc(r.created_at?new Date(r.created_at).toLocaleString("en-IN"):"—")+'</div><div class="meta">'+esc(r.request_note||"Demo-only request")+'</div><span class="badge '+cls+'">'+esc(state.toUpperCase())+'</span>'+(r.reviewed_at?'<div class="meta">Reviewed: '+esc(new Date(r.reviewed_at).toLocaleString("en-IN"))+'</div>':"")+(r.review_note?'<div class="meta">Review note: '+esc(r.review_note)+'</div>':"")+note+actions+'</div><div class="amount">'+money(r.amount)+'</div></article>';
- }).join("");
+  status.className="status";status.textContent="Loading requests…";
+  
+  // Fetch withdrawal requests
+  const response=await client.from("withdrawal_requests").select("*").order("created_at",{ascending:false}).limit(100);
+  if(response.error)throw response.error;
+  const data=response.data||[];
+  
+  if(!data.length){rows.innerHTML="";status.textContent="No withdrawal requests yet.";return}
+  status.textContent=data.length+" request(s) loaded.";
+  
+  let html = '';
+  for(let r of data) {
+      // Fetch user profile and bank details
+      const { data: profile } = await client.from("profiles").select("display_name, uid").eq("id", r.user_id).maybeSingle();
+      const { data: bank } = await client.from("user_bank_details").select("*").eq("user_id", r.user_id).maybeSingle();
+      
+      const name = profile?.display_name || "User";
+      const uid = profile?.uid || r.user_id;
+      const state = String(r.status||"pending").toLowerCase();
+      const cls = state==="approved"?"color:#8de4bd":state==="rejected"?"color:#ff9da4":"";
+      
+      const bankInfo = bank ? `
+        <b>Bank:</b> ${esc(bank.bank_name)}<br>
+        <b>A/C Name:</b> ${esc(bank.account_holder)}<br>
+        <b>A/C No:</b> ${esc(bank.account_number)}<br>
+        <b>IFSC:</b> ${esc(bank.ifsc_code)}
+      ` : "<span style='color:#ff9da4'>User has not added bank details!</span>";
+
+      const actions = state==="pending" ? `
+        <div class="actions">
+            <button class="reject" onclick="resolveReq('${r.id}', 'rejected')">REJECT</button>
+            <button onclick="resolveReq('${r.id}', 'approved')">APPROVE (PAID)</button>
+        </div>
+      ` : "";
+
+      html += `
+      <div class="req-card">
+        <div class="req-details">
+            <div style="font-size:14px;font-weight:800;margin-bottom:5px;">${esc(name)} <span style="font-size:10px;color:#888;">(${esc(uid)})</span></div>
+            <div>Date: ${new Date(r.created_at).toLocaleString("en-IN")}</div>
+            <div class="req-bank">${bankInfo}</div>
+        </div>
+        <div class="req-amount">
+            ${money(r.amount)}
+            <div><span class="badge" style="${cls}">${state.toUpperCase()}</span></div>
+            ${actions}
+        </div>
+      </div>`;
+  }
+  rows.innerHTML = html;
 }
-rows.addEventListener("click",async e=>{
- const btn=e.target.closest("button[data-decision]");if(!btn||btn.disabled)return;
- const decision=btn.dataset.decision;
- if(!confirm((decision==="approved"?"Approve":"Reject")+" this demo request status? No wallet credits or cash will move."))return;
- const id=btn.dataset.id,noteInput=document.querySelector('[data-note="'+id+'"]');
- rows.querySelectorAll('button[data-id="'+id+'"]').forEach(b=>b.disabled=true);
- try{const response=await client.rpc("nplus_admin_resolve_demo_withdrawal",{p_request_id:id,p_decision:decision,p_review_note:noteInput?noteInput.value:""});if(response.error)throw response.error;await load()}
- catch(e2){console.error(e2);status.className="status";status.textContent=e2.message||"Review failed.";rows.querySelectorAll('button[data-id="'+id+'"]').forEach(b=>b.disabled=false)}
-});
+
+// Global function to handle click
+window.resolveReq = async function(id, decision) {
+    if(!confirm(`Are you sure you want to mark this request as ${decision.toUpperCase()}?`)) return;
+    status.textContent = "Updating status...";
+    const { error } = await client.from("withdrawal_requests").update({ status: decision }).eq("id", id);
+    if(error) { alert("Error: " + error.message); } else { await load(); }
+}
+
 try{
- user=await window.NPlusAuth.requireAuth();if(!user)return;
- client=window.NPlusAuth.client;
- const profile=await client.from("profiles").select("role").eq("id",user.id).maybeSingle();
- if(profile.error)throw profile.error;
- if(String(profile.data?.role||"").toLowerCase()!=="admin"){status.className="status";status.textContent="Admin access required. This account cannot review withdrawal requests.";rows.innerHTML="";return}
- await load();
-}catch(e){console.error(e);status.className="status";status.textContent=e.message||"Admin operation failed."}
+  user=await window.NPlusAuth.requireAuth();if(!user)return;
+  client=window.NPlusAuth.client;
+  const profile=await client.from("profiles").select("role").eq("id",user.id).maybeSingle();
+  if(profile.error)throw profile.error;
+  if(String(profile.data?.role||"").toLowerCase()!=="admin"){
+      status.textContent="Admin access required.";return;
+  }
+  await load();
+}catch(e){console.error(e);status.textContent=e.message||"Admin operation failed."}
 })();
 </script>
-<script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("PWA registration skipped",e)));</script></body></html>
+</body>
+</html>
