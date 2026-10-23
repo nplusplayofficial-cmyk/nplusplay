@@ -84,3 +84,57 @@ These are bounded search results, not proof that the SQL never existed: files ma
 The source-recovery pass also confirmed that candidate files such as `sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql` and `sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql` exist on the audit branch, but their existence does not establish equivalence to the corresponding production-applied SQL. Their ambiguity status remains unchanged.
 
 **Next evidence source:** inspect the full migration-related file tree and historical commit diffs across the recovery branches, then request/inspect Supabase SQL Editor history or deployment artifacts for the five unresolved operations. Continue to keep all games disabled and do not replay candidate SQL on production.
+
+
+## Branch-tree and blob-hash verification — 2026-10-23
+
+### Scope checked
+
+Inspected the recursive Git trees for the current heads of:
+
+- `main` — `680238f2428416faf44df0dced6f907d4cea7f08`
+- `audit/supabase-migration-history-map-2026-10-23` — `6469f61af6eb3801c3e8e40e26fab4e7166c34c7`
+- `feature/nplus-free-release-audit-2026-10-19` — `c58273fd168bb92a0153c49c9b31e7b6ba622adc`
+- `fixes/premium-audit-2026-10-15` — `dd7f2c14666e628a46056dbb6e40077d367682cb`
+- `security/live-security-audit-2026-10-23` — `5635e886725db00c0322303f490b5492b2be88ea`
+
+The `main`, audit, feature, and security branches each have a readable repository tree. The fixes branch has no `supabase/migrations/` directory at its current head. The five missing migration identifiers listed above have no matching expected SQL paths in the current `supabase/migrations/` or `sql/` directories checked; GitHub path-specific commit-history queries for those exact expected paths also returned no commits. These are results for current trees and the exact queried paths only, not proof that no differently named script or external dashboard/deployment artifact exists.
+
+### Repository blob evidence for candidate copies
+
+A Git blob SHA proves only that two repository files have identical byte content when their SHAs match. It cannot prove production executed those bytes. The hashes below therefore improve source tracking but do not independently close any applied-history mapping.
+
+| Candidate source | Observed repository blob SHA | What this establishes |
+|---|---|---|
+| `supabase/migrations/20261021182718_nplus_server_settlement_foundation.sql` (feature branch) and `sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql` (main/feature) | `ee1c9ad63379100b683a799061c6c855360f47d6` | These repository copies match each other. |
+| `supabase/migrations/20261021182719_nplus_motorace_schema.sql` and `sql/NPLUS_PLAY_MOTORACE_SCHEMA.sql` | `84bdc7f8af7f23149b350c65abedf851fa29da4b` | Candidate copies match. |
+| `supabase/migrations/20261021182720_nplus_motorace_rpc.sql` and `sql/NPLUS_PLAY_MOTORACE_RPC.sql` | `9ee0350dab9cfcb7ebab2a415a245ff462c34646` | Candidate copies match. |
+| `supabase/migrations/20261021182721_nplus_aviator_schema.sql` and `sql/NPLUS_PLAY_AVIATOR_SCHEMA.sql` | `d5823d7d2a203a4754d9c72f6380faf02c6fd977` | Candidate copies match. |
+| `supabase/migrations/20261021182722_nplus_aviator_rpc.sql` and `sql/NPLUS_PLAY_AVIATOR_RPC.sql` | `411f5f7ed8cb4c6588fc80c366190d64b2126236` | Candidate copies match. |
+| `supabase/migrations/20261021182723_nplus_aviator_worker_recovery.sql` and `sql/NPLUS_PLAY_AVIATOR_SCHEDULER_RECOVERY.sql` (feature branch) | `c8bfdbdcec13b217f149c326899bc728d765f886` | Candidate copies match; the source itself is marked draft and is not proof of applied SQL. |
+| `supabase/migrations/20261021182724_nplus_aviator_persistent_scheduler.sql` | `83db97a9d70f6347dcec0230f171f43b9937d3fe` | Draft-branch candidate exists; a matching standalone SQL copy was not found in the inspected SQL directories. |
+| `supabase/migrations/20261021182725_nplus_admin_user_tools.sql` and feature-branch `sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql` | `94c33fcbff58c6fed492775e2f0383208335f04b` | These feature-branch copies match, but main's `sql/NPLUS_PLAY_ADMIN_USER_TOOLS.sql` is `39f27b3c8b9753a7a67c754f135fb74625990538`; branch versions conflict. |
+| `supabase/migrations/20261021182726_nplus_admin_game_status.sql` and `sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql` | `0eacf5f22445c0481aecb6fed1352d7369c4b9ec` | These candidate copies match main and feature. Applied SQL still unproven. |
+| `supabase/migrations/20261021182727_nplus_admin_null_profile_guard.sql` and feature-branch `sql/NPLUS_PLAY_ADMIN_NULL_PROFILE_GUARD_2026-10-19.sql` | `d8b7173000211f8271508be2e9cc08c0854b2a0c` | These feature-branch copies match, but main's same-named SQL candidate is `43f70a84a6124ac0da5245ee9434438d3e202cdc`; branch versions conflict. |
+| `supabase/migrations/20261021182728_nplus_recent_demo_activity.sql` and feature-branch `sql/NPLUS_PLAY_RECENT_DEMO_ACTIVITY.sql` | `b25e0fd478bc33297b92563fc3d46aa366f1a4e9` | Feature-branch copies match; no corresponding SQL file exists on main. |
+| `supabase/migrations/20261021182729_nplus_vip_referral_demo.sql` | `8e91d0b4077793b9e7d94cb670ae97130d364428` | This candidate differs from feature-branch `sql/NPLUS_VIP_REFERRAL_DEMO_2026-10-19.sql` (`c676e956d1cd64216cafb56fd288d018bfb3bdc8`) and from main/audit/security's same-named SQL candidate (`68fb76d6bdb4a6ceb7d571cd7c6af0253984ac82`). The applied version remains ambiguous. |
+
+### Fresh live-state evidence (read-only)
+
+A direct live migration-list call and SQL catalog queries reconfirmed:
+
+- `supabase_migrations.schema_migrations`: **40 rows**.
+- `public.game_settings`: all six game keys `WINGO`, `K3`, `5D`, `TRX`, `MOTO`, and `AVIATOR` have `enabled = false`.
+- Current catalog snapshot: **33** public tables, **69** public functions, **2** non-internal public triggers, and **22** public RLS policies.
+- Both `nplus_admin_set_wingo_demo` signatures still exist (four-argument and five-argument); this remains an unresolved follow-up, not something changed during this migration review.
+- Selected wallet/ledger and game table direct grants remain restricted in the inspected privilege snapshot. No production data or schema was changed.
+
+This is a current-state snapshot. It is not evidence that a clean migration replay recreates the same objects or that each historical SQL body has been recovered.
+
+## Clean replay and backup acceptance: execution blocker
+
+The 2026-10-15 backup path is a Windows-local path supplied in the handover. The backup bytes are not mounted in this runtime; only the pasted handover text is available. This runtime also has no `psql`, `pg_restore`, or `docker` executable available. Therefore neither a new restore test nor a disposable local PostgreSQL replay could be executed in this session. The previously recorded restore transcript remains partial evidence because it used `--no-owner --no-acl`.
+
+Do not create a Supabase cloud branch or project for replay without confirming its actual cost and obtaining approval where any nonzero cost applies. Do not upload the private backup to GitHub. To close these gates, run the replay/restore work in the existing local restore lab with the original private dump and a locally provisioned PostgreSQL/Supabase-compatible environment, then attach only redacted test output and schema/object summaries.
+
+**Status after this pass: source evidence improved; the five missing SQL sources, three conflicting copy groups, full 40-row applied-SQL equivalence, production-faithful restore, and clean canonical replay remain open. Work #1 must not be marked complete.**
