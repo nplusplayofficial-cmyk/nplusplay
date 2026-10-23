@@ -158,7 +158,7 @@ try {
 try {
   const recoveryPage = fs.readFileSync(path.join(root, 'forgot-password.html'), 'utf8');
   for (const required of [
-    'resetPasswordForEmail(email, { redirectTo })',
+    'resetPasswordForEmail(email, { redirectTo, captchaToken })',
     'PASSWORD_RECOVERY',
     'client.auth.updateUser({ password })',
     'mode=reset',
