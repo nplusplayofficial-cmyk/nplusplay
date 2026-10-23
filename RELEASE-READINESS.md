@@ -9,6 +9,11 @@ This section supersedes older status notes below where dates or deployment state
 - Read-only verification after these migrations confirmed 8/8 FK indexes present, 0 duplicate indexes remaining, one manual-deposit SELECT policy, and all 6 game-setting rows disabled.
 - A read-only authorization check passed for a non-admin against Admin referral and wallet-adjustment RPCs. The generic wallet RPC rejected a caller-supplied positive credit. No wallet balance or game setting was changed by this check.
 
+### Critical repository/database migration drift discovered
+- A fresh comparison found 40 applied migration-history rows in live Supabase but only 6 files under `main/supabase/migrations/`; only the two 2026-10-23 cleanup migrations match by exact version/name. Four older tracked migration filenames do not match their live applied versions, and 38 live entries lack an exact matching file.
+- This must be reconciled before using repository migrations to recreate or modify production. Do not run `supabase db push` and do not blindly merge the old draft migration files, because some are duplicated/re-recorded under different live migration versions.
+- Full version-by-version detail and safe recovery sequence: [docs/SUPABASE-LIVE-MIGRATION-DRIFT-2026-10-23.md](./docs/SUPABASE-LIVE-MIGRATION-DRIFT-2026-10-23.md).
+
 ### Current release blockers / explicit limitations
 - All 6 games (WINGO, K3, 5D, TRX WINGO, MotoRace, Aviator) remain disabled intentionally. Do not enable them until browser-level regression tests and each game's server-owned round/settlement behaviour have been validated.
 - Supabase Security Advisor still reports 53 authenticated-callable SECURITY DEFINER functions. Source review found auth.uid()/the shared server-side admin check in the reviewed functions, but the remaining RPC set must be retained under regression tests and reviewed before further permission changes. The public `nplus_recent_demo_activity(integer)` function remains intentionally callable by anon because it returns only aggregate game counts for the landing page; it does not return user IDs, individual bets, or balances.
