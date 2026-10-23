@@ -33,12 +33,14 @@ button{font:inherit;cursor:pointer}
 .form-group label{display:block;color:var(--muted);font-size:11px;margin-bottom:8px;letter-spacing:1px;}
 .form-group input{width:100%;background:#151515;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;color:#fff;font-size:14px;font-weight:700;}
 .form-group input:focus{outline:none;border-color:var(--gold);}
+.form-hint{font-size:10px;color:#666;margin-top:5px;display:block;}
 .btn-save{width:100%;background:linear-gradient(135deg,#f1e5c3,#c9a55b);color:#080808;border:0;border-radius:12px;padding:15px;font-weight:1000;font-size:14px;cursor:pointer;transition:0.2s;}
 .btn-save:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,165,91,.3);}
 .status{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#171717;border:1px solid var(--line);padding:13px 18px;border-radius:12px;transition:.25s;z-index:20;font-weight:800;font-size:13px;}
 .status.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .status.ok{border-color:rgba(35,211,154,.5);color:var(--green);}
 .status.err{border-color:rgba(255,82,96,.5);color:var(--red);}
+.qr-preview{width:150px;height:150px;object-fit:contain;background:#fff;border-radius:10px;margin-top:10px;border:1px solid #333;display:none;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="core/nplus-config.js?v=20261006"></script>
@@ -66,15 +68,24 @@ button{font:inherit;cursor:pointer}
   <section class="hero">
     <div class="eyebrow">PAYMENT CONFIGURATION</div>
     <h2>Deposit Settings</h2>
-    <p>These details will be shown to customers on the Deposit page for UPI/Bank transfers.</p>
+    <p>These details will be shown to customers on the Deposit page.</p>
   </section>
 
   <div class="form-card">
     <form id="paymentForm">
       <div class="form-group">
-        <label>UPI ID (e.g., 9876543210@airtel)</label>
+        <label>UPI ID (For Auto QR)</label>
         <input type="text" id="upiId" placeholder="Enter UPI ID" required>
       </div>
+      
+      <!-- ✅ File Upload Option -->
+      <div class="form-group">
+        <label>Upload Custom QR Image (Optional)</label>
+        <input type="file" id="qrFile" accept="image/*" style="background:transparent;border:none;padding:0;color:#aaa;">
+        <span class="form-hint">If you upload an image here, it will override the Auto QR.</span>
+        <img id="qrPreview" class="qr-preview" src="" alt="QR Preview">
+      </div>
+      
       <div class="form-group">
         <label>Account Holder Name</label>
         <input type="text" id="accHolder" placeholder="Enter Full Name" required>
@@ -100,14 +111,18 @@ button{font:inherit;cursor:pointer}
 
 <script>
 (()=>{
-  const cfg=window.NPlusConfig;
-  if(!cfg?.supabaseUrl||!cfg?.supabaseAnonKey)return;
-  const supabase=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+  const cfg = window.NPlusConfig;
+  if(!cfg?.supabaseUrl || !cfg?.supabaseAnonKey) return;
   
-  const logout=document.getElementById('logoutBtn');
-  const form=document.getElementById('paymentForm');
-  const statusBox=document.getElementById('statusBox');
-  const saveBtn=document.getElementById('saveBtn');
+  const supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  
+  const logout = document.getElementById('logoutBtn');
+  const form = document.getElementById('paymentForm');
+  const statusBox = document.getElementById('statusBox');
+  const saveBtn = document.getElementById('saveBtn');
+  const qrFileInput = document.getElementById('qrFile');
+  const qrPreview = document.getElementById('qrPreview');
+  let existingQrUrl = "";
 
   function showStatus(msg, isError=false) {
       statusBox.textContent = msg;
@@ -115,56 +130,104 @@ button{font:inherit;cursor:pointer}
       setTimeout(() => { statusBox.className = 'status'; }, 3000);
   }
 
-  // Auth Guard
   async function guard(){
-    const {data,error}=await supabase.auth.getSession();
-    if(error||!data.session){location.replace('admin-login.html');return;}
-    const {data:profile,error:profileError}=await supabase.from('profiles').select('role').eq('id',data.session.user.id).maybeSingle();
-    if(profileError||String(profile?.role||'').toLowerCase()!=='admin'){await supabase.auth.signOut();location.replace('admin-login.html');}
+    const { data, error } = await supabase.auth.getSession();
+    if(error || !data.session) { location.replace('admin-login.html'); return; }
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('role').eq('id', data.session.user.id).maybeSingle();
+    if(profileError || String(profile?.role||'').toLowerCase() !== 'admin') {
+        await supabase.auth.signOut(); location.replace('admin-login.html');
+    }
   }
-  logout.addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('admin-login.html');});
+  
+  logout.addEventListener('click', async () => {
+      await supabase.auth.signOut(); location.replace('admin-login.html');
+  });
 
-  // Fetch current settings
+  // Handle Preview
+  qrFileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if(file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+              qrPreview.src = e.target.result;
+              qrPreview.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+      } else {
+          qrPreview.style.display = existingQrUrl ? 'block' : 'none';
+          qrPreview.src = existingQrUrl || "";
+      }
+  });
+
   async function loadSettings() {
     const { data, error } = await supabase.from('payment_settings').select('*').eq('id', 1).single();
-    if (error) {
-        console.error("Error fetching settings:", error);
-        return;
-    }
+    if (error) { console.error(error); return; }
     if (data) {
         document.getElementById('upiId').value = data.upi_id || '';
         document.getElementById('accHolder').value = data.account_holder || '';
         document.getElementById('bankName').value = data.bank_name || '';
         document.getElementById('accNum').value = data.account_number || '';
         document.getElementById('ifsc').value = data.ifsc_code || '';
+        
+        existingQrUrl = data.qr_image_url || '';
+        if(existingQrUrl) {
+            qrPreview.src = existingQrUrl;
+            qrPreview.style.display = 'block';
+        }
     }
   }
 
-  // Save settings
   form.addEventListener('submit', async (e) => {
       e.preventDefault();
       saveBtn.disabled = true;
       saveBtn.textContent = 'SAVING...';
 
-      const updates = {
-          upi_id: document.getElementById('upiId').value.trim(),
-          account_holder: document.getElementById('accHolder').value.trim(),
-          bank_name: document.getElementById('bankName').value.trim(),
-          account_number: document.getElementById('accNum').value.trim(),
-          ifsc_code: document.getElementById('ifsc').value.trim(),
-          updated_at: new Date()
-      };
+      let finalQrUrl = existingQrUrl; // Keep existing if no new file
+      const file = qrFileInput.files[0];
 
-      const { error } = await supabase.from('payment_settings').update(updates).eq('id', 1);
+      try {
+          // 1. If user uploaded a new file, upload to Supabase Storage
+          if (file) {
+              const fileExt = file.name.split('.').pop();
+              const fileName = `qr_${Date.now()}.${fileExt}`;
+              
+              const { data: uploadData, error: uploadError } = await supabase.storage
+                  .from('payment_qr')
+                  .upload(fileName, file, { upsert: true });
 
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'SAVE PAYMENT DETAILS';
+              if (uploadError) throw uploadError;
 
-      if (error) {
-          console.error(error);
-          showStatus('Failed to save settings.', true);
-      } else {
-          showStatus('Payment details updated successfully!');
+              // 2. Get Public URL
+              const { data: publicUrlData } = supabase.storage
+                  .from('payment_qr')
+                  .getPublicUrl(fileName);
+                  
+              finalQrUrl = publicUrlData.publicUrl;
+          }
+
+          // 3. Save to Database
+          const updates = {
+              upi_id: document.getElementById('upiId').value.trim(),
+              qr_image_url: finalQrUrl,
+              account_holder: document.getElementById('accHolder').value.trim(),
+              bank_name: document.getElementById('bankName').value.trim(),
+              account_number: document.getElementById('accNum').value.trim(),
+              ifsc_code: document.getElementById('ifsc').value.trim(),
+              updated_at: new Date()
+          };
+
+          const { error } = await supabase.from('payment_settings').update(updates).eq('id', 1);
+          if (error) throw error;
+
+          showStatus('Payment details & QR updated!');
+          existingQrUrl = finalQrUrl;
+          
+      } catch(err) {
+          console.error(err);
+          showStatus(err.message || 'Failed to save settings.', true);
+      } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'SAVE PAYMENT DETAILS';
       }
   });
 
