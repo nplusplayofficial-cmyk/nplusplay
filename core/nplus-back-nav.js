@@ -32,6 +32,13 @@
     const adminSubpage = file.startsWith("admin-") && file !== "admin-login.html";
     return new URL(adminSubpage ? "./admin.html" : "./index.html", location.href).pathname;
   }
+  function isProtectedAuthRedirect(refPath) {
+    if (location.pathname.split("/").pop().toLowerCase() !== "auth.html") return false;
+    const next = new URLSearchParams(location.search).get("next") || "";
+    const nextFile = next.split(/[?#]/, 1)[0].split("/").pop().toLowerCase();
+    const refFile = refPath.split(/[?#]/, 1)[0].split("/").pop().toLowerCase();
+    return Boolean(nextFile && refFile && nextFile === refFile);
+  }
   const current = currentPath();
   let stack = readStack();
   let pending = "";
@@ -42,7 +49,7 @@
   } else {
     try { sessionStorage.removeItem(PENDING_KEY); } catch (_) {}
     const ref = referrerPath();
-    if (!ref || ref === current) stack = [current];
+    if (!ref || ref === current || isProtectedAuthRedirect(ref)) stack = [current];
     else {
       const i = stack.lastIndexOf(ref);
       stack = i >= 0 ? stack.slice(0, i + 1) : [ref];

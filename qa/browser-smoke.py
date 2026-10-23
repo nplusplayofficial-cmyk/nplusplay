@@ -143,6 +143,7 @@ def main() -> int:
             page.wait_for_url("**/beginner-guide.html", timeout=12000)
         except Exception as exc:
             errors.append(f"same-origin back navigation: {type(exc).__name__}: {exc}")
+        # A protected direct entry may redirect to Auth; its back control must safely return Home.
         try:
             direct_page = browser.new_page(viewport={"width": 1365, "height": 900})
             direct_page.goto(BASE_URL + "/activity.html", wait_until="domcontentloaded", timeout=25000)
