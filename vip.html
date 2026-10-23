@@ -65,4 +65,5 @@ const refs=await rpc('nplus_demo_referral_dashboard');renderReferrals(refs);stat
 async function copyValue(value){try{await navigator.clipboard.writeText(value);toast('Copied')}catch{$('refLink').focus();$('refLink').select();toast('Select and copy the link')}}
 $('copyCode').onclick=()=>copyValue($('refCode').value);$('copyLink').onclick=()=>copyValue($('refLink').value);$('refresh').onclick=load;load();
 })();
-</script></body></html>
+</script><script defer src="./core/nplus-back-nav.js"></script>
+</body></html>

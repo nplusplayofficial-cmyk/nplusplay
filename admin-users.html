@@ -41,4 +41,5 @@ $("logout").onclick=async function(){if(sb)await sb.auth.signOut();location.repl
 guard().then(function(ok){if(ok)refresh()});
 })();
 </script><script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("PWA registration skipped",e)));</script>
+<script defer src="./core/nplus-back-nav.js"></script>
 </body></html>

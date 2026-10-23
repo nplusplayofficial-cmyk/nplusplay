@@ -1,1 +1,35 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080908">
+<title>N+ PLAY — Member Dashboard</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#080908;color:#f4f1e8;font:14px Inter,system-ui,sans-serif}
+.wrap{width:min(680px,calc(100% - 28px));margin:76px auto 36px}
+.brand{color:#f0dfb5;text-decoration:none;font-weight:950;letter-spacing:2px}
+.card{margin-top:22px;padding:26px;border:1px solid rgba(201,165,91,.22);border-radius:20px;background:linear-gradient(145deg,#191811,#10110f)}
+.kicker{font-size:10px;letter-spacing:2px;color:#c9a55b;font-weight:900}
+h1{font-size:clamp(24px,5vw,34px);margin:12px 0 8px}p{color:#aaa99e;line-height:1.7;font-size:13px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.actions a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;border:1px solid rgba(201,165,91,.35);border-radius:11px;background:#211c12;color:#f0dfb5;text-decoration:none;font-weight:850;font-size:12px}
+.actions a.primary{background:linear-gradient(135deg,#f1e5c3,#c9a55b);color:#0a0906}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="brand" href="./index.html">N+ PLAY</a>
+  <section class="card">
+    <div class="kicker">MEMBER DASHBOARD</div>
+    <h1>Welcome to N+ PLAY</h1>
+    <p>This legacy dashboard address is kept available. Continue to your account for profile and wallet status, or return to the main game lobby.</p>
+    <div class="actions">
+      <a class="primary" href="./account.html">OPEN ACCOUNT</a>
+      <a href="./index.html">GO TO HOME</a>
+    </div>
+  </section>
+</main>
+<script defer src="./core/nplus-back-nav.js"></script>
+</body>
+</html>

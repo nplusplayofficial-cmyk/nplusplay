@@ -16,6 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PAGES = [
     ("/", ["N+ PLAY"]),
     ("/index.html", ["VIRTUAL DEMO"]),
+    ("/dashboard.html", ["N+ PLAY"]),
     ("/auth.html", ["resendOtpBtn"]),
     ("/forgot-password.html", ["password"]),
     ("/admin-login.html", ["password"]),
@@ -89,6 +90,13 @@ def main() -> int:
                     errors.append(f"{path}: HTTP {response.status}")
                     continue
                 page.locator("body").wait_for(state="visible")
+                back_button = page.locator("#nplus-global-back")
+                back_button.wait_for(state="visible", timeout=8000)
+                if back_button.count() != 1:
+                    errors.append(f"{path}: shared back arrow is missing or duplicated")
+                back_box = back_button.bounding_box()
+                if not back_box or back_box["width"] < 36 or back_box["height"] < 36:
+                    errors.append(f"{path}: shared back arrow has an unusable tap target")
                 body = page.locator("body").inner_text(timeout=8000).strip()
                 if len(body) < 20:
                     errors.append(f"{path}: body rendered almost empty ({len(body)} chars)")
@@ -126,6 +134,25 @@ def main() -> int:
             except Exception as exc:  # report all affected paths in a single CI run
                 errors.append(f"{path}: {type(exc).__name__}: {exc}")
 
+        # Verify previous in-app navigation and safe direct-entry fallback.
+        try:
+            page.goto(BASE_URL + "/beginner-guide.html", wait_until="domcontentloaded", timeout=25000)
+            page.evaluate("location.href = '/about.html'")
+            page.wait_for_url("**/about.html", timeout=12000)
+            page.locator("#nplus-global-back").click()
+            page.wait_for_url("**/beginner-guide.html", timeout=12000)
+        except Exception as exc:
+            errors.append(f"same-origin back navigation: {type(exc).__name__}: {exc}")
+        # A protected direct entry may redirect to Auth; its back control must safely return Home.
+        try:
+            direct_page = browser.new_page(viewport={"width": 1365, "height": 900})
+            direct_page.goto(BASE_URL + "/activity.html", wait_until="domcontentloaded", timeout=25000)
+            direct_page.locator("#nplus-global-back").wait_for(state="visible", timeout=8000)
+            direct_page.locator("#nplus-global-back").click()
+            direct_page.wait_for_url("**/index.html", timeout=12000)
+            direct_page.close()
+        except Exception as exc:
+            errors.append(f"direct-entry safe fallback: {type(exc).__name__}: {exc}")
         browser.close()
 
     print(f"Rendered pages: {loaded}/{len(PAGES) - len(skipped_optional)} available in this branch")
