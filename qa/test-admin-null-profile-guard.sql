@@ -140,6 +140,17 @@ BEGIN
     RAISE EXCEPTION 'Admin guard migration changed existing wallet ledger row counts.';
   END IF;
 
+  -- The five-argument overload must have no defaults, otherwise it shadows/ambiguates
+  -- the compatibility four-argument overload for shorter calls.
+  IF (SELECT p.pronargdefaults FROM pg_proc p
+      WHERE p.oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)'::regprocedure) <> 0 THEN
+    RAISE EXCEPTION 'Five-argument WINGO overload still has defaults and can make shorter calls ambiguous.';
+  END IF;
+  IF (SELECT p.pronargdefaults FROM pg_proc p
+      WHERE p.oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer)'::regprocedure) <> 2 THEN
+    RAISE EXCEPTION 'Four-argument WINGO overload did not preserve its two compatibility defaults.';
+  END IF;
+
   -- Both overloaded WINGO demo setters and every targeted function must carry
   -- the explicit NULL-safe test, not merely rely on the runtime cases above.
   FOR r IN
