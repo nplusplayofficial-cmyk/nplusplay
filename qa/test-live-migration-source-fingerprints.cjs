@@ -63,6 +63,33 @@ if (sqlFiles.length !== Object.keys(expected).length) {
   console.error('FAIL expected 29 distinct SQL evidence files; found ' + sqlFiles.length);
   failures++;
 }
+const duplicatePairs = [
+  ['20261021160935', '20261022055326'],
+  ['20261021161052', '20261022055330'],
+  ['20261021161109', '20261022055334'],
+  ['20261021161129', '20261022055340'],
+  ['20261021161143', '20261022055345'],
+  ['20261021161152', '20261022055350'],
+  ['20261021161206', '20261022055354'],
+  ['20261021161217', '20261022055400'],
+  ['20261021161233', '20261022055404'],
+  ['20261021161242', '20261022055410'],
+  ['20261021161251', '20261022055424']
+];
+const evidenceReadme = fs.readFileSync(
+  path.join(sourceDir, 'README.md'), 'utf8'
+);
+for (const pair of duplicatePairs) {
+  if (!evidenceReadme.includes(pair[0]) || !evidenceReadme.includes(pair[1])) {
+    console.error('FAIL duplicate body pair missing from replay-safety inventory: ' + pair.join(' / '));
+    failures++;
+  }
+}
+if (duplicatePairs.length !== 11) {
+  console.error('FAIL expected 11 exact duplicate-body pairs in replay-safety inventory.');
+  failures++;
+}
+
 if (failures) {
   console.error('Recovered migration source fingerprint audit failed: ' + failures + ' issue(s).');
   process.exitCode = 1;
