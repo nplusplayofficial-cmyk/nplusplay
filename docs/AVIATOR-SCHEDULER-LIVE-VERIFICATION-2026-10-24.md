@@ -26,6 +26,8 @@ These values are a timestamped operational snapshot, not a promise of future upt
 
 ## Repository source evidence
 
+The recovered SQL file is **not a canonical migration** and must not be replayed as part of a clean chain until Work #1 is approved.
+
 The scheduler SQL source has been copied to this folder as a **recovered evidence file only**:
 
 `docs/recovered-live-migration-sql-2026-10-23/20261021182724_nplus_aviator_persistent_scheduler.sql`
