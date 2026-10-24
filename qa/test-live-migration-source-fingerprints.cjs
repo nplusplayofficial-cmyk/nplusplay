@@ -90,6 +90,59 @@ if (duplicatePairs.length !== 11) {
   failures++;
 }
 
+const orderPath = path.join(root, 'qa/migration-replay-order-2026-10-24.json');
+if (!fs.existsSync(orderPath)) {
+  console.error('FAIL missing exact 40-row live migration replay order inventory');
+  failures++;
+} else {
+  let rows;
+  try {
+    rows = JSON.parse(fs.readFileSync(orderPath, 'utf8'));
+  } catch (error) {
+    console.error('FAIL replay-order JSON is invalid: ' + error.message);
+    failures++;
+    rows = [];
+  }
+  const expectedVersions = [
+    '20261020135823','20261020162640','20261020162811','20261021155813',
+    '20261021160439','20261021160443','20261021160446','20261021160503',
+    '20261021160917','20261021160935','20261021161052','20261021161109',
+    '20261021161129','20261021161143','20261021161152','20261021161206',
+    '20261021161217','20261021161233','20261021161242','20261021161251',
+    '20261021162503','20261021162645','20261022055326','20261022055330',
+    '20261022055334','20261022055340','20261022055345','20261022055350',
+    '20261022055354','20261022055400','20261022055404','20261022055410',
+    '20261022055424','20261022062741','20261022064315','20261023081657',
+    '20261023081758','20261023081916','20261023092858','20261023093056'
+  ];
+  if (rows.length !== 40 ||
+      rows.map(row => String(row.version)).join('|') !== expectedVersions.join('|')) {
+    console.error('FAIL replay-order inventory must list the exact 40 applied versions in order.');
+    failures++;
+  }
+  if (new Set(rows.map(row => String(row.version))).size !== 40) {
+    console.error('FAIL replay-order inventory contains duplicate version IDs.');
+    failures++;
+  }
+  const referencedSources = new Set();
+  for (const row of rows) {
+    referencedSources.add(String(row.file));
+    if (!expected[row.file] || expected[row.file] !== String(row.md5)) {
+      console.error('FAIL replay-order row hash/source does not match fingerprint manifest: ' + row.version);
+      failures++;
+    }
+    if (!row.name || !String(row.version).match(/^\\d{14}$/)) {
+      console.error('FAIL malformed replay-order row metadata: ' + JSON.stringify(row));
+      failures++;
+    }
+  }
+  if (referencedSources.size !== 29) {
+    console.error('FAIL the 40-row order must map to exactly 29 distinct SQL bodies; found ' + referencedSources.size);
+    failures++;
+  } else {
+    console.log('PASS exact 40-row replay order maps to 29 fingerprinted SQL bodies.');
+  }
+}
 if (failures) {
   console.error('Recovered migration source fingerprint audit failed: ' + failures + ' issue(s).');
   process.exitCode = 1;
