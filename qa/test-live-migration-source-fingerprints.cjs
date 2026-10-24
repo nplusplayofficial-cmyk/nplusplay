@@ -161,6 +161,27 @@ if (!fs.existsSync(orderPath)) {
     }
   }
 }
+const restoreRunnerPath = path.join(root, 'qa/restore-backup-acceptance.ps1');
+if (!fs.existsSync(restoreRunnerPath)) {
+  console.error('FAIL missing isolated private-backup restore acceptance runner.');
+  failures++;
+} else {
+  const restoreRunner = fs.readFileSync(restoreRunnerPath, 'utf8');
+  if (!restoreRunner.includes('nplus_restore_acceptance_') ||
+      !restoreRunner.includes('pg_restore --exit-on-error --single-transaction') ||
+      !restoreRunner.includes('finally') ||
+      !restoreRunner.includes('rm -f $ContainerBackupPath $ContainerSqlPath')) {
+    console.error('FAIL restore runner is missing isolated-restore, strict-restore, or private-temp-file cleanup safeguards.');
+    failures++;
+  }
+  if (/^\\s*&\\s*docker exec[^\\n]*\\b(dropdb|rm\\s+-rf)\\b/im.test(restoreRunner) ||
+      /^\\s*&\\s*docker exec[^\\n]*pg_restore[^\\n]*--no-owner/im.test(restoreRunner) ||
+      /^\\s*&\\s*docker exec[^\\n]*pg_restore[^\\n]*--no-acl/im.test(restoreRunner)) {
+    console.error('FAIL restore runner must not drop databases or suppress owner/ACL restore errors.');
+    failures++;
+  }
+}
+
 const replayRunnerPath = path.join(root, 'qa/replay-live-migration-sequence.ps1');
 const replayChecksPath = path.join(root, 'qa/verify-replayed-migration-state.sql');
 if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
