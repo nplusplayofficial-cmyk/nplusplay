@@ -20,11 +20,11 @@ No production migrations, schema DDL, wallet/ledger data, user records, game set
 
 ## Latest CI evidence (candidate branches, not production release proof)
 
-- Wallet/Admin/referral PR #16: [Static QA + browser smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40070078059), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40070078070).
+- Wallet/Admin/referral PR #16: [Static QA + browser smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40070098542), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40070098435).
 - Game rules gate PR #17: [Static QA](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40068386753), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40068386758).
-- Activity/Aviator PR #18 latest: [Static QA](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40070698260), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40070698322).
-- Migration source archive PR #19 latest: [Static QA including 29 source fingerprints](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40071116483), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40071116482).
-- Production security snapshot PR #21: [Static QA](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40071317905), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40071317893).
+- Activity/Aviator PR #18 latest: [Static QA](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40072721815), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40072721843).
+- Migration source archive PR #19 latest: [Static QA including 29 source fingerprints](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40073378567), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40073378549).
+- Production security snapshot PR #21: [Static QA](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40073282012), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40073282009).
 - Legacy anonymous table-grant candidate PR #20: [Static QA + disposable SQL suite](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40071135909), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40071135893).
 
 These CI runs use isolated disposable PostgreSQL and/or local static/browser smoke. They are not proof of a full authenticated production browser test or disaster-recovery acceptance.
