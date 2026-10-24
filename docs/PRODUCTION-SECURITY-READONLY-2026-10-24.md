@@ -47,6 +47,17 @@ A read-only catalog/function review confirmed:
 - `public.nplus_phone_is_registered(text)`: `anon` and `authenticated` EXECUTE are both false in the current snapshot.
 - `profiles`, `demo_wallets`, `demo_wallet_transactions`, `deposit_requests`, `withdrawal_requests`, and `game_settings` have RLS enabled; the reviewed privilege snapshot shows browser roles cannot write directly to the listed wallet/request/settings tables. `profiles` retains authenticated UPDATE grant with an own-row RLS policy and role-protection trigger.
 
+### SECURITY DEFINER body-marker cross-check
+
+A further read-only catalog query scanned the definitions of the 53 SECURITY DEFINER functions executable by authenticated users plus the one anon-executable function:
+
+- 54 total functions callable by one or both browser roles were included in the query.
+- All 54 have a configured fixed search path.
+- All 53 authenticated-callable functions reference either auth.uid() or the shared nplus_is_admin() helper in their function text; the sole no-marker exception is nplus_recent_demo_activity(integer), the intentional public aggregate-only feed.
+- The one anon-executable function is that same aggregate-only feed.
+
+This is a **source-pattern cross-check, not a proof of every authorization branch**. Calls through helpers, owner predicates, data returned, state transitions and non-admin outcomes still need targeted authenticated regression tests. The result reduces the untriaged set but does not justify clearing the Advisor warnings automatically.
+
 ## Legacy table grant follow-up
 
 The current database still reports table-level browser-role grants for legacy `manual_deposits` and `user_bank_details`:
