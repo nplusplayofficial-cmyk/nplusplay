@@ -31,11 +31,39 @@ These CI runs use isolated disposable PostgreSQL and/or local static/browser smo
 
 ## Exact user-PC tasks after assistant-side preparation
 
-1. Start the existing local restore-lab Docker container and run qa/restore-backup-acceptance.ps1 from PR #19's branch. It creates a new local database and restores without --no-owner/--no-acl; if restoration fails, capture the error without changing flags or connecting to production.
-2. After the restore passes, run the reviewed canonical migration replay in a fresh separate disposable Supabase-compatible local stack. Do not use the restored backup database as the replay target, do not use production, and do not use supabase db push against the live project.
-3. Supply a controlled test account/inbox for signup/OTP/password recovery and authenticated demo wallet/Admin/referral E2E tests. Do not share passwords, service-role keys, JWTs, database connection strings, or the private backup.
-4. Decide the K3/5D/TRX demo payout formulas before server settlement changes can be approved.
-5. Review and approve the proposed final merge order once all gates above pass.
+### A. Backup restore + 40-row migration replay
+
+The assistant-side branch now includes both local scripts. These commands act only inside the existing local Docker restore lab; they do not connect to production.
+
+```powershell
+# Start the existing local restore lab if it is not already running
+Set-Location "$HOME\Projects\nplusplay-restore-lab-v2"
+npx supabase start
+
+# Fetch the reviewed audit scripts (do not upload the private backup)
+Set-Location "$HOME\Projects"
+git clone --branch audit/migration-body-fingerprints-2026-10-24 https://github.com/nplusplayofficial-cmyk/nplusplay.git nplusplay-restore-acceptance
+Set-Location "$HOME\Projects\nplusplay-restore-acceptance"
+
+# First restore with ownership/ACL checks enabled; second replay all 40 bodies
+.\qa\restore-backup-acceptance.ps1
+.\qa\replay-live-migration-sequence.ps1
+```
+
+The first script requires the private backup at $HOME\NPLUS-PLAY-DB-BACKUP\nplus-play-full-2026-10-15.dump. It creates a new local database named nplus_restore_acceptance_20261024. The second checks that restored database, creates a separate local clone named nplus_migration_replay_20261024, then replays the captured 40 migration bodies in original order.
+
+If a command fails, **stop at that point** and record only the failing version plus a redacted error message. Do not add --no-owner/--no-acl, skip a failed migration, drop any database, share the private dump, or run anything against production. A failed replay must be investigated, not bypassed.
+
+### B. Authentication and wallet/Admin runtime tests
+
+- Use a controlled test account and inbox to test signup, email OTP verification, password reset, invalid/expired code, profile/wallet initialization, authenticated wallet request/approval, referral claim replay, Admin/non-admin authorization, desktop and mobile navigation.
+- Keep test credentials private. Never share passwords, service-role/secret keys, JWTs, database connection strings or private database rows.
+- Do not write test transactions into a real member's wallet; use an isolated environment and synthetic test accounts.
+
+### C. Product decision + release approval
+
+- Decide K3/5D/TRX virtual-demo payout/return formulas before server-settlement changes can be approved.
+- Review and approve the final merge order only after backup restore, replay, authenticated E2E, security and game-gate checks pass.
 
 ## Safety prohibitions
 
