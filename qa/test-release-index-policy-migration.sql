@@ -147,3 +147,40 @@ BEGIN
   RAISE NOTICE 'PASS: release index/policy migrations verified.';
 END
 $assertions$;
+
+-- Additional security follow-up, isolated in this disposable migration-test DB:
+-- simulate the broad pre-existing table grants then verify only PUBLIC/anon are revoked.
+ALTER TABLE public.manual_deposits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_bank_details ENABLE ROW LEVEL SECURITY;
+GRANT ALL PRIVILEGES ON TABLE public.manual_deposits,
+  public.user_bank_details TO PUBLIC, anon, authenticated;
+
+\ir ../sql/NPLUS_PLAY_LEGACY_TABLE_PRIVILEGE_HARDENING_2026-10-24.sql
+
+DO $legacy_privilege_assertions$
+BEGIN
+  IF has_table_privilege('anon','public.manual_deposits','SELECT')
+     OR has_table_privilege('anon','public.manual_deposits','INSERT')
+     OR has_table_privilege('anon','public.manual_deposits','UPDATE')
+     OR has_table_privilege('anon','public.manual_deposits','DELETE') THEN
+    RAISE EXCEPTION 'Anonymous table privileges remain on public.manual_deposits.';
+  END IF;
+  IF has_table_privilege('anon','public.user_bank_details','SELECT')
+     OR has_table_privilege('anon','public.user_bank_details','INSERT')
+     OR has_table_privilege('anon','public.user_bank_details','UPDATE')
+     OR has_table_privilege('anon','public.user_bank_details','DELETE') THEN
+    RAISE EXCEPTION 'Anonymous table privileges remain on public.user_bank_details.';
+  END IF;
+  IF NOT has_table_privilege('authenticated','public.manual_deposits','INSERT')
+     OR NOT has_table_privilege('authenticated','public.user_bank_details','SELECT')
+     OR NOT has_table_privilege('authenticated','public.user_bank_details','INSERT')
+     OR NOT has_table_privilege('authenticated','public.user_bank_details','UPDATE') THEN
+    RAISE EXCEPTION 'Authenticated table grants were changed unexpectedly.';
+  END IF;
+  IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.manual_deposits'::regclass)
+     OR NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.user_bank_details'::regclass) THEN
+    RAISE EXCEPTION 'RLS must remain enabled on both legacy tables.';
+  END IF;
+  RAISE NOTICE 'PASS: anonymous legacy-table privileges revoked; authenticated grants and RLS retained.';
+END
+$legacy_privilege_assertions$;
