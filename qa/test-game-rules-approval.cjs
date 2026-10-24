@@ -62,16 +62,16 @@ for (const key of ['K3', '5D', 'TRX']) {
   check(sqlTests.includes("'" + key + "'"), 'disposable SQL test references ' + key);
 }
 
-const settlementFiles = [
-  'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql',
-  'sql/NPLUS_PLAY_MOTORACE_RPC.sql',
-  'sql/NPLUS_PLAY_AVIATOR_RPC.sql'
-];
-const available = settlementFiles.map(f => fs.existsSync(path.join(root, f)) ? f : null).filter(Boolean);
+const sqlDirectories = ['sql', 'supabase/migrations'];
+const sqlFiles = sqlDirectories.flatMap(dir => {
+  const full = path.join(root, dir);
+  if (!fs.existsSync(full)) return [];
+  return fs.readdirSync(full).filter(name => name.endsWith('.sql')).map(name => path.join(full, name));
+});
+const allSql = sqlFiles.map(file => fs.readFileSync(file, 'utf8')).join('\n');
 for (const key of ['K3', '5D', 'TRX']) {
-  const rpcPattern = new RegExp('nplus_' + key.toLowerCase() + '.*(place_bet|settle_round|payout)', 'i');
-  const hasServerSettlement = available.some(f => rpcPattern.test(fs.readFileSync(path.join(root, f), 'utf8')));
-  check(!hasServerSettlement, key + ' has no approved server-settlement RPC in the reviewed settlement SQL files');
+  const rpcPattern = new RegExp('create\\s+(?:or\\s+replace\\s+)?function\\s+public\\.nplus_' + key.toLowerCase() + '.*?(?:place_bet|settle_round|payout)', 'is');
+  check(!rpcPattern.test(allSql), key + ' has no game-specific server settlement function in SQL/migrations');
 }
 
 if (failures) {
