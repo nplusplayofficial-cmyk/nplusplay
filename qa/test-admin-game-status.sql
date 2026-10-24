@@ -66,13 +66,6 @@ begin
   if v_enabled is not true then raise exception 'Admin status RPC did not re-enable the allowed WINGO flag.'; end if;
 
   -- Every game without approved server payout rules must remain disabled.
-  foreach v_result in array array['K3'::jsonb, '5D'::jsonb, 'TRX'::jsonb] loop
-    -- This array loop is deliberately not used for RPC arguments; test each exact key below.
-    null;
-  end loop;
-  foreach v_enabled in array array[false, false, false] loop
-    null;
-  end loop;
   perform public.nplus_set_game_status('K3',false);
   perform public.nplus_set_game_status('5D',false);
   perform public.nplus_set_game_status('TRX',false);
