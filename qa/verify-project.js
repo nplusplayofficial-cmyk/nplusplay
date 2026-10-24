@@ -149,7 +149,7 @@ try {
   if (!withdrawalLegacy.includes('./withdraw-demo.html') ||
       !withdrawalLegacy.includes('window.location.replace') ||
       !withdrawalPage.includes('nplus_create_demo_withdrawal_request') ||
-      !/no cash payout/i.test(withdrawalPage) ||
+      !/(?:no cash payout|no cash will be paid|no real-money withdrawal or bank payout is processed)/i.test(withdrawalPage) ||
       !/credits have no cash value/i.test(withdrawalPage) ||
       !withdrawalPage.includes('withdrawal-history.html') ||
       /\.from\s*\(\s*['"]withdrawal_requests['"]\s*\)\s*\.insert\s*\(/i.test(withdrawalPage) ||
@@ -646,7 +646,7 @@ try {
     fail('Demo withdrawal page must not store withdrawal requests in localStorage');
   }
   if (!withdraw.includes('nplus_create_demo_withdrawal_request') ||
-      !/no cash payout/i.test(withdraw) ||
+      !/(?:no cash payout|no cash will be paid|no real-money withdrawal or bank payout is processed)/i.test(withdraw) ||
       !withdraw.includes('withdrawal-history.html') ||
       !/credits have no cash value/i.test(withdraw) ||
       /\.from\s*\(\s*['"]withdrawal_requests['"]\s*\)\s*\.insert\s*\(/i.test(withdraw)) {
