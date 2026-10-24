@@ -21,9 +21,14 @@ GROUP BY user_id;
 \ir ../sql/NPLUS_PLAY_ADMIN_NULL_PROFILE_GUARD_2026-10-19.sql
 
 INSERT INTO auth.users(id,email)
-VALUES ('e1111111-1111-4111-8111-111111111111','orphan-profile-qa@example.invalid')
+VALUES
+  ('e1111111-1111-4111-8111-111111111111','orphan-profile-qa@example.invalid'),
+  ('e2222222-2222-4222-8222-222222222222','nonadmin-profile-qa@example.invalid')
 ON CONFLICT (id) DO NOTHING;
--- Deliberately do not insert a matching profiles row.
+INSERT INTO public.profiles(id,uid,display_name,email,phone,role)
+VALUES ('e2222222-2222-4222-8222-222222222222','QA-NULL-GUARD-USER','Null Guard QA User','nonadmin-profile-qa@example.invalid','9000000998','user')
+ON CONFLICT (id) DO UPDATE SET role='user';
+-- Deliberately do not insert a matching profiles row for e111...; it tests the missing-profile case.
 SELECT set_config('request.jwt.claim.sub','e1111111-1111-4111-8111-111111111111',false);
 SELECT set_config('request.jwt.claim.role','authenticated',false);
 
@@ -76,9 +81,25 @@ BEGIN
     'save WINGO manual result without profiles row'
   );
   PERFORM pg_temp.expect_admin_denied(
-    'select public.nplus_admin_set_wingo_demo(30, ''MANUAL'', ''RED'', 0, ''SMALL'')',
-    'set WINGO demo result without profiles row'
+    'select public.nplus_admin_set_wingo_demo(30, ''MANUAL'', ''RED'', 0)',
+    'four-argument WINGO setter without profiles row'
   );
+  PERFORM pg_temp.expect_admin_denied(
+    'select public.nplus_admin_set_wingo_demo(30, ''MANUAL'', ''RED'', 0, ''SMALL'')',
+    'five-argument WINGO setter without profiles row'
+  );
+
+  -- Both WINGO overloads must also reject a normal authenticated profile.
+  PERFORM set_config('request.jwt.claim.sub','e2222222-2222-4222-8222-222222222222',false);
+  PERFORM pg_temp.expect_admin_denied(
+    'select public.nplus_admin_set_wingo_demo(30, ''MANUAL'', ''RED'', 0)',
+    'four-argument WINGO setter for normal non-admin profile'
+  );
+  PERFORM pg_temp.expect_admin_denied(
+    'select public.nplus_admin_set_wingo_demo(30, ''MANUAL'', ''RED'', 0, ''SMALL'')',
+    'five-argument WINGO setter for normal non-admin profile'
+  );
+  PERFORM set_config('request.jwt.claim.sub','e1111111-1111-4111-8111-111111111111',false);
   PERFORM pg_temp.expect_admin_denied(
     'select * from public.nplus_admin_wingo_live_bets(''qa-orphan-profile'')',
     'read WINGO live bets without profiles row'
