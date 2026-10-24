@@ -51,6 +51,7 @@ BEGIN
     RAISE EXCEPTION 'Replay invariant failed: browser roles can execute phone-enumeration RPC.';
   END IF;
 
+  -- generic wallet positive/game-credit guard exists
   IF to_regprocedure('public.nplus_wallet_change(numeric,text,text,text)') IS NULL THEN
     RAISE EXCEPTION 'Replay invariant failed: generic wallet RPC is missing.';
   END IF;
