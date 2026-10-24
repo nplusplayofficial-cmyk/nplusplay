@@ -19,6 +19,7 @@ FROM public.demo_wallet_transactions
 GROUP BY user_id;
 
 \ir ../sql/NPLUS_PLAY_ADMIN_NULL_PROFILE_GUARD_2026-10-19.sql
+\ir ../sql/NPLUS_PLAY_WINGO_OVERLOAD_DEFAULT_FIX_CANDIDATE_2026-10-24.sql
 
 INSERT INTO auth.users(id,email)
 VALUES
@@ -60,11 +61,6 @@ DECLARE
   v_count integer := 0;
   v_admin_report jsonb;
 BEGIN
-  -- The five-argument overload has a default fifth parameter in current history,
-  -- so ordinary four-argument calls are ambiguous while both overloads share a name.
-  -- In this disposable test only, temporarily rename the five-arg function so each
-  -- implementation can be invoked directly and its authorization guard can be tested.
-  EXECUTE 'ALTER FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text) RENAME TO nplus_admin_set_wingo_demo_five_arg_qa';
   PERFORM pg_temp.expect_admin_denied(
     'select public.nplus_set_game_status(''WINGO'', false)',
     'game status change without profiles row'
@@ -90,7 +86,7 @@ BEGIN
     'four-argument WINGO setter without profiles row'
   );
   PERFORM pg_temp.expect_admin_denied(
-    'select public.nplus_admin_set_wingo_demo_five_arg_qa(30::integer, ''MANUAL''::text, ''RED''::text, 0::integer, ''SMALL''::text)',
+    'select public.nplus_admin_set_wingo_demo(30::integer, ''MANUAL''::text, ''RED''::text, 0::integer, ''SMALL''::text)',
     'five-argument WINGO setter without profiles row'
   );
 
@@ -101,7 +97,7 @@ BEGIN
     'four-argument WINGO setter for normal non-admin profile'
   );
   PERFORM pg_temp.expect_admin_denied(
-    'select public.nplus_admin_set_wingo_demo_five_arg_qa(30::integer, ''MANUAL''::text, ''RED''::text, 0::integer, ''SMALL''::text)',
+    'select public.nplus_admin_set_wingo_demo(30::integer, ''MANUAL''::text, ''RED''::text, 0::integer, ''SMALL''::text)',
     'five-argument WINGO setter for normal non-admin profile'
   );
   PERFORM set_config('request.jwt.claim.sub','e1111111-1111-4111-8111-111111111111',false);
@@ -113,9 +109,6 @@ BEGIN
     'select public.nplus_admin_wingo_round_summary(''qa-orphan-profile'')',
     'read WINGO round summary without profiles row'
   );
-
-  -- Restore the overload name before inspecting both signatures below.
-  EXECUTE 'ALTER FUNCTION public.nplus_admin_set_wingo_demo_five_arg_qa(integer,text,text,integer,text) RENAME TO nplus_admin_set_wingo_demo';
 
   -- A valid admin profile must still be allowed through the guarded report RPC.
   PERFORM set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
