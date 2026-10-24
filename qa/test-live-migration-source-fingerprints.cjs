@@ -143,6 +143,41 @@ if (!fs.existsSync(orderPath)) {
     console.log('PASS exact 40-row replay order maps to 29 fingerprinted SQL bodies.');
   }
 }
+const replayRunnerPath = path.join(root, 'qa/replay-live-migration-sequence.ps1');
+const replayChecksPath = path.join(root, 'qa/verify-replayed-migration-state.sql');
+if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
+  console.error('FAIL missing isolated replay runner or invariant SQL.');
+  failures++;
+} else {
+  const runner = fs.readFileSync(replayRunnerPath, 'utf8');
+  const replayChecks = fs.readFileSync(replayChecksPath, 'utf8');
+  if (!runner.includes('nplus_restore_acceptance_') ||
+      !runner.includes('nplus_migration_replay_') ||
+      !runner.includes('pg_dump -Fc') ||
+      !runner.includes('pg_restore --exit-on-error --single-transaction') ||
+      !runner.includes('ON_ERROR_STOP=1') ||
+      !runner.includes('test-live-migration-source-fingerprints.cjs')) {
+    console.error('FAIL replay runner is missing required local-clone/fingerprint/stop-on-error safeguards.');
+    failures++;
+  }
+  if (/^\s*&\s*docker exec[^\n]*\bdropdb\b/im.test(runner) ||
+      /^\s*&\s*docker exec[^\n]*pg_restore[^\n]*--no-owner/im.test(runner) ||
+      /^\s*&\s*docker exec[^\n]*pg_restore[^\n]*--no-acl/im.test(runner)) {
+    console.error('FAIL replay runner must never drop databases or suppress owner/ACL restore errors.');
+    failures++;
+  }
+  for (const invariant of [
+    'all six games remain disabled',
+    'generic positive/game-credit guard exists',
+    'server-only',
+    'ledger arithmetic remains consistent'
+  ]) {
+    if (!replayChecks.toLowerCase().includes(invariant.toLowerCase())) {
+      console.error('FAIL replay-state SQL is missing required invariant: ' + invariant);
+      failures++;
+    }
+  }
+}
 if (failures) {
   console.error('Recovered migration source fingerprint audit failed: ' + failures + ' issue(s).');
   process.exitCode = 1;
