@@ -28,6 +28,12 @@ CREATE TABLE public.user_bank_details (
 ALTER TABLE public.manual_deposits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_bank_details ENABLE ROW LEVEL SECURITY;
 
+-- In a fresh test database only: auth.uid() stub so owner policies parse/validate.
+CREATE SCHEMA auth;
+CREATE FUNCTION auth.uid() RETURNS uuid
+LANGUAGE sql STABLE
+AS $ SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid $;
+
 GRANT ALL PRIVILEGES ON TABLE public.manual_deposits,
   public.user_bank_details TO PUBLIC, anon, authenticated;
 
@@ -42,12 +48,6 @@ CREATE POLICY user_bank_details_owner_insert ON public.user_bank_details
 CREATE POLICY user_bank_details_owner_update ON public.user_bank_details
   FOR UPDATE TO authenticated USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
-
--- In a fresh test database only: auth.uid() stub so owner policies parse/validate.
-CREATE SCHEMA auth;
-CREATE FUNCTION auth.uid() RETURNS uuid
-LANGUAGE sql STABLE
-AS $$ SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 
 \ir ../sql/NPLUS_PLAY_LEGACY_TABLE_PRIVILEGE_HARDENING_2026-10-24.sql
 
