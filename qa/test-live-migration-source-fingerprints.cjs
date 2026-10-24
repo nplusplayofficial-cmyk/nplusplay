@@ -142,6 +142,24 @@ if (!fs.existsSync(orderPath)) {
   } else {
     console.log('PASS exact 40-row replay order maps to 29 fingerprinted SQL bodies.');
   }
+
+  // Validate the *specific* duplicate pairs captured from live history, not just
+  // the aggregate number of unique files. Otherwise a mis-mapped 40-row sequence
+  // could still pass while attaching a duplicate body to the wrong history version.
+  const rowByVersion = new Map(rows.map(row => [String(row.version), row]));
+  for (const [originalVersion, duplicateVersion] of duplicatePairs) {
+    const original = rowByVersion.get(originalVersion);
+    const duplicate = rowByVersion.get(duplicateVersion);
+    if (!original || !duplicate ||
+        original.file !== duplicate.file ||
+        String(original.md5) !== String(duplicate.md5)) {
+      console.error(
+        'FAIL duplicate live-history versions do not map to the same captured body: ' +
+        originalVersion + ' / ' + duplicateVersion
+      );
+      failures++;
+    }
+  }
 }
 const replayRunnerPath = path.join(root, 'qa/replay-live-migration-sequence.ps1');
 const replayChecksPath = path.join(root, 'qa/verify-replayed-migration-state.sql');
