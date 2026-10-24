@@ -2,7 +2,7 @@
 
 ## Status
 
-**Partial — homepage aggregate feed contract added; Aviator demand-driven recovery exists; autonomous scheduler is not configured. Do not mark the whole item complete yet.**
+**Partial — homepage aggregate feed source and privacy-safe RPC are ready; production Aviator scheduler is now verified as active through read-only catalog/health checks. Hosted homepage deployment and full authenticated integration verification remain open.**
 
 ## Recent Activity
 
@@ -21,17 +21,25 @@
 - Existing disposable SQL tests exercise repeated cash-out, late polling recovery, and wallet ledger credit counts.
 - Browser page polls the server round RPC while open and resyncs on focus/visibility/pageshow.
 
-## Release blocker: no autonomous scheduler
+## Scheduler runtime — corrected after read-only production verification
 
-No `pg_cron`, scheduled job, or server worker invoking Aviator recovery was found in repository SQL/workflows. Recovery is **demand-driven**: it runs when an authenticated client calls the round or cash-out RPC. This is not a guaranteed background scheduler and does not settle rounds while no clients call the RPC.
+The original source-only check incorrectly described the scheduler as absent. A direct read-only query against the production catalog on 2026-10-24 found:
 
-Do not enable or claim scheduler readiness until the hosting project's supported scheduler is identified, an idempotent service-only recovery entry point is designed, and a disposable integration test proves stale-round recovery without exposing a service secret to the browser. Do not blindly enable extensions or schedule production jobs.
+- `pg_cron` extension version 1.6.4 and `cron.job`.
+- Active `nplus-aviator-worker` job scheduled every second; its command calls `public.nplus_aviator_demo_worker_tick()`.
+- 84,957 successful cron-run records in the observed 24-hour window; no other status group was returned.
+- The worker health row showed a recent success (less than five seconds old), zero consecutive failures, no last error and a recent round ID.
+- Anon/authenticated cannot execute the privileged worker-tick function directly; the job command did not contain an HTTP/Vault/service-role-secret marker in the checks performed.
+
+Full timestamped evidence and caveats are in [AVIATOR-SCHEDULER-LIVE-VERIFICATION-2026-10-24.md](./AVIATOR-SCHEDULER-LIVE-VERIFICATION-2026-10-24.md).
+
+This verifies that the configured production scheduler was running at the checked time. It does **not** replace backup acceptance, canonical migration replay, or hosted browser integration tests. The scheduler SQL body is retained only as recovered evidence under `docs/recovered-live-migration-sql-2026-10-23/`; do not rerun it or copy it into `supabase/migrations` until Work #1's source/replay review is complete.
 
 ## Validation
 
-- `qa/test-activity-aviator-audit.cjs`: source-level privacy, route, idempotency and recovery checks.
+- `qa/test-activity-aviator-audit.cjs`: source-level privacy, route, idempotency, scheduler-source and recovery checks.
 - `qa/test-recent-demo-activity.sql`: disposable PostgreSQL test for aggregate result shape, supported game keys, bounded window and execute grants.
-- The SQL/browser CI run must finish successfully. A green static audit does not prove the hosted Supabase function is deployed, and the scheduler blocker remains until separately resolved.
+- Static QA and Release Smoke CI are green on the branch; a green static audit does not prove the homepage feed has been deployed or that every authenticated hosted path works.
 
 ## Safety
 
