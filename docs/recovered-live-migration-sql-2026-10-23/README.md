@@ -30,6 +30,17 @@ Exact repeated-body pairs:
 | 20261021161242 | 20261022055410 |
 | 20261021161251 | 20261022055424 |
 
+## Local clean replay helper
+
+After the separate backup-restore acceptance passes, this branch includes:
+
+- `qa/migration-replay-order-2026-10-24.json` — all 40 recorded live-history versions in original order, mapping 40 records to the 29 distinct SQL evidence files and their recorded MD5 fingerprints.
+- `qa/replay-live-migration-sequence.ps1` — creates a new local replay database from a separate verified restore, then executes each of the 40 bodies with stop-on-first-error behavior.
+- `qa/verify-replayed-migration-state.sql` — read-only invariants for game flags, RLS, wallet/request grants, generic wallet-credit guard, Admin WINGO overload guards, server-only Aviator worker, aggregate activity RPC and ledger arithmetic.
+- `qa/test-live-migration-source-fingerprints.cjs` — CI check for the 29 fingerprints, duplicate-body inventory and the exact 40-row replay order.
+
+Run only in the existing local Docker restore lab. The replay script leaves the disposable database in place if a migration fails so the failure can be reviewed. It does not skip a body, edit migration history, or connect to production. A passing source fingerprint check alone is not the same as a passing replay.
+
 ## Required gates before canonicalization
 
 1. Review every source/hash mapping, execution order, role/extension prerequisite, and precondition in the source map.
