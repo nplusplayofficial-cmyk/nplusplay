@@ -48,6 +48,8 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d nplus_migration_test -v ON_ERROR_STOP=1 -f qa/test-release-index-policy-migration.sql
       - name: Check syntax and local links
         run: node qa/verify-project.js
+      - name: Verify recovered live migration source fingerprints
+        run: node qa/test-live-migration-source-fingerprints.cjs
       - name: Test WINGO settlement against disposable PostgreSQL
         env:
           PGPASSWORD: nplus_test
