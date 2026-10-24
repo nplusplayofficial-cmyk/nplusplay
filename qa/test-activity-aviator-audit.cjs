@@ -37,8 +37,8 @@ check(/returns table\(game_key text, activity_count bigint\)/i.test(feedSql),
   'server feed contract exposes only game key and aggregate count');
 check(/security definer/i.test(feedSql) && /set search_path\s*=\s*pg_catalog,\s*public/i.test(feedSql),
   'server feed uses a fixed search_path');
-check(/least\(greatest\(coalesce\(p_window_minutes, 60\), 1\), 60\)/i.test(feedSql),
-  'server feed clamps the requested time window to 1–60 minutes');
+check(/least\\(\\s*greatest\\(coalesce\\(p_window_minutes, 60\\), 5\\),\\s*1440\\s*\\)/i.test(feedSql),
+  'server feed clamps the requested time window to 5–1440 minutes');
 check(/grant execute on function public\.nplus_recent_demo_activity\(integer\) to anon, authenticated/i.test(feedSql),
   'only the aggregate feed RPC is exposed for anonymous/authenticated reads');
 
