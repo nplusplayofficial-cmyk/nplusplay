@@ -88,9 +88,12 @@ try {
     }
   }
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  if (!worker.includes('nplus-play-shell-v7') ||
+  if (!worker.includes('nplus-play-shell-v8') ||
       !worker.includes('"./core/nplus-back-nav.js"') ||
-      !worker.includes('"./core/nplus-bottom-nav.css"')) {
+      !worker.includes('"./core/nplus-bottom-nav.css"') ||
+      !worker.includes('"./deposit-demo.html"') ||
+      !worker.includes('"./withdraw-demo.html"') ||
+      !worker.includes('"./admin-deposits.html"')) {
     fail('Service worker must bump its shell cache and precache shared navigation assets');
   }
 } catch (e) { fail('Shared navigation static guard failed: ' + e.message); }
@@ -131,16 +134,27 @@ try {
 
 // Demo request pages must use guarded RPCs and remain virtual-credit-only.
 try {
+  const depositLegacy = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
   const depositPage = fs.readFileSync(path.join(root, 'deposit-demo.html'), 'utf8');
-  if (!depositPage.includes('nplus_create_demo_deposit_request') ||
+  if (!depositLegacy.includes('./deposit-demo.html') ||
+      !depositLegacy.includes('window.location.replace') ||
+      !depositPage.includes('nplus_create_demo_deposit_request') ||
+      !depositPage.includes('sessionStorage') ||
+      !depositPage.includes('btn.disabled=!authReady') ||
       /\.from\s*\(\s*['"]deposit_requests['"]\s*\)\s*\.insert\s*\(/i.test(depositPage)) {
-    fail('Deposit request page must use the server-side idempotent RPC, not direct inserts');
+    fail('Deposit route must forward to the authenticated demo page, which uses an idempotent server RPC and no direct inserts');
   }
-  const withdrawalPage = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
-  if (!withdrawalPage.includes('nplus_create_demo_withdrawal_request') ||
+  const withdrawalLegacy = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
+  const withdrawalPage = fs.readFileSync(path.join(root, 'withdraw-demo.html'), 'utf8');
+  if (!withdrawalLegacy.includes('./withdraw-demo.html') ||
+      !withdrawalLegacy.includes('window.location.replace') ||
+      !withdrawalPage.includes('nplus_create_demo_withdrawal_request') ||
       !/no cash payout/i.test(withdrawalPage) ||
-      !withdrawalPage.includes('withdrawal-history.html')) {
-    fail('Withdrawal page must use the protected demo RPC, show history link and state no cash payout');
+      !/credits have no cash value/i.test(withdrawalPage) ||
+      !withdrawalPage.includes('withdrawal-history.html') ||
+      /\.from\s*\(\s*['"]withdrawal_requests['"]\s*\)\s*\.insert\s*\(/i.test(withdrawalPage) ||
+      /id=["'](?:holder|bank|accountNo|ifsc|branch|upiId|upiHolder|upiBank)["']/i.test(withdrawalPage)) {
+    fail('Withdrawal route must forward to the protected demo RPC flow with history and no bank/cash-payout UI');
   }
   const depositHistory = fs.readFileSync(path.join(root, 'deposit-history.html'), 'utf8');
   const withdrawalHistory = fs.readFileSync(path.join(root, 'withdrawal-history.html'), 'utf8');
@@ -149,8 +163,11 @@ try {
   }
   const adminWithdrawal = fs.readFileSync(path.join(root, 'admin-withdrawals.html'), 'utf8');
   if (!adminWithdrawal.includes('nplus_admin_resolve_demo_withdrawal') ||
-      !adminWithdrawal.includes('No wallet credits or cash will move')) {
-    fail('Admin withdrawal review must use the guarded status-only RPC');
+      !/status-only/i.test(adminWithdrawal) ||
+      !/no cash payout/i.test(adminWithdrawal) ||
+      !/wallet balance remains unchanged/i.test(adminWithdrawal) ||
+      /from\s*\(\s*['"]user_bank_details['"]\s*\)/i.test(adminWithdrawal)) {
+    fail('Admin withdrawal review must use the guarded status-only RPC and must not load bank details');
   }
   const requestSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql'), 'utf8').toLowerCase();
   for (const contract of [
@@ -604,28 +621,39 @@ try {
     fail('N+ ADMIN commission figures must be labelled estimated until a recorded fee ledger exists');
   }
 
-  const deposit = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
-  if (deposit.includes('nplusplay_wallet_v1') ||
-      /localStorage\.getItem\(LEGACY\)/.test(deposit)) {
-    fail('Deposit page must not display a stale localStorage wallet balance');
+  const depositLegacy = fs.readFileSync(path.join(root, 'deposit.html'), 'utf8');
+  const deposit = fs.readFileSync(path.join(root, 'deposit-demo.html'), 'utf8');
+  if (depositLegacy.includes('nplusplay_wallet_v1') ||
+      /localStorage\.getItem\(LEGACY\)/.test(depositLegacy)) {
+    fail('Legacy deposit route must not display stale localStorage wallet balances');
   }
-  if (!deposit.includes('walletReady=false') ||
-      !deposit.includes('Please sign in and wait for the shared wallet to sync')) {
-    fail('Deposit page must disable requests when the shared wallet cannot sync');
+  if (!depositLegacy.includes('./deposit-demo.html') ||
+      !depositLegacy.includes('window.location.replace') ||
+      !deposit.includes('nplus_create_demo_deposit_request') ||
+      !deposit.includes('btn.disabled=!authReady') ||
+      !deposit.includes('sessionStorage') ||
+      /\.from\s*\(\s*['"]deposit_requests['"]\s*\)\s*\.insert\s*\(/i.test(deposit)) {
+    fail('Demo deposit route must wait for auth, reuse an idempotency token, and submit only through its server RPC');
   }
 
-  const withdraw = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
+  const withdrawalLegacy = fs.readFileSync(path.join(root, 'withdraw.html'), 'utf8');
+  const withdraw = fs.readFileSync(path.join(root, 'withdraw-demo.html'), 'utf8');
+  if (!withdrawalLegacy.includes('./withdraw-demo.html') ||
+      !withdrawalLegacy.includes('window.location.replace')) {
+    fail('Legacy withdrawal route must forward to the protected demo request page');
+  }
   if (/function\s+addRequest\s*\(/.test(withdraw) || /addRequest\s*\(\s*\{/.test(withdraw)) {
-    fail('Withdraw page must not store withdrawal requests in localStorage');
+    fail('Demo withdrawal page must not store withdrawal requests in localStorage');
   }
   if (!withdraw.includes('nplus_create_demo_withdrawal_request') ||
       !/no cash payout/i.test(withdraw) ||
       !withdraw.includes('withdrawal-history.html') ||
-      !withdraw.includes('credits have no cash value')) {
-    fail('Withdraw page must use the server-side demo request flow and clearly disable cash payouts');
+      !/credits have no cash value/i.test(withdraw) ||
+      /\.from\s*\(\s*['"]withdrawal_requests['"]\s*\)\s*\.insert\s*\(/i.test(withdraw)) {
+    fail('Demo withdrawal page must use the protected server RPC and clearly disable cash payouts');
   }
   if (/id=["'](?:holder|bank|accountNo|ifsc|branch|upiId|upiHolder|upiBank)["']/i.test(withdraw)) {
-    fail('Withdraw page must not collect bank, account, IFSC or UPI details in demo mode');
+    fail('Demo withdrawal page must not collect bank, account, IFSC or UPI details');
   }
 
   const auth = fs.readFileSync(path.join(root, 'core/nplus-auth.js'), 'utf8');
