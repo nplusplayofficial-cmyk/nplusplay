@@ -131,7 +131,7 @@ if (!fs.existsSync(orderPath)) {
       console.error('FAIL replay-order row hash/source does not match fingerprint manifest: ' + row.version);
       failures++;
     }
-    if (!row.name || !String(row.version).match(/^\\d{14}$/)) {
+    if (!row.name || !String(row.version).match(/^\d{14}$/)) {
       console.error('FAIL malformed replay-order row metadata: ' + JSON.stringify(row));
       failures++;
     }
