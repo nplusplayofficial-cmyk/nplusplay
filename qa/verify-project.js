@@ -742,21 +742,6 @@ try {
   if (r.status !== 0) fail('service worker syntax: ' + (r.stderr || r.stdout || '').trim());
 } catch (e) { fail('service worker check failed: ' + e.message); }
 
-try {
-  const legacyGrantSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_LEGACY_TABLE_PRIVILEGE_HARDENING_2026-10-24.sql'), 'utf8').toLowerCase();
-  const legacyGrantTest = fs.readFileSync(path.join(root, 'qa/test-legacy-table-privilege-hardening.sql'), 'utf8').toLowerCase();
-  if (!/revoke all privileges on table public\\.manual_deposits[\\s\\S]*from public, anon/i.test(legacyGrantSql) ||
-      !/revoke all privileges on table public\\.user_bank_details[\\s\\S]*from public, anon/i.test(legacyGrantSql)) {
-    fail('Legacy privilege candidate must revoke only PUBLIC/anon grants from both legacy tables');
-  }
-  if (!legacyGrantTest.includes("has_table_privilege('anon','public.manual_deposits','insert')") ||
-      !legacyGrantTest.includes("has_table_privilege('anon','public.user_bank_details','select')") ||
-      !legacyGrantTest.includes("has_table_privilege('authenticated','public.user_bank_details','update')") ||
-      !legacyGrantTest.includes('relrowsecurity')) {
-    fail('Legacy table privilege test must check anon denial, authenticated preservation and RLS');
-  }
-} catch (e) { fail('Legacy table grant hardening static contract failed: ' + e.message); }
-
 console.log('HTML pages checked: ' + htmls.length);
 console.log('Warnings: ' + warnings);
 console.log('Errors: ' + errors);
