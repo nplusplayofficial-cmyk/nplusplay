@@ -1,0 +1,242 @@
+[
+  {
+    "version": "20261020135823",
+    "name": "block_generic_wallet_credits_before_game_rpc_deployment",
+    "file": "20261020135823_block_generic_wallet_credits_before_game_rpc_deployment.sql",
+    "md5": "2850de2e52763443e12cf336e5bda002"
+  },
+  {
+    "version": "20261020162640",
+    "name": "temporarily_pause_games_until_authoritative_backend_rollout",
+    "file": "20261020162640_temporarily_pause_games_until_authoritative_backend_rollout.sql",
+    "md5": "370856a6454d23c768ad1cb871ce1a3d"
+  },
+  {
+    "version": "20261020162811",
+    "name": "null_safe_admin_rpc_authorization_guard",
+    "file": "20261020162811_null_safe_admin_rpc_authorization_guard.sql",
+    "md5": "9f8b84431d2717292fbe528cab6a2e4a"
+  },
+  {
+    "version": "20261021155813",
+    "name": "admin_game_status_fail_closed_guard",
+    "file": "20261021155813_admin_game_status_fail_closed_guard.sql",
+    "md5": "c9b30fb18008b9b8b3d61fe3bdbb0c25"
+  },
+  {
+    "version": "20261021160439",
+    "name": "account_preferences_release_support",
+    "file": "20261021160439_account_preferences_release_support.sql",
+    "md5": "670231ad75fadaf0d55a6791ec4c70a4"
+  },
+  {
+    "version": "20261021160443",
+    "name": "demo_wallet_requests_release_support",
+    "file": "20261021160443_demo_wallet_requests_release_support.sql",
+    "md5": "0683f8ea730b1861ac71ff63c1181609"
+  },
+  {
+    "version": "20261021160446",
+    "name": "admin_deposit_actions_release_support",
+    "file": "20261021160446_admin_deposit_actions_release_support.sql",
+    "md5": "425287208f2add7902d084748980f7e8"
+  },
+  {
+    "version": "20261021160503",
+    "name": "demo_referrals_base_release_support",
+    "file": "20261021160503_demo_referrals_base_release_support.sql",
+    "md5": "dac41d2de70765aaa230e5fec8d172e1"
+  },
+  {
+    "version": "20261021160917",
+    "name": "nplus_vip_referral_demo",
+    "file": "20261021160917_nplus_vip_referral_demo.sql",
+    "md5": "e09b3db6a2adce61c3d587a7f0856941"
+  },
+  {
+    "version": "20261021160935",
+    "name": "nplus_server_settlement_foundation",
+    "file": "20261021160935_nplus_server_settlement_foundation.sql",
+    "md5": "0f401164b791555350fe667adf579821"
+  },
+  {
+    "version": "20261021161052",
+    "name": "nplus_motorace_schema",
+    "file": "20261021161052_nplus_motorace_schema.sql",
+    "md5": "4757f2cab064399bd17135c5cba3bd1f"
+  },
+  {
+    "version": "20261021161109",
+    "name": "nplus_motorace_rpc",
+    "file": "20261021161109_nplus_motorace_rpc.sql",
+    "md5": "62ddf12081dde7f41ed2c330536ba4fe"
+  },
+  {
+    "version": "20261021161129",
+    "name": "nplus_aviator_schema",
+    "file": "20261021161129_nplus_aviator_schema.sql",
+    "md5": "35729c3cbfc089da87d9dab49a0bef30"
+  },
+  {
+    "version": "20261021161143",
+    "name": "nplus_aviator_rpc",
+    "file": "20261021161143_nplus_aviator_rpc.sql",
+    "md5": "e7f9ea285515cbfc7d9722219795569e"
+  },
+  {
+    "version": "20261021161152",
+    "name": "nplus_aviator_worker_recovery",
+    "file": "20261021161152_nplus_aviator_worker_recovery.sql",
+    "md5": "f9eb22c6ab349c747f221c3edb544397"
+  },
+  {
+    "version": "20261021161206",
+    "name": "nplus_aviator_persistent_scheduler",
+    "file": "20261021161206_nplus_aviator_persistent_scheduler.sql",
+    "md5": "aafd879eb774f25765595c1b13369210"
+  },
+  {
+    "version": "20261021161217",
+    "name": "nplus_admin_user_tools",
+    "file": "20261021161217_nplus_admin_user_tools.sql",
+    "md5": "f071a5385b87239b255b91a28e700c60"
+  },
+  {
+    "version": "20261021161233",
+    "name": "nplus_admin_game_status",
+    "file": "20261021161233_nplus_admin_game_status.sql",
+    "md5": "d98bd9344d6591971ca3212007cf3967"
+  },
+  {
+    "version": "20261021161242",
+    "name": "nplus_admin_null_profile_guard",
+    "file": "20261021161242_nplus_admin_null_profile_guard.sql",
+    "md5": "baf2caaf9cd8ec227319ae43ecc08eb0"
+  },
+  {
+    "version": "20261021161251",
+    "name": "nplus_recent_demo_activity",
+    "file": "20261021161251_nplus_recent_demo_activity.sql",
+    "md5": "4ac4a9427f9f47145197da5e1068ba0d"
+  },
+  {
+    "version": "20261021162503",
+    "name": "post_rollout_revoke_phone_enumeration",
+    "file": "20261021162503_post_rollout_revoke_phone_enumeration.sql",
+    "md5": "71e8ad4581449eb4aea6c321315bfc46"
+  },
+  {
+    "version": "20261021162645",
+    "name": "enable_server_backed_virtual_demo_games",
+    "file": "20261021162645_enable_server_backed_virtual_demo_games.sql",
+    "md5": "4354d93ff2b85cc37c047afc263e35c5"
+  },
+  {
+    "version": "20261022055326",
+    "name": "20261021182718_nplus_server_settlement_foundation",
+    "file": "20261021160935_nplus_server_settlement_foundation.sql",
+    "md5": "0f401164b791555350fe667adf579821"
+  },
+  {
+    "version": "20261022055330",
+    "name": "20261021182719_nplus_motorace_schema",
+    "file": "20261021161052_nplus_motorace_schema.sql",
+    "md5": "4757f2cab064399bd17135c5cba3bd1f"
+  },
+  {
+    "version": "20261022055334",
+    "name": "20261021182720_nplus_motorace_rpc",
+    "file": "20261021161109_nplus_motorace_rpc.sql",
+    "md5": "62ddf12081dde7f41ed2c330536ba4fe"
+  },
+  {
+    "version": "20261022055340",
+    "name": "20261021182721_nplus_aviator_schema",
+    "file": "20261021161129_nplus_aviator_schema.sql",
+    "md5": "35729c3cbfc089da87d9dab49a0bef30"
+  },
+  {
+    "version": "20261022055345",
+    "name": "20261021182722_nplus_aviator_rpc",
+    "file": "20261021161143_nplus_aviator_rpc.sql",
+    "md5": "e7f9ea285515cbfc7d9722219795569e"
+  },
+  {
+    "version": "20261022055350",
+    "name": "20261021182723_nplus_aviator_worker_recovery",
+    "file": "20261021161152_nplus_aviator_worker_recovery.sql",
+    "md5": "f9eb22c6ab349c747f221c3edb544397"
+  },
+  {
+    "version": "20261022055354",
+    "name": "20261021182724_nplus_aviator_persistent_scheduler",
+    "file": "20261021161206_nplus_aviator_persistent_scheduler.sql",
+    "md5": "aafd879eb774f25765595c1b13369210"
+  },
+  {
+    "version": "20261022055400",
+    "name": "20261021182725_nplus_admin_user_tools",
+    "file": "20261021161217_nplus_admin_user_tools.sql",
+    "md5": "f071a5385b87239b255b91a28e700c60"
+  },
+  {
+    "version": "20261022055404",
+    "name": "20261021182726_nplus_admin_game_status",
+    "file": "20261021161233_nplus_admin_game_status.sql",
+    "md5": "d98bd9344d6591971ca3212007cf3967"
+  },
+  {
+    "version": "20261022055410",
+    "name": "20261021182727_nplus_admin_null_profile_guard",
+    "file": "20261021161242_nplus_admin_null_profile_guard.sql",
+    "md5": "baf2caaf9cd8ec227319ae43ecc08eb0"
+  },
+  {
+    "version": "20261022055424",
+    "name": "20261021182728_nplus_recent_demo_activity",
+    "file": "20261021161251_nplus_recent_demo_activity.sql",
+    "md5": "4ac4a9427f9f47145197da5e1068ba0d"
+  },
+  {
+    "version": "20261022062741",
+    "name": "enable_supported_virtual_demo_games_preview",
+    "file": "20261022062741_enable_supported_virtual_demo_games_preview.sql",
+    "md5": "3832fd6a90faed6f292ab4650a2f29c2"
+  },
+  {
+    "version": "20261022064315",
+    "name": "pause_unverified_games_and_lockdown_settlement_rpcs_20261022",
+    "file": "20261022064315_pause_unverified_games_and_lockdown_settlement_rpcs_20261022.sql",
+    "md5": "4265e6ddcf88987f1f0ea85a4d4ea516"
+  },
+  {
+    "version": "20261023081657",
+    "name": "fix_profiles_rls_admin_login_recursion_20261023",
+    "file": "20261023081657_fix_profiles_rls_admin_login_recursion_20261023.sql",
+    "md5": "a685847a88eec5470fa7e9c4295986fb"
+  },
+  {
+    "version": "20261023081758",
+    "name": "secure_admin_demo_wallet_adjustment_rpc_20261023",
+    "file": "20261023081758_secure_admin_demo_wallet_adjustment_rpc_20261023.sql",
+    "md5": "4ffc0b1a970bcc33698300f66a6c3cb5"
+  },
+  {
+    "version": "20261023081916",
+    "name": "align_admin_wallet_adjust_rpc_signature_20261023",
+    "file": "20261023081916_align_admin_wallet_adjust_rpc_signature_20261023.sql",
+    "md5": "14cb2a06f11f7f94712d1a49faa9a0ec"
+  },
+  {
+    "version": "20261023092858",
+    "name": "optimize_rls_policies_and_foreign_key_indexes_20261023",
+    "file": "20261023092858_optimize_rls_policies_and_foreign_key_indexes_20261023.sql",
+    "md5": "26f384c480ba6353c749f5cd8adb6da9"
+  },
+  {
+    "version": "20261023093056",
+    "name": "drop_duplicate_referral_unique_indexes_20261023",
+    "file": "20261023093056_drop_duplicate_referral_unique_indexes_20261023.sql",
+    "md5": "5660665b15239a33df937e709ee86fd3"
+  }
+]
