@@ -1,7 +1,22 @@
 \set ON_ERROR_STOP on
 
--- Fresh disposable PostgreSQL only. Proves PostgreSQL resolves four-argument
--- calls to the compatibility overload and five-argument calls to the strict overload.
+-- Fresh disposable PostgreSQL only. This reproduces both existing live-shaped
+-- overloads before applying the candidate: both have defaults that overlap at
+-- four arguments. Nothing in this test connects to production.
+DO $roles$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
+    CREATE ROLE anon NOLOGIN;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN
+    CREATE ROLE authenticated NOLOGIN;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN
+    CREATE ROLE service_role NOLOGIN;
+  END IF;
+END
+$roles$;
+
 CREATE SCHEMA auth;
 CREATE FUNCTION auth.uid() RETURNS uuid
 LANGUAGE sql STABLE
@@ -25,7 +40,7 @@ CREATE TABLE public.demo_game_controls (
   UNIQUE (game_key, duration_seconds)
 );
 
--- Minimal stand-in for the existing compatibility overload; defaults mirror live.
+-- Existing 4-argument compatibility overload with two defaults.
 CREATE FUNCTION public.nplus_admin_set_wingo_demo(
   p_duration integer,
   p_mode text,
@@ -38,6 +53,45 @@ AS $four$
   SELECT jsonb_build_object('overload','four','duration',p_duration,'mode',p_mode)
 $four$;
 
+-- Existing 5-argument overload from the audited live shape: the last three
+-- parameters have defaults too, making a 4-argument invocation ambiguous.
+CREATE FUNCTION public.nplus_admin_set_wingo_demo(
+  p_duration integer,
+  p_mode text,
+  p_color text DEFAULT NULL,
+  p_number integer DEFAULT NULL,
+  p_size text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE sql
+AS $five_old$
+  SELECT jsonb_build_object('overload','five-old','duration',p_duration,'mode',p_mode)
+$five_old$;
+
+DO $precondition$
+DECLARE
+  v_ambiguous boolean := false;
+BEGIN
+  IF (SELECT pronargdefaults FROM pg_proc
+      WHERE oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)'::regprocedure)
+      IS DISTINCT FROM 3 THEN
+    RAISE EXCEPTION 'FAIL: fixture does not reproduce three defaults on the existing five-argument overload';
+  END IF;
+
+  BEGIN
+    EXECUTE 'SELECT public.nplus_admin_set_wingo_demo(30, ''AUTO'', NULL, NULL)';
+  EXCEPTION
+    WHEN ambiguous_function THEN v_ambiguous := true;
+  END;
+
+  IF NOT v_ambiguous THEN
+    RAISE EXCEPTION 'FAIL: baseline fixture did not reproduce the four-argument overload ambiguity';
+  END IF;
+
+  RAISE NOTICE 'PASS: baseline fixture reproduces four-argument ambiguity before the candidate patch.';
+END
+$precondition$;
+
 INSERT INTO public.profiles(id,role) VALUES
   ('11111111-1111-4111-8111-111111111111','admin'),
   ('22222222-2222-4222-8222-222222222222','user');
@@ -47,12 +101,31 @@ INSERT INTO public.profiles(id,role) VALUES
 DO $shape$
 BEGIN
   IF (SELECT pronargdefaults FROM pg_proc
-      WHERE oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer)'::regprocedure) <> 2 THEN
+      WHERE oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer)'::regprocedure)
+      IS DISTINCT FROM 2 THEN
     RAISE EXCEPTION 'FAIL: four-argument compatibility overload defaults changed';
   END IF;
   IF (SELECT pronargdefaults FROM pg_proc
-      WHERE oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)'::regprocedure) <> 0 THEN
+      WHERE oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)'::regprocedure)
+      IS DISTINCT FROM 0 THEN
     RAISE EXCEPTION 'FAIL: five-argument overload still has defaults';
+  END IF;
+
+  IF has_function_privilege('anon','public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)','EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: anon retained execute privilege on the recreated five-argument Admin RPC';
+  END IF;
+  IF NOT has_function_privilege('authenticated','public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)','EXECUTE')
+     OR NOT has_function_privilege('service_role','public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)','EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: intended authenticated/service_role execute grants were not restored';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_proc
+    WHERE oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)'::regprocedure
+      AND prosecdef
+      AND 'search_path=public' = ANY(coalesce(proconfig, ARRAY[]::text[]))
+  ) THEN
+    RAISE EXCEPTION 'FAIL: recreated five-argument RPC is not SECURITY DEFINER with fixed search_path';
   END IF;
 END
 $shape$;
