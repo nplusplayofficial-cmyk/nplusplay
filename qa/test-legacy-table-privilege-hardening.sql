@@ -32,7 +32,7 @@ ALTER TABLE public.user_bank_details ENABLE ROW LEVEL SECURITY;
 CREATE SCHEMA auth;
 CREATE FUNCTION auth.uid() RETURNS uuid
 LANGUAGE sql STABLE
-AS $ SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid $;
+AS $auth_uid$ SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid $auth_uid$;
 
 GRANT ALL PRIVILEGES ON TABLE public.manual_deposits,
   public.user_bank_details TO PUBLIC, anon, authenticated;
