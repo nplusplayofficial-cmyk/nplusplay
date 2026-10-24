@@ -8,7 +8,7 @@
 
 - The homepage displays a server-backed aggregate feed for WINGO, MotoRace and Aviator.
 - Added `sql/NPLUS_PLAY_RECENT_DEMO_ACTIVITY.sql`: RPC returns only `game_key` and `activity_count`; no player ID, name, email, stake, payout, selection or outcome.
-- Requested window is clamped server-side to 1–60 minutes. Public access is only to this aggregate RPC.
+- The homepage requests 60 minutes; the RPC clamps direct inputs server-side to 5–1440 minutes, matching the fingerprinted applied function body. Public access is only to this aggregate RPC.
 - The homepage uses an allowlist and text-only DOM APIs, and displays an unavailable/empty state instead of fabricated sample activity.
 - `activity.html` requires a signed-in user and loads wallet ledger entries through the wallet bridge plus per-user game history RPCs.
 
