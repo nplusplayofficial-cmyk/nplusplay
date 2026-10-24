@@ -12,7 +12,6 @@ security definer
 set search_path = pg_catalog, public
 as $function$
 declare
-  v_window integer := least(greatest(coalesce(p_window_minutes, 60), 1), 60);
   v_since timestamptz := statement_timestamp()
     - make_interval(mins => least(greatest(coalesce(p_window_minutes, 60), 1), 60));
   v_until timestamptz := statement_timestamp();
