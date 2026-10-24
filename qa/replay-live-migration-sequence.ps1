@@ -23,6 +23,24 @@ $ContainerFinalSql = "/tmp/nplus-play-replay-final-check.sql"
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
   throw "Docker CLI not found. Start the existing local restore lab first."
 }
+
+$ExpectedContainerName = "supabase_db_nplusplay-restore-lab-v2"
+if ($ContainerName -ne $ExpectedContainerName) {
+  throw "Refusing non-project Docker container '$ContainerName'. Use the existing local restore-lab container '$ExpectedContainerName'."
+}
+
+# Fail closed if Docker is pointing at a remote host/context rather than a local socket.
+$dockerContext = (& docker context show 2>&1 | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($dockerContext)) {
+  throw "Could not identify the active Docker context. No database action was taken."
+}
+$dockerEndpoint = (& docker context inspect $dockerContext --format '{{.Endpoints.docker.Host}}' 2>&1 | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or $dockerEndpoint -notmatch '^(npipe://|unix://)') {
+  throw "Refusing non-local Docker endpoint '$dockerEndpoint'. Select the local Docker Desktop/Unix socket context. No database action was taken."
+}
+if ($env:DOCKER_HOST -and $env:DOCKER_HOST -notmatch '^(npipe://|unix://)') {
+  throw "DOCKER_HOST points to a non-local endpoint. No database action was taken."
+}
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   throw "Node.js is required for the applied-body fingerprint check."
 }
