@@ -21,7 +21,7 @@ Advisor snapshot observed on 2026-10-24:
 | Advisor finding | Observed count/status | Interpretation |
 |---|---:|---|
 | RLS enabled without policies | 20 tables | Read-only follow-up below found **zero anon/authenticated SELECT/INSERT/UPDATE/DELETE table privileges on every table in this finding set**. With RLS enabled and no policies this is a backend-only, default-deny posture for browser roles; retain only if intentional. |
-| Anonymous-callable SECURITY DEFINER | 1 function | `public.nplus_recent_demo_activity(integer)`, intentionally public for aggregate activity counts. Its result contract is only game key and count, with a server-clamped 1–60 minute window and fixed search path. No player identifier, stake, payout, selection or outcome is returned. |
+| Anonymous-callable SECURITY DEFINER | 1 function | `public.nplus_recent_demo_activity(integer)`, intentionally public for aggregate activity counts. Its result contract is only game key and count, with a server-clamped 5–1440 minute window and fixed search path. No player identifier, stake, payout, selection or outcome is returned. |
 | Authenticated-callable SECURITY DEFINER | 53 functions | These include user-facing RPCs and Admin RPCs. This warning is a review queue, **not proof of an authorization bypass**. Internal auth/ownership/admin checks must be proven for each endpoint by source review and tests. |
 | Leaked-password protection disabled | 1 Auth finding | Dashboard/Auth configuration follow-up required. Confirm availability for the current project plan and enable only if supported without an unapproved plan change or added cost. Do not publish user credentials or test passwords. |
 
