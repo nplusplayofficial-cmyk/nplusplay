@@ -170,7 +170,10 @@ if (!fs.existsSync(restoreRunnerPath)) {
   if (!restoreRunner.includes('nplus_restore_acceptance_') ||
       !restoreRunner.includes('pg_restore --exit-on-error --single-transaction') ||
       !restoreRunner.includes('finally') ||
-      !restoreRunner.includes('rm -f $ContainerBackupPath $ContainerSqlPath')) {
+      !restoreRunner.includes('rm -f $ContainerBackupPath $ContainerSqlPath') ||
+      !restoreRunner.includes('$ExpectedContainerName = "supabase_db_nplusplay-restore-lab-v2"') ||
+      !restoreRunner.includes('docker context inspect') ||
+      !restoreRunner.includes("dockerEndpoint -notmatch '^(npipe://|unix://)'")) {
     console.error('FAIL restore runner is missing isolated-restore, strict-restore, or private-temp-file cleanup safeguards.');
     failures++;
   }
@@ -195,7 +198,10 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
       !runner.includes('pg_dump -Fc') ||
       !runner.includes('pg_restore --exit-on-error --single-transaction') ||
       !runner.includes('ON_ERROR_STOP=1') ||
-      !runner.includes('test-live-migration-source-fingerprints.cjs')) {
+      !runner.includes('test-live-migration-source-fingerprints.cjs') ||
+      !runner.includes('$ExpectedContainerName = "supabase_db_nplusplay-restore-lab-v2"') ||
+      !runner.includes('docker context inspect') ||
+      !runner.includes("dockerEndpoint -notmatch '^(npipe://|unix://)'")) {
     console.error('FAIL replay runner is missing required local-clone/fingerprint/stop-on-error safeguards.');
     failures++;
   }
