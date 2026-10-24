@@ -33,6 +33,7 @@ declare
   v_result jsonb;
   v_enabled boolean;
   v_updated_by uuid;
+  v_key text;
 begin
   insert into auth.users(id,email)
   values (v_admin,'game-admin-qa@example.invalid'),(v_user,'game-user-qa@example.invalid');
@@ -64,15 +65,27 @@ begin
   select enabled into v_enabled from public.game_settings where game_key='WINGO';
   if v_enabled is not true then raise exception 'Admin status RPC did not re-enable the allowed WINGO flag.'; end if;
 
-  update public.game_settings set enabled=false where game_key='K3';
-  begin
-    perform public.nplus_set_game_status('K3',true);
-    raise exception 'TEST_FAILURE: paused K3 was re-enabled without payout approval.';
-  exception when others then
-    if sqlerrm not like '%Payout rules pending%' then raise; end if;
-  end;
-  select enabled into v_enabled from public.game_settings where game_key='K3';
-  if v_enabled is not false then raise exception 'Server guard did not preserve paused K3 status.'; end if;
+  -- Every game without approved server payout rules must remain disabled.
+  foreach v_result in array array['K3'::jsonb, '5D'::jsonb, 'TRX'::jsonb] loop
+    -- This array loop is deliberately not used for RPC arguments; test each exact key below.
+    null;
+  end loop;
+  foreach v_enabled in array array[false, false, false] loop
+    null;
+  end loop;
+  perform public.nplus_set_game_status('K3',false);
+  perform public.nplus_set_game_status('5D',false);
+  perform public.nplus_set_game_status('TRX',false);
+  foreach v_key in array array['K3','5D','TRX'] loop
+    begin
+      perform public.nplus_set_game_status(v_key,true);
+      raise exception 'TEST_FAILURE: paused % was re-enabled without payout approval.',v_key;
+    exception when others then
+      if sqlerrm not like '%Payout rules pending%' then raise; end if;
+    end;
+    select enabled into v_enabled from public.game_settings where game_key=v_key;
+    if v_enabled is not false then raise exception 'Server guard did not preserve paused % status.',v_key; end if;
+  end loop;
 
   begin
     perform public.nplus_set_game_status('WINGO',null::boolean);
