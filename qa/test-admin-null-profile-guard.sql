@@ -101,7 +101,7 @@ BEGIN
     'four-argument WINGO setter for normal non-admin profile'
   );
   PERFORM pg_temp.expect_admin_denied(
-    'select public.nplus_admin_set_wingo_demo(30::integer, ''MANUAL''::text, ''RED''::text, 0::integer, ''SMALL''::text)',
+    'select public.nplus_admin_set_wingo_demo_five_arg_qa(30::integer, ''MANUAL''::text, ''RED''::text, 0::integer, ''SMALL''::text)',
     'five-argument WINGO setter for normal non-admin profile'
   );
   PERFORM set_config('request.jwt.claim.sub','e1111111-1111-4111-8111-111111111111',false);
