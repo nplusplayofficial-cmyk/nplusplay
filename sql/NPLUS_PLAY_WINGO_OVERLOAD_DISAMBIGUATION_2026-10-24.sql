@@ -1,10 +1,17 @@
 -- Candidate-only fix for overlapping PostgreSQL function defaults.
 -- This file is NOT a canonical migration and has NOT been applied to production.
--- Apply only after clean backup restore/replay, source review, and explicit release approval.
--- Preserve the 4-argument compatibility overload; make every argument required on the
--- 5-argument overload so 4-argument RPC calls resolve deterministically.
+-- Apply only after backup restore/replay, dependency review, and explicit release approval.
+-- Keep the four-argument compatibility overload unchanged; recreate only the five-argument
+-- overload so all five inputs are required and four-argument calls resolve deterministically.
+--
+-- DROP is intentionally used without CASCADE: an existing dependency must stop this patch
+-- for investigation. Ownership/ACL consequences must be reviewed against the live catalog.
 
-CREATE OR REPLACE FUNCTION public.nplus_admin_set_wingo_demo(
+BEGIN;
+
+DROP FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text);
+
+CREATE FUNCTION public.nplus_admin_set_wingo_demo(
   p_duration integer,
   p_mode text,
   p_color text,
@@ -68,7 +75,7 @@ BEGIN
     p_number,
     CASE
       WHEN v_mode = 'MANUAL'
-        THEN v_color || ' ' || p_number::text || U&' \00B7 ' || v_size
+        THEN v_color || ' ' || p_number::text || ' · ' || v_size
       WHEN v_mode = 'RANDOM' THEN 'RANDOM DEMO'
       ELSE 'AUTO'
     END,
@@ -94,10 +101,19 @@ BEGIN
     'result',
       CASE
         WHEN v_mode = 'MANUAL'
-          THEN v_color || ' ' || p_number::text || U&' \00B7 ' || v_size
+          THEN v_color || ' ' || p_number::text || ' · ' || v_size
         WHEN v_mode = 'RANDOM' THEN 'RANDOM DEMO'
         ELSE 'AUTO'
       END
   );
 END;
 $function$;
+
+-- Restore only the audited intended browser/service execution rights after recreation.
+-- The body itself continues to reject unauthenticated and non-admin callers.
+REVOKE ALL ON FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)
+  FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)
+  TO authenticated, service_role;
+
+COMMIT;
