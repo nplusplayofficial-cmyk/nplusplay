@@ -9,7 +9,11 @@
 
 BEGIN;
 
-CREATE OR REPLACE FUNCTION public.nplus_admin_set_wingo_demo(p_duration integer, p_mode text, p_color text, p_number integer, p_size text)
+-- PostgreSQL does not permit CREATE OR REPLACE to remove existing parameter defaults.
+-- Deliberately use DROP without CASCADE: any dependency blocks the patch for review.
+DROP FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text);
+
+CREATE FUNCTION public.nplus_admin_set_wingo_demo(p_duration integer, p_mode text, p_color text, p_number integer, p_size text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -111,5 +115,11 @@ begin
 end;
 $function$;
 
--- CREATE OR REPLACE keeps the existing function ACLs; this is not a grant change.
+-- Restore the audited grants explicitly after the drop/recreate. Non-admin calls still
+-- execute through the RPC grant and are rejected by the function's internal role guard.
+REVOKE ALL ON FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)
+  FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)
+  TO authenticated, service_role;
+
 COMMIT;
