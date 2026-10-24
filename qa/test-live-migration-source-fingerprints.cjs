@@ -168,7 +168,7 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
   }
   for (const invariant of [
     'all six games remain disabled',
-    'generic positive/game-credit guard exists',
+    'generic wallet positive/game-credit guard exists',
     'server-only',
     'ledger arithmetic remains consistent'
   ]) {
