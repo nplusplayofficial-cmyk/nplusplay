@@ -29,6 +29,16 @@ No production migrations, schema DDL, wallet/ledger data, user records, game set
 
 These CI runs use isolated disposable PostgreSQL and/or local static/browser smoke. They are not proof of a full authenticated production browser test or disaster-recovery acceptance.
 
+## Cross-PR integration gate (reviewed 2026-10-25)
+
+The draft branches are independent branches from `main`, not a pre-integrated release branch. Before merging, reconcile shared files and run CI on the combined candidate:
+- PRs #17, #18 and #19 all edit `.github/workflows/nplus-play-qa.yml` around the same QA step area. Merge their workflow additions together deliberately; preserve all game-rule, activity/Aviator, migration-fingerprint, WINGO-overload, and privacy tests, and ensure disposable database names are unique.
+- PRs #16 and #19 both edit `qa/test-demo-referrals.sql`. Keep the legacy 200/20 test clearly labeled as legacy and ensure the current Admin-verified 500-point qualification/tier-claim contract is tested by PR #16's separate `qa/test-wallet-admin-referral-e2e.sql`; do not mistake the legacy test passing for current referral acceptance.
+- Candidate WINGO overload patch now captures and restores the pre-existing function owner around DROP/CREATE and has a disposable regression assertion for owner preservation. It still requires the local restored-database replay, dependency check, and confirmation of the actual deployed owner/ACL before any rollout; it is not a canonical migration and must not be applied to production directly.
+- PR #20's legacy table grant hardening is separate from the route change in PR #16. Review the final merged browser call paths and least-privilege grants together before deciding whether and when to apply it.
+
+Do not merge any draft PR as-is simply because its individual CI is green. A combined candidate must pass the full QA workflow after conflict resolution, and all backup/replay/authenticated-hosted tests remain release blockers.
+
 ## Exact user-PC tasks after assistant-side preparation
 
 ### A. Backup restore + 40-row migration replay
