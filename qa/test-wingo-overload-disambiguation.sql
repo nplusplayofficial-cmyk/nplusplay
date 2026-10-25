@@ -92,6 +92,11 @@ BEGIN
 END
 $precondition$;
 
+CREATE TEMP TABLE test_expected_wingo_owner ON COMMIT PRESERVE ROWS AS
+SELECT r.rolname AS owner_name
+FROM pg_proc p JOIN pg_roles r ON r.oid=p.proowner
+WHERE p.oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)'::regprocedure;
+
 INSERT INTO public.profiles(id,role) VALUES
   ('11111111-1111-4111-8111-111111111111','admin'),
   ('22222222-2222-4222-8222-222222222222','user');
@@ -117,6 +122,12 @@ BEGIN
   IF NOT has_function_privilege('authenticated','public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)','EXECUTE')
      OR NOT has_function_privilege('service_role','public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)','EXECUTE') THEN
     RAISE EXCEPTION 'FAIL: intended authenticated/service_role execute grants were not restored';
+  END IF;
+
+  IF (SELECT r.rolname FROM pg_proc p JOIN pg_roles r ON r.oid=p.proowner
+      WHERE p.oid='public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)'::regprocedure)
+     IS DISTINCT FROM (SELECT owner_name FROM test_expected_wingo_owner) THEN
+    RAISE EXCEPTION 'FAIL: original five-argument function owner was not preserved';
   END IF;
 
   IF NOT EXISTS (
