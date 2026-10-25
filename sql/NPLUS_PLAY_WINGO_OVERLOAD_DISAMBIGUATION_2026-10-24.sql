@@ -9,6 +9,22 @@
 
 BEGIN;
 
+-- Capture the deployed owner before DROP; PostgreSQL does not preserve function ownership
+-- across DROP/CREATE. If the current owner cannot be restored, the transaction must fail.
+CREATE TEMP TABLE nplus_wingo_overload_original_owner ON COMMIT DROP AS
+SELECT r.rolname AS owner_name
+FROM pg_proc p
+JOIN pg_roles r ON r.oid = p.proowner
+WHERE p.oid = 'public.nplus_admin_set_wingo_demo(integer,text,text,integer,text)'::regprocedure;
+
+DO $owner_precheck$
+BEGIN
+  IF (SELECT count(*) FROM pg_temp.nplus_wingo_overload_original_owner) <> 1 THEN
+    RAISE EXCEPTION 'Cannot identify original WINGO overload owner; aborting candidate patch.';
+  END IF;
+END
+$owner_precheck$;
+
 DROP FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text);
 
 CREATE FUNCTION public.nplus_admin_set_wingo_demo(
@@ -108,6 +124,20 @@ BEGIN
   );
 END;
 $function$;
+
+-- Restore the original function owner before restoring intended browser/service execution rights.
+DO $owner_restore$
+DECLARE
+  v_owner text;
+BEGIN
+  SELECT owner_name INTO STRICT v_owner
+  FROM pg_temp.nplus_wingo_overload_original_owner;
+  EXECUTE format(
+    'ALTER FUNCTION public.nplus_admin_set_wingo_demo(integer,text,text,integer,text) OWNER TO %I',
+    v_owner
+  );
+END
+$owner_restore$;
 
 -- Restore only the audited intended browser/service execution rights after recreation.
 -- The body itself continues to reject unauthenticated and non-admin callers.
