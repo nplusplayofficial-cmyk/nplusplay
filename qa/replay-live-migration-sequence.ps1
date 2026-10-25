@@ -141,7 +141,7 @@ foreach ($row in $rows) {
   }
   # Windows checkout may convert LF to CRLF. Normalize line endings before
   # comparing the source body with the read-only production fingerprint.
-  $normalizedSql = [System.IO.File]::ReadAllText($migrationFile).Replace("`r`n", "`n")
+  $normalizedSql = [regex]::Replace([System.IO.File]::ReadAllText($migrationFile), "\r\n?", "`n")
   $md5 = [System.Security.Cryptography.MD5]::Create()
   try {
     $normalizedBytes = [System.Text.Encoding]::UTF8.GetBytes($normalizedSql)
