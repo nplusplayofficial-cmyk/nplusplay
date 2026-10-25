@@ -139,7 +139,17 @@ foreach ($row in $rows) {
   if (-not (Test-Path -LiteralPath $migrationFile -PathType Leaf)) {
     throw "Missing recovered SQL source for migration $($row.version): $migrationFile. Replay stopped; target DB was kept."
   }
-  $actualHash = (Get-FileHash -LiteralPath $migrationFile -Algorithm MD5).Hash.ToLowerInvariant()
+  # Windows checkout may convert LF to CRLF. Normalize line endings before
+  # comparing the source body with the read-only production fingerprint.
+  $normalizedSql = [System.IO.File]::ReadAllText($migrationFile).Replace("`r`n", "`n")
+  $md5 = [System.Security.Cryptography.MD5]::Create()
+  try {
+    $normalizedBytes = [System.Text.Encoding]::UTF8.GetBytes($normalizedSql)
+    $actualHash = ([BitConverter]::ToString($md5.ComputeHash($normalizedBytes))).Replace("-", "").ToLowerInvariant()
+  }
+  finally {
+    $md5.Dispose()
+  }
   if ($actualHash -ne ([string]$row.md5).ToLowerInvariant()) {
     throw "Source fingerprint mismatch at migration $($row.version). Replay stopped before applying this body; target DB was kept."
   }
