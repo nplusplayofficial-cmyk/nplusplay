@@ -70,7 +70,7 @@ if ($LASTEXITCODE -ne 0 -or $image -notmatch 'supabase') {
   throw "Container image does not look like the expected local Supabase PostgreSQL image ('$image'). No database action was taken."
 }
 
-$rows = @(Get-Content -LiteralPath $OrderPath -Raw | ConvertFrom-Json)
+$rows = @((Get-Content -LiteralPath $OrderPath -Raw | ConvertFrom-Json))
 if ($rows.Count -ne 40) {
   throw "Expected exactly 40 ordered historical migration records; found $($rows.Count). No database action was taken."
 }
