@@ -52,7 +52,7 @@ for (const [name, digest] of Object.entries(expected)) {
   }
   // Git may check out LF repository files as CRLF on Windows. Normalize only
   // CRLF line endings to LF so the same SQL body fingerprints consistently.
-  const normalizedSource = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+  const normalizedSource = fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n');
   const actual = crypto.createHash('md5').update(Buffer.from(normalizedSource, 'utf8')).digest('hex');
   if (actual !== digest) {
     console.error('FAIL body fingerprint mismatch: ' + name + ' expected=' + digest + ' actual=' + actual);
