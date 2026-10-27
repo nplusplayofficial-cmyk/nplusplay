@@ -224,6 +224,6 @@ BEGIN
   END IF;
   RAISE NOTICE 'PASS: anonymous grants removed on all three legacy tables.';
   RAISE NOTICE 'PASS: authenticated has only manual_deposits SELECT and no direct grants on legacy bank/withdraw tables.';
-  RAISE NOTICE 'PASS: all three tables retain RLS and their reviewed policy definitions.'
+  RAISE NOTICE 'PASS: all three tables retain RLS and their reviewed policy definitions.';
 END
 $legacy_privilege_assertions$;

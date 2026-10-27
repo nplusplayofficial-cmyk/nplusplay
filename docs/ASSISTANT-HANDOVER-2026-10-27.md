@@ -102,3 +102,10 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 - The combined CI fixture had a stale assertion from the older authenticated grants-preserved contract; Static QA run #622 failed on that assertion. The assertion and standalone legacy ACL regression now match the candidate least-privilege plan.
 - Candidate now keeps authenticated SELECT on `manual_deposits` only; authenticated direct table grants to `user_bank_details` and `withdraw_requests` are removed. No table rows, owner, RLS flags or policies are changed by this SQL.
 - Production grants were not changed. Fresh Static QA on the latest commit is required; keep deployment blocked until it passes.
+
+
+## CI syntax correction — 2026-10-27
+
+- Static QA #624 identified a missing semicolon in the revised `qa/test-release-index-policy-migration.sql` final RAISE NOTICE statement. This was test-fixture SQL syntax, not a production migration failure.
+- The semicolon has been fixed on the candidate branch; fresh Static QA and Release Smoke must pass on the correction commit before any release gate is marked green.
+- Candidate ACL migration remains un-deployed; production is unchanged.
