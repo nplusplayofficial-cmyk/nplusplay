@@ -228,6 +228,12 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
 
   // The legacy-table overlay is permitted only for an explicitly labelled local
   // suffix rehearsal; it must never be presented as a clean 40-body replay.
+  if (!runner.includes('Where-Object { $_.Trim() -ne "t" }).Count -ne 0') ||
+      runner.includes('Where-Object { $_.Trim() -ne "t" }).Count -ne $expectedResumeChecks')) {
+    console.error('FAIL resume guard must require zero non-true checkpoint values.');
+    failures++;
+  }
+
   if (!runner.includes('"20261023092858"') ||
       !runner.includes('MIGRATION SUFFIX CHECK PASSED') ||
       !runner.includes('manual_deposits_overlay_marker') ||
