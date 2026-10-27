@@ -146,3 +146,20 @@ Read-only aggregate checks of 21 numeric amount/balance/stake/payout fields acro
 - Pre-documentation candidate commit `3ba6c56e591cd522f07e2d7cc6ff1be2f6787ced`: Static QA #632 run `40493302375` passed, including source syntax, referral finite guard, 10-function numeric RPC source-order guard, disposable PostgreSQL finite-value semantics, legacy ACL assertions, and desktop/mobile browser smoke.
 - Release Smoke #220 run `40493302177` passed on the same commit.
 - Candidate bundle contains 10 replacement definitions and is not deployed. Any documentation-only follow-up creates a new CI head; verify the exact final head before release.
+
+
+## Latest Supabase Advisor recheck — 2026-10-27 11:12 UTC
+
+The live Supabase Advisor returned these current findings:
+
+| Finding | Count / level | Review result |
+|---|---|---|
+| RLS enabled with no policies | 20 / INFO | Cross-checked each table: `anon` and `authenticated` have no direct SELECT/INSERT/UPDATE/DELETE table privileges. This is fail-closed for direct PostgREST access and consistent with server-only access through vetted RPCs. Do not add broad policies just to silence this informational lint. |
+| Anonymous SECURITY DEFINER | 1 / WARN | `nplus_recent_demo_activity(integer)` is intentionally public aggregate activity with bounded lookback and no user IDs. Keep that intent documented; revoke anon EXECUTE if the product later decides this data should not be public. |
+| Authenticated SECURITY DEFINER | 53 / WARN | Generic linter class, not 53 proven exploitable flaws. Current catalog/source triage records owner/search_path/actor or Admin checks. The linter stays until function design/grants change; do not blindly revoke used RPCs. |
+| Leaked password protection disabled | 1 / WARN | Genuine Auth configuration item. Supabase docs say this feature uses the Pwned Passwords API and is available on Pro plan and above: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection. The available connected tools expose no Auth-config mutator, and changing hidden configuration via SQL is unsupported; enable via Dashboard if the plan permits, then rerun Advisor. |
+| Unused indexes | 20 / INFO | No index removals applied. Usage statistics alone, especially on a low-traffic/demo project, are insufficient evidence to drop an index. Review after representative workload if performance/cost matters. |
+
+### Manual Auth setting steps
+
+Open the N+ PLAY Supabase project dashboard → **Authentication → Sign In / Providers → Email** → enable **Prevent use of leaked passwords** if available on the subscribed plan → Save → rerun Security Advisor. Do not paste project secrets into this repo or chat. If the switch is plan-locked on the current Free plan, this item remains a documented limitation rather than being bypassed unsafely.

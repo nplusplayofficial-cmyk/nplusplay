@@ -173,3 +173,12 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 5. Final Pages/browser verification must be performed after the release decision; current live Pages deployment remains the older main build, not this candidate.
 
 No production schema/ACL/wallet/game/Auth/scheduler state was modified in this work. PR #22 remains OPEN and DRAFT.
+
+
+## Latest live Advisor and table-access recheck — 2026-10-27
+
+- Supabase Security Advisor currently reports: 20 RLS-enabled/no-policy tables (INFO), one anon SECURITY DEFINER (WARN), 53 authenticated SECURITY DEFINER functions (WARN), and leaked-password protection disabled (WARN). Performance Advisor reports 20 unused indexes (INFO).
+- Verified every one of the 20 no-policy tables has RLS enabled and no direct SELECT/INSERT/UPDATE/DELETE privileges for either `anon` or `authenticated`. These are not grounds to add broad policies.
+- The one anonymous RPC is the intentional aggregate-only bounded `nplus_recent_demo_activity(integer)`. Authenticated SECURITY DEFINER warnings are generic lints; retain function-specific authorization, not blind global revocation.
+- Remaining actionable account configuration is **Prevent use of leaked passwords** under Supabase Authentication → Sign In / Providers → Email, where available on current plan. Supabase docs: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection. Connected tools do not expose an Auth config update action; no unsupported SQL or hidden config manipulation was attempted.
+- Do not drop the 20 unused-index candidates without workload evidence.

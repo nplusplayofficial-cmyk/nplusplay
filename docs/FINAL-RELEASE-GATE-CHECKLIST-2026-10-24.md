@@ -95,3 +95,24 @@ If a command fails, **stop at that point** and record only the failing version p
 - Do not run recovered files under docs/recovered-live-migration-sql-2026-10-23/; they are evidence, not deployable canonical migrations.
 - Do not reset balances, delete user records, or enable games as a shortcut.
 - Do not merge draft PRs #2, #6, #16–#21 blindly. Some are candidate fixes/audit evidence, not releases.
+
+
+## 2026-10-27 final recheck addendum
+
+### Verified safe checks
+- Candidate HEAD before this doc-only refresh: `12817608fd6d393d80e04b5b07b32b74ccdc0644`; Static QA #633 and Release Smoke #220 both passed at exact HEAD.
+- Current code hardening bundle contains 10 candidate-only SECURITY DEFINER function replacements with finite numeric guards, including matching deposit approval bounds and stored gift-code amount checks. Not deployed.
+- 20 RLS-enabled tables without policies were checked against ACLs: no direct SELECT/INSERT/UPDATE/DELETE privileges for `anon` or `authenticated`. Do not add policies only to suppress INFO findings.
+- Read-only scan over 21 numeric amount/balance/stake/payout fields found zero non-finite stored values.
+- Migration history: 40 records / 29 unique bodies and all 29 bodies match archived source text exactly.
+
+### Remaining pre-release gates (not satisfied)
+1. **Authoritative pre-history DDL/provenance:** unavailable for `manual_deposits`, `user_bank_details`, and `withdraw_requests`; no clean canonical replay/restore sign-off.
+2. **Hosted account journeys:** signup/email OTP, login, recovery, Admin/non-admin separation, virtual deposit/withdrawal review, referral, game wager/settlement/history on safe synthetic accounts.
+3. **Auth configuration:** leaked-password protection is disabled. Dashboard path: Authentication → Sign In / Providers → Email → Prevent use of leaked passwords. Supabase docs state the feature is available on Pro and above; current connected tools cannot change this Auth setting.
+4. **Game approval:** all six settings remain disabled. WINGO/Moto/Aviator require post-deploy hosted settlement/worker checks; K3/5D/TRX payout rules remain unapproved.
+5. **Independent review and release:** no PR review submissions or inline review threads on PR #22; it remains OPEN/DRAFT. Merge only after all required evidence and approvals are recorded.
+6. **Live deployment verification:** current Pages deployment on main is older (main HEAD `680238f2428416faf44df0dced6f907d4cea7f08` as last recorded) and is not the candidate. Do not deploy the candidate as-is.
+
+### Safety decision
+Keep PR #22 open as draft. No production migration, ACL, Auth, wallet, scheduler or game setting was changed during the 2026-10-27 pass. Never invent legacy DDL or use the QA schema overlay as a canonical baseline.
