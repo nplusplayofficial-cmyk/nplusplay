@@ -245,7 +245,7 @@ if ($UseReconstructedLegacyBaseline) {
     "qa/fixtures/replay-baseline/request-table-browser-acl-overlay.sql"
   )
   foreach ($relativePath in $PostReplayFiles) {
-    $localPath = Join-Path $RepoRoot ($relativePath -replace '/', '\\')
+    $localPath = Join-Path $RepoRoot ($relativePath.Replace('/', [IO.Path]::DirectorySeparatorChar))
     if (-not (Test-Path -LiteralPath $localPath -PathType Leaf)) {
       throw "Missing post-replay candidate/reconciliation file '$relativePath'. Final invariants will not be declared."
     }
@@ -264,6 +264,19 @@ if ($LASTEXITCODE -ne 0) { throw "Could not copy the final state assertions into
 & docker exec $ContainerName psql -X -v ON_ERROR_STOP=1 -U supabase_admin -d $ReplayDatabase -f $ContainerFinalSql
 if ($LASTEXITCODE -ne 0) {
   throw "A replay invariant failed. Keep the isolated replay DB for diagnosis; do not patch production or skip a failing assertion."
+}
+
+if ($UseReconstructedLegacyBaseline) {
+  $E2EPath = Join-Path $RepoRoot "qa\test-wallet-admin-referral-e2e.sql"
+  $ContainerE2E = "/tmp/nplus-play-wallet-admin-referral-e2e.sql"
+  if (-not (Test-Path -LiteralPath $E2EPath -PathType Leaf)) {
+    throw "Synthetic wallet/Admin/referral E2E test is missing. Replay validation cannot be declared complete."
+  }
+  Write-Host "Run synthetic wallet/Admin/referral database E2E (test transaction rolls back synthetic rows)."
+  & docker cp $E2EPath "${ContainerName}:$ContainerE2E"
+  if ($LASTEXITCODE -ne 0) { throw "Could not copy synthetic database E2E SQL to the replay clone." }
+  & docker exec $ContainerName psql -X -v ON_ERROR_STOP=1 -U supabase_admin -d $ReplayDatabase -f $ContainerE2E
+  if ($LASTEXITCODE -ne 0) { throw "Synthetic wallet/Admin/referral E2E failed on the replay clone; production untouched." }
 }
 
 Write-Host ""

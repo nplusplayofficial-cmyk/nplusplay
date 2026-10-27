@@ -193,3 +193,6 @@ No production schema/ACL/wallet/game/Auth/scheduler state was modified in this w
   `pwsh -File .\\qa\\replay-live-migration-sequence.ps1 -VerifiedRestoreDatabase nplus_restore_acceptance_20261024 -ReplayDatabase nplus_migration_replay_20261027 -UseReconstructedLegacyBaseline`.
 - This creates empty legacy tables from current live metadata, replays all 40 exact archived migration bodies, applies candidate referral/legacy ACL/finite-input changes and local ACL reconciliation, then runs final invariant and synthetic database E2E checks.
 - It is an explicit current-schema reconstruction, not original historical DDL. Never run the QA bootstrap/overlays on production. The full local Docker sequence still must be executed outside the connected environment.
+
+
+- Replay-runner contract test added: confirms the explicit opt-in, bootstrap before the 40-body fingerprinted replay, local-only candidate ACL reconciliation order, final invariant, and actual synthetic wallet/Admin/referral E2E invocation. Full local Docker execution remains separate.
