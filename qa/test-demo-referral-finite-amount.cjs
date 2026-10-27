@@ -23,7 +23,7 @@ const sql = fs.readFileSync(sqlPath, 'utf8');
 const test = fs.readFileSync(testPath, 'utf8');
 
 for (const fragment of [
-  'Candidate migration',
+  'Finite numeric guard migration: safe transfer and referral amount guards.',
   'CREATE OR REPLACE FUNCTION public.nplus_demo_admin_qualify_referral',
   'public.nplus_is_admin()',
   "p_verified_virtual_amount::text IN ('NaN', 'Infinity', '-Infinity')",
@@ -50,5 +50,5 @@ if (process.exitCode) {
 } else {
   console.log('PASS: candidate explicitly rejects NaN and infinities before threshold logic.');
   console.log('PASS: isolated SQL regression covers invalid values, exactly-once qualification and Admin authorization.');
-  console.log('NOTE: candidate-only source; production was not changed.');
+  console.log('NOTE: this function guard remains pending production rollout; the other three protective migrations are already applied.');
 }
