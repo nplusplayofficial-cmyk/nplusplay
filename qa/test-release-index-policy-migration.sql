@@ -152,8 +152,9 @@ $assertions$;
 -- simulate the broad pre-existing table grants then verify only PUBLIC/anon are revoked.
 ALTER TABLE public.manual_deposits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_bank_details ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.withdraw_requests ENABLE ROW LEVEL SECURITY;
 GRANT ALL PRIVILEGES ON TABLE public.manual_deposits,
-  public.user_bank_details TO PUBLIC, anon, authenticated;
+  public.user_bank_details, public.withdraw_requests TO PUBLIC, anon, authenticated;
 
 \ir ../sql/NPLUS_PLAY_LEGACY_TABLE_PRIVILEGE_HARDENING_2026-10-24.sql
 
@@ -171,16 +172,25 @@ BEGIN
      OR has_table_privilege('anon','public.user_bank_details','DELETE') THEN
     RAISE EXCEPTION 'Anonymous table privileges remain on public.user_bank_details.';
   END IF;
+  IF has_table_privilege('anon','public.withdraw_requests','SELECT')
+     OR has_table_privilege('anon','public.withdraw_requests','INSERT')
+     OR has_table_privilege('anon','public.withdraw_requests','UPDATE')
+     OR has_table_privilege('anon','public.withdraw_requests','DELETE') THEN
+    RAISE EXCEPTION 'Anonymous table privileges remain on public.withdraw_requests.';
+  END IF;
   IF NOT has_table_privilege('authenticated','public.manual_deposits','INSERT')
      OR NOT has_table_privilege('authenticated','public.user_bank_details','SELECT')
      OR NOT has_table_privilege('authenticated','public.user_bank_details','INSERT')
-     OR NOT has_table_privilege('authenticated','public.user_bank_details','UPDATE') THEN
+     OR NOT has_table_privilege('authenticated','public.user_bank_details','UPDATE')
+     OR NOT has_table_privilege('authenticated','public.withdraw_requests','SELECT')
+     OR NOT has_table_privilege('authenticated','public.withdraw_requests','INSERT') THEN
     RAISE EXCEPTION 'Authenticated table grants were changed unexpectedly.';
   END IF;
   IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.manual_deposits'::regclass)
-     OR NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.user_bank_details'::regclass) THEN
-    RAISE EXCEPTION 'RLS must remain enabled on both legacy tables.';
+     OR NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.user_bank_details'::regclass)
+     OR NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.withdraw_requests'::regclass) THEN
+    RAISE EXCEPTION 'RLS must remain enabled on all three legacy tables.';
   END IF;
-  RAISE NOTICE 'PASS: anonymous legacy-table privileges revoked; authenticated grants and RLS retained.';
+  RAISE NOTICE 'PASS: anonymous grants removed on all three legacy tables; authenticated grants and RLS retained.';
 END
 $legacy_privilege_assertions$;
