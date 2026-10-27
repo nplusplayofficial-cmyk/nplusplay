@@ -228,3 +228,14 @@ No production schema/ACL/wallet/game/Auth/scheduler state was modified in this w
 - Release Smoke #284: PASS.
 - Three production migrations are applied and recorded as versions 20261027172625, 20261027172637, and 20261027172656.
 - The ten-function finite-numeric guard is still pending production rollout; the live safe-transfer function did not contain its finite guard in the latest read-only check. Do not merge/deploy and claim full production hardening until the split migrations are applied and verified.
+
+
+## Latest live production and repository checkpoint — 2026-10-27
+
+- The three split finite-number guard migrations have now been successfully applied to production and verified read-only. Server-recorded versions: `20261027180120` (`guard_finite_numeric_request_and_gift_inputs`), `20261027180134` (`guard_finite_numeric_safe_transfer_and_referral`), and `20261027180141` (`guard_finite_numeric_game_stakes`). See [production rollout evidence](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md).
+- The repository migration files have been renamed to these exact recorded version IDs; their SQL bodies are unchanged. This avoids leaving the original candidate timestamps queued as additional migrations.
+- Post-deployment catalog check: all 10 target function definitions contain non-finite numeric guards; all remain postgres-owned SECURITY DEFINER functions with fixed `search_path=pg_catalog, public`.
+- All six production game flags remain disabled. Legacy table RLS/grant postconditions remain intact. Aggregate wallet integrity reports 5 profiles, 5 wallets, 146 ledger rows, and zero negative wallets, ledger arithmetic mismatches or current-wallet/latest-ledger mismatches.
+- Static QA #701 and Release Smoke #288 passed before the migration filename-alignment commits, using the identical SQL bodies. A fresh CI run on the current renamed-file/documentation head is still required.
+- PR #22 remains OPEN/DRAFT. Release is not complete: a fresh full local replay of the split migrations is still needed on the Windows restore lab; hosted Auth/OTP/recovery and synthetic browser journeys need the controlled inbox; referral reward rule, K3/5D/TRX payout rules, legacy historical provenance/risk disposition, Free-plan leaked-password limitation, and final hosted Pages smoke remain open.
+- No wallet/user/ledger data, Auth settings, scheduler configuration, paid plan, or game flags were changed during the migration rollout. Do not enable any game or merge/deploy the release candidate until the remaining gates are closed.
