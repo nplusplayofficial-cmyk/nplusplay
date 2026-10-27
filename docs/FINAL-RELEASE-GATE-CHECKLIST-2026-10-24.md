@@ -146,16 +146,17 @@ See [local replay evidence](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) 
 - Applied version 20261027172625: 20261027120000_allow_qualified_demo_referral_state.
 - Applied version 20261027172637: 20261027130000_harden_legacy_table_anon_privileges.
 - Applied version 20261027172656: 20261027140000_fix_wingo_admin_overload_defaults.
-- Not applied to production: three split finite-number guard migrations listed above. Static QA #697 has verified the three files in disposable PostgreSQL.
+- Applied to production after live function-body review and disposable PostgreSQL tests: finite-number guard migrations recorded as `20261027180120`, `20261027180134`, and `20261027180141`. Repository filenames have been aligned to those server-assigned versions. See [production guard rollout evidence](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md).
 - All six game settings remain disabled. Hosted Auth/OTP and browser journey acceptance, legacy historical schema provenance, and final live Pages verification remain unverified.
 
 
-### Split-migration candidate verification (2026-10-27)
+### Split-migration rollout and candidate verification — 2026-10-27
 
-- Current branch HEAD: 16a66cf8c941da7893716b1faad9729b8d6f98aa.
-- Static QA #697 PASS, zero warnings; isolated runtime finite numeric migration test PASS; browser smoke 38/38 pages and 17/17 mobile checks PASS.
-- Release Smoke #284 PASS.
-- Current live migration history contains the three applied versions 20261027172625, 20261027172637, and 20261027172656. The three split finite-number migration files (20261027180000–20261027180200) are not yet in live migration history; live safe-transfer function still lacks the finite-input guard.
+- The three split finite-number migrations were applied and verified in production as versions `20261027180120`, `20261027180134`, and `20261027180141`; the repository migration filenames now match these IDs.
+- Live catalog confirms all 10 guarded RPC definitions retain `postgres` ownership, `SECURITY DEFINER`, and `search_path=pg_catalog, public`; all contain NaN/Infinity checks.
+- All six game flags remain disabled. Legacy table RLS/grants remain intact. Aggregate integrity checks show 5 profiles, 5 wallets, 146 ledger rows and zero negative-wallet, ledger-arithmetic or latest-ledger mismatches.
+- On current candidate HEAD `b09f0580288d752878ca926578ee8da532da5422`, Release Smoke #294 passed and Static QA #707 was in progress at the time this section was refreshed. Recheck exact-head CI before merging.
+- A fresh full local reconstructed-baseline replay using the split filenames has not yet been recorded; the earlier full replay ran the pre-split monolithic source and is not a substitute.
 
 
 ### Latest production guard rollout — 2026-10-27
