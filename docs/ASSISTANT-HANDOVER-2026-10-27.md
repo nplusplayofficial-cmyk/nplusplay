@@ -115,3 +115,14 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 
 - On Static QA #626, the combined RLS/index-policy SQL test and finite Admin referral regression passed, but the separate legacy-table privilege test exposed a missing semicolon on its final RAISE NOTICE.
 - That test-only terminator is corrected in this candidate commit. Production schema/grants remain unchanged. Fresh CI must verify the strict ACL assertions end-to-end.
+
+
+## Latest candidate status — 2026-10-27 10:44 UTC (supersedes earlier run-pending notes)
+
+- Current branch head before this status-only documentation refresh: `961b4e90fceaca339ab3b481411358ab7e7aea3b`; PR #22 is OPEN, DRAFT, and mergeable.
+- Static QA run #627: `40490546126` completed SUCCESS. The static-qa and browser-smoke jobs both passed. Specifically, the combined RLS/index migration test, finite Admin referral guard and isolated PostgreSQL regression, standalone legacy-table privilege test, and desktop/mobile browser smoke all passed.
+- Release Smoke run #214: `40490546120` completed SUCCESS on the same head.
+- The legacy-table candidate ACL test now verifies that authenticated has only direct SELECT on `manual_deposits`, no direct table privileges on `user_bank_details`/`withdraw_requests`, no anon/PUBLIC privileges, and RLS + named policies stay intact.
+- Production read-only status remains: six game settings, zero enabled; both production finite-number guards are still absent because candidate SQL was not deployed; historical source verification is read-only; no production schema/ACL/wallet/Auth/scheduler change was made.
+- The all-40 migration history body source mapping is closed at 29 unique exact bodies plus 11 exact repeats; the clean canonical replay is still blocked by missing trusted pre-history creation source for the three legacy relations.
+- Latest production Pages deployment observed is still Oct 23 main commit `680238f2428416faf44df0dced6f907d4cea7f08`. Do not claim the candidate is live or the site fully verified.

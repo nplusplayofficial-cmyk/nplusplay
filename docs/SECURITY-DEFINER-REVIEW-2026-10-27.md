@@ -55,3 +55,10 @@ The live catalog currently has both `nplus_admin_set_wingo_demo(integer,text,tex
 5. Final live site verification after the release gates pass.
 
 No production mutations were made during this review.
+
+
+## Candidate regression status update — 2026-10-27
+
+The finite Admin referral qualification regression, finite Safe transfer regression, and both browser-role legacy-table ACL fixtures now pass in Static QA #627 on integration candidate commit `961b4e90fceaca339ab3b481411358ab7e7aea3b`. The Release Smoke #214 also passed on that commit.
+
+These tests verify only candidate SQL in disposable PostgreSQL; the corresponding function-body replacements and ACL migration have **not** been applied to the live database. The live finite-amount guards remain absent by design until canonical replay/hosted test gates and explicit release approval are satisfied.
