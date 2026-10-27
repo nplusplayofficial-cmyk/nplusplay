@@ -4,7 +4,7 @@
 
 **Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Bodies 39/40 passed only after QA-only empty schema overlays for three missing legacy tables; this is not a clean full replay. Wallet/ledger ACL parity and request-table ACL parity overlays passed. Final local invariants passed after the candidate qualified-referral-state migration; wallet/Admin/referral E2E passed with transaction rollback. Baseline/schema/ACL lineage, authenticated hosted-browser tests, and approved K3/5D/TRX rules remain release blockers. The integrated candidate's Static QA, browser smoke, and Release Smoke all pass on the latest head.
 
-Production rollout update: three protective migrations were applied on 2026-10-27 (referral lifecycle constraint, legacy-table ACL hardening, and WINGO overload fix). No wallet/ledger balances or user rows were rewritten; Auth settings, scheduler configuration, and game flags were not changed. The split finite-number RPC guard migrations remain pending production rollout. Static QA #697 applies them in disposable PostgreSQL successfully, but they were not applied to the live database.
+Production rollout update: the three protective migrations were applied on 2026-10-27, followed by the three split finite-number guard migrations at server-recorded versions `20261027180120`, `20261027180134`, and `20261027180141`. Live postconditions now confirm all 10 target RPCs contain NaN/Infinity guards, all six game flags remain disabled, legacy table RLS/grants match the reviewed contract, and aggregate wallet/ledger integrity checks report zero mismatches. See [production guard rollout evidence](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md). The current candidate still requires exact-head CI after filename alignment, a fresh full local replay of the split sequence, hosted Auth/browser acceptance, product/risk decisions, and final hosted Pages verification. It is not release-ready.
 
 ## Workstream status
 
@@ -156,3 +156,10 @@ See [local replay evidence](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) 
 - Static QA #697 PASS, zero warnings; isolated runtime finite numeric migration test PASS; browser smoke 38/38 pages and 17/17 mobile checks PASS.
 - Release Smoke #284 PASS.
 - Current live migration history contains the three applied versions 20261027172625, 20261027172637, and 20261027172656. The three split finite-number migration files (20261027180000–20261027180200) are not yet in live migration history; live safe-transfer function still lacks the finite-input guard.
+
+
+### Latest production guard rollout — 2026-10-27
+
+- Split migrations recorded in live Supabase history: `20261027180120`, `20261027180134`, `20261027180141`. Repository migration filenames now use these exact versions.
+- Live post-deployment checks: 10/10 guard functions present; all six games disabled; three legacy tables RLS-enabled with the reviewed direct-grant contract; 5 wallets, 146 ledger rows, no negative wallets or arithmetic/latest-ledger mismatches.
+- The prior full reconstructed replay is not evidence for the split-file sequence. Run a fresh local replay of the split files before release certification. Hosted auth/browser journeys, the referral-rule decision, K3/5D/TRX rule approval, legacy schema provenance/risk disposition, Free-plan password-protection decision, and final hosted Pages verification remain open.
