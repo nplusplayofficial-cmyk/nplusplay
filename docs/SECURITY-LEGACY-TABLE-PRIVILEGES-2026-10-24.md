@@ -45,3 +45,16 @@ The candidate hardening script and isolated PostgreSQL test now include all thre
 - Static QA + desktop/mobile browser smoke: [PASS](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40482213478).
 - Release Smoke: [PASS](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40482213497).
 - Both ran against candidate commit `a24b6ace7d6194b8bd7575f774a5b6e04a4d3980`. The new migration remains an unmerged candidate and has not been applied to production. The canonical clean-replay/schema-lineage gate remains open.
+
+
+## 2026-10-27 candidate least-privilege refinement
+
+The current production catalog reports broad table grants for both `anon` and `authenticated` on all three legacy relations, including DELETE/TRUNCATE/REFERENCES/TRIGGER/MAINTAIN. Read-only inspection found only `admin-deposits.html` directly SELECTs `manual_deposits`; current browser routes do not query `user_bank_details` or `withdraw_requests`, and a read-only `pg_proc.prosrc` scan found no current public function bodies referencing these legacy table names.
+
+The integration candidate now proposes a narrower direct table-access contract:
+- revoke direct grants from PUBLIC/anon/authenticated on all three tables;
+- grant authenticated `SELECT` on `manual_deposits` only, for the existing read-only Admin reconciliation page;
+- keep `user_bank_details` and `withdraw_requests` without browser-role direct table grants;
+- preserve rows, table owner, RLS flags and all existing policy definitions.
+
+The disposable SQL regression now asserts every browser-role privilege, including TRUNCATE/REFERENCES/TRIGGER/MAINTAIN, and the exact authenticated contract. This remains a candidate proposal and **has not been applied to production**. A fresh Static QA run must pass; canonical migration ordering and hosted route checks remain release gates.

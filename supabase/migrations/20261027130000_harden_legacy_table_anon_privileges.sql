@@ -1,8 +1,11 @@
 -- N+ PLAY legacy table least-privilege follow-up.
 -- Candidate migration only: do not deploy until canonical backup/replay and
 -- final authenticated route review pass. This migration does not change rows.
--- It removes unnecessary PUBLIC/anon direct privileges while preserving the
--- existing authenticated grant contract and owner-scoped RLS policies.
+-- Current UI evidence: only admin-deposits.html SELECTs manual_deposits for
+-- read-only reconciliation. No browser route queries user_bank_details or
+-- withdraw_requests, and no current public RPC body references these tables.
+-- Keep authenticated SELECT on manual_deposits only; revoke direct browser-role
+-- grants on the other two legacy tables. RLS and policy definitions stay intact.
 
 BEGIN;
 
@@ -66,11 +69,14 @@ END
 $preflight$;
 
 REVOKE ALL PRIVILEGES ON TABLE public.manual_deposits
-  FROM PUBLIC, anon;
+  FROM PUBLIC, anon, authenticated;
 REVOKE ALL PRIVILEGES ON TABLE public.user_bank_details
-  FROM PUBLIC, anon;
+  FROM PUBLIC, anon, authenticated;
 REVOKE ALL PRIVILEGES ON TABLE public.withdraw_requests
-  FROM PUBLIC, anon;
+  FROM PUBLIC, anon, authenticated;
+
+-- Admin legacy screen is reconciliation-only and executes SELECT, never approve/credit.
+GRANT SELECT ON TABLE public.manual_deposits TO authenticated;
 
 DO $verify$
 DECLARE
@@ -84,7 +90,11 @@ BEGIN
     IF has_table_privilege('anon', 'public.' || v_table, 'SELECT')
        OR has_table_privilege('anon', 'public.' || v_table, 'INSERT')
        OR has_table_privilege('anon', 'public.' || v_table, 'UPDATE')
-       OR has_table_privilege('anon', 'public.' || v_table, 'DELETE') THEN
+       OR has_table_privilege('anon', 'public.' || v_table, 'DELETE')
+       OR has_table_privilege('anon', 'public.' || v_table, 'TRUNCATE')
+       OR has_table_privilege('anon', 'public.' || v_table, 'REFERENCES')
+       OR has_table_privilege('anon', 'public.' || v_table, 'TRIGGER')
+       OR has_table_privilege('anon', 'public.' || v_table, 'MAINTAIN') THEN
       RAISE EXCEPTION 'Legacy privilege hardening failed: anon retains a direct privilege on public.%.', v_table;
     END IF;
 
@@ -94,13 +104,30 @@ BEGIN
   END LOOP;
 
   IF NOT has_table_privilege('authenticated','public.manual_deposits','SELECT')
-     OR NOT has_table_privilege('authenticated','public.manual_deposits','INSERT')
-     OR NOT has_table_privilege('authenticated','public.user_bank_details','SELECT')
-     OR NOT has_table_privilege('authenticated','public.user_bank_details','INSERT')
-     OR NOT has_table_privilege('authenticated','public.user_bank_details','UPDATE')
-     OR NOT has_table_privilege('authenticated','public.withdraw_requests','SELECT')
-     OR NOT has_table_privilege('authenticated','public.withdraw_requests','INSERT') THEN
-    RAISE EXCEPTION 'Legacy privilege hardening failed: authenticated grants differ from reviewed contract.';
+     OR has_table_privilege('authenticated','public.manual_deposits','INSERT')
+     OR has_table_privilege('authenticated','public.manual_deposits','UPDATE')
+     OR has_table_privilege('authenticated','public.manual_deposits','DELETE')
+     OR has_table_privilege('authenticated','public.manual_deposits','TRUNCATE')
+     OR has_table_privilege('authenticated','public.manual_deposits','REFERENCES')
+     OR has_table_privilege('authenticated','public.manual_deposits','TRIGGER')
+     OR has_table_privilege('authenticated','public.manual_deposits','MAINTAIN')
+     OR has_table_privilege('authenticated','public.user_bank_details','SELECT')
+     OR has_table_privilege('authenticated','public.user_bank_details','INSERT')
+     OR has_table_privilege('authenticated','public.user_bank_details','UPDATE')
+     OR has_table_privilege('authenticated','public.user_bank_details','DELETE')
+     OR has_table_privilege('authenticated','public.user_bank_details','TRUNCATE')
+     OR has_table_privilege('authenticated','public.user_bank_details','REFERENCES')
+     OR has_table_privilege('authenticated','public.user_bank_details','TRIGGER')
+     OR has_table_privilege('authenticated','public.user_bank_details','MAINTAIN')
+     OR has_table_privilege('authenticated','public.withdraw_requests','SELECT')
+     OR has_table_privilege('authenticated','public.withdraw_requests','INSERT')
+     OR has_table_privilege('authenticated','public.withdraw_requests','UPDATE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','DELETE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','TRUNCATE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','REFERENCES')
+     OR has_table_privilege('authenticated','public.withdraw_requests','TRIGGER')
+     OR has_table_privilege('authenticated','public.withdraw_requests','MAINTAIN') THEN
+    RAISE EXCEPTION 'Legacy privilege hardening failed: authenticated must have SELECT-only access to manual_deposits and no direct grants on the other legacy tables.';
   END IF;
 END
 $verify$;

@@ -83,3 +83,10 @@ Checked against GitHub on 2026-10-27.
 - The canonical replay blocker remains: none of the 40 recorded body rows creates `manual_deposits`, `user_bank_details`, or `withdraw_requests`; the later RLS/index migration references them only. The 2026-10-15 backup-derived baseline lacks those tables and current schema cannot prove their historical provenance.
 - Latest code head: `d139925f8ef95764dceadb82974bd3901a12d2a0`. Release Smoke #208 succeeded; Static QA #621's static-qa job and both finite-amount regression tests succeeded. Its desktop/mobile browser-smoke job was still in progress during Chromium installation on last refresh. Refresh the run before treating all workflow jobs as completed.
 - Production is unchanged. Do not merge/deploy until the clean replay/baseline, hosted journeys, security/release gates, and explicit approval are complete.
+
+
+## Legacy table grants — narrowed candidate contract
+
+- Read-only production catalog confirms broad authenticated direct table grants on all three legacy tables, including DELETE/TRUNCATE/REFERENCES/TRIGGER/MAINTAIN.
+- The candidate migration/test now retain authenticated SELECT on `manual_deposits` only (needed for the existing Admin read-only reconciliation page) and no direct browser-role grants on `user_bank_details` or `withdraw_requests`. Policy definitions/RLS remain unchanged in the candidate.
+- This is a proposed candidate migration only. Production grants remain unchanged. Await Static QA on the latest commit and keep the canonical replay/hosted route gates open.
