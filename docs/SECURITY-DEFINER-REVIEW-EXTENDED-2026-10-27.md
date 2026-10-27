@@ -120,7 +120,7 @@ At candidate commit `72969cf8ce1393e7a95b8b1221423c8f70120b36`, Static QA #660 a
 - Static QA: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40523464520
 - Release Smoke: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40523464537
 
-The disposable PostgreSQL runtime regression is being updated to apply all three split finite-number migration units and exercise the same ten function bodies. The full replay passed against the preceding monolithic source bundle; the current split sequence must pass fresh CI before it is considered verified. Browser smoke rendered 38/38 pages and passed 17/17 mobile viewport checks. This verifies the candidate migration on an isolated fixture, not on production and not as part of a rerun of the full restored local replay.
+Static QA #697 now applies all three split finite-number migration units in a disposable PostgreSQL database and passed the invalid-input regression; Static QA reported zero warnings, and browser smoke passed 38/38 pages plus 17/17 mobile viewport checks. The full local replay passed against the preceding monolithic source bundle. The split migration sequence is now CI/runtime-tested but has not yet been applied to production. Browser smoke rendered 38/38 pages and passed 17/17 mobile viewport checks. This verifies the candidate migration on an isolated fixture, not on production and not as part of a rerun of the full restored local replay.
 
 Production database, grants, wallet balances, Auth settings, scheduler, and game flags remain unchanged.
 
@@ -136,3 +136,11 @@ Read-only migration-history checks confirm three protective migrations were appl
 No wallet balances, user rows, Auth settings, game flags, scheduler configuration or existing legacy-table rows were rewritten by those migrations. All six live game flags remain disabled.
 
 The ten-function finite-number hardening remains NOT applied to production. Its first monolithic transport attempt did not return success, and the follow-up chunked apply was blocked. A live catalog check confirmed the safe-transfer finite guard was still absent. The function guards have been split into three repository migration files, but they require passing CI and a successful approved migration path before production rollout. Do not treat the numeric guards as live.
+
+
+## Split migration CI status — 2026-10-27
+
+- Static QA #697: PASS, zero warnings. https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40552546722
+- Release Smoke #284: PASS. https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40552546713
+- Browser smoke: 38/38 pages; 17/17 mobile viewport checks.
+- Split finite-number SQL applied and tested only in isolated disposable PostgreSQL. Live production catalog still lacks the safe-transfer finite guard; don't claim the ten RPC guards are deployed.
