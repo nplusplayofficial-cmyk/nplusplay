@@ -1,4 +1,4 @@
--- Candidate entry point kept for existing disposable PostgreSQL test harnesses.
--- Single source of truth is the timestamped migration below; not applied to production.
+-- Entry point for the disposable PostgreSQL ACL hardening regression test.
+-- Canonical migration filename is aligned to the server-assigned live migration version.
 \set ON_ERROR_STOP on
-\ir ../supabase/migrations/20261027130000_harden_legacy_table_anon_privileges.sql
+\ir ../supabase/migrations/20261027172637_20261027130000_harden_legacy_table_anon_privileges.sql
