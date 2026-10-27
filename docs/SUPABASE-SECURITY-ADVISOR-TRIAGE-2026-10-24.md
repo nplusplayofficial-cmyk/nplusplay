@@ -18,7 +18,7 @@ This document triages findings; it does not claim that every warning is exploita
 1. Keep the candidate least-privilege fix for `manual_deposits` and `user_bank_details` in draft until the legacy route inventory and RLS/authenticated access tests pass.
 2. Review all 53 authenticated SECURITY DEFINER functions by category (admin, user-owned data, public aggregate, internal worker); document authorization tests before changing privileges.
 3. Decide explicitly whether the homepage aggregate activity RPC is public. If yes, retain only its minimal aggregate output and test it anonymously; if no, revoke anon EXECUTE and remove anonymous UI calls together.
-4. Enable leaked-password protection in Auth settings and test signup, OTP, login, and reset flows.
+4. Organization/project plan is Free. [Supabase documentation](https://supabase.com/docs/guides/auth/password-security) says leaked-password protection is Pro+; do not upgrade or incur costs without approval. Record this as a known Free-plan limitation and verify supported password length/complexity and rate-limit settings, then test signup, OTP, login, and reset flows.
 5. Re-run Advisor after the approved changes and compare finding counts. Avoid dropping indexes based only on an unused-index warning; low traffic and recent creation can make indexes appear unused.
 
 ## Not done
@@ -36,7 +36,7 @@ The latest Advisor read confirms the same categories are still present; this is 
 - **20 RLS-enabled/no-policy tables (INFO).** A read-only table-privilege review found no direct browser-role table privileges for `anon` or `authenticated` on the tables in this Advisor set. Maintain default-deny and avoid adding blanket policies.
 - **1 anonymous SECURITY DEFINER function (WARN).** `public.nplus_recent_demo_activity(integer)` remains intentionally public for the aggregate-only homepage feed. Retain this public exception only with its narrow result contract and regression tests.
 - **53 authenticated SECURITY DEFINER functions (WARN).** Review authorization one function/category at a time. The linter warning alone does not mean an exploit exists; however, generic role grants cannot substitute for in-function Admin, user-ownership and input-bound checks. Current release candidate CI and local E2E cover important paths but do not prove every callable function.
-- **Leaked-password protection disabled (WARN).** Still unresolved; confirm plan/config support and cost before making an Auth-settings change. No setting changed during this check.
+- **Leaked-password protection disabled (WARN).** Confirmed Free-tier limitation: current Supabase docs say this feature is available on Pro and above. No plan upgrade or Auth-setting change was made. Keep it documented unless the owner explicitly approves a paid upgrade; check supported password length/complexity and rate-limit controls as no-cost compensating measures.
 - **20 unused indexes (INFO).** No changes. Check query workload and age before considering any removal.
 
 Read-only current database footprint: 40 migration-history rows, 69 public functions (all 69 reported SECURITY DEFINER), 33 public relations, 33 RLS-enabled tables, 22 public policies. All six game settings remain disabled. No production mutation occurred during this refresh.
