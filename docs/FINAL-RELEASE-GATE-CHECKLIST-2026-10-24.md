@@ -2,7 +2,7 @@
 
 ## Release decision
 
-**Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Clean 40-body replay is blocked at body 39 because the restored baseline lacks `public.manual_deposits`, `public.withdraw_requests`, and `public.user_bank_details`; current production has all three, but no body in the captured 40-row history creates them. The QA fixture safely stopped during read-only preflight before creating anything. This baseline/history gap, authenticated hosted-browser tests, cross-PR integration, and approved K3/5D/TRX rules remain release blockers.
+**Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Clean 40-body replay is blocked at body 39 because the restored baseline lacks `public.manual_deposits`, `public.withdraw_requests`, and `public.user_bank_details`; current production has all three, but no body in the captured 40-row history creates them. The QA-only local schema overlay was applied with zero rows to each table; a checkpoint-guard logic bug then prevented versions 39–40 from running and has been fixed with a regression test. This baseline/history gap, authenticated hosted-browser tests, cross-PR integration, and approved K3/5D/TRX rules remain release blockers.
 
 No production migrations, schema DDL, wallet/ledger data, user records, game settings, ACLs, or cron jobs were changed as part of these latest audit updates.
 
@@ -35,7 +35,8 @@ These CI runs use isolated disposable PostgreSQL and/or local static/browser smo
 - Captured SQL source fingerprint audit: **PASS 29/29**; exact ordered history: **PASS 40 rows**.
 - Local replay bodies **1–38 PASS**. Body **39/40** first stops at `CREATE INDEX ... ON public.manual_deposits`; guarded fixture attempts then find `public.withdraw_requests` and `public.user_bank_details` missing before creating any fixture objects.
 - Read-only production catalog confirms all three legacy tables exist, are owned by `postgres`, and have RLS enabled. Captured history body `20261023092858` references the relations but does not create them.
-- Conclusion: restored baseline and captured migration sequence omit prerequisite/out-of-band schema events. Strict clean replay remains blocked. A QA-only three-table schema overlay may rehearse bodies 39–40 but cannot establish clean full replay or full data parity. See [baseline-drift report](REPLAY-BASELINE-DRIFT-2026-10-27.md).
+- A QA-only three-table empty schema overlay was applied to the disposable partial replay DB after preflight; each of the three tables reported zero rows. The first suffix checkpoint attempt then stopped because the runner compared failed-check counts to the expected field count. Fix committed and a regression test added; versions 39–40 remain pending re-run.
+- Conclusion: restored baseline and captured migration sequence omit prerequisite/out-of-band schema events. Strict clean replay remains blocked even if the suffix rehearsal passes. See [baseline-drift report](REPLAY-BASELINE-DRIFT-2026-10-27.md).
 - No production database mutation was performed. Broad `anon` / `authenticated` ACLs on the legacy `manual_deposits` table remain a separate PR #20 review item.
 
 ## Cross-PR integration gate (reviewed 2026-10-25)
