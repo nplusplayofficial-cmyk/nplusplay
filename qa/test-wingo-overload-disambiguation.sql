@@ -105,7 +105,7 @@ INSERT INTO public.profiles(id,role) VALUES
   ('11111111-1111-4111-8111-111111111111','admin'),
   ('22222222-2222-4222-8222-222222222222','user');
 
-\ir ../supabase/migrations/20261027140000_fix_wingo_admin_overload_defaults.sql
+\ir ../supabase/migrations/20261027172656_20261027140000_fix_wingo_admin_overload_defaults.sql
 
 DO $shape$
 BEGIN
