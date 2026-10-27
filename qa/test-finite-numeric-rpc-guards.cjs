@@ -18,7 +18,7 @@ before(fn(s,'nplus_aviator_demo_place_bet'),'p_auto_cashout::text IN '+sp,'v_sta
 before(fn(s,'nplus_moto_demo_place_bet'),'p_stake::text IN '+sp,'stake_amt:=p_stake','Moto stake');
 before(fn(s,'nplus_wingo_demo_place_bet'),'p_stake::text IN '+sp,'v_stake := p_stake','WINGO stake');
 before(fn(s,'nplus_demo_safe_transfer'),'p_amount::text IN '+sp,'v_amount := p_amount','Safe transfer');
-before(fn(s,'nplus_demo_admin_qualify_referral'),'p_verified_virtual_amount::text IN '+sp,'INSERT INTO public.nplus_demo_referral_qualifications','Referral qualification');
+before(fn(s,'nplus_demo_admin_qualify_referral'),"p_verified_virtual_amount::text IN ('NaN', 'Infinity', '-Infinity')",'INSERT INTO public.nplus_demo_referral_qualifications','Referral qualification');
 if(/\b(?:GRANT|REVOKE|DROP FUNCTION|DROP TABLE|TRUNCATE)\b/i.test(s))fail('unexpected ACL/schema operation');
 if((s.match(/CREATE OR REPLACE FUNCTION public\./g)||[]).length!==10)fail('expected exactly ten function replacements');
 if(!s.includes("SET search_path TO 'pg_catalog', 'public'"))fail('fixed search_path missing');
