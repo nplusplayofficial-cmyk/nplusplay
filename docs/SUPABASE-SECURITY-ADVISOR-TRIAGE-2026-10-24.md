@@ -28,3 +28,15 @@ This document triages findings; it does not claim that every warning is exploita
 - No blanket RLS policy creation.
 - No Auth setting changes.
 - No assertion that the hosted login/browser journey has passed.
+
+## Refreshed current snapshot — 2026-10-27 09:02 UTC
+
+The latest Advisor read confirms the same categories are still present; this is an updated observation, not a claim that the warnings were remediated:
+
+- **20 RLS-enabled/no-policy tables (INFO).** A read-only table-privilege review found no direct browser-role table privileges for `anon` or `authenticated` on the tables in this Advisor set. Maintain default-deny and avoid adding blanket policies.
+- **1 anonymous SECURITY DEFINER function (WARN).** `public.nplus_recent_demo_activity(integer)` remains intentionally public for the aggregate-only homepage feed. Retain this public exception only with its narrow result contract and regression tests.
+- **53 authenticated SECURITY DEFINER functions (WARN).** Review authorization one function/category at a time. The linter warning alone does not mean an exploit exists; however, generic role grants cannot substitute for in-function Admin, user-ownership and input-bound checks. Current release candidate CI and local E2E cover important paths but do not prove every callable function.
+- **Leaked-password protection disabled (WARN).** Still unresolved; confirm plan/config support and cost before making an Auth-settings change. No setting changed during this check.
+- **20 unused indexes (INFO).** No changes. Check query workload and age before considering any removal.
+
+Read-only current database footprint: 40 migration-history rows, 69 public functions (all 69 reported SECURITY DEFINER), 33 public relations, 33 RLS-enabled tables, 22 public policies. All six game settings remain disabled. No production mutation occurred during this refresh.
