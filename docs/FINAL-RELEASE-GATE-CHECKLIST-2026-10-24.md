@@ -2,7 +2,7 @@
 
 ## Release decision
 
-**Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Bodies 39/40 passed only after a QA-only empty-schema overlay for three missing legacy tables; this is not a clean full replay. The first final invariant failed on wallet/ledger ACL parity; a guarded local-only overlay passed. The next invariant failed on request-table direct-write grants, and a separate guarded local-only ACL overlay is prepared but not yet applied. Current production catalog shows browser roles have no direct writes to the wallet/ledger/request tables; captured history does not fully reproduce these baseline ACLs. Schema/ACL parity, authenticated hosted-browser tests, cross-PR integration, and approved K3/5D/TRX rules remain release blockers.
+**Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Bodies 39/40 passed only after a QA-only empty-schema overlay for three missing legacy tables; this is not a clean full replay. The wallet/ledger ACL parity overlay passed. The final invariant then exposed request-table ACL drift; the first request overlay attempt safely rolled back because local `withdrawal_requests` is owned by `supabase_admin` instead of the audited production owner `postgres`. A corrected local-only overlay now snapshots original owner/ACL, normalizes the owner and grants, and is ready for retry. Baseline/schema/ACL parity, authenticated hosted-browser tests, cross-PR integration, and approved K3/5D/TRX rules remain release blockers.
 
 No production migrations, schema DDL, wallet/ledger data, user records, game settings, ACLs, or cron jobs were changed as part of these latest audit updates.
 
@@ -37,9 +37,9 @@ These CI runs use isolated disposable PostgreSQL and/or local static/browser smo
 - Read-only production catalog confirms all three legacy tables exist, are owned by `postgres`, and have RLS enabled. Captured history body `20261023092858` references the relations but does not create them.
 - A QA-only three-table empty schema overlay was applied to the disposable partial replay DB after preflight; each of the three tables reported zero rows. The first suffix checkpoint attempt then stopped because the runner compared failed-check counts to the expected field count. Fix committed and a regression test added; versions 39–40 remain pending re-run.
 - Bodies 39/40 passed on the QA-only three-table schema overlay; this is not a clean full replay.
-- The first final invariant failed on wallet/ledger ACL parity; the guarded local wallet/ledger ACL overlay passed and captured the pre-overlay ACLs. The next invariant then failed on request-table direct-write grants.
-- A guarded QA-only request-table ACL overlay now exists, snapshots the original grants, and is restricted to `nplus_migration_replay_20261026`; it has not yet been run.
-- Current production read-only catalog confirms `anon` and `authenticated` lack direct writes on `demo_wallets`, `demo_wallet_transactions`, `deposit_requests`, and `withdrawal_requests`. Captured history does not fully reconstruct these ACLs on the restored 2026-10-15 baseline.
+- The first final invariant failed on wallet/ledger ACL parity; the guarded local wallet/ledger ACL overlay passed and captured the pre-overlay ACLs. The request-table invariant then failed.
+- Read-only diagnosis found local `withdrawal_requests` owner `supabase_admin` versus production owner `postgres`. The first request ACL fixture safely rolled back on its owner guard. Corrected local-only fixture now records `owner_before` plus original grants and normalizes the local owner to `postgres`; it has not yet been applied.
+- Current production read-only catalog confirms browser roles lack direct writes on the wallet/ledger/request tables. Captured history does not fully reconstruct these ACLs on the restored 2026-10-15 baseline.
 - Conclusion: strict clean replay remains blocked by schema and ACL parity gaps. Do not weaken the assertion or modify production. See [baseline-drift report](REPLAY-BASELINE-DRIFT-2026-10-27.md).
 - No production database mutation was performed. Broad `anon` / `authenticated` ACLs on the legacy `manual_deposits` table remain a separate PR #20 review item.
 
