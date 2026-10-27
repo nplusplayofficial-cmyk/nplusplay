@@ -230,22 +230,26 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
   // suffix rehearsal; it must never be presented as a clean 40-body replay.
   if (!runner.includes('"20261023092858"') ||
       !runner.includes('MIGRATION SUFFIX CHECK PASSED') ||
-      !runner.includes('nplus_replay_audit.manual_deposits_overlay_marker')) {
-    console.error('FAIL replay runner is missing the guarded manual_deposits suffix checkpoint.');
+      !runner.includes('manual_deposits_overlay_marker') ||
+      !runner.includes('withdraw_requests')) {
+    console.error('FAIL replay runner is missing the guarded legacy-table suffix checkpoint.');
     failures++;
   }
 
   const overlayPath = path.join(root, 'qa/fixtures/replay-baseline/manual-deposits-schema-overlay.sql');
   if (!fs.existsSync(overlayPath)) {
-    console.error('FAIL missing QA-only manual_deposits schema overlay fixture.');
+    console.error('FAIL missing QA-only legacy-table schema overlay fixture.');
     failures++;
   } else {
     const overlay = fs.readFileSync(overlayPath, 'utf8');
     if (!overlay.includes('NEVER RUN THIS FILE AGAINST PRODUCTION') ||
         !overlay.includes("current_database() <> 'nplus_migration_replay_20261026'") ||
         !overlay.includes("INSERT INTO nplus_replay_audit.manual_deposits_overlay_marker") ||
-        !overlay.includes('copied_user_rows')) {
-      console.error('FAIL manual_deposits schema overlay lacks its local-only/no-user-data safeguards.');
+        !overlay.includes('CREATE TABLE public.manual_deposits') ||
+        !overlay.includes('CREATE TABLE public.withdraw_requests') ||
+        !overlay.includes('manual_deposits_rows') ||
+        !overlay.includes('withdraw_requests_rows')) {
+      console.error('FAIL legacy-table schema overlay lacks local-only/no-user-data safeguards or both table fixtures.');
       failures++;
     }
   }
