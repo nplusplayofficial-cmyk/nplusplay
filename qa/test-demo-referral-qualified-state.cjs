@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const migrationPath = path.join(root, 'supabase/migrations/20261027120000_allow_qualified_demo_referral_state.sql');
+const migrationPath = path.join(root, 'supabase/migrations/20261027172625_20261027120000_allow_qualified_demo_referral_state.sql');
 const e2ePath = path.join(root, 'qa/test-wallet-admin-referral-e2e.sql');
 
 function fail(message) {
