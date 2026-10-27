@@ -289,7 +289,7 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
   } else {
     const aclOverlay = fs.readFileSync(aclOverlayPath, 'utf8');
     if (!aclOverlay.includes('NEVER RUN THIS FILE AGAINST PRODUCTION') ||
-        !aclOverlay.includes("v_target !~ '^nplus_migration_replay_[0-9]{8} ||
+         !aclOverlay.includes("v_target !~ '^nplus_migration_replay_[0-9]{8}$'") ||
         !aclOverlay.includes('nplus_replay_audit.wallet_ledger_acl_snapshot') ||
         !aclOverlay.includes('REVOKE ALL ON TABLE public.demo_wallets, public.demo_wallet_transactions') ||
         !aclOverlay.includes('GRANT SELECT ON TABLE public.demo_wallets, public.demo_wallet_transactions') ||
@@ -307,7 +307,7 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
   } else {
     const requestAcl = fs.readFileSync(requestAclPath, 'utf8');
     if (!requestAcl.includes('NEVER RUN THIS FILE AGAINST PRODUCTION') ||
-        !requestAcl.includes("v_target !~ '^nplus_migration_replay_[0-9]{8} ||
+         !requestAcl.includes("v_target !~ '^nplus_migration_replay_[0-9]{8}$'") ||
         !requestAcl.includes('nplus_replay_audit.request_table_acl_snapshot') ||
         !requestAcl.includes('owner_before text NOT NULL') ||
         !requestAcl.includes("deposit_requests owner does not match the observed local baseline (postgres)") ||
