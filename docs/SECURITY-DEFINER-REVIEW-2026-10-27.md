@@ -168,3 +168,12 @@ Open the N+ PLAY Supabase project dashboard → **Authentication → Sign In / P
 ### Auth plan constraint
 
 The current Supabase organization is on the Free tier (read-only organization metadata check, 2026-10-27). Since Supabase documents leaked-password protection as Pro-and-above, this toggle cannot be enabled without a plan change; no upgrade or cost was initiated. Keep the risk explicitly recorded, and retain strong minimum password length/character requirements where free-tier configuration permits. Source: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
+
+
+## Superseding status after production finite-number rollout — 2026-10-27
+
+Earlier sections document the pre-rollout state. The later production guard rollout is recorded in [PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md).
+
+Post-deployment read-only checks confirm all ten target RPCs now contain NaN/Infinity guards and still use the intended `postgres` owner, SECURITY DEFINER and fixed `search_path=pg_catalog, public`. All six game flags remain false. The three legacy table grant/RLS postconditions and wallet/ledger aggregates remained correct after migration.
+
+Exact current candidate HEAD `5b89e6c3fd8130185adac6d6e23150c3f52b32da` passed Static QA #716 and Release Smoke #303. This does not close the distinct manual review of all 53 authenticated-callable SECURITY DEFINER functions, the Free-plan password-protection risk decision, or hosted account acceptance.
