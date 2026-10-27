@@ -144,3 +144,15 @@ The ten-function finite-number hardening remains NOT applied to production. Its 
 - Release Smoke #284: PASS. https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40552546713
 - Browser smoke: 38/38 pages; 17/17 mobile viewport checks.
 - Split finite-number SQL applied and tested only in isolated disposable PostgreSQL. Live production catalog still lacks the safe-transfer finite guard; don't claim the ten RPC guards are deployed.
+
+
+## Superseding production guard rollout and current Advisor snapshot — 2026-10-27 18:12 UTC
+
+The older status above saying the finite-number guards were not deployed describes the state at its historical observation time and is superseded by the later rollout recorded in [PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md).
+
+- The three finite-number guard migration units were applied successfully and are recorded in live history as `20261027180120`, `20261027180134`, and `20261027180141`.
+- A fresh live catalog query confirms all 10 guarded target RPCs have NaN/Infinity checks and remain owned by `postgres`, SECURITY DEFINER, with fixed `search_path=pg_catalog, public`.
+- The six game settings remain disabled; legacy-table RLS/grants and aggregate wallet/ledger invariants were rechecked after the rollout.
+- Exact candidate HEAD `5b89e6c3fd8130185adac6d6e23150c3f52b32da` passed Static QA #716 and Release Smoke #303. The isolated CI/browser result is not a substitute for the remaining full local split-file replay and hosted Auth/browser acceptance.
+
+Current Advisor still reports 20 RLS-enabled/no-policy INFO findings, one intentional aggregate-only anonymous SECURITY DEFINER WARN, 53 authenticated SECURITY DEFINER WARN findings, one plan-limited leaked-password-protection WARN, and 20 unused-index INFO findings. Do not add blanket RLS policies, revoke used RPCs indiscriminately, or drop unused-index candidates without workload evidence. The 53 generic function warnings still require explicit function-by-function disposition; current focused review/CI does not certify every one as closed. No Auth setting or paid-plan change was made.
