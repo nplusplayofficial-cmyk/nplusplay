@@ -16,7 +16,7 @@
 1. Backup restore acceptance passed. The 661-entry archive restored with owner/ACL restoration enabled. Checks reported 5 profiles, 5 wallets, 140 ledger rows, 5 deposits, and 6 game settings; zero wallet arithmetic mismatches, negative wallets, wallets without history, or wallet/latest-ledger mismatches.
 2. All 29 recovered distinct SQL bodies matched their captured fingerprints. The recorded order contained 40 migration history rows (including exact repeated bodies).
 3. All 40 recorded migration bodies replayed successfully on the disposable replay DB after applying a separate empty schema-only bootstrap for the three legacy relations missing from the 2026-10-15 backup baseline.
-4. The local-only candidate referral-state and legacy-table ACL migrations, finite-numeric guard migration, and QA-only wallet/ledger/request ACL reconciliation overlays applied successfully on that clone.
+4. The local-only candidate referral-state and legacy-table ACL migrations, the finite-numeric guard source bundle as it existed at the tested HEAD, and QA-only wallet/ledger/request ACL reconciliation overlays applied successfully on that clone.
 5. Final invariants passed: six game settings remained disabled; public tables had RLS enabled; browser roles could not directly write wallet/ledger/request tables; phone-enumeration RPC was not executable by browser roles; server-only Aviator worker and local cron job were present; both WINGO Admin overloads retained explicit authorization; Recent Activity remained aggregate-only; wallet-ledger arithmetic remained consistent.
 6. Synthetic database E2E passed for deposit idempotency/approval/rejection and Admin authorization, Admin wallet adjustment/ledger and positive-credit protection, referral uniqueness/self-referral/qualification/one-time tier claim, and withdrawal idempotency/status-only Admin review. The synthetic test transaction ended with `ROLLBACK`.
 
@@ -30,3 +30,15 @@
 ## Local lab configuration cleanup
 
 The local container's `cron.database_name` was changed to `nplus_migration_replay_20261028` to allow the captured scheduler migration to replay. After preserving this result, restore the lab's prior setting (`nplus_migration_replay_20261026`) if that database is still the intended local cron target. This is a local Docker configuration only.
+
+
+## Subsequent candidate hardening after this recorded local run — 2026-10-27
+
+The above local replay was run against candidate HEAD `27d13556c393881e67a27389a42279fa36d12690`. After that run, two timestamped candidate migrations were added and passed isolated CI regression tests:
+
+- `supabase/migrations/20261027140000_fix_wingo_admin_overload_defaults.sql` removes the overlapping defaults from the five-argument WINGO Admin overload while preserving the four-argument compatibility overload, original owner, fixed search path and intended execute grants. The disposable regression test reproduces the prior ambiguity and confirms deterministic overload resolution plus non-admin denial.
+- `supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql` applies finite-number checks to ten authenticated SECURITY DEFINER RPCs. Static QA now applies this exact migration in an isolated disposable PostgreSQL fixture and verifies malformed inputs and stored malformed values are rejected.
+
+Latest tested candidate at the time of this note: `72969cf8ce1393e7a95b8b1221423c8f70120b36`; Static QA #660 and Release Smoke #247 passed. This does **not** mean those two newer migrations have been replayed against the full restored local database. A final fresh local reconstructed-baseline replay is still required to exercise the exact latest candidate head. Use a new target DB name such as `nplus_migration_replay_20261029`; do not overwrite the earlier `20261028` evidence DB.
+
+For the final local run, temporarily set the local restore-lab `cron.database_name` to the new replay database before starting the sequence, then restore its prior value (`nplus_migration_replay_20261026`) and restart the local container afterwards. This is local Docker configuration only. Keep all six games disabled and do not use the reconstructed schema bootstrap as proof of original historical DDL.
