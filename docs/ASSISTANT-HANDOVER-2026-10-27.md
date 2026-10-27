@@ -216,7 +216,7 @@ No production schema/ACL/wallet/game/Auth/scheduler state was modified in this w
 - Applied Supabase migration version 20261027172625: 20261027120000_allow_qualified_demo_referral_state.
 - Applied Supabase migration version 20261027172637: 20261027130000_harden_legacy_table_anon_privileges.
 - Applied Supabase migration version 20261027172656: 20261027140000_fix_wingo_admin_overload_defaults.
-- The ten-function finite numeric guard remains pending production rollout; the monolithic migration transport did not succeed, and a read-only catalog check found the guard still absent. Candidate code was split into three smaller migration units at 20261027180000, 20261027180100, and 20261027180200 and its CI/runtime test is being updated.
+- At this point in the historical handover, the split finite numeric guards were pending. They were subsequently applied as versions `20261027180120`, `20261027180134`, and `20261027180141`; see the superseding latest checkpoint below. The repository QA replay paths now reference these recorded version IDs.
 - Production wallet/user rows, Auth settings, scheduler configuration and game flags have not been altered by these protective migrations. All six games remain disabled.
 - Current release candidate is still open/draft; hosted Auth/OTP tests, product/game approvals, current split migration CI, and live Pages verification remain release gates.
 
