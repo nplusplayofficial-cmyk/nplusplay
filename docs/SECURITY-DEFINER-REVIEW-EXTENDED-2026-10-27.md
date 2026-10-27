@@ -87,7 +87,10 @@ The live definitions still do **not** include the candidate finite-numeric guard
 
 Additional defense-in-depth in the candidate guard bundle checks deposit/withdraw request inputs before rounding/narrowing, stored amounts before Admin deposit approval and gift redemption, Admin gift creation, and Aviator/MotoRace/WINGO stake/auto-cashout inputs.
 
-- Candidate migration: `supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql`.
+- Finite-number guard migration units are split for safe transport and traceable history:
+  - supabase/migrations/20261027180000_guard_finite_numeric_request_and_gift_inputs.sql
+  - supabase/migrations/20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql
+  - supabase/migrations/20261027180200_guard_finite_numeric_game_stakes.sql.
 - Earlier source reference retained: `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql`.
 - Static source-order guard and PostgreSQL numeric-semantics tests remain enabled.
 - New runtime regression `qa/test-finite-numeric-migration.sql` applies the exact timestamped migration on an isolated disposable PostgreSQL database and exercises the ten real candidate function definitions for NaN/±Infinity/NULL rejection, stored deposit/gift amount checks, Aviator auto-cashout validation, and non-admin denial.
@@ -117,6 +120,19 @@ At candidate commit `72969cf8ce1393e7a95b8b1221423c8f70120b36`, Static QA #660 a
 - Static QA: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40523464520
 - Release Smoke: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40523464537
 
-The new disposable PostgreSQL test applied `supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql` itself and passed its invalid-input regression cases. Browser smoke rendered 38/38 pages and passed 17/17 mobile viewport checks. This verifies the candidate migration on an isolated fixture, not on production and not as part of a rerun of the full restored local replay.
+The disposable PostgreSQL runtime regression is being updated to apply all three split finite-number migration units and exercise the same ten function bodies. The full replay passed against the preceding monolithic source bundle; the current split sequence must pass fresh CI before it is considered verified. Browser smoke rendered 38/38 pages and passed 17/17 mobile viewport checks. This verifies the candidate migration on an isolated fixture, not on production and not as part of a rerun of the full restored local replay.
 
 Production database, grants, wallet balances, Auth settings, scheduler, and game flags remain unchanged.
+
+
+## Production rollout update — 2026-10-27
+
+Read-only migration-history checks confirm three protective migrations were applied successfully through the Supabase migration API. Supabase assigned these version IDs; repository filenames were aligned to the same IDs:
+
+- Version 20261027172625, name 20261027120000_allow_qualified_demo_referral_state — referral lifecycle CHECK contract.
+- Version 20261027172637, name 20261027130000_harden_legacy_table_anon_privileges — direct browser-role ACL hardening.
+- Version 20261027172656, name 20261027140000_fix_wingo_admin_overload_defaults — WINGO Admin overload defaults.
+
+No wallet balances, user rows, Auth settings, game flags, scheduler configuration or existing legacy-table rows were rewritten by those migrations. All six live game flags remain disabled.
+
+The ten-function finite-number hardening remains NOT applied to production. Its first monolithic transport attempt did not return success, and the follow-up chunked apply was blocked. A live catalog check confirmed the safe-transfer finite guard was still absent. The function guards have been split into three repository migration files, but they require passing CI and a successful approved migration path before production rollout. Do not treat the numeric guards as live.
