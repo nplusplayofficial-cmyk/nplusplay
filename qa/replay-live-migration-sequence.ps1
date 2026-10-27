@@ -252,9 +252,9 @@ if ($UseReconstructedLegacyBaseline) {
     "supabase/migrations/20261027172625_20261027120000_allow_qualified_demo_referral_state.sql",
     "supabase/migrations/20261027172637_20261027130000_harden_legacy_table_anon_privileges.sql",
     "supabase/migrations/20261027172656_20261027140000_fix_wingo_admin_overload_defaults.sql",
-    "supabase/migrations/20261027180000_guard_finite_numeric_request_and_gift_inputs.sql",
-    "supabase/migrations/20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql",
-    "supabase/migrations/20261027180200_guard_finite_numeric_game_stakes.sql",
+    "supabase/migrations/20261027180120_guard_finite_numeric_request_and_gift_inputs.sql",
+    "supabase/migrations/20261027180134_guard_finite_numeric_safe_transfer_and_referral.sql",
+    "supabase/migrations/20261027180141_guard_finite_numeric_game_stakes.sql",
     "qa/fixtures/replay-baseline/wallet-ledger-browser-acl-overlay.sql",
     "qa/fixtures/replay-baseline/request-table-browser-acl-overlay.sql"
   )
