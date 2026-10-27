@@ -41,17 +41,33 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM public.nplus_demo_referrals
     WHERE NOT (
-      (status='pending' AND qualifying_request_id IS NULL AND qualified_at IS NULL AND rewarded_at IS NULL)
-      OR (status='rewarded' AND qualifying_request_id IS NOT NULL AND qualified_at IS NOT NULL AND rewarded_at IS NOT NULL)
+      (status='pending'
+        AND qualifying_request_id IS NULL
+        AND qualified_at IS NULL
+        AND rewarded_at IS NULL)
+      OR (status='qualified'
+        AND qualifying_request_id IS NULL
+        AND qualified_at IS NOT NULL
+        AND rewarded_at IS NULL
+        AND reward_amount = 0.00)
+      OR (status='rewarded'
+        AND qualifying_request_id IS NOT NULL
+        AND qualified_at IS NOT NULL
+        AND rewarded_at IS NOT NULL)
     )
   ) THEN
-    RAISE EXCEPTION 'Existing referral row does not match the pre-qualified-state contract; inspect current rows before replacing the constraint.';
+    RAISE EXCEPTION 'Existing referral row does not match pending/qualified/rewarded lifecycle contract; inspect rows before replacing the constraints.';
   END IF;
 END
 $preflight$;
 
 ALTER TABLE public.nplus_demo_referrals
+  DROP CONSTRAINT IF EXISTS nplus_demo_referrals_status_check,
   DROP CONSTRAINT IF EXISTS nplus_demo_referrals_reward_state_check;
+
+ALTER TABLE public.nplus_demo_referrals
+  ADD CONSTRAINT nplus_demo_referrals_status_check
+  CHECK (status IN ('pending','qualified','rewarded'));
 
 ALTER TABLE public.nplus_demo_referrals
   ADD CONSTRAINT nplus_demo_referrals_reward_state_check
@@ -72,6 +88,10 @@ ALTER TABLE public.nplus_demo_referrals
       AND qualified_at IS NOT NULL
       AND rewarded_at IS NOT NULL)
   );
+
+COMMENT ON CONSTRAINT nplus_demo_referrals_status_check
+  ON public.nplus_demo_referrals IS
+  'Allowed lifecycle states: pending, Admin-qualified for a virtual tier, or rewarded.';
 
 COMMENT ON CONSTRAINT nplus_demo_referrals_reward_state_check
   ON public.nplus_demo_referrals IS
