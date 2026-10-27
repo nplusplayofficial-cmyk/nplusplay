@@ -124,6 +124,8 @@ jobs:
         run: |
           createdb -h 127.0.0.1 -U postgres nplus_legacy_privilege_test
           psql -h 127.0.0.1 -U postgres -d nplus_legacy_privilege_test -v ON_ERROR_STOP=1 -f qa/test-legacy-table-privilege-hardening.sql
+      - name: Guard legacy browser routes as read-only
+        run: node qa/test-legacy-browser-route-readonly.cjs
       - name: Test LEGACY 200/20 referral prototype only (not current release acceptance)
         env:
           PGPASSWORD: nplus_test
