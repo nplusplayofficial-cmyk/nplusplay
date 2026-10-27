@@ -219,3 +219,12 @@ No production schema/ACL/wallet/game/Auth/scheduler state was modified in this w
 - The ten-function finite numeric guard remains pending production rollout; the monolithic migration transport did not succeed, and a read-only catalog check found the guard still absent. Candidate code was split into three smaller migration units at 20261027180000, 20261027180100, and 20261027180200 and its CI/runtime test is being updated.
 - Production wallet/user rows, Auth settings, scheduler configuration and game flags have not been altered by these protective migrations. All six games remain disabled.
 - Current release candidate is still open/draft; hosted Auth/OTP tests, product/game approvals, current split migration CI, and live Pages verification remain release gates.
+
+
+## Current split migration/CI status — 2026-10-27
+
+- Current candidate HEAD: 16a66cf8c941da7893716b1faad9729b8d6f98aa.
+- Static QA #697: PASS, zero warnings; isolated finite-number migration runtime regression PASS; browser smoke 38/38 pages, 17/17 mobile viewport checks.
+- Release Smoke #284: PASS.
+- Three production migrations are applied and recorded as versions 20261027172625, 20261027172637, and 20261027172656.
+- The ten-function finite-numeric guard is still pending production rollout; the live safe-transfer function did not contain its finite guard in the latest read-only check. Do not merge/deploy and claim full production hardening until the split migrations are applied and verified.
