@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const sqlPath = path.join(root, 'supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql');
+const sqlPath = path.join(root, 'supabase/migrations/20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql');
 const testPath = path.join(root, 'qa/test-demo-referral-finite-amount.sql');
 
 function fail(message) {
