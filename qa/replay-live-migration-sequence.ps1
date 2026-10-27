@@ -74,6 +74,17 @@ if ($LASTEXITCODE -ne 0 -or $image -notmatch 'supabase') {
   throw "Container image does not look like the expected local Supabase PostgreSQL image ('$image'). No database action was taken."
 }
 
+# Fail before replaying any history unless pg_cron is configured for the exact local target DB.
+# The scheduler migration will stop if cron.database_name still points to a different database.
+$cronDatabaseQuery = "SELECT current_setting('cron.database_name', true);"
+$cronDatabase = (& docker exec $ContainerName psql -X -U supabase_admin -d postgres -A -t -c $cronDatabaseQuery 2>&1 | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($cronDatabase)) {
+  throw "Could not read local cron.database_name. No database migration was applied."
+}
+if ($cronDatabase -ne $ReplayDatabase) {
+  throw "Local cron.database_name is '$cronDatabase', but replay target is '$ReplayDatabase'. Replay did not start. On the LOCAL restore-lab only, set cron.database_name to '$ReplayDatabase', restart the container, verify the setting, and rerun with a fresh date-suffixed target. Do not skip the scheduler migration."
+}
+
 $rows = @(Get-Content -LiteralPath $OrderPath -Raw | ConvertFrom-Json | Write-Output)
 if ($rows.Count -ne 40) {
   throw "Expected exactly 40 ordered historical migration records; found $($rows.Count). No database action was taken."
