@@ -182,3 +182,6 @@ No production schema/ACL/wallet/game/Auth/scheduler state was modified in this w
 - The one anonymous RPC is the intentional aggregate-only bounded `nplus_recent_demo_activity(integer)`. Authenticated SECURITY DEFINER warnings are generic lints; retain function-specific authorization, not blind global revocation.
 - Remaining actionable account configuration is **Prevent use of leaked passwords** under Supabase Authentication → Sign In / Providers → Email, where available on current plan. Supabase docs: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection. Connected tools do not expose an Auth config update action; no unsupported SQL or hidden config manipulation was attempted.
 - Do not drop the 20 unused-index candidates without workload evidence.
+
+
+- The live Supabase org is on the Free tier; Supabase documents leaked-password protection as Pro+. No plan upgrade/cost was initiated, so this warning cannot be closed via available tools under current zero-budget constraint.

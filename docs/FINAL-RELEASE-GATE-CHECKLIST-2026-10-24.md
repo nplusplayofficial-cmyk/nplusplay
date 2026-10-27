@@ -116,3 +116,6 @@ If a command fails, **stop at that point** and record only the failing version p
 
 ### Safety decision
 Keep PR #22 open as draft. No production migration, ACL, Auth, wallet, scheduler or game setting was changed during the 2026-10-27 pass. Never invent legacy DDL or use the QA schema overlay as a canonical baseline.
+
+
+- **Auth plan constraint confirmed:** the current Supabase organization reports Free tier. Leaked-password protection is Pro+ per official docs, so do not claim this setting can be enabled on the current plan or upgrade without explicit budget approval.

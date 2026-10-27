@@ -163,3 +163,8 @@ The live Supabase Advisor returned these current findings:
 ### Manual Auth setting steps
 
 Open the N+ PLAY Supabase project dashboard → **Authentication → Sign In / Providers → Email** → enable **Prevent use of leaked passwords** if available on the subscribed plan → Save → rerun Security Advisor. Do not paste project secrets into this repo or chat. If the switch is plan-locked on the current Free plan, this item remains a documented limitation rather than being bypassed unsafely.
+
+
+### Auth plan constraint
+
+The current Supabase organization is on the Free tier (read-only organization metadata check, 2026-10-27). Since Supabase documents leaked-password protection as Pro-and-above, this toggle cannot be enabled without a plan change; no upgrade or cost was initiated. Keep the risk explicitly recorded, and retain strong minimum password length/character requirements where free-tier configuration permits. Source: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
