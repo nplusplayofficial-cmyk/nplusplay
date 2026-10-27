@@ -241,7 +241,7 @@ if ($UseReconstructedLegacyBaseline) {
     "supabase/migrations/20261027120000_allow_qualified_demo_referral_state.sql",
     "supabase/migrations/20261027130000_harden_legacy_table_anon_privileges.sql",
     "supabase/migrations/20261027140000_fix_wingo_admin_overload_defaults.sql",
-    "sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql",
+    "supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql",
     "qa/fixtures/replay-baseline/wallet-ledger-browser-acl-overlay.sql",
     "qa/fixtures/replay-baseline/request-table-browser-acl-overlay.sql"
   )
@@ -287,7 +287,7 @@ if ($ResumeFromVersion -eq "20261023092858") {
 } elseif ($UseReconstructedLegacyBaseline) {
   Write-Host "RECONSTRUCTED-BASELINE FULL REPLAY CHECK PASSED for local database '$ReplayDatabase'."
   Write-Host "All 40 captured production-history bodies were replayed after a separate schema-only bootstrap derived from the 2026-10-27 live catalog."
-  Write-Host "Local candidate migrations, numeric guard bundle, ACL reconciliation overlays, and final invariants were exercised on this clone."
+  Write-Host "Local candidate migrations, finite-numeric candidate migration, ACL reconciliation overlays, and final invariants were exercised on this clone."
   Write-Host "IMPORTANT: this does not prove the bootstrap is the original historical DDL or original policy/ACL history."
 } else {
   Write-Host "MIGRATION REPLAY CHECK PASSED for local database '$ReplayDatabase'."
