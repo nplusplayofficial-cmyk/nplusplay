@@ -83,3 +83,17 @@ The current database still reports table-level browser-role grants for legacy `m
 - No individual user rows, emails, phone numbers, balances, request IDs or bank details are included in this report.
 - The review did not attempt to change production settings, grants, functions, scheduled jobs, game flags or user/wallet data.
 - This document is an audit snapshot, not approval to merge or deploy a draft PR.
+
+## Advisor refresh — read-only, 2026-10-27 09:02 UTC
+
+The current Supabase Advisor snapshot was refreshed after the local release-candidate checks. Current catalog footprint from read-only queries: **40 migration-history rows, 69 public functions / SECURITY DEFINER functions, 33 public relations, 33 RLS-enabled tables, 22 policies**. All six game settings remain disabled.
+
+| Current Advisor finding | Observed count/status | Triage |
+|---|---:|---|
+| RLS enabled without policies | 20 tables, INFO | Read-only privilege review confirms the tables in this finding set have no direct `anon` or `authenticated` SELECT/INSERT/UPDATE/DELETE privileges. Keep default-deny; do not add blanket policies to silence the linter. |
+| Anonymous-callable SECURITY DEFINER | 1 function, WARN | `public.nplus_recent_demo_activity(integer)` is an intentional public homepage feed. Existing contract/test limits output to aggregate game key/count and clamps the time window. The public EXECUTE grant must remain an explicit product decision. |
+| Authenticated-callable SECURITY DEFINER | 53 functions, WARN | This generic warning is not itself proof of exploitability. It does mean each function needs category-based authorization review and targeted tests for unauthenticated/non-admin/user-owned paths. The current candidate covers several high-risk Admin, wallet, referral and settlement paths, but does not establish that every one of 53 is fully tested. |
+| Leaked-password protection disabled | 1 finding, WARN | Still open. Confirm current plan/configuration supports the setting without unapproved cost, then enable and test signup/password-reset if approved. No Auth setting was changed during this refresh. |
+| Unused indexes | 20 indexes, INFO | Not acted on. Low traffic or recently created indexes can appear unused; don't drop indexes without workload review. |
+
+This refresh was read-only. No production grants, RLS policies, functions, Auth settings, wallet entries, users, game settings, migration history or scheduled jobs were changed. Candidate CI success and local transaction/rollback tests do not close these hosted production authorization and Auth-setting follow-ups.
