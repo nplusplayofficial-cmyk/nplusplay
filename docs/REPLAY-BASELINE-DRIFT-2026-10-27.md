@@ -5,8 +5,10 @@
 - The private 2026-10-15 dump was restored locally into a new disposable database with owner/ACL restoration enabled. Restore acceptance passed: 5 profiles, 5 wallets, 140 ledger rows, 5 deposit requests, 6 game settings; zero wallet arithmetic mismatches, negative wallets, missing wallet history, or wallet/latest-ledger mismatches; 7 RLS-enabled public tables, 13 policies, and Vault present.
 - Exact source fingerprints passed for all 29 captured SQL bodies and the 40-row replay order.
 - The initial local replay passed migration bodies 1–38.
-- Body 39, `20261023092858_optimize_rls_policies_and_foreign_key_indexes_20261023.sql`, first failed at `public.manual_deposits`. Guarded QA overlay preflights then detected `public.withdraw_requests` and `public.user_bank_details` missing from the backup-derived partial replay baseline before creating any fixture objects. No migration 39/40 was resumed.
-- Migration body 40 has not been run. No migration was skipped. Production was not modified.
+- Body 39, `20261023092858_optimize_rls_policies_and_foreign_key_indexes_20261023.sql`, first failed at `public.manual_deposits`. Guarded QA overlay preflights detected `public.withdraw_requests` and `public.user_bank_details` missing from the backup-derived partial replay baseline.
+- After the dependency preflight was adjusted, the explicitly QA-only fixture was applied to the local partial replay database. It created empty schema-only shapes for the three legacy relations and reported zero rows in each; no production data was copied.
+- The suffix runner's checkpoint verifier then rejected a state whose 37 returned predicates were all `t`. This was a PowerShell guard logic bug (it compared the count of failed predicates to 37 instead of zero); the runner fix and a regression test have now been committed. Bodies 39–40 have not yet been resumed.
+- No migration was skipped. Production was not modified.
 
 ## Read-only catalog evidence
 
@@ -18,7 +20,7 @@ The same read-only catalog review showed broad table-level grants to `anon` and 
 
 ## What the QA-only overlay does — and does not prove
 
-`qa/fixtures/replay-baseline/manual-deposits-schema-overlay.sql` is an explicitly QA-only fixture intended to create empty schema-only approximations of the three missing legacy relations inside the already-partial local replay database. It copies no production rows and refuses to run against any database other than `nplus_migration_replay_20261026`. It preflights other referenced tables/columns first; the latest attempt stopped at missing `user_bank_details.user_id` before creating anything. The replay runner has a guarded suffix path for versions 39–40 only after the fixture and checkpoint checks pass.
+`qa/fixtures/replay-baseline/manual-deposits-schema-overlay.sql` is an explicitly QA-only fixture that was successfully applied to `nplus_migration_replay_20261026` after guarded dependency checks. It created empty schema-only approximations of the three missing legacy relations and confirmed zero rows in each. It copies no production rows and refuses to run against another database. The resume checkpoint guard then failed due to a validation-code bug; that bug has been fixed in commit `ffaf7bb`, and a regression test was added in `bd66c30`. Versions 39–40 remain pending.
 
 If the suffix check passes, that shows bodies 39–40 can run against the explicitly reconstructed table shape and that the final-state invariants pass in this local test. **It is not a clean 40-body replay from the 2026-10-15 dump**, and it does not reconstruct the table's previous RLS policy definitions or prove full restore parity.
 
