@@ -109,3 +109,9 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 - Static QA #624 identified a missing semicolon in the revised `qa/test-release-index-policy-migration.sql` final RAISE NOTICE statement. This was test-fixture SQL syntax, not a production migration failure.
 - The semicolon has been fixed on the candidate branch; fresh Static QA and Release Smoke must pass on the correction commit before any release gate is marked green.
 - Candidate ACL migration remains un-deployed; production is unchanged.
+
+
+## Legacy ACL test SQL terminator — 2026-10-27
+
+- On Static QA #626, the combined RLS/index-policy SQL test and finite Admin referral regression passed, but the separate legacy-table privilege test exposed a missing semicolon on its final RAISE NOTICE.
+- That test-only terminator is corrected in this candidate commit. Production schema/grants remain unchanged. Fresh CI must verify the strict ACL assertions end-to-end.

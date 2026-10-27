@@ -140,6 +140,6 @@ BEGIN
 
   RAISE NOTICE 'PASS: PUBLIC/anon privileges removed from manual_deposits, user_bank_details, and withdraw_requests';
   RAISE NOTICE 'PASS: authenticated can SELECT legacy Admin reconciliation rows only and has no other direct legacy table grants.';
-  RAISE NOTICE 'PASS: owner-scoped policies remain present and RLS remains enabled on all three tables.'
+  RAISE NOTICE 'PASS: owner-scoped policies remain present and RLS remains enabled on all three tables.';
 END
 $tests$;
