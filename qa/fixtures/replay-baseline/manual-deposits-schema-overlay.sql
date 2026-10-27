@@ -1,15 +1,15 @@
 -- QA-ONLY FIXTURE. NEVER RUN THIS FILE AGAINST PRODUCTION.
 -- This is not a canonical migration and contains NO production user rows.
--- Read-only catalog review (2026-10-27) found public.manual_deposits in the
--- current live database (owner postgres, RLS enabled, six columns, PK/FK),
+-- Read-only catalog review (2026-10-27) found both public.manual_deposits and
+-- public.withdraw_requests in current live schema (owner postgres, RLS enabled),
 -- but absent from the restored 2026-10-15 backup-derived replay baseline.
--- None of the 40 captured migration bodies creates this table; version
--- 20261023092858 only references it. Therefore strict clean replay remains
--- blocked by historical baseline/schema drift.
+-- No captured body creates either table; version 20261023092858 only references
+-- them. Strict clean replay therefore remains blocked by baseline/history drift.
 --
--- This fixture creates the minimal empty table shape needed to rehearse only
--- versions 39-40 in the already-partial LOCAL replay database. It does NOT
--- prove a clean 40-row replay or reconstruct the table's previous policy state.
+-- This fixture creates empty schema-only shapes for the two missing tables so
+-- versions 39-40 can be rehearsed against the already-partial LOCAL replay DB.
+-- It copies NO production rows, does not reconstruct old policies/data, and does
+-- NOT prove a clean 40-body replay or full restore parity.
 \set ON_ERROR_STOP on
 
 BEGIN;
@@ -35,6 +35,9 @@ BEGIN
   IF to_regclass('public.manual_deposits') IS NOT NULL THEN
     RAISE EXCEPTION 'QA overlay refused: public.manual_deposits already exists.';
   END IF;
+  IF to_regclass('public.withdraw_requests') IS NOT NULL THEN
+    RAISE EXCEPTION 'QA overlay refused: public.withdraw_requests already exists.';
+  END IF;
   IF to_regnamespace('nplus_replay_audit') IS NOT NULL THEN
     RAISE EXCEPTION 'QA overlay refused: replay-audit marker schema already exists.';
   END IF;
@@ -50,7 +53,6 @@ BEGIN
     'nplus_demo_referral_bonus_claims',
     'nplus_demo_referral_qualifications',
     'nplus_demo_support_requests',
-    'withdraw_requests',
     'withdrawal_requests',
     'user_bank_details',
     'user_preferences'
@@ -69,7 +71,6 @@ BEGIN
     'nplus_demo_referral_bonus_claims.invitee_count',
     'nplus_demo_referral_qualifications.verified_by',
     'nplus_demo_support_requests.handled_by',
-    'withdraw_requests.user_id',
     'withdrawal_requests.user_id',
     'withdrawal_requests.reviewed_by',
     'profiles.id',
@@ -119,8 +120,28 @@ ALTER TABLE public.manual_deposits ENABLE ROW LEVEL SECURITY;
 GRANT ALL PRIVILEGES ON TABLE public.manual_deposits
   TO anon, authenticated, postgres, service_role;
 
+-- The production catalog has the following legacy relation as well. The
+-- migration under test creates its user_id index and owner-only policies, so
+-- deliberately do NOT pre-create those indexes/policies here.
+CREATE TABLE public.withdraw_requests (
+  id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+  user_id uuid NOT NULL,
+  amount numeric NOT NULL,
+  status text DEFAULT 'pending'::text,
+  created_at timestamptz DEFAULT now(),
+  CONSTRAINT withdraw_requests_pkey PRIMARY KEY (id),
+  CONSTRAINT withdraw_requests_user_id_fkey
+    FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+
+ALTER TABLE public.withdraw_requests OWNER TO postgres;
+ALTER TABLE public.withdraw_requests ENABLE ROW LEVEL SECURITY;
+GRANT ALL PRIVILEGES ON TABLE public.withdraw_requests
+  TO anon, authenticated, postgres, service_role;
+
 COMMIT;
 
 SELECT current_database() AS local_database,
-       'empty schema-only manual_deposits overlay created' AS result,
-       (SELECT count(*) FROM public.manual_deposits) AS copied_user_rows;
+       'empty schema-only manual_deposits and withdraw_requests overlay created' AS result,
+       (SELECT count(*) FROM public.manual_deposits) AS manual_deposits_rows,
+       (SELECT count(*) FROM public.withdraw_requests) AS withdraw_requests_rows;
