@@ -30,6 +30,11 @@ DECLARE
   v_ledger_after bigint;
   v_count bigint;
   v_expected_bonus numeric;
+  v_referral_status text;
+  v_referral_reward numeric;
+  v_referral_request uuid;
+  v_referral_qualified_at timestamptz;
+  v_referral_rewarded_at timestamptz;
   v_error text;
 BEGIN
   -- All created users and generated profile/wallet/referral records are rolled back.
@@ -202,6 +207,22 @@ BEGIN
   IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE THEN
     RAISE EXCEPTION 'FAIL: Admin could not verify a qualifying referral';
   END IF;
+
+  -- "qualified" is a verification state only. It must not count as an already-paid
+  -- referral-row reward; tier claims are credited separately and once.
+  SELECT status, reward_amount, qualifying_request_id, qualified_at, rewarded_at
+    INTO v_referral_status, v_referral_reward, v_referral_request,
+         v_referral_qualified_at, v_referral_rewarded_at
+  FROM public.nplus_demo_referrals
+  WHERE referred_user_id = v_invited;
+  IF v_referral_status IS DISTINCT FROM 'qualified'
+     OR v_referral_reward IS DISTINCT FROM 0.00
+     OR v_referral_request IS NOT NULL
+     OR v_referral_qualified_at IS NULL
+     OR v_referral_rewarded_at IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL: qualified referral lifecycle state does not match contract';
+  END IF;
+
   v_retry := public.nplus_demo_admin_qualify_referral(v_invited,500);
   IF coalesce((v_retry->>'success')::boolean,true) OR v_retry->>'reason'<>'already_qualified' THEN
     RAISE EXCEPTION 'FAIL: referral qualification was accepted more than once';
