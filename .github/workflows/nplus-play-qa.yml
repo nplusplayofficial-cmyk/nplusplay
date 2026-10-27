@@ -81,6 +81,8 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d nplus_migration_replay_20261027 -v ON_ERROR_STOP=1 -f qa/test-reconstructed-legacy-bootstrap.sql
       - name: Guard reconstructed full replay procedure
         run: node qa/test-reconstructed-replay-runner.cjs
+      - name: Guard one-command local split replay wrapper
+        run: node qa/test-final-split-replay-wrapper.cjs
       - name: Guard unapproved K3, 5D and TRX payout rules
         run: node qa/test-game-rules-approval.cjs
       - name: Audit recent activity privacy and Aviator recovery
