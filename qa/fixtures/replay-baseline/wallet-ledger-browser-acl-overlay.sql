@@ -6,7 +6,7 @@
 -- Captured 40-row history has no explicit table-level GRANT/REVOKE for these
 -- existing wallet/ledger relations, so a restore of the 2026-10-15 baseline
 -- may retain a different ACL state. This overlay is a separate local QA step;
--- it is NOT a captured migration and does NOT make clean replay history complete.
+-- it is NOT a captured migration, and passing it is NOT a clean 40-body replay.
 \set ON_ERROR_STOP on
 
 BEGIN;
