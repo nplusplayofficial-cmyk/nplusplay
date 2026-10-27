@@ -145,7 +145,7 @@ if (-not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
     throw "Could not inspect the partial replay checkpoint. No migration was applied."
   }
   $resumeChecks = @($resumeState -split '\|')
-  if ($resumeChecks.Count -ne $expectedResumeChecks -or @($resumeChecks | Where-Object { $_.Trim() -ne "t" }).Count -ne $expectedResumeChecks) {
+  if ($resumeChecks.Count -ne $expectedResumeChecks -or @($resumeChecks | Where-Object { $_.Trim() -ne "t" }).Count -ne 0) {
     throw "Partial replay checkpoint does not match the expected state for version $ResumeFromVersion. No migration was applied. Observed: $resumeState"
   }
   if ($ResumeFromVersion -eq "20261023092858") {
