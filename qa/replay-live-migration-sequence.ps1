@@ -135,7 +135,7 @@ if (-not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
     $expectedResumeChecks = 6
   } else {
     # This is intentionally a SUFFIX CHECK after a QA-only schema overlay.
-    # The 2026-10-15 backup lacks manual_deposits, and no captured history row creates it.
+    # The restored 2026-10-15 baseline lacks manual_deposits and withdraw_requests, and no captured history row creates either table.
     $resumeQuery = "SELECT current_database() = '$ReplayDatabase', current_setting('cron.database_name') = '$ReplayDatabase', EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'), to_regclass('cron.job') IS NOT NULL, to_regclass('public.nplus_aviator_worker_health') IS NOT NULL, to_regprocedure('public.nplus_aviator_demo_worker_tick()') IS NOT NULL, to_regclass('public.manual_deposits') IS NOT NULL, COALESCE((SELECT relrowsecurity FROM pg_class WHERE oid = to_regclass('public.manual_deposits')), false), COALESCE((SELECT pg_get_userbyid(relowner) = 'postgres' FROM pg_class WHERE oid = to_regclass('public.manual_deposits')), false), (SELECT count(*) FROM pg_attribute WHERE attrelid = to_regclass('public.manual_deposits') AND attnum > 0 AND NOT attisdropped AND attname IN ('id','user_id','amount','utr','status','created_at')) = 6, EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = to_regclass('public.manual_deposits') AND conname = 'manual_deposits_pkey' AND contype = 'p'), EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = to_regclass('public.manual_deposits') AND conname = 'manual_deposits_user_id_fkey' AND contype = 'f'), to_regprocedure('extensions.uuid_generate_v4()') IS NOT NULL, to_regclass('public.idx_manual_deposits_user_id_fk') IS NULL, NOT EXISTS (SELECT 1 FROM pg_policy WHERE polrelid = to_regclass('public.manual_deposits') AND polname = 'manual_deposits_owner_admin_read'), to_regclass('public.withdraw_requests') IS NOT NULL, COALESCE((SELECT relrowsecurity FROM pg_class WHERE oid = to_regclass('public.withdraw_requests')), false), COALESCE((SELECT pg_get_userbyid(relowner) = 'postgres' FROM pg_class WHERE oid = to_regclass('public.withdraw_requests')), false), (SELECT count(*) FROM pg_attribute WHERE attrelid = to_regclass('public.withdraw_requests') AND attnum > 0 AND NOT attisdropped AND attname IN ('id','user_id','amount','status','created_at')) = 5, EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = to_regclass('public.withdraw_requests') AND conname = 'withdraw_requests_pkey' AND contype = 'p'), EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = to_regclass('public.withdraw_requests') AND conname = 'withdraw_requests_user_id_fkey' AND contype = 'f'), to_regclass('public.idx_withdraw_requests_user_id_fk') IS NULL, NOT EXISTS (SELECT 1 FROM pg_policy WHERE polrelid = to_regclass('public.withdraw_requests') AND polname = 'Users can insert own withdraw'), NOT EXISTS (SELECT 1 FROM pg_policy WHERE polrelid = to_regclass('public.withdraw_requests') AND polname = 'Users can view own withdraw'), to_regclass('nplus_replay_audit.manual_deposits_overlay_marker') IS NOT NULL, EXISTS (SELECT 1 FROM nplus_replay_audit.manual_deposits_overlay_marker WHERE marker = 'manual_deposits_schema_overlay'), (SELECT count(*) FROM public.manual_deposits) = 0, (SELECT count(*) FROM public.withdraw_requests) = 0;"
     $expectedResumeChecks = 28
   }
@@ -149,7 +149,7 @@ if (-not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
     throw "Partial replay checkpoint does not match the expected state for version $ResumeFromVersion. No migration was applied. Observed: $resumeState"
   }
   if ($ResumeFromVersion -eq "20261023092858") {
-    Write-Host "PASS: local-only manual_deposits overlay checkpoint verified. This is a suffix check, not a clean 40-row replay from the backup."
+    Write-Host "PASS: local-only manual_deposits + withdraw_requests overlay checkpoint verified. This is a suffix check, not a clean 40-row replay from the backup."
   } else {
     Write-Host "PASS: guarded resume checkpoint verified for $ReplayDatabase before migration $ResumeFromVersion."
   }
@@ -226,8 +226,8 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 if ($ResumeFromVersion -eq "20261023092858") {
-  Write-Host "MIGRATION SUFFIX CHECK PASSED for local database '$ReplayDatabase' (captured versions 39-40 after a QA-only manual_deposits schema overlay)."
-  Write-Host "IMPORTANT: this is not a clean 40-row replay of the 2026-10-15 backup. That backup baseline lacks public.manual_deposits and no captured migration creates it; resolve the baseline/history gap before declaring a canonical replay."
+  Write-Host "MIGRATION SUFFIX CHECK PASSED for local database '$ReplayDatabase' (captured versions 39-40 after a QA-only two-table schema overlay)."
+  Write-Host "IMPORTANT: this is not a clean 40-row replay of the 2026-10-15 backup. The baseline lacks public.manual_deposits and public.withdraw_requests, and no captured body creates either; resolve the baseline/history gap before declaring a canonical replay."
 } else {
   Write-Host "MIGRATION REPLAY CHECK PASSED for local database '$ReplayDatabase'."
   Write-Host "Compare the printed object counts with the read-only production snapshot and inspect any differences before approving a canonical chain."
