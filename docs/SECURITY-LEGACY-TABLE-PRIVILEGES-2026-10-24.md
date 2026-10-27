@@ -34,3 +34,8 @@ Read-only production catalog evidence now confirms:
 - `withdraw_requests`: anonymous direct grants also exist; current product withdrawal flow uses the newer `withdrawal_requests` table and server RPCs.
 
 The candidate hardening script and isolated PostgreSQL test now include all three tables. It removes `PUBLIC`/`anon` privileges only and deliberately preserves authenticated grants and owner policies to avoid an unreviewed client break. The candidate remains separate from the canonical migration chain and has not been applied to production.
+## Browser-route regression guard
+
+- `qa/test-legacy-browser-route-readonly.cjs` scans browser source and fails if any front-end code directly queries `user_bank_details` or `withdraw_requests`, or if `manual_deposits` is queried outside `admin-deposits.html`.
+- It asserts the legacy Admin block selects rows only and sends no legacy record to an RPC, preventing accidental approval/credit behavior.
+- The Static QA workflow now runs this guard after the disposable table-privilege test. It does not substitute for live hosted-user testing.
