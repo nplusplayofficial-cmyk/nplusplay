@@ -1,6 +1,7 @@
 # Replay the 40 captured production migration bodies on a fresh LOCAL copy
 # of the 2026-10-15 backup, then check critical invariants.
-# Supports one guarded resume at the observed pg_cron failure (20261021161206).
+# Supports guarded resumes at the pg_cron checkpoint and a documented schema-overlay suffix check.
+# The manual_deposits overlay is QA-only and does NOT constitute a clean replay of the original backup.
 # Never connects to production. Never drops/replaces an existing database.
 # Stops on the first failure and leaves the disposable replay DB for inspection.
 
@@ -83,12 +84,18 @@ if (($versions | Select-Object -Unique).Count -ne 40) {
 
 $resumeIndex = 1
 if (-not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
-  if ($ResumeFromVersion -ne "20261021161206") {
-    throw "Only the observed pg_cron failure checkpoint 20261021161206 is eligible for guarded resume."
+  if ($ResumeFromVersion -notin @("20261021161206", "20261023092858")) {
+    throw "Guarded resume is allowed only at the observed pg_cron checkpoint or the documented manual_deposits schema-overlay suffix checkpoint."
   }
   $resumeIndex = [Array]::IndexOf($versions, $ResumeFromVersion) + 1
-  if ($resumeIndex -lt 2 -or $versions[$resumeIndex - 2] -ne "20261021161152") {
-    throw "The expected preceding successful migration checkpoint is not present."
+  if ($resumeIndex -lt 2) {
+    throw "The requested resume version is not present in the captured migration order."
+  }
+  if ($ResumeFromVersion -eq "20261021161206" -and $versions[$resumeIndex - 2] -ne "20261021161152") {
+    throw "The expected preceding Aviator worker recovery checkpoint is not present."
+  }
+  if ($ResumeFromVersion -eq "20261023092858" -and $versions[$resumeIndex - 2] -ne "20261023081916") {
+    throw "The expected preceding Admin wallet signature checkpoint is not present."
   }
 }
 
@@ -120,17 +127,32 @@ if (-not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
     throw "Resume requested but partial replay target '$ReplayDatabase' does not exist."
   }
   if ($ReplayDatabase -ne "nplus_migration_replay_20261026") {
-    throw "The guarded resume is only approved for the observed partial replay target nplus_migration_replay_20261026."
+    throw "Guarded resume is only approved for the observed local replay target nplus_migration_replay_20261026."
   }
-  $resumeState = (& docker exec $ContainerName psql -X -U supabase_admin -d $ReplayDatabase -A -t -F '|' -c "SELECT current_database() = '$ReplayDatabase', current_setting('cron.database_name') = '$ReplayDatabase', to_regclass('public.nplus_aviator_worker_health') IS NOT NULL, to_regprocedure('public.nplus_aviator_demo_worker_tick()') IS NOT NULL, NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'), to_regclass('cron.job') IS NULL;" 2>&1 | Out-String).Trim()
+
+  if ($ResumeFromVersion -eq "20261021161206") {
+    $resumeQuery = "SELECT current_database() = '$ReplayDatabase', current_setting('cron.database_name') = '$ReplayDatabase', to_regclass('public.nplus_aviator_worker_health') IS NOT NULL, to_regprocedure('public.nplus_aviator_demo_worker_tick()') IS NOT NULL, NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'), to_regclass('cron.job') IS NULL;"
+    $expectedResumeChecks = 6
+  } else {
+    # This is intentionally a SUFFIX CHECK after a QA-only schema overlay.
+    # The 2026-10-15 backup lacks manual_deposits, and no captured history row creates it.
+    $resumeQuery = "SELECT current_database() = '$ReplayDatabase', current_setting('cron.database_name') = '$ReplayDatabase', EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'), to_regclass('cron.job') IS NOT NULL, to_regclass('public.nplus_aviator_worker_health') IS NOT NULL, to_regprocedure('public.nplus_aviator_demo_worker_tick()') IS NOT NULL, to_regclass('public.manual_deposits') IS NOT NULL, COALESCE((SELECT relrowsecurity FROM pg_class WHERE oid = to_regclass('public.manual_deposits')), false), COALESCE((SELECT pg_get_userbyid(relowner) = 'postgres' FROM pg_class WHERE oid = to_regclass('public.manual_deposits')), false), (SELECT count(*) FROM pg_attribute WHERE attrelid = to_regclass('public.manual_deposits') AND attnum > 0 AND NOT attisdropped AND attname IN ('id','user_id','amount','utr','status','created_at')) = 6, EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = to_regclass('public.manual_deposits') AND conname = 'manual_deposits_pkey' AND contype = 'p'), EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = to_regclass('public.manual_deposits') AND conname = 'manual_deposits_user_id_fkey' AND contype = 'f'), to_regprocedure('extensions.uuid_generate_v4()') IS NOT NULL, to_regclass('public.idx_manual_deposits_user_id_fk') IS NULL, NOT EXISTS (SELECT 1 FROM pg_policy WHERE polrelid = to_regclass('public.manual_deposits') AND polname = 'manual_deposits_owner_admin_read'), to_regclass('nplus_replay_audit.manual_deposits_overlay_marker') IS NOT NULL, EXISTS (SELECT 1 FROM nplus_replay_audit.manual_deposits_overlay_marker WHERE marker = 'manual_deposits_schema_overlay'), (SELECT count(*) FROM public.manual_deposits) = 0;"
+    $expectedResumeChecks = 18
+  }
+
+  $resumeState = (& docker exec $ContainerName psql -X -U supabase_admin -d $ReplayDatabase -A -t -F '|' -c $resumeQuery 2>&1 | Out-String).Trim()
   if ($LASTEXITCODE -ne 0) {
     throw "Could not inspect the partial replay checkpoint. No migration was applied."
   }
   $resumeChecks = @($resumeState -split '\|')
-  if ($resumeChecks.Count -ne 6 -or @($resumeChecks | Where-Object { $_.Trim() -ne "t" }).Count -ne 0) {
-    throw "Partial replay checkpoint is not in the expected pre-pg_cron state. No migration was applied. Observed: $resumeState"
+  if ($resumeChecks.Count -ne $expectedResumeChecks -or @($resumeChecks | Where-Object { $_.Trim() -ne "t" }).Count -ne $expectedResumeChecks) {
+    throw "Partial replay checkpoint does not match the expected state for version $ResumeFromVersion. No migration was applied. Observed: $resumeState"
   }
-  Write-Host "PASS: guarded resume checkpoint verified for $ReplayDatabase before migration $ResumeFromVersion."
+  if ($ResumeFromVersion -eq "20261023092858") {
+    Write-Host "PASS: local-only manual_deposits overlay checkpoint verified. This is a suffix check, not a clean 40-row replay from the backup."
+  } else {
+    Write-Host "PASS: guarded resume checkpoint verified for $ReplayDatabase before migration $ResumeFromVersion."
+  }
 }
 
 Write-Host "Step 2/5: re-run read-only backup acceptance against the restored baseline."
@@ -203,6 +225,11 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host ""
-Write-Host "MIGRATION REPLAY CHECK PASSED for local database '$ReplayDatabase'."
-Write-Host "Compare the printed object counts with the read-only production snapshot and inspect any differences before approving a canonical chain."
+if ($ResumeFromVersion -eq "20261023092858") {
+  Write-Host "MIGRATION SUFFIX CHECK PASSED for local database '$ReplayDatabase' (captured versions 39-40 after a QA-only manual_deposits schema overlay)."
+  Write-Host "IMPORTANT: this is not a clean 40-row replay of the 2026-10-15 backup. That backup baseline lacks public.manual_deposits and no captured migration creates it; resolve the baseline/history gap before declaring a canonical replay."
+} else {
+  Write-Host "MIGRATION REPLAY CHECK PASSED for local database '$ReplayDatabase'."
+  Write-Host "Compare the printed object counts with the read-only production snapshot and inspect any differences before approving a canonical chain."
+}
 Write-Host "This test does not modify Supabase production and does not alter its migration-history table."
