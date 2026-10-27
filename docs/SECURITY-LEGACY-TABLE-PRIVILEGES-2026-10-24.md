@@ -10,7 +10,7 @@ Other checks in this audit found direct write privileges restricted on `demo_wal
 
 - Candidate migration `supabase/migrations/20261027130000_harden_legacy_table_anon_privileges.sql` revokes all privileges from `PUBLIC` and `anon` on all three legacy tables: `manual_deposits`, `user_bank_details`, and `withdraw_requests`. The legacy SQL entry point is now a wrapper around this single migration source.
 - It intentionally keeps `authenticated` table grants and existing RLS policies unchanged.
-- `qa/test-legacy-table-privilege-hardening.sql` exercises the migration in a fresh disposable schema and checks anonymous grants are gone from all three tables, authenticated owner-scoped access contracts are preserved, and RLS remains enabled. `qa/test-legacy-browser-route-readonly.cjs` additionally guards the current Admin `manual_deposits` reconciliation screen as SELECT-only and forbids browser queries to `user_bank_details` / `withdraw_requests`. Authenticated grants are preserved until the legacy route contract is deliberately changed.
+- `qa/test-legacy-table-privilege-hardening.sql` exercises the current migration in a fresh disposable schema and checks that direct privileges are removed from PUBLIC/anon/authenticated on all three tables, then authenticated SELECT-only is restored on `manual_deposits` for the read-only Admin screen. It also verifies RLS and policy definitions remain intact. `qa/test-legacy-browser-route-readonly.cjs` guards the Admin `manual_deposits` route as SELECT-only and forbids browser queries to `user_bank_details` / `withdraw_requests`. The older authenticated-grant-preserving behavior below is superseded by the 2026-10-27 refinement.
 
 ## Safety / release gate
 
@@ -33,7 +33,7 @@ Read-only production catalog evidence now confirms:
 - `user_bank_details`: anonymous direct grants exist on a table containing bank/UPI fields; RLS has authenticated owner policies and no anonymous policies.
 - `withdraw_requests`: anonymous direct grants also exist; current product withdrawal flow uses the newer `withdrawal_requests` table and server RPCs.
 
-The candidate hardening script and isolated PostgreSQL test now include all three tables. It removes `PUBLIC`/`anon` privileges only and deliberately preserves authenticated grants and owner policies to avoid an unreviewed client break. The candidate remains separate from the canonical migration chain and has not been applied to production.
+The initial candidate removed `PUBLIC`/`anon` privileges only. This statement was superseded by the 2026-10-27 refinement below: the current candidate revokes direct browser-role grants across all three legacy tables and then grants authenticated SELECT only on `manual_deposits`, because that is the only current browser route using these tables. It preserves rows, owner, RLS flags and policy definitions; it remains candidate-only and has not been applied to production.
 ## Browser-route regression guard
 
 - `qa/test-legacy-browser-route-readonly.cjs` scans browser source and fails if any front-end code directly queries `user_bank_details` or `withdraw_requests`, or if `manual_deposits` is queried outside `admin-deposits.html`.
