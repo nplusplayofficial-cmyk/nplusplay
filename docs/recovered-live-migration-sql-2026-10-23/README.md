@@ -2,7 +2,9 @@
 
 ## Important: this is an evidence archive, not a migration directory
 
-The 29 SQL files in this folder are source snapshots used to reconcile the live Supabase migration history. They are **not** a reviewed canonical migration chain. Do not execute them, copy them into `supabase/migrations`, or run `supabase db push` based on this folder alone.
+The 29 fingerprinted SQL files in this folder are source snapshots used to reconcile the live Supabase migration history. There may also be separately identified supplemental SQL evidence, such as `20261021182724_nplus_aviator_persistent_scheduler.sql` from PR #18. That scheduler file is **not** one of the 40 stored historical migration rows and is not included in the 29 body fingerprints; its role is independently checked by `qa/test-activity-aviator-audit.cjs`.
+
+These files are **not** a reviewed canonical migration chain. Do not execute them, copy them into `supabase/migrations`, or run `supabase db push` based on this folder alone.
 
 The snapshots were recovered from the current repository candidates and a read-only comparison against stored SQL bodies in `supabase_migrations.schema_migrations`. Per-version evidence and body fingerprints are in:
 
