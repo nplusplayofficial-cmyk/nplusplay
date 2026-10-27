@@ -289,11 +289,14 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
     if (!requestAcl.includes('NEVER RUN THIS FILE AGAINST PRODUCTION') ||
         !requestAcl.includes("v_target <> 'nplus_migration_replay_20261026'") ||
         !requestAcl.includes('nplus_replay_audit.request_table_acl_snapshot') ||
+        !requestAcl.includes('owner_before text NOT NULL') ||
+        !requestAcl.includes("pg_get_userbyid(relowner) NOT IN ('postgres','supabase_admin')") ||
+        !requestAcl.includes('ALTER TABLE public.withdrawal_requests OWNER TO postgres') ||
         !requestAcl.includes('REVOKE ALL ON TABLE public.deposit_requests, public.withdrawal_requests') ||
         !requestAcl.includes('GRANT SELECT ON TABLE public.deposit_requests, public.withdrawal_requests') ||
         !requestAcl.includes('has_table_privilege') ||
         !requestAcl.includes('not a clean 40-body replay')) {
-      console.error('FAIL request-table ACL parity fixture lacks local-only, snapshot, post-check or no-clean-replay safeguards.');
+      console.error('FAIL request-table ACL parity fixture lacks local-only owner snapshot, reviewed owner normalization, grants verification or no-clean-replay safeguards.');
       failures++;
     }
   }
