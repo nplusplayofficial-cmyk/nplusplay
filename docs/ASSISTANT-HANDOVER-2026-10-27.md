@@ -4,16 +4,16 @@ Checked against GitHub on 2026-10-27.
 
 ## Current candidate
 - PR #22: https://github.com/nplusplayofficial-cmyk/nplusplay/pull/22
-- State: OPEN, DRAFT, mergeable=true; base main.
+- State at last refresh: OPEN, DRAFT, mergeable=true; base main.
 - Branch: integration/release-candidate-2026-10-27
-- Head: ef7a559ceeef8017a8d0153adf32faaface0b727
-- PR size at check: 41 commits, 86 changed files, +12,126/-1,016.
-- Repository default branch is main.
-- No merge/deploy was performed during this pass.
+- Last pre-guard head: 2fdedd6db4e7242d3ade48f3a108fffa4c0b29d2 (42 commits, 87 changed files, +12,180/-1,016).
+- The next candidate commit adds a finite-number guard for Admin referral qualification plus a dedicated disposable SQL regression; fresh CI is required on that new head.
+- Repository default branch is main. No merge/deploy is authorized or performed.
 
 ## Current CI evidence on exact head
-- Static QA run 40482439950: completed/success, head SHA matches candidate. Both static-qa and browser-smoke jobs succeeded; all 29 listed static-qa steps succeeded, including disposable legacy privilege SQL test and the legacy-browser-route-readonly guard.
-- Release Smoke run 40482440023: completed/success, head SHA matches candidate; source-smoke job succeeded.
+- Latest completed pre-guard Static QA run 40484241118 (#617): success on head 2fdedd6db4e7242d3ade48f3a108fffa4c0b29d2; both static-qa and browser-smoke jobs succeeded, including the disposable legacy privilege SQL test and legacy-browser-route-readonly guard.
+- Latest completed pre-guard Release Smoke run 40484241123 (#204): success on the same head.
+- Candidate-only finite-amount guard tests were added after those runs; do not count the new head as passing until its new Actions runs complete.
 - Combined status API returned no commit status entries, so rely on the explicit workflow-run records and job details, not that empty status endpoint.
 - These CI checks do not constitute hosted Supabase Auth/user-flow tests or clean canonical restore/replay acceptance.
 
@@ -52,3 +52,10 @@ Checked against GitHub on 2026-10-27.
 - Continue read-only code audit focused on security-definer callable functions; pick specific high-risk categories and add candidate-only disposable regression guards where current code provides grounded contract.
 - Review release checklist/doc contradictions so the newest head's evidence is consistent.
 - No user action is needed for CI reruns unless a later commit changes tested files. User-side steps only become necessary for missing authoritative backup/source and hosted test accounts/inbox, which assistant connector cannot safely synthesize.
+
+## Focused production read-only SECURITY DEFINER review (2026-10-27)
+
+- Reviewed selected live definitions and ACLs for Admin wallet adjustment, game status, deposit approve/reject, status-only demo withdrawal review, referral qualification/claim, MotoRace result reveal, and WINGO Admin overload shape. No production mutation occurred.
+- New report: [SECURITY DEFINER focused review](SECURITY-DEFINER-REVIEW-2026-10-27.md).
+- Found a numeric validation issue in the live Admin referral qualification RPC: PostgreSQL NaN compares as >=500 and fits numeric(14,2). Candidate-only finite-amount guard and disposable regression tests are being added to the integration branch. Not deployed.
+- WINGO four/five-argument default overlap remains in live catalog; current admin-reports page invokes the five-argument signature. Keep candidate overload regression and canonical ordering review before any DDL.
