@@ -2,9 +2,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const candidatePaths = [
-  path.join(__dirname, '..', 'supabase/migrations/20261027180000_guard_finite_numeric_request_and_gift_inputs.sql'),
-  path.join(__dirname, '..', 'supabase/migrations/20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql'),
-  path.join(__dirname, '..', 'supabase/migrations/20261027180200_guard_finite_numeric_game_stakes.sql')
+  path.join(__dirname, '..', 'supabase/migrations/20261027180120_guard_finite_numeric_request_and_gift_inputs.sql'),
+  path.join(__dirname, '..', 'supabase/migrations/20261027180134_guard_finite_numeric_safe_transfer_and_referral.sql'),
+  path.join(__dirname, '..', 'supabase/migrations/20261027180141_guard_finite_numeric_game_stakes.sql')
 ];
 function fail(s){console.error('FAIL: '+s);process.exitCode=1;}
 function fn(sql,name){const m='CREATE OR REPLACE FUNCTION public.'+name+'(';const i=sql.indexOf(m);if(i<0){fail('missing '+name);return '';}const j=sql.indexOf('CREATE OR REPLACE FUNCTION public.',i+m.length);return sql.slice(i,j<0?sql.length:j);}
