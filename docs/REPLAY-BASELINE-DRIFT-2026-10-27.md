@@ -39,3 +39,10 @@ The suffix test shows bodies 39–40 can run against the explicitly reconstructe
 ## Required release decision
 
 Keep the application **not release-ready** until an authoritative baseline/history for `manual_deposits`, `withdraw_requests`, and `user_bank_details` is obtained and schema/ACL lineage is resolved. The final local invariants and Wallet/Admin/referral E2E now pass under QA overlays and the candidate-only referral-state migration, but this is not a clean canonical replay. Hosted authenticated flows, final integrated CI, and approved K3/5D/TRX settlement rules remain blockers. Prefer a verified newer backup that includes the relation, or an approved canonical pre-history schema migration/source with owner, ACL, constraints and policy provenance reviewed. Do not edit the captured applied-body fingerprints, skip body 39, insert fake migration-history rows, run the QA fixture in production, or change production wallets, user data, game flags, grants or cron jobs as a shortcut.
+
+
+## 2026-10-27 production body verification update
+
+The 40-row stored migration history has now been reconciled at the **SQL body-source level**: all 29 distinct production-stored SQL bodies compare character-for-character to the 29 archived files; the remaining 11 history rows repeat those bodies. See [production body verification](./PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md).
+
+This confirms the historical SQL body files exist and match the stored bodies. It does not make the replay clean: none of the 29 distinct bodies creates `manual_deposits`, `user_bank_details`, or `withdraw_requests`; the captured index/policy migration only references them. The 2026-10-15 backup-derived replay baseline does not have the three tables. Their authoritative baseline DDL/history remains the current replay blocker. Do not re-run migrations, use the QA-only overlay in production, or alter migration history as a shortcut.

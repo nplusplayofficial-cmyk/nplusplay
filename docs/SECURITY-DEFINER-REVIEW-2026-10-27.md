@@ -55,20 +55,3 @@ The live catalog currently has both `nplus_admin_set_wingo_demo(integer,text,tex
 5. Final live site verification after the release gates pass.
 
 No production mutations were made during this review.
-
-
-## Second confirmed finite-number input issue: virtual Safe transfer
-
-A read-only live catalog probe on 2026-10-27 observed that `public.nplus_demo_safe_transfer(text,numeric)` is executable by `authenticated` and not by `anon`. Its previous implementation initialized `v_amount numeric(14,2) := p_amount` before validating the value, then checked only `v_amount <= 0` and `v_amount <> round(v_amount,2)`.
-
-PostgreSQL numeric semantics were confirmed read-only:
-- `'NaN'::numeric(14,2) <= 0` evaluates to false.
-- `'NaN'::numeric(14,2) <> round('NaN'::numeric(14,2),2)` evaluates to false.
-- `'NaN'::numeric(14,2) > 0` evaluates to true.
-- The live wallet column is `numeric(18,2)`, which can store NaN.
-
-This creates a plausible authenticated path to poison a user's own virtual wallet and Safe balance with NaN; it is not an anonymous access bypass or real-money payout path, but it is a data integrity defect. The live RPC and all related ACLs were only read; no attempt was made to invoke a mutating call against production.
-
-A candidate-only function replacement is now added at `sql/NPLUS_PLAY_SAFE_TRANSFER_FINITE_AMOUNT_GUARD_CANDIDATE_2026-10-27.sql`. It checks NULL/NaN/infinities, upper numeric range and original-argument decimal precision before assigning to `numeric(14,2)`; it keeps the authenticated identity check, user-owned row locks, balance limits and ledger writes. It does not change grants or any rows.
-
-Static source guard and isolated PostgreSQL runtime test were added to the Static QA workflow. Their result is pending for the newest candidate commit until Actions completes. Production is unchanged and the candidate replacement must not be applied until canonical migration/backup gates and explicit rollout review pass.

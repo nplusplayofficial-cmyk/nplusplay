@@ -46,3 +46,15 @@ No Supabase development branch/project was created in this audit because a free/
 ## Additional duplicate-body review
 
 A text-pattern triage of the 11 exact duplicate body pairs did not find unguarded table/index creation, add-constraint/add-column, INSERT, UPDATE, or DELETE patterns in those bodies. This does not prove idempotency or replay safety; a clean disposable replay remains mandatory.
+
+
+## 2026-10-27 read-only live-body reconciliation update
+
+The 2023 source counts and the Missing/Ambiguous labels in the historical sections above are superseded for **SQL bodies recorded in migration history** by a new direct comparison of production-stored SQL bodies to the integration branch's archived recovered SQL files.
+
+- Directly read `supabase_migrations.schema_migrations.statements` using SELECT only.
+- Exact character-for-character match: **29 / 29 distinct applied bodies** against the archived SQL files. All character counts matched; production-side MD5 fingerprints and source paths are documented in [PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md](./PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md).
+- The 40 migration-history rows comprise the 29 distinct bodies plus 11 repeats that have an exact body fingerprint match to an earlier row.
+- The five SQL bodies previously labelled missing are now located and exact-matched to the production-stored bodies; the previously ambiguous VIP referral, Admin user-tools and null-profile-guard bodies are also resolved against the archived bodies.
+
+**Still open:** clean canonical replay / disaster-recovery parity. The 40 applied SQL bodies never create `manual_deposits`, `user_bank_details` or `withdraw_requests`; only the later index/policy optimization body references them. The supplied 2026-10-15 backup-derived baseline lacks these relations. Their authoritative pre-history DDL, provenance and historical policies/ACLs are still missing, so do not invent a migration or mark replay complete. No production changes were made.

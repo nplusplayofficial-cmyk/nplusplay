@@ -210,3 +210,13 @@ This closes the earlier **source-retrieval** gap for those five operations, but 
 ### Duplicate-body static replay-risk scan — 2026-10-23
 
 A read-only pattern scan was run over the 11 identical-body pairs. It did not flag unguarded CREATE TABLE/INDEX, ADD CONSTRAINT/COLUMN, INSERT, UPDATE, or DELETE patterns in these duplicate bodies. Eight bodies contain CREATE OR REPLACE syntax; three do not. This is only a text-pattern triage aid (not a SQL parser and not a replay test), so it does **not** establish idempotency, transaction safety, role prerequisites, or identical outcomes in a clean database. Duplicate records remain subject to manual review and clean replay before any canonical chain is approved.
+
+
+## Production body cross-check — 2026-10-27 (supersedes old Missing/Ambiguous source labels)
+
+A read-only query read the stored SQL from `supabase_migrations.schema_migrations.statements` and compared it character-for-character with the candidate archive. The dedicated evidence report lists the body length and MD5 for every unique body:
+[`PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md`](./PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md).
+
+**Current result: 29 of 29 distinct stored SQL bodies are exact character-for-character matches to files in `docs/recovered-live-migration-sql-2026-10-23/`. The 40 history rows consist of these 29 distinct bodies plus 11 rows whose stored statement body repeats an earlier body exactly.** Thus earlier “Missing”, “Candidate” or “Ambiguous” labels in the original 2023 audit table above are stale where the exact file/body mapping is present in the verification report. Those earlier notes record what was known at the time of that audit and are retained for historical context.
+
+The body-source gap is now closed for the SQL recorded in the 40-row migration history. The clean replay gate is still blocked for a different reason: no recorded body creates `manual_deposits`, `user_bank_details`, or `withdraw_requests`; body `20261023092858` only references them. Their historical baseline DDL, source, prior policies and grants must be recovered from trusted source/deployment evidence. The current live-table snapshot alone is not a canonical migration source.

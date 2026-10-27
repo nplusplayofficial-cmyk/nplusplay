@@ -74,3 +74,12 @@ Checked against GitHub on 2026-10-27.
 - Live read-only semantics confirmed an additional virtual-wallet integrity issue in `nplus_demo_safe_transfer(text,numeric)`: PostgreSQL NaN bypassed the previous positivity/precision checks. The function is authenticated-callable and anon-denied.
 - Candidate-only replacement, static guard and dedicated disposable PostgreSQL test are now added. The fix validates the original numeric input before narrowing to `numeric(14,2)`; it preserves the user identity, wallet/Safe row locks, and ledger/transfer records.
 - The new candidate has not passed CI until the workflow run on its exact HEAD completes, and no production function or grant was modified.
+
+
+## Production migration history evidence update — 2026-10-27
+
+- The previously missing/ambiguous **migration-body source mapping is now closed** for recorded bodies: 29 distinct SQL bodies were compared character-for-character against the archived files in the candidate branch; all matched. The other 11 of the 40 migration history rows repeat an earlier body exactly.
+- Evidence: [PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md](./PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md). This was read-only inspection of stored migration statement text, not a production migration.
+- The canonical replay blocker remains: none of the 40 recorded body rows creates `manual_deposits`, `user_bank_details`, or `withdraw_requests`; the later RLS/index migration references them only. The 2026-10-15 backup-derived baseline lacks those tables and current schema cannot prove their historical provenance.
+- Latest code head: `d139925f8ef95764dceadb82974bd3901a12d2a0`. Release Smoke #208 succeeded; Static QA #621's static-qa job and both finite-amount regression tests succeeded. Its desktop/mobile browser-smoke job was still in progress during Chromium installation on last refresh. Refresh the run before treating all workflow jobs as completed.
+- Production is unchanged. Do not merge/deploy until the clean replay/baseline, hosted journeys, security/release gates, and explicit approval are complete.
