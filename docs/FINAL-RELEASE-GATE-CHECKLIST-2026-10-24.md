@@ -4,7 +4,7 @@
 
 **Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Bodies 39/40 passed only after QA-only empty schema overlays for three missing legacy tables; this is not a clean full replay. Wallet/ledger ACL parity and request-table ACL parity overlays passed. Final local invariants passed after the candidate qualified-referral-state migration; wallet/Admin/referral E2E passed with transaction rollback. Baseline/schema/ACL lineage, authenticated hosted-browser tests, and approved K3/5D/TRX rules remain release blockers. The integrated candidate's Static QA, browser smoke, and Release Smoke all pass on the latest head.
 
-Production rollout update: three protective migrations were applied on 2026-10-27 (referral lifecycle constraint, legacy-table ACL hardening, and WINGO overload fix). No wallet/ledger balances or user rows were rewritten; Auth settings, scheduler configuration, and game flags were not changed. The finite-number RPC guard migrations remain pending.
+Production rollout update: three protective migrations were applied on 2026-10-27 (referral lifecycle constraint, legacy-table ACL hardening, and WINGO overload fix). No wallet/ledger balances or user rows were rewritten; Auth settings, scheduler configuration, and game flags were not changed. The split finite-number RPC guard migrations remain pending production rollout. Static QA #697 applies them in disposable PostgreSQL successfully, but they were not applied to the live database.
 
 ## Workstream status
 
@@ -146,5 +146,13 @@ See [local replay evidence](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) 
 - Applied version 20261027172625: 20261027120000_allow_qualified_demo_referral_state.
 - Applied version 20261027172637: 20261027130000_harden_legacy_table_anon_privileges.
 - Applied version 20261027172656: 20261027140000_fix_wingo_admin_overload_defaults.
-- Not applied: three split finite-number guard migrations listed above.
+- Not applied to production: three split finite-number guard migrations listed above. Static QA #697 has verified the three files in disposable PostgreSQL.
 - All six game settings remain disabled. Hosted Auth/OTP and browser journey acceptance, legacy historical schema provenance, and final live Pages verification remain unverified.
+
+
+### Split-migration candidate verification (2026-10-27)
+
+- Current branch HEAD: 16a66cf8c941da7893716b1faad9729b8d6f98aa.
+- Static QA #697 PASS, zero warnings; isolated runtime finite numeric migration test PASS; browser smoke 38/38 pages and 17/17 mobile checks PASS.
+- Release Smoke #284 PASS.
+- Current live migration history contains the three applied versions 20261027172625, 20261027172637, and 20261027172656. The three split finite-number migration files (20261027180000–20261027180200) are not yet in live migration history; live safe-transfer function still lacks the finite-input guard.
