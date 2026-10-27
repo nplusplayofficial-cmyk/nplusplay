@@ -1,11 +1,12 @@
 -- QA-ONLY REQUEST-TABLE ACL PARITY OVERLAY.
 -- NEVER RUN THIS FILE AGAINST PRODUCTION.
--- Read-only production catalog review on 2026-10-27 showed authenticated
--- SELECT only and no anon privileges on deposit_requests/withdrawal_requests.
--- The captured history did not explicitly reconcile baseline table ACLs.
--- This overlay adjusts only the isolated local replay DB after snapshotting the
--- current request-table ACLs. It is not a captured migration and is not a clean
--- 40-body replay.
+-- Read-only production catalog review on 2026-10-27 showed both request tables
+-- owned by postgres with RLS enabled, anon with no privileges, and authenticated
+-- SELECT only. The replay database's withdrawal_requests is currently owned by
+-- supabase_admin while deposit_requests is owned by postgres; its original ACL
+-- is also broader than the reviewed contract. Both discrepancies are snapshotted.
+-- This changes ONLY the isolated local replay DB. It is not a captured migration
+-- and is not a clean 40-body replay.
 \set ON_ERROR_STOP on
 
 BEGIN;
@@ -34,7 +35,7 @@ BEGIN
       to_regclass('public.deposit_requests'),
       to_regclass('public.withdrawal_requests')
     )
-      AND (NOT relrowsecurity OR pg_get_userbyid(relowner) <> 'postgres')
+      AND (NOT relrowsecurity OR pg_get_userbyid(relowner) NOT IN ('postgres','supabase_admin'))
   ) THEN
     RAISE EXCEPTION 'QA request ACL overlay refused: owner/RLS precondition differs.';
   END IF;
@@ -61,6 +62,7 @@ $guard$;
 
 CREATE TABLE nplus_replay_audit.request_table_acl_snapshot (
   table_name text PRIMARY KEY,
+  owner_before text NOT NULL,
   relacl_before text,
   anon_select_before boolean NOT NULL,
   anon_insert_before boolean NOT NULL,
@@ -74,12 +76,12 @@ CREATE TABLE nplus_replay_audit.request_table_acl_snapshot (
 );
 
 INSERT INTO nplus_replay_audit.request_table_acl_snapshot (
-  table_name, relacl_before,
+  table_name, owner_before, relacl_before,
   anon_select_before, anon_insert_before, anon_update_before, anon_delete_before,
   authenticated_select_before, authenticated_insert_before,
   authenticated_update_before, authenticated_delete_before
 )
-SELECT c.relname, c.relacl::text,
+SELECT c.relname, pg_get_userbyid(c.relowner), c.relacl::text,
        has_table_privilege('anon', c.oid, 'SELECT'),
        has_table_privilege('anon', c.oid, 'INSERT'),
        has_table_privilege('anon', c.oid, 'UPDATE'),
@@ -93,6 +95,10 @@ JOIN pg_namespace n ON n.oid=c.relnamespace
 WHERE n.nspname='public'
   AND c.relname IN ('deposit_requests','withdrawal_requests')
 ORDER BY c.relname;
+
+-- Match the audited owner on the known local drift: production owner is postgres.
+-- The original owner is recorded in request_table_acl_snapshot before this step.
+ALTER TABLE public.withdrawal_requests OWNER TO postgres;
 
 REVOKE ALL ON TABLE public.deposit_requests, public.withdrawal_requests
   FROM PUBLIC, anon, authenticated;
@@ -123,7 +129,7 @@ $verify$;
 
 COMMIT;
 
-SELECT table_name, relacl_before, anon_select_before, anon_insert_before,
+SELECT table_name, owner_before, relacl_before, anon_select_before, anon_insert_before,
        anon_update_before, anon_delete_before, authenticated_select_before,
        authenticated_insert_before, authenticated_update_before, authenticated_delete_before
 FROM nplus_replay_audit.request_table_acl_snapshot
