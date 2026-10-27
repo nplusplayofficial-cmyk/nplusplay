@@ -69,9 +69,9 @@ CREATE TABLE public.nplus_wingo_demo_bets(
 );
 
 -- Install the same SQL file intended for the eventual reviewed production migration.
-\ir ../supabase/migrations/20261027180000_guard_finite_numeric_request_and_gift_inputs.sql
-\ir ../supabase/migrations/20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql
-\ir ../supabase/migrations/20261027180200_guard_finite_numeric_game_stakes.sql
+\ir ../supabase/migrations/20261027180120_guard_finite_numeric_request_and_gift_inputs.sql
+\ir ../supabase/migrations/20261027180134_guard_finite_numeric_safe_transfer_and_referral.sql
+\ir ../supabase/migrations/20261027180141_guard_finite_numeric_game_stakes.sql
 
 INSERT INTO public.profiles(id,role) VALUES
   ('11111111-1111-4111-8111-111111111111','admin'),
