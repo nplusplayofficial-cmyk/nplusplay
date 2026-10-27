@@ -639,7 +639,7 @@ begin
     raise exception 'Request has already been reviewed.';
   end if;
 
-  if v_request.amount is null or v_request.amount::text IN ('NaN','Infinity','-Infinity') or v_request.amount <= 0 then
+  if v_request.amount is null or v_request.amount::text IN ('NaN','Infinity','-Infinity') or v_request.amount < 100 or v_request.amount > 50000 then
     raise exception 'Deposit request amount is invalid.';
   end if;
 

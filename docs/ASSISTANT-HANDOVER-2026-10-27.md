@@ -149,3 +149,6 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 - All 69 public SECURITY DEFINER functions remain postgres-owned with fixed search_path; 53 are authenticated-executable; only aggregate-only Recent Activity is anon-executable. anon/authenticated/PUBLIC have no CREATE privilege on public schema.
 - A read-only scan over 21 current numeric amount/balance/stake/payout fields found zero NaN/±Infinity rows.
 - Targeted review is improved, but do not mark every one of the 53 Advisor findings closed without per-finding review evidence; remaining Advisor triage is still a release checklist item.
+
+
+- Deposit approval candidate now enforces exactly the same 100–50,000 virtual-point range as the request-creation RPC, plus finite-value validation. This is defense-in-depth before wallet/ledger writes; production remains unchanged.

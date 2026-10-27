@@ -108,3 +108,8 @@ The following additional SECURITY DEFINER groups were checked read-only by funct
 Read-only aggregate scan over 21 live amount/balance/stake/payout columns returned zero rows containing NaN or ±Infinity. This supports the snapshot that existing numeric columns are clean as of this check, but does not replace the new candidate input guards or establish historical data provenance.
 
 Scope note: this closes the targeted/high-risk code-review pass for the listed function groups and numeric entry points. It does not close every individual one of the 53 Advisor warnings as an independent signed-off finding; residual Advisor triage remains a release checklist item.
+
+
+### Admin deposit approval bounds aligned
+
+The candidate `nplus_approve_deposit(uuid)` now additionally enforces the same 100–50,000 virtual-point amount bounds as `nplus_create_demo_deposit_request`, alongside NULL/NaN/±Infinity rejection before wallet mutation. The static guard asserts both bounds are present in the candidate definition. No live function was altered.
