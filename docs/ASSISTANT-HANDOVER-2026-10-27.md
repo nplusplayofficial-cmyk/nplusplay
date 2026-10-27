@@ -67,3 +67,10 @@ Checked against GitHub on 2026-10-27.
 - This snapshot is current live evidence, **not** historical source SQL. It improves reviewability but does not close the missing table-creation history or make the 40-body replay canonical.
 - GitHub Actions workflows are being updated from checkout/setup-node v4 (Node 20 runtime warnings seen in the user's screenshots) to v5 (Node 24 runtime), with setup-node package-manager auto-caching disabled because these workflows do not need it.
 - Production ACLs on the three legacy relations still give anon and authenticated broad table privileges even though RLS is enabled; the candidate ACL migration that revokes only PUBLIC/anon is not deployed. Do not apply it outside a reviewed rollout.
+
+
+## Additional finite-amount defect (candidate-only; found 2026-10-27)
+
+- Live read-only semantics confirmed an additional virtual-wallet integrity issue in `nplus_demo_safe_transfer(text,numeric)`: PostgreSQL NaN bypassed the previous positivity/precision checks. The function is authenticated-callable and anon-denied.
+- Candidate-only replacement, static guard and dedicated disposable PostgreSQL test are now added. The fix validates the original numeric input before narrowing to `numeric(14,2)`; it preserves the user identity, wallet/Safe row locks, and ledger/transfer records.
+- The new candidate has not passed CI until the workflow run on its exact HEAD completes, and no production function or grant was modified.

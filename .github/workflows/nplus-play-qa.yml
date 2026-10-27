@@ -53,6 +53,14 @@ jobs:
         run: node qa/test-demo-referral-qualified-state.cjs
       - name: Guard finite Admin referral qualification amounts
         run: node qa/test-demo-referral-finite-amount.cjs
+      - name: Guard finite Admin safe-transfer amounts
+        run: node qa/test-demo-safe-transfer-finite-amount.cjs
+      - name: Test finite safe-transfer amounts in a dedicated disposable database
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_safe_transfer_finite_test
+          psql -h 127.0.0.1 -U postgres -d nplus_safe_transfer_finite_test -v ON_ERROR_STOP=1 -f qa/test-demo-safe-transfer-finite-amount.sql
       - name: Test finite Admin referral qualification in a dedicated disposable database
         env:
           PGPASSWORD: nplus_test
