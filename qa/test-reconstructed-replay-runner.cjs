@@ -20,6 +20,8 @@ const checks=[
  ['resume + reconstructed mode conflict rejected',runner.includes('cannot be combined with ResumeFromVersion')],
  ['bootstrap applied before historical replay',runner.indexOf('$BootstrapPath')<runner.indexOf('foreach ($row in $rows)')],
  ['replay still checks exact 40-record sequence',runner.includes('$rows.Count -ne 40')],
+ ['pg_cron target is checked before source/replay work',runner.indexOf('$cronDatabaseQuery')>0&&runner.indexOf('$cronDatabaseQuery')<runner.indexOf('Step 1/5: verify captured SQL source fingerprints.')],
+ ['mismatched pg_cron target fails closed before replay',runner.includes('$cronDatabase -ne $ReplayDatabase')&&runner.includes('Do not skip the scheduler migration')],
  ['exact per-body source fingerprint remains enforced',runner.includes('Source fingerprint mismatch at migration')],
  ['candidate referral lifecycle migration included',runner.includes('20261027120000_allow_qualified_demo_referral_state.sql')],
  ['legacy ACL hardening candidate included',runner.includes('20261027130000_harden_legacy_table_anon_privileges.sql')],
