@@ -239,3 +239,15 @@ No production schema/ACL/wallet/game/Auth/scheduler state was modified in this w
 - Static QA #701 and Release Smoke #288 passed before the migration filename-alignment commits, using the identical SQL bodies. A fresh CI run on the current renamed-file/documentation head is still required.
 - PR #22 remains OPEN/DRAFT. Release is not complete: a fresh full local replay of the split migrations is still needed on the Windows restore lab; hosted Auth/OTP/recovery and synthetic browser journeys need the controlled inbox; referral reward rule, K3/5D/TRX payout rules, legacy historical provenance/risk disposition, Free-plan leaked-password limitation, and final hosted Pages smoke remain open.
 - No wallet/user/ledger data, Auth settings, scheduler configuration, paid plan, or game flags were changed during the migration rollout. Do not enable any game or merge/deploy the release candidate until the remaining gates are closed.
+
+
+## Latest exact-head CI and release checkpoint — 2026-10-27
+
+- Current exact candidate HEAD: `5b89e6c3fd8130185adac6d6e23150c3f52b32da` on `integration/release-candidate-2026-10-27`.
+- Static QA #716 passed, including disposable PostgreSQL checks and browser smoke: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40557287957
+- Release Smoke #303 passed: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40557288991
+- PR #22 remains OPEN/DRAFT and unmerged. Latest Pages build observed is still the main deployment at `680238f2428416faf44df0dced6f907d4cea7f08` from 2026-10-23; do not present the candidate as live.
+- Production finite-input guard migrations are now live at recorded versions `20261027180120`, `20261027180134`, and `20261027180141`; all ten target function guards and safe postconditions are verified read-only. See [production rollout report](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md).
+- Repository runner/runtime-test references now use the recorded IDs; obsolete unrecorded timestamp copies `20261027150100–20261027150300` and prior candidate copies `20261027180000–20261027180200` have been removed. CI confirms the corrected path contracts.
+- Still required before release: fresh full local replay of exact split files on the Windows restore lab; hosted Auth/OTP/recovery and synthetic normal-user/Admin browser journeys with controlled inbox; owner decisions on referral contract and K3/5D/TRX rules; authoritative legacy schema provenance or explicit owner risk acceptance; explicit Free-plan leaked-password protection risk acceptance or an owner-approved plan decision; final hosted Pages journey verification.
+- No wallet/user/ledger data, Auth settings, scheduler configuration, paid plan or game flag was changed. All six games remain disabled.
