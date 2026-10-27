@@ -56,6 +56,11 @@ const requiredE2eFragments = [
   "nplus_demo_admin_qualify_referral(v_invited,499.99)",
   "nplus_demo_admin_qualify_referral(v_invited,500)",
   "v_retry->>'reason'<>'already_qualified'",
+  "v_referral_status IS DISTINCT FROM 'qualified'",
+  'v_referral_reward IS DISTINCT FROM 0.00',
+  'v_referral_request IS NOT NULL',
+  'v_referral_qualified_at IS NULL',
+  'v_referral_rewarded_at IS NOT NULL',
   'ROLLBACK;'
 ];
 for (const fragment of requiredE2eFragments) {
