@@ -22,4 +22,4 @@ if(/\b(?:GRANT|REVOKE|DROP FUNCTION|DROP TABLE|TRUNCATE)\b/i.test(s))fail('unexp
 if((s.match(/CREATE OR REPLACE FUNCTION public\./g)||[]).length!==10)fail('expected exactly ten function replacements');
 if(!s.includes("SET search_path TO 'pg_catalog', 'public'"))fail('fixed search_path missing');
 if(process.exitCode)console.error('Finite numeric RPC guard source contract failed.');
-else console.log('PASS: finite input guards precede casts/writes in eight authenticated RPCs; ACLs/schema unchanged in candidate bundle.');
+else console.log('PASS: finite input guards precede casts/writes in ten authenticated RPCs; ACLs/schema unchanged in candidate bundle.');

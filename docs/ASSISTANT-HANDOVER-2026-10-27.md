@@ -141,3 +141,11 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 - Read-only ACL review confirms authenticated has SELECT-only access to `deposit_requests`/`withdrawal_requests` and no direct grants on gift-code/game-bet tables.
 - Aggregate read-only checks across 21 numeric amount/balance/stake/payout columns reported zero current NaN/Infinity/-Infinity rows.
 - Candidate bundle is not deployed. New Static QA / Release Smoke must pass on the next head; production remains unchanged.
+
+
+## Function group audit and data integrity snapshot — 2026-10-27
+
+- Read-only review extended to Admin read-only reports, WINGO Admin mutation overloads, deposit approve/reject, status-only withdrawal review, game status allow-list/settlement prerequisites, Aviator cashout, MotoRace current/reveal timing, attendance/gift/referral reward claims, user history/my-bet read APIs, and support/VIP dashboards. See the SECURITY DEFINER review report for specific observations.
+- All 69 public SECURITY DEFINER functions remain postgres-owned with fixed search_path; 53 are authenticated-executable; only aggregate-only Recent Activity is anon-executable. anon/authenticated/PUBLIC have no CREATE privilege on public schema.
+- A read-only scan over 21 current numeric amount/balance/stake/payout fields found zero NaN/±Infinity rows.
+- Targeted review is improved, but do not mark every one of the 53 Advisor findings closed without per-finding review evidence; remaining Advisor triage is still a release checklist item.

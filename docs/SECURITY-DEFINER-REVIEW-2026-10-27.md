@@ -66,7 +66,7 @@ These tests verify only candidate SQL in disposable PostgreSQL; the correspondin
 
 ## Expanded finite numeric input review — 2026-10-27
 
-A read-only catalog review found eight authenticated SECURITY DEFINER RPCs whose numeric input paths needed finite-value validation:
+A read-only catalog review found eight authenticated SECURITY DEFINER RPCs whose user-input numeric paths needed finite-value validation, then added two stored-amount consumers for defense-in-depth:
 
 - deposit request amount and withdrawal request amount (previously rounded/narrowed in the declaration initializer before validation);
 - Admin gift-code amount;
@@ -75,7 +75,7 @@ A read-only catalog review found eight authenticated SECURITY DEFINER RPCs whose
 - virtual Safe transfer amount;
 - Admin referral qualification verified amount.
 
-Candidate-only replacements are bundled in `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql`. The patch rejects NULL/NaN/±Infinity before range comparisons or numeric narrowing; it preserves the role checks, fixed `search_path`, existing bounds, row locks, idempotency and wallet/ledger logic. It contains eight full function replacements derived from the live read-only definitions.
+Candidate-only replacements are bundled in `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql`. The patch rejects NULL/NaN/±Infinity before range comparisons or numeric narrowing; it preserves the role checks, fixed `search_path`, existing bounds, row locks, idempotency and wallet/ledger logic. It contains ten full function replacements derived from the live read-only definitions.
 
 The static source-order guard and disposable PostgreSQL numeric-semantics test are wired into Static QA. This is not full RPC end-to-end testing and the bundle is not deployed. Its final approval still requires CI, reviewed source diff, canonical replay/restore parity, and hosted safe test accounts.
 
@@ -92,3 +92,19 @@ Two additional read/write boundary guards were added to the same candidate bundl
 A read-only aggregate check over 21 amount/balance/stake/payout columns across wallet transactions, Safe balances/transfers, gift codes/claims, deposit/withdraw requests, referrals, and game bets returned **zero current non-finite rows**. This is a snapshot of current data, not a guarantee against future inputs; candidate guards remain necessary.
 
 These two added checks are candidate-only and require CI verification. No live stored rows, grants, functions or wallet balances were modified.
+
+
+## Complete focused function group review update — 2026-10-27
+
+The following additional SECURITY DEFINER groups were checked read-only by function body, ACL and current usage:
+
+- Admin read-only reports: commission summary, approved-deposit summary, user directory, per-user wallet transaction history, WINGO live bets/round summary, referral administration, support inbox, and VIP administration dashboard. Each reviewed report path contains an Admin role gate; paginated/list paths clamp limits (typically 200, with referral/support lists capped at 500).
+- Admin mutation RPCs: deposit approve/reject require Admin and lock pending requests; withdrawal review requires Admin, locks pending request, and explicitly changes status/review metadata only (no wallet change/cash payment); manual WINGO save/clear/set overloads require Admin and validate duration/result shape; game status requires Admin, rejects unknown keys and blocks K3/5D/TRX enabling.
+- User-scoped writes: Aviator cashout checks the authenticated user's bet, locks the round/bet, handles duplicate cash-out idempotently, and emits wallet/ledger updates only in server code; MotoRace reveal only accepts the current round and refuses reveal until the closing cutoff; attendance/gift/referral reward paths use actor-scoped uniqueness/claim checks; support submit bounds category/subject/message; VIP and Safe dashboards are actor scoped.
+- User-scoped reads: Aviator/Moto/WINGO history and personal bet functions filter on `auth.uid()` and clamp page sizes (typically 200; completed round history up to 500). Activity endpoint `nplus_recent_demo_activity(integer)` remains the only anonymous-executable SECURITY DEFINER endpoint and returns aggregate counts without user IDs, with a bounded lookback.
+- Admin WINGO overloads remain a migration-order item: both four- and five-argument defaulted signatures exist live; current reviewed `admin-reports.html` call supplies five named arguments. Disposable overload regression is passing in CI, but canonical migration ordering must be reviewed before applying DDL.
+- The dynamic `EXECUTE` in `nplus_set_game_status` is restricted to the scheduler-health lookup after Admin role check, an allow-listed game key, and a parameterized `USING` value; it is not generic user-controlled SQL.
+
+Read-only aggregate scan over 21 live amount/balance/stake/payout columns returned zero rows containing NaN or ±Infinity. This supports the snapshot that existing numeric columns are clean as of this check, but does not replace the new candidate input guards or establish historical data provenance.
+
+Scope note: this closes the targeted/high-risk code-review pass for the listed function groups and numeric entry points. It does not close every individual one of the 53 Advisor warnings as an independent signed-off finding; residual Advisor triage remains a release checklist item.
