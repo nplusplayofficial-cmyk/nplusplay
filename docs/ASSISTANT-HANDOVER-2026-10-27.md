@@ -95,3 +95,10 @@ Checked against GitHub on 2026-10-27.
 ## Latest CI failure triage — 2026-10-27
 
 Static QA run #622 exposed one stale assertion in the combined `qa/test-release-index-policy-migration.sql`: it still expected the previous authenticated INSERT/UPDATE grants after the candidate ACL contract was narrowed. The failure occurred in the fixture's post-migration assertion (not in SQL syntax or the browser smoke). The test is now being updated to assert the revised contract—authenticated SELECT-only on `manual_deposits`, no direct browser grants on `user_bank_details` / `withdraw_requests`, and all RLS/policies intact. The new run must pass before treating the ACL candidate as verified. Production ACLs remain unchanged.
+
+
+## Legacy-table ACL regression follow-up — 2026-10-27
+
+- The combined CI fixture had a stale assertion from the older authenticated grants-preserved contract; Static QA run #622 failed on that assertion. The assertion and standalone legacy ACL regression now match the candidate least-privilege plan.
+- Candidate now keeps authenticated SELECT on `manual_deposits` only; authenticated direct table grants to `user_bank_details` and `withdraw_requests` are removed. No table rows, owner, RLS flags or policies are changed by this SQL.
+- Production grants were not changed. Fresh Static QA on the latest commit is required; keep deployment blocked until it passes.
