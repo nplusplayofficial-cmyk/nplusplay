@@ -72,3 +72,12 @@ The finite-number guard code remains pending production rollout. The monolithic 
 ## Current split-migration verification — 2026-10-27
 
 The three split finite-number migrations pass the current Static QA runtime test in a disposable PostgreSQL database. Current code head is 16a66cf8c941da7893716b1faad9729b8d6f98aa. Release Smoke #284 passes. The finite-number guards are still not live on production; don't mark that production security gate complete until the three migration records are verified in live migration history and the function catalog shows the guards.
+
+
+## Superseding production rollout update — 2026-10-27
+
+The three finite-number guard migrations were subsequently applied to the live Supabase project and verified. Their recorded versions are `20261027180120`, `20261027180134`, and `20261027180141`; see [production guard rollout evidence](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md). This later production rollout does not change the provenance limitations of this local replay.
+
+The current repo migration filenames align to the server-recorded versions. Live postconditions confirmed all ten target RPCs have NaN/Infinity checks, all six game flags remain disabled, legacy table RLS/grants remain correct, and wallet/ledger aggregate invariants report no mismatches. The exact split-file sequence has not yet been fully replayed against the local restored-baseline clone; the earlier recorded replay used the pre-split monolithic guard source. Treat the prior replay result as historical evidence only, not as a pass for the current split files.
+
+Hosted Auth/OTP/login/recovery and synthetic browser journeys, owner decisions on the referral reward contract and payout rules, historical legacy schema provenance/risk disposition, the Free-plan leaked-password-protection decision, and final hosted Pages verification remain open. PR #22 remains OPEN/DRAFT.
