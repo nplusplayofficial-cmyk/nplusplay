@@ -62,3 +62,19 @@ No production mutations were made during this review.
 The finite Admin referral qualification regression, finite Safe transfer regression, and both browser-role legacy-table ACL fixtures now pass in Static QA #627 on integration candidate commit `961b4e90fceaca339ab3b481411358ab7e7aea3b`. The Release Smoke #214 also passed on that commit.
 
 These tests verify only candidate SQL in disposable PostgreSQL; the corresponding function-body replacements and ACL migration have **not** been applied to the live database. The live finite-amount guards remain absent by design until canonical replay/hosted test gates and explicit release approval are satisfied.
+
+
+## Expanded finite numeric input review — 2026-10-27
+
+A read-only catalog review found eight authenticated SECURITY DEFINER RPCs whose numeric input paths needed finite-value validation:
+
+- deposit request amount and withdrawal request amount (previously rounded/narrowed in the declaration initializer before validation);
+- Admin gift-code amount;
+- Aviator stake and optional auto-cashout;
+- MotoRace stake and WINGO stake;
+- virtual Safe transfer amount;
+- Admin referral qualification verified amount.
+
+Candidate-only replacements are bundled in `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql`. The patch rejects NULL/NaN/±Infinity before range comparisons or numeric narrowing; it preserves the role checks, fixed `search_path`, existing bounds, row locks, idempotency and wallet/ledger logic. It contains eight full function replacements derived from the live read-only definitions.
+
+The static source-order guard and disposable PostgreSQL numeric-semantics test are wired into Static QA. This is not full RPC end-to-end testing and the bundle is not deployed. Its final approval still requires CI, reviewed source diff, canonical replay/restore parity, and hosted safe test accounts.

@@ -126,3 +126,10 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 - Production read-only status remains: six game settings, zero enabled; both production finite-number guards are still absent because candidate SQL was not deployed; historical source verification is read-only; no production schema/ACL/wallet/Auth/scheduler change was made.
 - The all-40 migration history body source mapping is closed at 29 unique exact bodies plus 11 exact repeats; the clean canonical replay is still blocked by missing trusted pre-history creation source for the three legacy relations.
 - Latest production Pages deployment observed is still Oct 23 main commit `680238f2428416faf44df0dced6f907d4cea7f08`. Do not claim the candidate is live or the site fully verified.
+
+
+## Expanded finite-numeric RPC hardening — 2026-10-27 (candidate-only)
+
+- Read-only review identified eight authenticated numeric inputs that need explicit finite-value checks: demo deposit request, demo withdrawal request, Admin gift-code creation, Aviator stake/auto-cashout, MotoRace stake, WINGO stake, Safe transfer, and Admin referral qualification.
+- Added candidate bundle `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql` with full current function definitions and finite guards; deposit/withdraw input is checked before rounding/narrowing.
+- Added static source-order guard and dedicated disposable PostgreSQL semantic test into Static QA. The exact-head CI result is required before marking the change verified. Production functions, ACLs, wallets and game settings remain unchanged.
