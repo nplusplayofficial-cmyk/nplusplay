@@ -247,9 +247,11 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
         !overlay.includes("INSERT INTO nplus_replay_audit.manual_deposits_overlay_marker") ||
         !overlay.includes('CREATE TABLE public.manual_deposits') ||
         !overlay.includes('CREATE TABLE public.withdraw_requests') ||
+        !overlay.includes('CREATE TABLE public.user_bank_details') ||
         !overlay.includes('manual_deposits_rows') ||
-        !overlay.includes('withdraw_requests_rows')) {
-      console.error('FAIL legacy-table schema overlay lacks local-only/no-user-data safeguards or both table fixtures.');
+        !overlay.includes('withdraw_requests_rows') ||
+        !overlay.includes('user_bank_details_rows')) {
+      console.error('FAIL legacy-table schema overlay lacks local-only/no-user-data safeguards or all three table fixtures.');
       failures++;
     }
   }
