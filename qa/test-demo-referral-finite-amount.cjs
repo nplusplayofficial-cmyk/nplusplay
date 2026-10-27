@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const sqlPath = path.join(root, 'sql/NPLUS_PLAY_REFERRAL_FINITE_QUALIFICATION_GUARD_CANDIDATE_2026-10-27.sql');
+const sqlPath = path.join(root, 'supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql');
 const testPath = path.join(root, 'qa/test-demo-referral-finite-amount.sql');
 
 function fail(message) {
@@ -23,7 +23,7 @@ const sql = fs.readFileSync(sqlPath, 'utf8');
 const test = fs.readFileSync(testPath, 'utf8');
 
 for (const fragment of [
-  'Candidate-only',
+  'Candidate migration',
   'CREATE OR REPLACE FUNCTION public.nplus_demo_admin_qualify_referral',
   'public.nplus_is_admin()',
   "p_verified_virtual_amount::text IN ('NaN', 'Infinity', '-Infinity')",
