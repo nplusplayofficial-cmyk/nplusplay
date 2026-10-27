@@ -53,7 +53,7 @@ For the final local run, temporarily set the local restore-lab `cron.database_na
 - Fresh disposable replay target: `nplus_migration_replay_20261030`.
 - Captured history: all 40 recorded rows replayed successfully; all 29 distinct recovered SQL bodies matched the stored fingerprints.
 - Read-only restore checks again passed: 5 profiles, 5 wallets, 140 ledger rows, 5 deposits, 6 game settings; zero wallet arithmetic mismatches, negative balances, wallets without history, or latest-ledger mismatches.
-- Candidate migrations 20261027120000 (referral qualified state), 20261027130000 (legacy table browser ACL hardening), 20261027140000 (WINGO Admin overload defaults), and the pre-split monolithic finite numeric guard all applied successfully to the disposable clone. The current split form is a follow-up repository refactor and requires new CI verification.
+- Candidate migrations 20261027120000 (referral qualified state), 20261027130000 (legacy table browser ACL hardening), 20261027140000 (WINGO Admin overload defaults), and the pre-split monolithic finite numeric guard all applied successfully to the disposable clone. The current split form is now verified in isolated CI: Static QA #697 and Release Smoke #284 pass, runtime finite-number migration regression passes, and browser smoke passed 38/38 pages plus 17/17 mobile checks. The split form has not been applied to production.
 - QA-only wallet/ledger/request ACL reconciliation overlays applied and passed their contract checks.
 - Final invariants passed: all six game settings disabled; public tables RLS enabled; no direct browser writes to wallet/ledger/request tables; phone enumeration RPC denied to browser roles; generic positive/game credit guard present; Aviator worker server-only with local cron job; both WINGO Admin overloads include Admin authorization; Recent Activity remains aggregate-only; wallet ledger arithmetic consistent.
 - Synthetic DB E2E passed deposit idempotency/approval/rejection and Admin authorization; Admin wallet adjustment/ledger and positive-credit protection; referral uniqueness/self-referral/qualification/one-time tier claim; and withdrawal idempotency/status-only Admin review. Test ended with `ROLLBACK`.
@@ -67,3 +67,8 @@ For the final local run, temporarily set the local restore-lab `cron.database_na
 Three migrations have now been applied to the live Supabase project via the migration API: referral lifecycle state, legacy-table ACL hardening, and WINGO overload resolution. They were recorded by Supabase as versions 20261027172625, 20261027172637, and 20261027172656 respectively. The repository migration filenames were aligned to those recorded versions so future migration tooling will not replay them.
 
 The finite-number guard code remains pending production rollout. The monolithic apply did not return success; current live catalog checks indicated the guard was absent. That code is now split into three smaller migrations for isolated testing and controlled rollout. No wallet/user rows were rewritten, and the six game flags stayed disabled.
+
+
+## Current split-migration verification — 2026-10-27
+
+The three split finite-number migrations pass the current Static QA runtime test in a disposable PostgreSQL database. Current code head is 16a66cf8c941da7893716b1faad9729b8d6f98aa. Release Smoke #284 passes. The finite-number guards are still not live on production; don't mark that production security gate complete until the three migration records are verified in live migration history and the function catalog shows the guards.
