@@ -152,3 +152,24 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 
 
 - Deposit approval candidate now enforces exactly the same 100–50,000 virtual-point range as the request-creation RPC, plus finite-value validation. This is defense-in-depth before wallet/ledger writes; production remains unchanged.
+
+
+## Latest assistant-side completion checkpoint — 2026-10-27
+
+### Completed on the integration candidate
+- Exact body-source mapping for the 40 stored migration-history rows: 29 distinct SQL bodies match archived SQL character-for-character; 11 rows are exact repeats.
+- GitHub repository-wide code search over the available 24 branches found no authoritative `CREATE TABLE` DDL for the three legacy relations `manual_deposits`, `user_bank_details`, or `withdraw_requests`. Current live catalog snapshot is documented but is not a substitute for historical origin.
+- Latest code candidate before this documentation refresh: `3ba6c56e591cd522f07e2d7cc6ff1be2f6787ced`; Static QA #632 and Release Smoke #220 passed on that exact head.
+- Finite numeric guard candidate bundle covers ten authenticated SECURITY DEFINER functions: Safe transfer, referral qualification, deposit/withdraw request, Admin gift code creation, Aviator bet stake/auto-cashout, MotoRace stake, WINGO stake, Admin deposit approval, and gift redemption. Existing amount bounds and business logic remain; approval matches request bounds of 100–50,000 virtual points.
+- Candidate legacy ACL migration/test retains authenticated SELECT on `manual_deposits` only, no browser-role direct grants to `user_bank_details`/`withdraw_requests`, removes PUBLIC/anon table grants, and asserts RLS/policies remain.
+- Read-only scan of 21 monetary fields found zero stored non-finite values.
+- Full catalog triage: 69/69 SECURITY DEFINER functions are postgres-owned with fixed search paths; 53 authenticated-executable; only aggregate Recent Activity is anon-executable; no authenticated write-pattern function lacked a detected actor/Admin guard signal in the inventory.
+
+### Still blocking final release
+1. Trusted original pre-history DDL/deployment provenance for the three legacy tables, needed for clean canonical replay from the supplied backup.
+2. Hosted signup/OTP/login/password recovery and safe synthetic-account Admin/wallet/deposit/withdrawal/referral/game journeys.
+3. Formal per-finding risk acceptance for the remaining Advisor warnings and explicit review/approval of the candidate SQL bundle before any production rollout.
+4. K3/5D/TRX server settlement rules remain unapproved; all six game settings remain disabled pending a supported launch matrix.
+5. Final Pages/browser verification must be performed after the release decision; current live Pages deployment remains the older main build, not this candidate.
+
+No production schema/ACL/wallet/game/Auth/scheduler state was modified in this work. PR #22 remains OPEN and DRAFT.

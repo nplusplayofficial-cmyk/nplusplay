@@ -113,3 +113,36 @@ Scope note: this closes the targeted/high-risk code-review pass for the listed f
 ### Admin deposit approval bounds aligned
 
 The candidate `nplus_approve_deposit(uuid)` now additionally enforces the same 100–50,000 virtual-point amount bounds as `nplus_create_demo_deposit_request`, alongside NULL/NaN/±Infinity rejection before wallet mutation. The static guard asserts both bounds are present in the candidate definition. No live function was altered.
+
+
+## Full SECURITY DEFINER catalog triage — 2026-10-27
+
+A fresh read-only catalog inventory screened all public SECURITY DEFINER functions in the live project:
+
+| Check | Observed |
+|---|---:|
+| Total public SECURITY DEFINER functions | 69 |
+| Owner is `postgres` | 69 / 69 |
+| Fixed `search_path` setting | 69 / 69 |
+| Authenticated EXECUTE | 53 |
+| Anonymous EXECUTE | 1 |
+| Authenticated functions with an `auth.uid()` source marker | 49 / 53 |
+| Remaining authenticated functions with an Admin-helper/role-guard source marker | 3 / 53 |
+| Authenticated write-pattern functions with no detected actor/Admin guard marker | 0 |
+| Functions using PL/pgSQL dynamic `EXECUTE` | 1 |
+
+The one anonymous-executable endpoint is `nplus_recent_demo_activity(integer)`, which was separately checked as aggregate-only with a bounded lookback and no user identifiers. The three authenticated functions without direct `auth.uid()` text are Admin read paths that use the shared `nplus_is_admin()` helper. The single dynamic `EXECUTE` occurs in `nplus_set_game_status(text,boolean)` for an allow-listed Aviator scheduler-health lookup after Admin authorization; its value is parameterized rather than interpolated into the SQL identifier/text.
+
+Catalog check also confirms `anon`, `authenticated`, and PostgreSQL `PUBLIC` do not have CREATE privilege on the `public` schema. Targeted source inspection covered Admin wallet/deposit/withdrawal/game/WINGO/referral/security RPCs; user-scoped bet/cashout/history APIs; and attendance/gift/referral/Safe/support/VIP paths. List APIs clamp page sizes; write paths lock affected request/wallet/round rows or use unique claims for idempotency.
+
+**Scope honesty:** this is a complete catalog/authorization-pattern triage of all 53 authenticated-executable functions plus targeted source review of the risky groups, not a signed-off closure ticket for each of the 53 individual Advisor warnings. Remaining per-finding risk acceptance still needs a formal release review; do not mark all Advisor warnings closed solely from the counts above.
+
+## Current data-integrity snapshot
+
+Read-only aggregate checks of 21 numeric amount/balance/stake/payout fields across `demo_wallets`, `demo_wallet_transactions`, Safe balances/transfers, gift codes/claims, deposit/withdraw requests, referral qualifications/rewards, and Aviator/Moto/WINGO bet fields found **zero NaN/Infinity/-Infinity rows** as of 2026-10-27. No row contents or user identifiers were selected for this check.
+
+## Latest exact-head CI
+
+- Pre-documentation candidate commit `3ba6c56e591cd522f07e2d7cc6ff1be2f6787ced`: Static QA #632 run `40493302375` passed, including source syntax, referral finite guard, 10-function numeric RPC source-order guard, disposable PostgreSQL finite-value semantics, legacy ACL assertions, and desktop/mobile browser smoke.
+- Release Smoke #220 run `40493302177` passed on the same commit.
+- Candidate bundle contains 10 replacement definitions and is not deployed. Any documentation-only follow-up creates a new CI head; verify the exact final head before release.
