@@ -23,6 +23,13 @@ Read-only searches of `supabase_migrations.schema_migrations` found captured bod
 
 The same read-only catalog review showed broad table-level grants to `anon` and `authenticated` on the legacy `manual_deposits` table even though RLS is enabled. Separately, a read-only catalog query on current production confirmed that `anon` and `authenticated` have no `INSERT`, `UPDATE`, or `DELETE` privileges on `demo_wallets`, `demo_wallet_transactions`, `deposit_requests`, or `withdrawal_requests`; `authenticated` retains SELECT on these tables. A read-only search of captured migration bodies found no explicit GRANT/REVOKE statement targeting direct table privileges on the existing wallet/ledger tables. The local replay's failed invariants therefore signal baseline/history ACL-parity gaps, not a reason to weaken the assertions. No production grant changes were made; review the separate PR #20 candidate and the final post-PR #16 browser call paths before any rollout.
 
+## Additional current live schema evidence (2026-10-27)
+
+A separate, current read-only snapshot now records all columns, constraints, indexes, RLS policies, owners, RLS flags and ACL entries for `manual_deposits`, `user_bank_details` and `withdraw_requests`:
+[`PRODUCTION-LEGACY-TABLE-SCHEMA-SNAPSHOT-2026-10-27.md`](./PRODUCTION-LEGACY-TABLE-SCHEMA-SNAPSHOT-2026-10-27.md).
+
+That snapshot improves our evidence for today's live table shape. It confirms the three tables have RLS enabled and that the current effective table ACLs still grant broad privileges to both `anon` and `authenticated`. The reviewed candidate ACL hardening remains unapplied. The current definitions do not establish the original table-creation SQL or the historical policy/ACL state at the start of the captured 40-migration chain. Therefore the canonical replay blocker remains open; this snapshot is not a substitute for trusted historical SQL/deployment evidence.
+
 ## What the QA-only overlay does — and does not prove
 
 `qa/fixtures/replay-baseline/manual-deposits-schema-overlay.sql` was applied to the disposable `nplus_migration_replay_20261026` database after guarded dependency checks, creating three empty schema-only legacy-table approximations with zero rows each. A wallet/ledger ACL overlay snapshotted original grants and aligned local browser-role permissions to the reviewed contract. A request-table ACL overlay then snapshotted original owners/grants, normalized the known local `withdrawal_requests` owner mismatch, and aligned browser-role permissions. Captured bodies 39–40 passed, and the final local invariant SQL passed after all overlays.

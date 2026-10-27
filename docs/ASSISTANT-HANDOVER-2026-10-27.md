@@ -6,12 +6,12 @@ Checked against GitHub on 2026-10-27.
 - PR #22: https://github.com/nplusplayofficial-cmyk/nplusplay/pull/22
 - State at last refresh: OPEN, DRAFT, mergeable=true; base main.
 - Branch: integration/release-candidate-2026-10-27
-- Current code head at last full CI verification: 1e934440e5991e2eb8ce4caa5fbc3c486e67de1a (43 commits, 91 changed files).
+- Last full CI-green head before the action-runtime cleanup: 6507e437937dbc933e558c8442ea31741f65fec4 (44 commits, 91 changed files). The next commit updates GitHub Actions Node runtimes and adds current live schema evidence; new CI must pass on that commit.
 - Repository default branch is main. No merge/deploy is authorized or performed.
 
 ## Current CI evidence on exact head
-- Latest Static QA run 40485212655 (#618): completed/success on head 1e934440e5991e2eb8ce4caa5fbc3c486e67de1a. Both static-qa and browser-smoke jobs succeeded; the new finite-amount static guard and isolated PostgreSQL regression steps both passed.
-- Latest Release Smoke run 40485212657 (#205): completed/success on the same head.
+- Latest completed Static QA run 40485562957 (#619): success on head 6507e437937dbc933e558c8442ea31741f65fec4. Both static-qa and browser-smoke jobs succeeded; finite-amount guard, isolated PostgreSQL regression and legacy ACL guards passed.
+- Latest completed Release Smoke run 40485562854 (#206): success on the same head.
 - These workflows are candidate code/static/browser smoke checks; they do not close hosted authenticated journeys or canonical clean replay.
 - Combined status API returned no commit status entries, so rely on the explicit workflow-run records and job details, not that empty status endpoint.
 - These CI checks do not constitute hosted Supabase Auth/user-flow tests or clean canonical restore/replay acceptance.
@@ -59,3 +59,11 @@ Checked against GitHub on 2026-10-27.
 - Found a numeric validation issue in the live Admin referral qualification RPC: PostgreSQL NaN compares as >=500 and fits numeric(14,2). Candidate-only finite-amount guard is committed; the dedicated static guard and disposable PostgreSQL regression passed in run #618. Not deployed.
 - Refreshed metadata scan: 69/69 public SECURITY DEFINER functions have owner postgres and a fixed search_path; 53 have authenticated EXECUTE and one aggregate Recent Activity function has anon EXECUTE. A regex pre-screen found zero authenticated-executable/anon-denied functions without a detectable auth.uid/admin-guard signal; this is only a triage heuristic, not closure of all 53 manual reviews.
 - WINGO four/five-argument default overlap remains in live catalog; current admin-reports page invokes the five-argument signature. Keep candidate overload regression and canonical ordering review before any DDL.
+
+
+## Additional work in current pending-resolution pass
+
+- Read-only production schema inspection confirms the three legacy tables are present with RLS enabled; it also captures the exact current columns, constraints, indexes, seven RLS policies and current ACL metadata in [PRODUCTION-LEGACY-TABLE-SCHEMA-SNAPSHOT-2026-10-27.md](PRODUCTION-LEGACY-TABLE-SCHEMA-SNAPSHOT-2026-10-27.md).
+- This snapshot is current live evidence, **not** historical source SQL. It improves reviewability but does not close the missing table-creation history or make the 40-body replay canonical.
+- GitHub Actions workflows are being updated from checkout/setup-node v4 (Node 20 runtime warnings seen in the user's screenshots) to v5 (Node 24 runtime), with setup-node package-manager auto-caching disabled because these workflows do not need it.
+- Production ACLs on the three legacy relations still give anon and authenticated broad table privileges even though RLS is enabled; the candidate ACL migration that revokes only PUBLIC/anon is not deployed. Do not apply it outside a reviewed rollout.
