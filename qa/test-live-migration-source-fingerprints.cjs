@@ -290,7 +290,8 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
         !requestAcl.includes("v_target <> 'nplus_migration_replay_20261026'") ||
         !requestAcl.includes('nplus_replay_audit.request_table_acl_snapshot') ||
         !requestAcl.includes('owner_before text NOT NULL') ||
-        !requestAcl.includes("pg_get_userbyid(relowner) NOT IN ('postgres','supabase_admin')") ||
+        !requestAcl.includes("deposit_requests owner does not match the observed local baseline (postgres)") ||
+        !requestAcl.includes("withdrawal_requests owner is not one of the two explicitly reviewed baseline values") ||
         !requestAcl.includes('ALTER TABLE public.withdrawal_requests OWNER TO postgres') ||
         !requestAcl.includes('REVOKE ALL ON TABLE public.deposit_requests, public.withdrawal_requests') ||
         !requestAcl.includes('GRANT SELECT ON TABLE public.deposit_requests, public.withdrawal_requests') ||
