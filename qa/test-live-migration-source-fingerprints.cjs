@@ -62,9 +62,29 @@ for (const [name, digest] of Object.entries(expected)) {
   }
 }
 const sqlFiles = fs.readdirSync(sourceDir).filter(name => name.endsWith('.sql'));
-if (sqlFiles.length !== Object.keys(expected).length) {
-  console.error('FAIL expected 29 distinct SQL evidence files; found ' + sqlFiles.length);
+const supplementalSqlFiles = new Set([
+  // Independent scheduler evidence from PR #18; not one of the 40 stored
+  // historical migration rows and not part of the 29 body fingerprints.
+  '20261021182724_nplus_aviator_persistent_scheduler.sql'
+]);
+const historicalSqlFiles = sqlFiles.filter(name =>
+  Object.prototype.hasOwnProperty.call(expected, name)
+);
+const unclassifiedSqlFiles = sqlFiles.filter(name =>
+  !Object.prototype.hasOwnProperty.call(expected, name) &&
+  !supplementalSqlFiles.has(name)
+);
+if (historicalSqlFiles.length !== Object.keys(expected).length) {
+  console.error('FAIL expected 29 distinct historical SQL evidence files; found ' + historicalSqlFiles.length);
   failures++;
+}
+if (unclassifiedSqlFiles.length) {
+  console.error('FAIL unclassified SQL evidence files in historical source folder: ' + unclassifiedSqlFiles.join(', '));
+  failures++;
+}
+if (supplementalSqlFiles.has('20261021182724_nplus_aviator_persistent_scheduler.sql') &&
+    sqlFiles.includes('20261021182724_nplus_aviator_persistent_scheduler.sql')) {
+  console.log('PASS supplemental Aviator scheduler evidence is excluded from the 29 historical body fingerprints and checked by the separate activity/Aviator audit.');
 }
 const duplicatePairs = [
   ['20261021160935', '20261022055326'],
