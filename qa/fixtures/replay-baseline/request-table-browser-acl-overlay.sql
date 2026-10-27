@@ -35,9 +35,15 @@ BEGIN
       to_regclass('public.deposit_requests'),
       to_regclass('public.withdrawal_requests')
     )
-      AND (NOT relrowsecurity OR pg_get_userbyid(relowner) NOT IN ('postgres','supabase_admin'))
+      AND NOT relrowsecurity
   ) THEN
-    RAISE EXCEPTION 'QA request ACL overlay refused: owner/RLS precondition differs.';
+    RAISE EXCEPTION 'QA request ACL overlay refused: RLS must already be enabled on both tables.';
+  END IF;
+  IF (SELECT pg_get_userbyid(relowner) FROM pg_class WHERE oid = to_regclass('public.deposit_requests')) <> 'postgres' THEN
+    RAISE EXCEPTION 'QA request ACL overlay refused: deposit_requests owner does not match the observed local baseline (postgres).';
+  END IF;
+  IF (SELECT pg_get_userbyid(relowner) FROM pg_class WHERE oid = to_regclass('public.withdrawal_requests')) NOT IN ('postgres','supabase_admin') THEN
+    RAISE EXCEPTION 'QA request ACL overlay refused: withdrawal_requests owner is not one of the two explicitly reviewed baseline values.';
   END IF;
   IF to_regclass('nplus_replay_audit.request_table_acl_snapshot') IS NOT NULL THEN
     RAISE EXCEPTION 'QA request ACL overlay already applied; do not run twice.';
