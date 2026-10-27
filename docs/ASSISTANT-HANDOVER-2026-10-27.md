@@ -185,3 +185,11 @@ No production schema/ACL/wallet/game/Auth/scheduler state was modified in this w
 
 
 - The live Supabase org is on the Free tier; Supabase documents leaked-password protection as Pro+. No plan upgrade/cost was initiated, so this warning cannot be closed via available tools under current zero-budget constraint.
+
+
+## Reconstructed replay procedure
+- QA-only bootstrap: `qa/fixtures/replay-baseline/reconstructed-live-legacy-schema-bootstrap.sql`; disposable regression: `qa/test-reconstructed-legacy-bootstrap.sql`.
+- On the existing local restore lab, run:
+  `pwsh -File .\\qa\\replay-live-migration-sequence.ps1 -VerifiedRestoreDatabase nplus_restore_acceptance_20261024 -ReplayDatabase nplus_migration_replay_20261027 -UseReconstructedLegacyBaseline`.
+- This creates empty legacy tables from current live metadata, replays all 40 exact archived migration bodies, applies candidate referral/legacy ACL/finite-input changes and local ACL reconciliation, then runs final invariant and synthetic database E2E checks.
+- It is an explicit current-schema reconstruction, not original historical DDL. Never run the QA bootstrap/overlays on production. The full local Docker sequence still must be executed outside the connected environment.

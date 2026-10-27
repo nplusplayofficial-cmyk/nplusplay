@@ -10,7 +10,8 @@ param(
   [string]$ContainerName = "supabase_db_nplusplay-restore-lab-v2",
   [string]$VerifiedRestoreDatabase = "nplus_restore_acceptance_20261024",
   [string]$ReplayDatabase = "nplus_migration_replay_20261024",
-  [string]$ResumeFromVersion = ""
+  [string]$ResumeFromVersion = "",
+  [switch]$UseReconstructedLegacyBaseline
 )
 
 $ErrorActionPreference = "Stop"
@@ -83,6 +84,10 @@ if (($versions | Select-Object -Unique).Count -ne 40) {
 }
 
 $resumeIndex = 1
+if ($UseReconstructedLegacyBaseline -and -not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
+  throw "UseReconstructedLegacyBaseline requires a fresh restored-backup clone and cannot be combined with ResumeFromVersion."
+}
+
 if (-not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
   if ($ResumeFromVersion -notin @("20261021161206", "20261023092858")) {
     throw "Guarded resume is allowed only at the observed pg_cron checkpoint or the documented manual_deposits schema-overlay suffix checkpoint."
@@ -187,6 +192,19 @@ if ([string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
   Write-Host "Step 3/5: keeping the verified partial replay target; skipping already-passed versions 1 through $($resumeIndex - 1)."
 }
 
+if ($UseReconstructedLegacyBaseline) {
+  $BootstrapPath = Join-Path $PSScriptRoot "fixtures\replay-baseline\reconstructed-live-legacy-schema-bootstrap.sql"
+  $ContainerBootstrap = "/tmp/nplus-play-reconstructed-legacy-baseline.sql"
+  if (-not (Test-Path -LiteralPath $BootstrapPath -PathType Leaf)) {
+    throw "Reconstructed legacy baseline fixture is missing. No historical migration body will be applied."
+  }
+  Write-Host "Apply empty schema-only reconstruction from the verified live snapshot; this is not original historical DDL."
+  & docker cp $BootstrapPath "${ContainerName}:$ContainerBootstrap"
+  if ($LASTEXITCODE -ne 0) { throw "Could not copy the reconstructed legacy baseline to the local replay database." }
+  & docker exec $ContainerName psql -X -v ON_ERROR_STOP=1 -U supabase_admin -d $ReplayDatabase -f $ContainerBootstrap
+  if ($LASTEXITCODE -ne 0) { throw "Reconstructed legacy baseline failed verification. Replay stopped; production untouched." }
+}
+
 Write-Host "Step 4/5: replay the 40 applied SQL bodies in the recorded live-history order."
 $index = 0
 foreach ($row in $rows) {
@@ -216,6 +234,30 @@ foreach ($row in $rows) {
   Write-Host ("PASS {0}/40 {1} {2}" -f $index, $row.version, $row.name)
 }
 
+if ($UseReconstructedLegacyBaseline) {
+  # These candidate migrations and ACL snapshots are applied only after all 40 byte-
+  # fingerprinted production-history bodies, in the disposable replay clone.
+  $PostReplayFiles = @(
+    "supabase/migrations/20261027120000_allow_qualified_demo_referral_state.sql",
+    "supabase/migrations/20261027130000_harden_legacy_table_anon_privileges.sql",
+    "sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql",
+    "qa/fixtures/replay-baseline/wallet-ledger-browser-acl-overlay.sql",
+    "qa/fixtures/replay-baseline/request-table-browser-acl-overlay.sql"
+  )
+  foreach ($relativePath in $PostReplayFiles) {
+    $localPath = Join-Path $RepoRoot ($relativePath -replace '/', '\\')
+    if (-not (Test-Path -LiteralPath $localPath -PathType Leaf)) {
+      throw "Missing post-replay candidate/reconciliation file '$relativePath'. Final invariants will not be declared."
+    }
+    $containerPath = "/tmp/nplus-play-post-replay-$([IO.Path]::GetFileName($relativePath))"
+    Write-Host "Apply disposable-clone candidate/reconciliation: $relativePath"
+    & docker cp $localPath "${ContainerName}:$containerPath"
+    if ($LASTEXITCODE -ne 0) { throw "Could not copy local-only post-replay file '$relativePath'." }
+    & docker exec $ContainerName psql -X -v ON_ERROR_STOP=1 -U supabase_admin -d $ReplayDatabase -f $containerPath
+    if ($LASTEXITCODE -ne 0) { throw "Post-replay candidate/reconciliation failed at '$relativePath'. Database kept for inspection; production untouched." }
+  }
+}
+
 Write-Host "Step 5/5: run read-only replay invariants and object-count snapshot."
 & docker cp $FinalStateSql "${ContainerName}:$ContainerFinalSql"
 if ($LASTEXITCODE -ne 0) { throw "Could not copy the final state assertions into the local container." }
@@ -226,8 +268,13 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 if ($ResumeFromVersion -eq "20261023092858") {
-  Write-Host "MIGRATION SUFFIX CHECK PASSED for local database '$ReplayDatabase' (captured versions 39-40 after a QA-only two-table schema overlay)."
-  Write-Host "IMPORTANT: this is not a clean 40-row replay of the 2026-10-15 backup. The baseline lacks public.manual_deposits and public.withdraw_requests, and no captured body creates either; resolve the baseline/history gap before declaring a canonical replay."
+  Write-Host "MIGRATION SUFFIX CHECK PASSED for local database '$ReplayDatabase' after the QA-only legacy-schema overlay."
+  Write-Host "IMPORTANT: this suffix check is not proof of original historical DDL or full backup replay."
+} elseif ($UseReconstructedLegacyBaseline) {
+  Write-Host "RECONSTRUCTED-BASELINE FULL REPLAY CHECK PASSED for local database '$ReplayDatabase'."
+  Write-Host "All 40 captured production-history bodies were replayed after a separate schema-only bootstrap derived from the 2026-10-27 live catalog."
+  Write-Host "Local candidate migrations, numeric guard bundle, ACL reconciliation overlays, and final invariants were exercised on this clone."
+  Write-Host "IMPORTANT: this does not prove the bootstrap is the original historical DDL or original policy/ACL history."
 } else {
   Write-Host "MIGRATION REPLAY CHECK PASSED for local database '$ReplayDatabase'."
   Write-Host "Compare the printed object counts with the read-only production snapshot and inspect any differences before approving a canonical chain."

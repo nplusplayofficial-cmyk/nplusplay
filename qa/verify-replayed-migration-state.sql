@@ -108,6 +108,59 @@ BEGIN
     RAISE EXCEPTION 'Replay invariant failed: % ledger arithmetic mismatch(es).', v_count;
   END IF;
 
+  IF has_table_privilege('anon','public.manual_deposits','SELECT')
+     OR has_table_privilege('anon','public.manual_deposits','INSERT')
+     OR has_table_privilege('anon','public.manual_deposits','UPDATE')
+     OR has_table_privilege('anon','public.manual_deposits','DELETE')
+     OR has_table_privilege('anon','public.manual_deposits','TRUNCATE')
+     OR has_table_privilege('anon','public.manual_deposits','REFERENCES')
+     OR has_table_privilege('anon','public.manual_deposits','TRIGGER')
+     OR has_table_privilege('anon','public.manual_deposits','MAINTAIN')
+     OR has_table_privilege('anon','public.user_bank_details','SELECT')
+     OR has_table_privilege('anon','public.user_bank_details','INSERT')
+     OR has_table_privilege('anon','public.user_bank_details','UPDATE')
+     OR has_table_privilege('anon','public.user_bank_details','DELETE')
+     OR has_table_privilege('anon','public.user_bank_details','TRUNCATE')
+     OR has_table_privilege('anon','public.user_bank_details','REFERENCES')
+     OR has_table_privilege('anon','public.user_bank_details','TRIGGER')
+     OR has_table_privilege('anon','public.user_bank_details','MAINTAIN')
+     OR has_table_privilege('anon','public.withdraw_requests','SELECT')
+     OR has_table_privilege('anon','public.withdraw_requests','INSERT')
+     OR has_table_privilege('anon','public.withdraw_requests','UPDATE')
+     OR has_table_privilege('anon','public.withdraw_requests','DELETE')
+     OR has_table_privilege('anon','public.withdraw_requests','TRUNCATE')
+     OR has_table_privilege('anon','public.withdraw_requests','REFERENCES')
+     OR has_table_privilege('anon','public.withdraw_requests','TRIGGER')
+     OR has_table_privilege('anon','public.withdraw_requests','MAINTAIN') THEN
+    RAISE EXCEPTION 'Replay invariant failed: anon retains direct privileges on legacy tables.';
+  END IF;
+  IF NOT has_table_privilege('authenticated','public.manual_deposits','SELECT')
+     OR has_table_privilege('authenticated','public.manual_deposits','INSERT')
+     OR has_table_privilege('authenticated','public.manual_deposits','UPDATE')
+     OR has_table_privilege('authenticated','public.manual_deposits','DELETE')
+     OR has_table_privilege('authenticated','public.manual_deposits','TRUNCATE')
+     OR has_table_privilege('authenticated','public.manual_deposits','REFERENCES')
+     OR has_table_privilege('authenticated','public.manual_deposits','TRIGGER')
+     OR has_table_privilege('authenticated','public.manual_deposits','MAINTAIN')
+     OR has_table_privilege('authenticated','public.user_bank_details','SELECT')
+     OR has_table_privilege('authenticated','public.user_bank_details','INSERT')
+     OR has_table_privilege('authenticated','public.user_bank_details','UPDATE')
+     OR has_table_privilege('authenticated','public.user_bank_details','DELETE')
+     OR has_table_privilege('authenticated','public.user_bank_details','TRUNCATE')
+     OR has_table_privilege('authenticated','public.user_bank_details','REFERENCES')
+     OR has_table_privilege('authenticated','public.user_bank_details','TRIGGER')
+     OR has_table_privilege('authenticated','public.user_bank_details','MAINTAIN')
+     OR has_table_privilege('authenticated','public.withdraw_requests','SELECT')
+     OR has_table_privilege('authenticated','public.withdraw_requests','INSERT')
+     OR has_table_privilege('authenticated','public.withdraw_requests','UPDATE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','DELETE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','TRUNCATE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','REFERENCES')
+     OR has_table_privilege('authenticated','public.withdraw_requests','TRIGGER')
+     OR has_table_privilege('authenticated','public.withdraw_requests','MAINTAIN') THEN
+    RAISE EXCEPTION 'Replay invariant failed: legacy table browser ACLs differ from the reviewed least-privilege contract.';
+  END IF;
+
   RAISE NOTICE 'PASS: all six games remain disabled.';
   RAISE NOTICE 'PASS: public tables have RLS enabled; browser roles cannot directly write wallet/ledger/request tables.';
   RAISE NOTICE 'PASS: phone-enumeration RPC is not executable by browser roles.';

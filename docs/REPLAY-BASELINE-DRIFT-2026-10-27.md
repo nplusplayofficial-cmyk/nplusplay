@@ -46,3 +46,16 @@ Keep the application **not release-ready** until an authoritative baseline/histo
 The 40-row stored migration history has now been reconciled at the **SQL body-source level**: all 29 distinct production-stored SQL bodies compare character-for-character to the 29 archived files; the remaining 11 history rows repeat those bodies. See [production body verification](./PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md).
 
 This confirms the historical SQL body files exist and match the stored bodies. It does not make the replay clean: none of the 29 distinct bodies creates `manual_deposits`, `user_bank_details`, or `withdraw_requests`; the captured index/policy migration only references them. The 2026-10-15 backup-derived replay baseline does not have the three tables. Their authoritative baseline DDL/history remains the current replay blocker. Do not re-run migrations, use the QA-only overlay in production, or alter migration history as a shortcut.
+
+
+## Explicit reconstructed-baseline full replay path — 2026-10-27
+
+A guarded opt-in path was added for the local restore lab:
+
+`pwsh -File .\\qa\\replay-live-migration-sequence.ps1 -VerifiedRestoreDatabase nplus_restore_acceptance_20261024 -ReplayDatabase nplus_migration_replay_20261027 -UseReconstructedLegacyBaseline`
+
+The new `qa/fixtures/replay-baseline/reconstructed-live-legacy-schema-bootstrap.sql` creates the three missing empty legacy relation shapes from the current live catalog snapshot: columns/defaults, PK/FK/unique constraints, owner, RLS and the observed pre-history ACL seed. It refuses to run outside a date-suffixed replay DB, if any table already exists, if prerequisites are missing, or if the replay-audit schema exists. A disposable PostgreSQL regression tests that fixture.
+
+With the opt-in switch the runner clones the accepted backup with owner/ACL restoration enabled, applies the explicitly reconstructed bootstrap, replays all 40 byte-fingerprinted historical bodies, then applies the two candidate migrations, finite-input RPC bundle and QA-only current-ACL reconciliation overlays before final invariants and synthetic wallet/Admin/referral E2E. The end-state contract checks now include the three legacy-table grants.
+
+**Scope honesty:** this is reproducible replay from an explicit schema-only reconstruction, not proof that this was the original historical DDL or original policies/ACLs. The full Supabase-specific replay still needs to be run in the user's local Docker restore lab; connected tools cannot access that local container. Never apply the bootstrap/ACL overlays to production.

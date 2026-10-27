@@ -119,3 +119,11 @@ Keep PR #22 open as draft. No production migration, ACL, Auth, wallet, scheduler
 
 
 - **Auth plan constraint confirmed:** the current Supabase organization reports Free tier. Leaked-password protection is Pro+ per official docs, so do not claim this setting can be enabled on the current plan or upgrade without explicit budget approval.
+
+
+### Reconstructed full replay path — 2026-10-27
+- [ ] Run in the existing local restore lab:
+  `pwsh -File .\\qa\\replay-live-migration-sequence.ps1 -VerifiedRestoreDatabase nplus_restore_acceptance_20261024 -ReplayDatabase nplus_migration_replay_20261027 -UseReconstructedLegacyBaseline`
+- [ ] Confirm all 40 source-fingerprinted bodies, candidate migration/function checks, ACL reconciliation, final invariants, and synthetic wallet/Admin/referral E2E with rollback pass.
+- [ ] Record that this uses current-live schema reconstruction, not proof of original historic DDL; never apply QA fixtures or ACL overlays to production.
+- [ ] Hosted Auth/OTP and synthetic-user browser journeys remain separate gates.
