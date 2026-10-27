@@ -1,5 +1,6 @@
 # Replay the 40 captured production migration bodies on a fresh LOCAL copy
 # of the 2026-10-15 backup, then check critical invariants.
+# Supports one guarded resume at the observed pg_cron failure (20261021161206).
 # Never connects to production. Never drops/replaces an existing database.
 # Stops on the first failure and leaves the disposable replay DB for inspection.
 
@@ -7,7 +8,8 @@
 param(
   [string]$ContainerName = "supabase_db_nplusplay-restore-lab-v2",
   [string]$VerifiedRestoreDatabase = "nplus_restore_acceptance_20261024",
-  [string]$ReplayDatabase = "nplus_migration_replay_20261024"
+  [string]$ReplayDatabase = "nplus_migration_replay_20261024",
+  [string]$ResumeFromVersion = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -79,6 +81,17 @@ if (($versions | Select-Object -Unique).Count -ne 40) {
   throw "Replay order contains duplicate version IDs. No database action was taken."
 }
 
+$resumeIndex = 1
+if (-not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
+  if ($ResumeFromVersion -ne "20261021161206") {
+    throw "Only the observed pg_cron failure checkpoint 20261021161206 is eligible for guarded resume."
+  }
+  $resumeIndex = [Array]::IndexOf($versions, $ResumeFromVersion) + 1
+  if ($resumeIndex -lt 2 -or $versions[$resumeIndex - 2] -ne "20261021161152") {
+    throw "The expected preceding successful migration checkpoint is not present."
+  }
+}
+
 Write-Host "Verified local container: $ContainerName ($image)"
 Write-Host "Step 1/5: verify captured SQL source fingerprints."
 Push-Location $RepoRoot
@@ -99,8 +112,25 @@ $targetExists = (& docker exec $ContainerName psql -X -U supabase_admin -d postg
 if ($LASTEXITCODE -ne 0) {
   throw "Could not inspect the local database catalog."
 }
-if ($targetExists -eq "1") {
+if ([string]::IsNullOrWhiteSpace($ResumeFromVersion) -and $targetExists -eq "1") {
   throw "Replay target '$ReplayDatabase' already exists. Nothing was dropped or overwritten; choose a new date suffix."
+}
+if (-not [string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
+  if ($targetExists -ne "1") {
+    throw "Resume requested but partial replay target '$ReplayDatabase' does not exist."
+  }
+  if ($ReplayDatabase -ne "nplus_migration_replay_20261026") {
+    throw "The guarded resume is only approved for the observed partial replay target nplus_migration_replay_20261026."
+  }
+  $resumeState = (& docker exec $ContainerName psql -X -U supabase_admin -d $ReplayDatabase -A -t -F '|' -c "SELECT current_database() = '$ReplayDatabase', current_setting('cron.database_name') = '$ReplayDatabase', to_regclass('public.nplus_aviator_worker_health') IS NOT NULL, to_regprocedure('public.nplus_aviator_demo_worker_tick()') IS NOT NULL, NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'), to_regclass('cron.job') IS NULL;" 2>&1 | Out-String).Trim()
+  if ($LASTEXITCODE -ne 0) {
+    throw "Could not inspect the partial replay checkpoint. No migration was applied."
+  }
+  $resumeChecks = @($resumeState -split '\|')
+  if ($resumeChecks.Count -ne 6 -or @($resumeChecks | Where-Object { $_.Trim() -ne "t" }).Count -ne 0) {
+    throw "Partial replay checkpoint is not in the expected pre-pg_cron state. No migration was applied. Observed: $resumeState"
+  }
+  Write-Host "PASS: guarded resume checkpoint verified for $ReplayDatabase before migration $ResumeFromVersion."
 }
 
 Write-Host "Step 2/5: re-run read-only backup acceptance against the restored baseline."
@@ -111,30 +141,35 @@ if ($LASTEXITCODE -ne 0) {
   throw "The restored base no longer passes its read-only acceptance checks. Do not start replay and do not change production."
 }
 
-Write-Host "Step 3/5: create a separate clone of the verified restored baseline."
-& docker exec $ContainerName pg_dump -Fc -U supabase_admin -d $VerifiedRestoreDatabase -f $ContainerDumpPath
-if ($LASTEXITCODE -ne 0) { throw "Could not dump the verified baseline to a temporary file inside the local container." }
+if ([string]::IsNullOrWhiteSpace($ResumeFromVersion)) {
+  Write-Host "Step 3/5: create a separate clone of the verified restored baseline."
+  & docker exec $ContainerName pg_dump -Fc -U supabase_admin -d $VerifiedRestoreDatabase -f $ContainerDumpPath
+  if ($LASTEXITCODE -ne 0) { throw "Could not dump the verified baseline to a temporary file inside the local container." }
 
-try {
-  & docker exec $ContainerName createdb -U supabase_admin -T template0 $ReplayDatabase
-  if ($LASTEXITCODE -ne 0) { throw "Could not create fresh replay database '$ReplayDatabase'." }
+  try {
+    & docker exec $ContainerName createdb -U supabase_admin -T template0 $ReplayDatabase
+    if ($LASTEXITCODE -ne 0) { throw "Could not create fresh replay database '$ReplayDatabase'." }
 
-  # Preserve object owners and ACLs. Never add --no-owner or --no-acl.
-  & docker exec $ContainerName pg_restore --exit-on-error --single-transaction -U supabase_admin -d $ReplayDatabase $ContainerDumpPath
-  if ($LASTEXITCODE -ne 0) {
-    throw "Baseline clone restore failed with owner/ACL checks enabled. Keep the isolated target for inspection; do not bypass the error."
+    # Preserve object owners and ACLs. Never add --no-owner or --no-acl.
+    & docker exec $ContainerName pg_restore --exit-on-error --single-transaction -U supabase_admin -d $ReplayDatabase $ContainerDumpPath
+    if ($LASTEXITCODE -ne 0) {
+      throw "Baseline clone restore failed with owner/ACL checks enabled. Keep the isolated target for inspection; do not bypass the error."
+    }
   }
-}
-finally {
-  # Remove only the temporary clone archive made by this script. The original
-  # private backup and both databases are never deleted by this script.
-  & docker exec $ContainerName rm -f $ContainerDumpPath 2>$null | Out-Null
+  finally {
+    # Remove only the temporary clone archive made by this script. The original
+    # private backup and both databases are never deleted by this script.
+    & docker exec $ContainerName rm -f $ContainerDumpPath 2>$null | Out-Null
+  }
+} else {
+  Write-Host "Step 3/5: keeping the verified partial replay target; skipping already-passed versions 1 through $($resumeIndex - 1)."
 }
 
 Write-Host "Step 4/5: replay the 40 applied SQL bodies in the recorded live-history order."
 $index = 0
 foreach ($row in $rows) {
   $index++
+  if ($index -lt $resumeIndex) { continue }
   $migrationFile = Join-Path $SourceRoot ([string]$row.file)
   if (-not (Test-Path -LiteralPath $migrationFile -PathType Leaf)) {
     throw "Missing recovered SQL source for migration $($row.version): $migrationFile. Replay stopped; target DB was kept."
