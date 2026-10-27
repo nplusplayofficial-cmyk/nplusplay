@@ -1,4 +1,11 @@
 \set ON_ERROR_STOP on
+-- LEGACY CONTRACT WARNING (2026-10-24):
+-- This SQL exercises the older automatic 200-virtual-credit / 20-virtual-credit referral prototype
+-- from sql/NPLUS_PLAY_DEMO_REFERRALS.sql. It is retained as a regression test for that legacy
+-- function family only; a pass here does NOT verify the currently applied 500-point qualification
+-- and explicit invite-tier claim model in nplus_vip_referral_demo.
+-- Current release acceptance requires the separate full-schema suite from PR #16:
+-- qa/test-wallet-admin-referral-e2e.sql, run only against an isolated restored disposable database.
 -- Disposable PostgreSQL test only. This migration and reward are virtual credits, never cash.
 \ir ../sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql
 \ir ../sql/NPLUS_PLAY_ADMIN_DEPOSIT_ACTIONS.sql

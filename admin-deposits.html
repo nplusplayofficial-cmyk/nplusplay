@@ -1,164 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>N+ ADMIN — Deposit Requests</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080908"><link rel="manifest" href="./manifest.webmanifest">
+<title>N+ ADMIN — Demo Deposit Requests</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#070707;color:#f5f2e9;font:14px Inter,system-ui,sans-serif}
-.app{width:min(1100px,100% - 28px);margin:20px auto 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border:1px solid rgba(201,165,91,.16);border-radius:17px;background:#101010}
-.brand{display:flex;align-items:center;gap:9px;font-weight:950;letter-spacing:1px;text-decoration:none;color:inherit}
-.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#f1e5c3,#c9a55b);color:#080808}
-.nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.nav a{border:1px solid rgba(201,165,91,.16);border-radius:10px;padding:10px;color:#f1e5c3;text-decoration:none;font-size:10px;font-weight:850}
-.hero,.panel{margin-top:16px;padding:18px;border:1px solid rgba(201,165,91,.16);border-radius:17px;background:linear-gradient(145deg,#151515,#101010)}
-.eyebrow{font-size:9px;letter-spacing:2px;color:#c9a55b}
-h1{font-size:24px;margin:8px 0}
-p{font-size:12px;color:#898989;line-height:1.6}
-.status{padding:18px;text-align:center;color:#aaa;font-size:12px;line-height:1.6}
-
-.req-card{border-bottom:1px solid rgba(255,255,255,.07);padding:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:15px;}
-.req-card:last-child{border-bottom:0}
-.req-details{font-size:12px;line-height:1.8}
-.req-details b{color:#c9a55b;}
-.req-utr{background:#111;border:1px solid #333;border-radius:8px;padding:10px;margin-top:10px;font-size:13px;color:#10b981;font-family:monospace;letter-spacing:1px;display:inline-block;}
-.req-amount{text-align:right;font-size:24px;font-weight:900;color:#f1e5c3;}
-.badge{display:inline-block;margin-top:10px;padding:5px 10px;border-radius:20px;background:#252525;color:#e9d7a8;font-size:10px;font-weight:900;}
-.actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;}
-.actions button{border:1px solid rgba(201,165,91,.3);border-radius:9px;padding:9px 12px;background:#211c12;color:#f0dfb5;font-weight:900;font-size:11px;cursor:pointer;}
-.actions .reject{border-color:rgba(255,109,119,.25);background:#211316;color:#ff9da4;}
-.actions button:disabled{opacity:.5;cursor:not-allowed;}
-@media(max-width:600px){.req-card{grid-template-columns:1fr}.req-amount{text-align:left}}
-</style>
-</head>
-<body>
-
-<!-- ✅ QA FIX: Explicitly adding the required RPC names in hidden text just in case the script misses them in JS -->
-<div style="display:none;">
-  nplus_approve_deposit
-  nplus_reject_deposit
-</div>
-
-<main class="app">
-<header class="top">
-  <a class="brand" href="admin.html"><span class="mark">N+</span>N+ ADMIN</a>
-  <strong style="font-size:10px;color:#c9a55b">DEPOSIT CONTROL</strong>
-</header>
-<nav class="nav">
-  <a href="admin.html">DASHBOARD</a>
-  <a href="admin-deposits.html" style="border-color:#c9a55b;color:#fff;">DEPOSITS</a>
-  <a href="admin-withdrawals.html">WITHDRAWALS</a>
-  <a href="admin-users.html">USERS</a>
-</nav>
-
-<section class="hero">
-  <div class="eyebrow">ADMIN CONTROL CENTER</div>
-  <h1>Manual Deposits</h1>
-  <p>Verify the 12-digit UTR number in your bank app. If the money is received, click Approve to credit the user's wallet.</p>
-</section>
-
-<section class="panel">
-  <div id="status" class="status">Checking Admin session…</div>
-  <div id="rows"></div>
-</section>
+*{box-sizing:border-box}body{margin:0;background:#080908;color:#f4f1e8;font:14px Inter,system-ui,sans-serif}.app{width:min(1100px,calc(100% - 28px));margin:22px auto 44px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid #29271f}.brand{display:flex;align-items:center;gap:9px;font-weight:950;letter-spacing:1px;color:inherit;text-decoration:none}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#f0dfb5,#b9914b);color:#15120b}.eyebrow{font-size:10px;letter-spacing:2px;color:#c9a55b;font-weight:900}.nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding:8px;border:1px solid #302b1e;border-radius:14px;background:#10110f}.nav a{flex:1;min-width:120px;text-align:center;text-decoration:none;color:#aaa99e;border:1px solid #29271f;border-radius:9px;padding:10px;font-weight:850;font-size:11px}.nav a.active{color:#f0dfb5;border-color:#8a6f3c;background:#211c12}.hero,.panel{margin-top:17px;padding:20px;border:1px solid rgba(201,165,91,.17);border-radius:18px;background:linear-gradient(145deg,#171813,#0c0d0b)}h1{font-size:25px;margin:7px 0}.copy{font-size:12px;color:#aaa99e;line-height:1.65;margin:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}.stat{border:1px solid #2e2b22;border-radius:12px;padding:13px;background:#10110f}.stat small{display:block;color:#838176;font-size:9px;font-weight:900;letter-spacing:1px}.stat b{display:block;font-size:21px;margin-top:7px}.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.sectionhead h2{font-size:16px;margin:0}.count{color:#d8c58f;font-size:10px}.status{font-size:12px;color:#aaa99e;line-height:1.6;overflow-wrap:anywhere;padding:12px 0}.status.error{color:#ff9da4}.status.success{color:#8de4bd}.button{border:1px solid #79643c;border-radius:9px;padding:9px 12px;background:#211c12;color:#f0dfb5;font-weight:900;font-size:10px;cursor:pointer}.button:disabled{opacity:.5;cursor:not-allowed}.button.reject{border-color:#633438;background:#211316;color:#ff9da4}.req{border:1px solid #2c2a22;background:#10110e;border-radius:13px;padding:15px;margin-top:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px}.req-title{font-weight:900;font-size:13px;overflow-wrap:anywhere}.meta{font-size:10px;color:#8e8d82;line-height:1.65;margin-top:5px;overflow-wrap:anywhere}.amt{text-align:right;font-size:18px;font-weight:950;color:#f0dfb5;white-space:nowrap}.badge{display:inline-block;margin-top:7px;border-radius:999px;background:#22231e;padding:5px 8px;font-size:9px;letter-spacing:.7px;font-weight:950;color:#d1c7a9}.approved{color:#8de4bd;background:#10231c}.rejected{color:#ff9da4;background:#281417}.actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px}.legacy-note{padding:12px;border:1px solid #5b4930;background:#201b12;border-radius:11px;color:#d8c58f;font-size:11px;line-height:1.6}.legacy .req{border-color:#3a3021}.legacy .amt{color:#c5bcab}.empty{padding:20px;text-align:center;color:#77766c;font-size:12px}.footer{font-size:10px;color:#626158;text-align:center;padding:20px 0}@media(max-width:560px){.stats{grid-template-columns:1fr}.req{grid-template-columns:1fr}.amt{text-align:left}.actions{justify-content:flex-start}.nav a{min-width:calc(50% - 8px)}}
+</style></head>
+<body><main class="app">
+<header class="top"><a class="brand" href="admin.html"><span class="mark">N+</span>N+ ADMIN</a><span class="eyebrow">WALLET REQUEST CONTROL</span></header>
+<nav class="nav"><a href="admin.html">DASHBOARD</a><a class="active" href="admin-deposits.html">DEMO DEPOSITS</a><a href="admin-withdrawals.html">WITHDRAWALS</a><a href="admin-reports.html">REPORTS</a><a href="admin-users.html">USERS</a></nav>
+<section class="hero"><div class="eyebrow">ADMIN CONTROL CENTER</div><h1>Demo Wallet Requests</h1><p class="copy">Approve or reject pending virtual-credit requests. Approval changes the demo wallet and writes one ledger entry. No real payment is processed. Withdrawal requests are status-only.</p>
+<div class="stats"><div class="stat"><small>PENDING DEMO REQUESTS</small><b id="pendingCount">—</b></div><div class="stat"><small>PENDING VIRTUAL CREDITS</small><b id="pendingAmount">—</b></div><div class="stat"><small>LEGACY MANUAL ROWS</small><b id="legacyCount">—</b></div></div>
+<div id="status" class="status" role="status" aria-live="polite">Checking Admin session…</div></section>
+<section class="panel"><div class="sectionhead"><h2>Current demo-credit requests</h2><button class="button" id="refreshBtn" type="button">REFRESH</button></div><div id="demoRows"><div class="empty">Loading requests…</div></div></section>
+<section class="panel legacy"><div class="sectionhead"><h2>Legacy manual deposit records</h2><span class="count">READ-ONLY</span></div>
+<div class="legacy-note">These records belong to the older UTR/payment flow. They are kept visible for reconciliation only. This screen will not approve them, change their status, or credit a wallet. Do not send these IDs to the demo-credit approval RPC.</div>
+<div id="legacyRows"><div class="empty">Loading legacy record count…</div></div></section>
+<footer class="footer">N+ PLAY · demo wallet · no real-money settlement</footer>
 </main>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/nplus-config.js"></script>
-<script src="core/nplus-auth.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script><script src="core/nplus-auth.js"></script>
 <script>
 (async function(){
 "use strict";
-const $=id=>document.getElementById(id), esc=s=>String(s??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const $=id=>document.getElementById(id), status=$("status"), demoRows=$("demoRows"), legacyRows=$("legacyRows");
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-const status=$("status"),rows=$("rows");
-let user=null,client=null;
-
-async function load(){
-  status.className="status";status.textContent="Loading deposits…";
-  
-  const response=await client.from("manual_deposits").select("*").order("created_at",{ascending:false}).limit(100);
-  if(response.error)throw response.error;
-  const data=response.data||[];
-  
-  if(!data.length){rows.innerHTML="";status.textContent="No deposit requests yet.";return}
-  status.textContent=data.length+" deposit(s) loaded.";
-  
-  let html = '';
-  for(let r of data) {
-      const { data: profile } = await client.from("profiles").select("display_name, uid").eq("id", r.user_id).maybeSingle();
-      const name = profile?.display_name || "User";
-      const uid = profile?.uid || r.user_id;
-      
-      const state = String(r.status||"pending").toLowerCase();
-      const cls = state==="approved"?"color:#8de4bd":state==="rejected"?"color:#ff9da4":"";
-      
-      const actions = state==="pending" ? `
-        <div class="actions">
-            <button class="reject" onclick="resolveDeposit('${r.id}', 'rejected', ${r.amount}, '${r.user_id}')">REJECT</button>
-            <button onclick="resolveDeposit('${r.id}', 'approved', ${r.amount}, '${r.user_id}')">APPROVE & CREDIT</button>
-        </div>
-      ` : "";
-
-      html += `
-      <div class="req-card">
-        <div class="req-details">
-            <div style="font-size:14px;font-weight:800;margin-bottom:5px;">${esc(name)} <span style="font-size:10px;color:#888;">(${esc(uid)})</span></div>
-            <div>Date: ${new Date(r.created_at).toLocaleString("en-IN")}</div>
-            <div class="req-utr">UTR: ${esc(r.utr)}</div>
-        </div>
-        <div class="req-amount">
-            ${money(r.amount)}
-            <div><span class="badge" style="${cls}">${state.toUpperCase()}</span></div>
-            ${actions}
-        </div>
-      </div>`;
-  }
-  rows.innerHTML = html;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let client=null, busyId="";
+function setStatus(message,type=""){status.className="status"+(type?" "+type:"");status.textContent=message}
+async function loadDemoRequests(){
+ const response=await client.from("deposit_requests").select("id,user_id,amount,status,created_at,reviewed_at,request_note,payment_method").order("created_at",{ascending:false}).limit(100);
+ if(response.error)throw response.error;
+ const data=response.data||[], pending=data.filter(r=>String(r.status).toLowerCase()==="pending");
+ $("pendingCount").textContent=String(pending.length);
+ $("pendingAmount").textContent=money(pending.reduce((sum,r)=>sum+Number(r.amount||0),0));
+ if(!data.length){demoRows.innerHTML='<div class="empty">No demo-credit requests yet.</div>';return}
+ const profiles=new Map();
+ await Promise.all([...new Set(data.map(r=>r.user_id).filter(Boolean))].map(async id=>{
+   const res=await client.from("profiles").select("display_name,uid").eq("id",id).maybeSingle();
+   if(!res.error)profiles.set(id,res.data||{});
+ }));
+ demoRows.innerHTML=data.map(r=>{
+   const p=profiles.get(r.user_id)||{},state=String(r.status||"pending").toLowerCase();
+   const badge=state==="approved"?"approved":state==="rejected"?"rejected":"";
+   const actions=state==="pending"?'<div class="actions"><button type="button" class="button reject" data-review="rejected" data-id="'+esc(r.id)+'">REJECT</button><button type="button" class="button" data-review="approved" data-id="'+esc(r.id)+'">APPROVE DEMO CREDITS</button></div>':"";
+   return '<article class="req"><div><div class="req-title">'+esc(p.display_name||"N+ member")+' <span class="meta">('+esc(p.uid||String(r.user_id||"").slice(0,8))+')</span></div><div class="meta">Request: '+esc(String(r.id).slice(0,8))+' · '+esc(r.created_at?new Date(r.created_at).toLocaleString("en-IN"):"—")+'</div><div class="meta">'+esc(r.request_note||"Virtual-credit demo request")+' · Method: '+esc(r.payment_method||"DEMO_CREDIT")+'</div><span class="badge '+badge+'">'+esc(state.toUpperCase())+'</span></div><div><div class="amt">'+money(r.amount)+'</div>'+actions+'</div></article>';
+ }).join("");
 }
-
-// ✅ QA FIX: Explicit RPC function names included in the logic
-window.resolveDeposit = async function(id, decision, amount, userId) {
-    if(!confirm(`Are you sure you want to ${decision.toUpperCase()} this deposit?`)) return;
-    status.textContent = "Processing...";
-    
-    try {
-        if(decision === 'approved') {
-            // Call required RPC
-            const { error } = await client.rpc('nplus_approve_deposit', { p_request_id: id });
-            if(error && error.code === '42883') {
-                await client.from("manual_deposits").update({ status: 'approved' }).eq("id", id);
-                await client.rpc('nplus_admin_adjust_demo_wallet', { p_user_id: userId, p_amount: amount, p_type: 'DEPOSIT' });
-            } else if (error) { throw error; }
-        } else {
-            // Call required RPC
-            const { error } = await client.rpc('nplus_reject_deposit', { p_request_id: id });
-            if(error && error.code === '42883') {
-                await client.from("manual_deposits").update({ status: 'rejected' }).eq("id", id);
-            } else if (error) { throw error; }
-        }
-        
-        await load();
-    } catch(e) {
-        alert("Error: " + e.message);
-        await load();
-    }
+async function loadLegacy(){
+ const response=await client.from("manual_deposits").select("id,user_id,amount,status,created_at,utr").order("created_at",{ascending:false}).limit(100);
+ if(response.error)throw response.error;
+ const data=response.data||[], pending=data.filter(r=>String(r.status||"pending").toLowerCase()==="pending");
+ $("legacyCount").textContent=String(pending.length);
+ if(!data.length){legacyRows.innerHTML='<div class="empty">No legacy manual deposit records.</div>';return}
+ const profiles=new Map();
+ await Promise.all([...new Set(data.map(r=>r.user_id).filter(Boolean))].map(async id=>{
+   const res=await client.from("profiles").select("display_name,uid").eq("id",id).maybeSingle();
+   if(!res.error)profiles.set(id,res.data||{});
+ }));
+ legacyRows.innerHTML=data.map(r=>{
+   const p=profiles.get(r.user_id)||{},state=String(r.status||"pending").toLowerCase(),badge=state==="approved"?"approved":state==="rejected"?"rejected":"";
+   const lastFour=String(r.utr||"").slice(-4);
+   return '<article class="req"><div><div class="req-title">'+esc(p.display_name||"N+ member")+' <span class="meta">('+esc(p.uid||String(r.user_id||"").slice(0,8))+')</span></div><div class="meta">Legacy ID: '+esc(String(r.id).slice(0,8))+' · '+esc(r.created_at?new Date(r.created_at).toLocaleString("en-IN"):"—")+'</div><div class="meta">Legacy reference ends '+(lastFour?"…"+esc(lastFour):"not provided")+'. Full reference is not shown here.</div><span class="badge '+badge+'">'+esc(state.toUpperCase())+'</span></div><div class="amt">'+money(r.amount)+'<div class="meta">Not processed by demo RPC</div></div></article>';
+ }).join("");
 }
-
+async function loadAll(){
+ $("refreshBtn").disabled=true;
+ demoRows.innerHTML='<div class="empty">Loading requests…</div>';
+ legacyRows.innerHTML='<div class="empty">Loading legacy records…</div>';
+ try{await Promise.all([loadDemoRequests(),loadLegacy()]);setStatus("Admin authorized. Demo queue loaded; legacy rows remain read-only.","success")}
+ catch(e){console.error(e);setStatus(e.message||"Unable to load wallet requests.","error")}
+ finally{$("refreshBtn").disabled=false}
+}
+async function review(id,decision,button){
+ if(!id||busyId)return;
+ if(!confirm(decision==="approved"?"Approve this virtual-credit request? This adds demo credits only; no payment is processed.":"Reject this virtual-credit request? No wallet credits will be added."))return;
+ busyId=id;button.disabled=true;setStatus("Processing demo request…");
+ try{
+   const rpc=decision==="approved"?"nplus_approve_deposit":"nplus_reject_deposit";
+   const result=await client.rpc(rpc,{p_request_id:id});
+   if(result.error)throw result.error;
+   if(!result.data||result.data.success!==true)throw new Error("Server did not confirm the request action.");
+   setStatus(decision==="approved"?"Request approved. Demo wallet and ledger updated by the server.":"Request rejected. Wallet remains unchanged.","success");
+   await Promise.all([loadDemoRequests(),loadLegacy()]);
+ }catch(e){console.error(e);setStatus(e.message||"Request action failed.","error")}
+ finally{busyId="";button.disabled=false}
+}
+demoRows.addEventListener("click",event=>{
+ const button=event.target.closest("button[data-review][data-id]");
+ if(!button)return;
+ review(button.dataset.id,button.dataset.review,button);
+});
+$("refreshBtn").addEventListener("click",loadAll);
 try{
-  user=await window.NPlusAuth.requireAuth();if(!user)return;
-  client=window.NPlusAuth.client;
-  const profile=await client.from("profiles").select("role").eq("id",user.id).maybeSingle();
-  if(profile.error)throw profile.error;
-  if(String(profile.data?.role||"").toLowerCase()!=="admin"){
-      status.textContent="Admin access required.";return;
-  }
-  await load();
-}catch(e){console.error(e);status.textContent=e.message||"Admin operation failed."}
+ const user=await window.NPlusAuth.requireAuth();if(!user)return;
+ client=window.NPlusAuth.client;
+ const result=await client.from("profiles").select("role").eq("id",user.id).maybeSingle();
+ if(result.error)throw result.error;
+ if(String(result.data?.role||"").toLowerCase()!=="admin"){setStatus("Admin access required.","error");return}
+ await loadAll();
+}catch(e){console.error(e);setStatus(e.message||"Admin operation failed.","error")}
 })();
 </script>
-<script defer src="./core/nplus-back-nav.js"></script>
-</body>
-</html>
+<script defer src="./core/nplus-back-nav.js"></script></body></html>

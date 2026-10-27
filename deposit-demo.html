@@ -1,22 +1,122 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080908"><link rel="manifest" href="./manifest.webmanifest"><title>N+ PLAY — Demo Credit Request</title>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080908">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>N+ PLAY — Demo Credit Request</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#080908;color:#f4f1e8;font:14px Inter,system-ui,sans-serif}.wrap{width:min(520px,100% - 28px);margin:28px auto}.card{border:1px solid #302b1e;border-radius:20px;padding:22px;background:linear-gradient(145deg,#1b1a14,#10110f)}.brand{font-weight:950;letter-spacing:2px;text-decoration:none;color:inherit}.mark{display:inline-grid;place-items:center;background:linear-gradient(135deg,#f0dfb5,#b9914b);color:#15120b;width:34px;height:34px;border-radius:11px;margin-right:8px}h1{font-size:24px;margin:22px 0 8px}.copy{font-size:12px;color:#aaa99e;line-height:1.65}.amount{font-size:32px;font-weight:950;color:#f0dfb5;margin:14px 0}.status{padding:11px 0;color:#b4b2a8;font-size:12px;line-height:1.55;overflow-wrap:anywhere}.btn{width:100%;border:1px solid #79643c;border-radius:11px;padding:13px;background:#211c12;color:#f0dfb5;font-weight:900;cursor:pointer;margin-top:8px}.btn:disabled{opacity:.55;cursor:not-allowed}.back{display:inline-block;color:#d8c58f;margin:14px 16px 0 0;text-decoration:none;font-size:12px}.notice{border:1px solid #354638;background:#101b14;padding:12px;border-radius:10px;font-size:11px;color:#a8dfc6;line-height:1.6}.error{color:#ff9da4}.success{color:#8de4bd}
-</style></head><body><main class="wrap"><a class="brand" href="index.html"><span class="mark">N+</span>PLAY</a><section class="card">
-<div style="color:#d3b06b;font-size:10px;letter-spacing:2px;margin-top:20px">WALLET CENTER · DEMO</div><h1>Request virtual credits</h1>
-<p class="copy">This creates a pending demo-credit request for Admin review. It does not charge a payment method and does not immediately change your wallet balance.</p>
-<div class="amount" id="amount">₹0.00</div><div class="notice">Virtual-credit demo only. These credits have no cash value. No real-money deposit or payout is processed.</div>
-<div class="status" id="status" role="status" aria-live="polite">Checking signed-in account…</div><button class="btn" id="submit" disabled>SUBMIT DEMO REQUEST</button>
-<a class="back" href="deposit.html">← Back to deposit</a><a class="back" href="deposit-history.html">View deposit history →</a>
-</section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script><script src="core/nplus-auth.js"></script>
+*{box-sizing:border-box}body{margin:0;background:#080908;color:#f4f1e8;font:14px Inter,system-ui,sans-serif}.wrap{width:min(520px,calc(100% - 28px));margin:28px auto}.card{border:1px solid #302b1e;border-radius:20px;padding:22px;background:linear-gradient(145deg,#1b1a14,#10110f)}.brand{font-weight:950;letter-spacing:2px;text-decoration:none;color:inherit}.mark{display:inline-grid;place-items:center;background:linear-gradient(135deg,#f0dfb5,#b9914b);color:#15120b;width:34px;height:34px;border-radius:11px;margin-right:8px}h1{font-size:24px;margin:22px 0 8px}.copy{font-size:12px;color:#aaa99e;line-height:1.65}.label{display:block;margin:19px 0 7px;color:#a6a395;font-size:10px;font-weight:900;letter-spacing:1px}.amount-input{width:100%;border:1px solid #393529;border-radius:11px;background:#090a08;color:#f4f1e8;padding:13px;font-size:20px;font-weight:900}.amount{font-size:28px;font-weight:950;color:#f0dfb5;margin:12px 0}.notice{border:1px solid #354638;background:#101b14;padding:12px;border-radius:10px;font-size:11px;color:#a8dfc6;line-height:1.6}.status{padding:11px 0;color:#b4b2a8;font-size:12px;line-height:1.55;overflow-wrap:anywhere}.btn{width:100%;border:1px solid #79643c;border-radius:11px;padding:13px;background:#211c12;color:#f0dfb5;font-weight:900;cursor:pointer;margin-top:8px}.btn:disabled{opacity:.55;cursor:not-allowed}.back{display:inline-block;color:#d8c58f;margin:14px 16px 0 0;text-decoration:none;font-size:12px}.error{color:#ff9da4}.success{color:#8de4bd}.small{font-size:10px;color:#77766c;margin-top:8px;line-height:1.6}
+</style>
+</head>
+<body>
+<main class="wrap">
+<a class="brand" href="account.html"><span class="mark">N+</span>PLAY</a>
+<section class="card">
+<div style="color:#d3b06b;font-size:10px;letter-spacing:2px;margin-top:20px">WALLET CENTER · DEMO</div>
+<h1>Request virtual credits</h1>
+<p class="copy">Create a pending demo-credit request for N+ ADMIN review. Submitting does not charge a payment method and does not immediately change your wallet balance.</p>
+<label class="label" for="requestAmount">DEMO CREDIT AMOUNT (100–50,000)</label>
+<input class="amount-input" id="requestAmount" type="number" inputmode="decimal" min="100" max="50000" step="0.01" value="100" autocomplete="off">
+<div class="amount" id="amount">₹100.00</div>
+<div class="notice">Virtual-credit demo only. Credits have no cash value. No real-money deposit or payout is processed.</div>
+<div class="status" id="status" role="status" aria-live="polite">Checking signed-in account…</div>
+<button class="btn" id="submit" disabled>SUBMIT DEMO REQUEST</button>
+<a class="back" href="account.html">← Back to account</a>
+<a class="back" href="deposit-history.html">View request history →</a>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="core/nplus-config.js"></script>
+<script src="core/nplus-auth.js"></script>
 <script>
 (async function(){
-"use strict";const $=id=>document.getElementById(id),amount=Number(new URLSearchParams(location.search).get("amount")),btn=$("submit"),status=$("status");
-const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});let user=null;$("amount").textContent=money(amount);
-function tokenFor(){const key="nplus_demo_deposit_request_token_v1:"+user.id+":"+amount.toFixed(2);let value=sessionStorage.getItem(key);if(!value){if(window.crypto&&typeof crypto.randomUUID==="function")value=crypto.randomUUID();else{const b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;const h=[...b].map(x=>x.toString(16).padStart(2,"0")).join("");value=h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20)}sessionStorage.setItem(key,value)}return {key,value}}
-try{if(!Number.isFinite(amount)||amount<100||amount>50000)throw new Error("Choose an amount between ₹100 and ₹50,000 demo credits.");if(!window.NPlusAuth||!window.NPlusAuth.client)throw new Error("Supabase is not configured.");user=await window.NPlusAuth.current();if(!user){status.textContent="Please sign in first.";location.replace("auth.html?next="+encodeURIComponent("deposit-demo.html"+location.search));return}btn.disabled=false;status.textContent="Signed in. Submit to create a pending request; your balance will not change."}catch(e){status.className="status error";status.textContent=e.message||"Unable to prepare request."}
-btn.onclick=async function(){if(btn.disabled||!user)return;btn.disabled=true;btn.textContent="SUBMITTING…";status.className="status";status.textContent="Submitting request securely…";const token=tokenFor();try{const response=await window.NPlusAuth.client.rpc("nplus_create_demo_deposit_request",{p_amount:Math.round(amount*100)/100,p_request_token:token.value,p_request_note:"Submitted from N+ PLAY demo deposit page"});if(response.error)throw response.error;const result=Array.isArray(response.data)?response.data[0]:response.data;if(!result||result.success!==true)throw new Error("The deposit request did not return a valid result.");sessionStorage.removeItem(token.key);status.className="status success";status.textContent=(result.duplicate_request?"Existing request recovered: ":"Request submitted: ")+result.request_id+" · Status: "+result.status+". No credits were added. Admin review is required.";btn.textContent="REQUEST SAVED";btn.onclick=null}catch(e){console.error("Demo deposit request failed",e);status.className="status error";status.textContent=e.message||"Request failed. Retry safely; the same request token will be reused.";btn.disabled=false;btn.textContent="RETRY DEMO REQUEST"}};
+"use strict";
+const $=id=>document.getElementById(id);
+const input=$("requestAmount"), amountLabel=$("amount"), btn=$("submit"), status=$("status");
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+let amount=100, user=null, authReady=false, busy=false, submitted=false;
+const supplied=new URLSearchParams(location.search).get("amount");
+if(supplied!==null && supplied.trim()!==""){
+  const initial=Number(supplied);
+  if(Number.isFinite(initial)&&initial>=100&&initial<=50000){amount=initial;input.value=String(initial);}
+}
+function validAmount(){return Number.isFinite(amount)&&amount>=100&&amount<=50000;}
+function updateAmount(){
+  amount=Number(input.value);
+  amountLabel.textContent=Number.isFinite(amount)?money(amount):"Enter an amount";
+  if(!validAmount()) {
+    status.className="status error";
+    status.textContent="Choose a demo-credit amount between 100 and 50,000.";
+  } else if(authReady&&!busy&&!submitted) {
+    status.className="status";
+    status.textContent="Ready. Submit to create a pending request; your wallet balance will not change.";
+  }
+  btn.disabled=!authReady||busy||submitted||!validAmount();
+}
+function tokenFor(){
+  const key="nplus_demo_deposit_request_token_v2:"+user.id+":"+amount.toFixed(2);
+  let value=sessionStorage.getItem(key);
+  if(!value){
+    if(window.crypto&&typeof crypto.randomUUID==="function") value=crypto.randomUUID();
+    else {
+      const b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;
+      const h=[...b].map(x=>x.toString(16).padStart(2,"0")).join("");
+      value=h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20);
+    }
+    sessionStorage.setItem(key,value);
+  }
+  return {key,value};
+}
+input.addEventListener("input",updateAmount);
+try{
+  if(!window.NPlusAuth||!window.NPlusAuth.client) throw new Error("Supabase is not configured.");
+  user=await window.NPlusAuth.current();
+  if(!user){
+    status.textContent="Please sign in first.";
+    location.replace("auth.html?next="+encodeURIComponent("deposit-demo.html"+location.search));
+    return;
+  }
+  authReady=true;
+  updateAmount();
+}catch(e){
+  status.className="status error";
+  status.textContent=e.message||"Unable to prepare a demo request.";
+}
+btn.addEventListener("click",async function(){
+  updateAmount();
+  if(!authReady||!user||!validAmount()||busy||submitted)return;
+  busy=true;btn.disabled=true;btn.textContent="SUBMITTING…";
+  status.className="status";status.textContent="Submitting demo request securely…";
+  const amountAtSubmit=Math.round(amount*100)/100;
+  const token=tokenFor();
+  try{
+    const response=await window.NPlusAuth.client.rpc("nplus_create_demo_deposit_request",{
+      p_amount:amountAtSubmit,p_request_token:token.value,p_request_note:"Submitted from N+ PLAY demo deposit page"
+    });
+    if(response.error)throw response.error;
+    const result=Array.isArray(response.data)?response.data[0]:response.data;
+    if(!result||result.success!==true)throw new Error("The demo request did not return a valid result.");
+    sessionStorage.removeItem(token.key);
+    submitted=true;
+    status.className="status success";
+    status.textContent=(result.duplicate_request?"Existing request recovered: ":"Request submitted: ")+result.request_id+" · Status: "+result.status+". No credits were added; N+ ADMIN review is required.";
+    btn.textContent="REQUEST SAVED";btn.disabled=true;
+  }catch(e){
+    console.error("N+ PLAY demo deposit request failed",e);
+    status.className="status error";
+    status.textContent=e.message||"Request failed. Retry safely; the same request token will be reused.";
+    btn.textContent="RETRY DEMO REQUEST";
+  }finally{
+    busy=false;
+    if(!submitted) btn.disabled=!authReady||!validAmount();
+  }
+});
+updateAmount();
 })();
-</script><script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("PWA registration skipped",e)));</script><script defer src="./core/nplus-back-nav.js"></script>
-</body></html>
+</script>
+<script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("PWA registration skipped",e)));</script>
+<script defer src="./core/nplus-back-nav.js"></script>
+</body>
+</html>
