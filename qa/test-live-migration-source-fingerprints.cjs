@@ -261,6 +261,24 @@ if (!fs.existsSync(replayRunnerPath) || !fs.existsSync(replayChecksPath)) {
       failures++;
     }
   }
+
+  const aclOverlayPath = path.join(root, 'qa/fixtures/replay-baseline/wallet-ledger-browser-acl-overlay.sql');
+  if (!fs.existsSync(aclOverlayPath)) {
+    console.error('FAIL missing QA-only wallet/ledger ACL parity fixture.');
+    failures++;
+  } else {
+    const aclOverlay = fs.readFileSync(aclOverlayPath, 'utf8');
+    if (!aclOverlay.includes('NEVER RUN THIS FILE AGAINST PRODUCTION') ||
+        !aclOverlay.includes("v_target <> 'nplus_migration_replay_20261026'") ||
+        !aclOverlay.includes('nplus_replay_audit.wallet_ledger_acl_snapshot') ||
+        !aclOverlay.includes('REVOKE ALL ON TABLE public.demo_wallets, public.demo_wallet_transactions') ||
+        !aclOverlay.includes('GRANT SELECT ON TABLE public.demo_wallets, public.demo_wallet_transactions') ||
+        !aclOverlay.includes('has_table_privilege') ||
+        !aclOverlay.includes('NOT a clean 40-body replay')) {
+      console.error('FAIL wallet/ledger ACL parity fixture lacks local-only, snapshot, post-check or no-clean-replay safeguards.');
+      failures++;
+    }
+  }
 }
 if (failures) {
   console.error('Recovered migration source fingerprint audit failed: ' + failures + ' issue(s).');
