@@ -1,15 +1,15 @@
 -- QA-ONLY FIXTURE. NEVER RUN THIS FILE AGAINST PRODUCTION.
 -- This is not a canonical migration and contains NO production user rows.
--- Read-only catalog review (2026-10-27) found both public.manual_deposits and
--- public.withdraw_requests in current live schema (owner postgres, RLS enabled),
--- but absent from the restored 2026-10-15 backup-derived replay baseline.
--- No captured body creates either table; version 20261023092858 only references
--- them. Strict clean replay therefore remains blocked by baseline/history drift.
+-- Read-only catalog review (2026-10-27) found public.manual_deposits,
+-- public.withdraw_requests, and public.user_bank_details in current live schema,
+-- all owned by postgres with RLS enabled, but absent from the restored 2026-10-15
+-- backup-derived replay baseline. No captured body creates these tables; version
+-- 20261023092858 only references them. Strict clean replay remains blocked.
 --
--- This fixture creates empty schema-only shapes for the two missing tables so
+-- This fixture creates empty schema-only shapes for those three legacy tables so
 -- versions 39-40 can be rehearsed against the already-partial LOCAL replay DB.
--- It copies NO production rows, does not reconstruct old policies/data, and does
--- NOT prove a clean 40-body replay or full restore parity.
+-- It copies NO production rows, does not reconstruct old policy/data history, and
+-- does NOT prove a clean 40-body replay or full restore parity.
 \set ON_ERROR_STOP on
 
 BEGIN;
@@ -38,6 +38,9 @@ BEGIN
   IF to_regclass('public.withdraw_requests') IS NOT NULL THEN
     RAISE EXCEPTION 'QA overlay refused: public.withdraw_requests already exists.';
   END IF;
+  IF to_regclass('public.user_bank_details') IS NOT NULL THEN
+    RAISE EXCEPTION 'QA overlay refused: public.user_bank_details already exists.';
+  END IF;
   IF to_regnamespace('nplus_replay_audit') IS NOT NULL THEN
     RAISE EXCEPTION 'QA overlay refused: replay-audit marker schema already exists.';
   END IF;
@@ -54,7 +57,6 @@ BEGIN
     'nplus_demo_referral_qualifications',
     'nplus_demo_support_requests',
     'withdrawal_requests',
-    'user_bank_details',
     'user_preferences'
   ] LOOP
     IF to_regclass('public.' || v_relation) IS NULL THEN
@@ -75,8 +77,7 @@ BEGIN
     'withdrawal_requests.reviewed_by',
     'profiles.id',
     'profiles.role',
-    'user_preferences.user_id',
-    'user_bank_details.user_id'
+    'user_preferences.user_id'
   ] LOOP
     IF NOT EXISTS (
       SELECT 1
@@ -139,9 +140,33 @@ ALTER TABLE public.withdraw_requests ENABLE ROW LEVEL SECURITY;
 GRANT ALL PRIVILEGES ON TABLE public.withdraw_requests
   TO anon, authenticated, postgres, service_role;
 
+-- Empty schema-only approximation of the live user_bank_details relation.
+-- The account-related columns are included by name/type only; no real values
+-- are copied or created. The captured migration adds row policies after this.
+CREATE TABLE public.user_bank_details (
+  id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+  user_id uuid NOT NULL,
+  account_holder text,
+  account_number text,
+  ifsc_code text,
+  bank_name text,
+  upi_id text,
+  updated_at timestamptz DEFAULT now(),
+  CONSTRAINT user_bank_details_pkey PRIMARY KEY (id),
+  CONSTRAINT user_bank_details_user_id_fkey
+    FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT user_bank_details_user_id_key UNIQUE (user_id)
+);
+
+ALTER TABLE public.user_bank_details OWNER TO postgres;
+ALTER TABLE public.user_bank_details ENABLE ROW LEVEL SECURITY;
+GRANT ALL PRIVILEGES ON TABLE public.user_bank_details
+  TO anon, authenticated, postgres, service_role;
+
 COMMIT;
 
 SELECT current_database() AS local_database,
-       'empty schema-only manual_deposits and withdraw_requests overlay created' AS result,
+       'empty schema-only legacy-table overlay created' AS result,
        (SELECT count(*) FROM public.manual_deposits) AS manual_deposits_rows,
-       (SELECT count(*) FROM public.withdraw_requests) AS withdraw_requests_rows;
+       (SELECT count(*) FROM public.withdraw_requests) AS withdraw_requests_rows,
+       (SELECT count(*) FROM public.user_bank_details) AS user_bank_details_rows;
