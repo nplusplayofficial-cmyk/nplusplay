@@ -101,7 +101,7 @@ If a command fails, **stop at that point** and record only the failing version p
 
 ### Verified safe checks
 - Candidate HEAD before this doc-only refresh: `12817608fd6d393d80e04b5b07b32b74ccdc0644`; Static QA #633 and Release Smoke #220 both passed at exact HEAD.
-- Finite-number guard code for 10 SECURITY DEFINER functions has been split into three migrations: 20261027180000_guard_finite_numeric_request_and_gift_inputs.sql, 20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql, and 20261027180200_guard_finite_numeric_game_stakes.sql. Not applied to production; pending split-runtime CI and an available approved rollout path.
+- Finite-number guard code for 10 SECURITY DEFINER functions is applied to production as versions `20261027180120`, `20261027180134`, and `20261027180141`; the repository filenames and replay harness now use those recorded IDs. See [production rollout evidence](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md). A fresh full local reconstructed-baseline replay of this split sequence and exact-head CI remain required.
 - 20 RLS-enabled tables without policies were checked against ACLs: no direct SELECT/INSERT/UPDATE/DELETE privileges for `anon` or `authenticated`. Do not add policies only to suppress INFO findings.
 - Read-only scan over 21 numeric amount/balance/stake/payout fields found zero non-finite stored values.
 - Migration history: 40 records / 29 unique bodies and all 29 bodies match archived source text exactly.
