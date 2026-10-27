@@ -99,11 +99,11 @@ BEGIN
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public'
-                 AND tablename='manual_deposits' AND policyname='manual_deposits_owner_read')
+                 AND tablename='manual_deposits' AND policyname='manual_deposits_owner_admin_read')
      OR NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public'
-                    AND tablename='user_bank_details' AND policyname='user_bank_details_owner_update')
+                    AND tablename='user_bank_details' AND policyname='Users can update own bank')
      OR NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public'
-                    AND tablename='withdraw_requests' AND policyname='withdraw_requests_owner_insert') THEN
+                    AND tablename='withdraw_requests' AND policyname='Users can insert own withdraw') THEN
     RAISE EXCEPTION 'FAIL: expected authenticated owner policies were not preserved';
   END IF;
 
