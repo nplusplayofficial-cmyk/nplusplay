@@ -201,11 +201,11 @@ No production schema/ACL/wallet/game/Auth/scheduler state was modified in this w
 ## Current handover — 2026-10-27 latest candidate
 
 - Current candidate branch: `integration/release-candidate-2026-10-27`.
-- Most recent verified test commit: `72969cf8ce1393e7a95b8b1221423c8f70120b36`.
+- Latest user-executed full reconstructed-baseline replay tested exact candidate HEAD: `eb4377e09139cf826c6d102d7d8b6b39a41a99c4`. All 40 recorded migration rows / 29 unique SQL bodies, the four candidate migrations, ACL overlays, final invariants and wallet/Admin/referral E2E passed; local cron target was restored after the run.
 - Static QA #660: PASS (includes the exact timestamped finite-numeric migration runtime test on a disposable PostgreSQL DB and 38/38 page + 17/17 mobile checks).
 - Release Smoke #247: PASS.
 - Candidate WINGO overload migration and finite-numeric guard migration are now tracked under `supabase/migrations` and covered by isolated CI tests.
 - PR #22 remains OPEN/DRAFT, deliberately not merged. Current Pages deployment points to older `main`, not the candidate.
-- A new full local reconstructed-baseline replay on the current branch is still required because the two formal migrations were added after the user's earlier local full replay. See the final replay steps in `docs/FINAL-RELEASE-GATE-CHECKLIST-2026-10-24.md`.
+- The latest full local replay is now recorded as PASS, but it remains based on a schema-only bootstrap reconstructed from the live catalog. It is not proof of original historical DDL/ACL/policy lineage, and hosted user/auth acceptance remains open.
 - Unresolved non-code gates: authoritative legacy DDL/ACL lineage; hosted signup/email OTP/login/recovery and Admin/user acceptance using a safe test inbox; owner decision on 200/20 referral vs 500-point tier contract; K3/5D/TRX payout approval; Free-plan leaked-password-protection risk acceptance or owner-approved plan change; final deployment and hosted smoke.
 - No production Supabase schema, grants, wallet data, Auth configuration, cron settings, or game flags were changed. Keep all six games disabled. The local 40-body replay used schema reconstruction and is not canonical historical replay.
