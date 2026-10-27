@@ -81,7 +81,7 @@ Thus `anon` and `authenticated` currently have table-level SELECT, INSERT, UPDAT
 
 Candidate-only remediation is already present and tested in:
 `supabase/migrations/20261027130000_harden_legacy_table_anon_privileges.sql`.
-That migration removes PUBLIC/anon direct privileges while preserving reviewed authenticated grants and RLS. It has **not** been deployed to production.
+The current candidate migration revokes direct privileges from PUBLIC, anon, and authenticated on all three legacy tables, then restores authenticated SELECT-only on `manual_deposits` for the read-only Admin reconciliation screen. It preserves row data, table owners, RLS flags, and policy definitions. It has **not** been deployed to production.
 
 ## Replay interpretation
 
