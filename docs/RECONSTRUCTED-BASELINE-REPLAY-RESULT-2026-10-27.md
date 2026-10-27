@@ -1,0 +1,32 @@
+# Reconstructed-Baseline Local Replay Result — 2026-10-27
+
+## Result
+
+**PASS — user-run local restore-lab acceptance, not production deployment approval.**
+
+- Candidate branch: `integration/release-candidate-2026-10-27`
+- Candidate source HEAD tested: `27d13556c393881e67a27389a42279fa36d12690`
+- Local Docker container: `supabase_db_nplusplay-restore-lab-v2`
+- Restore acceptance DB: `nplus_restore_acceptance_20261027`
+- Disposable replay DB: `nplus_migration_replay_20261028`
+- PostgreSQL image reported by the local runner: `public.ecr.aws/supabase/postgres:17.11.0.004`
+
+## Evidence recorded from the local run
+
+1. Backup restore acceptance passed. The 661-entry archive restored with owner/ACL restoration enabled. Checks reported 5 profiles, 5 wallets, 140 ledger rows, 5 deposits, and 6 game settings; zero wallet arithmetic mismatches, negative wallets, wallets without history, or wallet/latest-ledger mismatches.
+2. All 29 recovered distinct SQL bodies matched their captured fingerprints. The recorded order contained 40 migration history rows (including exact repeated bodies).
+3. All 40 recorded migration bodies replayed successfully on the disposable replay DB after applying a separate empty schema-only bootstrap for the three legacy relations missing from the 2026-10-15 backup baseline.
+4. The local-only candidate referral-state and legacy-table ACL migrations, finite-numeric RPC guard bundle, and QA-only wallet/ledger/request ACL reconciliation overlays applied successfully on that clone.
+5. Final invariants passed: six game settings remained disabled; public tables had RLS enabled; browser roles could not directly write wallet/ledger/request tables; phone-enumeration RPC was not executable by browser roles; server-only Aviator worker and local cron job were present; both WINGO Admin overloads retained explicit authorization; Recent Activity remained aggregate-only; wallet-ledger arithmetic remained consistent.
+6. Synthetic database E2E passed for deposit idempotency/approval/rejection and Admin authorization, Admin wallet adjustment/ledger and positive-credit protection, referral uniqueness/self-referral/qualification/one-time tier claim, and withdrawal idempotency/status-only Admin review. The synthetic test transaction ended with `ROLLBACK`.
+
+## Important limitations
+
+- This is a **reconstructed-baseline** replay, not proof of canonical historical schema replay. The three legacy relation definitions were reconstructed from a snapshot of the current live catalog; this does not prove their original historical DDL, policy history, or ACL provenance.
+- Candidate migrations and QA-only ACL overlays were tested on a local disposable database only. No production Supabase schema, grants, wallet balances, Auth settings, scheduler, or game settings were changed by this run.
+- This local replay is not a hosted signup/OTP/login or full-browser acceptance test, and does not close the remaining manual SECURITY DEFINER review, leaked-password protection plan limitation, or unapproved K3/5D/TRX settlement rules.
+- All six games remain disabled. Do not merge/deploy on the strength of this run alone.
+
+## Local lab configuration cleanup
+
+The local container's `cron.database_name` was changed to `nplus_migration_replay_20261028` to allow the captured scheduler migration to replay. After preserving this result, restore the lab's prior setting (`nplus_migration_replay_20261026`) if that database is still the intended local cron target. This is a local Docker configuration only.
