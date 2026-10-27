@@ -37,7 +37,7 @@ The local container's `cron.database_name` was changed to `nplus_migration_repla
 The above local replay was run against candidate HEAD `27d13556c393881e67a27389a42279fa36d12690`. After that run, two timestamped candidate migrations were added and passed isolated CI regression tests:
 
 - `supabase/migrations/20261027140000_fix_wingo_admin_overload_defaults.sql` removes the overlapping defaults from the five-argument WINGO Admin overload while preserving the four-argument compatibility overload, original owner, fixed search path and intended execute grants. The disposable regression test reproduces the prior ambiguity and confirms deterministic overload resolution plus non-admin denial.
-- `supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql` applies finite-number checks to ten authenticated SECURITY DEFINER RPCs. Static QA now applies this exact migration in an isolated disposable PostgreSQL fixture and verifies malformed inputs and stored malformed values are rejected.
+- The former monolithic numeric guard source was split into 20261027180000_guard_finite_numeric_request_and_gift_inputs.sql, 20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql, and 20261027180200_guard_finite_numeric_game_stakes.sql. The prior full local replay exercised the same function bodies from the pre-split monolithic file; the split sequence needs a fresh CI/runtime pass before it is called verified.
 
 Latest tested candidate at the time of this note: `72969cf8ce1393e7a95b8b1221423c8f70120b36`; Static QA #660 and Release Smoke #247 passed. This does **not** mean those two newer migrations have been replayed against the full restored local database. A final fresh local reconstructed-baseline replay is still required to exercise the exact latest candidate head. Use a new target DB name such as `nplus_migration_replay_20261029`; do not overwrite the earlier `20261028` evidence DB.
 
@@ -53,10 +53,17 @@ For the final local run, temporarily set the local restore-lab `cron.database_na
 - Fresh disposable replay target: `nplus_migration_replay_20261030`.
 - Captured history: all 40 recorded rows replayed successfully; all 29 distinct recovered SQL bodies matched the stored fingerprints.
 - Read-only restore checks again passed: 5 profiles, 5 wallets, 140 ledger rows, 5 deposits, 6 game settings; zero wallet arithmetic mismatches, negative balances, wallets without history, or latest-ledger mismatches.
-- Candidate migrations `20261027120000` (referral qualified state), `20261027130000` (legacy table browser ACL hardening), `20261027140000` (WINGO Admin overload defaults), and `20261027150000` (finite numeric RPC guards) all applied successfully to the disposable clone.
+- Candidate migrations 20261027120000 (referral qualified state), 20261027130000 (legacy table browser ACL hardening), 20261027140000 (WINGO Admin overload defaults), and the pre-split monolithic finite numeric guard all applied successfully to the disposable clone. The current split form is a follow-up repository refactor and requires new CI verification.
 - QA-only wallet/ledger/request ACL reconciliation overlays applied and passed their contract checks.
 - Final invariants passed: all six game settings disabled; public tables RLS enabled; no direct browser writes to wallet/ledger/request tables; phone enumeration RPC denied to browser roles; generic positive/game credit guard present; Aviator worker server-only with local cron job; both WINGO Admin overloads include Admin authorization; Recent Activity remains aggregate-only; wallet ledger arithmetic consistent.
 - Synthetic DB E2E passed deposit idempotency/approval/rejection and Admin authorization; Admin wallet adjustment/ledger and positive-credit protection; referral uniqueness/self-referral/qualification/one-time tier claim; and withdrawal idempotency/status-only Admin review. Test ended with `ROLLBACK`.
 - The local cron setting was restored to `nplus_migration_replay_20261026`; PostgreSQL was accepting connections after restart.
 
 **Scope limitation:** this is still a reconstructed-baseline replay: the three legacy relation shapes were bootstrapped from the current live catalog because the supplied 2026-10-15 backup plus captured SQL bodies do not establish their original historical DDL/policy/ACL lineage. This is not canonical historical replay and does not certify production release. No production Supabase database, migration history, wallet/user rows, Auth settings, scheduler settings or game flags were changed.
+
+
+## Production migration rollout update — 2026-10-27
+
+Three migrations have now been applied to the live Supabase project via the migration API: referral lifecycle state, legacy-table ACL hardening, and WINGO overload resolution. They were recorded by Supabase as versions 20261027172625, 20261027172637, and 20261027172656 respectively. The repository migration filenames were aligned to those recorded versions so future migration tooling will not replay them.
+
+The finite-number guard code remains pending production rollout. The monolithic apply did not return success; current live catalog checks indicated the guard was absent. That code is now split into three smaller migrations for isolated testing and controlled rollout. No wallet/user rows were rewritten, and the six game flags stayed disabled.
