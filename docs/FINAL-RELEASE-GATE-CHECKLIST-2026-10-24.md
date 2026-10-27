@@ -121,15 +121,21 @@ Keep PR #22 open as draft. No production migration, ACL, Auth, wallet, scheduler
 - **Auth plan constraint confirmed:** the current Supabase organization reports Free tier. Leaked-password protection is Pro+ per official docs, so do not claim this setting can be enabled on the current plan or upgrade without explicit budget approval.
 
 
-### Latest-candidate local replay — required before release
+### Latest-candidate local replay — completed with reconstruction caveat
 
-The previous local reconstructed-baseline replay passed on source HEAD `27d13556c393881e67a27389a42279fa36d12690`, targeting `nplus_migration_replay_20261028`. The latest candidate subsequently added the WINGO overload migration and the timestamped finite-numeric guard migration. CI now passes those migrations in isolated tests, but the full local replay runner has not yet exercised those newest migrations on the restored database.
+The full local reconstructed-baseline replay was rerun successfully by the user on exact candidate HEAD `eb4377e09139cf826c6d102d7d8b6b39a41a99c4`, target DB `nplus_migration_replay_20261030`, after restoring `nplus_restore_acceptance_20261027`.
 
-- [ ] Update the existing local worktree to current `origin/integration/release-candidate-2026-10-27` and record `git rev-parse HEAD`.
-- [ ] Confirm the backup-acceptance DB `nplus_restore_acceptance_20261027` still exists; do not overwrite the earlier successful replay DB.
-- [ ] Temporarily set the local lab `cron.database_name` to a fresh target `nplus_migration_replay_20261029`, restart the Docker container, and confirm the setting before replay.
-- [ ] Run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\qa\replay-live-migration-sequence.ps1" -VerifiedRestoreDatabase nplus_restore_acceptance_20261027 -ReplayDatabase nplus_migration_replay_20261029 -UseReconstructedLegacyBaseline`.
-- [ ] Verify all recorded migration bodies, the new WINGO and numeric migrations, ACL reconciliation, final invariants, and synthetic wallet/Admin/referral E2E pass.
-- [ ] Restore the local lab's prior cron target `nplus_migration_replay_20261026`, restart the container, verify the setting, and preserve the new replay DB as evidence.
-- [ ] Record that this remains a reconstructed-schema replay, not proof of original historical legacy DDL/ACL/policy lineage. Never apply the bootstrap/ACL overlays to production.
+- [x] Updated worktree to candidate branch and confirmed exact HEAD.
+- [x] Confirmed verified backup-acceptance database exists and used a fresh replay target.
+- [x] Set local lab `cron.database_name` to `nplus_migration_replay_20261030`, restarted and verified PostgreSQL readiness/configuration.
+- [x] All 40 captured history rows replayed; all 29 unique SQL bodies matched their recorded fingerprints.
+- [x] Referral-state, legacy ACL, WINGO overload, and finite-numeric candidate migrations applied to the disposable clone.
+- [x] QA-only wallet/ledger/request ACL overlays, final invariants and synthetic wallet/Admin/referral E2E passed; E2E rolled back its synthetic rows.
+- [x] Restored local lab cron target to `nplus_migration_replay_20261026`, restarted the container, confirmed PostgreSQL accepts connections and verified the restored setting.
+- [x] Recorded the scope limitation: the three legacy table shapes came from current-live schema reconstruction, not original historical DDL/ACL/policy provenance; do not apply bootstrap or overlays to production.
 - [ ] Hosted Auth/OTP and synthetic-user browser journeys remain separate gates.
+- [ ] Obtain authoritative legacy schema/ACL history or explicitly accept that historical provenance cannot be proven.
+- [ ] Resolve referral rule (legacy 200/20 vs current 500/tier), K3/5D/TRX payout rules, and Free-plan leaked-password-protection risk acceptance.
+- [ ] Complete independent review and final deployment/live-hosted verification after the remaining gates are approved.
+
+See [local replay evidence](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) and [local pg_cron checkpoint guide](LOCAL-REPLAY-CRON-CHECKPOINT-2026-10-27.md).
