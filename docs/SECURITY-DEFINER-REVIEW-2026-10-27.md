@@ -78,3 +78,17 @@ A read-only catalog review found eight authenticated SECURITY DEFINER RPCs whose
 Candidate-only replacements are bundled in `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql`. The patch rejects NULL/NaN/±Infinity before range comparisons or numeric narrowing; it preserves the role checks, fixed `search_path`, existing bounds, row locks, idempotency and wallet/ledger logic. It contains eight full function replacements derived from the live read-only definitions.
 
 The static source-order guard and disposable PostgreSQL numeric-semantics test are wired into Static QA. This is not full RPC end-to-end testing and the bundle is not deployed. Its final approval still requires CI, reviewed source diff, canonical replay/restore parity, and hosted safe test accounts.
+
+
+## Defense-in-depth on stored deposit/gift amounts — 2026-10-27
+
+The latest read-only catalog review checked direct table ACLs/RLS for demo transaction entry points. Authenticated has SELECT-only on `deposit_requests` and `withdrawal_requests`; authenticated has no direct table grants on Aviator/Moto/WINGO bet tables or gift-code tables. Owner-scoped RLS alone is not the only barrier—the direct write ACLs are absent on those tables.
+
+Two additional read/write boundary guards were added to the same candidate bundle:
+
+- `nplus_approve_deposit(uuid)` now rejects a stored request amount that is NULL, NaN, +Infinity or -Infinity before taking the wallet-row lock or changing the wallet/ledger.
+- `nplus_demo_gift_redeem(text)` now rejects a malformed stored gift-code amount before writing a claim, incrementing claims_count or crediting the virtual wallet.
+
+A read-only aggregate check over 21 amount/balance/stake/payout columns across wallet transactions, Safe balances/transfers, gift codes/claims, deposit/withdraw requests, referrals, and game bets returned **zero current non-finite rows**. This is a snapshot of current data, not a guarantee against future inputs; candidate guards remain necessary.
+
+These two added checks are candidate-only and require CI verification. No live stored rows, grants, functions or wallet balances were modified.

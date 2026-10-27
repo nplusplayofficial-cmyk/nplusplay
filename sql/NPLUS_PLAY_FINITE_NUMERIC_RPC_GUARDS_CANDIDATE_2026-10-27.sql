@@ -594,4 +594,162 @@ BEGIN
 END;
 $function$;
 
+
+CREATE OR REPLACE FUNCTION public.nplus_approve_deposit(p_request_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog', 'public'
+AS $function$
+declare
+  v_admin_id uuid := auth.uid();
+  v_role text;
+  v_request public.deposit_requests%rowtype;
+  v_before numeric(12,2);
+  v_after numeric(12,2);
+begin
+  if v_admin_id is null then
+    raise exception 'Authentication required.';
+  end if;
+
+  select lower(coalesce(p.role, ''))
+  into v_role
+  from public.profiles p
+  where p.id = v_admin_id;
+
+  if coalesce(v_role, '') <> 'admin' then
+    raise exception 'Admin access required.';
+  end if;
+
+  if p_request_id is null then
+    raise exception 'Deposit request ID is required.';
+  end if;
+
+  select *
+  into v_request
+  from public.deposit_requests
+  where id = p_request_id
+  for update;
+
+  if not found then
+    raise exception 'Deposit request not found.';
+  end if;
+
+  if v_request.status <> 'pending' then
+    raise exception 'Request has already been reviewed.';
+  end if;
+
+  if v_request.amount is null or v_request.amount::text IN ('NaN','Infinity','-Infinity') or v_request.amount <= 0 then
+    raise exception 'Deposit request amount is invalid.';
+  end if;
+
+  select w.balance
+  into v_before
+  from public.demo_wallets w
+  where w.user_id = v_request.user_id
+  for update;
+
+  if not found then
+    raise exception 'User wallet not found.';
+  end if;
+
+  v_after := v_before + round(v_request.amount, 2);
+
+  update public.demo_wallets
+  set balance = v_after,
+      updated_at = clock_timestamp()
+  where user_id = v_request.user_id;
+
+  insert into public.demo_wallet_transactions(
+    user_id, delta, balance_before, balance_after, type, source, note
+  )
+  values(
+    v_request.user_id,
+    round(v_request.amount, 2),
+    v_before,
+    v_after,
+    'credit',
+    'admin_deposit',
+    'Virtual deposit request approved by admin'
+  );
+
+  update public.deposit_requests
+  set status = 'approved',
+      reviewed_at = clock_timestamp(),
+      reviewed_by = v_admin_id
+  where id = v_request.id;
+
+  return jsonb_build_object(
+    'success', true,
+    'request_id', v_request.id,
+    'amount', round(v_request.amount, 2),
+    'balance_before', v_before,
+    'balance_after', v_after
+  );
+end;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.nplus_demo_gift_redeem(p_code text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog', 'public'
+AS $function$
+DECLARE
+  v_actor uuid := auth.uid();
+  v_code text := upper(trim(coalesce(p_code,'')));
+  v_amount numeric(12,2);
+  v_max integer;
+  v_count integer;
+  v_expires timestamptz;
+  v_before numeric(14,2);
+  v_after numeric(14,2);
+BEGIN
+  IF v_actor IS NULL THEN RAISE EXCEPTION 'Authentication required.'; END IF;
+  IF v_code = '' THEN RETURN jsonb_build_object('success',false,'reason','invalid_code','message','Enter a gift code.'); END IF;
+
+  SELECT amount, max_claims, claims_count, expires_at
+    INTO v_amount, v_max, v_count, v_expires
+    FROM public.nplus_demo_gift_codes
+   WHERE code = v_code AND active = true
+   FOR UPDATE;
+
+  IF NOT FOUND THEN RETURN jsonb_build_object('success',false,'reason','not_found','message','Gift code is invalid or inactive.'); END IF;
+  IF v_amount IS NULL OR v_amount::text IN ('NaN','Infinity','-Infinity')
+     OR v_amount <= 0 OR v_amount > 1000000 THEN
+    RETURN jsonb_build_object('success',false,'reason','invalid_amount','message','The stored demo gift amount is invalid.');
+  END IF;
+  IF v_expires IS NOT NULL AND v_expires <= now() THEN
+    RETURN jsonb_build_object('success',false,'reason','expired','message','This demo gift code has expired.');
+  END IF;
+  IF v_count >= v_max THEN RETURN jsonb_build_object('success',false,'reason','fully_claimed','message','This demo gift code has reached its claim limit.'); END IF;
+
+  INSERT INTO public.nplus_demo_gift_claims(user_id, code, amount)
+  VALUES (v_actor, v_code, v_amount)
+  ON CONFLICT (user_id, code) DO NOTHING;
+
+  IF NOT FOUND THEN RETURN jsonb_build_object('success',false,'reason','already_claimed','message','This code was already redeemed on this account.'); END IF;
+
+  UPDATE public.nplus_demo_gift_codes SET claims_count = claims_count + 1 WHERE code = v_code;
+
+  INSERT INTO public.demo_wallets(user_id, balance) VALUES (v_actor, 0)
+  ON CONFLICT (user_id) DO NOTHING;
+  UPDATE public.demo_wallets SET balance = balance + v_amount, updated_at = now()
+    WHERE user_id = v_actor RETURNING balance - v_amount, balance INTO v_before, v_after;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Demo wallet not found.'; END IF;
+
+  INSERT INTO public.demo_wallet_transactions(user_id,delta,balance_before,balance_after,type,source,note)
+  VALUES (v_actor,v_amount,v_before,v_after,'GIFT_REWARD','GIFT',format('Demo gift code %s',v_code));
+
+  INSERT INTO public.nplus_demo_vip_state(user_id,experience_points)
+  VALUES (v_actor,v_amount::bigint)
+  ON CONFLICT (user_id) DO UPDATE
+    SET experience_points = public.nplus_demo_vip_state.experience_points + EXCLUDED.experience_points,
+        updated_at = now();
+
+  RETURN jsonb_build_object('success',true,'code',v_code,'amount',v_amount,
+    'wallet_balance',v_after,'message',format('Added %s virtual demo points.',v_amount));
+END;
+$function$;
+
 COMMIT;

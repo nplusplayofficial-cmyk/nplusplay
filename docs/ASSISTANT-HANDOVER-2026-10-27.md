@@ -133,3 +133,11 @@ Static QA run #622 exposed one stale assertion in the combined `qa/test-release-
 - Read-only review identified eight authenticated numeric inputs that need explicit finite-value checks: demo deposit request, demo withdrawal request, Admin gift-code creation, Aviator stake/auto-cashout, MotoRace stake, WINGO stake, Safe transfer, and Admin referral qualification.
 - Added candidate bundle `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql` with full current function definitions and finite guards; deposit/withdraw input is checked before rounding/narrowing.
 - Added static source-order guard and dedicated disposable PostgreSQL semantic test into Static QA. The exact-head CI result is required before marking the change verified. Production functions, ACLs, wallets and game settings remain unchanged.
+
+
+## Stored-amount defense-in-depth — 2026-10-27
+
+- Added two further candidate checks to the 10-function bundle: Admin deposit approval rejects malformed persisted request amounts before wallet credit/ledger writes; gift redemption rejects malformed stored gift amounts before claim-count/wallet updates.
+- Read-only ACL review confirms authenticated has SELECT-only access to `deposit_requests`/`withdrawal_requests` and no direct grants on gift-code/game-bet tables.
+- Aggregate read-only checks across 21 numeric amount/balance/stake/payout columns reported zero current NaN/Infinity/-Infinity rows.
+- Candidate bundle is not deployed. New Static QA / Release Smoke must pass on the next head; production remains unchanged.
