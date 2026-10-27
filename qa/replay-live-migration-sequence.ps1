@@ -240,6 +240,7 @@ if ($UseReconstructedLegacyBaseline) {
   $PostReplayFiles = @(
     "supabase/migrations/20261027120000_allow_qualified_demo_referral_state.sql",
     "supabase/migrations/20261027130000_harden_legacy_table_anon_privileges.sql",
+    "supabase/migrations/20261027140000_fix_wingo_admin_overload_defaults.sql",
     "sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql",
     "qa/fixtures/replay-baseline/wallet-ledger-browser-acl-overlay.sql",
     "qa/fixtures/replay-baseline/request-table-browser-acl-overlay.sql"
