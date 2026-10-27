@@ -8,9 +8,9 @@ Other checks in this audit found direct write privileges restricted on `demo_wal
 
 ## Candidate fix
 
-- `sql/NPLUS_PLAY_LEGACY_TABLE_PRIVILEGE_HARDENING_2026-10-24.sql` now revokes all privileges from `PUBLIC` and `anon` on all three legacy tables: `manual_deposits`, `user_bank_details`, and `withdraw_requests`.
+- Candidate migration `supabase/migrations/20261027130000_harden_legacy_table_anon_privileges.sql` revokes all privileges from `PUBLIC` and `anon` on all three legacy tables: `manual_deposits`, `user_bank_details`, and `withdraw_requests`. The legacy SQL entry point is now a wrapper around this single migration source.
 - It intentionally keeps `authenticated` table grants and existing RLS policies unchanged.
-- `qa/test-legacy-table-privilege-hardening.sql` uses a fresh disposable schema to check anonymous grants are gone from all three tables, authenticated owner-scoped access contracts are preserved, and RLS remains enabled. The current Admin page reads `manual_deposits` as authenticated but never changes those legacy rows; authenticated grants are therefore preserved until the legacy route is retired.
+- `qa/test-legacy-table-privilege-hardening.sql` exercises the migration in a fresh disposable schema and checks anonymous grants are gone from all three tables, authenticated owner-scoped access contracts are preserved, and RLS remains enabled. `qa/test-legacy-browser-route-readonly.cjs` additionally guards the current Admin `manual_deposits` reconciliation screen as SELECT-only and forbids browser queries to `user_bank_details` / `withdraw_requests`. Authenticated grants are preserved until the legacy route contract is deliberately changed.
 
 ## Safety / release gate
 
@@ -39,3 +39,9 @@ The candidate hardening script and isolated PostgreSQL test now include all thre
 - `qa/test-legacy-browser-route-readonly.cjs` scans browser source and fails if any front-end code directly queries `user_bank_details` or `withdraw_requests`, or if `manual_deposits` is queried outside `admin-deposits.html`.
 - It asserts the legacy Admin block selects rows only and sends no legacy record to an RPC, preventing accidental approval/credit behavior.
 - The Static QA workflow now runs this guard after the disposable table-privilege test. It does not substitute for live hosted-user testing.
+
+## Latest candidate test status (2026-10-27)
+
+- Static QA + desktop/mobile browser smoke: [PASS](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40482213478).
+- Release Smoke: [PASS](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40482213497).
+- Both ran against candidate commit `a24b6ace7d6194b8bd7575f774a5b6e04a4d3980`. The new migration remains an unmerged candidate and has not been applied to production. The canonical clean-replay/schema-lineage gate remains open.
