@@ -42,3 +42,21 @@ The above local replay was run against candidate HEAD `27d13556c393881e67a27389a
 Latest tested candidate at the time of this note: `72969cf8ce1393e7a95b8b1221423c8f70120b36`; Static QA #660 and Release Smoke #247 passed. This does **not** mean those two newer migrations have been replayed against the full restored local database. A final fresh local reconstructed-baseline replay is still required to exercise the exact latest candidate head. Use a new target DB name such as `nplus_migration_replay_20261029`; do not overwrite the earlier `20261028` evidence DB.
 
 For the final local run, temporarily set the local restore-lab `cron.database_name` to the new replay database before starting the sequence, then restore its prior value (`nplus_migration_replay_20261026`) and restart the local container afterwards. This is local Docker configuration only. Keep all six games disabled and do not use the reconstructed schema bootstrap as proof of original historical DDL.
+
+
+## Latest full local replay — 2026-10-27
+
+**User-executed result: PASS** on exact candidate HEAD `eb4377e09139cf826c6d102d7d8b6b39a41a99c4`.
+
+- Local restore lab: `supabase_db_nplusplay-restore-lab-v2`, PostgreSQL image `public.ecr.aws/supabase/postgres:17.11.0.004`.
+- Backup acceptance source: `nplus_restore_acceptance_20261027`.
+- Fresh disposable replay target: `nplus_migration_replay_20261030`.
+- Captured history: all 40 recorded rows replayed successfully; all 29 distinct recovered SQL bodies matched the stored fingerprints.
+- Read-only restore checks again passed: 5 profiles, 5 wallets, 140 ledger rows, 5 deposits, 6 game settings; zero wallet arithmetic mismatches, negative balances, wallets without history, or latest-ledger mismatches.
+- Candidate migrations `20261027120000` (referral qualified state), `20261027130000` (legacy table browser ACL hardening), `20261027140000` (WINGO Admin overload defaults), and `20261027150000` (finite numeric RPC guards) all applied successfully to the disposable clone.
+- QA-only wallet/ledger/request ACL reconciliation overlays applied and passed their contract checks.
+- Final invariants passed: all six game settings disabled; public tables RLS enabled; no direct browser writes to wallet/ledger/request tables; phone enumeration RPC denied to browser roles; generic positive/game credit guard present; Aviator worker server-only with local cron job; both WINGO Admin overloads include Admin authorization; Recent Activity remains aggregate-only; wallet ledger arithmetic consistent.
+- Synthetic DB E2E passed deposit idempotency/approval/rejection and Admin authorization; Admin wallet adjustment/ledger and positive-credit protection; referral uniqueness/self-referral/qualification/one-time tier claim; and withdrawal idempotency/status-only Admin review. Test ended with `ROLLBACK`.
+- The local cron setting was restored to `nplus_migration_replay_20261026`; PostgreSQL was accepting connections after restart.
+
+**Scope limitation:** this is still a reconstructed-baseline replay: the three legacy relation shapes were bootstrapped from the current live catalog because the supplied 2026-10-15 backup plus captured SQL bodies do not establish their original historical DDL/policy/ACL lineage. This is not canonical historical replay and does not certify production release. No production Supabase database, migration history, wallet/user rows, Auth settings, scheduler settings or game flags were changed.
