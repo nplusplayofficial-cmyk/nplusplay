@@ -48,16 +48,16 @@ CREATE POLICY manual_deposits_owner_admin_read ON public.manual_deposits
   FOR SELECT TO authenticated USING (user_id = auth.uid());
 CREATE POLICY manual_deposits_owner_insert ON public.manual_deposits
   FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
-CREATE POLICY Users can view own bank ON public.user_bank_details
+CREATE POLICY "Users can view own bank" ON public.user_bank_details
   FOR SELECT TO authenticated USING (user_id = auth.uid());
-CREATE POLICY Users can insert own bank ON public.user_bank_details
+CREATE POLICY "Users can insert own bank" ON public.user_bank_details
   FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
-CREATE POLICY Users can update own bank ON public.user_bank_details
+CREATE POLICY "Users can update own bank" ON public.user_bank_details
   FOR UPDATE TO authenticated USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
-CREATE POLICY Users can view own withdraw ON public.withdraw_requests
+CREATE POLICY "Users can view own withdraw" ON public.withdraw_requests
   FOR SELECT TO authenticated USING (user_id = auth.uid());
-CREATE POLICY Users can insert own withdraw ON public.withdraw_requests
+CREATE POLICY "Users can insert own withdraw" ON public.withdraw_requests
   FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
 
 \ir ../sql/NPLUS_PLAY_LEGACY_TABLE_PRIVILEGE_HARDENING_2026-10-24.sql
