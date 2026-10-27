@@ -121,9 +121,15 @@ Keep PR #22 open as draft. No production migration, ACL, Auth, wallet, scheduler
 - **Auth plan constraint confirmed:** the current Supabase organization reports Free tier. Leaked-password protection is Pro+ per official docs, so do not claim this setting can be enabled on the current plan or upgrade without explicit budget approval.
 
 
-### Reconstructed full replay path — 2026-10-27
-- [ ] Run in the existing local restore lab:
-  `pwsh -File .\\qa\\replay-live-migration-sequence.ps1 -VerifiedRestoreDatabase nplus_restore_acceptance_20261024 -ReplayDatabase nplus_migration_replay_20261027 -UseReconstructedLegacyBaseline`
-- [ ] Confirm all 40 source-fingerprinted bodies, candidate migration/function checks, ACL reconciliation, final invariants, and synthetic wallet/Admin/referral E2E with rollback pass.
-- [ ] Record that this uses current-live schema reconstruction, not proof of original historic DDL; never apply QA fixtures or ACL overlays to production.
+### Latest-candidate local replay — required before release
+
+The previous local reconstructed-baseline replay passed on source HEAD `27d13556c393881e67a27389a42279fa36d12690`, targeting `nplus_migration_replay_20261028`. The latest candidate subsequently added the WINGO overload migration and the timestamped finite-numeric guard migration. CI now passes those migrations in isolated tests, but the full local replay runner has not yet exercised those newest migrations on the restored database.
+
+- [ ] Update the existing local worktree to current `origin/integration/release-candidate-2026-10-27` and record `git rev-parse HEAD`.
+- [ ] Confirm the backup-acceptance DB `nplus_restore_acceptance_20261027` still exists; do not overwrite the earlier successful replay DB.
+- [ ] Temporarily set the local lab `cron.database_name` to a fresh target `nplus_migration_replay_20261029`, restart the Docker container, and confirm the setting before replay.
+- [ ] Run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\qa\replay-live-migration-sequence.ps1" -VerifiedRestoreDatabase nplus_restore_acceptance_20261027 -ReplayDatabase nplus_migration_replay_20261029 -UseReconstructedLegacyBaseline`.
+- [ ] Verify all recorded migration bodies, the new WINGO and numeric migrations, ACL reconciliation, final invariants, and synthetic wallet/Admin/referral E2E pass.
+- [ ] Restore the local lab's prior cron target `nplus_migration_replay_20261026`, restart the container, verify the setting, and preserve the new replay DB as evidence.
+- [ ] Record that this remains a reconstructed-schema replay, not proof of original historical legacy DDL/ACL/policy lineage. Never apply the bootstrap/ACL overlays to production.
 - [ ] Hosted Auth/OTP and synthetic-user browser journeys remain separate gates.
