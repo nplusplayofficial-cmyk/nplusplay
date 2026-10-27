@@ -89,7 +89,8 @@ Additional defense-in-depth in the candidate guard bundle checks deposit/withdra
 
 - Candidate migration: `supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql`.
 - Earlier source reference retained: `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql`.
-- Static source-order guard and disposable PostgreSQL numeric-semantics regression are wired into Static QA.
+- Static source-order guard and PostgreSQL numeric-semantics tests remain enabled.
+- New runtime regression `qa/test-finite-numeric-migration.sql` applies the exact timestamped migration on an isolated disposable PostgreSQL database and exercises the ten real candidate function definitions for NaN/±Infinity/NULL rejection, stored deposit/gift amount checks, Aviator auto-cashout validation, and non-admin denial.
 - The finite-amount replacements are **not deployed to production**. The relevant production functions therefore remain an open rollout risk until an approved migration plan, hosted testing and release approval permit a reviewed deployment.
 
 ## Auth plan limitation
@@ -108,3 +109,14 @@ The current Supabase organization is on the Free plan. Supabase's current Passwo
 ## Final conclusion
 
 This is an expanded source/catalog review with candidate regression coverage, not a production certification. Production tables, grants, wallets, Auth settings, scheduler configuration and game flags were not changed by this review. Keep all six games disabled and do not treat the reconstructed replay as canonical history.
+
+
+## Candidate runtime evidence refresh — 2026-10-27
+
+At candidate commit `72969cf8ce1393e7a95b8b1221423c8f70120b36`, Static QA #660 and Release Smoke #247 both passed:
+- Static QA: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40523464520
+- Release Smoke: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40523464537
+
+The new disposable PostgreSQL test applied `supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql` itself and passed its invalid-input regression cases. Browser smoke rendered 38/38 pages and passed 17/17 mobile viewport checks. This verifies the candidate migration on an isolated fixture, not on production and not as part of a rerun of the full restored local replay.
+
+Production database, grants, wallet balances, Auth settings, scheduler, and game flags remain unchanged.
