@@ -551,7 +551,18 @@ BEGIN
   IF NOT coalesce(public.nplus_is_admin(), false) THEN
     RAISE EXCEPTION 'Administrator access required.' USING ERRCODE='42501';
   END IF;
-  IF p_referred_user_id IS NULL OR p_verified_virtual_amount IS NULL OR p_verified_virtual_amount::text IN ('NaN','Infinity','-Infinity') OR p_verified_virtual_amount < 500.00 THEN
+  IF p_referred_user_id IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'referral_not_found',
+      'message', 'No referral record exists for that account.');
+  END IF;
+
+  IF p_verified_virtual_amount IS NULL
+     OR p_verified_virtual_amount::text IN ('NaN', 'Infinity', '-Infinity') THEN
+    RETURN jsonb_build_object('success', false, 'reason', 'invalid_verified_amount',
+      'message', 'Verified amount must be a finite numeric value.');
+  END IF;
+
+  IF p_verified_virtual_amount < 500.00 THEN
     RETURN jsonb_build_object('success', false, 'reason', 'qualification_below_minimum',
       'message', 'Verify at least 500 virtual demo points for this invited account.');
   END IF;
