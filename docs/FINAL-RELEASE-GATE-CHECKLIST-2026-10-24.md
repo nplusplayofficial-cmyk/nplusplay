@@ -164,3 +164,14 @@ See [local replay evidence](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) 
 - Split migrations recorded in live Supabase history: `20261027180120`, `20261027180134`, `20261027180141`. Repository migration filenames now use these exact versions.
 - Live post-deployment checks: 10/10 guard functions present; all six games disabled; three legacy tables RLS-enabled with the reviewed direct-grant contract; 5 wallets, 146 ledger rows, no negative wallets or arithmetic/latest-ledger mismatches.
 - The prior full reconstructed replay is not evidence for the split-file sequence. Run a fresh local replay of the split files before release certification. Hosted auth/browser journeys, the referral-rule decision, K3/5D/TRX rule approval, legacy schema provenance/risk disposition, Free-plan password-protection decision, and final hosted Pages verification remain open.
+
+
+## Latest exact-head verification — 2026-10-27 18:10 UTC
+
+- Candidate HEAD: `5b89e6c3fd8130185adac6d6e23150c3f52b32da`.
+- Static QA #716 PASS (including browser smoke): https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40557287957
+- Release Smoke #303 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40557288991
+- Both workflow runs are on the exact candidate SHA above.
+- Current Pages deployment remains the earlier main commit `680238f2428416faf44df0dced6f907d4cea7f08`; the candidate is not confirmed deployed or hosted-tested.
+- Remaining release gates are unchanged: the exact split migrations still need a fresh full local replay; hosted Auth/OTP/recovery and synthetic browser journeys need a controlled inbox; referral and game payout rules need owner decision; legacy historical schema provenance/risk disposition and the Free-plan password-protection decision remain open; finish SECURITY DEFINER finding disposition and run final hosted Pages smoke after approval.
+- Keep PR #22 OPEN/DRAFT and all six game flags disabled.
