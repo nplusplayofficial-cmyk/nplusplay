@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const sqlPath = path.join(root, 'supabase/migrations/20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql');
+const sqlPath = path.join(root, 'supabase/migrations/20261027180134_guard_finite_numeric_safe_transfer_and_referral.sql');
 const testPath = path.join(root, 'qa/test-demo-referral-finite-amount.sql');
 
 function fail(message) {
@@ -50,5 +50,5 @@ if (process.exitCode) {
 } else {
   console.log('PASS: candidate explicitly rejects NaN and infinities before threshold logic.');
   console.log('PASS: isolated SQL regression covers invalid values, exactly-once qualification and Admin authorization.');
-  console.log('NOTE: this function guard remains pending production rollout; the other three protective migrations are already applied.');
+  console.log('NOTE: this test runs against a disposable PostgreSQL fixture only; see the production rollout record for live postconditions.');
 }
