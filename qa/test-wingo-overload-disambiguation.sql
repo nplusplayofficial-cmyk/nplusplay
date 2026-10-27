@@ -49,6 +49,8 @@ CREATE FUNCTION public.nplus_admin_set_wingo_demo(
 )
 RETURNS jsonb
 LANGUAGE sql
+SECURITY DEFINER
+SET search_path TO 'public'
 AS $four$
   SELECT jsonb_build_object('overload','four','duration',p_duration,'mode',p_mode)
 $four$;
@@ -64,6 +66,8 @@ CREATE FUNCTION public.nplus_admin_set_wingo_demo(
 )
 RETURNS jsonb
 LANGUAGE sql
+SECURITY DEFINER
+SET search_path TO 'public'
 AS $five_old$
   SELECT jsonb_build_object('overload','five-old','duration',p_duration,'mode',p_mode)
 $five_old$;
