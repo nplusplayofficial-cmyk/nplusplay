@@ -25,7 +25,7 @@ const checks=[
  ['exact per-body source fingerprint remains enforced',runner.includes('Source fingerprint mismatch at migration')],
  ['candidate referral lifecycle migration included',runner.includes('20261027172625_20261027120000_allow_qualified_demo_referral_state.sql')],
  ['legacy ACL hardening candidate included',runner.includes('20261027172637_20261027130000_harden_legacy_table_anon_privileges.sql')],
- ['finite numeric candidate migration included',runner.includes('20261027180000_guard_finite_numeric_request_and_gift_inputs.sql')&&runner.includes('20261027180100_guard_finite_numeric_safe_transfer_and_referral.sql')&&runner.includes('20261027180200_guard_finite_numeric_game_stakes.sql')],
+ ['finite numeric candidate migration included',runner.includes('20261027180120_guard_finite_numeric_request_and_gift_inputs.sql')&&runner.includes('20261027180134_guard_finite_numeric_safe_transfer_and_referral.sql')&&runner.includes('20261027180141_guard_finite_numeric_game_stakes.sql')],
  ['WINGO overload migration included',runner.includes('20261027172656_20261027140000_fix_wingo_admin_overload_defaults.sql')],
  ['wallet ACL reconciliation before request ACL reconciliation',runner.indexOf('wallet-ledger-browser-acl-overlay.sql')<runner.indexOf('request-table-browser-acl-overlay.sql')],
  ['synthetic database E2E actually invoked',runner.includes('test-wallet-admin-referral-e2e.sql')&&runner.includes('Synthetic wallet/Admin/referral E2E failed')],
