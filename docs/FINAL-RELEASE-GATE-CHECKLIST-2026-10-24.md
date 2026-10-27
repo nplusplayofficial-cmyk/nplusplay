@@ -2,7 +2,7 @@
 
 ## Release decision
 
-**Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Bodies 39/40 passed only after a QA-only empty-schema overlay for three missing legacy tables; this is not a clean full replay. The final invariant then failed because the replay DB retains direct wallet/ledger write privileges for browser roles. Current production catalog shows those direct writes are revoked, but captured history has no explicit table-level GRANT/REVOKE for the wallet/ledger relations. Baseline/schema/ACL parity, authenticated hosted-browser tests, cross-PR integration, and approved K3/5D/TRX rules remain release blockers.
+**Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Bodies 39/40 passed only after a QA-only empty-schema overlay for three missing legacy tables; this is not a clean full replay. The first final invariant failed on wallet/ledger ACL parity; a guarded local-only overlay passed. The next invariant failed on request-table direct-write grants, and a separate guarded local-only ACL overlay is prepared but not yet applied. Current production catalog shows browser roles have no direct writes to the wallet/ledger/request tables; captured history does not fully reproduce these baseline ACLs. Schema/ACL parity, authenticated hosted-browser tests, cross-PR integration, and approved K3/5D/TRX rules remain release blockers.
 
 No production migrations, schema DDL, wallet/ledger data, user records, game settings, ACLs, or cron jobs were changed as part of these latest audit updates.
 
@@ -36,9 +36,11 @@ These CI runs use isolated disposable PostgreSQL and/or local static/browser smo
 - Local replay bodies **1–38 PASS**. Body **39/40** first stops at `CREATE INDEX ... ON public.manual_deposits`; guarded fixture attempts then find `public.withdraw_requests` and `public.user_bank_details` missing before creating any fixture objects.
 - Read-only production catalog confirms all three legacy tables exist, are owned by `postgres`, and have RLS enabled. Captured history body `20261023092858` references the relations but does not create them.
 - A QA-only three-table empty schema overlay was applied to the disposable partial replay DB after preflight; each of the three tables reported zero rows. The first suffix checkpoint attempt then stopped because the runner compared failed-check counts to the expected field count. Fix committed and a regression test added; versions 39–40 remain pending re-run.
-- Bodies 39/40 passed on the QA-only three-table schema overlay, but the final invariant failed because replayed browser roles still have direct wallet/ledger write privileges.
-- A current production read-only query confirms `anon` and `authenticated` lack INSERT/UPDATE/DELETE on `demo_wallets`, `demo_wallet_transactions`, `deposit_requests`, and `withdrawal_requests`; captured migrations do not explicitly GRANT/REVOKE table privileges on the existing wallet/ledger tables.
-- Conclusion: strict clean replay remains blocked by schema and wallet/ledger ACL parity gaps. Inspect the exact local ACLs; do not weaken the assertion or modify production. See [baseline-drift report](REPLAY-BASELINE-DRIFT-2026-10-27.md).
+- Bodies 39/40 passed on the QA-only three-table schema overlay; this is not a clean full replay.
+- The first final invariant failed on wallet/ledger ACL parity; the guarded local wallet/ledger ACL overlay passed and captured the pre-overlay ACLs. The next invariant then failed on request-table direct-write grants.
+- A guarded QA-only request-table ACL overlay now exists, snapshots the original grants, and is restricted to `nplus_migration_replay_20261026`; it has not yet been run.
+- Current production read-only catalog confirms `anon` and `authenticated` lack direct writes on `demo_wallets`, `demo_wallet_transactions`, `deposit_requests`, and `withdrawal_requests`. Captured history does not fully reconstruct these ACLs on the restored 2026-10-15 baseline.
+- Conclusion: strict clean replay remains blocked by schema and ACL parity gaps. Do not weaken the assertion or modify production. See [baseline-drift report](REPLAY-BASELINE-DRIFT-2026-10-27.md).
 - No production database mutation was performed. Broad `anon` / `authenticated` ACLs on the legacy `manual_deposits` table remain a separate PR #20 review item.
 
 ## Cross-PR integration gate (reviewed 2026-10-25)
