@@ -90,3 +90,8 @@ Checked against GitHub on 2026-10-27.
 - Read-only production catalog confirms broad authenticated direct table grants on all three legacy tables, including DELETE/TRUNCATE/REFERENCES/TRIGGER/MAINTAIN.
 - The candidate migration/test now retain authenticated SELECT on `manual_deposits` only (needed for the existing Admin read-only reconciliation page) and no direct browser-role grants on `user_bank_details` or `withdraw_requests`. Policy definitions/RLS remain unchanged in the candidate.
 - This is a proposed candidate migration only. Production grants remain unchanged. Await Static QA on the latest commit and keep the canonical replay/hosted route gates open.
+
+
+## Latest CI failure triage — 2026-10-27
+
+Static QA run #622 exposed one stale assertion in the combined `qa/test-release-index-policy-migration.sql`: it still expected the previous authenticated INSERT/UPDATE grants after the candidate ACL contract was narrowed. The failure occurred in the fixture's post-migration assertion (not in SQL syntax or the browser smoke). The test is now being updated to assert the revised contract—authenticated SELECT-only on `manual_deposits`, no direct browser grants on `user_bank_details` / `withdraw_requests`, and all RLS/policies intact. The new run must pass before treating the ACL candidate as verified. Production ACLs remain unchanged.

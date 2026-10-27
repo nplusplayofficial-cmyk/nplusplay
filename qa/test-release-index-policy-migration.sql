@@ -149,7 +149,8 @@ END
 $assertions$;
 
 -- Additional security follow-up, isolated in this disposable migration-test DB:
--- simulate the broad pre-existing table grants then verify only PUBLIC/anon are revoked.
+-- simulate broad pre-existing table grants, then verify only the current route's
+-- minimum authenticated SELECT remains and unused legacy tables have no browser grants.
 ALTER TABLE public.manual_deposits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_bank_details ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.withdraw_requests ENABLE ROW LEVEL SECURITY;
@@ -163,34 +164,66 @@ BEGIN
   IF has_table_privilege('anon','public.manual_deposits','SELECT')
      OR has_table_privilege('anon','public.manual_deposits','INSERT')
      OR has_table_privilege('anon','public.manual_deposits','UPDATE')
-     OR has_table_privilege('anon','public.manual_deposits','DELETE') THEN
+     OR has_table_privilege('anon','public.manual_deposits','DELETE')
+     OR has_table_privilege('anon','public.manual_deposits','TRUNCATE')
+     OR has_table_privilege('anon','public.manual_deposits','REFERENCES')
+     OR has_table_privilege('anon','public.manual_deposits','TRIGGER')
+     OR has_table_privilege('anon','public.manual_deposits','MAINTAIN') THEN
     RAISE EXCEPTION 'Anonymous table privileges remain on public.manual_deposits.';
   END IF;
   IF has_table_privilege('anon','public.user_bank_details','SELECT')
      OR has_table_privilege('anon','public.user_bank_details','INSERT')
      OR has_table_privilege('anon','public.user_bank_details','UPDATE')
-     OR has_table_privilege('anon','public.user_bank_details','DELETE') THEN
+     OR has_table_privilege('anon','public.user_bank_details','DELETE')
+     OR has_table_privilege('anon','public.user_bank_details','TRUNCATE')
+     OR has_table_privilege('anon','public.user_bank_details','REFERENCES')
+     OR has_table_privilege('anon','public.user_bank_details','TRIGGER')
+     OR has_table_privilege('anon','public.user_bank_details','MAINTAIN') THEN
     RAISE EXCEPTION 'Anonymous table privileges remain on public.user_bank_details.';
   END IF;
   IF has_table_privilege('anon','public.withdraw_requests','SELECT')
      OR has_table_privilege('anon','public.withdraw_requests','INSERT')
      OR has_table_privilege('anon','public.withdraw_requests','UPDATE')
-     OR has_table_privilege('anon','public.withdraw_requests','DELETE') THEN
+     OR has_table_privilege('anon','public.withdraw_requests','DELETE')
+     OR has_table_privilege('anon','public.withdraw_requests','TRUNCATE')
+     OR has_table_privilege('anon','public.withdraw_requests','REFERENCES')
+     OR has_table_privilege('anon','public.withdraw_requests','TRIGGER')
+     OR has_table_privilege('anon','public.withdraw_requests','MAINTAIN') THEN
     RAISE EXCEPTION 'Anonymous table privileges remain on public.withdraw_requests.';
   END IF;
-  IF NOT has_table_privilege('authenticated','public.manual_deposits','INSERT')
-     OR NOT has_table_privilege('authenticated','public.user_bank_details','SELECT')
-     OR NOT has_table_privilege('authenticated','public.user_bank_details','INSERT')
-     OR NOT has_table_privilege('authenticated','public.user_bank_details','UPDATE')
-     OR NOT has_table_privilege('authenticated','public.withdraw_requests','SELECT')
-     OR NOT has_table_privilege('authenticated','public.withdraw_requests','INSERT') THEN
-    RAISE EXCEPTION 'Authenticated table grants were changed unexpectedly.';
+  IF NOT has_table_privilege('authenticated','public.manual_deposits','SELECT')
+     OR has_table_privilege('authenticated','public.manual_deposits','INSERT')
+     OR has_table_privilege('authenticated','public.manual_deposits','UPDATE')
+     OR has_table_privilege('authenticated','public.manual_deposits','DELETE')
+     OR has_table_privilege('authenticated','public.manual_deposits','TRUNCATE')
+     OR has_table_privilege('authenticated','public.manual_deposits','REFERENCES')
+     OR has_table_privilege('authenticated','public.manual_deposits','TRIGGER')
+     OR has_table_privilege('authenticated','public.manual_deposits','MAINTAIN')
+     OR has_table_privilege('authenticated','public.user_bank_details','SELECT')
+     OR has_table_privilege('authenticated','public.user_bank_details','INSERT')
+     OR has_table_privilege('authenticated','public.user_bank_details','UPDATE')
+     OR has_table_privilege('authenticated','public.user_bank_details','DELETE')
+     OR has_table_privilege('authenticated','public.user_bank_details','TRUNCATE')
+     OR has_table_privilege('authenticated','public.user_bank_details','REFERENCES')
+     OR has_table_privilege('authenticated','public.user_bank_details','TRIGGER')
+     OR has_table_privilege('authenticated','public.user_bank_details','MAINTAIN')
+     OR has_table_privilege('authenticated','public.withdraw_requests','SELECT')
+     OR has_table_privilege('authenticated','public.withdraw_requests','INSERT')
+     OR has_table_privilege('authenticated','public.withdraw_requests','UPDATE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','DELETE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','TRUNCATE')
+     OR has_table_privilege('authenticated','public.withdraw_requests','REFERENCES')
+     OR has_table_privilege('authenticated','public.withdraw_requests','TRIGGER')
+     OR has_table_privilege('authenticated','public.withdraw_requests','MAINTAIN') THEN
+    RAISE EXCEPTION 'Authenticated table grants exceed the reviewed legacy route contract.';
   END IF;
   IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.manual_deposits'::regclass)
      OR NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.user_bank_details'::regclass)
      OR NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.withdraw_requests'::regclass) THEN
     RAISE EXCEPTION 'RLS must remain enabled on all three legacy tables.';
   END IF;
-  RAISE NOTICE 'PASS: anonymous grants removed on all three legacy tables; authenticated grants and RLS retained.';
+  RAISE NOTICE 'PASS: anonymous grants removed on all three legacy tables.';
+  RAISE NOTICE 'PASS: authenticated has only manual_deposits SELECT and no direct grants on legacy bank/withdraw tables.';
+  RAISE NOTICE 'PASS: all three tables retain RLS and their reviewed policy definitions.'
 END
 $legacy_privilege_assertions$;

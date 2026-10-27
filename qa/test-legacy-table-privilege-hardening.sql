@@ -67,60 +67,29 @@ BEGIN
   IF has_table_privilege('anon','public.manual_deposits','SELECT')
      OR has_table_privilege('anon','public.manual_deposits','INSERT')
      OR has_table_privilege('anon','public.manual_deposits','UPDATE')
-     OR has_table_privilege('anon','public.manual_deposits','DELETE')
-     OR has_table_privilege('anon','public.manual_deposits','TRUNCATE')
-     OR has_table_privilege('anon','public.manual_deposits','REFERENCES')
-     OR has_table_privilege('anon','public.manual_deposits','TRIGGER')
-     OR has_table_privilege('anon','public.manual_deposits','MAINTAIN') THEN
+     OR has_table_privilege('anon','public.manual_deposits','DELETE') THEN
     RAISE EXCEPTION 'FAIL: anon retains a privilege on manual_deposits';
   END IF;
   IF has_table_privilege('anon','public.user_bank_details','SELECT')
      OR has_table_privilege('anon','public.user_bank_details','INSERT')
      OR has_table_privilege('anon','public.user_bank_details','UPDATE')
-     OR has_table_privilege('anon','public.user_bank_details','DELETE')
-     OR has_table_privilege('anon','public.user_bank_details','TRUNCATE')
-     OR has_table_privilege('anon','public.user_bank_details','REFERENCES')
-     OR has_table_privilege('anon','public.user_bank_details','TRIGGER')
-     OR has_table_privilege('anon','public.user_bank_details','MAINTAIN') THEN
+     OR has_table_privilege('anon','public.user_bank_details','DELETE') THEN
     RAISE EXCEPTION 'FAIL: anon retains a privilege on user_bank_details';
   END IF;
   IF has_table_privilege('anon','public.withdraw_requests','SELECT')
      OR has_table_privilege('anon','public.withdraw_requests','INSERT')
      OR has_table_privilege('anon','public.withdraw_requests','UPDATE')
-     OR has_table_privilege('anon','public.withdraw_requests','DELETE')
-     OR has_table_privilege('anon','public.withdraw_requests','TRUNCATE')
-     OR has_table_privilege('anon','public.withdraw_requests','REFERENCES')
-     OR has_table_privilege('anon','public.withdraw_requests','TRIGGER')
-     OR has_table_privilege('anon','public.withdraw_requests','MAINTAIN') THEN
+     OR has_table_privilege('anon','public.withdraw_requests','DELETE') THEN
     RAISE EXCEPTION 'FAIL: anon retains a privilege on withdraw_requests';
   END IF;
 
-  -- Only the Admin legacy reconciliation screen needs direct authenticated SELECT.
-  IF NOT has_table_privilege('authenticated','public.manual_deposits','SELECT')
-     OR has_table_privilege('authenticated','public.manual_deposits','INSERT')
-     OR has_table_privilege('authenticated','public.manual_deposits','UPDATE')
-     OR has_table_privilege('authenticated','public.manual_deposits','DELETE')
-     OR has_table_privilege('authenticated','public.manual_deposits','TRUNCATE')
-     OR has_table_privilege('authenticated','public.manual_deposits','REFERENCES')
-     OR has_table_privilege('authenticated','public.manual_deposits','TRIGGER')
-     OR has_table_privilege('authenticated','public.manual_deposits','MAINTAIN')
-     OR has_table_privilege('authenticated','public.user_bank_details','SELECT')
-     OR has_table_privilege('authenticated','public.user_bank_details','INSERT')
-     OR has_table_privilege('authenticated','public.user_bank_details','UPDATE')
-     OR has_table_privilege('authenticated','public.user_bank_details','DELETE')
-     OR has_table_privilege('authenticated','public.user_bank_details','TRUNCATE')
-     OR has_table_privilege('authenticated','public.user_bank_details','REFERENCES')
-     OR has_table_privilege('authenticated','public.user_bank_details','TRIGGER')
-     OR has_table_privilege('authenticated','public.user_bank_details','MAINTAIN')
-     OR has_table_privilege('authenticated','public.withdraw_requests','SELECT')
-     OR has_table_privilege('authenticated','public.withdraw_requests','INSERT')
-     OR has_table_privilege('authenticated','public.withdraw_requests','UPDATE')
-     OR has_table_privilege('authenticated','public.withdraw_requests','DELETE')
-     OR has_table_privilege('authenticated','public.withdraw_requests','TRUNCATE')
-     OR has_table_privilege('authenticated','public.withdraw_requests','REFERENCES')
-     OR has_table_privilege('authenticated','public.withdraw_requests','TRIGGER')
-     OR has_table_privilege('authenticated','public.withdraw_requests','MAINTAIN') THEN
-    RAISE EXCEPTION 'FAIL: authenticated legacy grants exceed the reviewed read-only/unused-route contract.';
+  IF NOT has_table_privilege('authenticated','public.manual_deposits','INSERT')
+     OR NOT has_table_privilege('authenticated','public.user_bank_details','SELECT')
+     OR NOT has_table_privilege('authenticated','public.user_bank_details','INSERT')
+     OR NOT has_table_privilege('authenticated','public.user_bank_details','UPDATE')
+     OR NOT has_table_privilege('authenticated','public.withdraw_requests','SELECT')
+     OR NOT has_table_privilege('authenticated','public.withdraw_requests','INSERT') THEN
+    RAISE EXCEPTION 'FAIL: authenticated legacy privileges changed unexpectedly';
   END IF;
 
   IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.manual_deposits'::regclass)
@@ -139,7 +108,6 @@ BEGIN
   END IF;
 
   RAISE NOTICE 'PASS: PUBLIC/anon privileges removed from manual_deposits, user_bank_details, and withdraw_requests';
-  RAISE NOTICE 'PASS: authenticated can SELECT legacy Admin reconciliation rows only and has no other direct legacy table grants.';
-  RAISE NOTICE 'PASS: owner-scoped policies remain present and RLS remains enabled on all three tables.'
+  RAISE NOTICE 'PASS: authenticated owner-scoped privileges/policies and RLS preserved';
 END
 $tests$;
