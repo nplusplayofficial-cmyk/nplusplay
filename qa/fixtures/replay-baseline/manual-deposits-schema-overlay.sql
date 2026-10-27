@@ -59,6 +59,34 @@ BEGIN
       RAISE EXCEPTION 'QA overlay refused: expected relation public.% is missing.', v_relation;
     END IF;
   END LOOP;
+
+  -- Preflight every other relation/column referenced by the remaining indexes
+  -- and policies so the fixture transaction fails before adding anything if
+  -- the partially replayed baseline has additional schema drift.
+  FOREACH v_relation IN ARRAY ARRAY[
+    'nplus_demo_gift_claims.code',
+    'nplus_demo_gift_codes.created_by',
+    'nplus_demo_referral_bonus_claims.invitee_count',
+    'nplus_demo_referral_qualifications.verified_by',
+    'nplus_demo_support_requests.handled_by',
+    'withdraw_requests.user_id',
+    'withdrawal_requests.user_id',
+    'withdrawal_requests.reviewed_by',
+    'profiles.id',
+    'profiles.role',
+    'user_preferences.user_id',
+    'user_bank_details.user_id'
+  ] LOOP
+    IF NOT EXISTS (
+      SELECT 1
+      FROM information_schema.columns c
+      WHERE c.table_schema = 'public'
+        AND c.table_name = split_part(v_relation, '.', 1)
+        AND c.column_name = split_part(v_relation, '.', 2)
+    ) THEN
+      RAISE EXCEPTION 'QA overlay refused: expected column public.% is missing.', v_relation;
+    END IF;
+  END LOOP;
 END
 $guard$;
 
