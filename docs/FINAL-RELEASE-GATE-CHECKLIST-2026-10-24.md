@@ -101,7 +101,7 @@ If a command fails, **stop at that point** and record only the failing version p
 
 ### Verified safe checks
 - Candidate HEAD before this doc-only refresh: `12817608fd6d393d80e04b5b07b32b74ccdc0644`; Static QA #633 and Release Smoke #220 both passed at exact HEAD.
-- Current code hardening bundle contains 10 candidate-only SECURITY DEFINER function replacements with finite numeric guards, including matching deposit approval bounds and stored gift-code amount checks. Not deployed.
+- Candidate migration `supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql` contains 10 SECURITY DEFINER function replacements with finite numeric guards, including matching deposit approval bounds and stored gift-code amount checks. Not deployed.
 - 20 RLS-enabled tables without policies were checked against ACLs: no direct SELECT/INSERT/UPDATE/DELETE privileges for `anon` or `authenticated`. Do not add policies only to suppress INFO findings.
 - Read-only scan over 21 numeric amount/balance/stake/payout fields found zero non-finite stored values.
 - Migration history: 40 records / 29 unique bodies and all 29 bodies match archived source text exactly.
