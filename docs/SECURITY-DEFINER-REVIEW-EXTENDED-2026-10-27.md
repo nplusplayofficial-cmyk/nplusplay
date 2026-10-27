@@ -87,7 +87,8 @@ The live definitions still do **not** include the candidate finite-numeric guard
 
 Additional defense-in-depth in the candidate guard bundle checks deposit/withdraw request inputs before rounding/narrowing, stored amounts before Admin deposit approval and gift redemption, Admin gift creation, and Aviator/MotoRace/WINGO stake/auto-cashout inputs.
 
-- Candidate bundle: `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql`
+- Candidate migration: `supabase/migrations/20261027150000_guard_finite_numeric_rpc_inputs.sql`.
+- Earlier source reference retained: `sql/NPLUS_PLAY_FINITE_NUMERIC_RPC_GUARDS_CANDIDATE_2026-10-27.sql`.
 - Static source-order guard and disposable PostgreSQL numeric-semantics regression are wired into Static QA.
 - The finite-amount replacements are **not deployed to production**. The relevant production functions therefore remain an open rollout risk until an approved migration plan, hosted testing and release approval permit a reviewed deployment.
 
