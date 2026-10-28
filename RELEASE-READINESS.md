@@ -21,6 +21,7 @@ The following are recorded in live Supabase migration history:
 - `20261027180120`, `20261027180134`, `20261027180141` — finite-number RPC guards.
 - `20261028134905` — server-authoritative K3/5D/TRX virtual demo settlement.
 - `20261028134917` — chosen one-time referral contract (approved DEMO_CREDIT >= 200 -> inviter gets 20 virtual points once).
+- `20261028183128` — owner-approved, guarded activation of all six virtual demo games with a private release-operations audit row.
 
 ### K3 / 5D / TRX server settlement
 
