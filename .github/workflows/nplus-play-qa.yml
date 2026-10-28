@@ -49,6 +49,8 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d nplus_migration_test -v ON_ERROR_STOP=1 -f qa/test-release-index-policy-migration.sql
       - name: Check syntax and local links
         run: node qa/verify-project.js
+      - name: Compile inline JavaScript for game and referral pages
+        run: node qa/test-game-inline-script-syntax.cjs
       - name: Guard qualified demo referral lifecycle state
         run: node qa/test-demo-referral-qualified-state.cjs
       - name: Guard finite Admin referral qualification amounts
