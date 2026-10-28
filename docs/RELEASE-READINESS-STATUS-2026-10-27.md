@@ -3,10 +3,12 @@
 ## Current state
 
 - **Production server migrations applied and verified** for K3/5D/TRX settlement and the chosen 200/20 referral contract.
-- **Exact candidate CI at the application/SQL code head passed:** Static QA #768 — https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40700269858; Release Smoke #355 — https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40700269916. Browser-smoke passed in Static QA #768. Later commits in this branch currently update release records/filenames only; require CI on the final exact PR head before merge.
-- **PR #22** — OPEN / DRAFT / unmerged. Candidate is not yet verified on GitHub Pages.
-- **All six game flags were still disabled at the post-migration read-only check.** Do not describe the games as active until their flags are enabled after deploy and verified.
-- Hosted signup/email OTP/password recovery/mobile return has not been run with a controlled inbox. Per owner instruction, proceed with this limitation clearly recorded; it is not a test PASS.
+- **PR #22 merged:** https://github.com/nplusplayofficial-cmyk/nplusplay/pull/22
+- **Merge commit:** `09c432a6fc4256898772084aa78f7ec671b3e5d4`.
+- **GitHub Pages deployment #456 PASS** for the merge commit: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40744468877.
+- **Post-merge Static QA #774 PASS:** https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40744469617. Pre-merge exact-head Static QA #773 and Release Smoke #360 also passed.
+- **All six game flags remained disabled** at the latest live read-only check; do not describe the games as playable until they are enabled through the guarded Admin interface and verified.
+- Hosted signup/email OTP/password recovery/mobile return has not been run with a controlled inbox. Owner authorized proceeding with this limitation recorded; it is not a test PASS.
 
 ## Live migration records (verified read-only)
 
