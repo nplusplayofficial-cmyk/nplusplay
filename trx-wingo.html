@@ -55,10 +55,10 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
 </header>
 
 <main class="content">
-<div class="notice">TRX WINGO BETTING PAUSED · DEMO RESULTS ONLY · PAYOUT RULES UNDER REVIEW</div>
+<div class="notice">TRX WINGO SERVER DEMO · RESULTS HIDDEN UNTIL SETTLEMENT · VIRTUAL POINTS ONLY</div>
 
 <section class="head">
- <div class="headtop"><strong>TRX WINGO · 1 MIN</strong><span class="live">● DEMO · PAUSED</span></div>
+ <div class="headtop"><strong>TRX WINGO · 1 MIN</strong><span class="live" id="trxLive">● SERVER DEMO</span></div>
  <div class="meta">
   <div class="box"><span>Period</span><b id="period">—</b></div>
   <div class="box timer"><span>Time Remaining</span><div class="clock"><span class="tb" id="mm">00</span><span class="colon">:</span><span class="tb" id="ss">00</span></div><div class="prog"><i id="bar"></i></div></div>
@@ -69,7 +69,7 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
   <button id="howBtn">HOW TO PLAY</button>
   <button id="hashBtn">HASH INFO</button>
  </div>
- <div class="bet-status" id="betStatus">BETTING OPEN · 55s</div>
+ <div class="bet-status closed" id="betStatus">WAITING FOR SERVER STATUS</div>
 
 </section>
 
@@ -141,8 +141,8 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
 </div>
 
 <script>
-const STORE='nplusplay_trxwingo_demo_v2';
-const state={sec:60,slot:null,period:'',digits:[0,0,0,0,0],selected:null,amount:10,qty:1,mult:1,panel:'history',bets:[]};
+const state={sec:60,slot:null,period:'',digits:[],selected:null,amount:10,qty:1,mult:1,panel:'history',bets:[]};
+let serverSnapshot=null,serverRound=null,serverHistory=[],serverRefreshBusy=false,serverRequestId=null;
 
 function pad(n,l=2){return String(n).padStart(l,'0')}
 let walletBusy=false;
@@ -170,61 +170,95 @@ async function syncWallet(){
 }
 
 async function loadWalletAndBets(){
- try{
-  const s=JSON.parse(localStorage.getItem(STORE)||'{}');
-  state.bets=Array.isArray(s.bets)?s.bets.slice(0,100):[];
- }catch(e){state.bets=[]}
+ state.bets=[];
  await readWallet();
 }
 
 function save(){localStorage.setItem(STORE,JSON.stringify({bets:state.bets}))}
 
 function roundInfo(now=Date.now()){const ms=state.sec*1000,slot=Math.floor(now/ms),end=(slot+1)*ms;return{slot,end,remaining:Math.max(0,end-now)}}
-function periodForSlot(slot){const d=new Date(slot*state.sec*1000);return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+pad(d.getHours())+pad(d.getMinutes())+pad(slot%100000,5)}
 function h32(t){let x=2166136261>>>0;for(let i=0;i<t.length;i++){x^=t.charCodeAt(i);x=Math.imul(x,16777619)>>>0}return x>>>0}
-function getResult(slot){
- const p=periodForSlot(slot);let x=h32(p+'|TRX-WINGO'),d=[];
- for(let i=0;i<5;i++){x=(Math.imul(x,1664525)+1013904223)>>>0;d.push(Math.floor(x/4294967296*10))}
- const sum=d.reduce((a,b)=>a+b,0),last=d[4];
- const color=(last===0||last===5)?'VIOLET':([2,4,6,8].includes(last)?'RED':'GREEN');
- return{slot,period:p,digits:d,sum,color,big:sum>=23,odd:sum%2===1,block:83316000+(slot%100000)}
-}
 function hash(r){return ('00000000'+h32(r.period+'|'+r.digits.join('')).toString(16)).slice(-8)}
-function current(){return getResult(roundInfo().slot)}
-
-function renderResult(r,animate=false){
- state.period=r.period;state.digits=r.digits;
- document.getElementById('period').textContent=r.period;
- document.getElementById('hash').textContent='#'+hash(r);
- document.getElementById('draws').innerHTML=r.digits.map(d=>'<i>'+d+'</i>').join('');
- document.getElementById('balls').innerHTML=r.digits.map((d,i)=>{
-  const c=d===0||d===5?'violet':[2,4,6,8].includes(d)?'red':'green';
-  return '<div><div class="slot"><div class="ball '+c+(animate?' spin':'')+'">'+d+'</div></div><div class="lab">RESULT</div></div>'
- }).join('')
+function renderPendingTRX(){
+ const period=serverRound?.period||'Syncing server round…';
+ state.period=period;state.digits=[];
+ document.getElementById('period').textContent=period;
+ document.getElementById('hash').textContent='SERVER RESULT HIDDEN';
+ document.getElementById('draws').innerHTML='<i>?</i><i>?</i><i>?</i><i>?</i><i>?</i>';
+ document.getElementById('balls').innerHTML='<div class="empty" style="grid-column:1/-1">Server-generated demo result is hidden until this round settles.</div>';
 }
+function historyRows(n=30){return serverHistory.slice(0,n)}
 function updateBetStatus(){
  const inf=roundInfo();
  const secLeft=inf.remaining/1000;
  const el=document.getElementById('betStatus');
- if(secLeft>5.05){
-   el.textContent='BETTING OPEN · '+Math.ceil(secLeft)+'s';
-   el.classList.remove('closed');
+ if(serverRound?.betting_enabled!==true){
+  el.textContent='GAME DISABLED BY N+ ADMIN';
+  el.classList.add('closed');
+ }else if(secLeft>5.05){
+  el.textContent='BETTING OPEN · '+Math.ceil(secLeft)+'s';
+  el.classList.remove('closed');
  }else{
-   el.textContent='BETTING CLOSED · '+Math.max(0,Math.ceil(secLeft))+'s';
-   el.classList.add('closed');
+  el.textContent='BETTING CLOSED · '+Math.max(0,Math.ceil(secLeft))+'s';
+  el.classList.add('closed');
+ }
+ const confirm=document.querySelector('.confirm');
+ if(confirm)confirm.disabled=!state.selected||serverRound?.betting_enabled!==true||Number(state.amount)*state.qty*state.mult<1||Number(state.amount)*state.qty*state.mult>10000;
+}
+async function refreshServerGame(){
+ if(serverRefreshBusy)return;
+ const client=window.NPlusAuth?.client;
+ if(!client)return;
+ serverRefreshBusy=true;
+ try{
+  const {data,error}=await client.rpc('nplus_demo_lottery_snapshot',{p_game_key:'TRX',p_duration_seconds:60});
+  if(error)throw error;
+  serverSnapshot=data||null;
+  serverRound=data?.current_round||null;
+  serverHistory=(Array.isArray(data?.history)?data.history:[]).map(row=>{
+   const o=row.result||{},digits=Array.isArray(o.digits)?o.digits.map(Number):[];
+   return {slot:Number(row.round_slot),period:String(row.period||''),digits,sum:Number(o.sum),
+    color:String(o.color||'').toUpperCase(),big:o.size==='BIG',odd:o.parity==='ODD',
+    block:Number(row.round_slot)%100000,settled_at:row.settled_at};
+  }).filter(row=>row.period&&row.digits.length===5&&row.digits.every(Number.isInteger));
+  state.bets=(Array.isArray(data?.my_bets)?data.my_bets:[]).map(b=>({
+   period:String(b.period||''),selection:String(b.selection_type||'')+': '+String(b.selection_value||''),
+   time:Date.parse(b.created_at)||0,stake:Number(b.stake||0),status:String(b.status||'pending').toUpperCase(),payout:Number(b.payout||0)
+  }));
+  renderPendingTRX();
+  const enabled=serverRound?.betting_enabled===true;
+  const live=document.getElementById('trxLive');
+  if(live)live.textContent=enabled?'● SERVER DEMO · BETS ENABLED':'● GAME DISABLED';
+  updateBetStatus();
+  renderPanel(state.panel);
+  updateTotal();
+ }catch(error){
+  console.error('TRX server snapshot failed:',error);
+  serverRound=null;
+  renderPendingTRX();
+  document.getElementById('betStatus').textContent='SERVER UNAVAILABLE · BETTING DISABLED';
+  document.getElementById('betStatus').classList.add('closed');
+  document.querySelector('.confirm').disabled=true;
+ }finally{
+  serverRefreshBusy=false;
  }
 }
 function tick(){
- const inf=roundInfo(),r=getResult(inf.slot);
- if(state.slot===null){state.slot=inf.slot;renderResult(r,false);renderPanel('history')}
- else if(inf.slot!==state.slot){state.slot=inf.slot;renderResult(r,true);renderPanel(state.panel)}
+ const inf=roundInfo();
+ if(state.slot===null||inf.slot!==state.slot){
+  state.slot=inf.slot;
+  state.selected=null;
+  serverRequestId=null;
+  document.getElementById('sheet').classList.remove('open');
+  renderPendingTRX();
+  void refreshServerGame();
+ }
  const left=Math.max(1,Math.ceil(inf.remaining/1000)),m=Math.floor(left/60),s=left%60;
  document.getElementById('mm').textContent=pad(m);
  document.getElementById('ss').textContent=pad(s);
  document.getElementById('bar').style.width=(inf.remaining/(state.sec*1000)*100)+'%';
  updateBetStatus();
 }
-function historyRows(n=30){const inf=roundInfo(),a=[];for(let i=1;i<=n;i++)a.push(getResult(inf.slot-i));return a}
 
 function renderNumbers(){
  const root=document.getElementById('nums');root.innerHTML='';
@@ -235,8 +269,9 @@ function bettingOpen(){
   return (inf.remaining/1000)>5.05;
 }
 function select(v,el){
-  if(!bettingOpen()){updateBetStatus();return}
-  state.selected=v;
+  if(!bettingOpen()||serverRound?.betting_enabled!==true){updateBetStatus();return}
+  state.selected=String(v);
+  serverRequestId=crypto.randomUUID();
   document.querySelectorAll('.num').forEach(x=>x.classList.remove('sel'));
   if(el)el.classList.add('sel');
   document.getElementById('sheetSel').textContent=v;
@@ -248,12 +283,13 @@ function randomPick(){
   select(String(n),document.querySelectorAll('.num')[n])
 }
 document.querySelectorAll('.color,.bs button').forEach(b=>b.onclick=()=>{
-  if(!bettingOpen()){updateBetStatus();return}
-  state.selected=b.dataset.pick;
-  document.getElementById('sheetSel').textContent=b.dataset.pick;
+  if(!bettingOpen()||serverRound?.betting_enabled!==true){updateBetStatus();return}
+  state.selected=String(b.dataset.pick).toUpperCase();
+  serverRequestId=crypto.randomUUID();
+  document.getElementById('sheetSel').textContent=state.selected;
   openSheet()
 })
-document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{state.mult=+b.dataset.m;updateTotal()})
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{state.mult=+b.dataset.m;serverRequestId=null;updateTotal()})
 
 function openSheet(){
  if(!state.selected)return;
@@ -262,22 +298,60 @@ function openSheet(){
  updateTotal();
 }
 function closeSheet(){document.getElementById('sheet').classList.remove('open')}
-function changeQty(d){state.qty=Math.max(1,Math.min(20,state.qty+d));document.getElementById('q').textContent=state.qty;updateTotal()}
-function updateTotal(){document.getElementById('tot').textContent='₹'+(state.amount*state.qty*state.mult).toFixed(2)}
-document.querySelectorAll('.amt').forEach(b=>b.onclick=()=>{document.querySelectorAll('.amt').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.amount=+b.dataset.a;updateTotal()})
-async function confirmBet(){ alert('TRX WINGO betting is temporarily paused while server payout rules are reviewed. Your wallet will not be debited.'); return; } function renderPanel(panel='history'){
+function changeQty(d){state.qty=Math.max(1,Math.min(20,state.qty+d));document.getElementById('q').textContent=state.qty;serverRequestId=null;updateTotal()}
+function updateTotal(){
+ const total=state.amount*state.qty*state.mult;
+ document.getElementById('tot').textContent='₹'+total.toFixed(2);
+ const button=document.querySelector('.confirm');
+ if(button)button.disabled=!state.selected||serverRound?.betting_enabled!==true||total<1||total>10000;
+}
+document.querySelectorAll('.amt').forEach(b=>b.onclick=()=>{document.querySelectorAll('.amt').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.amount=+b.dataset.a;serverRequestId=null;updateTotal()})
+async function confirmBet(){
+ const client=window.NPlusAuth?.client;
+ if(!client){alert('Sign in to place a server-backed demo bet.');return}
+ if(serverRound?.betting_enabled!==true){alert('TRX WINGO is currently disabled by N+ ADMIN.');return}
+ if(!state.selected)return;
+ const selection=String(state.selected).toUpperCase();
+ let selectionType,selectionValue;
+ if(/^[0-9]$/.test(selection)){selectionType='digit';selectionValue=selection}
+ else if(['RED','GREEN','VIOLET'].includes(selection)){selectionType='color';selectionValue=selection}
+ else if(['BIG','SMALL'].includes(selection)){selectionType='size';selectionValue=selection}
+ else{alert('Unsupported TRX WINGO selection.');return}
+ const stake=Number(state.amount)*state.qty*state.mult;
+ if(!serverRequestId)serverRequestId=crypto.randomUUID();
+ const button=document.querySelector('.confirm');
+ button.disabled=true;
+ try{
+  const {data,error}=await client.rpc('nplus_demo_lottery_place_bet',{
+   p_game_key:'TRX',p_duration_seconds:60,p_selection_type:selectionType,
+   p_selection_value:selectionValue,p_stake:stake,p_request_id:serverRequestId
+  });
+  if(error)throw error;
+  closeSheet();
+  serverRequestId=null;
+  await refreshServerGame();
+  await syncWallet();
+  alert('Server-confirmed virtual demo bet placed.');
+ }catch(error){
+  console.error('TRX server bet failed:',error);
+  alert(error.message||'Server did not accept the demo bet.');
+ }finally{
+  button.disabled=false;
+  updateTotal();
+ }
+} function renderPanel(panel='history'){
  state.panel=panel;document.querySelectorAll('.pt').forEach(b=>b.classList.toggle('active',b.dataset.panel===panel));
  const body=document.getElementById('panelBody');
  if(panel==='history'){
   const rows=historyRows(25);
-  body.innerHTML='<div class="table"><div class="th"><span>PERIOD</span><span>BLOCK</span><span>TIME</span><span>HASH</span><span>RESULT</span></div>'+
-  rows.map(r=>'<div class="tr"><span>'+r.period+'</span><span>'+r.block+'</span><span>'+new Date(r.slot*state.sec*1000).toLocaleTimeString([], {hour12:false})+'</span><span>#'+hash(r)+'</span><span><i class="rball '+(r.color==='GREEN'?'rg':r.color==='VIOLET'?'rv':'rr')+'">'+r.digits[4]+'</i></span></div>').join('')+'</div>'
+  body.innerHTML='<div class="table"><div class="th"><span>PERIOD</span><span>ROUND SLOT</span><span>TIME</span><span>DEMO HASH</span><span>RESULT</span></div>'+
+  rows.map(r=>'<div class="tr"><span>'+r.period+'</span><span>'+r.block+'</span><span>'+new Date(r.slot*state.sec*1000).toLocaleTimeString([], {hour12:false})+'</span><span>#'+hash(r)+'</span><span><i class="rball '+(r.color==='GREEN'?'rg':r.color==='VIOLET'?'rv':'rr')+'">'+r.digits[4]+'</i></span></div>').join('')+'</div>';
  }else if(panel==='my'){
-  body.innerHTML=state.bets.length?'<div class="table"><div class="th"><span>PERIOD</span><span>BET</span><span>TIME</span><span>STAKE</span><span></span></div>'+
-  state.bets.slice(0,20).map(b=>'<div class="tr"><span>'+b.period+'</span><span>'+b.selection+'</span><span>'+new Date(b.time).toLocaleTimeString([], {hour12:false})+'</span><span>₹'+Number(b.stake).toFixed(2)+'</span><span><em class="badge">DEMO</em></span></div>').join('')+'</div>':'<div class="empty">No demo bets yet.</div>'
+  body.innerHTML=state.bets.length?'<div class="table"><div class="th"><span>PERIOD</span><span>BET</span><span>TIME</span><span>STAKE</span><span>STATUS</span></div>'+
+  state.bets.slice(0,20).map(b=>'<div class="tr"><span>'+b.period+'</span><span>'+b.selection+'</span><span>'+new Date(b.time).toLocaleTimeString([], {hour12:false})+'</span><span>₹'+Number(b.stake).toFixed(2)+'</span><span><em class="badge">'+b.status+'</em></span></div>').join('')+'</div>':'<div class="empty">No server-recorded demo bets yet.</div>';
  }else{
-  const rows=historyRows(60),c={GREEN:0,VIOLET:0,RED:0};rows.forEach(r=>c[r.color]++);
-  body.innerHTML=Object.entries(c).map(([k,v])=>'<div style="display:flex;align-items:center;gap:7px;margin:8px 0;font-size:7px"><b style="width:42px">'+k+'</b><div style="height:7px;border-radius:8px;background:linear-gradient(90deg,#8f754a,#dfc68d);width:'+Math.max(5,v/60*100)+'%"></div><span>'+v+'</span></div>').join('')+'<div class="empty">Historical demo statistics only; they do not predict future results.</div>'
+  const rows=historyRows(60),counts={GREEN:0,VIOLET:0,RED:0};rows.forEach(r=>counts[r.color]++);
+  body.innerHTML=Object.entries(counts).map(([k,v])=>'<div style="display:flex;align-items:center;gap:7px;margin:8px 0;font-size:7px"><b style="width:42px">'+k+'</b><div style="height:7px;border-radius:8px;background:linear-gradient(90deg,#8f754a,#dfc68d);width:'+Math.max(5,v/60*100)+'%"></div><span>'+v+'</span></div>').join('')+'<div class="empty">Statistics use settled server rounds only; they do not predict future results.</div>';
  }
 }
 document.querySelectorAll('.pt').forEach(b=>b.onclick=()=>renderPanel(b.dataset.panel))
@@ -287,12 +361,15 @@ document.getElementById('howBtn').onclick=()=>openInfo('howModal');
 document.getElementById('hashBtn').onclick=()=>openInfo('hashModal');
 
 loadWalletAndBets().then(()=>{
+ renderPendingTRX();
  renderNumbers();
- tick();
  updateTotal();
+ tick();
+ void refreshServerGame();
  syncWallet();
 });
 setInterval(tick,250);
+setInterval(()=>void refreshServerGame(),2000);
 window.addEventListener('nplus:wallet-change',()=>syncWallet());
 window.addEventListener('storage',()=>syncWallet());
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncWallet()});
