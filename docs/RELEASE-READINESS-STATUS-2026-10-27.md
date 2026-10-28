@@ -19,6 +19,7 @@ Supabase project `pcrxlqduygvzchzxsmdv`:
 - `20261027180120`, `20261027180134`, `20261027180141` — finite numeric guards.
 - `20261028134905` — `server_authoritative_k3_5d_trx_demo`.
 - `20261028134917` — `demo_referral_200_20_rule`.
+- `20261028183128` — `enable_all_demo_game_flags_authorized_release`; all-six activation plus private audit row.
 
 ### K3 / 5D / TRX demo settlement
 
@@ -38,13 +39,16 @@ On a new transition to approved, a `DEMO_CREDIT` deposit request of at least 200
 
 ### Post-apply security/data verification
 
-- All six production flags were `false` at the recorded post-apply read: 5D, AVIATOR, K3, MOTO, TRX, WINGO.
+- All six production flags are now `true`: 5D, AVIATOR, K3, MOTO, TRX, WINGO. The owner-approved activation migration checked all required server components and the AVIATOR scheduler/worker, and aborted unless all flags were initially OFF and wallet/ledger invariants passed.
 - New `nplus_demo_lottery_bets` and `nplus_demo_lottery_rounds` tables have RLS enabled and no direct browser-role SELECT/INSERT/UPDATE/DELETE grants.
 - `nplus_demo_lottery_snapshot` and `nplus_demo_lottery_place_bet` have EXECUTE only for authenticated; internal lottery helper functions are not executable by anon/authenticated; Admin game-status RPC remains authenticated-only.
 - Referral approval trigger is installed on `deposit_requests`; referral table remained empty at verification, so no legacy referral points were back-credited.
 - Wallet integrity: 5 profiles, 5 wallets, 146 wallet-ledger rows, zero negative wallets, zero ledger arithmetic mismatches, and zero current-wallet/latest-ledger mismatches.
 - Legacy tables `manual_deposits`, `user_bank_details`, and `withdraw_requests` retain RLS. `anon` has no direct table privileges. `authenticated` has SELECT only on `manual_deposits` and no direct privileges on the other two.
-- These postchecks did not update existing user, wallet, or ledger rows. Migration definitions and flags are verified; hosted user journeys remain unverified.
+- Private release audit row records the old all-OFF state, new all-ON state, owner authorization basis, deployment commit and no-change guarantee for existing rows. The operation cleared `updated_by` rather than attributing it to an authenticated Admin.
+- No existing user, wallet, ledger, deposit or referral rows were changed. Migration definitions and flags are verified; hosted user journeys remain unverified.
+- AVIATOR worker health after activation: no last error and zero consecutive failures.
+- Post-activation wallet integrity: 5 profiles, 5 wallets, 146 ledger rows; zero negative balances, arithmetic mismatches or latest-wallet mismatches.
 
 ## Exact split-migration reconstructed-baseline replay — PASS
 
@@ -65,13 +69,13 @@ User ran `qa/run-final-split-replay.ps1` on 2026-10-28:
 - **Free-plan leaked-password protection:** owner accepts the reviewed plan limitation with compensating controls; no paid upgrade or Auth-setting change was made.
 - **Hosted Auth/browser acceptance:** owner authorizes proceeding while this remains unverified. No one should claim OTP/signup/recovery/browser acceptance passed. Run it with a controlled inbox when available.
 
-## Final release/deployment steps
+## Final release/deployment status — 2026-10-28
 
-1. Verify the latest CI on the **exact current PR #22 head** after documentation/filename updates.
-2. Mark PR #22 ready and merge it once exact-head CI is green.
-3. Verify GitHub Pages build/deployment for the merge commit and fetch the live pages.
-4. Read-only check the expected live migration records, game flags, trigger/execute grants, and wallet/ledger invariants after deployment.
-5. **Enable all six game flags** only after the deployed site/server RPCs pass smoke. Enable through the authenticated Admin game-status path or an explicitly audited privileged operations step; do not impersonate an Admin JWT. Verify all six flags are true and the Admin UI reflects that state.
-6. Share the site as live only after the actual Pages deployment and game flags are verified. Keep the hosted Auth acceptance limitation disclosed.
+1. PR #22 merged as `09c432a6fc4256898772084aa78f7ec671b3e5d4`.
+2. GitHub Pages deployment #456 succeeded for that merge commit. Latest status-doc refresh is building/deploying from main.
+3. Owner-approved activation migration `20261028183128_enable_all_demo_game_flags_authorized_release` passed preflight, recorded an audit row and enabled all six flags in one transaction.
+4. Final read-only verification confirms all six flags true, required server functions present, AVIATOR scheduler active/worker healthy, lottery tables RLS-enabled with no browser-role direct grants, and 10/10 payout multiplier cases passing.
+5. Wallet/ledger integrity is unchanged: 5 profiles, 5 wallets, 146 ledger entries; zero negative balances or ledger/latest-balance mismatches.
+6. Hosted signup/email OTP/password recovery/mobile return remains unverified; this is disclosed, not claimed as passed.
 
 Safety invariants: virtual demo points only; no cash payouts; preserve existing user/wallet/ledger data; no automatic back-credit; never call hosted Auth or deployment tests passed unless actually run.
