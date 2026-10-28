@@ -1,5 +1,34 @@
 # N+ PLAY + N+ ADMIN — Assistant-side handover for next release pass
 
+Refreshed 2026-10-28. This top section supersedes earlier dated status notes below wherever they conflict; older entries remain historical evidence.
+
+## Current verified state
+
+- PR #22: OPEN / DRAFT / unmerged; base `main`. It is not deployed to Pages.
+- Branch: `integration/release-candidate-2026-10-27`.
+- Current HEAD after release-evidence updates: `2b9c558c2ffdbbf0c50c11fd77320b1d5722e406`.
+- Latest CI on this HEAD: Static QA #728 PASS (https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40690612407); Release Smoke #315 PASS (https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40690612270). Browser smoke passed in Static QA #728.
+- **Exact split-migration reconstructed-baseline local replay passed** on 2026-10-28 using code HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58f57` (subsequent commits only update release evidence/doc files). 40/40 captured production-history rows applied; all 29 distinct SQL fingerprints matched; the three candidate protection migrations and current split finite-number migrations passed on the reconstructed clone; ACL reconciliation overlays, final invariants, and synthetic wallet/Admin/referral/deposit/withdrawal E2E passed; E2E rolled back.
+- Local restore-lab `cron.database_name` was restored and verified as `nplus_migration_replay_20261026`.
+- Full replay evidence and scope limitations: [release-readiness report](RELEASE-READINESS-STATUS-2026-10-27.md). The reconstructed legacy-table bootstrap does not prove original historical DDL/policy/ACL provenance.
+- Latest live production read-only checks: all six game flags false; three legacy tables RLS-enabled and direct grants restricted as intended; 5 profiles, 5 wallets, 146 ledger rows; zero negative wallets, ledger arithmetic mismatch, or current-wallet/latest-ledger mismatch. No production data or Auth/plan/scheduler/game settings were changed by these checks.
+- All 10 targeted numeric-sensitive live RPCs have NaN/Infinity guards; migrations are recorded as `20261027180120`, `20261027180134`, `20261027180141`.
+
+## Remaining release blockers
+
+1. Hosted signup/email OTP/login/password-recovery/mobile-return, Admin-vs-normal-user authorization, and synthetic wallet/deposit/withdrawal/referral browser flows still require a controlled inbox and synthetic hosted accounts.
+2. Product owner decision required: prior requirement (200 approved demo credits -> one-time 20 demo points) conflicts with current 500-point qualification/tier-claim model. Do not silently choose, back-credit or change rewards.
+3. K3/5D/TRX server-authoritative result and payout rules need written approval and runtime tests. All six game flags must stay disabled until their supported gates pass.
+4. Authoritative historic schema/ACL/policy evidence for `manual_deposits`, `user_bank_details`, `withdraw_requests` is missing; obtain it or record explicit acceptance that original provenance cannot be proven.
+5. Free-plan leaked-password-protection limitation needs owner risk acceptance with compensating controls or an owner-approved plan decision; no plan/Auth change has been made.
+6. After these gates close: review exact commit, approve/merge PR #22, verify actual GitHub Pages deployment commit, and run hosted live acceptance. Candidate is not declared live.
+7. Security Advisor still reports 20 RLS-enabled/no-policy INFO findings, one intentionally public aggregate SECURITY DEFINER WARN, 53 authenticated-callable SECURITY DEFINER WARN findings, and leaked-password-protection WARN. Existing source review and tests reduce ambiguity but do not replace the hosted authorization/risk decision.
+
+No blanket function EXECUTE revoke, broad RLS policy creation, production data mutation, plan change, scheduler change, or game enablement should be used to clear these gates.
+
+---
+
+
 Checked against GitHub on 2026-10-27.
 
 ## Current candidate
