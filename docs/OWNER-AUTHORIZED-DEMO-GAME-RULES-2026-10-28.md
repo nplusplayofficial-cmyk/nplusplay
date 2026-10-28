@@ -47,12 +47,12 @@ The reviewed migration SQL is now applied to the live Supabase project and recor
 
 Read-only post-apply verification confirmed the lottery tables exist with RLS enabled and no direct browser-role grants; internal settlement helpers are not executable by browser roles; authenticated snapshot/place-bet functions are available; the referral approval trigger is installed; no existing referral was back-credited; the wallet/ledger invariants remain clean.
 
-**All six game flags remained OFF at post-apply verification.** The code candidate is not yet deployed to GitHub Pages. Latest pre-documentation CI: Static QA #768 PASS and Release Smoke #355 PASS. Hosted signup/email OTP/recovery/browser acceptance remains unverified; owner has authorized proceeding while recording that limitation.
+**All six game flags remain OFF.** PR #22 merged at `09c432a6fc4256898772084aa78f7ec671b3e5d4`; GitHub Pages deployment #456 succeeded for that commit. Post-merge Static QA #774 also passed. The production payout function passed 10/10 expected multiplier checks, all required server components were present, and wallet/ledger invariants remained clean. Hosted signup/email OTP/recovery/browser acceptance remains unverified; owner authorized proceeding while recording that limitation.
 
 ## Release guardrails
 
-1. No real-money deposit, bet, payout, or cash withdrawal. All balances/rewards are virtual demo points only.
-2. Preserve all existing users, wallet balances and ledger rows.
-3. A game must have its server settlement migration and disposable PostgreSQL regression pass before enabling its flag. Do not enable K3/5D/TRX merely because the UI renders.
-4. Production game flags remain off until the migration is reviewed, applied in the intended order, and runtime smoke succeeds. Enabling a feature is a separate explicit step.
-5. Do not claim hosted signup/email acceptance or Pages deployment until those actions have actually been verified.
+1. No real-money deposit, bet, payout, or cash withdrawal. All balances/rewards are non-redeemable virtual demo points only.
+2. Preserve all existing users, wallet balances and ledger rows; no referral back-credit.
+3. K3/5D/TRX server settlement migration and regression suite are installed/passed. Unsupported bet categories remain disabled by UI and server checks.
+4. To make the game pages playable, use the authenticated [N+ ADMIN](https://nplusplayofficial-cmyk.github.io/nplusplay/admin-login.html) session and [Admin Games](https://nplusplayofficial-cmyk.github.io/nplusplay/admin-games.html) guarded toggles. The game flags are intentionally still OFF because no authenticated Admin browser session was available for the final control action; do not bypass `nplus_set_game_status` or fabricate an Admin JWT. The Admin RPC checks required server components before enabling games.
+5. Hosted signup/email acceptance is not claimed as passed until actually tested with a controlled inbox. Pages deployment is verified by deployment run #456.
