@@ -71,7 +71,7 @@ body{min-height:100vh}
 <body>
 <main class="app">
 <header class="top"><button class="icon" onclick="history.back()">‹</button><div class="brand">N+ PLAY</div><button class="icon">⚙</button></header>
-<section class="wallet"><div><small>DEMO WALLET</small><strong id="balance">₹1,000.00</strong></div><button class="gold" onclick="location.href='deposit.html'">DEPOSIT</button></section>
+<section class="wallet"><div><small>DEMO WALLET</small><strong id="balance">1,000.00 pts</strong></div><button class="gold" onclick="location.href='deposit.html'">DEPOSIT</button></section>
 <div class="notice">18+ · N+ PLAY VIRTUAL-CREDIT DEMO · NO REAL-MONEY WAGERING</div>
 
 <section class="card">
@@ -113,12 +113,12 @@ body{min-height:100vh}
 <div class="sheet">
   <h3>Place Demo Bet</h3>
   <div class="selectedBox" id="selectedBox">Select a bike</div>
-  <div class="field">Amount · Minimum ₹1</div>
+  <div class="field">Amount · Minimum 1 pts</div>
   <input class="amount" id="amount" type="number" min="1" step="0.01" value="1">
-  <div class="amts"><button data-amt="1">₹1</button><button data-amt="5">₹5</button><button data-amt="10">₹10</button><button data-amt="50">₹50</button></div>
+  <div class="amts"><button data-amt="1">1 pts</button><button data-amt="5">5 pts</button><button data-amt="10">10 pts</button><button data-amt="50">50 pts</button></div>
   <div class="field">Quantity</div><div class="step"><button id="minus">−</button><span id="qty">1</span><button id="plus">+</button></div>
   <div class="field">Multiplier</div><div class="multis"><button class="active" data-multi="1">X1</button><button data-multi="2">X2</button><button data-multi="5">X5</button><button data-multi="10">X10</button><button data-multi="20">X20</button></div>
-  <div class="tot"><span>Total demo deduction<br><span class="fee">Includes N+ demo platform fee 1.5%</span></span><strong id="total">₹1.02</strong></div>
+  <div class="tot"><span>Total demo deduction<br><span class="fee">Includes N+ demo platform fee 1.5%</span></span><strong id="total">1.02 pts</strong></div>
   <label class="agree"><input id="agree" type="checkbox"> I agree to the demo game rules</label>
   <div class="actions"><button class="cancel" id="cancel">CANCEL</button><button class="confirm" id="confirm" disabled>CONFIRM DEMO BET</button></div>
 </div>
@@ -146,7 +146,7 @@ const COLORS=['#ff4d5d','#4d9dff','#ffd34d','#45df82','#b477ff','#ff984d','#36d9
 const PAYOUT=2;
 const FEE=0.015;
 const $=id=>document.getElementById(id);
-const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const money = n => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
 
 let db;
 try{db=JSON.parse(localStorage.getItem(STORE)||'null')}catch(e){db=null}
@@ -441,7 +441,7 @@ $('confirm').onclick=async()=>{
  if(walletBalance===null)await refreshWallet();
  const unit=Math.max(0,Number($('amount').value)||0);
  const stake=unit*qty*multiplier;
- if(stake<1){alert('Minimum demo stake is ₹1.');return}
+ if(stake<1){alert('Minimum demo stake is 1 pts.');return}
  const fee=stake*FEE,total=stake+fee;
  if(walletBalance===null){alert('Wallet is still syncing. Please try again.');return}
  if(total>walletBalance){alert('Insufficient demo balance.');return}
