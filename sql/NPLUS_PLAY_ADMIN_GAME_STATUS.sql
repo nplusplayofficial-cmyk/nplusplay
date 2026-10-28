@@ -46,8 +46,12 @@ begin
     raise exception 'Invalid game.';
   end if;
 
-  if v_key in ('K3','5D','TRX') and p_enabled then
-    raise exception 'Payout rules pending; this game cannot be enabled.';
+  if p_enabled and v_key in ('K3','5D','TRX') and (
+    to_regclass('public.nplus_demo_lottery_rounds') is null
+    or to_regprocedure('public.nplus_demo_lottery_snapshot(text,integer)') is null
+    or to_regprocedure('public.nplus_demo_lottery_place_bet(text,integer,text,text,numeric,uuid)') is null
+  ) then
+    raise exception 'Server-authoritative demo settlement is not installed.';
   end if;
 
   update public.game_settings
