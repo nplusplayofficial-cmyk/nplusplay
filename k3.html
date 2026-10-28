@@ -75,7 +75,7 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <section class="round" id="round"><div class="roundtop"><button class="how" id="how">HOW TO PLAY</button><div class="timer"><div class="tl">Time remaining</div><div class="time" id="time">01:00</div></div></div><div class="period"><span>Current period</span><code id="period">—</code></div><div class="progress"><div class="bar" id="bar"></div></div><div class="status" id="status">BETTING OPEN</div><div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div></section>
 <div class="title">Recent results</div><div class="recent" id="recent"></div>
 <div class="dicebox" id="dicebox"><div class="cube-wrap"><div class="cube" id="die1"></div></div><div class="cube-wrap"><div class="cube" id="die2"></div></div><div class="cube-wrap"><div class="cube" id="die3"></div></div></div><div id="resultLine" style="text-align:center;margin:8px 0 2px;font-size:9px;letter-spacing:1px;color:#858a84;text-transform:uppercase">RESULT · <b style="color:#e6d6b8">—</b></div>
-<div class="filters"><button class="filter active" data-cat="Total">TOTAL</button><button class="filter" data-cat="2 same">2 SAME</button><button class="filter" data-cat="3 same">3 SAME</button><button class="filter" data-cat="Different">DIFFERENT</button></div>
+<div style="margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:11px">INITIAL SERVER RULES: Big/Small and Even/Odd only · 2× gross on wins. Other K3 selections are disabled.</div>
 <div class="category" id="category"></div>
 <div class="title">Quick K3 bets</div>
 <div class="bigbuttons"><button class="small" data-type="size" data-value="Small">SMALL<small> ≤10 · 2X</small></button><button class="big" data-type="size" data-value="Big">BIG<small> ≥11 · 2X</small></button><button class="even" data-type="parity" data-value="Even">EVEN<small> 2X</small></button><button class="odd" data-type="parity" data-value="Odd">ODD<small> 2X</small></button></div>
@@ -120,6 +120,7 @@ async function syncWalletFromSupabase(){
   }
 }
 let serverSnapshot=null,serverRound=null,serverRefreshBusy=false,serverRequestId=null;
+let serverSnapshotFailed=false;
 async function refreshServerGame(){
   if(serverRefreshBusy)return;
   const client=window.NPlusAuth?.client;
@@ -130,6 +131,7 @@ async function refreshServerGame(){
     if(error)throw error;
     serverSnapshot=data||null;
     serverRound=data?.current_round||null;
+    serverSnapshotFailed=false;
     const remoteHistory=Array.isArray(data?.history)?data.history:[];
     state.history[state.sec]=remoteHistory.map(row=>{
       const o=row.result||{},d=Array.isArray(o.dice)?o.dice.map(Number):[];
@@ -150,6 +152,9 @@ async function refreshServerGame(){
     renderSelection();
   }catch(err){
     console.error("K3 server snapshot failed:",err);
+    serverSnapshot=null;
+    serverRound=null;
+    serverSnapshotFailed=true;
     $("#status").textContent="SERVER UNAVAILABLE · BETTING DISABLED";
     $("#status").style.color="#ff7773";
     renderPending();
@@ -158,7 +163,7 @@ async function refreshServerGame(){
   }
 }
 const periodAt=(start,sec)=>{const d=new Date(start),idx=Math.floor(start/(sec*1000));return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+"K3"+String(sec)+"M"+String(idx%100000).padStart(5,"0")};
-const round=()=>{const now=Date.now(),start=Math.floor(now/(state.sec*1000))*(state.sec*1000),elapsed=Math.floor((now-start)/1000);return{now,start,remaining:state.sec-elapsed,period:periodAt(start,state.sec)}};
+const round=()=>{const now=Date.now(),start=Math.floor(now/(state.sec*1000))*(state.sec*1000),elapsed=Math.floor((now-start)/1000);return{now,start,remaining:state.sec-elapsed,period:serverRound?.period||periodAt(start,state.sec)}};
 function renderPending(){$("#dicebox").innerHTML='<div style="padding:18px;color:#8b8d86;text-align:center;font-size:10px;letter-spacing:1px">SERVER RESULT LOCKED UNTIL ROUND CLOSE</div>';$("#resultLine").textContent="SERVER-GENERATED DEMO RESULT · CHECK SETTLED HISTORY AFTER CLOSE";state.result=null;}
 function save(){localStorage.setItem(STORE,JSON.stringify({history:state.history,bets:state.bets}))}
 function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||"{}");if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets)}catch{}}
@@ -188,13 +193,12 @@ function renderDice(a,b,c,animate=false){
       el.style.transform=final;
     }
   });
-}function categoryHTML(cat){
- if(cat==="Total")return `<div class="title">Choose sum</div><div class="numbers">${Array.from({length:16},(_,i)=>{const n=i+3;return `<button class="num" data-type="sum" data-value="${n}">${n}<small>${n===3||n===18?"HIGH":"K3"}</small></button>`}).join("")}</div>`;
- if(cat==="2 same")return `<div class="cat-title">2 matching numbers · <b>demo category</b></div><div class="cat-row">${[1,2,3,4,5,6].map(n=>`<button class="cat-btn" data-type="pair" data-value="${n}${n}">${n}${n}</button>`).join("")}</div><div class="cat-title">A pair of unique numbers</div><div class="cat-row">${[11,22,33,44,55,66].map(n=>`<button class="cat-btn" data-type="pair" data-value="${n}">${n}</button>`).join("")}</div>`;
- if(cat==="3 same")return `<div class="cat-title">3 of the same number · <b>demo category</b></div><div class="cat-row">${[1,2,3,4,5,6].map(n=>`<button class="cat-btn" data-type="triple" data-value="${n}${n}${n}">${n}${n}${n}</button>`).join("")}</div><div class="cat-title">Any 3 of the same number</div><div class="cat-row"><button class="cat-wide" data-type="anyTriple" data-value="Any 3 Same">ANY 3 OF THE SAME NUMBER</button></div>`;
- return `<div class="cat-title">3 different numbers · <b>demo category</b></div><div class="cat-row">${[1,2,3,4,5,6].map(n=>`<button class="cat-btn" data-type="different" data-value="${n}">${n}</button>`).join("")}</div><div class="cat-title">3 continuous numbers</div><div class="cat-row"><button class="cat-wide" data-type="continuous" data-value="3 Continuous">3 CONTINUOUS NUMBERS</button></div><div class="cat-title">2 different numbers</div><div class="cat-row">${[1,2,3,4,5,6].map(n=>`<button class="cat-btn" data-type="different2" data-value="${n}">${n}</button>`).join("")}</div>`;
+}function categoryHTML(){
+ return '<div class="cat-title">Use the four server-supported quick picks below: Big, Small, Even and Odd. Unsupported selection types are not available.</div>';
 }
-function renderCategory(cat="Total"){$("#category").innerHTML=categoryHTML(cat);if(cat==="Total"){$("#category").querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>openBet(b.dataset.type,b.dataset.value))}}
+function renderCategory(){
+ $("#category").innerHTML=categoryHTML();
+}
 function renderSelection(){const s=state.selection;$("#selectionText").textContent=s?`${s.type.toUpperCase()} · ${s.value}`:"No selection yet"}
 function renderPanel(){
  const p=$("#panel"),h=state.history[state.sec],bets=state.bets[state.sec]||[];
@@ -210,7 +214,20 @@ function closeSheet(){$("#overlay").classList.remove("show")}
 function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>10000||total>state.balance||round().remaining<=5||!serverRound?.betting_enabled}
 function startMode(sec){state.sec=sec;state.selection=null;serverRequestId=null;$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));renderRecent();renderCategory(activeCategory);renderSelection();renderPanel();state.lastStart=null;renderPending();void refreshServerGame();toast(`K3 ${sec/60} MIN`)}
 function newRound(start){state.result=null;renderPending();void refreshServerGame();}
-function update(){const r=round(),closed=r.remaining<=5;if(state.lastStart!==null&&state.lastStart!==r.start)newRound(state.lastStart);state.lastStart=r.start;$("#time").textContent=`${String(Math.floor(r.remaining/60)).padStart(2,"0")}:${String(r.remaining%60).padStart(2,"0")}`;$("#period").textContent=r.period;$("#bar").style.width=(r.remaining/state.sec*100)+"%";$("#status").textContent=closed?"BETTING CLOSED":"BETTING OPEN";$("#round").classList.toggle("closed",closed);if(closed)$("#status").style.color="#ff7773";else $("#status").style.color="#72dfaa";const stage=closed?3:r.remaining<=10?2:r.remaining<=20?1:0;$$(".stage span").forEach((x,i)=>x.classList.toggle("on",i<=stage))}
+function update(){
+ const r=round(),closed=r.remaining<=5;
+ if(state.lastStart!==null&&state.lastStart!==r.start)newRound(state.lastStart);
+ state.lastStart=r.start;
+ $("#time").textContent=`${String(Math.floor(r.remaining/60)).padStart(2,"0")}:${String(r.remaining%60).padStart(2,"0")}`;
+ $("#period").textContent=r.period;
+ $("#bar").style.width=(r.remaining/state.sec*100)+"%";
+ const enabled=serverRound?.betting_enabled===true;
+ $("#status").textContent=serverSnapshotFailed?"SERVER UNAVAILABLE · BETTING DISABLED":!serverRound?"CONNECTING TO SERVER":!enabled?"GAME DISABLED BY N+ ADMIN":closed?"BETTING CLOSED":"BETTING OPEN · SERVER SETTLEMENT";
+ $("#round").classList.toggle("closed",closed||!enabled||!serverRound);
+ $("#status").style.color=closed||!enabled||!serverRound||serverSnapshotFailed?"#ff7773":"#72dfaa";
+ const stage=closed?3:r.remaining<=10?2:r.remaining<=20?1:0;
+ $(".stage span").forEach((x,i)=>x.classList.toggle("on",i<=stage));
+}
 function toast(t){const x=$("#toast");x.textContent=t;x.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove("show"),1700)}
 renderBalance();renderPending();renderRecent();renderCategory();renderSelection();renderPanel();void refreshServerGame();
 syncWalletFromSupabase();setInterval(()=>void refreshServerGame(),2000);
