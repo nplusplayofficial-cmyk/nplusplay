@@ -64,7 +64,7 @@ const requiredE2eFragments = [
   'v_referral_request IS DISTINCT FROM v_deposit_id',
   'v_referral_qualified_at IS NULL',
   'v_referral_rewarded_at IS NULL',
-  "v_result->>'total_rewards')::numeric<>20",
+  "coalesce((v_result->>'total_rewards')::numeric,-1)<>20",
   'ROLLBACK;'
 ];
 for (const fragment of requiredE2eFragments) {
