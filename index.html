@@ -1602,7 +1602,7 @@ body{
         <span class="brand-name accent-text">PLAY</span>
     </a>
     <div class="header-right">
-        <div class="wallet" id="homeWallet" aria-label="Current  wallet balance"><span class="wallet-dot"></span><span class="wallet-value" id="homeWalletValue">₹1,000</span></div>
+        <div class="wallet" id="homeWallet" aria-label="Current demo-points balance"><span class="wallet-dot"></span><span class="wallet-value" id="homeWalletValue">1,000 pts</span></div>
         <span class="age">18+</span>
     </div>
 </header>
@@ -1761,11 +1761,11 @@ body{
         </div>
     </div>
     <div class="champions">
-        <div class="champion"><div class="rank top">1</div><div class="player">Mem***JVN<small>Top  score</small></div><div class="amount">₹14,850</div></div>
-        <div class="champion"><div class="rank second">2</div><div class="player">Su***aj<small> player</small></div><div class="amount">₹11,200</div></div>
-        <div class="champion"><div class="rank third">3</div><div class="player">Kap***oor<small> player</small></div><div class="amount">₹9,450</div></div>
-        <div class="champion"><div class="rank">4</div><div class="player">Mem***H3M<small> player</small></div><div class="amount">₹7,800</div></div>
-        <div class="champion"><div class="rank">5</div><div class="player">Me***er<small> player</small></div><div class="amount">₹6,150</div></div>
+        <div class="champion"><div class="rank top">1</div><div class="player">Mem***JVN<small>Top  score</small></div><div class="amount">14,850 pts</div></div>
+        <div class="champion"><div class="rank second">2</div><div class="player">Su***aj<small> player</small></div><div class="amount">11,200 pts</div></div>
+        <div class="champion"><div class="rank third">3</div><div class="player">Kap***oor<small> player</small></div><div class="amount">9,450 pts</div></div>
+        <div class="champion"><div class="rank">4</div><div class="player">Mem***H3M<small> player</small></div><div class="amount">7,800 pts</div></div>
+        <div class="champion"><div class="rank">5</div><div class="player">Me***er<small> player</small></div><div class="amount">6,150 pts</div></div>
     </div>
 </section>
 
@@ -1906,10 +1906,7 @@ document.querySelectorAll('.cat').forEach(tab=>{
     const money = (value) => {
         const n = Number(value);
         const safe = Number.isFinite(n) ? n : 0;
-        return "₹" + safe.toLocaleString("en-IN", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+        return safe.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
     };
 
     let lastValue = null;
