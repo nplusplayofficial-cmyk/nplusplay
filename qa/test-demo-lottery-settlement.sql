@@ -139,7 +139,7 @@ BEGIN
 
   SELECT id,round_slot INTO v_round_id,v_round_slot FROM public.nplus_demo_lottery_rounds WHERE period=v_period;
   UPDATE public.nplus_demo_lottery_rounds SET outcome='{"dice":[1,1,1],"sum":3,"size":"SMALL","parity":"ODD"}'::jsonb,
-    ends_at=clock_timestamp()-interval '1 second' WHERE id=v_round_id;
+    starts_at=clock_timestamp()-interval '2 seconds', ends_at=clock_timestamp()-interval '1 second' WHERE id=v_round_id;
   v_snapshot:=public.nplus_demo_lottery_snapshot('K3',600);
   SELECT balance INTO v_after FROM public.demo_wallets WHERE user_id=v_user;
   IF (SELECT status FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>'won'
@@ -166,7 +166,7 @@ BEGIN
   v_bet_id:=(v_first->>'bet_id')::uuid;
   SELECT id INTO v_round_id FROM public.nplus_demo_lottery_rounds WHERE period=v_period;
   UPDATE public.nplus_demo_lottery_rounds SET outcome='{"digits":[1,2,3,4,5],"sum":15,"size":"SMALL","parity":"ODD"}'::jsonb,
-    ends_at=clock_timestamp()-interval '1 second' WHERE id=v_round_id;
+    starts_at=clock_timestamp()-interval '2 seconds', ends_at=clock_timestamp()-interval '1 second' WHERE id=v_round_id;
   v_snapshot:=public.nplus_demo_lottery_snapshot('5D',180);
   IF (SELECT status FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>'won'
      OR (SELECT payout FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>100 THEN
@@ -187,7 +187,7 @@ BEGIN
   v_bet_id:=(v_first->>'bet_id')::uuid;
   SELECT id INTO v_round_id FROM public.nplus_demo_lottery_rounds WHERE period=v_period;
   UPDATE public.nplus_demo_lottery_rounds SET outcome='{"digits":[1,2,3,4,5],"sum":15,"last_digit":5,"color":"VIOLET","size":"BIG","parity":"ODD"}'::jsonb,
-    ends_at=clock_timestamp()-interval '1 second' WHERE id=v_round_id;
+    starts_at=clock_timestamp()-interval '2 seconds', ends_at=clock_timestamp()-interval '1 second' WHERE id=v_round_id;
   v_snapshot:=public.nplus_demo_lottery_snapshot('TRX',60);
   IF (SELECT status FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>'won'
      OR (SELECT payout FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>50 THEN
