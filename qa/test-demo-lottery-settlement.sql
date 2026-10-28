@@ -51,7 +51,7 @@ INSERT INTO public.game_settings(game_key,game_name,enabled)
 VALUES ('K3','K3 WINGO',false),('5D','5D',false),('TRX','TRX WINGO',false)
 ON CONFLICT(game_key) DO NOTHING;
 
-\ir ../supabase/migrations/20261028120000_server_authoritative_k3_5d_trx_demo.sql
+\ir ../supabase/migrations/20261028134905_server_authoritative_k3_5d_trx_demo.sql
 
 BEGIN;
 DO $tests$
