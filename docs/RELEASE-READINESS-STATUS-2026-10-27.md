@@ -1,66 +1,75 @@
-# N+ PLAY + N+ ADMIN — release readiness snapshot (2026-10-28)
+# N+ PLAY + N+ ADMIN — release readiness status (2026-10-28)
 
-## Status
+## Current state
 
-**Exact split-migration local replay now PASS. The complete production launch is still blocked by hosted acceptance and owner decisions.** This report distinguishes local reconstructed-baseline evidence from canonical historical schema proof and hosted Auth verification.
+- **Production server migrations applied and verified** for K3/5D/TRX settlement and the chosen 200/20 referral contract.
+- **Exact candidate CI at the application/SQL code head passed:** Static QA #768 — https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40700269858; Release Smoke #355 — https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40700269916. Browser-smoke passed in Static QA #768. Later commits in this branch currently update release records/filenames only; require CI on the final exact PR head before merge.
+- **PR #22** — OPEN / DRAFT / unmerged. Candidate is not yet verified on GitHub Pages.
+- **All six game flags were still disabled at the post-migration read-only check.** Do not describe the games as active until their flags are enabled after deploy and verified.
+- Hosted signup/email OTP/password recovery/mobile return has not been run with a controlled inbox. Per owner instruction, proceed with this limitation clearly recorded; it is not a test PASS.
 
-## Current candidate and CI
+## Live migration records (verified read-only)
 
-- PR #22: [open draft PR](https://github.com/nplusplayofficial-cmyk/nplusplay/pull/22)
-- Branch: `integration/release-candidate-2026-10-27`
-- Candidate code HEAD used for the local replay: `bb3e2c708d630ba629ea3d99ac4a229961b58f57`
-- Static QA #725: PASS — https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40686878703
-- Release Smoke #312: PASS — https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40686878533
-- Browser-smoke passed as part of Static QA #725.
+Supabase project `pcrxlqduygvzchzxsmdv`:
+- `20261027172625` — referral qualified state.
+- `20261027172637` — legacy table direct-grant hardening.
+- `20261027172656` — WINGO Admin overload fix.
+- `20261027180120`, `20261027180134`, `20261027180141` — finite numeric guards.
+- `20261028134905` — `server_authoritative_k3_5d_trx_demo`.
+- `20261028134917` — `demo_referral_200_20_rule`.
 
-PR #22 remains OPEN / DRAFT / unmerged. The candidate has not been declared deployed to GitHub Pages.
+### K3 / 5D / TRX demo settlement
 
-## Exact split-migration full local replay — PASS (user-run, 2026-10-28)
+The current candidate contains the matching source files:
+- `supabase/migrations/20261028134905_server_authoritative_k3_5d_trx_demo.sql`
+- `qa/test-demo-lottery-settlement.sql`
 
-The user ran `qa/run-final-split-replay.ps1` from the correct current candidate worktree.
+The production migration installs private RLS-enabled lottery round/bet tables with no direct `anon`/`authenticated` privileges; server-owned result generation, snapshot, bet-placement and settlement RPCs; finite stake limits; round cutoff; request-token idempotency; and one-time wallet/ledger settlements. The guarded `nplus_set_game_status` RPC refuses to enable K3/5D/TRX unless those server functions exist. The UI pages read server status/results and place bets using authenticated RPCs only.
 
-- Container: `supabase_db_nplusplay-restore-lab-v2`, image `public.ecr.aws/supabase/postgres:17.11.0.004`.
-- Verified restore source: `nplus_restore_acceptance_20261027`.
-- Fresh disposable replay database: `nplus_migration_replay_20261031`.
-- All 29 distinct captured SQL-body fingerprints matched. All 40 captured production-history bodies replayed in their captured order.
-- Candidate migrations `20261027172625` (referral lifecycle constraint), `20261027172637` (legacy-table browser ACL hardening), `20261027172656` (WINGO Admin overload defaults), and the exact current split finite-number migrations `20261027180120`, `20261027180134`, `20261027180141` all applied successfully on the disposable reconstructed clone.
-- QA-only wallet/ledger and request-table ACL reconciliation overlays applied and passed their explicit contract checks.
-- Backup-acceptance checks: 5 profiles, 5 wallets, 140 wallet-ledger rows, 5 deposits, 6 game settings; zero negative balances, zero ledger arithmetic mismatches, zero wallets without history, and zero wallet/latest-ledger mismatches in that restored baseline.
-- Final invariants passed: all six games disabled; RLS/browser write constraints; phone-enumeration RPC not executable by browser roles; generic positive/game-credit guard; server-only Aviator worker and local cron job; both WINGO Admin overloads authorized; recent activity aggregate-only; wallet-ledger arithmetic consistent.
-- Synthetic database E2E passed deposit idempotency/approval/rejection and Admin authorization; Admin wallet adjustment/ledger and positive-credit protection; referral uniqueness/self-referral/qualification/one-time tier claim; and withdrawal idempotency/status-only Admin review. Synthetic E2E ended in `ROLLBACK`.
-- **PASS:** `RECONSTRUCTED-BASELINE FULL REPLAY CHECK PASSED` for `nplus_migration_replay_20261031`.
-- **PASS:** local `cron.database_name` restored to `nplus_migration_replay_20261026`.
-- This result is for code HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58f57`. The replay script also confirms it did not modify Supabase production or its migration history.
+Owner-approved initial rules are recorded in [OWNER-AUTHORIZED-DEMO-GAME-RULES-2026-10-28.md](OWNER-AUTHORIZED-DEMO-GAME-RULES-2026-10-28.md). Unsupported selections are disabled: K3 only Big/Small and Even/Odd; 5D per-position exact digit/size/parity (sum disabled); TRX color/last digit/size. All payouts are gross virtual demo points and not cash.
 
-### Scope limitation
+### Referral 200/20 contract
 
-The source clone used a separate schema-only reconstruction of the three legacy relations from the 2026-10-27 live catalog, and QA-only ACL overlays. Therefore the replay verifies the captured 40-body sequence plus candidate split migrations and listed invariants on a reconstructed baseline. It does **not** prove original historical DDL/policy/ACL provenance for `manual_deposits`, `user_bank_details`, and `withdraw_requests`. This replay does not close hosted signup/OTP/login/recovery or hosted browser acceptance.
+The current candidate contains `supabase/migrations/20261028134917_demo_referral_200_20_rule.sql` and `qa/test-demo-referral-200-20.sql`.
 
-## Production read-only postconditions
+On a new transition to approved, a `DEMO_CREDIT` deposit request of at least 200 points for a referred user marks the referral rewarded and atomically writes exactly one 20-point inviter wallet credit and matching ledger row. Pending/rejected requests, other payment methods, self-referrals and repeats don't qualify. The migration does not back-credit existing referrals. Old tier-claim/manual qualification paths no longer issue points; member and Admin referral pages now use the 200/20 model.
 
-Refreshed against Supabase project `pcrxlqduygvzchzxsmdv` on 2026-10-28:
+### Post-apply security/data verification
 
-- Recorded migration versions: `20261027172625`, `20261027172637`, `20261027172656`, `20261027180120`, `20261027180134`, and `20261027180141`.
-- All 10 target numeric-sensitive RPCs have NaN/Infinity guards per the verified rollout evidence.
-- All six game flags (5D, AVIATOR, K3, MOTO, TRX, WINGO) are `false`.
-- The three legacy tables have RLS enabled. `anon` has no direct SELECT/INSERT/UPDATE/DELETE privileges. `authenticated` has SELECT only on `manual_deposits` and no direct privileges on `user_bank_details` or `withdraw_requests`. Legacy-table ACL hardening is already deployed and verified.
-- Current production integrity: 5 profiles, 5 wallets, 146 wallet-ledger rows; zero negative wallets, zero ledger arithmetic mismatches, and zero current-wallet/latest-ledger mismatches.
-- Read-only checks did not change users, wallet/ledger rows, Auth settings, paid plan, scheduler, or game flags.
-- Source/catalog review documents 53 authenticated-callable SECURITY DEFINER functions and one intentionally public aggregate activity RPC; no blanket EXECUTE revoke should be used.
+- All six production flags were `false` at the recorded post-apply read: 5D, AVIATOR, K3, MOTO, TRX, WINGO.
+- New `nplus_demo_lottery_bets` and `nplus_demo_lottery_rounds` tables have RLS enabled and no direct browser-role SELECT/INSERT/UPDATE/DELETE grants.
+- `nplus_demo_lottery_snapshot` and `nplus_demo_lottery_place_bet` have EXECUTE only for authenticated; internal lottery helper functions are not executable by anon/authenticated; Admin game-status RPC remains authenticated-only.
+- Referral approval trigger is installed on `deposit_requests`; referral table remained empty at verification, so no legacy referral points were back-credited.
+- Wallet integrity: 5 profiles, 5 wallets, 146 wallet-ledger rows, zero negative wallets, zero ledger arithmetic mismatches, and zero current-wallet/latest-ledger mismatches.
+- Legacy tables `manual_deposits`, `user_bank_details`, and `withdraw_requests` retain RLS. `anon` has no direct table privileges. `authenticated` has SELECT only on `manual_deposits` and no direct privileges on the other two.
+- These postchecks did not update existing user, wallet, or ledger rows. Migration definitions and flags are verified; hosted user journeys remain unverified.
 
-## Gates still open before full game launch
+## Exact split-migration reconstructed-baseline replay — PASS
 
-1. **Hosted account acceptance:** test real signup/email OTP delivery, login, password recovery/mobile return, normal-user versus Admin access, and synthetic wallet/deposit/withdrawal/referral journeys with a controlled inbox. Do not modify existing accounts.
-2. **Referral contract:** earlier requirement is 200 approved demo credits → inviter receives 20 demo points once. Current code/UI implements 500-point qualification plus separate screenshot-based tier claims. Owner must choose the rule before changing behavior or issuing credits.
-3. **K3/5D/TRX rules:** no written, approved server-authoritative result/payout/rounding/cancel/refund/recovery contract exists. Do not invent payout multipliers. Keep all six flags disabled until written rules and server-settlement tests are approved.
-4. **Historical schema provenance:** provide authoritative historic DDL/policy/ACL source for the three legacy tables, or accept in writing that original history cannot be proven from available evidence.
-5. **Free-plan Auth risk:** leaked-password protection is unavailable on the reviewed Free plan. Record explicit risk acceptance with compensating controls or make an owner-approved plan decision; no upgrade/Auth setting change has been made.
-6. **Release/deployment:** after these gates close, review and approve the exact candidate, merge PR #22, verify the Pages deployment commit, and test the hosted N+ PLAY/Admin flows. Current candidate is not declared live.
+User ran `qa/run-final-split-replay.ps1` on 2026-10-28:
+- Existing local restore-lab `supabase_db_nplusplay-restore-lab-v2`.
+- Verified restore source `nplus_restore_acceptance_20261027`.
+- Fresh disposable target `nplus_migration_replay_20261031`.
+- All 40 captured production-history bodies replayed in order; all 29 unique SQL fingerprints matched.
+- Candidate protection migrations plus the current split finite-number guards passed on the reconstructed clone; QA-only wallet/ledger and request ACL overlays and final invariants passed.
+- Synthetic deposit/Admin/wallet/referral/withdrawal E2E passed and ended in `ROLLBACK`.
+- Local cron database target restored and verified as `nplus_migration_replay_20261026`.
 
-## Safety invariants
+**Scope limitation:** the three legacy tables were created by schema-only reconstruction plus QA-only ACL overlays. This does not prove original historic DDL/policy/ACL provenance. See [replay result](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md).
 
-- Demo/virtual points only. No real-money betting or cash payouts.
-- Preserve all existing profiles, wallets and ledger rows.
-- Do not make unapproved production ACL/RLS, Auth, paid-plan, scheduler, or game-setting changes.
-- Keep all six game flags disabled until written game rules and hosted acceptance pass.
-- Do not mark the full game launch production-ready while any release gate remains open.
+## Owner-approved limitations
+
+- **Historic schema provenance:** owner accepts that original legacy-table DDL/policy/ACL history cannot be proven from available evidence for this demo-only release. This is not canonical history proof.
+- **Free-plan leaked-password protection:** owner accepts the reviewed plan limitation with compensating controls; no paid upgrade or Auth-setting change was made.
+- **Hosted Auth/browser acceptance:** owner authorizes proceeding while this remains unverified. No one should claim OTP/signup/recovery/browser acceptance passed. Run it with a controlled inbox when available.
+
+## Final release/deployment steps
+
+1. Verify the latest CI on the **exact current PR #22 head** after documentation/filename updates.
+2. Mark PR #22 ready and merge it once exact-head CI is green.
+3. Verify GitHub Pages build/deployment for the merge commit and fetch the live pages.
+4. Read-only check the expected live migration records, game flags, trigger/execute grants, and wallet/ledger invariants after deployment.
+5. **Enable all six game flags** only after the deployed site/server RPCs pass smoke. Enable through the authenticated Admin game-status path or an explicitly audited privileged operations step; do not impersonate an Admin JWT. Verify all six flags are true and the Admin UI reflects that state.
+6. Share the site as live only after the actual Pages deployment and game flags are verified. Keep the hosted Auth acceptance limitation disclosed.
+
+Safety invariants: virtual demo points only; no cash payouts; preserve existing user/wallet/ledger data; no automatic back-credit; never call hosted Auth or deployment tests passed unless actually run.
