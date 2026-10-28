@@ -1,72 +1,72 @@
-# N+ PLAY + N+ ADMIN — Release owner decisions required (2026-10-27)
+# N+ PLAY + N+ ADMIN — Release owner decisions and verified gates (2026-10-28)
 
-This is a decision register, not permission to change production. The app remains demo/virtual-credit only. All six game flags must remain disabled until their respective requirements are approved. Preserve existing users, wallet balances and ledger rows.
+## Owner decisions recorded
 
-## Decision 1 — referral qualification and reward
+The user explicitly instructed: approve the remaining decisions and complete the N+ PLAY + N+ ADMIN demo-only release. The decisions below document the chosen contract and the remaining facts that are not falsely represented as tested.
 
-**Conflict:** the earlier request was a referred account qualifying at 200 demo credits and awarding the inviter 20 demo points once. The current production/candidate qualification flow uses 500 virtual points and a multi-tier bonus claim model; the Admin qualification RPC records qualification but sets the referral reward amount to zero.
+### 1. Referral qualification and reward — APPROVED: 200/20
 
-Choose one contract explicitly:
+- One referred account must have an **approved** server-recorded `DEMO_CREDIT` request of at least 200 virtual points.
+- Inviter receives exactly one 20 virtual demo-point reward.
+- Pending/rejected requests, other payment methods, self-referrals and duplicate approval updates do not qualify.
+- No existing referral is back-credited. Legacy tier claims and manual qualification no longer issue rewards.
+- Candidate regression covers the trigger, wallet and ledger entries, no back-credit, dashboard summaries, and rollback.
+- Production migration `20261028134917_demo_referral_200_20_rule` is applied and recorded. The trigger is installed on `public.deposit_requests`.
 
-- [ ] **Legacy 200/20:** at least 200 approved virtual demo credits for one referred account triggers a single 20-point virtual reward for the inviter. Requires reviewed migration/function/QA work before activation; no back-crediting automatically.
-- [ ] **Current 500/tier:** keep 500-point qualification and tier claims; specify/accept the displayed tier reward table and that qualification alone does not award 20 points.
-- [ ] **Neither:** provide an approved replacement rule table.
+### 2. K3 / 5D / TRX rules — APPROVED, SERVER-IMPLEMENTED
 
-Until this decision is recorded, do not award credits or silently change qualification/reward behavior.
+Written rules are recorded in [owner-authorized demo game rules](OWNER-AUTHORIZED-DEMO-GAME-RULES-2026-10-28.md).
 
-## Decision 2 — K3, 5D and TRX WINGO
+- K3: three server-generated dice; Big/Small and Even/Odd only; 2.0× gross on wins.
+- 5D: five server-generated digits A–E; per-position exact digit 10.0×, size/parity 2.0×; sum betting disabled until its own payout table exists.
+- TRX WINGO: five server-generated digits; last digit determines color/size; Green/Red 2.5×, Violet 5.0×, exact last digit 10.0×, size 2.0× gross. It is explicitly a demo result, not live blockchain data.
+- All three use server-owned outcomes, five-second cutoff, finite stake bounds, round-scoped request idempotency, atomic wallet/ledger changes and one-time settlement.
+- Production migration `20261028134905_server_authoritative_k3_5d_trx_demo` is applied and recorded. Both lottery tables have RLS enabled and no direct `anon`/`authenticated` privileges. The browser uses authenticated RPCs only.
+- These payout rules use virtual demo points only; they do not imply cash or redeemable value.
 
-**Current safe state:** all six games are disabled. K3/5D/TRX result generation and settlement do not have an approved server-owned payout contract.
+### 3. Historical legacy-table schema provenance — OWNER ACCEPTS LIMITATION
 
-- [ ] Approve written rules for each game: valid picks, round duration/cutoff, server result derivation, win conditions, payout formula/rounding, ties, cancellation/refund, idempotency and restart recovery.
-- [ ] Keep K3/5D/TRX disabled and launch only the UI/approved server-backed demo flows that are already covered by the current release.
+The original historical DDL/policy/ACL lineage for `manual_deposits`, `user_bank_details`, and `withdraw_requests` cannot be proven from the supplied 2026-10-15 backup and recorded migration history. Owner accepts proceeding with a documented reconstructed-baseline limitation for a virtual-demo-only release. Do not describe this as canonical historical replay.
 
-No flag will be enabled based on a placeholder rule.
+### 4. Leaked-password protection on Supabase Free — OWNER ACCEPTS LIMITATION
 
-## Decision 3 — legacy schema provenance
+The current Free plan does not provide leaked-password protection. Owner accepts proceeding with the documented compensating controls for a virtual-demo-only release. The setting is not enabled; no paid upgrade or Auth setting change has been made.
 
-The supplied backup and recovered migration bodies do not establish the original historical table creation, policy and ACL lineage for `manual_deposits`, `user_bank_details`, and `withdraw_requests`. Current live schema/grants were inspected and candidate/reconstructed replay tests exist, but that is not historical proof.
+### 5. Hosted Auth/browser acceptance — OWNER ACCEPTS UNVERIFIED STATUS FOR THIS RELEASE PASS
 
-- [ ] Provide an authoritative pre-history backup/schema source.
-- [ ] Or explicitly accept in writing that original historical provenance cannot be proven from available evidence and approve release based on the documented reconstructed-baseline limitations.
+Owner authorizes proceeding after local/CI/server-side checks despite the lack of a controlled test inbox. The following have **not** been verified in a real hosted browser in this work: signup/email OTP delivery, password recovery/mobile return, and the full hosted normal-user/Admin journey. This decision records acceptance to proceed; it is not a claim that those tests passed. Never fabricate a test result or modify an existing account. Run controlled hosted acceptance when an inbox/account is available.
 
-Do not fabricate DDL or alter production to make replay pass.
+### 6. Full reconstructed-baseline replay — PASS
 
-## Decision 4 — leaked-password protection on the current Free plan
+User ran `qa/run-final-split-replay.ps1` on 2026-10-28 using candidate code HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58c41` (replay evidence identifies source HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58c`; see exact output linked below).
 
-Security Advisor reports leaked-password protection disabled. The current Free plan does not expose this feature per the recorded plan review.
-
-- [ ] Accept this limitation for a demo-only release with compensating controls and documented risk.
-- [ ] Or authorize a plan decision after reviewing its actual cost. No upgrade has been initiated.
-
-No hidden Auth configuration change or unsupported SQL workaround is permitted.
-
-## Decision 5 — hosted Auth/browser acceptance
-
-This requires a controlled email inbox and synthetic accounts that can receive OTP/recovery emails. Do not test by altering existing user accounts.
-
-- [ ] Provide a controlled test inbox or run the hosted signup/email OTP/login/password recovery and mobile-return checklist yourself, then attach results to PR #22.
-
-Until actual email delivery and browser journeys are observed, this gate stays open.
-
-## Decision 6 — exact local split-migration replay
-
-**PASS — completed by the user on 2026-10-28.**
-
-- Candidate code HEAD at time of replay: `bb3e2c708d630ba629ea3d99ac4a229961b58f57`.
 - Existing local container: `supabase_db_nplusplay-restore-lab-v2`.
 - Restore source: `nplus_restore_acceptance_20261027`.
-- Disposable replay target: `nplus_migration_replay_20261031`.
-- All 40 captured production-history bodies replayed; all 29 distinct body fingerprints matched.
-- The three candidate protection migrations and the exact current three split finite-number guard migrations applied on the disposable reconstructed clone; QA-only ACL overlays and final invariants passed.
-- Synthetic wallet/Admin/referral/withdrawal E2E passed and rolled back. The six game flags remained disabled.
-- Local `cron.database_name` was restored and verified as `nplus_migration_replay_20261026`.
-- See [release readiness report](RELEASE-READINESS-STATUS-2026-10-27.md) for full evidence.
+- Disposable replay DB: `nplus_migration_replay_20261031`.
+- All 40 captured production-history bodies replayed in order; all 29 unique SQL fingerprints matched.
+- Current split finite-number guards, candidate protection migrations, QA-only ACL overlays, final invariants and synthetic wallet/Admin/referral/deposit/withdrawal E2E passed; synthetic transaction rolled back.
+- Local `cron.database_name` restored and verified as `nplus_migration_replay_20261026`.
+- Scope limitation: three legacy relations were created by a schema-only reconstruction plus QA-only ACL overlays. This does not prove original historical DDL/policy/ACL provenance.
+- See [replay report](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) and [release readiness report](RELEASE-READINESS-STATUS-2026-10-27.md).
 
-**Limitation:** this was a reconstructed-baseline replay with schema-only bootstrap and QA-only ACL overlays. It does not establish original historic DDL/policy/ACL provenance for the three legacy tables, and does not replace hosted Auth/browser acceptance.
+## Current production and candidate evidence (2026-10-28)
 
-## Release decision
+- Production migration records now include `20261028134905_server_authoritative_k3_5d_trx_demo` and `20261028134917_demo_referral_200_20_rule`, after earlier recorded protections/finite-number guards `20261027172625`, `20261027172637`, `20261027172656`, `20261027180120`, `20261027180134`, `20261027180141`.
+- Static QA #768 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40700269858
+- Release Smoke #355 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40700269916
+- Latest live read-only wallet invariant check: 5 profiles, 5 wallets, 146 ledger rows, zero negative balances, zero ledger arithmetic mismatch, zero wallet/latest-ledger mismatch.
+- Referral migration did not credit any historical referrals: live referral table had zero rows at post-apply check.
+- All six game flags are still disabled at this checkpoint. The new migration installs server settlement and the guarded Admin toggle RPC but does not itself enable games.
+- PR #22 is still OPEN/DRAFT and the current candidate has not yet been verified as the live Pages deployment.
 
-PR #22 stays OPEN/DRAFT until the above decisions and evidence are closed. After a fresh exact-head CI pass and approval, the release path is: review exact commit → merge → verify Pages deployment → test live N+ PLAY and N+ ADMIN signup/login/navigation and approved flows. The previously deployed Pages build is older main; the candidate is not yet declared live.
+## Release path
 
-No user, wallet or ledger data, Auth setting, paid plan, scheduler setting or game flag is to be changed merely to clear this register.
+Proceed with the exact current PR head only after its latest Static QA and Release Smoke are green. Then mark PR #22 ready, merge, verify GitHub Pages deployment for the merge commit, and run a read-only post-deploy check. Game flags may be activated only after the deployed pages and server RPCs are verified to be consistent; never present the unverified hosted Auth journey as tested.
+
+## Non-negotiable constraints
+
+- Virtual demo points only. No real-money deposit, wagering, cash payouts or withdrawals.
+- Preserve existing users, wallet balances and ledger rows; no automatic back-credit.
+- No blanket SECURITY DEFINER EXECUTE revokes or blanket RLS policies.
+- Do not bypass the authenticated game-status interface or impersonate an Admin JWT.
+- Keep launch/deployment reporting truthful about any hosted Auth/browser tests not performed.
