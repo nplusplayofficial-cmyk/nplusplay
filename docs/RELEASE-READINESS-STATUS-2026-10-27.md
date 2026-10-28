@@ -7,7 +7,7 @@
 - **Merge commit:** `09c432a6fc4256898772084aa78f7ec671b3e5d4`.
 - **GitHub Pages deployment #456 PASS** for the merge commit: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40744468877.
 - **Post-merge Static QA #774 PASS:** https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40744469617. Pre-merge exact-head Static QA #773 and Release Smoke #360 also passed.
-- **All six game flags remained disabled** at the latest live read-only check; do not describe the games as playable until they are enabled through the guarded Admin interface and verified.
+- **All six game flags are enabled** after owner-approved activation migration `20261028183128_enable_all_demo_game_flags_authorized_release`; post-activation read-only verification confirms 5D, AVIATOR, K3, MOTO, TRX and WINGO are all `true`. The operation is recorded in the private release audit table and did not change existing wallet/ledger rows.
 - Hosted signup/email OTP/password recovery/mobile return has not been run with a controlled inbox. Owner authorized proceeding with this limitation recorded; it is not a test PASS.
 
 ## Live migration records (verified read-only)
