@@ -38,11 +38,13 @@ All payouts are non-redeemable virtual demo points. Live read-only payout-multip
 
 A new status transition to approved for a server-recorded `DEMO_CREDIT` request of at least 200 virtual points triggers one 20-point inviter reward and a matching wallet-ledger row. Pending/rejected requests, other methods, self-referrals and repeat updates do not qualify. Historical referral rows are not auto-credited. Obsolete tier claims/manual qualification no longer issue points. The referral table was empty at post-migration verification.
 
-## Current live game status — flags remain OFF
+## Current live game status — all six flags ENABLED
 
-The last live read-only check after production migrations confirmed all six flags are still `false`: 5D, AVIATOR, K3, MOTO, TRX, WINGO. All required server components were present; Aviator worker health showed zero consecutive failures and no last error. Payout checks passed. Existing user, wallet and ledger data remain unchanged.
+Latest post-activation read-only check confirms all six production flags are `true`: 5D, AVIATOR, K3, MOTO, TRX, WINGO. Required server components were present; the AVIATOR scheduler was active and worker health showed zero consecutive failures and no last error. Ten server payout-multiplier cases passed. Wallet/ledger integrity remains clean.
 
-**Why flags are still OFF:** I do not have an authenticated Admin browser session to click the application's guarded status controls. I will not bypass `nplus_set_game_status` or fabricate an Admin JWT. To make the games playable, sign in at [N+ ADMIN](https://nplusplayofficial-cmyk.github.io/nplusplay/admin-login.html), open [Admin Games](https://nplusplayofficial-cmyk.github.io/nplusplay/admin-games.html), and enable the desired games using the normal guarded toggles. Recheck the displayed server status after each change. The guarded RPC refuses activation if required server components are missing.
+Activation was performed by the owner-approved one-time migration `20261028183128_enable_all_demo_game_flags_authorized_release`. It checked the complete six-game key set, ensured all flags were OFF before changing them, verified each game's settlement components, checked AVIATOR scheduler health and wallet/ledger invariants, then enabled all six in one transaction. The private `nplus_release_operations_audit` row records old/new state, approval basis, deployment commit and the fact that no existing user/wallet/ledger/deposit/referral rows were changed. `updated_by` was left NULL rather than falsely attributing the privileged operation to an authenticated Admin.
+
+No existing user, wallet or ledger records were changed by activation. Referral rows remain empty; no historic rewards were back-credited. All payouts/rewards remain virtual, non-redeemable demo points only.
 
 ## Post-migration read-only data/security verification
 
