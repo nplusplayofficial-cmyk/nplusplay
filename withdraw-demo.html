@@ -16,7 +16,7 @@
 <div class="balance-card"><div class="label" style="margin:0 0 7px">CURRENT DEMO BALANCE</div><div class="amount" id="balance">Checking…</div><div class="small">This balance is read from your signed-in account.</div></div>
 <label class="label" for="requestAmount">REQUEST AMOUNT</label>
 <input class="amount-input" id="requestAmount" type="number" inputmode="decimal" min="0.01" step="0.01" value="1" autocomplete="off">
-<div class="amount" id="amount">₹1.00</div>
+<div class="amount" id="amount">1.00 pts</div>
 <div class="notice">Virtual-credit demo only. Credits have no cash value. No real-money withdrawal or bank payout is processed.</div>
 <div class="status" id="status" role="status" aria-live="polite">Checking signed-in account…</div>
 <button class="btn" id="submit" disabled>SUBMIT DEMO REQUEST</button>
@@ -27,7 +27,7 @@
 (async function(){
 "use strict";
 const $=id=>document.getElementById(id),input=$("requestAmount"),balanceLabel=$("balance"),amountLabel=$("amount"),status=$("status"),btn=$("submit");
-const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const money = n => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
 let user=null,balance=null,authReady=false,busy=false,submitted=false,amount=1;
 const supplied=new URLSearchParams(location.search).get("amount");
 if(supplied!==null&&supplied.trim()!==""){const v=Number(supplied);if(Number.isFinite(v)&&v>0){amount=v;input.value=String(v)}}
