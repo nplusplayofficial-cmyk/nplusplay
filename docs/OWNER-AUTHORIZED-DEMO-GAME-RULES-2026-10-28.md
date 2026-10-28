@@ -39,6 +39,16 @@ Choose the earlier explicit requirement: one approved DEMO_CREDIT request of at 
 - The current Supabase Free plan does not expose leaked-password protection. The owner accepts this specific plan limitation for a demo-only release, with compensating controls: verified email/OTP flow where configured, rate-limited authentication, no real-money/cash flows, strict server-side role/ownership guards, private tables with no browser grants, finite input bounds, and auditable wallet ledger. This does not claim the feature is enabled.
 - Hosted email OTP/signup/login/recovery has not been proven by the local CI or local replay. Owner authorization to proceed does not change that fact; record actual hosted results after a controlled-inbox test when available.
 
+## Production rollout status — 2026-10-28
+
+The reviewed migration SQL is now applied to the live Supabase project and recorded as:
+- `20261028134905` — `server_authoritative_k3_5d_trx_demo`
+- `20261028134917` — `demo_referral_200_20_rule`
+
+Read-only post-apply verification confirmed the lottery tables exist with RLS enabled and no direct browser-role grants; internal settlement helpers are not executable by browser roles; authenticated snapshot/place-bet functions are available; the referral approval trigger is installed; no existing referral was back-credited; the wallet/ledger invariants remain clean.
+
+**All six game flags remained OFF at post-apply verification.** The code candidate is not yet deployed to GitHub Pages. Latest pre-documentation CI: Static QA #768 PASS and Release Smoke #355 PASS. Hosted signup/email OTP/recovery/browser acceptance remains unverified; owner has authorized proceeding while recording that limitation.
+
 ## Release guardrails
 
 1. No real-money deposit, bet, payout, or cash withdrawal. All balances/rewards are virtual demo points only.
