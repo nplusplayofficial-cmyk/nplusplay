@@ -814,7 +814,7 @@ button:disabled{
 
       <div class="stat">
         <span>PENDING VIRTUAL CREDITS</span>
-        <strong id="pendingAmount">₹0.00</strong>
+        <strong id="pendingAmount">0.00 pts</strong>
       </div>
 
       <div class="stat">
@@ -928,7 +928,7 @@ button:disabled{
             <div class="wa-card"><span>NEXT PERIOD</span><strong id="waNextPeriod">—</strong></div>
             <div class="wa-card"><span>TIME LEFT</span><strong id="waTimeLeft">—</strong></div>
             <div class="wa-card"><span>BET COUNT</span><strong id="waBetCount">0</strong></div>
-            <div class="wa-card"><span>TOTAL STAKE</span><strong id="waStake">₹0.00</strong></div>
+            <div class="wa-card"><span>TOTAL STAKE</span><strong id="waStake">0.00 pts</strong></div>
           </div>
 
           <div class="wa-breakdown">
@@ -995,7 +995,7 @@ button:disabled{
       </div>
       <div class="commission-card">
         <span>TOTAL BET AMOUNT</span>
-        <strong id="totalBetAmount">₹0.00</strong>
+        <strong id="totalBetAmount">0.00 pts</strong>
       </div>
       <div class="commission-card">
         <span>TOTAL WINS</span>
@@ -1003,19 +1003,19 @@ button:disabled{
       </div>
       <div class="commission-card">
         <span>TOTAL WINNING AMOUNT</span>
-        <strong id="totalWinningAmount">₹0.00</strong>
+        <strong id="totalWinningAmount">0.00 pts</strong>
       </div>
       <div class="commission-card highlight">
         <span>TODAY COMMISSION</span>
-        <strong id="todayCommission">₹0.00</strong>
+        <strong id="todayCommission">0.00 pts</strong>
       </div>
       <div class="commission-card highlight">
         <span>ALL-TIME COMMISSION</span>
-        <strong id="allTimeCommission">₹0.00</strong>
+        <strong id="allTimeCommission">0.00 pts</strong>
       </div>
       <div class="commission-card">
         <span>TODAY BET AMOUNT</span>
-        <strong id="todayBetAmount">₹0.00</strong>
+        <strong id="todayBetAmount">0.00 pts</strong>
       </div>
       <div class="commission-card">
         <span>COMMISSION RATE</span>
@@ -1067,7 +1067,7 @@ button:disabled{
         </div>
         <div class="live-card">
           <span>CURRENT ROUND STAKE</span>
-          <strong id="liveBetAmount">₹0.00</strong>
+          <strong id="liveBetAmount">0.00 pts</strong>
         </div>
       </div>
 
@@ -1106,12 +1106,12 @@ button:disabled{
     <div class="deposit-grid">
       <div class="deposit-stat">
         <span>TOTAL APPROVED DEPOSITED</span>
-        <strong id="approvedDepositTotal">₹0.00</strong>
+        <strong id="approvedDepositTotal">0.00 pts</strong>
       </div>
 
       <div class="deposit-stat">
         <span>TODAY APPROVED DEPOSITED</span>
-        <strong id="todayDepositTotal">₹0.00</strong>
+        <strong id="todayDepositTotal">0.00 pts</strong>
       </div>
 
       <div class="deposit-stat">
@@ -1225,10 +1225,7 @@ button:disabled{
   ];
 
   function money(value) {
-    return "₹" + Number(value || 0).toLocaleString("en-IN", {
-      minimumFractionDigits:2,
-      maximumFractionDigits:2
-    });
+    return Number(value || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
   }
 
   function escapeHTML(value) {
@@ -2952,11 +2949,11 @@ button:disabled{
 
       $("approvedDepositTotal")
         .textContent =
-        "₹0.00";
+        "0.00 pts";
 
       $("todayDepositTotal")
         .textContent =
-        "₹0.00";
+        "0.00 pts";
 
       $("approvedDepositCount")
         .textContent =
