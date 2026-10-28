@@ -55,14 +55,16 @@ if (!migration.includes('Candidate migration only') ||
 }
 
 const requiredE2eFragments = [
-  "nplus_demo_admin_qualify_referral(v_invited,499.99)",
   "nplus_demo_admin_qualify_referral(v_invited,500)",
-  "v_retry->>'reason'<>'already_qualified'",
-  "v_referral_status IS DISTINCT FROM 'qualified'",
-  'v_referral_reward IS DISTINCT FROM 0.00',
-  'v_referral_request IS NOT NULL',
+  "v_result->>'reason'<>'approval_driven'",
+  "nplus_demo_claim_referral_bonus(1)",
+  "v_result->>'reason'<>'tier_claims_disabled'",
+  "v_referral_status IS DISTINCT FROM 'rewarded'",
+  'v_referral_reward IS DISTINCT FROM 20.00',
+  'v_referral_request IS DISTINCT FROM v_deposit_id',
   'v_referral_qualified_at IS NULL',
-  'v_referral_rewarded_at IS NOT NULL',
+  'v_referral_rewarded_at IS NULL',
+  "v_result->>'total_rewards')::numeric<>20",
   'ROLLBACK;'
 ];
 for (const fragment of requiredE2eFragments) {
@@ -75,6 +77,6 @@ if (process.exitCode) {
   console.error('Qualified demo referral-state regression contract failed.');
 } else {
   console.log('PASS qualified referral lifecycle migration guard and state contract.');
-  console.log('PASS E2E enforces below-minimum, exactly-once Admin qualification and transaction rollback.');
+  console.log('PASS E2E enforces the approved 200/20 trigger, disables old tier/manual paths, and rolls back synthetic data.');
   console.log('NOTE static contract only; run the isolated database E2E for runtime validation.');
 }
