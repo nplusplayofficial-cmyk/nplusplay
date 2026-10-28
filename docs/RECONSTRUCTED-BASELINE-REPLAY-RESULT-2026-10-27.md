@@ -1,3 +1,30 @@
+# Reconstructed-Baseline Local Replay Result — current addendum (2026-10-28)
+
+## Latest exact split-migration replay — PASS
+
+The user-run replay below supersedes earlier statements in this historical report that said a full replay of the current split finite-number migrations was still pending.
+
+- Candidate code HEAD used for this replay: `bb3e2c708d630ba629ea3d99ac4a229961b58f57`.
+- Existing local restore-lab container: `supabase_db_nplusplay-restore-lab-v2` using `public.ecr.aws/supabase/postgres:17.11.0.004`.
+- Verified restored source: `nplus_restore_acceptance_20261027`.
+- Fresh disposable target: `nplus_migration_replay_20261031`.
+- All 40 captured production-history bodies replayed in recorded order, and all 29 distinct SQL-body fingerprints matched.
+- Candidate migrations `20261027172625`, `20261027172637`, `20261027172656` plus the exact current split finite-number guards `20261027180120`, `20261027180134`, `20261027180141` applied successfully on the reconstructed disposable clone.
+- QA-only wallet/ledger and request-table ACL reconciliation overlays passed.
+- Final invariants passed: all six games disabled; browser direct table writes blocked; phone-enumeration RPC unavailable to browser roles; generic positive/game credit guard present; Aviator worker server-only and expected local cron job installed; WINGO Admin overloads checked; Recent Activity aggregate-only; wallet-ledger arithmetic consistent.
+- Synthetic database E2E passed deposit idempotency/approval/rejection/Admin authorization; Admin wallet adjustment/ledger and positive-credit protection; referral uniqueness/self-referral/qualification/one-time tier claim; withdrawal idempotency/status-only review. Synthetic transaction ended with `ROLLBACK`.
+- Final runner message: `RECONSTRUCTED-BASELINE FULL REPLAY CHECK PASSED`.
+- Local `cron.database_name` restored and verified as `nplus_migration_replay_20261026`.
+- This local test did not modify production schema or migration history.
+
+### Scope limitation
+
+The test uses a schema-only bootstrap derived from the 2026-10-27 live catalog for `manual_deposits`, `user_bank_details`, and `withdraw_requests`, as well as QA-only ACL reconciliation overlays. It verifies the current captured sequence and candidate split migrations on this reconstructed baseline. It does **not** prove the original historical DDL, RLS-policy history, or ACL provenance. It does not replace hosted signup/email OTP/login/recovery or browser acceptance. All six game flags remain disabled.
+
+For current CI, live read-only invariants, and unresolved launch gates, see [Release readiness status](RELEASE-READINESS-STATUS-2026-10-27.md).
+
+---
+
 # Reconstructed-Baseline Local Replay Result — 2026-10-27
 
 ## Result
