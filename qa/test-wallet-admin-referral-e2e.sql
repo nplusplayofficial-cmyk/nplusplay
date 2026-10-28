@@ -145,9 +145,12 @@ BEGIN
    WHERE user_id=v_invited AND type='credit' AND source='admin_deposit' AND delta=500;
   IF v_count<>1 THEN RAISE EXCEPTION 'FAIL: deposit approval did not create exactly one ledger row'; END IF;
   SELECT balance INTO v_referrer_after FROM public.demo_wallets WHERE user_id=v_referrer;
-  IF v_referrer_after<>v_referrer_before
-     OR EXISTS (SELECT 1 FROM public.demo_wallet_transactions WHERE user_id=v_referrer AND type='REFERRAL_REWARD' AND source='REFERRAL') THEN
-    RAISE EXCEPTION 'FAIL: approving a deposit automatically rewarded a referrer before Admin qualification/tier claim';
+  SELECT count(*) INTO v_count FROM public.demo_wallet_transactions
+   WHERE user_id=v_referrer AND type='REFERRAL_REWARD' AND source='REFERRAL' AND delta=20;
+  IF v_referrer_after<>v_referrer_before+20 OR v_count<>1
+     OR (SELECT status FROM public.nplus_demo_referrals WHERE referred_user_id=v_invited)<>'rewarded'
+     OR (SELECT qualifying_request_id FROM public.nplus_demo_referrals WHERE referred_user_id=v_invited)<>v_deposit_id THEN
+    RAISE EXCEPTION 'FAIL: approved qualifying DEMO_CREDIT request did not award exactly one 20-point referral reward';
   END IF;
 
   v_error := '';
@@ -196,72 +199,46 @@ BEGIN
     RAISE EXCEPTION 'FAIL: non-admin wallet adjustment was not denied';
   END IF;
 
-  -- Approved demo credits do not automatically pay the referrer; qualification is an
-  -- explicit Admin verification step, once, after a >=500 virtual-credit check.
+  -- The approved contract awards 20 points once on an approved >=200 DEMO_CREDIT request.
+  -- Manual qualification and the old tier claim endpoint must no longer mint rewards.
   PERFORM set_config('request.jwt.claim.sub',v_admin::text,true);
-  v_result := public.nplus_demo_admin_qualify_referral(v_invited,499.99);
-  IF coalesce((v_result->>'success')::boolean,true) OR v_result->>'reason'<>'qualification_below_minimum' THEN
-    RAISE EXCEPTION 'FAIL: below-minimum referral qualification was accepted';
-  END IF;
   v_result := public.nplus_demo_admin_qualify_referral(v_invited,500);
-  IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE THEN
-    RAISE EXCEPTION 'FAIL: Admin could not verify a qualifying referral';
+  IF coalesce((v_result->>'success')::boolean,true) OR v_result->>'reason'<>'approval_driven' THEN
+    RAISE EXCEPTION 'FAIL: manual referral qualification path is not disabled';
+  END IF;
+  v_result := public.nplus_demo_claim_referral_bonus(1);
+  IF coalesce((v_result->>'success')::boolean,true) OR v_result->>'reason'<>'tier_claims_disabled' THEN
+    RAISE EXCEPTION 'FAIL: obsolete tier claim path still issues rewards';
+  END IF;
+  IF has_function_privilege('authenticated','public.nplus_demo_claim_referral_bonus(integer)','EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: obsolete tier-claim RPC remains callable by authenticated users';
   END IF;
 
-  -- "qualified" is a verification state only. It must not count as an already-paid
-  -- referral-row reward; tier claims are credited separately and once.
   SELECT status, reward_amount, qualifying_request_id, qualified_at, rewarded_at
     INTO v_referral_status, v_referral_reward, v_referral_request,
          v_referral_qualified_at, v_referral_rewarded_at
   FROM public.nplus_demo_referrals
-  WHERE referred_user_id = v_invited;
-  IF v_referral_status IS DISTINCT FROM 'qualified'
-     OR v_referral_reward IS DISTINCT FROM 0.00
-     OR v_referral_request IS NOT NULL
+  WHERE referred_user_id=v_invited;
+  IF v_referral_status IS DISTINCT FROM 'rewarded'
+     OR v_referral_reward IS DISTINCT FROM 20.00
+     OR v_referral_request IS DISTINCT FROM v_deposit_id
      OR v_referral_qualified_at IS NULL
-     OR v_referral_rewarded_at IS NOT NULL THEN
-    RAISE EXCEPTION 'FAIL: qualified referral lifecycle state does not match contract';
+     OR v_referral_rewarded_at IS NULL THEN
+    RAISE EXCEPTION 'FAIL: final referral lifecycle does not match one-time 200/20 rule';
   END IF;
 
-  v_retry := public.nplus_demo_admin_qualify_referral(v_invited,500);
-  IF coalesce((v_retry->>'success')::boolean,true) OR v_retry->>'reason'<>'already_qualified' THEN
-    RAISE EXCEPTION 'FAIL: referral qualification was accepted more than once';
-  END IF;
-
-  -- Referral tier claim is user-scoped, event-window scoped, and exactly once.
-  SELECT bonus_amount INTO v_expected_bonus
-  FROM public.nplus_demo_referral_tier_rules WHERE invitee_count=1;
-  IF v_expected_bonus IS NULL THEN RAISE EXCEPTION 'FAIL: one-invitee demo tier is not configured'; END IF;
   PERFORM set_config('request.jwt.claim.sub',v_referrer::text,true);
-  SELECT balance INTO v_balance_before FROM public.demo_wallets WHERE user_id=v_referrer;
-  SELECT count(*) INTO v_ledger_before FROM public.demo_wallet_transactions WHERE user_id=v_referrer;
-  v_result := public.nplus_demo_claim_referral_bonus(1);
-  IF coalesce((v_result->>'success')::boolean,false) IS NOT TRUE
-     OR (v_result->>'reward_amount')::numeric<>v_expected_bonus THEN
-    RAISE EXCEPTION 'FAIL: eligible one-invitee bonus tier could not be claimed';
+  v_result := public.nplus_demo_referral_dashboard();
+  IF coalesce((v_result->>'referral_count')::integer,-1)<>1
+     OR coalesce((v_result->>'rewarded_count')::integer,-1)<>1
+     OR coalesce((v_result->>'total_rewards')::numeric,-1)<>20 THEN
+    RAISE EXCEPTION 'FAIL: member referral dashboard totals do not match the rewarded row';
   END IF;
-  SELECT balance INTO v_balance_after FROM public.demo_wallets WHERE user_id=v_referrer;
-  SELECT count(*) INTO v_ledger_after FROM public.demo_wallet_transactions WHERE user_id=v_referrer;
-  IF v_balance_after<>v_balance_before+v_expected_bonus OR v_ledger_after<>v_ledger_before+1 THEN
-    RAISE EXCEPTION 'FAIL: referral claim did not create one matching wallet/ledger update';
-  END IF;
-  SELECT count(*) INTO v_count FROM public.demo_wallet_transactions
-  WHERE user_id=v_referrer AND type='REFERRAL_REWARD' AND source='REFERRAL' AND delta=v_expected_bonus;
-  IF v_count<>1 THEN RAISE EXCEPTION 'FAIL: referral reward ledger entry count is not exactly one'; END IF;
-
-  v_error := '';
-  BEGIN
-    v_retry := public.nplus_demo_claim_referral_bonus(1);
-  EXCEPTION WHEN OTHERS THEN v_error := SQLERRM;
-  END;
-  IF v_error<>'' THEN RAISE EXCEPTION 'FAIL: repeated tier claim raised unexpectedly: %',v_error; END IF;
-  IF coalesce((v_retry->>'success')::boolean,true) OR v_retry->>'reason'<>'already_claimed' THEN
-    RAISE EXCEPTION 'FAIL: duplicate referral tier claim was not rejected';
-  END IF;
-  SELECT balance INTO v_balance_before FROM public.demo_wallets WHERE user_id=v_referrer;
-  SELECT count(*) INTO v_ledger_before FROM public.demo_wallet_transactions WHERE user_id=v_referrer;
-  IF v_balance_before<>v_balance_after OR v_ledger_before<>v_ledger_after THEN
-    RAISE EXCEPTION 'FAIL: duplicate referral tier claim changed wallet/ledger';
+  PERFORM set_config('request.jwt.claim.sub',v_admin::text,true);
+  v_result := public.nplus_demo_admin_vip_dashboard();
+  IF coalesce((v_result->>'referrals_rewarded')::integer,-1)<>1
+     OR coalesce((v_result->>'referral_points_awarded')::numeric,-1)<>20 THEN
+    RAISE EXCEPTION 'FAIL: Admin referral summary does not use the current 200/20 referral rows';
   END IF;
 
   -- Demo withdrawal is idempotent and never deducts wallet credits. Admin approve/reject
