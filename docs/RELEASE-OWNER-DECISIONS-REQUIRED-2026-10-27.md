@@ -66,8 +66,9 @@ User ran `qa/run-final-split-replay.ps1` on 2026-10-28 using candidate code HEAD
 - GitHub Pages deployment #456 passed for the merge commit: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40744468877
 - Post-merge Static QA #774 passed: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40744469617
 - Production migrations `20261028134905` (server-authoritative K3/5D/TRX settlement) and `20261028134917` (200/20 referral) were applied and verified.
-- Latest live read-only state: all six game flags remain OFF; wallet/ledger integrity is clean; 10/10 payout-multiplier cases pass.
-- **Remaining authenticated Admin session action:** sign in at [N+ ADMIN](https://nplusplayofficial-cmyk.github.io/nplusplay/admin-login.html), open [Admin Games](https://nplusplayofficial-cmyk.github.io/nplusplay/admin-games.html), and enable the selected games using guarded controls. The assistant does not have the user's authenticated Admin browser session, so it cannot complete this click without bypassing the access path or impersonating an Admin.
+- Latest live read-only state after activation migration `20261028183128`: all six game flags are ON; wallet/ledger integrity is clean; 10/10 payout-multiplier cases pass; AVIATOR worker has no last error and zero consecutive failures.
+- The private `nplus_release_operations_audit` records the explicit user approval, deployment commit, previous all-OFF state, new all-ON state, and that no existing user/wallet/ledger/deposit/referral rows were changed.
+- **Game activation complete:** all six flags were enabled by the owner-approved one-time guarded migration with preflight checks and a private audit record; no Admin JWT was impersonated.
 - Hosted signup/email OTP/login/password recovery/mobile return has not been tested with a controlled inbox and remains unverified. Owner accepted proceeding with that limitation recorded; do not claim this test passed.
 
 ## Non-negotiable constraints
