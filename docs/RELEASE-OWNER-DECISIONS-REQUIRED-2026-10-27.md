@@ -51,17 +51,19 @@ Until actual email delivery and browser journeys are observed, this gate stays o
 
 ## Decision 6 — exact local split-migration replay
 
-The previous full replay used the pre-split monolithic guard source. Static QA now tests the split migrations in disposable PostgreSQL, and production catalog postconditions are verified, but an exact-head full reconstructed-baseline replay still needs the user's existing Windows restore lab.
+**PASS — completed by the user on 2026-10-28.**
 
-After pulling the latest branch, run once from the repository root:
+- Candidate code HEAD at time of replay: `bb3e2c708d630ba629ea3d99ac4a229961b58f57`.
+- Existing local container: `supabase_db_nplusplay-restore-lab-v2`.
+- Restore source: `nplus_restore_acceptance_20261027`.
+- Disposable replay target: `nplus_migration_replay_20261031`.
+- All 40 captured production-history bodies replayed; all 29 distinct body fingerprints matched.
+- The three candidate protection migrations and the exact current three split finite-number guard migrations applied on the disposable reconstructed clone; QA-only ACL overlays and final invariants passed.
+- Synthetic wallet/Admin/referral/withdrawal E2E passed and rolled back. The six game flags remained disabled.
+- Local `cron.database_name` was restored and verified as `nplus_migration_replay_20261026`.
+- See [release readiness report](RELEASE-READINESS-STATUS-2026-10-27.md) for full evidence.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\qa\run-final-split-replay.ps1"
-```
-
-The wrapper only allows the existing local Supabase restore-lab container, refuses non-local Docker endpoints and reused replay targets, and restores the documented prior local cron setting in `finally`. Default new target: `nplus_migration_replay_20261031`. If that target already exists, do not delete it; choose a new unused `nplus_migration_replay_YYYYMMDD` value and pass it with `-ReplayDatabase`. Preserve failing databases as evidence.
-
-The reconstructed replay does not resolve historical DDL provenance by itself.
+**Limitation:** this was a reconstructed-baseline replay with schema-only bootstrap and QA-only ACL overlays. It does not establish original historic DDL/policy/ACL provenance for the three legacy tables, and does not replace hosted Auth/browser acceptance.
 
 ## Release decision
 
