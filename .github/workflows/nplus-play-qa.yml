@@ -121,6 +121,12 @@ jobs:
         run: |
           createdb -h 127.0.0.1 -U postgres nplus_demo_lottery_test
           psql -h 127.0.0.1 -U postgres -d nplus_demo_lottery_test -v ON_ERROR_STOP=1 -f qa/test-demo-lottery-settlement.sql
+      - name: Test approved 200/20 one-time demo referral reward
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_demo_referral_20020_test
+          psql -h 127.0.0.1 -U postgres -d nplus_demo_referral_20020_test -v ON_ERROR_STOP=1 -f qa/test-demo-referral-200-20.sql
       - name: Test MotoRace settlement against disposable PostgreSQL
         env:
           PGPASSWORD: nplus_test
