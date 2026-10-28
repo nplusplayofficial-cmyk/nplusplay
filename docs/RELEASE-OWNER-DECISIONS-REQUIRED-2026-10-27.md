@@ -56,8 +56,9 @@ User ran `qa/run-final-split-replay.ps1` on 2026-10-28 using candidate code HEAD
 - Release Smoke #355 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40700269916
 - Latest live read-only wallet invariant check: 5 profiles, 5 wallets, 146 ledger rows, zero negative balances, zero ledger arithmetic mismatch, zero wallet/latest-ledger mismatch.
 - Referral migration did not credit any historical referrals: live referral table had zero rows at post-apply check.
-- All six game flags are still disabled at this checkpoint. The new migration installs server settlement and the guarded Admin toggle RPC but does not itself enable games.
-- PR #22 is still OPEN/DRAFT and the current candidate has not yet been verified as the live Pages deployment.
+- All six game flags are now enabled by audited activation migration `20261028183128_enable_all_demo_game_flags_authorized_release`, and post-activation read-only verification confirms all six are true.
+- PR #22 is merged; Pages deployment #456 succeeded for merge commit `09c432a6fc4256898772084aa78f7ec671b3e5d4`. The final status-document refresh is redeploying from main.
+- Audit row #1 records all-OFF -> all-ON, user authorization, deployment commit and that no existing user/wallet/ledger/deposit/referral rows were modified.
 
 ## Release path — updated 2026-10-28
 
