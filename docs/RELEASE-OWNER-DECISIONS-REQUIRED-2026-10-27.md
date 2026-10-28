@@ -59,9 +59,16 @@ User ran `qa/run-final-split-replay.ps1` on 2026-10-28 using candidate code HEAD
 - All six game flags are still disabled at this checkpoint. The new migration installs server settlement and the guarded Admin toggle RPC but does not itself enable games.
 - PR #22 is still OPEN/DRAFT and the current candidate has not yet been verified as the live Pages deployment.
 
-## Release path
+## Release path — updated 2026-10-28
 
-Proceed with the exact current PR head only after its latest Static QA and Release Smoke are green. Then mark PR #22 ready, merge, verify GitHub Pages deployment for the merge commit, and run a read-only post-deploy check. Game flags may be activated only after the deployed pages and server RPCs are verified to be consistent; never present the unverified hosted Auth journey as tested.
+- PR #22 is merged as `09c432a6fc4256898772084aa78f7ec671b3e5d4`.
+- Exact candidate CI passed (Static QA #773; Release Smoke #360).
+- GitHub Pages deployment #456 passed for the merge commit: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40744468877
+- Post-merge Static QA #774 passed: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40744469617
+- Production migrations `20261028134905` (server-authoritative K3/5D/TRX settlement) and `20261028134917` (200/20 referral) were applied and verified.
+- Latest live read-only state: all six game flags remain OFF; wallet/ledger integrity is clean; 10/10 payout-multiplier cases pass.
+- **Remaining authenticated Admin session action:** sign in at [N+ ADMIN](https://nplusplayofficial-cmyk.github.io/nplusplay/admin-login.html), open [Admin Games](https://nplusplayofficial-cmyk.github.io/nplusplay/admin-games.html), and enable the selected games using guarded controls. The assistant does not have the user's authenticated Admin browser session, so it cannot complete this click without bypassing the access path or impersonating an Admin.
+- Hosted signup/email OTP/login/password recovery/mobile return has not been tested with a controlled inbox and remains unverified. Owner accepted proceeding with that limitation recorded; do not claim this test passed.
 
 ## Non-negotiable constraints
 
