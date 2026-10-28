@@ -452,9 +452,12 @@ async function refreshServerGame(){
     updateTotal();
   }catch(error){
     console.error('5D server snapshot failed:',error);
+    serverSnapshot=null;
+    serverRound=null;
     document.getElementById('spinStatus').textContent='SERVER UNAVAILABLE · BETTING DISABLED';
     document.querySelector('.confirm').disabled=true;
     renderPending5D();
+    updateTotal();
   }finally{
     serverRefreshBusy=false;
   }
