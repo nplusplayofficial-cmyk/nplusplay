@@ -1,3 +1,31 @@
+# N+ PLAY + N+ ADMIN — Release readiness current status (2026-10-28)
+
+This update supersedes older deployment/CI/replay statements below where they conflict. Older dated sections remain as historical records.
+
+## Current verified state
+
+- **PR #22:** OPEN / DRAFT / unmerged. The current candidate is not deployed to GitHub Pages. [Open PR #22](https://github.com/nplusplayofficial-cmyk/nplusplay/pull/22).
+- **Candidate HEAD before this documentation-only status refresh:** `f4a7f17e22a9f0fcc249f253c3998e2bbb97ca08`. Latest CI for that code/docs head: Static QA #731 was running at the time of this entry; Release Smoke #318 succeeded. A fresh exact-head CI pass is required after the final documentation commit.
+- **Local split-migration replay:** the user's full reconstructed-baseline run passed on code HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58f57`. All 40 captured production-history rows replayed, all 29 unique body fingerprints matched, the current split finite-number migrations and candidate protections passed, ACL reconciliation overlays/final invariants passed, and synthetic wallet/Admin/referral/deposit/withdrawal E2E passed with transaction rollback. Local cron was restored and verified as `nplus_migration_replay_20261026`.
+- Full current replay detail: [reconstructed-baseline replay report](docs/RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md). The replay uses a reconstructed schema for the three legacy tables plus QA-only ACL overlays, so it does not establish original historical DDL/policy/ACL provenance or hosted Auth acceptance.
+- **Production read-only invariants:** live migration history records the three protection migrations `20261027172625`, `20261027172637`, `20261027172656` and the three finite-number guard migrations `20261027180120`, `20261027180134`, `20261027180141`. All 10 targeted numeric-sensitive RPCs have NaN/Infinity guards. All six game flags (5D, AVIATOR, K3, MOTO, TRX, WINGO) remain disabled.
+- The three legacy tables have RLS enabled. `anon` has no direct table privileges; `authenticated` has SELECT only on `manual_deposits` and no direct privileges on `user_bank_details` or `withdraw_requests`.
+- Latest live read-only wallet integrity check: 5 profiles, 5 wallets, 146 wallet-ledger rows, zero negative wallets, zero ledger arithmetic mismatches, and zero current-wallet/latest-ledger mismatches. No production user/wallet/ledger rows, Auth settings, paid plan, scheduler, or game flags were changed by these read-only checks.
+- Latest recorded Security Advisor snapshot (2026-10-28): 20 RLS-enabled/no-policy INFO findings, one public aggregate Recent Activity SECURITY DEFINER WARN, 53 authenticated-callable SECURITY DEFINER WARN findings, and leaked-password protection disabled on the current Free plan. Avoid broad grant revocation or blanket policies; the category warnings must be handled by reviewed function contracts and hosted acceptance.
+
+## Remaining gates before full launch
+
+1. **Hosted Auth/browser acceptance:** real signup/email OTP/login/password recovery/mobile return and synthetic normal-user/Admin wallet, deposit/withdrawal/referral journeys need a controlled inbox and synthetic accounts.
+2. **Referral product decision:** the earlier request was 200 approved demo credits leading to one inviter reward of 20 demo points once; current code/UI uses 500-point qualification and separately claimed screenshot-based tiers. Do not silently change behavior, auto-credit, or back-credit.
+3. **K3/5D/TRX payout rules:** no written approved server-authoritative result, payout, rounding, cancellation/refund, idempotency and recovery contract. Keep all six games disabled until rules and settlement tests are approved.
+4. **Legacy schema provenance:** obtain authoritative historic DDL/policy/ACL evidence for `manual_deposits`, `user_bank_details`, `withdraw_requests`, or explicitly accept in writing that original history cannot be proven from available evidence.
+5. **Free-plan Auth risk:** record owner risk acceptance for leaked-password protection being unavailable on the current Free plan with compensating controls, or an owner-approved plan decision. No Auth change or paid upgrade has occurred.
+6. **Release:** after the above gates close, review/approve the exact current commit, merge PR #22, verify the actual Pages deployment commit, and test hosted N+ PLAY/N+ ADMIN user journeys. The existing Pages deployment remains older than the candidate; do not share it as a verified launch candidate.
+
+**Safety invariants:** demo/virtual points only; no real-money betting or cash payouts; preserve all existing user/wallet/ledger data; no unapproved production changes; all six game flags remain disabled until written rules and hosted acceptance pass.
+
+---
+
 ## Current production verification — 2026-10-23
 
 This section supersedes older status notes below where dates or deployment state differ.
