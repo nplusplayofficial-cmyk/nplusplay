@@ -98,7 +98,7 @@ CREATE OR REPLACE FUNCTION public.nplus_demo_ensure_referral_code(p_user_id uuid
 RETURNS text LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'pg_catalog','public'
 AS $fn$ SELECT referral_code FROM public.nplus_demo_referral_codes WHERE user_id=p_user_id $fn$;
 
-\ir ../supabase/migrations/20261028120100_demo_referral_200_20_rule.sql
+\ir ../supabase/migrations/20261028134917_demo_referral_200_20_rule.sql
 
 BEGIN;
 DO $tests$
