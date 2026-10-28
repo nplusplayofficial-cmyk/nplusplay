@@ -38,7 +38,7 @@ Owner authorizes proceeding after local/CI/server-side checks despite the lack o
 
 ### 6. Full reconstructed-baseline replay — PASS
 
-User ran `qa/run-final-split-replay.ps1` on 2026-10-28 using candidate code HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58c41` (replay evidence identifies source HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58c`; see exact output linked below).
+User ran `qa/run-final-split-replay.ps1` on 2026-10-28 using candidate code HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58f57` (exact code HEAD shown in the successful replay run).
 
 - Existing local container: `supabase_db_nplusplay-restore-lab-v2`.
 - Restore source: `nplus_restore_acceptance_20261027`.
