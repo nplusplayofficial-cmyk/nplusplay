@@ -1,10 +1,48 @@
 # N+ PLAY + N+ ADMIN — Consolidated release gate checklist (2026-10-24)
 
-## Release decision
+## Superseding release update — 2026-10-28
 
-**Not release-ready yet.** The local 2026-10-15 backup restore and all 29 captured SQL source fingerprints are verified. Bodies 39/40 passed only after QA-only empty schema overlays for three missing legacy tables; this is not a clean full replay. Wallet/ledger ACL parity and request-table ACL parity overlays passed. Final local invariants passed after the candidate qualified-referral-state migration; wallet/Admin/referral E2E passed with transaction rollback. Baseline/schema/ACL lineage, authenticated hosted-browser tests, and approved K3/5D/TRX rules remain release blockers. The integrated candidate's Static QA, browser smoke, and Release Smoke all pass on the latest head.
+This dated checklist is retained as a historical timeline. The state below supersedes its earlier statements wherever those statements say the current split-migration local replay has not yet passed.
 
-Production rollout update: the three protective migrations were applied on 2026-10-27, followed by the three split finite-number guard migrations at server-recorded versions `20261027180120`, `20261027180134`, and `20261027180141`. Live postconditions now confirm all 10 target RPCs contain NaN/Infinity guards, all six game flags remain disabled, legacy table RLS/grants match the reviewed contract, and aggregate wallet/ledger integrity checks report zero mismatches. See [production guard rollout evidence](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md). The current candidate still requires exact-head CI after filename alignment, a fresh full local replay of the split sequence, hosted Auth/browser acceptance, product/risk decisions, and final hosted Pages verification. It is not release-ready.
+**Overall release decision: NOT YET APPROVED FOR FULL GAME LAUNCH.** The current code candidate is CI-green and the exact split-migration reconstructed-baseline replay has passed, but hosted Auth/browser acceptance and product/risk approvals remain unresolved. Do not merge/deploy or enable game flags before those gates close.
+
+### Current exact-head CI
+- Candidate HEAD: `2b9c558c2ffdbbf0c50c11fd77320b1d5722e406`.
+- Static QA #728 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40690612407
+- Release Smoke #315 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40690612270
+- Browser smoke passed within Static QA #728.
+
+### Full exact split-migration reconstructed-baseline replay — PASS
+The user ran `qa/run-final-split-replay.ps1` on 2026-10-28 from the candidate worktree at code HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58f57`. Subsequent commits only revised release documentation.
+
+- All 40 captured production-history bodies replayed; all 29 unique fingerprints matched.
+- Candidate protections and the three split finite-number guard migrations applied on the disposable reconstructed clone.
+- QA-only ACL reconciliation overlays and final invariants passed.
+- Synthetic deposit/Admin/wallet/referral/withdrawal E2E passed and ended in `ROLLBACK`.
+- All six games remained disabled throughout the local test.
+- Local cron target restored and verified as `nplus_migration_replay_20261026`.
+- Full evidence and caveats: [RECONSTRUCTED-BASELINE replay result](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) and [current release readiness report](RELEASE-READINESS-STATUS-2026-10-27.md).
+
+**Scope limit:** this was replay over a schema-only reconstruction of three legacy tables plus QA-only ACL reconciliation overlays. It does not prove the original historical DDL/policy/ACL provenance for `manual_deposits`, `user_bank_details`, and `withdraw_requests`, and does not replace hosted Auth/browser testing.
+
+### Current live production read-only invariants
+- Recorded protective migrations: `20261027172625`, `20261027172637`, `20261027172656`, `20261027180120`, `20261027180134`, `20261027180141`.
+- All 10 targeted numeric-sensitive RPCs have NaN/Infinity guards.
+- All six game flags (5D, AVIATOR, K3, MOTO, TRX, WINGO) are `false`.
+- Three legacy tables have RLS enabled; anon has no direct table access; authenticated has SELECT only on `manual_deposits` and no direct privileges on the other two.
+- 5 profiles, 5 wallets, 146 wallet-ledger rows; zero negative wallets, zero ledger arithmetic mismatches, zero current-wallet/latest-ledger mismatches.
+- Read-only checks did not change production user/wallet/ledger rows, Auth, paid plan, scheduler, or game flags.
+
+### Remaining blockers before full game launch
+1. Hosted signup/email OTP/login/recovery/mobile-return and synthetic normal-user/Admin, wallet/deposit/withdrawal/referral flows with a controlled inbox.
+2. Owner decision on conflicting referral contracts: previous 200-approved-demo-credit / one-time-20-demo-point requirement versus current 500-point qualification and separately claimed invitation tiers.
+3. Approved server-authoritative K3/5D/TRX result/payout/rounding/cancel/refund/idempotency/recovery rules and runtime tests.
+4. Authoritative historic DDL/ACL/policy evidence for the three legacy tables, or written acceptance that the original historical lineage cannot be proven.
+5. Owner risk acceptance for leaked-password protection unavailable on the current Free plan, with compensating controls, or an owner-approved plan decision.
+6. Final review/approval/merge of PR #22, actual GitHub Pages deployment verification, and hosted acceptance after the above gates close.
+
+---
+
 
 ## Workstream status
 
