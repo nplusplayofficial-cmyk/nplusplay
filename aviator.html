@@ -151,7 +151,7 @@ th{color:#70757c;font-size:9px}
 <main class="app">
 <header class="top">
   <div class="logo">Aviator</div>
-  <div class="balance" id="balance">₹1,000.00</div>
+  <div class="balance" id="balance">1,000.00 pts</div>
   <button class="menuBtn" id="menuBtn" aria-label="Open menu">☰</button>
 </header>
 <div class="notice">N+ PLAY · VIRTUAL-CREDIT DEMO · NO REAL-MONEY WAGERING</div>
@@ -167,7 +167,7 @@ th{color:#70757c;font-size:9px}
     </div>
     <div class="pool">
       <div class="pooltop">
-        <strong id="pool">₹0.00</strong>
+        <strong id="pool">0.00 pts</strong>
         <span id="count">0 Bets</span>
       </div>
       <div class="bar"><i id="barFill"></i></div>
@@ -225,7 +225,7 @@ th{color:#70757c;font-size:9px}
           </div>
         </div>
 
-        <button class="betbtn">Bet<br><span>₹10.00</span></button>
+        <button class="betbtn">Bet<br><span>10.00 pts</span></button>
       </div>
 
       <div class="autoSettings">
@@ -265,7 +265,7 @@ th{color:#70757c;font-size:9px}
           </div>
         </div>
 
-        <button class="betbtn">Bet<br><span>₹10.00</span></button>
+        <button class="betbtn">Bet<br><span>10.00 pts</span></button>
       </div>
 
       <div class="autoSettings">
@@ -361,7 +361,7 @@ const MIN_BET=1;
 
 const $=id=>document.getElementById(id);
 const $$=s=>[...document.querySelectorAll(s)];
-const money=n=> '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const money = n => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
 const fx=x=>Number(x).toFixed(2)+'x';
 
 let db={balance:1000,rounds:[],bets:[],lastRound:null};
@@ -852,8 +852,8 @@ $$('[data-action]').forEach(row=>row.onclick=()=>{
   }
   if(a==='limits'){
     showModal('Game Limits',`<div class="demoLimit">
-      <div class="limitBox"><small>MIN DEMO BET</small><b>₹1</b></div>
-      <div class="limitBox"><small>MAX DEMO BET</small><b>₹1,00,000</b></div>
+      <div class="limitBox"><small>MIN DEMO BET</small><b>1 pts</b></div>
+      <div class="limitBox"><small>MAX DEMO BET</small><b>1,00,000 pts</b></div>
       <div class="limitBox"><small>ROUND HISTORY</small><b>100</b></div>
       <div class="limitBox"><small>BET HISTORY</small><b>100</b></div>
     </div>`);
