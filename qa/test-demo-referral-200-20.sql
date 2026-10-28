@@ -152,20 +152,33 @@ BEGIN
   RAISE EXCEPTION 'FAIL: self-referral was not rejected.';
  END IF;
 
- -- An unapproved request does not pay; a 199.99 approved request does not pay.
- INSERT INTO public.deposit_requests(id,user_id,amount,status,payment_method)
- VALUES ('cc611111-1111-4111-8111-111111111111',v_invited,250,'pending','DEMO_CREDIT');
+ -- A pending request does not pay; an approved 199.99 request does not pay.
  SELECT balance INTO v_before FROM public.demo_wallets WHERE user_id=v_referrer;
+ INSERT INTO public.deposit_requests(id,user_id,amount,status,payment_method)
+ VALUES ('cc600000-0000-4000-8000-000000000001',v_invited,250,'pending','DEMO_CREDIT');
+ SELECT balance INTO v_after FROM public.demo_wallets WHERE user_id=v_referrer;
+ IF v_after<>v_before THEN RAISE EXCEPTION 'FAIL: pending request awarded a referral reward.'; END IF;
+
+ INSERT INTO public.deposit_requests(id,user_id,amount,status,payment_method)
+ VALUES ('cc611111-1111-4111-8111-111111111111',v_invited,199.99,'pending','DEMO_CREDIT');
  UPDATE public.deposit_requests SET status='approved',reviewed_by=v_admin,reviewed_at=now()
  WHERE id='cc611111-1111-4111-8111-111111111111';
  SELECT balance INTO v_after FROM public.demo_wallets WHERE user_id=v_referrer;
+ IF v_after<>v_before THEN RAISE EXCEPTION 'FAIL: sub-200 request awarded a referral reward.'; END IF;
+
+ -- A new approved 200+ DEMO_CREDIT request pays exactly once.
+ INSERT INTO public.deposit_requests(id,user_id,amount,status,payment_method)
+ VALUES ('cc633333-3333-4333-8333-333333333333',v_invited,250,'pending','DEMO_CREDIT');
+ UPDATE public.deposit_requests SET status='approved',reviewed_by=v_admin,reviewed_at=now()
+ WHERE id='cc633333-3333-4333-8333-333333333333';
+ SELECT balance INTO v_after FROM public.demo_wallets WHERE user_id=v_referrer;
  IF v_after<>v_before+20 THEN RAISE EXCEPTION 'FAIL: qualifying amount did not award exactly 20'; END IF;
 
- -- Retry by changing other request columns cannot pay twice, even if status is named again.
+ -- Retry by updating unrelated columns cannot pay twice, even if status is named again.
  SELECT count(*) INTO v_count FROM public.demo_wallet_transactions
  WHERE user_id=v_referrer AND type='REFERRAL_REWARD' AND source='REFERRAL';
  UPDATE public.deposit_requests SET status='approved',request_note='retry update'
- WHERE id='cc611111-1111-4111-8111-111111111111';
+ WHERE id='cc633333-3333-4333-8333-333333333333';
  SELECT balance INTO v_after FROM public.demo_wallets WHERE user_id=v_referrer;
  SELECT count(*) INTO v_ledger_after FROM public.demo_wallet_transactions
  WHERE user_id=v_referrer AND type='REFERRAL_REWARD' AND source='REFERRAL';
@@ -174,7 +187,7 @@ BEGIN
  END IF;
  SELECT status,qualifying_request_id INTO v_status,v_request
  FROM public.nplus_demo_referrals WHERE referred_user_id=v_invited;
- IF v_status<>'rewarded' OR v_request<>'cc611111-1111-4111-8111-111111111111'::uuid THEN
+ IF v_status<>'rewarded' OR v_request<>'cc633333-3333-4333-8333-333333333333'::uuid THEN
   RAISE EXCEPTION 'FAIL: qualifying referral did not persist the rewarded state/request ID.';
  END IF;
  IF (SELECT qualifying_request_amount FROM public.nplus_demo_referrals WHERE referred_user_id=v_invited)<>250
@@ -186,10 +199,10 @@ BEGIN
  INSERT INTO public.nplus_demo_referrals(user_id,referrer_user_id,referred_user_id,referral_code,status,reward_amount,reward_credits,qualified_at)
  VALUES (v_other_referrer,v_other_referrer,v_other_invited,'NPREFERRER02','qualified',0,20,now());
  INSERT INTO public.deposit_requests(id,user_id,amount,status,payment_method)
- VALUES ('cc622222-2222-4222-8222-222222222222',v_other_invited,500,'pending','CASH');
+ VALUES ('cc644444-4444-4444-8444-444444444444',v_other_invited,500,'pending','CASH');
  SELECT balance INTO v_before FROM public.demo_wallets WHERE user_id=v_other_referrer;
  UPDATE public.deposit_requests SET status='approved',reviewed_by=v_admin,reviewed_at=now()
- WHERE id='cc622222-2222-4222-8222-222222222222';
+ WHERE id='cc644444-4444-4444-8444-444444444444';
  SELECT balance INTO v_after FROM public.demo_wallets WHERE user_id=v_other_referrer;
  IF v_after<>v_before OR EXISTS(SELECT 1 FROM public.demo_wallet_transactions WHERE user_id=v_other_referrer AND type='REFERRAL_REWARD') THEN
   RAISE EXCEPTION 'FAIL: non-DEMO_CREDIT or already-qualified referral was paid.';
