@@ -115,6 +115,12 @@ jobs:
         env:
           PGPASSWORD: nplus_test
         run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-admin-game-status.sql
+      - name: Test server-authoritative K3, 5D and TRX demo settlement
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_demo_lottery_test
+          psql -h 127.0.0.1 -U postgres -d nplus_demo_lottery_test -v ON_ERROR_STOP=1 -f qa/test-demo-lottery-settlement.sql
       - name: Test MotoRace settlement against disposable PostgreSQL
         env:
           PGPASSWORD: nplus_test
