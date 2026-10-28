@@ -33,11 +33,12 @@ jobs:
           --health-retries 5
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
+          package-manager-cache: false
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Test live RLS/index migrations in a dedicated disposable database
@@ -48,6 +49,66 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d nplus_migration_test -v ON_ERROR_STOP=1 -f qa/test-release-index-policy-migration.sql
       - name: Check syntax and local links
         run: node qa/verify-project.js
+      - name: Compile inline JavaScript for game and referral pages
+        run: node qa/test-game-inline-script-syntax.cjs
+      - name: Guard qualified demo referral lifecycle state
+        run: node qa/test-demo-referral-qualified-state.cjs
+      - name: Guard finite Admin referral qualification amounts
+        run: node qa/test-demo-referral-finite-amount.cjs
+      - name: Test finite Admin referral qualification in a dedicated disposable database
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_referral_finite_test
+          psql -h 127.0.0.1 -U postgres -d nplus_referral_finite_test -v ON_ERROR_STOP=1 -f qa/test-demo-referral-finite-amount.sql
+      - name: Guard finite numeric RPC inputs
+        run: node qa/test-finite-numeric-rpc-guards.cjs
+      - name: Test finite numeric guard semantics in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_finite_numeric_rpc_test
+          psql -h 127.0.0.1 -U postgres -d nplus_finite_numeric_rpc_test -v ON_ERROR_STOP=1 -f qa/test-finite-numeric-rpc-guards.sql
+      - name: Execute finite-numeric candidate migration in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_finite_numeric_migration_test
+          psql -h 127.0.0.1 -U postgres -d nplus_finite_numeric_migration_test -v ON_ERROR_STOP=1 -f qa/test-finite-numeric-migration.sql
+      - name: Test reconstructed legacy-table baseline in disposable PostgreSQL
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_migration_replay_20261027
+          psql -h 127.0.0.1 -U postgres -d nplus_migration_replay_20261027 -v ON_ERROR_STOP=1 -f qa/test-reconstructed-legacy-bootstrap.sql
+      - name: Guard reconstructed full replay procedure
+        run: node qa/test-reconstructed-replay-runner.cjs
+      - name: Guard one-command local split replay wrapper
+        run: node qa/test-final-split-replay-wrapper.cjs
+      - name: Guard unapproved K3, 5D and TRX payout rules
+        run: node qa/test-game-rules-approval.cjs
+      - name: Audit recent activity privacy and Aviator recovery
+        run: node qa/test-activity-aviator-audit.cjs
+      - name: Verify recovered live migration source fingerprints
+        run: node qa/test-live-migration-source-fingerprints.cjs
+      - name: Test WINGO Admin overload disambiguation in a fresh disposable database
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_wingo_overload_test
+          psql -h 127.0.0.1 -U postgres -d nplus_wingo_overload_test -v ON_ERROR_STOP=1 -f qa/test-wingo-overload-disambiguation.sql
+      - name: Test public Recent Activity privacy contract in a dedicated disposable database
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_activity_test
+          psql -h 127.0.0.1 -U postgres -d nplus_activity_test -v ON_ERROR_STOP=1 -f qa/test-recent-demo-activity-privacy.sql
+      - name: Test Recent Activity recovery SQL in a separate disposable database
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_activity_recovery_test
+          psql -h 127.0.0.1 -U postgres -d nplus_activity_recovery_test -v ON_ERROR_STOP=1 -f qa/test-recent-demo-activity.sql
       - name: Test WINGO settlement against disposable PostgreSQL
         env:
           PGPASSWORD: nplus_test
@@ -56,6 +117,18 @@ jobs:
         env:
           PGPASSWORD: nplus_test
         run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-admin-game-status.sql
+      - name: Test server-authoritative K3, 5D and TRX demo settlement
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_demo_lottery_test
+          psql -h 127.0.0.1 -U postgres -d nplus_demo_lottery_test -v ON_ERROR_STOP=1 -f qa/test-demo-lottery-settlement.sql
+      - name: Test approved 200/20 one-time demo referral reward
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_demo_referral_20020_test
+          psql -h 127.0.0.1 -U postgres -d nplus_demo_referral_20020_test -v ON_ERROR_STOP=1 -f qa/test-demo-referral-200-20.sql
       - name: Test MotoRace settlement against disposable PostgreSQL
         env:
           PGPASSWORD: nplus_test
@@ -92,7 +165,15 @@ jobs:
         env:
           PGPASSWORD: nplus_test
         run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-demo-wallet-requests.sql
-      - name: Test demo referral attribution and virtual-credit rewards in disposable PostgreSQL
+      - name: Test legacy table privilege hardening in a dedicated disposable database
+        env:
+          PGPASSWORD: nplus_test
+        run: |
+          createdb -h 127.0.0.1 -U postgres nplus_legacy_privilege_test
+          psql -h 127.0.0.1 -U postgres -d nplus_legacy_privilege_test -v ON_ERROR_STOP=1 -f qa/test-legacy-table-privilege-hardening.sql
+      - name: Guard legacy browser routes as read-only
+        run: node qa/test-legacy-browser-route-readonly.cjs
+      - name: Test LEGACY 200/20 referral prototype only (not current release acceptance)
         env:
           PGPASSWORD: nplus_test
         run: psql -h 127.0.0.1 -U postgres -d nplus_test -v ON_ERROR_STOP=1 -f qa/test-demo-referrals.sql
@@ -106,15 +187,15 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Install Playwright
         run: pip install playwright==1.55.0
       - name: Install Chromium
-        run: python -m playwright install --with-deps chromium
+        run: python -m playwright install --only-shell chromium
       - name: Start local candidate server
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/nplus-play-http.log 2>&1 &

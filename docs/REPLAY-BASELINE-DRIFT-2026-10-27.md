@@ -1,0 +1,61 @@
+# N+ PLAY migration replay baseline-drift report — 2026-10-27
+
+## Result
+
+- The private 2026-10-15 dump was restored locally into a new disposable database with owner/ACL restoration enabled. Restore acceptance passed: 5 profiles, 5 wallets, 140 ledger rows, 5 deposit requests, 6 game settings; zero wallet arithmetic mismatches, negative wallets, missing wallet history, or wallet/latest-ledger mismatches; 7 RLS-enabled public tables, 13 policies, and Vault present.
+- Exact source fingerprints passed for all 29 captured SQL bodies and the 40-row replay order.
+- The initial local replay passed migration bodies 1–38.
+- Body 39, `20261023092858_optimize_rls_policies_and_foreign_key_indexes_20261023.sql`, first failed at `public.manual_deposits`. Guarded QA overlay preflights detected `public.withdraw_requests` and `public.user_bank_details` missing from the backup-derived partial replay baseline.
+- After the dependency preflight was adjusted, the explicitly QA-only fixture was applied to the local partial replay database. It created empty schema-only shapes for the three legacy relations and reported zero rows in each; no production data was copied.
+- The suffix runner's checkpoint verifier initially rejected a state whose 37 returned predicates were all `t`. This PowerShell guard logic bug was fixed and a regression test was added. Captured migration bodies 39–40 subsequently passed in the local partial replay.
+- After the three-table QA overlay, captured migration bodies **39/40 and 40/40 both passed** in the local replay database.
+- The first read-only final invariant failed because restored wallet/ledger ACLs differed from the current audited production grants. A guarded QA-only wallet/ledger ACL overlay captured the original ACLs and changed only the local replay DB to the reviewed contract: anon no table privileges, authenticated SELECT only.
+- The final invariant next found request-table ACL/owner drift. A first request ACL fixture attempt refused the owner mismatch and rolled back. The corrected QA-only fixture captured the original owner/ACL, normalized only the local `withdrawal_requests` owner to `postgres`, and applied the reviewed browser-role grants.
+- **Final local invariant check: PASS (2026-10-27).** All six game settings remain disabled; browser roles cannot directly write wallet/ledger/request tables; phone-enumeration RPC is not executable by browser roles; generic wallet positive/game-credit guard exists; Aviator worker is server-only with expected local cron job; both WINGO Admin overloads have explicit authorization; Recent Activity exposes aggregate counts only; wallet ledger arithmetic is consistent.
+- **Wallet/Admin/referral E2E: PASS (2026-10-27)** after applying candidate migration `20261027120000_allow_qualified_demo_referral_state.sql` to the disposable replay DB only. Deposit idempotency/approval/rejection and Admin authorization; Admin wallet adjustment and positive-credit protection; referral uniqueness/self-referral/qualification/one-time tier claim; and withdrawal idempotency/status-only review all passed. Test transaction ended with `ROLLBACK`.
+- No migration was skipped. Production was not modified.
+
+## Read-only catalog evidence
+
+Read-only catalog queries against the currently connected production project on 2026-10-27 found `public.manual_deposits`, `public.withdraw_requests`, and `public.user_bank_details` present, all owned by `postgres` with RLS enabled. `manual_deposits` has six columns, primary key `manual_deposits_pkey`, foreign key to `auth.users(id)`, and index `idx_manual_deposits_user_id_fk`; `withdraw_requests` has five columns, primary key `withdraw_requests_pkey`, foreign key to `auth.users(id)`, and index `idx_withdraw_requests_user_id_fk`. `user_bank_details` has eight columns, primary key `user_bank_details_pkey`, unique constraint `user_bank_details_user_id_key`, and foreign key `user_bank_details_user_id_fkey` to `auth.users(id)`.
+
+Read-only searches of `supabase_migrations.schema_migrations` found captured body `20261023092858` mentions these relations, but does not create them. The overlay guard found `withdraw_requests` and a subsequent read-only preflight found `user_bank_details.user_id` missing from the backup-derived replay baseline, before creating any fixture objects. Thus the supplied 2026-10-15 backup and captured 40-body history do not, by themselves, reconstruct the current production schema. These relations were introduced/restored outside the captured 40-body sequence, or the supplied backup predates that schema state. This is a baseline/history gap, not a source fingerprint or SQL syntax issue.
+
+The same read-only catalog review showed broad table-level grants to `anon` and `authenticated` on the legacy `manual_deposits` table even though RLS is enabled. Separately, a read-only catalog query on current production confirmed that `anon` and `authenticated` have no `INSERT`, `UPDATE`, or `DELETE` privileges on `demo_wallets`, `demo_wallet_transactions`, `deposit_requests`, or `withdrawal_requests`; `authenticated` retains SELECT on these tables. A read-only search of captured migration bodies found no explicit GRANT/REVOKE statement targeting direct table privileges on the existing wallet/ledger tables. The local replay's failed invariants therefore signal baseline/history ACL-parity gaps, not a reason to weaken the assertions. No production grant changes were made; review the separate PR #20 candidate and the final post-PR #16 browser call paths before any rollout.
+
+## Additional current live schema evidence (2026-10-27)
+
+A separate, current read-only snapshot now records all columns, constraints, indexes, RLS policies, owners, RLS flags and ACL entries for `manual_deposits`, `user_bank_details` and `withdraw_requests`:
+[`PRODUCTION-LEGACY-TABLE-SCHEMA-SNAPSHOT-2026-10-27.md`](./PRODUCTION-LEGACY-TABLE-SCHEMA-SNAPSHOT-2026-10-27.md).
+
+That snapshot improves our evidence for today's live table shape. It confirms the three tables have RLS enabled and that the current effective table ACLs still grant broad privileges to both `anon` and `authenticated`. The reviewed candidate ACL hardening remains unapplied. The current definitions do not establish the original table-creation SQL or the historical policy/ACL state at the start of the captured 40-migration chain. Therefore the canonical replay blocker remains open; this snapshot is not a substitute for trusted historical SQL/deployment evidence.
+
+## What the QA-only overlay does — and does not prove
+
+`qa/fixtures/replay-baseline/manual-deposits-schema-overlay.sql` was applied to the disposable `nplus_migration_replay_20261026` database after guarded dependency checks, creating three empty schema-only legacy-table approximations with zero rows each. A wallet/ledger ACL overlay snapshotted original grants and aligned local browser-role permissions to the reviewed contract. A request-table ACL overlay then snapshotted original owners/grants, normalized the known local `withdrawal_requests` owner mismatch, and aligned browser-role permissions. Captured bodies 39–40 passed, and the final local invariant SQL passed after all overlays.
+
+The suffix test shows bodies 39–40 can run against the explicitly reconstructed table shape and that final-state invariants pass under QA overlays. **It is not a clean 40-body replay from the 2026-10-15 dump**, and it does not reconstruct prior RLS policy definitions or prove full restore parity.
+
+## Required release decision
+
+Keep the application **not release-ready** until an authoritative baseline/history for `manual_deposits`, `withdraw_requests`, and `user_bank_details` is obtained and schema/ACL lineage is resolved. The final local invariants and Wallet/Admin/referral E2E now pass under QA overlays and the candidate-only referral-state migration, but this is not a clean canonical replay. Hosted authenticated flows, final integrated CI, and approved K3/5D/TRX settlement rules remain blockers. Prefer a verified newer backup that includes the relation, or an approved canonical pre-history schema migration/source with owner, ACL, constraints and policy provenance reviewed. Do not edit the captured applied-body fingerprints, skip body 39, insert fake migration-history rows, run the QA fixture in production, or change production wallets, user data, game flags, grants or cron jobs as a shortcut.
+
+
+## 2026-10-27 production body verification update
+
+The 40-row stored migration history has now been reconciled at the **SQL body-source level**: all 29 distinct production-stored SQL bodies compare character-for-character to the 29 archived files; the remaining 11 history rows repeat those bodies. See [production body verification](./PRODUCTION-MIGRATION-BODY-VERIFICATION-2026-10-27.md).
+
+This confirms the historical SQL body files exist and match the stored bodies. It does not make the replay clean: none of the 29 distinct bodies creates `manual_deposits`, `user_bank_details`, or `withdraw_requests`; the captured index/policy migration only references them. The 2026-10-15 backup-derived replay baseline does not have the three tables. Their authoritative baseline DDL/history remains the current replay blocker. Do not re-run migrations, use the QA-only overlay in production, or alter migration history as a shortcut.
+
+
+## Explicit reconstructed-baseline full replay path — 2026-10-27
+
+A guarded opt-in path was added for the local restore lab:
+
+`pwsh -File .\\qa\\replay-live-migration-sequence.ps1 -VerifiedRestoreDatabase nplus_restore_acceptance_20261024 -ReplayDatabase nplus_migration_replay_20261027 -UseReconstructedLegacyBaseline`
+
+The new `qa/fixtures/replay-baseline/reconstructed-live-legacy-schema-bootstrap.sql` creates the three missing empty legacy relation shapes from the current live catalog snapshot: columns/defaults, PK/FK/unique constraints, owner, RLS and the observed pre-history ACL seed. It refuses to run outside a date-suffixed replay DB, if any table already exists, if prerequisites are missing, or if the replay-audit schema exists. A disposable PostgreSQL regression tests that fixture.
+
+With the opt-in switch the runner clones the accepted backup with owner/ACL restoration enabled, applies the explicitly reconstructed bootstrap, replays all 40 byte-fingerprinted historical bodies, then applies the two candidate migrations, finite-input RPC bundle and QA-only current-ACL reconciliation overlays before final invariants and synthetic wallet/Admin/referral E2E. The end-state contract checks now include the three legacy-table grants.
+
+**Scope honesty:** this is reproducible replay from an explicit schema-only reconstruction, not proof that this was the original historical DDL or original policies/ACLs. The full Supabase-specific replay still needs to be run in the user's local Docker restore lab; connected tools cannot access that local container. Never apply the bootstrap/ACL overlays to production.

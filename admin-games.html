@@ -1213,7 +1213,7 @@ button:disabled{
   let serverGameSettings = Object.create(null);
   let serverGameSettingsError = null;
   const serverGameToggleBusy = new Set();
-  const HARD_PAUSED_GAMES = new Set(["K3", "5D", "TRX"]);
+  const HARD_PAUSED_GAMES = new Set([]);
 
   const DEMO_GAMES = [
     { name:"WINGO", key:"WINGO", icon:"🎯" },
@@ -1448,13 +1448,6 @@ button:disabled{
     if (serverGameToggleBusy.has(gameKey)) return;
 
     const nextEnabled = setting.enabled !== true;
-    if (HARD_PAUSED_GAMES.has(gameKey) && nextEnabled) {
-      showStatus(
-        gameKey + " cannot be enabled until its server payout rules are approved and tested.",
-        "err"
-      );
-      return;
-    }
 
     serverGameToggleBusy.add(gameKey);
     renderGameCards();
@@ -1501,7 +1494,7 @@ button:disabled{
       const gameStatus = unavailable
         ? "STATUS UNAVAILABLE"
         : isHardPaused
-        ? "BETTING PAUSED · PAYOUT RULES"
+        ? "BETTING PAUSED · RULES NOT INSTALLED"
         : enabled
         ? "SERVER ENABLED"
         : "DISABLED BY ADMIN";
@@ -1514,14 +1507,14 @@ button:disabled{
         : serverGameToggleBusy.has(game.key)
         ? "SAVING…"
         : isHardPaused
-        ? "LOCKED · PAYOUT RULES PENDING"
+        ? "LOCKED · SERVER RULES PENDING"
         : enabled
         ? "DISABLE BETTING"
         : "ENABLE BETTING";
       const serverStatusLabel = unavailable
         ? "UNAVAILABLE"
         : isHardPaused
-        ? "PAUSED · RULES PENDING"
+        ? "PAUSED · SERVER RULES PENDING"
         : enabled
         ? "ENABLED"
         : "DISABLED";

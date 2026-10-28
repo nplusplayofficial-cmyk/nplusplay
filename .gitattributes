@@ -1,0 +1,2 @@
+# Preserve exact historical SQL evidence bytes. These recovered applied-body snapshots include mixed line endings whose bytes are part of the recorded fingerprints.
+docs/recovered-live-migration-sql-2026-10-23/*.sql -text

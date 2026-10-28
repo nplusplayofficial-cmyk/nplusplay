@@ -1,0 +1,215 @@
+# N+ PLAY + N+ ADMIN — Consolidated release gate checklist (2026-10-24)
+
+## Superseding release update — 2026-10-28
+
+This dated checklist is retained as a historical timeline. The state below supersedes its earlier statements wherever those statements say the current split-migration local replay has not yet passed.
+
+**Overall release decision: NOT YET APPROVED FOR FULL GAME LAUNCH.** The current code candidate is CI-green and the exact split-migration reconstructed-baseline replay has passed, but hosted Auth/browser acceptance and product/risk approvals remain unresolved. Do not merge/deploy or enable game flags before those gates close.
+
+### Current exact-head CI
+- Candidate HEAD: `2b9c558c2ffdbbf0c50c11fd77320b1d5722e406`.
+- Static QA #728 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40690612407
+- Release Smoke #315 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40690612270
+- Browser smoke passed within Static QA #728.
+
+### Full exact split-migration reconstructed-baseline replay — PASS
+The user ran `qa/run-final-split-replay.ps1` on 2026-10-28 from the candidate worktree at code HEAD `bb3e2c708d630ba629ea3d99ac4a229961b58f57`. Subsequent commits only revised release documentation.
+
+- All 40 captured production-history bodies replayed; all 29 unique fingerprints matched.
+- Candidate protections and the three split finite-number guard migrations applied on the disposable reconstructed clone.
+- QA-only ACL reconciliation overlays and final invariants passed.
+- Synthetic deposit/Admin/wallet/referral/withdrawal E2E passed and ended in `ROLLBACK`.
+- All six games remained disabled throughout the local test.
+- Local cron target restored and verified as `nplus_migration_replay_20261026`.
+- Full evidence and caveats: [RECONSTRUCTED-BASELINE replay result](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) and [current release readiness report](RELEASE-READINESS-STATUS-2026-10-27.md).
+
+**Scope limit:** this was replay over a schema-only reconstruction of three legacy tables plus QA-only ACL reconciliation overlays. It does not prove the original historical DDL/policy/ACL provenance for `manual_deposits`, `user_bank_details`, and `withdraw_requests`, and does not replace hosted Auth/browser testing.
+
+### Current live production read-only invariants
+- Recorded protective migrations: `20261027172625`, `20261027172637`, `20261027172656`, `20261027180120`, `20261027180134`, `20261027180141`.
+- All 10 targeted numeric-sensitive RPCs have NaN/Infinity guards.
+- All six game flags (5D, AVIATOR, K3, MOTO, TRX, WINGO) are `false`.
+- Three legacy tables have RLS enabled; anon has no direct table access; authenticated has SELECT only on `manual_deposits` and no direct privileges on the other two.
+- 5 profiles, 5 wallets, 146 wallet-ledger rows; zero negative wallets, zero ledger arithmetic mismatches, zero current-wallet/latest-ledger mismatches.
+- Read-only checks did not change production user/wallet/ledger rows, Auth, paid plan, scheduler, or game flags.
+
+### Remaining blockers before full game launch
+1. Hosted signup/email OTP/login/recovery/mobile-return and synthetic normal-user/Admin, wallet/deposit/withdrawal/referral flows with a controlled inbox.
+2. Owner decision on conflicting referral contracts: previous 200-approved-demo-credit / one-time-20-demo-point requirement versus current 500-point qualification and separately claimed invitation tiers.
+3. Approved server-authoritative K3/5D/TRX result/payout/rounding/cancel/refund/idempotency/recovery rules and runtime tests.
+4. Authoritative historic DDL/ACL/policy evidence for the three legacy tables, or written acceptance that the original historical lineage cannot be proven.
+5. Owner risk acceptance for leaked-password protection unavailable on the current Free plan, with compensating controls, or an owner-approved plan decision.
+6. Final review/approval/merge of PR #22, actual GitHub Pages deployment verification, and hosted acceptance after the above gates close.
+
+---
+
+
+## Workstream status
+
+| # | Workstream | What is now verified / prepared | Remaining to close |
+|---:|---|---|---|
+| 1 | Migration source reconciliation + backup acceptance | Read-only live history has 40 rows, 29 unique body fingerprints, and 11 duplicate-body pairs. Source fingerprints pass 29/29 and backup restore acceptance passes with owner/ACL restoration. Bodies 1–38 passed against the restored baseline; bodies 39–40 passed after a QA-only three-table empty schema overlay. Both wallet/ledger and request-table browser-role ACL overlays were applied locally after snapshotting the original ACLs/owner drift. Final local invariant SQL passed, including all six games off, no browser direct wallet/ledger/request writes, phone-enumeration revocation, generic wallet-credit guard, server-only Aviator worker/cron, WINGO Admin authorization, aggregate-only Recent Activity, and wallet/ledger arithmetic. [Detailed baseline/ACL drift report](REPLAY-BASELINE-DRIFT-2026-10-27.md). | Obtain an authoritative newer backup or reviewed canonical pre-history schema sources for all three legacy tables and reconcile full schema/ACL lineage. The overlay-based suffix/final-state check must not be represented as a clean 40-body replay. Do not skip assertions or alter production to make replay pass. |
+| 2 | Production database security audit | Refreshed read-only Advisor snapshot and catalog footprint are recorded in [production security report](PRODUCTION-SECURITY-READONLY-2026-10-24.md) and [Advisor triage](SUPABASE-SECURITY-ADVISOR-TRIAGE-2026-10-24.md) (2026-10-27 09:02 UTC): 40 migration rows, 69 public SECURITY DEFINER functions, 33 RLS-enabled public tables, 22 policies; all six games remain disabled. Advisor still reports 20 RLS-enabled/no-policy tables (INFO; no direct anon/authenticated table privileges), one intentional anonymous aggregate Recent Activity RPC (WARN), 53 authenticated SECURITY DEFINER warnings requiring function-by-function review (WARN), leaked-password protection disabled (WARN), and 20 unused indexes (INFO). Prior read-only scan found fixed search paths on all 54 browser-callable SECURITY DEFINER functions. Generic positive wallet credits are blocked; phone lookup EXECUTE is revoked for browser roles. [PR #20](https://github.com/nplusplayofficial-cmyk/nplusplay/pull/20) has candidate-only legacy grant hardening; not applied to production. | Hosted non-admin/anonymous test coverage is still incomplete across all 53 authenticated-callable SECURITY DEFINER functions; review targeted high-risk functions and decide if the aggregate homepage RPC remains public. Leaked-password protection is unavailable on the current Free plan per [Supabase Auth docs](https://supabase.com/docs/guides/auth/password-security) (Pro+); do not upgrade without approval. Record as an accepted Free-plan limitation or obtain owner approval for paid upgrade; check supported password length/complexity and rate-limit settings as no-cost mitigations. Keep unused-index cleanup out of this release without workload evidence. **Live catalog review confirmed both WINGO overloads have overlapping defaults** (4-arg calls are ambiguous); the candidate test reproduces/fixes overload resolution while preserving owner/grants/fixed search_path, and current production owner/ACL has been verified read-only. Candidate remains unmerged pending canonical migration ordering/dependency and clean backup/replay. Latest read-only catalog review also found anonymous direct grants on `withdraw_requests`. Candidate hardening + disposable QA now revoke direct privileges from PUBLIC/anon/authenticated on all three legacy tables, then restore authenticated SELECT-only on `manual_deposits` for the read-only Admin reconciliation page. Migration recorded as version 20261027172637 (name 20261027130000_harden_legacy_table_anon_privileges) is now deployed. Live grants should be rechecked after deployment. Disposable PostgreSQL tests verify browser roles have no direct privileges on `user_bank_details`/`withdraw_requests`, anon has no direct privileges on all three, authenticated has SELECT-only on `manual_deposits`, and RLS/policies remain intact; a static browser guard ensures `manual_deposits` is read-only and `user_bank_details`/`withdraw_requests` are not queried by frontend code. Static QA + browser smoke and Release Smoke both PASS on candidate commit `a24b6ace7d6194b8bd7575f774a5b6e04a4d3980`. Clean replay/source-order remains a gate. |
+| 3 | Login / signup / OTP / password reset | Static checks and existing auth-repair candidate code/docs are available; main static QA runs. | Test actual email OTP delivery/verification, signup/profile/wallet initialization, password recovery, expired/invalid codes and mobile return navigation using a controlled test account/inbox on a safe test deployment. No real-user account changes. |
+| 4 | Wallet / Admin / referral | PR #16 current code head has green static QA + browser smoke. On the disposable local replay DB, the candidate-only follow-up migration `20261027120000_allow_qualified_demo_referral_state.sql` resolved both legacy constraint blockers by allowing `pending`, `qualified`, and `rewarded`. The corrected wallet/Admin/referral E2E now passes: deposit idempotency/approval/rejection and Admin authorization; Admin wallet adjustment/ledger and positive-credit protection; referral uniqueness/self-referral/qualification/one-time tier claim; withdrawal idempotency/status-only Admin review. The E2E transaction ended with `ROLLBACK`; final local security/ledger invariants also passed. **Production migration history now records version 20261027172625 with name 20261027120000_allow_qualified_demo_referral_state;** it is applied. | Hosted authenticated wallet/Admin/referral flows with synthetic test accounts are still required. Preserve legacy manual deposit rows; no auto-approval or auto-credit. Do not deploy the follow-up migration to production before full backup/replay and release review. |
+| 5 | Games / payout rules | PR #17 safety gates are green in static and release-smoke CI. All six production game flags are currently disabled. | K3/5D/TRX payout/return formulas need explicit product approval. Server-owned settlement for all offered games must pass review/integration tests before any flags are enabled. Do not invent or infer payout rules and do not enable games early. |
+| 6 | Recent activity + Aviator recovery | PR #18 latest CI has passed source/SQL/browser smoke. Read-only production checks verified active pg_cron job nplus-aviator-worker every second, 84,957 successful worker runs in the observed 24-hour window, recent successful worker-health heartbeat and zero consecutive failures at the checked time. | Homepage feed code is not merged/deployed or verified in the hosted site. Complete authenticated hosted activity/history test and recovery edge-case acceptance after migration/backup gates. Scheduler SQL in the evidence folder is not a canonical migration and must not be rerun. |
+| 7 | Final release / live URL | Current main Pages deployment stays untouched; source branches remain drafts. | After all prior gates pass, merge only the reviewed PRs in a planned order, run CI on the exact merge commit, verify GitHub Pages build/deployment, then test login/account/Admin/navigation on the actual hosted URL. Publish the final link only after runtime verification. |
+
+## Latest CI evidence (candidate branches, not production release proof)
+
+- Wallet/Admin/referral PR #16: [Static QA + browser smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40070098542), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40070098435).
+- Game rules gate PR #17: [Static QA](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40068386753), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40068386758).
+- Activity/Aviator PR #18 latest: [Static QA + browser smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40079438773), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40079438766).
+- Migration source archive PR #19 latest verified code head: [Static QA + exact duplicate-pair, WINGO overload, Recent Activity privacy, and restore-script safety checks](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40080182395), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40080182400). A later documentation-only branch refresh will receive its own CI run.
+- Production security snapshot PR #21: [Static QA](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40073282012), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40073282009).
+- Legacy anonymous table-grant candidate PR #20: [Static QA + disposable SQL suite](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40071135909), [Release Smoke](https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40071135893).
+
+These CI runs use isolated disposable PostgreSQL and/or local static/browser smoke. They are not proof of a full authenticated production browser test or disaster-recovery acceptance.
+
+## Replay result and baseline drift (checked 2026-10-27)
+
+- Backup restore acceptance: **PASS** with owners/ACLs preserved.
+- Captured SQL source fingerprint audit: **PASS 29/29**; exact ordered history: **PASS 40 rows**.
+- Local replay bodies **1–38 PASS**. Body **39/40** first stops at `CREATE INDEX ... ON public.manual_deposits`; guarded fixture attempts then find `public.withdraw_requests` and `public.user_bank_details` missing before creating any fixture objects.
+- Read-only production catalog confirms all three legacy tables exist, are owned by `postgres`, and have RLS enabled. Captured history body `20261023092858` references the relations but does not create them.
+- A QA-only three-table empty schema overlay was applied to the disposable partial replay DB; each legacy fixture table had zero rows. Bodies 39/40 passed on that reconstructed schema shape.
+- Wallet/ledger and request-table ACL overlays each snapshotted pre-overlay owner/grants and aligned the local replay database with the reviewed browser-role privileges; the request overlay also normalized the observed local `withdrawal_requests` owner from `supabase_admin` to `postgres`.
+- Final local invariant SQL then passed all listed checks and emitted the summary counts shown in the baseline-drift report.
+- This is not a clean canonical 40-body replay from the 2026-10-15 backup. The backup baseline/history does not reconstruct three legacy tables or the observed ACL/owner state. Obtain and review an authoritative newer backup or canonical pre-history schema source before calling backup/replay parity complete.
+- No production database mutation was performed. Broad `anon` / `authenticated` ACLs on the legacy `manual_deposits` table remain a separate PR #20 review item. See [baseline-drift report](REPLAY-BASELINE-DRIFT-2026-10-27.md).
+- No production database mutation was performed. Broad `anon` / `authenticated` ACLs on the legacy `manual_deposits` table remain a separate PR #20 review item.
+
+## Cross-PR integration gate (reviewed 2026-10-25)
+
+The draft branches are independent branches from `main`, not a pre-integrated release branch. Before merging, reconcile shared files and run CI on the combined candidate:
+- PRs #17, #18 and #19 all edited `.github/workflows/nplus-play-qa.yml`. Their overlap is reconciled on integration PR #22; the combined workflow preserves game-rule, activity/Aviator, migration-fingerprint, WINGO-overload, legacy privilege and privacy tests, with distinct disposable database names. Current combined Static QA/browser smoke and Release Smoke both pass.
+- PRs #16 and #19 both edit `qa/test-demo-referrals.sql`. Keep the legacy 200/20 test clearly labeled as legacy and ensure the current Admin-verified 500-point qualification/tier-claim contract is tested by PR #16's separate `qa/test-wallet-admin-referral-e2e.sql`; do not mistake the legacy test passing for current referral acceptance.
+- Candidate WINGO overload patch captures/restores the pre-existing owner around DROP/CREATE and has a disposable regression assertion for owner preservation. Read-only production review confirmed owner `postgres`, SECURITY DEFINER, `search_path=public`, grants to `authenticated` and `service_role`, and no `anon` EXECUTE; candidate test matches that contract. Canonical migration source/order, dependency check and clean backup/replay remain required before rollout; do not apply this standalone SQL directly to production.
+- PR #20's legacy table grant hardening is separate from the route change in PR #16. Review the final merged browser call paths and least-privilege grants together before deciding whether and when to apply it.
+
+Do not merge any draft PR as-is simply because its individual CI is green. A combined candidate must pass the full QA workflow after conflict resolution, and all backup/replay/authenticated-hosted tests remain release blockers.
+
+## Exact user-PC tasks after assistant-side preparation
+
+### A. Backup restore + 40-row migration replay
+
+The assistant-side branch now includes both local scripts. These commands act only inside the existing local Docker restore lab; they do not connect to production.
+
+```powershell
+# Start the existing local restore lab if it is not already running
+Set-Location "$HOME\Projects\nplusplay-restore-lab-v2"
+npx supabase start
+
+# Fetch the reviewed audit scripts (do not upload the private backup)
+Set-Location "$HOME\Projects"
+git clone --branch audit/migration-body-fingerprints-2026-10-24 https://github.com/nplusplayofficial-cmyk/nplusplay.git nplusplay-restore-acceptance
+Set-Location "$HOME\Projects\nplusplay-restore-acceptance"
+
+# First restore with ownership/ACL checks enabled; second replay all 40 bodies
+.\qa\restore-backup-acceptance.ps1
+.\qa\replay-live-migration-sequence.ps1
+```
+
+The first script requires the private backup at $HOME\NPLUS-PLAY-DB-BACKUP\nplus-play-full-2026-10-15.dump. It creates a new local database named nplus_restore_acceptance_20261024. The second checks that restored database, creates a separate local clone named nplus_migration_replay_20261024, then replays the captured 40 migration bodies in original order.
+
+If a command fails, **stop at that point** and record only the failing version plus a redacted error message. Do not add --no-owner/--no-acl, skip a failed migration, drop any database, share the private dump, or run anything against production. A failed replay must be investigated, not bypassed.
+
+### B. Authentication and wallet/Admin runtime tests
+
+- Use a controlled test account and inbox to test signup, email OTP verification, password reset, invalid/expired code, profile/wallet initialization, authenticated wallet request/approval, referral claim replay, Admin/non-admin authorization, desktop and mobile navigation.
+- Keep test credentials private. Never share passwords, service-role/secret keys, JWTs, database connection strings or private database rows.
+- Do not write test transactions into a real member's wallet; use an isolated environment and synthetic test accounts.
+
+### C. Product decision + release approval
+
+- Decide K3/5D/TRX virtual-demo payout/return formulas before server-settlement changes can be approved.
+- Review and approve the final merge order only after backup restore, replay, authenticated E2E, security and game-gate checks pass.
+
+## Safety prohibitions
+
+- Do not upload or commit the private dump archive.
+- Do not edit supabase_migrations.schema_migrations to make source counts match.
+- Do not run recovered files under docs/recovered-live-migration-sql-2026-10-23/; they are evidence, not deployable canonical migrations.
+- Do not reset balances, delete user records, or enable games as a shortcut.
+- Do not merge draft PRs #2, #6, #16–#21 blindly. Some are candidate fixes/audit evidence, not releases.
+
+
+## 2026-10-27 final recheck addendum
+
+### Verified safe checks
+- Candidate HEAD before this doc-only refresh: `12817608fd6d393d80e04b5b07b32b74ccdc0644`; Static QA #633 and Release Smoke #220 both passed at exact HEAD.
+- Finite-number guard code for 10 SECURITY DEFINER functions is applied to production as versions `20261027180120`, `20261027180134`, and `20261027180141`; the repository filenames and replay harness now use those recorded IDs. See [production rollout evidence](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md). A fresh full local reconstructed-baseline replay of this split sequence and exact-head CI remain required.
+- 20 RLS-enabled tables without policies were checked against ACLs: no direct SELECT/INSERT/UPDATE/DELETE privileges for `anon` or `authenticated`. Do not add policies only to suppress INFO findings.
+- Read-only scan over 21 numeric amount/balance/stake/payout fields found zero non-finite stored values.
+- Migration history: 40 records / 29 unique bodies and all 29 bodies match archived source text exactly.
+
+### Remaining pre-release gates (not satisfied)
+1. **Authoritative pre-history DDL/provenance:** unavailable for `manual_deposits`, `user_bank_details`, and `withdraw_requests`; no clean canonical replay/restore sign-off.
+2. **Hosted account journeys:** signup/email OTP, login, recovery, Admin/non-admin separation, virtual deposit/withdrawal review, referral, game wager/settlement/history on safe synthetic accounts.
+3. **Auth configuration:** leaked-password protection is disabled. Dashboard path: Authentication → Sign In / Providers → Email → Prevent use of leaked passwords. Supabase docs state the feature is available on Pro and above; current connected tools cannot change this Auth setting.
+4. **Game approval:** all six settings remain disabled. WINGO/Moto/Aviator require post-deploy hosted settlement/worker checks; K3/5D/TRX payout rules remain unapproved.
+5. **Independent review and release:** no PR review submissions or inline review threads on PR #22; it remains OPEN/DRAFT. Merge only after all required evidence and approvals are recorded.
+6. **Live deployment verification:** current Pages deployment on main is older (main HEAD `680238f2428416faf44df0dced6f907d4cea7f08` as last recorded) and is not the candidate. Do not deploy the candidate as-is.
+
+### Safety decision
+Keep PR #22 open as draft. No production migration, ACL, Auth, wallet, scheduler or game setting was changed during the 2026-10-27 pass. Never invent legacy DDL or use the QA schema overlay as a canonical baseline.
+
+
+- **Auth plan constraint confirmed:** the current Supabase organization reports Free tier. Leaked-password protection is Pro+ per official docs, so do not claim this setting can be enabled on the current plan or upgrade without explicit budget approval.
+
+
+### Latest-candidate local replay — completed with reconstruction caveat
+
+The full local reconstructed-baseline replay was rerun successfully by the user on exact candidate HEAD `eb4377e09139cf826c6d102d7d8b6b39a41a99c4`, target DB `nplus_migration_replay_20261030`, after restoring `nplus_restore_acceptance_20261027`.
+
+- [x] Updated worktree to candidate branch and confirmed exact HEAD.
+- [x] Confirmed verified backup-acceptance database exists and used a fresh replay target.
+- [x] Set local lab `cron.database_name` to `nplus_migration_replay_20261030`, restarted and verified PostgreSQL readiness/configuration.
+- [x] All 40 captured history rows replayed; all 29 unique SQL bodies matched their recorded fingerprints.
+- [x] Referral-state, legacy ACL, WINGO overload, and finite-numeric candidate migrations applied to the disposable clone.
+- [x] QA-only wallet/ledger/request ACL overlays, final invariants and synthetic wallet/Admin/referral E2E passed; E2E rolled back its synthetic rows.
+- [x] Restored local lab cron target to `nplus_migration_replay_20261026`, restarted the container, confirmed PostgreSQL accepts connections and verified the restored setting.
+- [x] Recorded the scope limitation: the three legacy table shapes came from current-live schema reconstruction, not original historical DDL/ACL/policy provenance; do not apply bootstrap or overlays to production.
+- [ ] Hosted Auth/OTP and synthetic-user browser journeys remain separate gates.
+- [ ] Obtain authoritative legacy schema/ACL history or explicitly accept that historical provenance cannot be proven.
+- [ ] Resolve referral rule (legacy 200/20 vs current 500/tier), K3/5D/TRX payout rules, and Free-plan leaked-password-protection risk acceptance.
+- [ ] Complete independent review and final deployment/live-hosted verification after the remaining gates are approved.
+
+See [local replay evidence](RECONSTRUCTED-BASELINE-REPLAY-RESULT-2026-10-27.md) and [local pg_cron checkpoint guide](LOCAL-REPLAY-CRON-CHECKPOINT-2026-10-27.md).
+
+
+### Current production migration history (2026-10-27)
+
+- Applied version 20261027172625: 20261027120000_allow_qualified_demo_referral_state.
+- Applied version 20261027172637: 20261027130000_harden_legacy_table_anon_privileges.
+- Applied version 20261027172656: 20261027140000_fix_wingo_admin_overload_defaults.
+- Applied to production after live function-body review and disposable PostgreSQL tests: finite-number guard migrations recorded as `20261027180120`, `20261027180134`, and `20261027180141`. Repository filenames have been aligned to those server-assigned versions. See [production guard rollout evidence](PRODUCTION-FINITE-NUMERIC-GUARDS-ROLLOUT-2026-10-27.md).
+- All six game settings remain disabled. Hosted Auth/OTP and browser journey acceptance, legacy historical schema provenance, and final live Pages verification remain unverified.
+
+
+### Split-migration rollout and candidate verification — 2026-10-27
+
+- The three split finite-number migrations were applied and verified in production as versions `20261027180120`, `20261027180134`, and `20261027180141`; the repository migration filenames now match these IDs.
+- Live catalog confirms all 10 guarded RPC definitions retain `postgres` ownership, `SECURITY DEFINER`, and `search_path=pg_catalog, public`; all contain NaN/Infinity checks.
+- All six game flags remain disabled. Legacy table RLS/grants remain intact. Aggregate integrity checks show 5 profiles, 5 wallets, 146 ledger rows and zero negative-wallet, ledger-arithmetic or latest-ledger mismatches.
+- On current candidate HEAD `b09f0580288d752878ca926578ee8da532da5422`, Release Smoke #294 passed and Static QA #707 was in progress at the time this section was refreshed. Recheck exact-head CI before merging.
+- A fresh full local reconstructed-baseline replay using the split filenames has not yet been recorded; the earlier full replay ran the pre-split monolithic source and is not a substitute.
+
+
+### Latest production guard rollout — 2026-10-27
+
+- Split migrations recorded in live Supabase history: `20261027180120`, `20261027180134`, `20261027180141`. Repository migration filenames now use these exact versions.
+- Live post-deployment checks: 10/10 guard functions present; all six games disabled; three legacy tables RLS-enabled with the reviewed direct-grant contract; 5 wallets, 146 ledger rows, no negative wallets or arithmetic/latest-ledger mismatches.
+- The prior full reconstructed replay is not evidence for the split-file sequence. Run a fresh local replay of the split files before release certification. Hosted auth/browser journeys, the referral-rule decision, K3/5D/TRX rule approval, legacy schema provenance/risk disposition, Free-plan password-protection decision, and final hosted Pages verification remain open.
+
+
+## Latest exact-head verification — 2026-10-27 18:10 UTC
+
+- Candidate HEAD: `5b89e6c3fd8130185adac6d6e23150c3f52b32da`.
+- Static QA #716 PASS (including browser smoke): https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40557287957
+- Release Smoke #303 PASS: https://github.com/nplusplayofficial-cmyk/nplusplay/actions/runs/40557288991
+- Both workflow runs are on the exact candidate SHA above.
+- Current Pages deployment remains the earlier main commit `680238f2428416faf44df0dced6f907d4cea7f08`; the candidate is not confirmed deployed or hosted-tested.
+- Remaining release gates are unchanged: the exact split migrations still need a fresh full local replay; hosted Auth/OTP/recovery and synthetic browser journeys need a controlled inbox; referral and game payout rules need owner decision; legacy historical schema provenance/risk disposition and the Free-plan password-protection decision remain open; finish SECURITY DEFINER finding disposition and run final hosted Pages smoke after approval.
+- Keep PR #22 OPEN/DRAFT and all six game flags disabled.

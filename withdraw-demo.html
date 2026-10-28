@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080908"><link rel="manifest" href="./manifest.webmanifest">
+<title>N+ PLAY — Demo Withdrawal Request</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#080908;color:#f4f1e8;font:14px Inter,system-ui,sans-serif}.wrap{width:min(520px,calc(100% - 28px));margin:28px auto}.card{border:1px solid #302b1e;border-radius:20px;padding:22px;background:linear-gradient(145deg,#1b1a14,#10110f)}.brand{font-weight:950;letter-spacing:2px;text-decoration:none;color:inherit}.mark{display:inline-grid;place-items:center;background:linear-gradient(135deg,#f0dfb5,#b9914b);color:#15120b;width:34px;height:34px;border-radius:11px;margin-right:8px}.eyebrow{color:#d3b06b;font-size:10px;letter-spacing:2px;margin-top:20px}h1{font-size:24px;margin:10px 0 8px}.copy{font-size:12px;color:#aaa99e;line-height:1.65}.balance-card{margin-top:17px;padding:15px;border:1px solid rgba(66,217,165,.16);border-radius:14px;background:#101811}.label{display:block;margin:19px 0 7px;color:#a6a395;font-size:10px;font-weight:900;letter-spacing:1px}.amount-input{width:100%;border:1px solid #393529;border-radius:11px;background:#090a08;color:#f4f1e8;padding:13px;font-size:20px;font-weight:900}.amount{font-size:27px;font-weight:950;color:#f0dfb5;margin:12px 0}.notice{border:1px solid #354638;background:#101b14;padding:12px;border-radius:10px;font-size:11px;color:#a8dfc6;line-height:1.6}.status{padding:11px 0;color:#b4b2a8;font-size:12px;line-height:1.55;overflow-wrap:anywhere}.btn{width:100%;border:1px solid #79643c;border-radius:11px;padding:13px;background:#211c12;color:#f0dfb5;font-weight:900;cursor:pointer;margin-top:8px}.btn:disabled{opacity:.55;cursor:not-allowed}.back{display:inline-block;color:#d8c58f;margin:14px 16px 0 0;text-decoration:none;font-size:12px}.error{color:#ff9da4}.success{color:#8de4bd}.small{font-size:10px;color:#77766c;margin-top:8px;line-height:1.6}
+</style></head>
+<body><main class="wrap">
+<a class="brand" href="account.html"><span class="mark">N+</span>PLAY</a>
+<section class="card">
+<div class="eyebrow">WALLET CENTER · DEMO</div>
+<h1>Request a demo withdrawal</h1>
+<p class="copy">Submit a virtual-credit request for N+ ADMIN to review. Admin approval only changes the request status; it does not deduct wallet credits and does not send cash.</p>
+<div class="balance-card"><div class="label" style="margin:0 0 7px">CURRENT DEMO BALANCE</div><div class="amount" id="balance">Checking…</div><div class="small">This balance is read from your signed-in account.</div></div>
+<label class="label" for="requestAmount">REQUEST AMOUNT</label>
+<input class="amount-input" id="requestAmount" type="number" inputmode="decimal" min="0.01" step="0.01" value="1" autocomplete="off">
+<div class="amount" id="amount">₹1.00</div>
+<div class="notice">Virtual-credit demo only. Credits have no cash value. No real-money withdrawal or bank payout is processed.</div>
+<div class="status" id="status" role="status" aria-live="polite">Checking signed-in account…</div>
+<button class="btn" id="submit" disabled>SUBMIT DEMO REQUEST</button>
+<a class="back" href="account.html">← Back to account</a><a class="back" href="withdrawal-history.html">View request history →</a>
+</section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js"></script><script src="core/nplus-auth.js"></script>
+<script>
+(async function(){
+"use strict";
+const $=id=>document.getElementById(id),input=$("requestAmount"),balanceLabel=$("balance"),amountLabel=$("amount"),status=$("status"),btn=$("submit");
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+let user=null,balance=null,authReady=false,busy=false,submitted=false,amount=1;
+const supplied=new URLSearchParams(location.search).get("amount");
+if(supplied!==null&&supplied.trim()!==""){const v=Number(supplied);if(Number.isFinite(v)&&v>0){amount=v;input.value=String(v)}}
+function validAmount(){return Number.isFinite(amount)&&amount>0&&amount<=100000&&balance!==null&&amount<=balance;}
+function updateAmount(){
+  amount=Number(input.value);
+  amountLabel.textContent=Number.isFinite(amount)?money(amount):"Enter an amount";
+  if(!Number.isFinite(amount)||amount<=0||amount>100000){status.className="status error";status.textContent="Enter an amount greater than zero and no more than 100,000 demo credits."}
+  else if(balance!==null&&amount>balance){status.className="status error";status.textContent="The request amount exceeds your current demo balance."}
+  else if(authReady&&!busy&&!submitted){status.className="status";status.textContent="Ready. Submit for Admin review; credits will not be deducted."}
+  btn.disabled=!authReady||busy||submitted||!validAmount();
+}
+function tokenFor(){
+  const key="nplus_demo_withdraw_request_token_v1:"+user.id+":"+amount.toFixed(2);
+  let value=sessionStorage.getItem(key);
+  if(!value){
+    if(window.crypto&&typeof crypto.randomUUID==="function")value=crypto.randomUUID();
+    else{
+      const b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;
+      const h=[...b].map(x=>x.toString(16).padStart(2,"0")).join("");
+      value=h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20);
+    }
+    sessionStorage.setItem(key,value);
+  }
+  return{key,value};
+}
+input.addEventListener("input",updateAmount);
+try{
+ if(!window.NPlusAuth||!window.NPlusAuth.client)throw new Error("Supabase is not configured.");
+ user=await window.NPlusAuth.current();
+ if(!user){status.textContent="Please sign in first.";location.replace("auth.html?next="+encodeURIComponent("withdraw-demo.html"+location.search));return;}
+ const response=await window.NPlusAuth.client.from("demo_wallets").select("balance").eq("user_id",user.id).maybeSingle();
+ if(response.error)throw response.error;
+ if(!response.data)throw new Error("Demo wallet not found.");
+ balance=Number(response.data.balance);
+ if(!Number.isFinite(balance)||balance<0)throw new Error("Demo balance could not be verified.");
+ balanceLabel.textContent=money(balance);
+ authReady=true;updateAmount();
+}catch(e){status.className="status error";status.textContent=e.message||"Unable to prepare the demo withdrawal request."}
+btn.addEventListener("click",async()=>{
+ updateAmount();
+ if(!authReady||!user||!validAmount()||busy||submitted)return;
+ busy=true;btn.disabled=true;btn.textContent="SUBMITTING…";status.className="status";status.textContent="Submitting demo request securely…";
+ const requestAmount=Math.round(amount*100)/100,token=tokenFor();
+ try{
+  const response=await window.NPlusAuth.client.rpc("nplus_create_demo_withdrawal_request",{
+   p_amount:requestAmount,p_request_token:token.value,p_request_note:"Submitted from N+ PLAY demo withdrawal page; no cash payout"
+  });
+  if(response.error)throw response.error;
+  const result=Array.isArray(response.data)?response.data[0]:response.data;
+  if(!result||result.success!==true)throw new Error("The demo withdrawal request did not return a valid result.");
+  sessionStorage.removeItem(token.key);submitted=true;
+  status.className="status success";
+  status.textContent=(result.duplicate_request?"Existing request recovered: ":"Request submitted: ")+result.request_id+" · Status: "+result.status+". Wallet unchanged; no cash will be paid.";
+  btn.textContent="REQUEST SAVED";btn.disabled=true;
+ }catch(e){
+  console.error("N+ PLAY demo withdrawal request failed",e);status.className="status error";
+  status.textContent=e.message||"Request failed. Retry safely; the same token will be reused.";
+  btn.textContent="RETRY DEMO REQUEST";
+ }finally{
+  busy=false;
+  if(!submitted)btn.disabled=!authReady||!validAmount();
+ }
+});
+updateAmount();
+})();
+</script>
+<script>if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("PWA registration skipped",e)));</script><script defer src="./core/nplus-back-nav.js"></script>
+</body></html>

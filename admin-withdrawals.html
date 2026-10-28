@@ -51,7 +51,7 @@ p{font-size:12px;color:#898989;line-height:1.6}
   <div class="eyebrow">ADMIN CONTROL CENTER</div>
   <h1>Withdrawal Requests</h1>
   <!-- ✅ QA FIX: Exact string placed visibly -->
-  <p style="color:#ff9da4; font-weight:800;">Status-only demo review · No wallet credits or cash will move</p>
+  <p style="color:#8de4bd;font-weight:800;">Status-only review · No cash payout · Wallet balance remains unchanged</p>
 </section>
 
 <section class="panel">
@@ -84,24 +84,15 @@ async function load(){
   let html = '';
   for(let r of data) {
       const { data: profile } = await client.from("profiles").select("display_name, uid").eq("id", r.user_id).maybeSingle();
-      const { data: bank } = await client.from("user_bank_details").select("*").eq("user_id", r.user_id).maybeSingle();
-      
       const name = profile?.display_name || "User";
       const uid = profile?.uid || r.user_id;
       const state = String(r.status||"pending").toLowerCase();
       const cls = state==="approved"?"color:#8de4bd":state==="rejected"?"color:#ff9da4":"";
-      
-      const bankInfo = bank ? `
-        <b>Bank:</b> ${esc(bank.bank_name)}<br>
-        <b>A/C Name:</b> ${esc(bank.account_holder)}<br>
-        <b>A/C No:</b> ${esc(bank.account_number)}<br>
-        <b>IFSC:</b> ${esc(bank.ifsc_code)}
-      ` : "<span style='color:#ff9da4'>User has not added bank details!</span>";
 
       const actions = state==="pending" ? `
         <div class="actions">
             <button class="reject" onclick="resolveReq('${r.id}', 'rejected')">REJECT</button>
-            <button onclick="resolveReq('${r.id}', 'approved')">APPROVE (PAID)</button>
+            <button onclick="resolveReq('${r.id}', 'approved')">APPROVE (STATUS ONLY)</button>
         </div>
       ` : "";
 
@@ -110,7 +101,7 @@ async function load(){
         <div class="req-details">
             <div style="font-size:14px;font-weight:800;margin-bottom:5px;">${esc(name)} <span style="font-size:10px;color:#888;">(${esc(uid)})</span></div>
             <div>Date: ${new Date(r.created_at).toLocaleString("en-IN")}</div>
-            <div class="req-bank">${bankInfo}</div>
+            <div style="color:#8de4bd;font-size:10px;margin-top:6px">Demo-only request · No cash payout or wallet deduction</div>
         </div>
         <div class="req-amount">
             ${money(r.amount)}
@@ -133,11 +124,9 @@ window.resolveReq = async function(id, decision) {
         p_review_note: "" 
     });
     
-    if(error && error.code === '42883') {
-        const { error: updateError } = await client.from("withdrawal_requests").update({ status: decision }).eq("id", id);
-        if(updateError) { alert("Error: " + updateError.message); } else { await load(); }
-    } else if (error) {
-        alert("Error: " + error.message);
+    if(error) {
+        alert("Secure demo-review RPC failed: " + error.message);
+        status.textContent = "Request unchanged. The secure Admin RPC is required.";
     } else {
         await load();
     }

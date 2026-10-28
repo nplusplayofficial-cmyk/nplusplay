@@ -1,0 +1,55 @@
+# Recovered live-migration SQL evidence — 2026-10-23
+
+## Important: this is an evidence archive, not a migration directory
+
+The 29 fingerprinted SQL files in this folder are source snapshots used to reconcile the live Supabase migration history. There may also be separately identified supplemental SQL evidence, such as `20261021182724_nplus_aviator_persistent_scheduler.sql` from PR #18. That scheduler file is **not** one of the 40 stored historical migration rows and is not included in the 29 body fingerprints; its role is independently checked by `qa/test-activity-aviator-audit.cjs`.
+
+These files are **not** a reviewed canonical migration chain. Do not execute them, copy them into `supabase/migrations`, or run `supabase db push` based on this folder alone.
+
+The snapshots were recovered from the current repository candidates and a read-only comparison against stored SQL bodies in `supabase_migrations.schema_migrations`. Per-version evidence and body fingerprints are in:
+
+- `../SUPABASE-MIGRATION-SOURCE-MAP-2026-10-23.md`
+- `../SUPABASE-MIGRATION-RECONCILIATION-STATUS-2026-10-23.md`
+- `../SUPABASE-MIGRATION-BODY-FINGERPRINTS-2026-10-24.md`
+
+## Why 29 files represent 40 applied history rows
+
+The live history had 40 rows and 29 distinct SQL bodies at the last read-only snapshot. Eleven pairs of rows contain the same SQL body. A replay plan must preserve the original 40-row order and decide whether each duplicate execution is safe to repeat; deduplicating history or re-running a snapshot on production is not an acceptable shortcut.
+
+Exact repeated-body pairs:
+
+| First applied version | Repeat version |
+|---|---|
+| 20261021160935 | 20261022055326 |
+| 20261021161052 | 20261022055330 |
+| 20261021161109 | 20261022055334 |
+| 20261021161129 | 20261022055340 |
+| 20261021161143 | 20261022055345 |
+| 20261021161152 | 20261022055350 |
+| 20261021161206 | 20261022055354 |
+| 20261021161217 | 20261022055400 |
+| 20261021161233 | 20261022055404 |
+| 20261021161242 | 20261022055410 |
+| 20261021161251 | 20261022055424 |
+
+## Local clean replay helper
+
+After the separate backup-restore acceptance passes, this branch includes:
+
+- `qa/migration-replay-order-2026-10-24.json` — all 40 recorded live-history versions in original order, mapping 40 records to the 29 distinct SQL evidence files and their recorded MD5 fingerprints.
+- `qa/replay-live-migration-sequence.ps1` — creates a new local replay database from a separate verified restore, then executes each of the 40 bodies with stop-on-first-error behavior.
+- `qa/verify-replayed-migration-state.sql` — read-only invariants for game flags, RLS, wallet/request grants, generic wallet-credit guard, Admin WINGO overload guards, server-only Aviator worker, aggregate activity RPC and ledger arithmetic.
+- `qa/test-live-migration-source-fingerprints.cjs` — CI check for the 29 fingerprints, duplicate-body inventory and the exact 40-row replay order.
+
+Run only in the existing local Docker restore lab. The replay script leaves the disposable database in place if a migration fails so the failure can be reviewed. It does not skip a body, edit migration history, or connect to production. A passing source fingerprint check alone is not the same as a passing replay.
+
+## Required gates before canonicalization
+
+1. Review every source/hash mapping, execution order, role/extension prerequisite, and precondition in the source map.
+2. Decide and document duplicate-body replay safety.
+3. Replay the reviewed sequence in a fresh disposable Supabase-compatible PostgreSQL environment.
+4. Separately restore the private 2026-10-15 backup with original owners and ACLs preserved; compare wallet/ledger integrity, objects, policies, grants and game settings.
+5. Compare the resulting clean schema to the read-only production snapshot.
+6. Only then create canonical migration files/history repair proposal. Never modify production history to make counts match.
+
+The private backup is not included in this folder or repository. It may contain authentication, wallet and Vault data and must remain on the user's private workstation.
