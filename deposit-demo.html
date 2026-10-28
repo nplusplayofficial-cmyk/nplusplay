@@ -19,7 +19,7 @@
 <p class="copy">Create a pending demo-credit request for N+ ADMIN review. Submitting does not charge a payment method and does not immediately change your wallet balance.</p>
 <label class="label" for="requestAmount">DEMO CREDIT AMOUNT (100–50,000)</label>
 <input class="amount-input" id="requestAmount" type="number" inputmode="decimal" min="100" max="50000" step="0.01" value="100" autocomplete="off">
-<div class="amount" id="amount">₹100.00</div>
+<div class="amount" id="amount">100.00 pts</div>
 <div class="notice">Virtual-credit demo only. Credits have no cash value. No real-money deposit or payout is processed.</div>
 <div class="status" id="status" role="status" aria-live="polite">Checking signed-in account…</div>
 <button class="btn" id="submit" disabled>SUBMIT DEMO REQUEST</button>
@@ -35,7 +35,7 @@
 "use strict";
 const $=id=>document.getElementById(id);
 const input=$("requestAmount"), amountLabel=$("amount"), btn=$("submit"), status=$("status");
-const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const money = n => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
 let amount=100, user=null, authReady=false, busy=false, submitted=false;
 const supplied=new URLSearchParams(location.search).get("amount");
 if(supplied!==null && supplied.trim()!==""){
