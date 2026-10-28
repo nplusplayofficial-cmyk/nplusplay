@@ -404,10 +404,17 @@ BEGIN
 
   -- Serialize idempotency tokens for a caller; replays never debit the wallet twice.
   PERFORM pg_advisory_xact_lock(hashtext(v_user::text),hashtext(p_request_id::text));
+  v_now:=clock_timestamp();
   SELECT * INTO v_bet FROM public.nplus_demo_lottery_bets
   WHERE user_id=v_user AND request_id=p_request_id;
   IF FOUND THEN
-    IF v_bet.selection_type<>v_type OR v_bet.selection_value<>v_value OR v_bet.stake<>p_stake THEN
+    IF v_bet.selection_type<>v_type OR v_bet.selection_value<>v_value OR v_bet.stake<>p_stake
+       OR NOT EXISTS (
+         SELECT 1 FROM public.nplus_demo_lottery_rounds existing_round
+         WHERE existing_round.id=v_bet.round_id
+           AND existing_round.game_key=v_key
+           AND existing_round.duration_seconds=p_duration_seconds
+       ) THEN
       RAISE EXCEPTION 'Request id was already used for a different demo bet.';
     END IF;
     SELECT balance INTO v_balance_after FROM public.demo_wallets WHERE user_id=v_user;
@@ -421,6 +428,8 @@ BEGIN
   END IF;
 
   PERFORM public.nplus_demo_lottery_settle_due(v_key,p_duration_seconds);
+  -- Refresh time after settling other due rounds; do not accept a bet using a stale timestamp.
+  v_now:=clock_timestamp();
 
   v_slot:=floor(extract(epoch from v_now)/p_duration_seconds)::bigint;
   v_start:=to_timestamp(v_slot*p_duration_seconds);
@@ -436,6 +445,7 @@ BEGIN
   SELECT * INTO v_round FROM public.nplus_demo_lottery_rounds
   WHERE game_key=v_key AND duration_seconds=p_duration_seconds AND round_slot=v_slot
   FOR UPDATE;
+  v_now:=clock_timestamp();
   IF v_round.status<>'open' OR v_now>=v_round.ends_at-interval '5 seconds' THEN
     RAISE EXCEPTION 'Betting is closed for this round.';
   END IF;
