@@ -74,7 +74,7 @@ begin
       perform public.nplus_set_game_status(v_key,true);
       raise exception 'TEST_FAILURE: paused % was re-enabled without payout approval.',v_key;
     exception when others then
-      if sqlerrm not like '%Payout rules pending%' then raise; end if;
+      if sqlerrm not like '%Server-authoritative demo settlement is not installed%' then raise; end if;
     end;
     select enabled into v_enabled from public.game_settings where game_key=v_key;
     if v_enabled is not false then raise exception 'Server guard did not preserve paused % status.',v_key; end if;
