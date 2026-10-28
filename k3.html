@@ -70,7 +70,7 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <header><div class="hleft"><button class="ib" id="back">‹</button><div class="brand"><div class="mark">N+</div> PLAY</div><span class="live"><i></i>PAUSED</span></div><div class="hright"><button class="ib" id="rulesBtn">?</button></div></header>
 <main>
 <section class="wallet"><div class="walletrow"><div><div class="label">Available balance</div><div class="balance" id="balance">₹1,000.00</div></div><div class="wa"><button class="wit" id="withdraw">WITHDRAW</button><button class="dep" id="deposit">DEPOSIT</button></div></div></section>
-<div class="notice"><span>🎲 <b>K3 BETTING PAUSED</b> · Demo results only until payout rules are approved</span><span>DETAIL ›</span></div>
+<div class="notice"><span>🎲 <b>K3 SERVER DEMO</b> · Big/Small and Even/Odd only · 2× gross on wins</span><span>DETAIL ›</span></div>
 <div class="modes" id="modes"><button class="mode active" data-sec="60"><strong>K3</strong><small>1 MIN</small></button><button class="mode" data-sec="180"><strong>K3</strong><small>3 MIN</small></button><button class="mode" data-sec="300"><strong>K3</strong><small>5 MIN</small></button><button class="mode" data-sec="600"><strong>K3</strong><small>10 MIN</small></button></div>
 <section class="round" id="round"><div class="roundtop"><button class="how" id="how">HOW TO PLAY</button><div class="timer"><div class="tl">Time remaining</div><div class="time" id="time">01:00</div></div></div><div class="period"><span>Current period</span><code id="period">—</code></div><div class="progress"><div class="bar" id="bar"></div></div><div class="status" id="status">BETTING OPEN</div><div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div></section>
 <div class="title">Recent results</div><div class="recent" id="recent"></div>
@@ -119,13 +119,50 @@ async function syncWalletFromSupabase(){
     walletSyncBusy=false;
   }
 }
+let serverSnapshot=null,serverRound=null,serverRefreshBusy=false,serverRequestId=null;
+async function refreshServerGame(){
+  if(serverRefreshBusy)return;
+  const client=window.NPlusAuth?.client;
+  if(!client)return;
+  serverRefreshBusy=true;
+  try{
+    const {data,error}=await client.rpc("nplus_demo_lottery_snapshot",{p_game_key:"K3",p_duration_seconds:state.sec});
+    if(error)throw error;
+    serverSnapshot=data||null;
+    serverRound=data?.current_round||null;
+    const remoteHistory=Array.isArray(data?.history)?data.history:[];
+    state.history[state.sec]=remoteHistory.map(row=>{
+      const o=row.result||{},d=Array.isArray(o.dice)?o.dice.map(Number):[];
+      return {period:String(row.period||""),ts:Date.parse(row.starts_at)||0,a:d[0],b:d[1],c:d[2],sum:Number(o.sum),type:o.size==="BIG"?"Big":"Small",parity:o.parity==="EVEN"?"Even":"Odd",result:o,settled_at:row.settled_at};
+    }).filter(row=>row.period&&Number.isFinite(row.sum)&&Number.isFinite(row.a)&&Number.isFinite(row.b)&&Number.isFinite(row.c));
+    state.bets[state.sec]=(Array.isArray(data?.my_bets)?data.my_bets:[]).map(b=>({
+      value:b.selection_value,type:b.selection_type,period:b.period,total:Number(b.stake),qty:1,multi:1,
+      status:String(b.status||"pending").toUpperCase(),payout:Number(b.payout||0),ts:Date.parse(b.created_at)||0
+    }));
+    if(serverRound?.period)$("#period").textContent=serverRound.period;
+    const r=round();
+    const closed=r.remaining<=5;
+    $("#status").textContent=!serverRound?.betting_enabled?"GAME DISABLED BY ADMIN":closed?"BETTING CLOSED":"BETTING OPEN · SERVER SETTLEMENT";
+    $("#status").style.color=!serverRound?.betting_enabled||closed?"#ff7773":"#72dfaa";
+    renderPending();
+    renderRecent();
+    renderPanel();
+    renderSelection();
+  }catch(err){
+    console.error("K3 server snapshot failed:",err);
+    $("#status").textContent="SERVER UNAVAILABLE · BETTING DISABLED";
+    $("#status").style.color="#ff7773";
+    renderPending();
+  }finally{
+    serverRefreshBusy=false;
+  }
+}
 const periodAt=(start,sec)=>{const d=new Date(start),idx=Math.floor(start/(sec*1000));return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+"K3"+String(sec)+"M"+String(idx%100000).padStart(5,"0")};
 const round=()=>{const now=Date.now(),start=Math.floor(now/(state.sec*1000))*(state.sec*1000),elapsed=Math.floor((now-start)/1000);return{now,start,remaining:state.sec-elapsed,period:periodAt(start,state.sec)}};
-function randResult(){let a=1+Math.floor(Math.random()*6),b=1+Math.floor(Math.random()*6),c=1+Math.floor(Math.random()*6);return{a,b,c,sum:a+b+c,type:sumType(a+b+c),parity:parity(a+b+c)}}
-function resultForPeriod(p){let h=0;for(let i=0;i<p.length;i++)h=(Math.imul(h,31)+p.charCodeAt(i))|0;const a=Math.abs(h)%6+1,b=Math.abs(Math.imul(h,17))%6+1,c=Math.abs(Math.imul(h,29))%6+1;return{a,b,c,sum:a+b+c,type:sumType(a+b+c),parity:parity(a+b+c)}}
+function renderPending(){$("#dicebox").innerHTML='<div style="padding:18px;color:#8b8d86;text-align:center;font-size:10px;letter-spacing:1px">SERVER RESULT LOCKED UNTIL ROUND CLOSE</div>';$("#resultLine").textContent="SERVER-GENERATED DEMO RESULT · CHECK SETTLED HISTORY AFTER CLOSE";state.result=null;}
 function save(){localStorage.setItem(STORE,JSON.stringify({history:state.history,bets:state.bets}))}
 function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||"{}");if(x.history)state.history=Object.assign(state.history,x.history);if(x.bets)state.bets=Object.assign(state.bets,x.bets)}catch{}}
-function ensureHistory(){const r=round(),arr=state.history[state.sec],known=new Set(arr.map(x=>x.period));for(let i=0;i<80;i++){const st=r.start-i*state.sec*1000,p=periodAt(st,state.sec);if(!known.has(p)){const x=resultForPeriod(p);arr.push({...x,period:p,ts:st});}}arr.sort((a,b)=>b.ts-a.ts);state.history[state.sec]=arr.slice(0,80);save()}
+function ensureHistory(){return;}
 function renderBalance(){$("#balance").textContent=money(state.balance)}
 function renderRecent(){$("#recent").innerHTML=state.history[state.sec].slice(0,14).map(x=>`<div class="ball ${x.sum%2?"r":"g"}">${x.sum}</div>`).join("")}
 function renderDice(a,b,c,animate=false){
@@ -168,15 +205,15 @@ function renderPanel(){
  else{const won=bets.filter(x=>x.status==="WON").length,lost=bets.filter(x=>x.status==="LOST").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${bets.length}</b><span>Selections</span></div><div class="stat"><b>${won}</b><span>Demo wins</span></div><div class="stat"><b>${lost}</b><span>Demo losses</span></div><div class="stat"><b>${money(bets.reduce((a,x)=>a+x.total,0))}</b><span>Total stake</span></div></div>`}
 }
 let activeCategory="Total";
-function openBet(type,value){const r=round();if(r.remaining<=5){toast("Betting closed for this round");return}state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${String(type).toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${r.period}</span>`;$("#overlay").classList.add("show");syncSheet()}
+function openBet(type,value){const r=round();if(!["size","parity"].includes(String(type))){toast("Approved K3 demo rules support Big/Small and Even/Odd only.");return}if(r.remaining<=5){toast("Betting closed for this round");return}if(!state.selection||state.selection.type!==type||state.selection.value!==value)serverRequestId=crypto.randomUUID();state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${String(type).toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${serverRound?.period||r.period} · 2× gross if won</span>`;$("#overlay").classList.add("show");syncSheet()}
 function closeSheet(){$("#overlay").classList.remove("show")}
-function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>state.balance||round().remaining<=5}
-function startMode(sec){state.sec=sec;state.selection=null;$$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));ensureHistory();renderRecent();renderCategory(activeCategory);renderSelection();renderPanel();state.lastStart=null;toast(`K3 ${sec/60} MIN`)}
-function newRound(start){const p=periodAt(start,state.sec),x=resultForPeriod(p);if(!state.history[state.sec].some(a=>a.period===p)){state.history[state.sec].unshift({...x,period:p,ts:start});state.history[state.sec]=state.history[state.sec].slice(0,80)}state.result=x;renderDice(x.a,x.b,x.c,true);$("#resultLine").innerHTML=`RESULT · <b style="color:#e6d6b8">${x.a}+${x.b}+${x.c} = ${x.sum} · ${x.type.toUpperCase()} · ${x.parity.toUpperCase()}</b>`;renderRecent();renderPanel();save()}
+function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>10000||total>state.balance||round().remaining<=5||!serverRound?.betting_enabled}
+function startMode(sec){state.sec=sec;state.selection=null;serverRequestId=null;$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));renderRecent();renderCategory(activeCategory);renderSelection();renderPanel();state.lastStart=null;renderPending();void refreshServerGame();toast(`K3 ${sec/60} MIN`)}
+function newRound(start){state.result=null;renderPending();void refreshServerGame();}
 function update(){const r=round(),closed=r.remaining<=5;if(state.lastStart!==null&&state.lastStart!==r.start)newRound(state.lastStart);state.lastStart=r.start;$("#time").textContent=`${String(Math.floor(r.remaining/60)).padStart(2,"0")}:${String(r.remaining%60).padStart(2,"0")}`;$("#period").textContent=r.period;$("#bar").style.width=(r.remaining/state.sec*100)+"%";$("#status").textContent=closed?"BETTING CLOSED":"BETTING OPEN";$("#round").classList.toggle("closed",closed);if(closed)$("#status").style.color="#ff7773";else $("#status").style.color="#72dfaa";const stage=closed?3:r.remaining<=10?2:r.remaining<=20?1:0;$$(".stage span").forEach((x,i)=>x.classList.toggle("on",i<=stage))}
 function toast(t){const x=$("#toast");x.textContent=t;x.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove("show"),1700)}
-load();ensureHistory();const rr=round();state.result=resultForPeriod(rr.period);renderBalance();renderRecent();renderDice(state.result.a,state.result.b,state.result.c,false);$("#resultLine").innerHTML=`RESULT · <b style="color:#e6d6b8">${state.result.a}+${state.result.b}+${state.result.c} = ${state.result.sum} · ${state.result.type.toUpperCase()} · ${state.result.parity.toUpperCase()}</b>`;renderCategory();renderSelection();renderPanel();
-syncWalletFromSupabase();
+renderBalance();renderPending();renderRecent();renderCategory();renderSelection();renderPanel();void refreshServerGame();
+syncWalletFromSupabase();setInterval(()=>void refreshServerGame(),2000);
 window.addEventListener("nplus:wallet-change",()=>syncWalletFromSupabase());
 window.addEventListener("pageshow",()=>syncWalletFromSupabase());
 window.addEventListener("focus",()=>syncWalletFromSupabase());
@@ -191,7 +228,7 @@ $("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">₹${v
 document.addEventListener("click",e=>{const a=e.target.closest("[data-amt]");if(a){$("#amount").value=a.dataset.amt;syncSheet()}const m=e.target.closest("[data-m]");if(m){state.multi=+m.dataset.m;$$(".multi").forEach(x=>x.classList.toggle("active",x===m));syncSheet()}});
 $("#amount").oninput=syncSheet;$("#minus").onclick=()=>{state.qty=Math.max(1,state.qty-1);$("#qty").textContent=state.qty;syncSheet()};$("#plus").onclick=()=>{state.qty=Math.min(100,state.qty+1);$("#qty").textContent=state.qty;syncSheet()};$("#agree").onchange=syncSheet;
 $("#close").onclick=$("#cancel").onclick=closeSheet;$("#overlay").onclick=e=>{if(e.target===e.currentTarget)closeSheet()};
-$("#confirm").onclick=()=>{toast("K3 betting is temporarily paused while server payout rules are reviewed.");}; $("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;state.tab=b.dataset.tab;$$(".tab").forEach(x=>x.classList.toggle("active",x===b));renderPanel()};
+$("#confirm").onclick=async()=>{if(!state.selection)return;const button=$("#confirm"),client=window.NPlusAuth?.client;if(!client){toast("Sign in to place a server-backed demo bet.");return}if(!serverRound?.betting_enabled){toast("K3 is currently disabled by N+ ADMIN.");return}const total=Number($("#amount").value||0)*state.qty*state.multi;const requestId=serverRequestId||(serverRequestId=crypto.randomUUID());button.disabled=true;try{const {data,error}=await client.rpc("nplus_demo_lottery_place_bet",{p_game_key:"K3",p_duration_seconds:state.sec,p_selection_type:state.selection.type,p_selection_value:String(state.selection.value).toUpperCase(),p_stake:total,p_request_id:requestId});if(error)throw error;state.balance=Number(data?.balance??state.balance);renderBalance();closeSheet();serverRequestId=null;await refreshServerGame();await syncWalletFromSupabase();toast("Server-confirmed virtual demo bet placed.");}catch(err){console.error(err);toast(err.message||"Server did not accept the demo bet.");}finally{button.disabled=false;syncSheet()}}; $("#tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;state.tab=b.dataset.tab;$$(".tab").forEach(x=>x.classList.toggle("active",x===b));renderPanel()};
 $("#rulesBtn").onclick=$("#how").onclick=()=>$("#rules").classList.add("show");$("#ruleClose").onclick=()=>$("#rules").classList.remove("show");$("#deposit").onclick=()=>location.href="deposit.html";$("#withdraw").onclick=()=>location.href="withdraw.html";$("#back").onclick=()=>history.back();
 setInterval(update,200);update();
 })();
