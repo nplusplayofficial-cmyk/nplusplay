@@ -55,8 +55,8 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <section class="wallet">
 <div class="walletrow">
 <div>
-<div class="label">Available balance</div>
-<div class="balance" id="balance">₹0.00</div>
+<div class="label">Available demo points</div>
+<div class="balance" id="balance">0.00 pts</div>
 </div>
 <div class="wa">
 <button class="wit" id="withdraw">WITHDRAW</button>
@@ -66,7 +66,7 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 </section>
 
 <div class="notice">
-<span>🔊 <b>WINGO LIVE</b> · Virtual-credit experience</span>
+<span>🔊 <b>WINGO DEMO</b> · Virtual-credit experience</span>
 <span>DETAIL ›</span>
 </div>
 
@@ -169,7 +169,7 @@ N+ PLAY · WINGO ULTRA FINAL
 
 <div class="tot">
 <span>Total demo credits</span>
-<strong id="total">₹10.00</strong>
+<strong id="total">10.00 pts</strong>
 </div>
 
 <label class="agree">
@@ -282,10 +282,7 @@ const payoutFor=(b,result)=>{
   return 0;
 };
 
-const money=n=>"₹"+Number(n).toLocaleString("en-IN",{
-  minimumFractionDigits:2,
-  maximumFractionDigits:2
-});
+const money = n => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
 
 function hash(s){
   let h=2166136261;
@@ -1275,7 +1272,7 @@ function toast(t){
     $("#amts").innerHTML=
       [10,50,100,500,1000]
         .map(v=>
-          `<button data-amt="${v}">₹${v}</button>`
+          `<button data-amt="${v}">${v} pts</button>`
         )
         .join("");
 
