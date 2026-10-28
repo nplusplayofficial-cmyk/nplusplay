@@ -504,17 +504,17 @@ try {
   }
   for (const [page, label] of [['k3.html','K3'], ['5d.html','5D'], ['trx-wingo.html','TRX WINGO']]) {
     const source = fs.readFileSync(path.join(root, page), 'utf8');
-    if (/NPlusWallet\.changeBalance\s*\(/.test(source) || /type\s*:\s*['"]GAME_WIN['"]/.test(source)) {
-      fail(page + ' must not write wallet entries client-side while payout rules are pending');
+    if (/NPlusWallet\.changeBalance\s*\(/.test(source) ||
+        /type\s*:\s*['"]GAME_WIN['"]/.test(source) ||
+        /nplus_wallet_change|GAME_WIN/.test(source)) {
+      fail(page + ' must not write wallet/settlement entries client-side');
     }
-    if (!source.includes('BETTING PAUSED')) {
-      fail(page + ' must visibly pause bets until server payout rules are approved');
+    if (!source.includes("nplus_demo_lottery_snapshot") ||
+        !source.includes("nplus_demo_lottery_place_bet")) {
+      fail(page + ' must use the server-backed demo snapshot and place-bet RPCs');
     }
-    if (page === 'k3.html' && source.includes('<span class="live"><i></i>LIVE</span>')) {
-      fail('K3 must not display a LIVE badge while wagering is paused');
-    }
-    if (page === 'trx-wingo.html' && source.includes('<span class="live">● LIVE</span>')) {
-      fail('TRX WINGO must not display a LIVE badge while wagering is paused');
+    if (!/betting_enabled/.test(source) || !/SERVER/.test(source)) {
+      fail(page + ' must fail closed when the server status/result is unavailable');
     }
   }
 
@@ -561,11 +561,10 @@ try {
   }
 
   const adminGames = fs.readFileSync(path.join(root, 'admin-games.html'), 'utf8');
-  if (!adminGames.includes('HARD_PAUSED_GAMES = new Set(["K3", "5D", "TRX"])') ||
-      !adminGames.includes('BETTING PAUSED') ||
-      !adminGames.includes('LOCKED · PAYOUT RULES PENDING') ||
-      !adminGames.includes('PAUSED · RULES PENDING')) {
-    fail('N+ ADMIN game cards must show and lock paused wagers until payout rules are approved');
+  if (adminGames.includes('HARD_PAUSED_GAMES = new Set(["K3", "5D", "TRX"])') ||
+      !adminGames.includes('nplus_set_game_status') ||
+      !adminGames.includes('loadServerGameSettings')) {
+    fail('N+ ADMIN must use server-persisted game status and must not permanently hard-lock settled demo games');
   }
   if (!adminGames.includes('from("game_settings")') ||
       !adminGames.includes('nplus_set_game_status') ||
@@ -574,9 +573,10 @@ try {
     fail('N+ ADMIN game status toggles must read/write persistent Supabase settings');
   }
   const adminGameStatusSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_ADMIN_GAME_STATUS.sql'), 'utf8');
-  if (!adminGameStatusSql.includes('Payout rules pending; this game cannot be enabled.') ||
-      !adminGameStatusSql.includes("v_key in ('K3','5D','TRX') and p_enabled")) {
-    fail('N+ ADMIN must server-lock K3/5D/TRX until payout rules are approved');
+  if (!adminGameStatusSql.includes('Server-authoritative demo settlement is not installed.') ||
+      !adminGameStatusSql.includes('nplus_demo_lottery_snapshot(text,integer)') ||
+      !adminGameStatusSql.includes('nplus_demo_lottery_place_bet(text,integer,text,text,numeric,uuid)')) {
+    fail('N+ ADMIN must require server settlement functions before enabling K3/5D/TRX');
   }
 
   const wingoSql = fs.readFileSync(path.join(root, 'sql/NPLUS_PLAY_SERVER_SETTLEMENT_FOUNDATION.sql'), 'utf8');
