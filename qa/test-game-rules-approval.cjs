@@ -36,7 +36,7 @@ for (const item of pages) {
   check(item.rule.test(html), item.file + ' labels/blocks unsupported demo selection rules');
 }
 
-const migration = read('supabase/migrations/20261028120000_server_authoritative_k3_5d_trx_demo.sql');
+const migration = read('supabase/migrations/20261028134905_server_authoritative_k3_5d_trx_demo.sql');
 for (const contract of [
   'create table if not exists public.nplus_demo_lottery_rounds',
   'create table if not exists public.nplus_demo_lottery_bets',
