@@ -58,9 +58,11 @@ class FakeElement {
     this.listeners[name].push(callback);
   }
   querySelector(selector) {
-    const wanted = selector.startsWith(".") ? selector.slice(1) : null;
+    const wantedClass = selector.startsWith(".") ? selector.slice(1) : null;
+    const wantedTag = wantedClass ? null : selector.toUpperCase();
     for (const child of this.children) {
-      if (wanted && String(child.className).split(/\s+/).includes(wanted)) return child;
+      if (wantedClass && String(child.className).split(/\s+/).includes(wantedClass)) return child;
+      if (wantedTag && child.tagName === wantedTag) return child;
       const nested = child.querySelector(selector);
       if (nested) return nested;
     }
@@ -264,7 +266,7 @@ function articleTexts(page) {
   assert.ok(workerSource.includes('const VERSION = "nplus-play-shell-v12"'), "service-worker cache version is bumped");
   assert.ok(!workerSource.includes('"./core/nplus-round-history.js"'), "live history script is not precached");
   assert.ok(workerSource.includes('fetch(req, { cache: "no-store" })'), "history script uses a no-store network fetch");
-  assert.ok(/\\/core\\/nplus-round-history\\.js\\$/.test(workerSource), "service worker has a history-script-only cache bypass");
+  assert.ok(workerSource.includes("nplus-round-history\\.js$/i"), "service worker has a history-script-only cache bypass");
 
   console.log("Round history runtime tests passed: six game pages, latest-first order, open-round exclusion, formatting, duration switching, empty/error states, Activity all-six coverage, partial failures and stale-cache bypass.");
 })().catch(error => {
