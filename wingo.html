@@ -844,37 +844,15 @@ function renderPanel(){
   const bets=state.bets[state.sec]||[];
 
   if(state.tab==="history"){
-    p.innerHTML=
-      `<div class="hh">
-        <span>Period</span>
-        <span>Number</span>
-        <span>Big/Small</span>
-        <span>Color</span>
-      </div>`+
-      h.slice(0,12).map((x,i)=>
-        `<div class="hr ${i===0?"latest":""}">
-          <code>${x.period}</code>
-          <span class="rn ${x.color}">${x.number}</span>
-          <span class="st ${x.size.toLowerCase()}">${x.size}</span>
-          <span>
-            ${(x.colors||[x.colorName]).map(c=>
-              `<i class="cd ${
-                c.toLowerCase()[0]==="r"
-                  ?"r"
-                  :c.toLowerCase()[0]==="g"
-                  ?"g"
-                  :"v"
-              }"></i>`
-            ).join("")}
-          </span>
-        </div>`
-      ).join("")+
-      `<div class="pagination">
-        <button class="pg">‹</button>
-        <span>1 / 50</span>
-        <button class="pg">›</button>
-      </div>`;
-  }
+ const rows=h.slice(0,12).map((x,i)=>
+  `<div class="hr ${i===0?"latest":""}">
+   <code>${x.period}</code><span class="rn ${x.color}">${x.number}</span>
+   <span class="st ${x.size.toLowerCase()}">${x.size}</span>
+   <span>${(x.colors||[x.colorName]).map(c=>`<i class="cd ${c.toLowerCase()[0]==="r"?"r":c.toLowerCase()[0]==="g"?"g":"v"}"></i>`).join("")}</span>
+  </div>`
+ ).join("");
+ p.innerHTML=`<div class="hh"><span>Period</span><span>Number</span><span>Big/Small</span><span>Color</span></div>`+(rows||`<div class="note">No settled WINGO round yet. The first result will appear when a server round closes.</div>`)+(rows?`<div class="pagination"><button class="pg">‹</button><span>1 / 50</span><button class="pg">›</button></div>`:"");
+}
 
   else if(state.tab==="bets"){
     p.innerHTML=
