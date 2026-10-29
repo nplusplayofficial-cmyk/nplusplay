@@ -495,7 +495,7 @@ try {
 // Visible round IDs must be unique across game types without changing settlement keys.
 try {
   const displayHelper = fs.readFileSync(path.join(root, 'core/nplus-period-display.js'), 'utf8');
-  for (const token of ['K3: "K3"', '"5D": "D5"', 'TRX: "TX"', 'WINGO: "WG"', 'MOTO: "MR"', 'AVIATOR: "AV"', 'function aviatorRound']) {
+  for (const token of ['K3: "K3"', '"5D": "5D"', 'TRX: "TRX"', 'WINGO: "WINGO"', 'MOTO: "MOTO"', 'AVIATOR: "AVIATOR"', 'function aviatorRound']) {
     if (!displayHelper.includes(token)) fail('Unique round-period display helper missing contract: ' + token);
   }
   const visiblePeriodContracts = [
