@@ -194,6 +194,9 @@ th{color:#70757c;font-size:9px}
 
       <div class="status" id="status">NEXT ROUND</div>
     </div>
+    <div class="period-display" style="display:flex;justify-content:space-between;gap:10px;padding:10px 12px;background:#10110f;border-top:1px solid rgba(201,165,91,.18);font-size:10px;color:#aaa">
+      <span>ROUND PERIOD</span><strong id="aviatorPeriod" style="color:#efdfb7;overflow-wrap:anywhere">Syncing server round…</strong>
+    </div>
   </div>
 
   <div class="betpanels">
@@ -507,6 +510,8 @@ async function syncAviatorRound(force=false){
   const nextId=String(row.round_id);
   const changed=String(activeRoundId)!==nextId;
   serverRound=row;
+  const periodEl=document.getElementById('aviatorPeriod');
+  if(periodEl)periodEl.textContent=window.NPlusPeriodDisplay.aviatorRound(row.round_index,row.round_id);
   if(changed){
    activeRoundId=nextId;
    crashHandledRoundId=null;
