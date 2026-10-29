@@ -263,10 +263,11 @@ function articleTexts(page) {
   assert.ok(partial.list.textContent.includes("K3") && partial.list.textContent.includes("AVIATOR"),
     "Activity retains successful game histories when another RPC fails");
 
-  assert.ok(workerSource.includes('const VERSION = "nplus-play-shell-v12"'), "service-worker cache version is bumped");
+  assert.ok(workerSource.includes('const VERSION = "nplus-play-shell-v13"'), "service-worker cache version is bumped");
   assert.ok(!workerSource.includes('"./core/nplus-round-history.js"'), "live history script is not precached");
   assert.ok(workerSource.includes('fetch(req, { cache: "no-store" })'), "history script uses a no-store network fetch");
   assert.ok(workerSource.includes("nplus-round-history\\.js$/i"), "service worker has a history-script-only cache bypass");
+  assert.ok(workerSource.includes("nplus-period-display\\.js$/i"), "unique period labels bypass stale PWA cache");
 
   console.log("Round history runtime tests passed: six game pages, latest-first order, open-round exclusion, formatting, duration switching, empty/error states, Activity all-six coverage, partial failures and stale-cache bypass.");
 })().catch(error => {
