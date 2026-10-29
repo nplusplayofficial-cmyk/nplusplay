@@ -26,7 +26,8 @@
   }
 
   function aviatorRound(roundIndex, fallbackId) {
-    const index = Number(roundIndex);
+    const hasIndex = roundIndex !== null && roundIndex !== undefined && String(roundIndex).trim() !== "";
+    const index = hasIndex ? Number(roundIndex) : NaN;
     const raw = Number.isSafeInteger(index) && index >= 0
       ? String(index).padStart(8, "0")
       : String(fallbackId || "unavailable");
