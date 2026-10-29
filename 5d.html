@@ -674,25 +674,19 @@ function renderPanel(panel='history'){
   const body=document.getElementById('panelBody');
 
   if(panel==='history'){
-    const list=completedHistory(state.sec,30);
-
-    body.innerHTML=`
-      <div class="table">
-        <div class="th"><span>PERIOD</span><span>RESULT</span><span>SUM</span></div>
-        ${list.map(h=>`
-          <div class="tr">
-            <span>${h.period}</span>
-            <span class="dots">${h.digits.map(d=>`<i class="hdot">${d}</i>`).join('')}</span>
-            <span>
-              <b>${h.sum}</b>
-              <em class="badge ${h.big?'b':'s'}">${h.big?'B':'S'}</em>
-              <em class="badge ${h.odd?'o':'e'}">${h.odd?'O':'E'}</em>
-            </span>
-          </div>
-        `).join('')}
-      </div>`;
-
-  }else if(panel==='bets'){
+ const list=completedHistory(state.sec,30);
+ body.innerHTML=list.length?`
+  <div class="table">
+   <div class="th"><span>PERIOD</span><span>RESULT</span><span>SUM</span></div>
+   ${list.map(h=>`
+    <div class="tr">
+     <span>${h.period}</span>
+     <span class="dots">${h.digits.map(d=>`<i class="hdot">${d}</i>`).join('')}</span>
+     <span><b>${h.sum}</b> <em class="badge ${h.big?'b':'s'}">${h.big?'B':'S'}</em> <em class="badge ${h.odd?'o':'e'}">${h.odd?'O':'E'}</em></span>
+    </div>
+   `).join('')}
+  </div>`:`<div class="empty">No settled 5D result in this duration yet. The latest result will appear after the server round closes.</div>`;
+}}else if(panel==='bets'){
     const list=state.betsByMode[state.sec]||[];
 
     body.innerHTML=list.length ? `
