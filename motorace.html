@@ -137,6 +137,7 @@ body{min-height:100vh}
   </div>
 </div>
 
+<script src="./core/nplus-period-display.js?v=20261030-unique-periods"></script>
 <script>
 (() => {
 'use strict';
@@ -355,7 +356,7 @@ function ensureRound(){
  if(p!==activePeriod){
   const previousPeriod=activePeriod;
   activePeriod=p;
-  $('period').textContent=p;
+  $('period').textContent=window.NPlusPeriodDisplay.forGame('MOTO',p);
   raceStartedFor=null;
   clearTimeout(resultCloseTimer);
   $('result').classList.remove('show');
@@ -491,14 +492,14 @@ function renderPanel(mode='history'){
  if(mode==='my'){
    const rows=db.bets.slice(0,100);
    p.innerHTML=rows.length?'<table class="table"><thead><tr><th>PERIOD</th><th>BET</th><th>STAKE</th><th>FEE</th><th>STATUS</th></tr></thead><tbody>'+
-   rows.map(b=>'<tr><td>'+b.period+'</td><td>'+(b.selection.kind==='bike'?'BIKE '+b.selection.value:b.selection.value)+' · '+positionTextFor(b.position)+'</td><td>'+money(b.stake)+'</td><td>'+money(b.fee)+'</td><td class="'+b.status.toLowerCase()+'">'+b.status+'</td></tr>').join('')+
+   rows.map(b=>'<tr><td>'+window.NPlusPeriodDisplay.forGame('MOTO',b.period)+'</td><td>'+(b.selection.kind==='bike'?'BIKE '+b.selection.value:b.selection.value)+' · '+positionTextFor(b.position)+'</td><td>'+money(b.stake)+'</td><td>'+money(b.fee)+'</td><td class="'+b.status.toLowerCase()+'">'+b.status+'</td></tr>').join('')+
    '</tbody></table>':'<div class="empty">No betting history yet.</div>';
  }else if(mode==='stats'){
    const fee=db.bets.reduce((a,b)=>a+b.fee,0),wins=db.bets.filter(b=>b.status==='WIN').length;
    p.innerHTML='<div style="padding:10px;line-height:2;font-size:11px">Game rounds stored: <b>'+db.rounds.length+'</b><br>My bets stored: <b>'+db.bets.length+'</b><br>Wins: <b>'+wins+'</b><br>N+ demo fee ledger: <b>'+money(fee)+'</b><br><span style="color:#777">Demo fee rate: 1.5% of stake.</span></div>';
  }else{
    p.innerHTML=db.rounds.length?'<table class="table"><thead><tr><th>PERIOD</th><th>1ST</th><th>2ND</th><th>3RD</th></tr></thead><tbody>'+
-   db.rounds.slice(0,100).map(r=>'<tr><td>'+r.period+'</td>'+r.result.slice(0,3).map(n=>'<td style="color:'+COLORS[n-1]+';font-weight:950">BIKE '+n+'</td>').join('')+'</tr>').join('')+
+   db.rounds.slice(0,100).map(r=>'<tr><td>'+window.NPlusPeriodDisplay.forGame('MOTO',r.period)+'</td>'+r.result.slice(0,3).map(n=>'<td style="color:'+COLORS[n-1]+';font-weight:950">BIKE '+n+'</td>').join('')+'</tr>').join('')+
    '</tbody></table>':'<div class="empty">No game history yet.</div>';
  }
 }
@@ -531,7 +532,7 @@ async function startRace(){
   result=validateMotoOutcome(reveal?.outcome);
   racePeriod=String(reveal.period||current.period||racePeriod);
   activePeriod=racePeriod;
-  $('period').textContent=racePeriod;
+  $('period').textContent=window.NPlusPeriodDisplay.forGame('MOTO',racePeriod);
  }catch(e){
   console.error('MotoRace server result reveal failed:',e);
   raceStartedFor=null;
@@ -637,7 +638,7 @@ syncSheet();
   const serverRound=await syncServerMotoRound(true);
   activePeriod=String(serverRound.period||periodFor());
   serverRoundIndex=Number(serverRound.round_index);
-  $('period').textContent=activePeriod;
+  $('period').textContent=window.NPlusPeriodDisplay.forGame('MOTO',activePeriod);
   await Promise.all([syncMotoHistory(),syncMotoBets()]);
   await refreshWallet();
   await settlePendingOlderRounds(activePeriod);
