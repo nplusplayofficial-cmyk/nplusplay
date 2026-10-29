@@ -85,6 +85,8 @@ button{
   cursor:pointer;
 }
 button:disabled{opacity:.55;cursor:not-allowed}
+.captcha-wrap{display:flex;justify-content:center;margin-top:16px;min-height:65px}
+.captcha-note{color:var(--muted);font-size:11px;text-align:center;margin-top:7px}
 .back{
   display:block;
   margin-top:16px;
@@ -121,6 +123,10 @@ button:disabled{opacity:.55;cursor:not-allowed}
     <label for="password">PASSWORD</label>
     <input id="password" type="password" autocomplete="current-password" required>
 
+    <div class="captcha-wrap">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFiVZEG7inxdNXKI" data-callback="onNPlusAdminCaptchaSuccess" data-expired-callback="onNPlusAdminCaptchaExpired" data-error-callback="onNPlusAdminCaptchaError" data-theme="dark"></div>
+    </div>
+    <div class="captcha-note">Complete the Cloudflare security check to continue.</div>
     <button id="loginBtn" type="submit">ADMIN LOGIN</button>
     <div id="error" class="error"></div>
   </form>
@@ -129,7 +135,25 @@ button:disabled{opacity:.55;cursor:not-allowed}
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="core/nplus-config.js?v=20261023-admin-auth-fix"></script>
+<script src="core/nplus-config.js?v=20261029-admin-turnstile-fix"></script>
+<script>
+window.__nplusAdminCaptchaToken = "";
+window.onNPlusAdminCaptchaSuccess = function(token) {
+  window.__nplusAdminCaptchaToken = String(token || "");
+};
+window.onNPlusAdminCaptchaExpired = function() {
+  window.__nplusAdminCaptchaToken = "";
+};
+window.onNPlusAdminCaptchaError = function() {
+  window.__nplusAdminCaptchaToken = "";
+  const box = document.getElementById("error");
+  if (box) {
+    box.textContent = "Cloudflare security check could not load. Refresh the page and try again.";
+    box.classList.add("show");
+  }
+};
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 (() => {
   "use strict";
@@ -193,10 +217,16 @@ button:disabled{opacity:.55;cursor:not-allowed}
     try {
       const email = document.getElementById("email").value.trim().toLowerCase();
       const password = document.getElementById("password").value;
+      const captchaToken = window.__nplusAdminCaptchaToken;
+
+      if (!captchaToken) {
+        throw new Error("Complete the Cloudflare security check before logging in.");
+      }
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
+        options: { captchaToken }
       });
 
       if (error) throw error;
@@ -222,6 +252,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
       console.error("Admin login failed:", error);
       showError(error?.message || "Unable to complete admin login. Please try again.");
     } finally {
+      // Turnstile tokens are single-use; clear and refresh after each attempted login.
+      window.__nplusAdminCaptchaToken = "";
+      if (window.turnstile && typeof window.turnstile.reset === "function") {
+        window.turnstile.reset();
+      }
       btn.disabled = false;
       btn.textContent = "ADMIN LOGIN";
     }
