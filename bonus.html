@@ -41,14 +41,14 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:poi
 <div class="app">
 <header class="header">
  <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
- <div class="headright"><div class="wallet" id="wallet">— pts</div><span class="age">18+</span></div>
+ <div class="headright"><div class="wallet" id="wallet">₹—</div><span class="age">18+</span></div>
 </header>
 
 <section class="hero">
  <div class="kicker">N+ PLAY • REWARD CENTER</div>
  <h1>Rewards Ledger</h1>
  <p>Review reward credits actually recorded to your signed-in account. Unverified offers are not counted as rewards.</p>
- <div class="balance-row"><div><small>ACCOUNT BALANCE</small><strong id="balance">— pts</strong></div><div class="sync"><i></i><span id="sync">CHECKING</span></div></div>
+ <div class="balance-row"><div><small>ACCOUNT BALANCE</small><strong id="balance">₹—</strong></div><div class="sync"><i></i><span id="sync">CHECKING</span></div></div>
 </section>
 
 <section class="summary">
@@ -101,7 +101,7 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}button{cursor:poi
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const money = n => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
+  const money = n => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rewardTypes = new Set(["BONUS_CREDIT","REWARD_CREDIT","PROMOTION_CREDIT","REFERRAL_CREDIT","BONUS","REWARD","PROMOTION","REFERRAL"]);
   const heroStatus = $("sync");
