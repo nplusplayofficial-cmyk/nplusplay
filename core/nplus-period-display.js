@@ -4,11 +4,11 @@
   "use strict";
   const PREFIX = Object.freeze({
     K3: "K3",
-    "5D": "D5",
-    TRX: "TX",
-    WINGO: "WG",
-    MOTO: "MR",
-    AVIATOR: "AV"
+    "5D": "5D",
+    TRX: "TRX",
+    WINGO: "WINGO",
+    MOTO: "MOTO",
+    AVIATOR: "AVIATOR"
   });
 
   function forGame(game, rawPeriod) {
