@@ -88,7 +88,7 @@ try {
     }
   }
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  if (!worker.includes('nplus-play-shell-v10') ||
+  if (!worker.includes('nplus-play-shell-v11') ||
       !worker.includes('"./core/nplus-back-nav.js"') ||
       !worker.includes('"./core/nplus-bottom-nav.css"') ||
       !worker.includes('"./deposit-demo.html"') ||
@@ -454,11 +454,35 @@ try {
   ]) {
     if (!historyUi.includes(required)) fail('Shared server history UI is missing contract: ' + required);
   }
+  if (!historyUi.includes('gameMain.appendChild(root)')) {
+    fail('Shared server-settled history panel must mount at the end of the game main, not below the header');
+  }
   for (const page of ['k3.html', '5d.html', 'trx-wingo.html', 'wingo.html', 'aviator.html', 'motorace.html']) {
     const source = fs.readFileSync(path.join(root, page), 'utf8');
-    if (!source.includes('core/nplus-round-history.js?v=20261029-server-history')) {
+    if (!source.includes('core/nplus-round-history.js?v=20261030-history-bottom')) {
       fail(page + ' must load the shared server-settled history panel');
     }
+    if (/\bpts\b/i.test(source)) fail(page + ' must not show the obsolete pts suffix');
+  }
+  for (const [page, anchor, history] of [
+    ['wingo.html', 'id="panel"', 'id="recent"'],
+    ['k3.html', 'id="panel"', 'id="recent"'],
+    ['motorace.html', 'id="panel"', 'id="recent"'],
+    ['aviator.html', 'id="table"', 'id="history"']
+  ]) {
+    const source = fs.readFileSync(path.join(root, page), 'utf8');
+    if (source.indexOf(history) < source.indexOf(anchor)) {
+      fail(page + ' must place visible recent/history controls below the main betting area');
+    }
+  }
+  for (const page of [
+    'account.html', 'activity.html', 'admin-games.html', 'admin-vip.html',
+    'attendance.html', 'bonus.html', 'coupons.html', 'deposit-demo.html',
+    'deposit-history.html', 'gift.html', 'rebate.html', 'referral.html',
+    'vip.html', 'withdraw-demo.html', 'withdrawal-history.html'
+  ]) {
+    const source = fs.readFileSync(path.join(root, page), 'utf8');
+    if (/\bpts\b/i.test(source)) fail(page + ' must display demo amounts with the rupee symbol, not pts');
   }
 } catch (e) {
   fail('Shared server-settled history UI guard failed: ' + e.message);
