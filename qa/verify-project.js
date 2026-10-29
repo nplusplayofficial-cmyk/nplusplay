@@ -88,13 +88,15 @@ try {
     }
   }
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  if (!worker.includes('nplus-play-shell-v11') ||
+  if (!worker.includes('nplus-play-shell-v12') ||
       !worker.includes('"./core/nplus-back-nav.js"') ||
       !worker.includes('"./core/nplus-bottom-nav.css"') ||
       !worker.includes('"./deposit-demo.html"') ||
       !worker.includes('"./withdraw-demo.html"') ||
-      !worker.includes('"./admin-deposits.html"')) {
-    fail('Service worker must bump its shell cache and precache shared navigation assets');
+      !worker.includes('"./admin-deposits.html"') ||
+      worker.includes('"./core/nplus-round-history.js"') ||
+      !worker.includes('fetch(req, { cache: "no-store" })')) {
+    fail('Service worker must bump its shell cache, precache navigation assets, and bypass stale history-script cache');
   }
 } catch (e) { fail('Shared navigation static guard failed: ' + e.message); }
 
@@ -215,7 +217,8 @@ try {
     'nplus_moto_demo_my_bets',
     'nplus_aviator_demo_my_bets',
     'Game history is unavailable in this environment',
-    'readRpc(client,name,args)'
+    'readRpc(client,name,args)',
+    'core/nplus-round-history.js?v=20261030-history-bottom'
   ]) {
     if (!activityPage.includes(required)) fail('Activity game-history flow missing: ' + required);
   }
@@ -844,6 +847,13 @@ try {
   const r = cp.spawnSync(process.execPath, ['--check', path.join(root, 'sw.js')], { encoding: 'utf8' });
   if (r.status !== 0) fail('service worker syntax: ' + (r.stderr || r.stdout || '').trim());
 } catch (e) { fail('service worker check failed: ' + e.message); }
+
+const roundHistoryTest = cp.spawnSync(process.execPath, [path.join(root, 'qa/test-round-history.cjs')], { encoding: 'utf8' });
+if (roundHistoryTest.status !== 0) {
+  fail('Settled round-history runtime tests failed: ' + String(roundHistoryTest.stderr || roundHistoryTest.stdout || '').trim());
+} else {
+  console.log(String(roundHistoryTest.stdout || '').trim());
+}
 
 console.log('HTML pages checked: ' + htmls.length);
 console.log('Warnings: ' + warnings);
