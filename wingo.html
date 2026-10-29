@@ -55,8 +55,8 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <section class="wallet">
 <div class="walletrow">
 <div>
-<div class="label">Available demo points</div>
-<div class="balance" id="balance">0.00 pts</div>
+<div class="label">Available demo balance</div>
+<div class="balance" id="balance">₹0.00</div>
 </div>
 <div class="wa">
 <button class="wit" id="withdraw">WITHDRAW</button>
@@ -90,9 +90,6 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <div class="status" id="status">BETTING OPEN</div>
 <div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div>
 </section>
-
-<div class="title">Recent results</div>
-<div class="recent" id="recent"></div>
 
 <div class="title">Choose colour</div>
 <div class="choice3">
@@ -135,6 +132,9 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 
 <section class="panel" id="panel"></section>
 
+<div class="title">Recent results</div>
+<div class="recent" id="recent"></div>
+
 <footer>
 <span class="badge">VIRTUAL CREDIT DEMO</span><br>
 N+ PLAY · WINGO ULTRA FINAL
@@ -169,7 +169,7 @@ N+ PLAY · WINGO ULTRA FINAL
 
 <div class="tot">
 <span>Total demo credits</span>
-<strong id="total">10.00 pts</strong>
+<strong id="total">₹10.00</strong>
 </div>
 
 <label class="agree">
@@ -282,7 +282,7 @@ const payoutFor=(b,result)=>{
   return 0;
 };
 
-const money = n => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
+const money = n => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function hash(s){
   let h=2166136261;
@@ -1250,7 +1250,7 @@ function toast(t){
     $("#amts").innerHTML=
       [10,50,100,500,1000]
         .map(v=>
-          `<button data-amt="${v}">${v} pts</button>`
+          `<button data-amt="${v}">₹${v}</button>`
         )
         .join("");
 
@@ -1620,7 +1620,7 @@ setInterval(
 </script>
 
 
-<script src="./core/nplus-round-history.js?v=20261029-server-history"></script>
+<script src="./core/nplus-round-history.js?v=20261030-history-bottom"></script>
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 <script defer src="./core/nplus-back-nav.js"></script>
 </body>
