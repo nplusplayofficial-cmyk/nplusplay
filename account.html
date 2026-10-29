@@ -81,7 +81,7 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
 <div class="app">
 <header class="header">
  <a class="brand" href="index.html"><span class="mark">N+</span><b>PLAY</b></a>
- <div class="headright"><div class="wallet" id="wallet">1,000.00 pts</div><span class="live"><i></i>DEMO</span><span class="age">18+</span></div>
+ <div class="headright"><div class="wallet" id="wallet">₹1,000.00</div><span class="live"><i></i>DEMO</span><span class="age">18+</span></div>
 </header>
 
 <section class="profile">
@@ -90,7 +90,7 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
   <div class="profile-info"><h1 id="accountGreeting">Welcome to N+ PLAY</h1><p>Your gaming profile & preferences</p><span class="verified" id="accountProfileStatus">CHECKING ACCOUNT…</span></div>
   <button class="profile-edit" id="editProfile">✎</button>
  </div>
- <div class="profile-balance"><div><small>AVAILABLE DEMO POINTS</small><strong id="balance">1,000.00 pts</strong></div><div class="sync"><i></i><span id="syncText">SYNCED</span></div></div>
+ <div class="profile-balance"><div><small>AVAILABLE DEMO BALANCE</small><strong id="balance">₹1,000.00</strong></div><div class="sync"><i></i><span id="syncText">SYNCED</span></div></div>
 </section>
 
 <section class="section wallet-section">
@@ -185,7 +185,7 @@ padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(8,9,8,.9
  const walletEl=document.querySelector("#wallet");
  const balanceEl=document.querySelector("#balance");
  const syncEl=document.querySelector("#syncText");
- const money = n => Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
+ const money = n => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
  function paintWallet(value, status="SYNCED"){
    const n=Number(value);
