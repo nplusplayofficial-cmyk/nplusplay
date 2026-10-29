@@ -686,7 +686,7 @@ function renderPanel(panel='history'){
     </div>
    `).join('')}
   </div>`:`<div class="empty">No settled 5D result in this duration yet. The latest result will appear after the server round closes.</div>`;
-}}else if(panel==='bets'){
+}else if(panel==='bets'){
     const list=state.betsByMode[state.sec]||[];
 
     body.innerHTML=list.length ? `
