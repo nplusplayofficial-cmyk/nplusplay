@@ -1608,6 +1608,9 @@ document.addEventListener(
   }
 );
 
+// Refresh settled server history independently of whether this tab had a bet.
+setInterval(()=>void ensureHistory(state.sec),10000);
+
 setInterval(
   update,
   150
