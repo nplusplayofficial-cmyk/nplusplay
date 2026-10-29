@@ -23,14 +23,14 @@ const displayed = [
   api.aviatorRound(51825, "aviator-test-id")
 ];
 assert.equal(new Set(displayed).size, 6, "same-time game rounds render as unique IDs across all six games");
-assert.deepEqual(displayed.map(id => id.split("-")[0]), ["K3", "D5", "TX", "WG", "MR", "AV"]);
+assert.deepEqual(displayed.map(id => id.split("-")[0]), ["K3", "5D", "TRX", "WINGO", "MOTO", "AVIATOR"]);
 assert.equal(api.forGame("K3", "202610300056-K3-60-29888366"), "K3-202610300056-60-29888366");
-assert.equal(api.forGame("5D", "202610300056-5D-60-29888366"), "D5-202610300056-60-29888366");
-assert.equal(api.forGame("TRX", "202610300056-TRX-60-29888366"), "TX-202610300056-60-29888366");
-assert.equal(api.forGame("WINGO", "20261030200088366"), "WG-20261030200088366");
-assert.equal(api.forGame("MOTO", "202610301927"), "MR-202610301927");
-assert.equal(api.aviatorRound(51825, "unused"), "AV-00051825");
-assert.equal(api.aviatorRound(null, "aviator-test-id"), "AV-aviator-test-id");
+assert.equal(api.forGame("5D", "202610300056-5D-60-29888366"), "5D-202610300056-60-29888366");
+assert.equal(api.forGame("TRX", "202610300056-TRX-60-29888366"), "TRX-202610300056-60-29888366");
+assert.equal(api.forGame("WINGO", "20261030200088366"), "WINGO-20261030200088366");
+assert.equal(api.forGame("MOTO", "202610301927"), "MOTO-202610301927");
+assert.equal(api.aviatorRound(51825, "unused"), "AVIATOR-00051825");
+assert.equal(api.aviatorRound(null, "aviator-test-id"), "AVIATOR-aviator-test-id");
 assert.equal(api.forGame("K3", "—"), "—", "unavailable value is not disguised as a round ID");
 
 const contracts = [
