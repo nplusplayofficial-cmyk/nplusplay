@@ -58,9 +58,11 @@
     list.appendChild(make("div", "nph-empty", "Loading completed server rounds…"));
     const foot = make("div", "nph-foot", "Server-settled virtual demo results only. The current round stays hidden until settlement.");
     root.append(head, list, foot);
-    const header = document.querySelector("header");
-    if (header && header.parentElement) header.insertAdjacentElement("afterend", root);
-    else document.body.prepend(root);
+    // Keep the shared settled-round history at the end of the game content.
+    // Inserting after the header placed this panel above the game on every page.
+    const gameMain = document.querySelector("main");
+    if (gameMain) gameMain.appendChild(root);
+    else document.body.appendChild(root);
   }
 
   function activeDuration() {
