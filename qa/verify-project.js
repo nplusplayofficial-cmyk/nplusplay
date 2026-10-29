@@ -88,7 +88,7 @@ try {
     }
   }
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  if (!worker.includes('nplus-play-shell-v9') ||
+  if (!worker.includes('nplus-play-shell-v10') ||
       !worker.includes('"./core/nplus-back-nav.js"') ||
       !worker.includes('"./core/nplus-bottom-nav.css"') ||
       !worker.includes('"./deposit-demo.html"') ||
@@ -439,6 +439,29 @@ for (const required of [
   'deposit-history.html', 'withdrawal-history.html', 'admin-withdrawals.html'
 ]) {
   if (!exists(required)) fail('required file missing: ' + required);
+}
+
+// Shared last-settled-round UI must be loaded on every server-backed demo game page.
+try {
+  const historyUi = fs.readFileSync(path.join(root, 'core/nplus-round-history.js'), 'utf8');
+  for (const required of [
+    'nplus_demo_lottery_snapshot',
+    'nplus_wingo_demo_history',
+    'nplus_aviator_demo_history',
+    'nplus_moto_demo_history',
+    'No settled rounds returned for this game and duration yet',
+    'The current round stays hidden until settlement'
+  ]) {
+    if (!historyUi.includes(required)) fail('Shared server history UI is missing contract: ' + required);
+  }
+  for (const page of ['k3.html', '5d.html', 'trx-wingo.html', 'wingo.html', 'aviator.html', 'motorace.html']) {
+    const source = fs.readFileSync(path.join(root, page), 'utf8');
+    if (!source.includes('core/nplus-round-history.js?v=20261029-server-history')) {
+      fail(page + ' must load the shared server-settled history panel');
+    }
+  }
+} catch (e) {
+  fail('Shared server-settled history UI guard failed: ' + e.message);
 }
 
 // Round history must be maintained server-side for every supported demo game.
