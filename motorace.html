@@ -274,6 +274,7 @@ async function syncMotoHistory(){
  })).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,100);
  save();
  renderRecent();
+ renderPanel(currentPanel||'history');
  return db.rounds;
 }
 async function syncMotoBets(){
@@ -662,6 +663,8 @@ document.addEventListener('visibilitychange',()=>{
  }
 });
 setInterval(refreshWallet,2000);
+// Poll server-settled history even when the user has placed no bets.
+setInterval(()=>{if(!document.hidden)void syncMotoHistory().catch(console.error)},10000);
 
 setInterval(updateClock,100);
 updateClock();
