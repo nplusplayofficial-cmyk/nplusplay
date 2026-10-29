@@ -337,6 +337,7 @@ body{display:flex;justify-content:center}
 <script src="core/nplus-auth.js?v=20261007"></script>
 <script src="core/nplus-wallet-bridge.js?v=20261007"></script>
 
+<script src="./core/nplus-period-display.js?v=20261030-unique-periods"></script>
 <script>
 const STORE='nplusplay_5d_final_v4';
 
@@ -440,7 +441,7 @@ async function refreshServerGame(){
       payout:Number(b.payout||0),created_at:b.created_at
     }));
     renderPending5D();
-    document.getElementById('period').textContent=serverRound?.period||'Server round unavailable';
+    document.getElementById('period').textContent=serverRound?.period?window.NPlusPeriodDisplay.forGame('5D',serverRound.period):'Server round unavailable';
     const enabled=serverRound?.betting_enabled===true;
     const remaining=serverRound?.ends_at?Date.parse(serverRound.ends_at)-Date.now():0;
     const notice=document.querySelector('.notice');
@@ -507,7 +508,7 @@ function renderPending5D(){
   const root=document.getElementById('resultNums');
   root.innerHTML='<span class="resultdot">?</span>'.repeat(5);
   document.getElementById('resultSum').textContent='—';
-  document.getElementById('period').textContent=serverRound?.period||'Syncing server round…';
+  document.getElementById('period').textContent=serverRound?.period?window.NPlusPeriodDisplay.forGame('5D',serverRound.period):'Syncing server round…';
   document.getElementById('sumline').textContent='SERVER-GENERATED DEMO RESULT · HIDDEN UNTIL ROUND SETTLES';
   document.getElementById('reels').innerHTML=Array.from({length:5},()=>'<div class="reel locked"><div class="strip"><div class="cell current">?</div></div></div>').join('');
   document.getElementById('spinStatus').textContent=serverRound?.betting_enabled?'SERVER ROUND · RESULT HIDDEN':'GAME DISABLED BY ADMIN';
@@ -680,7 +681,7 @@ function renderPanel(panel='history'){
    <div class="th"><span>PERIOD</span><span>RESULT</span><span>SUM</span></div>
    ${list.map(h=>`
     <div class="tr">
-     <span>${h.period}</span>
+     <span>${window.NPlusPeriodDisplay.forGame("5D",h.period)}</span>
      <span class="dots">${h.digits.map(d=>`<i class="hdot">${d}</i>`).join('')}</span>
      <span><b>${h.sum}</b> <em class="badge ${h.big?'b':'s'}">${h.big?'B':'S'}</em> <em class="badge ${h.odd?'o':'e'}">${h.odd?'O':'E'}</em></span>
     </div>
@@ -694,7 +695,7 @@ function renderPanel(panel='history'){
         <div class="th"><span>PERIOD</span><span>SELECTION</span><span>STAKE</span></div>
         ${list.slice(0,18).map(b=>`
           <div class="tr">
-            <span>${b.period}</span>
+            <span>${window.NPlusPeriodDisplay.forGame("5D",b.period)}</span>
             <span>${b.selection}<br><em class="badge b">DEMO</em></span>
             <span>₹${Number(b.total).toFixed(2)}</span>
           </div>

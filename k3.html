@@ -91,6 +91,7 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <div class="rules" id="rules"><div class="rulecard"><div class="rulehead"><h2>K3 · How to Play</h2><button class="ruleclose" id="ruleClose">×</button></div><div class="rule"><b>1. Durations</b><p>Choose K3 1 Min, 3 Min, 5 Min or 10 Min. Each mode has its own local demo history and period stream.</p></div><div class="rule"><b>2. Dice result</b><p>Three six-sided dice roll and reveal a generated virtual result. Sum, Big/Small and Even/Odd are derived from the three dice.</p></div><div class="rule"><b>3. Categories</b><p>Total shows sums 3–18. 2 Same, 3 Same and Different expose the corresponding K3 selection groups and open the same betting sheet.</p></div><div class="rule"><b>4. Betting</b><p>Select an option, choose amount, quantity and demo multiplier, agree to the rules and confirm while betting is open. The final 5 seconds are locked.</p></div><div class="rule"><b>5. History, My Bets & Chart</b><p>All three are in-page WINGO-style tabs. History shows results, My Bets shows your demo selections, and Chart shows recent sum distribution.</p></div><div class="rule"><b>6. Virtual-credit notice</b><p>This prototype uses virtual credits only. No real-money wagers, payouts, deposits, withdrawals or real-money commission settlement are processed.</p></div></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="./core/nplus-period-display.js?v=20261030-unique-periods"></script>
 <script>
 (()=>{"use strict";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -142,7 +143,7 @@ async function refreshServerGame(){
       value:b.selection_value,type:b.selection_type,period:b.period,total:Number(b.stake),qty:1,multi:1,
       status:String(b.status||"pending").toUpperCase(),payout:Number(b.payout||0),ts:Date.parse(b.created_at)||0
     }));
-    if(serverRound?.period)$("#period").textContent=serverRound.period;
+    if(serverRound?.period)$("#period").textContent=window.NPlusPeriodDisplay.forGame("K3",serverRound.period);
     const r=round();
     const closed=r.remaining<=5;
     $("#status").textContent=!serverRound?.betting_enabled?"GAME DISABLED BY ADMIN":closed?"BETTING CLOSED":"BETTING OPEN · SERVER SETTLEMENT";
@@ -204,16 +205,16 @@ function renderSelection(){const s=state.selection;$("#selectionText").textConte
 function renderPanel(){
  const p=$("#panel"),h=state.history[state.sec],bets=state.bets[state.sec]||[];
  if(state.tab==="history"){
- const rows=h.slice(0,12).map((x,i)=>`<div class="hr ${i===0?"latest":""}"><code>${x.period}</code><span class="rn">${x.sum}</span><span class="st ${x.type.toLowerCase()}">${x.type} · ${x.parity}</span><span>${x.a} · ${x.b} · ${x.c}</span></div>`).join("");
+ const rows=h.slice(0,12).map((x,i)=>`<div class="hr ${i===0?"latest":""}"><code>${window.NPlusPeriodDisplay.forGame("K3",x.period)}</code><span class="rn">${x.sum}</span><span class="st ${x.type.toLowerCase()}">${x.type} · ${x.parity}</span><span>${x.a} · ${x.b} · ${x.c}</span></div>`).join("");
  p.innerHTML=`<div class="hh"><span>Period</span><span>Sum</span><span>Type</span><span>Dice</span></div>`+(rows||`<div class="note">No settled K3 round yet. The first server result appears when a round closes.</div>`)+(rows?`<div class="pagination">1 / 50</div>`:"");
 }
- else if(state.tab==="bets"){p.innerHTML=bets.length?bets.slice(0,20).map(b=>`<div class="betitem"><div><b>${b.value}</b><small>${b.type} · ${b.period}</small></div><div>${money(b.total)}<small>x${b.multi} · qty ${b.qty}</small></div><div class="${b.status==="WON"?"statusWon":b.status==="LOST"?"statusLost":"statusPending"}">${b.status}</div></div>`).join(""):`<div class="note">No demo selections in this duration.</div>`}
+ else if(state.tab==="bets"){p.innerHTML=bets.length?bets.slice(0,20).map(b=>`<div class="betitem"><div><b>${b.value}</b><small>${b.type} · ${window.NPlusPeriodDisplay.forGame("K3",b.period)}</small></div><div>${money(b.total)}<small>x${b.multi} · qty ${b.qty}</small></div><div class="${b.status==="WON"?"statusWon":b.status==="LOST"?"statusLost":"statusPending"}">${b.status}</div></div>`).join(""):`<div class="note">No demo selections in this duration.</div>`}
  else if(state.tab==="chart"){const counts=Array(16).fill(0);h.forEach(x=>counts[x.sum-3]++);const max=Math.max(1,...counts);p.innerHTML=`<div class="bars">${counts.map((v,i)=>`<div class="br"><b>${i+3}</b><div class="track"><div class="fill" style="width:${v/max*100}%"></div></div><span>${v}</span></div>`).join("")}</div><div class="note">Recent K3 sum frequency · demo history only.</div>`}
  else if(state.tab==="strategy"){const total=h.length,b=h.filter(x=>x.type==="Big").length,e=h.filter(x=>x.parity==="Even").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${total}</b><span>Rounds</span></div><div class="stat"><b>${b}</b><span>Big</span></div><div class="stat"><b>${total-b}</b><span>Small</span></div><div class="stat"><b>${e}</b><span>Even</span></div><div class="stat"><b>${total-e}</b><span>Odd</span></div><div class="stat"><b>${h.filter(x=>x.a===x.b&&x.b===x.c).length}</b><span>3 Same</span></div></div><div class="note">Historical patterns only; they do not predict future results.</div>`}
  else{const won=bets.filter(x=>x.status==="WON").length,lost=bets.filter(x=>x.status==="LOST").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${bets.length}</b><span>Selections</span></div><div class="stat"><b>${won}</b><span>Demo wins</span></div><div class="stat"><b>${lost}</b><span>Demo losses</span></div><div class="stat"><b>${money(bets.reduce((a,x)=>a+x.total,0))}</b><span>Total stake</span></div></div>`}
 }
 let activeCategory="Total";
-function openBet(type,value){const r=round();if(!["size","parity"].includes(String(type))){toast("Approved K3 demo rules support Big/Small and Even/Odd only.");return}if(r.remaining<=5){toast("Betting closed for this round");return}if(!state.selection||state.selection.type!==type||state.selection.value!==value)serverRequestId=crypto.randomUUID();state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${String(type).toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${serverRound?.period||r.period} · 2× gross if won</span>`;$("#overlay").classList.add("show");syncSheet()}
+function openBet(type,value){const r=round();if(!["size","parity"].includes(String(type))){toast("Approved K3 demo rules support Big/Small and Even/Odd only.");return}if(r.remaining<=5){toast("Betting closed for this round");return}if(!state.selection||state.selection.type!==type||state.selection.value!==value)serverRequestId=crypto.randomUUID();state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${String(type).toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${window.NPlusPeriodDisplay.forGame("K3",serverRound?.period||r.period)} · 2× gross if won</span>`;$("#overlay").classList.add("show");syncSheet()}
 function closeSheet(){$("#overlay").classList.remove("show")}
 function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>10000||total>state.balance||round().remaining<=5||!serverRound?.betting_enabled}
 function startMode(sec){state.sec=sec;state.selection=null;serverRequestId=null;$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));renderRecent();renderCategory(activeCategory);renderSelection();renderPanel();state.lastStart=null;renderPending();void refreshServerGame();toast(`K3 ${sec/60} MIN`)}
@@ -223,7 +224,7 @@ function update(){
  if(state.lastStart!==null&&state.lastStart!==r.start)newRound(state.lastStart);
  state.lastStart=r.start;
  $("#time").textContent=`${String(Math.floor(r.remaining/60)).padStart(2,"0")}:${String(r.remaining%60).padStart(2,"0")}`;
- $("#period").textContent=r.period;
+ $("#period").textContent=window.NPlusPeriodDisplay.forGame("K3",r.period);
  $("#bar").style.width=(r.remaining/state.sec*100)+"%";
  const enabled=serverRound?.betting_enabled===true;
  $("#status").textContent=serverSnapshotFailed?"SERVER UNAVAILABLE · BETTING DISABLED":!serverRound?"CONNECTING TO SERVER":!enabled?"GAME DISABLED BY N+ ADMIN":closed?"BETTING CLOSED":"BETTING OPEN · SERVER SETTLEMENT";

@@ -194,6 +194,9 @@ th{color:#70757c;font-size:9px}
 
       <div class="status" id="status">NEXT ROUND</div>
     </div>
+    <div class="period-display" style="display:flex;justify-content:space-between;gap:10px;padding:10px 12px;background:#10110f;border-top:1px solid rgba(201,165,91,.18);font-size:10px;color:#aaa">
+      <span>ROUND PERIOD</span><strong id="aviatorPeriod" style="color:#efdfb7;overflow-wrap:anywhere">Syncing server round…</strong>
+    </div>
   </div>
 
   <div class="betpanels">
@@ -347,6 +350,7 @@ th{color:#70757c;font-size:9px}
   </div>
 </div>
 
+<script src="./core/nplus-period-display.js?v=20261030-unique-periods"></script>
 <script>
 (() => {
 'use strict';
@@ -471,7 +475,7 @@ async function syncAviatorHistory(){
  if(error)throw error;
  const rows=Array.isArray(data)?data:[];
  db.rounds=rows.filter(r=>r?.round_id&&Number.isFinite(Number(r.crash_point))).map(r=>({
-  roundId:String(r.round_id),result:Number(r.crash_point),at:Date.parse(r.crashed_at)||Date.now(),serverAuthoritative:true
+  roundId:String(r.round_id),roundIndex:Number(r.round_index),result:Number(r.crash_point),at:Date.parse(r.crashed_at)||Date.now(),serverAuthoritative:true
  })).slice(0,100);
  saveDb();
  renderHistoryTop();
@@ -506,6 +510,8 @@ async function syncAviatorRound(force=false){
   const nextId=String(row.round_id);
   const changed=String(activeRoundId)!==nextId;
   serverRound=row;
+  const periodEl=document.getElementById('aviatorPeriod');
+  if(periodEl)periodEl.textContent=window.NPlusPeriodDisplay.aviatorRound(row.round_index,row.round_id);
   if(changed){
    activeRoundId=nextId;
    crashHandledRoundId=null;
@@ -629,11 +635,11 @@ function renderBetList(){
 function renderTable(){
   if(tabMode==='history'){
     $('table').innerHTML='<table><thead><tr><th>ROUND</th><th>CRASH</th><th>TIME</th></tr></thead><tbody>'+
-      db.rounds.slice(0,100).map(r=>`<tr><td>${r.roundId}</td><td class="${r.result>=10?'purple':r.result<2?'red':'green'}">${fx(r.result)}</td><td>${new Date(r.at).toLocaleTimeString()}</td></tr>`).join('')+
+      db.rounds.slice(0,100).map(r=>`<tr><td>${window.NPlusPeriodDisplay.aviatorRound(r.roundIndex,r.roundId)}</td><td class="${r.result>=10?'purple':r.result<2?'red':'green'}">${fx(r.result)}</td><td>${new Date(r.at).toLocaleTimeString()}</td></tr>`).join('')+
       '</tbody></table>';
   }else{
     $('table').innerHTML='<table><thead><tr><th>ROUND</th><th>BET</th><th>RESULT</th><th>RETURN</th></tr></thead><tbody>'+
-      db.bets.slice(0,100).map(b=>`<tr><td>${b.roundId}</td><td>${money(b.stake)}</td><td class="${b.status==='WIN'?'green':b.status==='LOSS'?'red':'gold'}">${b.status}</td><td>${b.payout?money(b.payout):'—'}</td></tr>`).join('')+
+      db.bets.slice(0,100).map(b=>`<tr><td>${window.NPlusPeriodDisplay.aviatorRound(b.roundIndex,b.roundId)}</td><td>${money(b.stake)}</td><td class="${b.status==='WIN'?'green':b.status==='LOSS'?'red':'gold'}">${b.status}</td><td>${b.payout?money(b.payout):'—'}</td></tr>`).join('')+
       '</tbody></table>';
   }
 }

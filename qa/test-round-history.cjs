@@ -7,6 +7,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const sourceRoot = path.resolve(__dirname, "..");
+const periodDisplaySource = fs.readFileSync(path.join(sourceRoot, "core/nplus-period-display.js"), "utf8");
 const historySource = fs.readFileSync(path.join(sourceRoot, "core/nplus-round-history.js"), "utf8");
 const workerSource = fs.readFileSync(path.join(sourceRoot, "sw.js"), "utf8");
 
@@ -200,6 +201,7 @@ async function makePage(pageName, options = {}) {
     document, window, location: { pathname },
     console: { error(...args) { loggedErrors.push(args.map(String).join(" ")); }, warn() {} }
   };
+  vm.runInNewContext(periodDisplaySource, context, { filename: "core/nplus-period-display.js" });
   vm.runInNewContext(historySource, context, { filename: "core/nplus-round-history.js" });
   await new Promise(resolve => setImmediate(resolve));
   await new Promise(resolve => setImmediate(resolve));
@@ -222,7 +224,7 @@ function articleTexts(page) {
     ["5d.html", "5D-102", "5D-101", "Digits 1 · 2 · 3 · 4 · 5", "nplus_demo_lottery_snapshot"],
     ["trx-wingo.html", "TRX-102", "TRX-101", "Last 7", "nplus_demo_lottery_snapshot"],
     ["wingo.html", "W-42", "W-41", "Number 8", "nplus_wingo_demo_history"],
-    ["aviator.html", "Round 88", "Round 87", "Crash point 1.42", "nplus_aviator_demo_history"],
+    ["aviator.html", "AVIATOR-00000088", "AVIATOR-00000087", "Crash point 1.42", "nplus_aviator_demo_history"],
     ["motorace.html", "M-52", "M-51", "Top 3: Bike 7 · Bike 3 · Bike 8", "nplus_moto_demo_history"]
   ]) {
     const page = await makePage(pageName);
@@ -263,10 +265,11 @@ function articleTexts(page) {
   assert.ok(partial.list.textContent.includes("K3") && partial.list.textContent.includes("AVIATOR"),
     "Activity retains successful game histories when another RPC fails");
 
-  assert.ok(workerSource.includes('const VERSION = "nplus-play-shell-v12"'), "service-worker cache version is bumped");
+  assert.ok(workerSource.includes('const VERSION = "nplus-play-shell-v13"'), "service-worker cache version is bumped");
   assert.ok(!workerSource.includes('"./core/nplus-round-history.js"'), "live history script is not precached");
   assert.ok(workerSource.includes('fetch(req, { cache: "no-store" })'), "history script uses a no-store network fetch");
   assert.ok(workerSource.includes("nplus-round-history\\.js$/i"), "service worker has a history-script-only cache bypass");
+  assert.ok(workerSource.includes("nplus-period-display\\.js$/i"), "unique period labels bypass stale PWA cache");
 
   console.log("Round history runtime tests passed: six game pages, latest-first order, open-round exclusion, formatting, duration switching, empty/error states, Activity all-six coverage, partial failures and stale-cache bypass.");
 })().catch(error => {

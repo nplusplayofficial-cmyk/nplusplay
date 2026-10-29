@@ -140,6 +140,7 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
  </div>
 </div>
 
+<script src="./core/nplus-period-display.js?v=20261030-unique-periods"></script>
 <script>
 const state={sec:60,slot:null,period:'',digits:[],selected:null,amount:10,qty:1,mult:1,panel:'history',bets:[]};
 let serverSnapshot=null,serverRound=null,serverHistory=[],serverRefreshBusy=false,serverRequestId=null;
@@ -182,7 +183,7 @@ function hash(r){return ('00000000'+h32(r.period+'|'+r.digits.join('')).toString
 function renderPendingTRX(){
  const period=serverRound?.period||'Syncing server round…';
  state.period=period;state.digits=[];
- document.getElementById('period').textContent=period;
+ document.getElementById('period').textContent=serverRound?.period?window.NPlusPeriodDisplay.forGame('TRX',period):period;
  document.getElementById('hash').textContent='SERVER RESULT HIDDEN';
  document.getElementById('draws').innerHTML='<i>?</i><i>?</i><i>?</i><i>?</i><i>?</i>';
  document.getElementById('balls').innerHTML='<div class="empty" style="grid-column:1/-1">Server-generated demo result is hidden until this round settles.</div>';
@@ -345,11 +346,11 @@ async function confirmBet(){
  if(panel==='history'){
  const rows=historyRows(25);
  body.innerHTML=rows.length?'<div class="table"><div class="th"><span>PERIOD</span><span>ROUND SLOT</span><span>TIME</span><span>DEMO HASH</span><span>RESULT</span></div>'+
-  rows.map(r=>'<div class="tr"><span>'+r.period+'</span><span>'+r.block+'</span><span>'+new Date(r.slot*state.sec*1000).toLocaleTimeString([], {hour12:false})+'</span><span>#'+hash(r)+'</span><span><i class="rball '+(r.color==='GREEN'?'rg':r.color==='VIOLET'?'rv':'rr')+'">'+r.digits[4]+'</i></span></div>').join('')+'</div>':
+  rows.map(r=>'<div class="tr"><span>'+window.NPlusPeriodDisplay.forGame('TRX',r.period)+'</span><span>'+r.block+'</span><span>'+new Date(r.slot*state.sec*1000).toLocaleTimeString([], {hour12:false})+'</span><span>#'+hash(r)+'</span><span><i class="rball '+(r.color==='GREEN'?'rg':r.color==='VIOLET'?'rv':'rr')+'">'+r.digits[4]+'</i></span></div>').join('')+'</div>':
   '<div class="empty">No settled TRX demo round yet. The first result will appear after the current server round closes.</div>';
 }else if(panel==='my'){
   body.innerHTML=state.bets.length?'<div class="table"><div class="th"><span>PERIOD</span><span>BET</span><span>TIME</span><span>STAKE</span><span>STATUS</span></div>'+
-  state.bets.slice(0,20).map(b=>'<div class="tr"><span>'+b.period+'</span><span>'+b.selection+'</span><span>'+new Date(b.time).toLocaleTimeString([], {hour12:false})+'</span><span>₹'+Number(b.stake).toFixed(2)+'</span><span><em class="badge">'+b.status+'</em></span></div>').join('')+'</div>':'<div class="empty">No server-recorded demo bets yet.</div>';
+  state.bets.slice(0,20).map(b=>'<div class="tr"><span>'+window.NPlusPeriodDisplay.forGame('TRX',b.period)+'</span><span>'+b.selection+'</span><span>'+new Date(b.time).toLocaleTimeString([], {hour12:false})+'</span><span>₹'+Number(b.stake).toFixed(2)+'</span><span><em class="badge">'+b.status+'</em></span></div>').join('')+'</div>':'<div class="empty">No server-recorded demo bets yet.</div>';
  }else{
   const rows=historyRows(60),counts={GREEN:0,VIOLET:0,RED:0};rows.forEach(r=>counts[r.color]++);
   body.innerHTML=Object.entries(counts).map(([k,v])=>'<div style="display:flex;align-items:center;gap:7px;margin:8px 0;font-size:7px"><b style="width:42px">'+k+'</b><div style="height:7px;border-radius:8px;background:linear-gradient(90deg,#8f754a,#dfc68d);width:'+Math.max(5,v/60*100)+'%"></div><span>'+v+'</span></div>').join('')+'<div class="empty">Statistics use settled server rounds only; they do not predict future results.</div>';

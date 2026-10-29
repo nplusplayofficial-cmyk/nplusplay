@@ -221,6 +221,7 @@ I agree to the game rules
 
 <div class="toast" id="toast"></div>
 
+<script src="./core/nplus-period-display.js?v=20261030-unique-periods"></script>
 <script>
 (()=>{
 "use strict";
@@ -846,7 +847,7 @@ function renderPanel(){
   if(state.tab==="history"){
  const rows=h.slice(0,12).map((x,i)=>
   `<div class="hr ${i===0?"latest":""}">
-   <code>${x.period}</code><span class="rn ${x.color}">${x.number}</span>
+   <code>${window.NPlusPeriodDisplay.forGame("WINGO",x.period)}</code><span class="rn ${x.color}">${x.number}</span>
    <span class="st ${x.size.toLowerCase()}">${x.size}</span>
    <span>${(x.colors||[x.colorName]).map(c=>`<i class="cd ${c.toLowerCase()[0]==="r"?"r":c.toLowerCase()[0]==="g"?"g":"v"}"></i>`).join("")}</span>
   </div>`
@@ -862,7 +863,7 @@ function renderPanel(){
           `<div class="betitem">
             <div>
               <b>${b.value}</b>
-              <small>${b.type} · ${b.period}</small>
+              <small>${b.type} · ${window.NPlusPeriodDisplay.forGame("WINGO",b.period)}</small>
             </div>
             <div>
               ${money(b.total)}
@@ -1016,7 +1017,7 @@ function update(){
       $("#time").textContent=
         `00:${String(r.remaining).padStart(2,"0")}`;
 
-      $("#period").textContent=r.period;
+      $("#period").textContent=window.NPlusPeriodDisplay.forGame("WINGO",r.period);
 
       $("#bar").style.width=
         (r.remaining/state.sec*100)+"%";
@@ -1083,7 +1084,7 @@ function openBet(type,value){
     `<strong>${type.toUpperCase()}</strong> · <strong>${value}</strong>
      <br>
      <span style="display:block;margin-top:4px;color:#777">
-       Period ${r.period}
+       Period ${window.NPlusPeriodDisplay.forGame("WINGO",r.period)}
      </span>`;
 
   $("#overlay").classList.add("show");
@@ -1185,7 +1186,7 @@ function showResult(
       :"Wallet unchanged";
 
   $("#resultInfo").innerHTML=
-    `Period <strong>${p}</strong><br>
+    `Period <strong>${window.NPlusPeriodDisplay.forGame("WINGO",p)}</strong><br>
     ${
       bets.length
         ?`${wonCount} won · ${lossCount} lost · ${bets.length} selection${bets.length>1?"s":""}

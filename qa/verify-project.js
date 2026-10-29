@@ -88,14 +88,15 @@ try {
     }
   }
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  if (!worker.includes('nplus-play-shell-v12') ||
+  if (!worker.includes('nplus-play-shell-v13') ||
       !worker.includes('"./core/nplus-back-nav.js"') ||
       !worker.includes('"./core/nplus-bottom-nav.css"') ||
       !worker.includes('"./deposit-demo.html"') ||
       !worker.includes('"./withdraw-demo.html"') ||
       !worker.includes('"./admin-deposits.html"') ||
       worker.includes('"./core/nplus-round-history.js"') ||
-      !worker.includes('fetch(req, { cache: "no-store" })')) {
+      !worker.includes('fetch(req, { cache: "no-store" })') ||
+      !worker.includes('nplus-period-display\\.js$/i')) {
     fail('Service worker must bump its shell cache, precache navigation assets, and bypass stale history-script cache');
   }
 } catch (e) { fail('Shared navigation static guard failed: ' + e.message); }
@@ -491,6 +492,37 @@ try {
   fail('Shared server-settled history UI guard failed: ' + e.message);
 }
 
+// Visible round IDs must be unique across game types without changing settlement keys.
+try {
+  const displayHelper = fs.readFileSync(path.join(root, 'core/nplus-period-display.js'), 'utf8');
+  for (const token of ['K3: "K3"', '"5D": "5D"', 'TRX: "TRX"', 'WINGO: "WINGO"', 'MOTO: "MOTO"', 'AVIATOR: "AVIATOR"', 'function aviatorRound']) {
+    if (!displayHelper.includes(token)) fail('Unique round-period display helper missing contract: ' + token);
+  }
+  const visiblePeriodContracts = [
+    ['k3.html', 'NPlusPeriodDisplay.forGame("K3"'],
+    ['5d.html', "NPlusPeriodDisplay.forGame('5D'"],
+    ['trx-wingo.html', "NPlusPeriodDisplay.forGame('TRX'"],
+    ['wingo.html', 'NPlusPeriodDisplay.forGame("WINGO"'],
+    ['motorace.html', "NPlusPeriodDisplay.forGame('MOTO'"],
+    ['aviator.html', 'NPlusPeriodDisplay.aviatorRound(']
+  ];
+  for (const [page, token] of visiblePeriodContracts) {
+    const source = fs.readFileSync(path.join(root, page), 'utf8');
+    if (!source.includes('core/nplus-period-display.js?v=20261030-unique-periods')) {
+      fail(page + ' must load the unique period-display helper');
+    }
+    if (!source.includes(token)) fail(page + ' must render game-prefixed period IDs');
+  }
+  const activityPage = fs.readFileSync(path.join(root, 'activity.html'), 'utf8');
+  const activityRenderer = fs.readFileSync(path.join(root, 'core/nplus-round-history.js'), 'utf8');
+  if (!activityPage.includes('core/nplus-period-display.js?v=20261030-unique-periods') ||
+      !activityRenderer.includes('NPlusPeriodDisplay.forGame(targetGame, period)')) {
+    fail('Activity must load and use game-prefixed round-period display labels');
+  }
+} catch (e) {
+  fail('Unique round-period display guard failed: ' + e.message);
+}
+
 // Round history must be maintained server-side for every supported demo game.
 try {
   const historyMaintenance = fs.readFileSync(
@@ -633,9 +665,18 @@ try {
 
   if (!home.includes('VIRTUAL DEMO') || !home.includes('Demo Leaderboard') ||
       !home.includes('Sample scores • virtual credits only') ||
-      !home.includes('class="badge paused"') ||
+      !home.includes('6 GAMES') ||
+      !home.includes('Coming Soon') ||
       /class="live-label"><span><\/span> LIVE/.test(home)) {
-    fail('Homepage must clearly label virtual-demo mode, sample scores and paused games');
+    fail('Homepage must label virtual-demo mode, sample scores, six supported games and upcoming games');
+  }
+  for (const [page, label] of [
+    ['wingo.html', 'Win Go'], ['motorace.html', 'MotoRace'], ['k3.html', 'K3'],
+    ['5d.html', '5D'], ['trx-wingo.html', 'TRX Win Go'], ['aviator.html', 'Aviator']
+  ]) {
+    if (!home.includes('<a class="game" href="' + page + '"><span class="badge new">SERVER DEMO</span>')) {
+      fail('Homepage must advertise ' + label + ' as a server-backed virtual demo game');
+    }
   }
 
   const adminGames = fs.readFileSync(path.join(root, 'admin-games.html'), 'utf8');
@@ -853,6 +894,13 @@ if (roundHistoryTest.status !== 0) {
   fail('Settled round-history runtime tests failed: ' + String(roundHistoryTest.stderr || roundHistoryTest.stdout || '').trim());
 } else {
   console.log(String(roundHistoryTest.stdout || '').trim());
+}
+
+const periodDisplayTest = cp.spawnSync(process.execPath, [path.join(root, 'qa/test-period-display.cjs')], { encoding: 'utf8' });
+if (periodDisplayTest.status !== 0) {
+  fail('Unique round-period display tests failed: ' + String(periodDisplayTest.stderr || periodDisplayTest.stdout || '').trim());
+} else {
+  console.log(String(periodDisplayTest.stdout || '').trim());
 }
 
 console.log('HTML pages checked: ' + htmls.length);
