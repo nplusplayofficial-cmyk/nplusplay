@@ -101,7 +101,7 @@ try {
 // Admin login and wallet-adjustment source must remain aligned with the server security contract.
 try {
   const adminLogin = fs.readFileSync(path.join(root, 'admin-login.html'), 'utf8');
-  if (!adminLogin.includes('core/nplus-config.js?v=20261023-admin-auth-fix') ||
+  if (!adminLogin.includes('core/nplus-config.js?v=20261029-admin-turnstile-fix') ||
       !adminLogin.includes('supabase.auth.signInWithPassword') ||
       !adminLogin.includes('Password accepted, but the admin permission check failed')) {
     fail('Admin login must load the current config and distinguish profile-check failures from a non-admin account');
