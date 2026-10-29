@@ -444,7 +444,7 @@ for (const required of [
   if (!exists(required)) fail('required file missing: ' + required);
 }
 
-// Shared last-settled-round UI must be loaded on every server-backed demo game page.
+// Keep the consolidated settled-round panel on Activity only; game pages already have their native History/Recent Results UI.
 try {
   const historyUi = fs.readFileSync(path.join(root, 'core/nplus-round-history.js'), 'utf8');
   for (const required of [
@@ -462,8 +462,8 @@ try {
   }
   for (const page of ['k3.html', '5d.html', 'trx-wingo.html', 'wingo.html', 'aviator.html', 'motorace.html']) {
     const source = fs.readFileSync(path.join(root, page), 'utf8');
-    if (!source.includes('core/nplus-round-history.js?v=20261030-history-bottom')) {
-      fail(page + ' must load the shared server-settled history panel');
+    if (source.includes('core/nplus-round-history.js?v=20261030-history-bottom')) {
+      fail(page + ' must not load the extra bottom settled-round panel; native History/Recent Results must remain the game history UI');
     }
     if (/\bpts\b/i.test(source)) fail(page + ' must not show the obsolete pts suffix');
   }
