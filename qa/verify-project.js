@@ -504,8 +504,7 @@ try {
     ['trx-wingo.html', "NPlusPeriodDisplay.forGame('TRX'"],
     ['wingo.html', 'NPlusPeriodDisplay.forGame("WINGO"'],
     ['motorace.html', "NPlusPeriodDisplay.forGame('MOTO'"],
-    ['aviator.html', 'NPlusPeriodDisplay.aviatorRound('],
-    ['activity.html', 'NPlusPeriodDisplay.forGame(targetGame, period)']
+    ['aviator.html', 'NPlusPeriodDisplay.aviatorRound(']
   ];
   for (const [page, token] of visiblePeriodContracts) {
     const source = fs.readFileSync(path.join(root, page), 'utf8');
@@ -513,6 +512,12 @@ try {
       fail(page + ' must load the unique period-display helper');
     }
     if (!source.includes(token)) fail(page + ' must render game-prefixed period IDs');
+  }
+  const activityPage = fs.readFileSync(path.join(root, 'activity.html'), 'utf8');
+  const activityRenderer = fs.readFileSync(path.join(root, 'core/nplus-round-history.js'), 'utf8');
+  if (!activityPage.includes('core/nplus-period-display.js?v=20261030-unique-periods') ||
+      !activityRenderer.includes('NPlusPeriodDisplay.forGame(targetGame, period)')) {
+    fail('Activity must load and use game-prefixed round-period display labels');
   }
 } catch (e) {
   fail('Unique round-period display guard failed: ' + e.message);
