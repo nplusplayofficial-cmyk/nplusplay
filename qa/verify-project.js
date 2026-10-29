@@ -430,6 +430,7 @@ for (const required of [
   'qa/test-generic-wallet-credit-guard.sql',
   'sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql',
   'supabase/migrations/20261019000150_demo_wallet_requests.sql',
+  'supabase/migrations/20261029112558_fix_all_demo_game_round_history.sql',
   'supabase/migrations/20261019000175_admin_deposit_actions.sql',
   'qa/test-demo-wallet-requests.sql',
   'sql/NPLUS_PLAY_DEMO_REFERRALS.sql',
@@ -438,6 +439,33 @@ for (const required of [
   'deposit-history.html', 'withdrawal-history.html', 'admin-withdrawals.html'
 ]) {
   if (!exists(required)) fail('required file missing: ' + required);
+}
+
+// Round history must be maintained server-side for every supported demo game.
+try {
+  const historyMaintenance = fs.readFileSync(
+    path.join(root, 'supabase/migrations/20261029112558_fix_all_demo_game_round_history.sql'),
+    'utf8'
+  );
+  for (const required of [
+    'nplus_demo_history_maintenance_tick',
+    'nplus-demo-history-maintenance',
+    'nplus_demo_lottery_settle_due',
+    'nplus_wingo_demo_settle_round',
+    'nplus_moto_demo_settle_round',
+    'nplus_demo_lottery_make_outcome',
+    "session_user <> 'postgres'",
+    "'10 seconds'"
+  ]) {
+    if (!historyMaintenance.includes(required)) {
+      fail('Server demo round-history maintenance contract missing: ' + required);
+    }
+  }
+  if (!historyMaintenance.includes('REVOKE ALL ON FUNCTION public.nplus_demo_history_maintenance_tick() FROM PUBLIC, anon, authenticated, service_role')) {
+    fail('Round-history maintenance must remain inaccessible to browser roles');
+  }
+} catch (e) {
+  fail('Round-history maintenance guard failed: ' + e.message);
 }
 
 // Release guard: WINGO must not credit wins through the legacy generic client RPC.
