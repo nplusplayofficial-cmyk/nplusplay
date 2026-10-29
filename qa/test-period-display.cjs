@@ -38,9 +38,8 @@ const contracts = [
   ["5d.html", "NPlusPeriodDisplay.forGame('5D'"],
   ["trx-wingo.html", "NPlusPeriodDisplay.forGame('TRX'"],
   ["wingo.html", 'NPlusPeriodDisplay.forGame("WINGO"'],
-  ["motorace.html", 'NPlusPeriodDisplay.forGame("MOTO"'],
-  ["aviator.html", "NPlusPeriodDisplay.aviatorRound("],
-  ["activity.html", "NPlusPeriodDisplay.forGame(targetGame, period)"]
+  ["motorace.html", "NPlusPeriodDisplay.forGame('MOTO'"],
+  ["aviator.html", "NPlusPeriodDisplay.aviatorRound("]
 ];
 for (const [file, token] of contracts) {
   const html = fs.readFileSync(path.join(root, file), "utf8");
@@ -48,4 +47,8 @@ for (const [file, token] of contracts) {
     file + " loads the display-only period helper");
   assert.ok(html.includes(token), file + " renders a game-specific unique period ID");
 }
+const activity = fs.readFileSync(path.join(root, "activity.html"), "utf8");
+const activityRenderer = fs.readFileSync(path.join(root, "core/nplus-round-history.js"), "utf8");
+assert.ok(activity.includes("core/nplus-period-display.js?v=20261030-unique-periods"), "Activity loads period helper");
+assert.ok(activityRenderer.includes("NPlusPeriodDisplay.forGame(targetGame, period)"), "Activity renderer prefixes each game's period");
 console.log("Round-period uniqueness tests passed: six disjoint game prefixes, Aviator sequence IDs, unavailable-state handling, all game-page and Activity integrations.");
