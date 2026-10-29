@@ -47,7 +47,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="core/nplus-config.js?v=20261019-vip"></script><script src="core/nplus-auth.js?v=20261019-vip"></script>
 <script>
 (()=>{'use strict';
-const $=id=>document.getElementById(id);const money=n=>'+'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2})+' pts';const fmt=n=>Number(n||0).toLocaleString('en-IN');
+const $=id=>document.getElementById(id);const money=n=>'+₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});const fmt=n=>Number(n||0).toLocaleString('en-IN');
 const thresholds=[0,1000,5000,20000,50000,100000,250000,500000,1000000,2500000];
 let client=null,referral=null;
 function status(id,msg,type=''){const el=$(id);el.textContent=msg;el.className='status'+(type?' '+type:'')}
