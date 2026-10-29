@@ -232,7 +232,7 @@ body{display:flex;justify-content:center}
     <button class="roundbtn" onclick="alert('5D demo settings')" aria-label="Settings">⚙</button>
   </div>
   <div class="wallet">
-    <div><small>DEMO WALLET</small><div class="balance" id="balance">1,000.00 pts</div></div>
+    <div><small>DEMO WALLET</small><div class="balance" id="balance">₹1,000.00</div></div>
     <button class="deposit" onclick="location.href='deposit.html'">DEPOSIT</button>
   </div>
 </header>
@@ -319,13 +319,13 @@ body{display:flex;justify-content:center}
     <div class="sheettop"><strong>PLACE DEMO BET</strong><button class="close" onclick="closeSheet()">×</button></div>
     <div style="margin-top:7px;color:#74716b;font-size:8px">Selection: <b id="sheetSelection" style="color:#dfc68d">—</b></div>
     <div class="amounts">
-      <button class="amt active" data-a="10">10 pts</button>
-      <button class="amt" data-a="50">50 pts</button>
-      <button class="amt" data-a="100">100 pts</button>
-      <button class="amt" data-a="500">500 pts</button>
+      <button class="amt active" data-a="10">₹10</button>
+      <button class="amt" data-a="50">₹50</button>
+      <button class="amt" data-a="100">₹100</button>
+      <button class="amt" data-a="500">₹500</button>
     </div>
     <div class="qty"><span>Quantity</span><div class="step"><button onclick="changeQty(-1)">−</button><b id="qty">1</b><button onclick="changeQty(1)">+</button></div></div>
-    <div class="total"><span>Total demo stake</span><b id="total">10.00 pts</b></div>
+    <div class="total"><span>Total demo stake</span><b id="total">₹10.00</b></div>
     <div class="rules">Virtual credits only. No cash deposit, payout, withdrawal, or real-money wagering is processed by this page.</div>
     <button class="confirm" onclick="confirmBet()" disabled>PLACE DEMO BET</button>
   </div>
@@ -466,7 +466,7 @@ async function refreshServerGame(){
 function renderWallet(value){
   const val=Number(value);
   if(!Number.isFinite(val)) return;
-  document.getElementById('balance').textContent=val.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})+' pts';
+  document.getElementById('balance').textContent='₹'+val.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
 let walletSyncBusy=false;
@@ -696,7 +696,7 @@ function renderPanel(panel='history'){
           <div class="tr">
             <span>${b.period}</span>
             <span>${b.selection}<br><em class="badge b">DEMO</em></span>
-            <span>${Number(b.total).toFixed(2)} pts</span>
+            <span>₹${Number(b.total).toFixed(2)}</span>
           </div>
         `).join('')}
       </div>` :
@@ -735,7 +735,7 @@ function changeQty(delta){
 }
 function updateTotal(){
   const total=state.amount*state.qty;
-  document.getElementById('total').textContent=total.toFixed(2)+' pts';
+  document.getElementById('total').textContent='₹'+total.toFixed(2);
   const button=document.querySelector('.confirm');
   if(button)button.disabled=!state.selected||state.cat==='SUM'||!serverRound?.betting_enabled||total<1||total>10000||total>Number(window.__nplus5dBalance||0);
 }
@@ -844,7 +844,7 @@ setInterval(()=>void refreshServerGame(),2000);
 updateTotal();
 </script>
 
-<script src="./core/nplus-round-history.js?v=20261029-server-history"></script>
+<script src="./core/nplus-round-history.js?v=20261030-history-bottom"></script>
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 <script defer src="./core/nplus-back-nav.js"></script>
 </body>
