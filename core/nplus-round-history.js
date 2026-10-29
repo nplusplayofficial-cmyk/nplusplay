@@ -127,15 +127,22 @@
     const period = String(row.period || row.round_index || row.round_slot || "");
     const sortIndex = Number(targetGame === "K3" || targetGame === "5D" || targetGame === "TRX" ? row.round_slot : row.round_index) || 0;
     const settledTime = row.settled_at || row.crashed_at || row.crashes_at || row.ends_at || row.starts_at;
+    const displayPeriod = period
+      ? (window.NPlusPeriodDisplay && typeof window.NPlusPeriodDisplay.forGame === "function"
+        ? window.NPlusPeriodDisplay.forGame(targetGame, period)
+        : targetGame + "-" + period)
+      : targetGame + "-Round-unavailable";
     const common = {
-      game: targetGame, period: period || "Round unavailable",
+      game: targetGame, period: displayPeriod,
       time: fmtTime(settledTime), timeSort: timeSort(row), sortIndex
     };
 
     if (targetGame === "AVIATOR") {
       if (gameStatus !== "crashed") return null;
       const crash = Number(row.crash_point);
-      common.period = "Round " + String(row.round_index == null ? "—" : row.round_index);
+      common.period = window.NPlusPeriodDisplay && typeof window.NPlusPeriodDisplay.aviatorRound === "function"
+        ? window.NPlusPeriodDisplay.aviatorRound(row.round_index, row.round_id)
+        : "AV-" + String(row.round_index == null ? "—" : row.round_index);
       common.result = Number.isFinite(crash) && crash >= 1
         ? "Crash point " + crash.toFixed(2) + "×"
         : "Recorded crash · result unavailable";
