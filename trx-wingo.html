@@ -343,10 +343,11 @@ async function confirmBet(){
  state.panel=panel;document.querySelectorAll('.pt').forEach(b=>b.classList.toggle('active',b.dataset.panel===panel));
  const body=document.getElementById('panelBody');
  if(panel==='history'){
-  const rows=historyRows(25);
-  body.innerHTML='<div class="table"><div class="th"><span>PERIOD</span><span>ROUND SLOT</span><span>TIME</span><span>DEMO HASH</span><span>RESULT</span></div>'+
-  rows.map(r=>'<div class="tr"><span>'+r.period+'</span><span>'+r.block+'</span><span>'+new Date(r.slot*state.sec*1000).toLocaleTimeString([], {hour12:false})+'</span><span>#'+hash(r)+'</span><span><i class="rball '+(r.color==='GREEN'?'rg':r.color==='VIOLET'?'rv':'rr')+'">'+r.digits[4]+'</i></span></div>').join('')+'</div>';
- }else if(panel==='my'){
+ const rows=historyRows(25);
+ body.innerHTML=rows.length?'<div class="table"><div class="th"><span>PERIOD</span><span>ROUND SLOT</span><span>TIME</span><span>DEMO HASH</span><span>RESULT</span></div>'+
+  rows.map(r=>'<div class="tr"><span>'+r.period+'</span><span>'+r.block+'</span><span>'+new Date(r.slot*state.sec*1000).toLocaleTimeString([], {hour12:false})+'</span><span>#'+hash(r)+'</span><span><i class="rball '+(r.color==='GREEN'?'rg':r.color==='VIOLET'?'rv':'rr')+'">'+r.digits[4]+'</i></span></div>').join('')+'</div>':
+  '<div class="empty">No settled TRX demo round yet. The first result will appear after the current server round closes.</div>';
+}}else if(panel==='my'){
   body.innerHTML=state.bets.length?'<div class="table"><div class="th"><span>PERIOD</span><span>BET</span><span>TIME</span><span>STAKE</span><span>STATUS</span></div>'+
   state.bets.slice(0,20).map(b=>'<div class="tr"><span>'+b.period+'</span><span>'+b.selection+'</span><span>'+new Date(b.time).toLocaleTimeString([], {hour12:false})+'</span><span>'+Number(b.stake).toFixed(2)+' pts</span><span><em class="badge">'+b.status+'</em></span></div>').join('')+'</div>':'<div class="empty">No server-recorded demo bets yet.</div>';
  }else{
