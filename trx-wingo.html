@@ -51,7 +51,7 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
 <div class="app">
 <header class="top">
   <div class="toprow"><button class="btn" onclick="history.back()">‹</button><div class="brand">N+ <b>PLAY</b></div><button class="btn" onclick="alert('TRX WINGO demo settings')">⚙</button></div>
-  <div class="wallet"><div><small>DEMO WALLET</small><div class="bal" id="balance">1,000.00 pts</div></div><button class="dep" onclick="location.href='deposit.html'">DEPOSIT</button></div>
+  <div class="wallet"><div><small>DEMO WALLET</small><div class="bal" id="balance">₹1,000.00</div></div><button class="dep" onclick="location.href='deposit.html'">DEPOSIT</button></div>
 </header>
 
 <main class="content">
@@ -132,9 +132,9 @@ body{display:flex;justify-content:center}.app{width:min(100%,500px);min-height:1
   <div class="handle"></div>
   <div class="sheethead"><strong>PLACE DEMO BET</strong><button class="close" onclick="closeSheet()">×</button></div>
   <div class="selection">Selection: <b id="sheetSel">—</b></div>
-  <div class="amounts"><button class="amt active" data-a="10">10 pts</button><button class="amt" data-a="50">50 pts</button><button class="amt" data-a="100">100 pts</button><button class="amt" data-a="500">500 pts</button></div>
+  <div class="amounts"><button class="amt active" data-a="10">₹10</button><button class="amt" data-a="50">₹50</button><button class="amt" data-a="100">₹100</button><button class="amt" data-a="500">₹500</button></div>
   <div class="qty"><span>Quantity</span><div class="step"><button onclick="changeQty(-1)">−</button><b id="q">1</b><button onclick="changeQty(1)">+</button></div></div>
-  <div class="total"><span>Total Demo Stake</span><b id="tot">10.00 pts</b></div>
+  <div class="total"><span>Total Demo Stake</span><b id="tot">₹10.00</b></div>
   <div class="rules">Virtual credits only. No cash deposit, payout, withdrawal, or real-money wagering is processed.</div>
   <button class="confirm" onclick="confirmBet()" disabled>PLACE DEMO BET</button>
  </div>
@@ -150,7 +150,7 @@ let walletBusy=false;
 function paintWallet(v){
  const n=Number(v);
  if(!Number.isFinite(n))return;
- document.getElementById('balance').textContent=n.toLocaleString('en-IN',{minimumFractionDigits:2})+' pts';
+ document.getElementById('balance').textContent='₹'+n.toLocaleString('en-IN',{minimumFractionDigits:2});
 }
 
 async function readWallet(){
@@ -301,7 +301,7 @@ function closeSheet(){document.getElementById('sheet').classList.remove('open')}
 function changeQty(d){state.qty=Math.max(1,Math.min(20,state.qty+d));document.getElementById('q').textContent=state.qty;serverRequestId=null;updateTotal()}
 function updateTotal(){
  const total=state.amount*state.qty*state.mult;
- document.getElementById('tot').textContent=total.toFixed(2)+' pts';
+ document.getElementById('tot').textContent='₹'+total.toFixed(2);
  const button=document.querySelector('.confirm');
  if(button)button.disabled=!state.selected||serverRound?.betting_enabled!==true||total<1||total>10000;
 }
@@ -349,7 +349,7 @@ async function confirmBet(){
   '<div class="empty">No settled TRX demo round yet. The first result will appear after the current server round closes.</div>';
 }else if(panel==='my'){
   body.innerHTML=state.bets.length?'<div class="table"><div class="th"><span>PERIOD</span><span>BET</span><span>TIME</span><span>STAKE</span><span>STATUS</span></div>'+
-  state.bets.slice(0,20).map(b=>'<div class="tr"><span>'+b.period+'</span><span>'+b.selection+'</span><span>'+new Date(b.time).toLocaleTimeString([], {hour12:false})+'</span><span>'+Number(b.stake).toFixed(2)+' pts</span><span><em class="badge">'+b.status+'</em></span></div>').join('')+'</div>':'<div class="empty">No server-recorded demo bets yet.</div>';
+  state.bets.slice(0,20).map(b=>'<div class="tr"><span>'+b.period+'</span><span>'+b.selection+'</span><span>'+new Date(b.time).toLocaleTimeString([], {hour12:false})+'</span><span>₹'+Number(b.stake).toFixed(2)+'</span><span><em class="badge">'+b.status+'</em></span></div>').join('')+'</div>':'<div class="empty">No server-recorded demo bets yet.</div>';
  }else{
   const rows=historyRows(60),counts={GREEN:0,VIOLET:0,RED:0};rows.forEach(r=>counts[r.color]++);
   body.innerHTML=Object.entries(counts).map(([k,v])=>'<div style="display:flex;align-items:center;gap:7px;margin:8px 0;font-size:7px"><b style="width:42px">'+k+'</b><div style="height:7px;border-radius:8px;background:linear-gradient(90deg,#8f754a,#dfc68d);width:'+Math.max(5,v/60*100)+'%"></div><span>'+v+'</span></div>').join('')+'<div class="empty">Statistics use settled server rounds only; they do not predict future results.</div>';
@@ -379,7 +379,7 @@ window.addEventListener('pageshow',()=>syncWallet());
 setInterval(()=>syncWallet(),2000);
 </script>
 
-<script src="./core/nplus-round-history.js?v=20261029-server-history"></script>
+<script src="./core/nplus-round-history.js?v=20261030-history-bottom"></script>
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 <script defer src="./core/nplus-back-nav.js"></script>
 </body>
