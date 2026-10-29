@@ -69,11 +69,11 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <div class="ambient"></div><div class="app">
 <header><div class="hleft"><button class="ib" id="back">‹</button><div class="brand"><div class="mark">N+</div> PLAY</div><span class="live"><i></i>PAUSED</span></div><div class="hright"><button class="ib" id="rulesBtn">?</button></div></header>
 <main>
-<section class="wallet"><div class="walletrow"><div><div class="label">Available demo points</div><div class="balance" id="balance">1,000.00 pts</div></div><div class="wa"><button class="wit" id="withdraw">WITHDRAW</button><button class="dep" id="deposit">DEPOSIT</button></div></div></section>
+<section class="wallet"><div class="walletrow"><div><div class="label">Available demo balance</div><div class="balance" id="balance">₹1,000.00</div></div><div class="wa"><button class="wit" id="withdraw">WITHDRAW</button><button class="dep" id="deposit">DEPOSIT</button></div></div></section>
 <div class="notice"><span>🎲 <b>K3 SERVER DEMO</b> · Big/Small and Even/Odd only · 2× gross on wins</span><span>DETAIL ›</span></div>
 <div class="modes" id="modes"><button class="mode active" data-sec="60"><strong>K3</strong><small>1 MIN</small></button><button class="mode" data-sec="180"><strong>K3</strong><small>3 MIN</small></button><button class="mode" data-sec="300"><strong>K3</strong><small>5 MIN</small></button><button class="mode" data-sec="600"><strong>K3</strong><small>10 MIN</small></button></div>
 <section class="round" id="round"><div class="roundtop"><button class="how" id="how">HOW TO PLAY</button><div class="timer"><div class="tl">Time remaining</div><div class="time" id="time">01:00</div></div></div><div class="period"><span>Current period</span><code id="period">—</code></div><div class="progress"><div class="bar" id="bar"></div></div><div class="status" id="status">BETTING OPEN</div><div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div></section>
-<div class="title">Recent results</div><div class="recent" id="recent"></div>
+
 <div class="dicebox" id="dicebox"><div class="cube-wrap"><div class="cube" id="die1"></div></div><div class="cube-wrap"><div class="cube" id="die2"></div></div><div class="cube-wrap"><div class="cube" id="die3"></div></div></div><div id="resultLine" style="text-align:center;margin:8px 0 2px;font-size:9px;letter-spacing:1px;color:#858a84;text-transform:uppercase">RESULT · <b style="color:#e6d6b8">—</b></div>
 <div style="margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:11px">INITIAL SERVER RULES: Big/Small and Even/Odd only · 2× gross on wins. Other K3 selections are disabled.</div>
 <div class="category" id="category"></div>
@@ -82,10 +82,11 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <div class="selection"><div><b>YOUR SELECTION</b><br><span id="selectionText">No selection yet</span></div><button class="edit" id="edit">EDIT</button></div>
 <div class="tabs" id="tabs"><button class="tab active" data-tab="history">HISTORY</button><button class="tab" data-tab="bets">MY BETS</button><button class="tab" data-tab="chart">CHART</button><button class="tab" data-tab="strategy">STRATEGY</button><button class="tab" data-tab="stats">STATS</button></div>
 <section class="panel" id="panel"></section>
+<div class="title">Recent results</div><div class="recent" id="recent"></div>
 <footer><span class="badge">VIRTUAL CREDIT DEMO</span><br>N+ PLAY · K3</footer>
 </main></div>
 
-<div class="overlay" id="overlay"><div class="sheet"><div class="grab"></div><div class="sheettop"><h3>Place demo selection</h3><button class="close" id="close">×</button></div><div class="selectedBox" id="selectedBox">Select a K3 option.</div><div class="field">Amount</div><input class="amount" id="amount" type="number" min="1" step="1" value="10"><div class="amts" id="amts"></div><div class="field">Quantity</div><div class="step"><button id="minus">−</button><span id="qty">1</span><button id="plus">+</button></div><div class="field">Multiplier</div><div class="multis" id="multis"></div><div class="tot"><span>Total demo credits</span><strong id="total">10.00 pts</strong></div><label class="agree"><input id="agree" type="checkbox"> I agree to the game rules</label><div class="acts"><button class="can" id="cancel">CANCEL</button><button class="con" id="confirm" disabled>CONFIRM</button></div></div></div>
+<div class="overlay" id="overlay"><div class="sheet"><div class="grab"></div><div class="sheettop"><h3>Place demo selection</h3><button class="close" id="close">×</button></div><div class="selectedBox" id="selectedBox">Select a K3 option.</div><div class="field">Amount</div><input class="amount" id="amount" type="number" min="1" step="1" value="10"><div class="amts" id="amts"></div><div class="field">Quantity</div><div class="step"><button id="minus">−</button><span id="qty">1</span><button id="plus">+</button></div><div class="field">Multiplier</div><div class="multis" id="multis"></div><div class="tot"><span>Total demo credits</span><strong id="total">₹10.00</strong></div><label class="agree"><input id="agree" type="checkbox"> I agree to the game rules</label><div class="acts"><button class="can" id="cancel">CANCEL</button><button class="con" id="confirm" disabled>CONFIRM</button></div></div></div>
 
 <div class="rules" id="rules"><div class="rulecard"><div class="rulehead"><h2>K3 · How to Play</h2><button class="ruleclose" id="ruleClose">×</button></div><div class="rule"><b>1. Durations</b><p>Choose K3 1 Min, 3 Min, 5 Min or 10 Min. Each mode has its own local demo history and period stream.</p></div><div class="rule"><b>2. Dice result</b><p>Three six-sided dice roll and reveal a generated virtual result. Sum, Big/Small and Even/Odd are derived from the three dice.</p></div><div class="rule"><b>3. Categories</b><p>Total shows sums 3–18. 2 Same, 3 Same and Different expose the corresponding K3 selection groups and open the same betting sheet.</p></div><div class="rule"><b>4. Betting</b><p>Select an option, choose amount, quantity and demo multiplier, agree to the rules and confirm while betting is open. The final 5 seconds are locked.</p></div><div class="rule"><b>5. History, My Bets & Chart</b><p>All three are in-page WINGO-style tabs. History shows results, My Bets shows your demo selections, and Chart shows recent sum distribution.</p></div><div class="rule"><b>6. Virtual-credit notice</b><p>This prototype uses virtual credits only. No real-money wagers, payouts, deposits, withdrawals or real-money commission settlement are processed.</p></div></div></div>
 <div class="toast" id="toast"></div>
@@ -96,7 +97,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const STORE="nplusplay_k3_wingo_style_v1";
 const modes=[60,180,300,600], pipMap={1:[4],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
 const state={sec:60,balance:0,qty:1,multi:1,selection:null,tab:"history",history:{60:[],180:[],300:[],600:[]},bets:{60:[],180:[],300:[],600:[]},lastStart:null,result:null};
-const money=n=>Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})+" pts";
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 const sumType=n=>n<=10?"Small":"Big", parity=n=>n%2?"Odd":"Even";
 let walletSyncBusy=false;
 let walletSyncTimer=0;
@@ -244,7 +245,7 @@ $$(".filter").forEach(b=>b.onclick=()=>{$$(".filter").forEach(x=>x.classList.rem
 $("#category").addEventListener("click",e=>{const b=e.target.closest("[data-type]");if(b)openBet(b.dataset.type,b.dataset.value)});
 $$(".bigbuttons button").forEach(b=>b.onclick=()=>openBet(b.dataset.type,b.dataset.value));
 $("#edit").onclick=()=>state.selection?openBet(state.selection.type,state.selection.value):toast("Choose a K3 selection first");
-$("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">${v} pts</button>`).join("");$("#multis").innerHTML=[1,5,10,20,50,100].map(v=>`<button class="multi ${v===1?"active":""}" data-m="${v}">X${v}</button>`).join("");
+$("#amts").innerHTML=[10,50,100,500,1000].map(v=>`<button data-amt="${v}">₹${v}</button>`).join("");$("#multis").innerHTML=[1,5,10,20,50,100].map(v=>`<button class="multi ${v===1?"active":""}" data-m="${v}">X${v}</button>`).join("");
 document.addEventListener("click",e=>{const a=e.target.closest("[data-amt]");if(a){$("#amount").value=a.dataset.amt;syncSheet()}const m=e.target.closest("[data-m]");if(m){state.multi=+m.dataset.m;$$(".multi").forEach(x=>x.classList.toggle("active",x===m));syncSheet()}});
 $("#amount").oninput=syncSheet;$("#minus").onclick=()=>{state.qty=Math.max(1,state.qty-1);$("#qty").textContent=state.qty;syncSheet()};$("#plus").onclick=()=>{state.qty=Math.min(100,state.qty+1);$("#qty").textContent=state.qty;syncSheet()};$("#agree").onchange=syncSheet;
 $("#close").onclick=$("#cancel").onclick=closeSheet;$("#overlay").onclick=e=>{if(e.target===e.currentTarget)closeSheet()};
@@ -254,7 +255,7 @@ setInterval(update,200);update();
 })();
 </script>
 
-<script src="./core/nplus-round-history.js?v=20261029-server-history"></script>
+<script src="./core/nplus-round-history.js?v=20261030-history-bottom"></script>
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("N+ PLAY PWA registration skipped",e)));</script>
 <script defer src="./core/nplus-back-nav.js"></script>
 </body></html>
