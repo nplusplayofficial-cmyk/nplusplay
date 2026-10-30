@@ -59,13 +59,17 @@ BEGIN
       IF v_value='ANY' AND (v_a=v_b OR v_a=v_c OR v_b=v_c) THEN RETURN 216::numeric / 96; END IF;
       IF v_value ~ '^[1-6]$' THEN
         v_target := v_value::integer;
-        IF ((v_a=v_target)::integer + (v_b=v_target)::integer + (v_c=v_target)::integer)>=2 THEN
+        IF ((CASE WHEN v_a=v_target THEN 1 ELSE 0 END)
+            + (CASE WHEN v_b=v_target THEN 1 ELSE 0 END)
+            + (CASE WHEN v_c=v_target THEN 1 ELSE 0 END))>=2 THEN
           RETURN 216::numeric / 16;
         END IF;
       END IF;
     ELSIF v_type='triple' AND (v_value='ANY' OR v_value ~ '^[1-6]$') THEN
       IF v_a=v_b AND v_b=v_c THEN
-        IF v_value='ANY' OR v_a=v_value::integer THEN RETURN 36; END IF;
+        IF v_value='ANY' THEN RETURN 36; END IF;
+        v_target := v_value::integer;
+        IF v_a=v_target THEN RETURN 216; END IF;
       END IF;
     ELSIF v_type='different' AND v_value='ALL' THEN
       IF v_a<>v_b AND v_a<>v_c AND v_b<>v_c THEN RETURN 216::numeric / 120; END IF;
