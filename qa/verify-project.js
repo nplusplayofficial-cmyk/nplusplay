@@ -896,11 +896,36 @@ if (roundHistoryTest.status !== 0) {
   console.log(String(roundHistoryTest.stdout || '').trim());
 }
 
+// Game header availability must follow live server state, never a hard-coded LIVE/PAUSED label.
+try {
+  const liveStatusHelper = fs.readFileSync(path.join(root, 'core/nplus-game-live-status.js'), 'utf8');
+  for (const token of ['function resolveState', 'function paint', 'LIVE DEMO', 'PAUSED BY ADMIN', 'SERVER OFFLINE']) {
+    if (!liveStatusHelper.includes(token)) fail('Dynamic game live-status helper missing contract: ' + token);
+  }
+  for (const page of ['k3.html', 'wingo.html']) {
+    const source = fs.readFileSync(path.join(root, page), 'utf8');
+    if (!source.includes('id="gameLiveStatus"') ||
+        !source.includes('core/nplus-game-live-status.js?v=20261030-live-status') ||
+        !source.includes('NPlusGameLiveStatus.paint(')) {
+      fail(page + ' must drive its header availability from the server response');
+    }
+  }
+} catch (e) {
+  fail('Dynamic game live-status guard failed: ' + e.message);
+}
+
 const periodDisplayTest = cp.spawnSync(process.execPath, [path.join(root, 'qa/test-period-display.cjs')], { encoding: 'utf8' });
 if (periodDisplayTest.status !== 0) {
   fail('Unique round-period display tests failed: ' + String(periodDisplayTest.stderr || periodDisplayTest.stdout || '').trim());
 } else {
   console.log(String(periodDisplayTest.stdout || '').trim());
+}
+
+const liveStatusTest = cp.spawnSync(process.execPath, [path.join(root, 'qa/test-live-status.cjs')], { encoding: 'utf8' });
+if (liveStatusTest.status !== 0) {
+  fail('Dynamic game live-status tests failed: ' + String(liveStatusTest.stderr || liveStatusTest.stdout || '').trim());
+} else {
+  console.log(String(liveStatusTest.stdout || '').trim());
 }
 
 console.log('HTML pages checked: ' + htmls.length);
