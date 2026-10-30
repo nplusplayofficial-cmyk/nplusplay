@@ -70,12 +70,12 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <header><div class="hleft"><button class="ib" id="back">‹</button><div class="brand"><div class="mark">N+</div> PLAY</div><span class="live" id="gameLiveStatus"><i></i>SYNCING</span></div><div class="hright"><button class="ib" id="rulesBtn">?</button></div></header>
 <main>
 <section class="wallet"><div class="walletrow"><div><div class="label">Available demo balance</div><div class="balance" id="balance">₹1,000.00</div></div><div class="wa"><button class="wit" id="withdraw">WITHDRAW</button><button class="dep" id="deposit">DEPOSIT</button></div></div></section>
-<div class="notice"><span>🎲 <b>K3 SERVER DEMO</b> · Big/Small and Even/Odd only · 2× gross on wins</span><span>DETAIL ›</span></div>
+<div class="notice"><span>🎲 <b>K3 SERVER DEMO</b> · Sum 3–18 · Single / Pair / Triple / Different · Virtual credits</span><span>DETAIL ›</span></div>
 <div class="modes" id="modes"><button class="mode active" data-sec="60"><strong>K3</strong><small>1 MIN</small></button><button class="mode" data-sec="180"><strong>K3</strong><small>3 MIN</small></button><button class="mode" data-sec="300"><strong>K3</strong><small>5 MIN</small></button><button class="mode" data-sec="600"><strong>K3</strong><small>10 MIN</small></button></div>
 <section class="round" id="round"><div class="roundtop"><button class="how" id="how">HOW TO PLAY</button><div class="timer"><div class="tl">Time remaining</div><div class="time" id="time">01:00</div></div></div><div class="period"><span>Current period</span><code id="period">—</code></div><div class="progress"><div class="bar" id="bar"></div></div><div class="status" id="status">BETTING OPEN</div><div class="stage" id="stage"><span class="on"></span><span></span><span></span><span></span></div></section>
 
 <div class="dicebox" id="dicebox"><div class="cube-wrap"><div class="cube" id="die1"></div></div><div class="cube-wrap"><div class="cube" id="die2"></div></div><div class="cube-wrap"><div class="cube" id="die3"></div></div></div><div id="resultLine" style="text-align:center;margin:8px 0 2px;font-size:9px;letter-spacing:1px;color:#858a84;text-transform:uppercase">RESULT · <b style="color:#e6d6b8">—</b></div>
-<div style="margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:11px">INITIAL SERVER RULES: Big/Small and Even/Odd only · 2× gross on wins. Other K3 selections are disabled.</div>
+<div style="margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:11px">SERVER SETTLED DEMO RULES: Big/Small and Even/Odd pay 2×. Exact total, single number, pair and triple returns use the exact three-dice probabilities. The gross multiplier is shown before you confirm.</div>
 <div class="category" id="category"></div>
 <div class="title">Quick K3 bets</div>
 <div class="bigbuttons"><button class="small" data-type="size" data-value="Small">SMALL<small> ≤10 · 2X</small></button><button class="big" data-type="size" data-value="Big">BIG<small> ≥11 · 2X</small></button><button class="even" data-type="parity" data-value="Even">EVEN<small> 2X</small></button><button class="odd" data-type="parity" data-value="Odd">ODD<small> 2X</small></button></div>
@@ -93,6 +93,7 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 
 <script src="./core/nplus-period-display.js?v=20261030-unique-periods"></script>
 <script src="./core/nplus-game-live-status.js?v=20261030-live-status"></script>
+<script src="./core/nplus-k3-rules.js?v=20261030-k3-full-options"></script>
 <script>
 (()=>{"use strict";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -199,7 +200,27 @@ function renderDice(a,b,c,animate=false){
     }
   });
 }function categoryHTML(){
- return '<div class="cat-title">Use the four server-supported quick picks below: Big, Small, Even and Odd. Unsupported selection types are not available.</div>';
+ const button=(type,value,label,detail)=>`<button class="cat-btn" data-type="${type}" data-value="${value}"><b>${label}</b><small style="display:block;margin-top:4px;font-size:7px;color:#bba87f">${detail}</small></button>`;
+ const sums=window.NPlusK3Rules.sumOptions().map(n=>button("sum",n,String(n),window.NPlusK3Rules.formatMultiplier("sum",n))).join("");
+ const singles=[1,2,3,4,5,6].map(n=>button("single",n,"Number "+n,window.NPlusK3Rules.formatMultiplier("single",n))).join("");
+ const pairs=[button("double","ANY","Any Pair",window.NPlusK3Rules.formatMultiplier("double","ANY"))]
+   .concat([1,2,3,4,5,6].map(n=>button("double",n,"Pair "+n,window.NPlusK3Rules.formatMultiplier("double",n)))).join("");
+ const triples=[button("triple","ANY","Any Triple",window.NPlusK3Rules.formatMultiplier("triple","ANY"))]
+   .concat([1,2,3,4,5,6].map(n=>button("triple",n,"Triple "+n,window.NPlusK3Rules.formatMultiplier("triple",n)))).join("");
+ const patterns=button("different","ALL","All Different",window.NPlusK3Rules.formatMultiplier("different","ALL"));
+ return `
+  <div class="cat-title"><b>EXACT TOTAL SUM</b> · 3 TO 18 · GROSS RETURN</div>
+  <div class="cat-row">${sums}</div>
+  <div class="cat-title"><b>SINGLE NUMBER</b> · NUMBER APPEARS ON ANY DIE</div>
+  <div class="cat-row">${singles}</div>
+  <div class="cat-title"><b>PAIR</b> · AT LEAST TWO DICE MATCH</div>
+  <div class="cat-row">${pairs}</div>
+  <div class="cat-title"><b>TRIPLE</b> · ALL THREE DICE MATCH</div>
+  <div class="cat-row">${triples}</div>
+  <div class="cat-title"><b>OTHER PATTERN</b></div>
+  <div class="cat-row">${patterns}</div>
+  <div class="cat-title" style="line-height:1.5">Multipliers are gross demo-credit returns, including the original stake. Final wins and credits are calculated by the server.</div>
+ `;
 }
 function renderCategory(){
  $("#category").innerHTML=categoryHTML();
@@ -217,7 +238,19 @@ function renderPanel(){
  else{const won=bets.filter(x=>x.status==="WON").length,lost=bets.filter(x=>x.status==="LOST").length;p.innerHTML=`<div class="stats"><div class="stat"><b>${bets.length}</b><span>Selections</span></div><div class="stat"><b>${won}</b><span>Demo wins</span></div><div class="stat"><b>${lost}</b><span>Demo losses</span></div><div class="stat"><b>${money(bets.reduce((a,x)=>a+x.total,0))}</b><span>Total stake</span></div></div>`}
 }
 let activeCategory="Total";
-function openBet(type,value){const r=round();if(!["size","parity"].includes(String(type))){toast("Approved K3 demo rules support Big/Small and Even/Odd only.");return}if(r.remaining<=5){toast("Betting closed for this round");return}if(!state.selection||state.selection.type!==type||state.selection.value!==value)serverRequestId=crypto.randomUUID();state.selection={type,value};renderSelection();$("#selectedBox").innerHTML=`<strong>${String(type).toUpperCase()}</strong> · <strong>${value}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${window.NPlusPeriodDisplay.forGame("K3",serverRound?.period||r.period)} · 2× gross if won</span>`;$("#overlay").classList.add("show");syncSheet()}
+function openBet(type,value){
+ const r=round(),kind=String(type||"").toLowerCase(),pick=String(value==null?"":value).toUpperCase();
+ const gross=window.NPlusK3Rules.grossMultiplier(kind,pick);
+ if(!gross){toast("Unsupported K3 selection.");return}
+ if(r.remaining<=5){toast("Betting closed for this round");return}
+ if(serverRound?.betting_enabled!==true){toast("K3 server round is not accepting bets.");return}
+ if(!state.selection||state.selection.type!==kind||String(state.selection.value).toUpperCase()!==pick)serverRequestId=crypto.randomUUID();
+ state.selection={type:kind,value:pick};
+ renderSelection();
+ $("#selectedBox").innerHTML=`<strong>${kind.toUpperCase()}</strong> · <strong>${pick}</strong><br><span style="display:block;margin-top:4px;color:#777">Period ${window.NPlusPeriodDisplay.forGame("K3",serverRound?.period||r.period)} · Gross return ${gross.toFixed(2)}× (includes stake)</span>`;
+ $("#overlay").classList.add("show");
+ syncSheet();
+}
 function closeSheet(){$("#overlay").classList.remove("show")}
 function syncSheet(){const total=Number($("#amount").value||0)*state.qty*state.multi;$("#total").textContent=money(total);$("#confirm").disabled=!state.selection||!$("#agree").checked||total<1||total>10000||total>state.balance||round().remaining<=5||!serverRound?.betting_enabled}
 function startMode(sec){state.sec=sec;state.selection=null;serverRequestId=null;$(".mode").forEach(x=>x.classList.toggle("active",+x.dataset.sec===sec));renderRecent();renderCategory(activeCategory);renderSelection();renderPanel();state.lastStart=null;renderPending();void refreshServerGame();toast(`K3 ${sec/60} MIN`)}
