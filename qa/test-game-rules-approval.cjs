@@ -21,8 +21,8 @@ function read(relative) {
 }
 
 const pages = [
-  { file: 'k3.html', key: 'K3', rule: /Big\/Small and Even\/Odd only|size.*parity/i },
-  { file: '5d.html', key: '5D', rule: /SUM bets are disabled|SUM betting is disabled|SUM selection disabled/i },
+  { file: 'k3.html', key: 'K3', rule: /Sum 3–18|Exact total|SINGLE NUMBER|ALL DIFFERENT/i },
+  { file: '5d.html', key: '5D', rule: /TOTAL SUM|SUM.*BIG.*SMALL/i },
   { file: 'trx-wingo.html', key: 'TRX', rule: /SERVER DEMO|server settlement/i }
 ];
 
@@ -37,6 +37,7 @@ for (const item of pages) {
 }
 
 const migration = read('supabase/migrations/20261028134905_server_authoritative_k3_5d_trx_demo.sql');
+const expandedMigration = read('supabase/migrations/20261030101000_expand_k3_5d_demo_selection_rules.sql');
 for (const contract of [
   'create table if not exists public.nplus_demo_lottery_rounds',
   'create table if not exists public.nplus_demo_lottery_bets',
@@ -56,8 +57,16 @@ for (const contract of [
 }
 check(/p_stake::text\s+IN\s*\('NaN','Infinity','-Infinity'\)/i.test(migration),
   'server rejects non-finite lottery stakes');
-check(/v_key='K3'[\s\S]*?return 2/i.test(migration),
-  'K3 only supports explicitly defined 2x Big/Small and Odd/Even returns');
+check(/v_key='K3'[\\s\\S]*?return 2/i.test(migration),
+  'K3 base Big/Small and Odd/Even remain server-defined at 2x gross');
+for (const contract of [
+  "v_type='sum'", "v_type='single'", "v_type='double'", "v_type='triple'", "v_type='different'",
+  "v_value ~ '^(3|[4-9]|1[0-8])$'", "v_ways := ARRAY[1,3,6,10,15,21,25,27,27,25,21,15,10,6,3,1]"
+]) check(expandedMigration.includes(contract), 'K3 expanded migration includes exact-odds rule: ' + contract);
+check(expandedMigration.includes("SUM:(BIG|SMALL)") && expandedMigration.includes("SUM:(ODD|EVEN)"),
+  '5D aggregate SUM Big/Small/Odd/Even are server payout rules');
+check(expandedMigration.includes("v_key='K3'") && expandedMigration.includes("v_key='5D'"),
+  'expansion migration replaces payout and place-bet RPCs for both games');
 check(/v_key='5D'[\s\S]*?return 10/i.test(migration) && /v_key='5D'[\s\S]*?return 2/i.test(migration),
   '5D per-position digit and size/parity multipliers are server-defined');
 check(/v_key='TRX'[\s\S]*?return 2\.5/i.test(migration) && /return 5/i.test(migration),
@@ -84,8 +93,8 @@ const e2e = read('qa/test-demo-lottery-settlement.sql');
 for (const expectation of [
   'disabled K3 accepted a bet',
   'non-admin enabled K3',
-  'K3 server settlement or exactly-once 2x payout failed',
-  '5D exact-position digit did not settle to 10x gross payout',
+  'K3 base bet or expanded exact-SUM 8x settlement failed.',
+  '5D digit or aggregate SUM 2x gross settlement failed.',
   'TRX Violet result did not settle to 5x gross payout',
   'ROLLBACK'
 ]) check(e2e.includes(expectation), 'disposable settlement regression covers: ' + expectation);
