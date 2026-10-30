@@ -238,7 +238,7 @@ body{display:flex;justify-content:center}
 </header>
 
 <main class="content">
-  <div class="notice">5D SERVER DEMO · RESULT HIDDEN UNTIL SETTLEMENT · VIRTUAL POINTS ONLY</div>
+  <div class="notice">5D SERVER DEMO · A–E POSITION BETS + TOTAL SUM BIG/SMALL/ODD/EVEN · VIRTUAL POINTS ONLY</div>
 
   <div class="modes" id="modes">
     <button class="mode active" data-sec="60">5D 1 Min</button>
@@ -445,7 +445,7 @@ async function refreshServerGame(){
     const enabled=serverRound?.betting_enabled===true;
     const remaining=serverRound?.ends_at?Date.parse(serverRound.ends_at)-Date.now():0;
     const notice=document.querySelector('.notice');
-    if(notice)notice.textContent=enabled?'5D SERVER DEMO · RESULT HIDDEN UNTIL SETTLEMENT · A–E DIGIT / SIZE / PARITY ONLY':'5D GAME DISABLED BY N+ ADMIN · SERVER BETTING OFF';
+    if(notice)notice.textContent=enabled?'5D SERVER DEMO · A–E DIGIT / SIZE / PARITY + SUM BIG / SMALL / ODD / EVEN · VIRTUAL POINTS ONLY':'5D GAME DISABLED BY N+ ADMIN · SERVER BETTING OFF';
     const status=document.querySelector('.live');
     if(status)status.textContent=enabled?'● SERVER DEMO · RESULT HIDDEN':'● GAME DISABLED';
     if(!enabled||remaining<=5000)document.querySelector('.confirm').disabled=true;
@@ -640,20 +640,26 @@ function tick(){
   else status.textContent='SERVER SETTLEMENT · BETTING OPEN';
 }
 function selectBet(value, element){
-  if(state.cat==='SUM'){return}
-  state.selected=value;
+  const choice=String(value||'').toUpperCase();
+  if(state.cat==='SUM'){
+    if(!['BIG','SMALL','ODD','EVEN'].includes(choice))return;
+    state.selected='SUM:'+choice;
+  }else{
+    state.selected=value;
+  }
   serverRequestId=crypto.randomUUID();
-  document.getElementById('selected').textContent=value;
-  document.getElementById('sheetSelection').textContent=value;
+  document.getElementById('selected').textContent=state.selected;
+  document.getElementById('sheetSelection').textContent=state.selected;
   document.getElementById('betcard').classList.add('show');
   document.querySelectorAll('.num').forEach(x=>x.classList.remove('selected'));
+  document.querySelectorAll('.q').forEach(x=>x.classList.toggle('active',x.dataset.quick===choice));
   if(element)element.classList.add('selected');
 }
 function renderNumbers(){
   const root=document.getElementById('numbers');
   root.innerHTML='';
   if(state.cat==='SUM'){
-    root.innerHTML='<div class="empty">SUM betting is disabled until a complete server payout table is approved. Position A–E digit, size and parity demo bets are supported.</div>';
+    root.innerHTML='<div class="empty">TOTAL SUM = A + B + C + D + E (0–45). Use the Big / Small / Odd / Even buttons above to place a server-settled SUM selection. Each supported SUM class pays 2× gross on a win.</div>';
     return;
   }
   for(let n=0;n<=9;n++) addNumberButton(n,state.cat);
@@ -738,7 +744,7 @@ function updateTotal(){
   const total=state.amount*state.qty;
   document.getElementById('total').textContent='₹'+total.toFixed(2);
   const button=document.querySelector('.confirm');
-  if(button)button.disabled=!state.selected||state.cat==='SUM'||!serverRound?.betting_enabled||total<1||total>10000||total>Number(window.__nplus5dBalance||0);
+  if(button)button.disabled=!state.selected||!serverRound?.betting_enabled||total<1||total>10000||total>Number(window.__nplus5dBalance||0);
 }
 let betBusy=false;
 
@@ -746,17 +752,23 @@ async function confirmBet(){
   const client=window.NPlusAuth?.client;
   if(!client){alert('Sign in to place a server-backed demo bet.');return}
   if(!serverRound?.betting_enabled){alert('5D is currently disabled by N+ ADMIN.');return}
-  if(state.cat==='SUM'){alert('SUM bets are disabled until their own server payout table is approved.');return}
   if(!state.selected)return;
   const total=state.amount*state.qty;
   let selectionType,selectionValue;
-  const exact=String(state.selected).match(/^[A-E] = ([0-9])$/);
-  if(exact){selectionType='digit';selectionValue=state.cat+':'+exact[1]}
-  else{
-    const choice=String(state.selected).toUpperCase();
-    if(['BIG','SMALL'].includes(choice)){selectionType='size';selectionValue=state.cat+':'+choice}
-    else if(['ODD','EVEN'].includes(choice)){selectionType='parity';selectionValue=state.cat+':'+choice}
-    else{alert('Unsupported 5D selection.');return}
+  const sumChoice=String(state.selected).toUpperCase().match(/^SUM:(BIG|SMALL|ODD|EVEN)$/);
+  if(sumChoice){
+    const choice=sumChoice[1];
+    selectionType=['BIG','SMALL'].includes(choice)?'size':'parity';
+    selectionValue='SUM:'+choice;
+  }else{
+    const exact=String(state.selected).match(/^[A-E] = ([0-9])$/);
+    if(exact){selectionType='digit';selectionValue=state.cat+':'+exact[1]}
+    else{
+      const choice=String(state.selected).toUpperCase();
+      if(['BIG','SMALL'].includes(choice)){selectionType='size';selectionValue=state.cat+':'+choice}
+      else if(['ODD','EVEN'].includes(choice)){selectionType='parity';selectionValue=state.cat+':'+choice}
+      else{alert('Unsupported 5D selection.');return}
+    }
   }
   if(!serverRequestId)serverRequestId=crypto.randomUUID();
   const button=document.querySelector('.confirm');
@@ -807,6 +819,7 @@ document.querySelectorAll('.tab').forEach(btn=>{
     btn.classList.add('active');
     state.cat=btn.dataset.cat;
     state.selected=null;
+    document.querySelectorAll('.q').forEach(x=>x.classList.remove('active'));
     document.getElementById('betcard').classList.remove('show');
     renderNumbers();
   });
