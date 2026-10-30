@@ -15,7 +15,7 @@
 <style>
 :root{--bg:#070808;--card:#111311;--card2:#161816;--line:rgba(255,255,255,.085);--txt:#f4f1e9;--muted:#858a84;--gold:#d8b66d;--gold2:#f2d594;--red:#ef5a57;--green:#27bd78;--violet:#a86aee;--blue:#639bea;--danger:#ff706c}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -15%,#302b1d 0,#111310 30%,#070808 65%);color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{display:flex;justify-content:center}.app{width:100%;max-width:520px;min-height:100vh;background:linear-gradient(180deg,rgba(10,11,10,.98),rgba(6,7,7,.99));box-shadow:0 0 90px #000;overflow:hidden}.ambient{position:fixed;width:520px;height:520px;top:-250px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(216,182,109,.12),transparent 68%);pointer-events:none}
-header{height:64px;position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);background:rgba(8,9,8,.86);backdrop-filter:blur(18px)}.hleft,.hright{display:flex;align-items:center;gap:8px}.brand{display:flex;align-items:center;gap:7px;font-weight:900;letter-spacing:.5px}.mark{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#f4d996,#9c7132);color:#171209;font-size:11px;font-weight:950}.live{font-size:9px;color:#7ee2b0;display:flex;gap:4px;align-items:center}.live i{width:6px;height:6px;border-radius:50%;background:#35cf89;box-shadow:0 0 10px #35cf89}.ib{width:35px;height:35px;border-radius:11px;border:1px solid var(--line);background:#121413;color:#d7d8d2;display:grid;place-items:center}
+header{height:64px;position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);background:rgba(8,9,8,.86);backdrop-filter:blur(18px)}.hleft,.hright{display:flex;align-items:center;gap:8px}.brand{display:flex;align-items:center;gap:7px;font-weight:900;letter-spacing:.5px}.mark{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#f4d996,#9c7132);color:#171209;font-size:11px;font-weight:950}.live{font-size:9px;color:#7ee2b0;display:flex;gap:4px;align-items:center}.live i{width:6px;height:6px;border-radius:50%;background:#35cf89;box-shadow:0 0 10px #35cf89}.nplus-live-badge:before{content:"";width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}.nplus-live-paused{color:#ff7773!important}.nplus-live-offline{color:#ff7773!important}.nplus-live-syncing{color:#dfc17e!important}.ib{width:35px;height:35px;border-radius:11px;border:1px solid var(--line);background:#121413;color:#d7d8d2;display:grid;place-items:center}
 main{padding:12px 12px 36px}.wallet{border:1px solid rgba(216,182,109,.2);border-radius:18px;padding:14px;background:linear-gradient(145deg,#29261e,#111310 70%);box-shadow:inset 0 1px rgba(255,255,255,.05),0 15px 35px #0006}.walletrow{display:flex;align-items:center;justify-content:space-between;gap:10px}.label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}.balance{font-size:25px;font-weight:950;margin-top:2px;transition:transform .2s,color .2s}.balance.bump{transform:scale(1.06);color:var(--gold2)}.wa{display:flex;gap:6px}.wa button{border:0;border-radius:10px;padding:9px 10px;font-size:9px;font-weight:900}.dep{background:var(--gold);color:#161209}.wit{background:#252825;color:#ddd;border:1px solid var(--line)!important}.notice{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:10px 0;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:#0f110f;color:#949993;font-size:9px}.notice b{color:#ddd}.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}.mode{border:1px solid var(--line);background:#111312;border-radius:13px;padding:9px 2px;color:#818680}.mode strong{display:block;font-size:10px;color:#d8d9d4}.mode small{font-size:8px}.mode.active{border-color:#b8924c;background:linear-gradient(180deg,#2b2417,#141410);box-shadow:0 8px 24px #d8b66d12}.mode.active strong,.mode.active small{color:var(--gold2)}
 .round{border:1px solid var(--line);border-radius:18px;padding:12px;background:linear-gradient(145deg,#181a18,#0d0f0e);overflow:hidden;position:relative}.round:after{content:"";position:absolute;width:230px;height:130px;top:-90px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,#d8b66d1b,transparent 70%);pointer-events:none}.roundtop{display:flex;justify-content:space-between;position:relative;z-index:1}.how{border:1px solid var(--line);background:#121412;color:#cccfc9;border-radius:9px;padding:7px 9px;font-size:8px;font-weight:800}.timer{text-align:right}.tl{font-size:8px;color:#858983;text-transform:uppercase;letter-spacing:.8px}.time{font-size:27px;line-height:1.1;font-weight:950;letter-spacing:2px;font-variant-numeric:tabular-nums}.closed .time{color:var(--danger)}.period{display:flex;justify-content:space-between;gap:10px;margin-top:9px;align-items:center}.period span{font-size:8px;color:#777b76;text-transform:uppercase}.period code{font:8px ui-monospace,SFMono-Regular,monospace;color:#d7d5ce}.progress{height:3px;border-radius:99px;background:#272a27;overflow:hidden;margin-top:10px}.bar{height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .15s linear}.closed .bar{background:var(--danger)}.status{text-align:center;font-size:8px;font-weight:900;letter-spacing:1.1px;color:#72dfaa;margin-top:8px}.closed .status{color:var(--danger)}.stage{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px}.stage span{height:3px;border-radius:99px;background:#252825}.stage span.on{background:var(--gold)}
 .title{font-size:9px;color:#777c77;text-transform:uppercase;letter-spacing:1.25px;margin:15px 2px 8px}.recent{display:flex;gap:7px;overflow:auto;padding:2px 1px}.recent::-webkit-scrollbar{display:none}.ball{flex:0 0 31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#171918;border:1px solid var(--line);font-size:10px;font-weight:950}.ball.r{color:#ff7773;border-color:#ef5a5750}.ball.g{color:#6bdfac;border-color:#27bd7850}.ball.v{color:#c38af5;border-color:#a86aee55}.choice3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.choice{border:1px solid var(--line);background:#111312;color:#d5d7d2;border-radius:12px;padding:10px 4px;font-size:10px;font-weight:900}.choice small{display:block;color:#717670;font-size:7px;font-weight:500;margin-top:2px}.choice.active.red{border-color:#ef5a57a0;background:#ef5a5715;color:#ff8b87}.choice.active.green{border-color:#27bd78a0;background:#27bd7814;color:#75e4b0}.choice.active.violet{border-color:#a86aeea0;background:#a86aee15;color:#cc9bfb}
@@ -43,7 +43,7 @@ footer{text-align:center;padding:12px;color:#575c57;font-size:7px}.badge{display
 <div class="hleft">
 <button class="ib" id="back">‹</button>
 <div class="brand"><div class="mark">N+</div> PLAY</div>
-<span class="live"><i></i>LIVE</span>
+<span class="live" id="gameLiveStatus"><i></i>SYNCING</span>
 </div>
 <div class="hright">
 <button class="ib" id="sound">⌁</button>
@@ -222,6 +222,7 @@ I agree to the game rules
 <div class="toast" id="toast"></div>
 
 <script src="./core/nplus-period-display.js?v=20261030-unique-periods"></script>
+<script src="./core/nplus-game-live-status.js?v=20261030-live-status"></script>
 <script>
 (()=>{
 "use strict";
@@ -998,7 +999,8 @@ function update(){
   Promise.resolve()
     .then(async()=>{
       const r=round();
-      try{await ensureServerRound(state.sec);}catch(err){console.error("WINGO server round sync failed:",err);}
+      let roundSyncFailed=false;
+      try{await ensureServerRound(state.sec);}catch(err){roundSyncFailed=true;console.error("WINGO server round sync failed:",err);}
       await syncWingoAdminStatus();
       const closed=r.remaining<=5;
 
@@ -1022,8 +1024,10 @@ function update(){
       $("#bar").style.width=
         (r.remaining/state.sec*100)+"%";
 
-      const adminDisabled=serverRoundCache[state.sec]?.betting_enabled===false;
-      const adminStatusUnavailable=serverRoundCache[state.sec]?.admin_status_unavailable===true;
+      const currentServerRound=serverRoundCache[state.sec];
+      const adminDisabled=currentServerRound?.betting_enabled===false;
+      const adminStatusUnavailable=roundSyncFailed||currentServerRound?.admin_status_unavailable===true;
+      window.NPlusGameLiveStatus?.paint($("#gameLiveStatus"),{ready:!!currentServerRound,enabled:currentServerRound?.betting_enabled===true,unavailable:adminStatusUnavailable});
       $("#status").textContent=
         adminStatusUnavailable
           ?"STATUS UNAVAILABLE · RETRYING"
