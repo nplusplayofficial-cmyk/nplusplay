@@ -1027,7 +1027,7 @@ function update(){
       const currentServerRound=serverRoundCache[state.sec];
       const adminDisabled=currentServerRound?.betting_enabled===false;
       const adminStatusUnavailable=roundSyncFailed||currentServerRound?.admin_status_unavailable===true;
-      window.NPlusGameLiveStatus?.paint($("#gameLiveStatus"),{ready:!!currentServerRound,enabled:currentServerRound?.betting_enabled===true,unavailable:adminStatusUnavailable});
+      window.NPlusGameLiveStatus.paint($("#gameLiveStatus"),{ready:!!currentServerRound,enabled:currentServerRound?.betting_enabled===true,unavailable:adminStatusUnavailable});
       $("#status").textContent=
         adminStatusUnavailable
           ?"STATUS UNAVAILABLE · RETRYING"
