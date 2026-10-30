@@ -85,7 +85,7 @@ jobs:
         run: node qa/test-reconstructed-replay-runner.cjs
       - name: Guard one-command local split replay wrapper
         run: node qa/test-final-split-replay-wrapper.cjs
-      - name: Guard unapproved K3, 5D and TRX payout rules
+      - name: Guard approved K3, 5D and TRX payout rules
         run: node qa/test-game-rules-approval.cjs
       - name: Audit recent activity privacy and Aviator recovery
         run: node qa/test-activity-aviator-audit.cjs
