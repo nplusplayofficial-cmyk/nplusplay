@@ -57,7 +57,7 @@ for (const contract of [
 }
 check(/p_stake::text\s+IN\s*\('NaN','Infinity','-Infinity'\)/i.test(migration),
   'server rejects non-finite lottery stakes');
-check(/v_key='K3'[\\s\\S]*?return 2/i.test(migration),
+check(/v_key='K3'[\s\S]*?return 2/i.test(migration),
   'K3 base Big/Small and Odd/Even remain server-defined at 2x gross');
 for (const contract of [
   "v_type='sum'", "v_type='single'", "v_type='double'", "v_type='triple'", "v_type='different'",
