@@ -127,14 +127,14 @@ let serverSnapshotFailed=false;
 async function refreshServerGame(){
   if(serverRefreshBusy)return;
   const client=window.NPlusAuth?.client;
-  if(!client){window.NPlusGameLiveStatus?.paint($("#gameLiveStatus"),{ready:false});return;}
+  if(!client){window.NPlusGameLiveStatus.paint($("#gameLiveStatus"),{ready:false});return;}
   serverRefreshBusy=true;
   try{
     const {data,error}=await client.rpc("nplus_demo_lottery_snapshot",{p_game_key:"K3",p_duration_seconds:state.sec});
     if(error)throw error;
     serverSnapshot=data||null;
     serverRound=data?.current_round||null;
-    window.NPlusGameLiveStatus?.paint($("#gameLiveStatus"),{ready:!!serverRound,enabled:serverRound?.betting_enabled===true});
+    window.NPlusGameLiveStatus.paint($("#gameLiveStatus"),{ready:!!serverRound,enabled:serverRound?.betting_enabled===true});
     serverSnapshotFailed=false;
     const remoteHistory=Array.isArray(data?.history)?data.history:[];
     state.history[state.sec]=remoteHistory.map(row=>{
@@ -159,7 +159,7 @@ async function refreshServerGame(){
     serverSnapshot=null;
     serverRound=null;
     serverSnapshotFailed=true;
-    window.NPlusGameLiveStatus?.paint($("#gameLiveStatus"),{unavailable:true});
+    window.NPlusGameLiveStatus.paint($("#gameLiveStatus"),{unavailable:true});
     $("#status").textContent="SERVER UNAVAILABLE · BETTING DISABLED";
     $("#status").style.color="#ff7773";
     renderPending();
