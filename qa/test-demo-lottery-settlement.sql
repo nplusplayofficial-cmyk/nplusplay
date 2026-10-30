@@ -52,6 +52,47 @@ VALUES ('K3','K3 WINGO',false),('5D','5D',false),('TRX','TRX WINGO',false)
 ON CONFLICT(game_key) DO NOTHING;
 
 \ir ../supabase/migrations/20261028134905_server_authoritative_k3_5d_trx_demo.sql
+\ir ../supabase/migrations/20261030101000_expand_k3_5d_demo_selection_rules.sql
+
+-- Exact K3 probability tables and 5D aggregate SUM settlement rules.
+DO $option_rules$
+DECLARE
+  o_k3 jsonb := '{"dice":[1,1,1],"sum":3,"size":"SMALL","parity":"ODD"}'::jsonb;
+  o_pair jsonb := '{"dice":[1,1,2],"sum":4,"size":"SMALL","parity":"EVEN"}'::jsonb;
+  o_diff jsonb := '{"dice":[1,2,3],"sum":6,"size":"SMALL","parity":"EVEN"}'::jsonb;
+  o_five jsonb := '{"digits":[1,2,3,4,5],"sum":15,"size":"SMALL","parity":"ODD"}'::jsonb;
+BEGIN
+  IF public.nplus_demo_lottery_payout_multiplier('K3','sum','3',o_k3)<>216
+     OR public.nplus_demo_lottery_payout_multiplier('K3','sum','4','{"dice":[1,1,2],"sum":4}'::jsonb)<>72
+     OR public.nplus_demo_lottery_payout_multiplier('K3','sum','10','{"dice":[1,3,6],"sum":10}'::jsonb)<>8
+     OR public.nplus_demo_lottery_payout_multiplier('K3','sum','18','{"dice":[6,6,6],"sum":18}'::jsonb)<>216 THEN
+    RAISE EXCEPTION 'TEST_FAILURE: K3 exact sum probability multipliers are incorrect.';
+  END IF;
+  IF abs(public.nplus_demo_lottery_payout_multiplier('K3','single','1',o_pair)-(216::numeric/91))>0.000001
+     OR public.nplus_demo_lottery_payout_multiplier('K3','single','6',o_pair)<>0 THEN
+    RAISE EXCEPTION 'TEST_FAILURE: K3 single-number any-die rule is incorrect.';
+  END IF;
+  IF public.nplus_demo_lottery_payout_multiplier('K3','double','ANY',o_pair)<>2.25
+     OR public.nplus_demo_lottery_payout_multiplier('K3','double','1',o_pair)<>13.5
+     OR public.nplus_demo_lottery_payout_multiplier('K3','double','2',o_pair)<>0 THEN
+    RAISE EXCEPTION 'TEST_FAILURE: K3 pair match rules are incorrect.';
+  END IF;
+  IF public.nplus_demo_lottery_payout_multiplier('K3','triple','ANY',o_k3)<>36
+     OR public.nplus_demo_lottery_payout_multiplier('K3','triple','1',o_k3)<>216
+     OR public.nplus_demo_lottery_payout_multiplier('K3','triple','2',o_k3)<>0
+     OR abs(public.nplus_demo_lottery_payout_multiplier('K3','different','ALL',o_diff)-1.8)>0.000001 THEN
+    RAISE EXCEPTION 'TEST_FAILURE: K3 triple and all-different rules are incorrect.';
+  END IF;
+  IF public.nplus_demo_lottery_payout_multiplier('5D','size','SUM:SMALL',o_five)<>2
+     OR public.nplus_demo_lottery_payout_multiplier('5D','parity','SUM:ODD',o_five)<>2
+     OR public.nplus_demo_lottery_payout_multiplier('5D','size','SUM:BIG',o_five)<>0
+     OR public.nplus_demo_lottery_payout_multiplier('5D','parity','SUM:EVEN',o_five)<>0 THEN
+    RAISE EXCEPTION 'TEST_FAILURE: 5D aggregate SUM class payout rules are incorrect.';
+  END IF;
+  RAISE NOTICE 'PASS: K3 exact sum, single, any/specific pair, any/specific triple and all-different odds';
+  RAISE NOTICE 'PASS: 5D SUM Big/Small/Odd/Even server payout rules';
+END
+$option_rules$;
 
 BEGIN;
 DO $tests$
@@ -70,6 +111,7 @@ DECLARE
   v_ledger_before bigint;
   v_ledger_after bigint;
   v_bet_id uuid;
+  v_second_bet_id uuid;
   v_request uuid;
   v_game text;
   v_duration integer;
@@ -137,19 +179,25 @@ BEGIN
     IF SQLERRM NOT LIKE '%already used for a different demo bet%' THEN RAISE; END IF;
   END;
 
+  -- Expanded K3 exact SUM pick on the same round; gross return is 8x for SUM 10.
+  v_first:=public.nplus_demo_lottery_place_bet('K3',600,'sum','10',10,'ba666666-6666-4666-8666-666666666666');
+  v_second_bet_id:=(v_first->>'bet_id')::uuid;
+
   SELECT id,round_slot INTO v_round_id,v_round_slot FROM public.nplus_demo_lottery_rounds WHERE period=v_period;
-  UPDATE public.nplus_demo_lottery_rounds SET outcome='{"dice":[1,1,1],"sum":3,"size":"SMALL","parity":"ODD"}'::jsonb,
+  UPDATE public.nplus_demo_lottery_rounds SET outcome='{"dice":[1,3,6],"sum":10,"size":"SMALL","parity":"EVEN"}'::jsonb,
     starts_at=clock_timestamp()-interval '2 seconds', ends_at=clock_timestamp()-interval '1 second' WHERE id=v_round_id;
   v_snapshot:=public.nplus_demo_lottery_snapshot('K3',600);
   SELECT balance INTO v_after FROM public.demo_wallets WHERE user_id=v_user;
   IF (SELECT status FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>'won'
      OR (SELECT payout FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>20
-     OR v_after<>v_before+10 THEN
-    RAISE EXCEPTION 'K3 server settlement or exactly-once 2x payout failed.';
+     OR (SELECT status FROM public.nplus_demo_lottery_bets WHERE id=v_second_bet_id)<>'won'
+     OR (SELECT payout FROM public.nplus_demo_lottery_bets WHERE id=v_second_bet_id)<>80
+     OR v_after<>v_before+80 THEN
+    RAISE EXCEPTION 'K3 base bet or expanded exact-SUM 8x settlement failed.';
   END IF;
   v_snapshot:=public.nplus_demo_lottery_snapshot('K3',600);
-  IF (SELECT count(*) FROM public.demo_wallet_transactions WHERE user_id=v_user AND type='GAME_WIN' AND source='K3')<>1 THEN
-    RAISE EXCEPTION 'K3 repeated snapshot duplicated settlement credit.';
+  IF (SELECT count(*) FROM public.demo_wallet_transactions WHERE user_id=v_user AND type='GAME_WIN' AND source='K3')<>2 THEN
+    RAISE EXCEPTION 'K3 repeated snapshot duplicated settlement credits.';
   END IF;
 
   -- 5D position-specific exact digit, with server outcome not exposed while open.
@@ -164,13 +212,17 @@ BEGIN
   v_request:='ba444444-4444-4444-8444-444444444444';
   v_first:=public.nplus_demo_lottery_place_bet('5D',180,'digit','A:1',10,v_request);
   v_bet_id:=(v_first->>'bet_id')::uuid;
+  v_first:=public.nplus_demo_lottery_place_bet('5D',180,'size','SUM:SMALL',10,'ba777777-7777-4777-8777-777777777777');
+  v_second_bet_id:=(v_first->>'bet_id')::uuid;
   SELECT id INTO v_round_id FROM public.nplus_demo_lottery_rounds WHERE period=v_period;
   UPDATE public.nplus_demo_lottery_rounds SET outcome='{"digits":[1,2,3,4,5],"sum":15,"size":"SMALL","parity":"ODD"}'::jsonb,
     starts_at=clock_timestamp()-interval '2 seconds', ends_at=clock_timestamp()-interval '1 second' WHERE id=v_round_id;
   v_snapshot:=public.nplus_demo_lottery_snapshot('5D',180);
   IF (SELECT status FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>'won'
-     OR (SELECT payout FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>100 THEN
-    RAISE EXCEPTION '5D exact-position digit did not settle to 10x gross payout.';
+     OR (SELECT payout FROM public.nplus_demo_lottery_bets WHERE id=v_bet_id)<>100
+     OR (SELECT status FROM public.nplus_demo_lottery_bets WHERE id=v_second_bet_id)<>'won'
+     OR (SELECT payout FROM public.nplus_demo_lottery_bets WHERE id=v_second_bet_id)<>20 THEN
+    RAISE EXCEPTION '5D digit or aggregate SUM 2x gross settlement failed.';
   END IF;
 
   -- TRX outcome uses the last of five server-generated digits for color/size/number.
@@ -205,7 +257,7 @@ BEGIN
 
   RAISE NOTICE 'PASS: disabled flag and Admin-only game activation guard';
   RAISE NOTICE 'PASS: hidden server outcomes, idempotent debits, finite stake bounds and cutoff';
-  RAISE NOTICE 'PASS: K3 2x, 5D 10x and TRX 5x gross demo settlement';
+  RAISE NOTICE 'PASS: K3 base and exact-SUM gross demo settlement; 5D position and SUM settlement; TRX 5x gross demo settlement';
   RAISE NOTICE 'PASS: private tables and signed-in RPC execution grants';
 END
 $tests$;

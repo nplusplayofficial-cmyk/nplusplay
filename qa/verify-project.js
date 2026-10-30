@@ -88,7 +88,7 @@ try {
     }
   }
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  if (!worker.includes('nplus-play-shell-v13') ||
+  if (!worker.includes('nplus-play-shell-v14') ||
       !worker.includes('"./core/nplus-back-nav.js"') ||
       !worker.includes('"./core/nplus-bottom-nav.css"') ||
       !worker.includes('"./deposit-demo.html"') ||
@@ -96,7 +96,8 @@ try {
       !worker.includes('"./admin-deposits.html"') ||
       worker.includes('"./core/nplus-round-history.js"') ||
       !worker.includes('fetch(req, { cache: "no-store" })') ||
-      !worker.includes('nplus-period-display\\.js$/i')) {
+      !worker.includes('nplus-period-display\\.js$/i') ||
+      !worker.includes('nplus-k3-rules\\.js$/i')) {
     fail('Service worker must bump its shell cache, precache navigation assets, and bypass stale history-script cache');
   }
 } catch (e) { fail('Shared navigation static guard failed: ' + e.message); }
@@ -435,6 +436,8 @@ for (const required of [
   'sql/NPLUS_PLAY_DEMO_WALLET_REQUESTS.sql',
   'supabase/migrations/20261019000150_demo_wallet_requests.sql',
   'supabase/migrations/20261029112558_fix_all_demo_game_round_history.sql',
+  'supabase/migrations/20261030101000_expand_k3_5d_demo_selection_rules.sql',
+  'qa/test-k3-5d-options.cjs',
   'supabase/migrations/20261019000175_admin_deposit_actions.sql',
   'qa/test-demo-wallet-requests.sql',
   'sql/NPLUS_PLAY_DEMO_REFERRALS.sql',
@@ -894,6 +897,33 @@ if (roundHistoryTest.status !== 0) {
   fail('Settled round-history runtime tests failed: ' + String(roundHistoryTest.stderr || roundHistoryTest.stdout || '').trim());
 } else {
   console.log(String(roundHistoryTest.stdout || '').trim());
+}
+
+// New K3/5D options must be present in both the interface and server-side migration.
+try {
+  const k3 = fs.readFileSync(path.join(root, 'k3.html'), 'utf8');
+  const k3Rules = fs.readFileSync(path.join(root, 'core/nplus-k3-rules.js'), 'utf8');
+  const five = fs.readFileSync(path.join(root, '5d.html'), 'utf8');
+  const expanded = fs.readFileSync(path.join(root, 'supabase/migrations/20261030101000_expand_k3_5d_demo_selection_rules.sql'), 'utf8');
+  for (const token of ['button("sum"', 'button("single"', 'button("double"', 'button("triple"', 'button("different"', 'NPlusK3Rules.grossMultiplier(']) {
+    if (!k3.includes(token)) fail('K3 UI missing expanded selection: ' + token);
+  }
+  for (const token of ["v_type='sum'", "v_type='single'", "v_type='double'", "v_type='triple'", "v_type='different'"]) {
+    if (!expanded.includes(token)) fail('K3 server payout migration missing rule: ' + token);
+  }
+  if (!k3Rules.includes('SUM_WAYS') || !five.includes("state.selected='SUM:'+choice") ||
+      !five.includes("selectionValue='SUM:'+choice") ||
+      !expanded.includes("SUM:(BIG|SMALL)") || !expanded.includes("SUM:(ODD|EVEN)")) {
+    fail('K3 odds helper or 5D aggregate SUM frontend/server contracts are incomplete');
+  }
+  const k3OptionsTest = cp.spawnSync(process.execPath, [path.join(root, 'qa/test-k3-5d-options.cjs')], { encoding: 'utf8' });
+  if (k3OptionsTest.status !== 0) {
+    fail('K3/5D selection runtime tests failed: ' + String(k3OptionsTest.stderr || k3OptionsTest.stdout || '').trim());
+  } else {
+    console.log(String(k3OptionsTest.stdout || '').trim());
+  }
+} catch (e) {
+  fail('K3/5D expanded rules static guard failed: ' + e.message);
 }
 
 // Game header availability must follow live server state, never a hard-coded LIVE/PAUSED label.

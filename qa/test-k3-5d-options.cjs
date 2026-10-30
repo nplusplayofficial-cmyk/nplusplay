@@ -32,17 +32,18 @@ assert.equal(rules.formatMultiplier("sum", "3"), "216.00×");
 
 const k3 = fs.readFileSync(path.join(root, "k3.html"), "utf8");
 assert.ok(k3.includes('core/nplus-k3-rules.js?v=20261030-k3-full-options'), "K3 loads the exact-odds rules");
-assert.ok(k3.includes('data-type="sum"'), "K3 offers exact sum selections");
-assert.ok(k3.includes('data-type="single"'), "K3 offers single-die number picks");
-assert.ok(k3.includes('data-type="double"'), "K3 offers pair picks");
-assert.ok(k3.includes('data-type="triple"'), "K3 offers triple picks");
-assert.ok(k3.includes('data-type="different"'), "K3 offers all-different pick");
+assert.ok(k3.includes('button("sum"'), "K3 offers exact sum selections");
+assert.ok(k3.includes('button("single"'), "K3 offers single-die number picks");
+assert.ok(k3.includes('button("double"'), "K3 offers pair picks");
+assert.ok(k3.includes('button("triple"'), "K3 offers triple picks");
+assert.ok(k3.includes('button("different"'), "K3 offers all-different pick");
+assert.ok(k3.includes("core/nplus-k3-rules.js?v=20261030-k3-full-options"), "K3 loads the odds helper");
 assert.ok(k3.includes('NPlusK3Rules.grossMultiplier('), "K3 displays the same multipliers that selection UI calculates");
 assert.ok(!/Other K3 selections are disabled/i.test(k3), "K3 no longer tells users its additional selections are disabled");
 
 const five = fs.readFileSync(path.join(root, "5d.html"), "utf8");
-assert.ok(five.includes('SUM:(BIG|SMALL|ODD|EVEN)'), "5D SUM supports Big/Small/Odd/Even server selections");
-assert.ok(five.includes("SUM:"), "5D displays and submits SUM-prefixed selections");
+assert.ok(five.includes("state.selected='SUM:'+choice"), "5D SUM maps Big/Small/Odd/Even to SUM-prefixed selections");
+assert.ok(five.includes("selectionValue='SUM:'+choice"), "5D submits SUM-prefixed values to the server");
 assert.ok(!/SUM betting is disabled|SUM bets are disabled/i.test(five), "5D no longer marks its SUM tab as disabled");
 
 console.log("K3/5D selection tests passed: exact K3 sum odds, single/pair/triple/all-different picks, and 5D total-sum Big/Small/Odd/Even.");
