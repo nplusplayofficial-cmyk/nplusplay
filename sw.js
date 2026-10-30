@@ -26,6 +26,10 @@ self.addEventListener("fetch", event => {
     event.respondWith(fetch(req, { cache: "no-store" }));
     return;
   }
+  if (/\/core\/nplus-k3-rules\.js$/i.test(url.pathname)) {
+    event.respondWith(fetch(req, { cache: "no-store" }));
+    return;
+  }
   if (req.mode === "navigate") {
     event.respondWith(fetch(req).then(res => {
       if (res.ok) { const clone = res.clone(); caches.open(VERSION).then(c => c.put(req, clone)); }
